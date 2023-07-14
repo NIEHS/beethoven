@@ -1,2 +1,2 @@
 # NRT-AP-Model
-\textbf{N}ear
+**N**ear**R**eal**T**ime
