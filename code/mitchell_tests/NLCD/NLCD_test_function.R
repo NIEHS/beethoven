@@ -6,7 +6,10 @@
 nlcd_state <- function(year = 2021, state,
                        green_space = FALSE, download = FALSE){
   ## set the working directory for the function to pull data
-  setwd("/Volumes/SET/Projects/NRT-AP-Model/code/mitchell_tests/NLCD")
+  setwd("/Volumes/SET/Projects/NRT-AP-Model/code/mitchell_tests/NLCD") ## use relative path rather than absolute
+  
+  system("wget htt....")
+  system("unzip ...")
   
   ## load required packages
   library(terra); library(tigris); options(tigris_use_cache = TRUE)
