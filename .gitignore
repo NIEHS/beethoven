@@ -50,3 +50,4 @@ docs/
 # translation temp files
 po/*~
 output/
+code/mitchell_tests/NLCD/data_test
