@@ -1,5 +1,3 @@
-# NRT-AP-Model
-**N**ear-**R**eal-**T**ime-**C**riteria-**A**ir-**P**ollutant-**M**odel work for {SET}
 
 
 ```mermaid
@@ -8,8 +6,18 @@ flowchart TD
     B --> C{Let me think}
     C -->|One| D[Laptop];   
     C -->|Two| E[iPhone];
-    C -->|\Three| F[fa:fa-car Car];
+    C -->|Three| F[fa:fa-car Car];
   
+```
+
+```mermaid
+stateDiagram-v2
+    [*] --> Still
+    Still --> [*]
+    Still --> Moving
+    Moving --> Still
+    Moving --> Crash
+    Crash --> [*]
 ```
 
 ```geojson
