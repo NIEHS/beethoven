@@ -50,4 +50,7 @@ docs/
 # translation temp files
 po/*~
 output/
+
+# ignore items from NLCD/MERRA test
 code/mitchell_tests/NLCD/data_test
+code/mitchell_tests/MERRA/add_to_ignore
