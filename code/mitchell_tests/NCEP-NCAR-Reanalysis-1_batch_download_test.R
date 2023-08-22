@@ -9,7 +9,7 @@ wd <- "/ddn/gs1/group/set/Projects/NRT-AP-Model/code"
 setwd(wd)
 
 ## define base variable for building urls
-base <- "https://psl.noaa.gov/thredds/fileServer/Datasets/ncep.reanalysis/Dailies/"
+base <- "https://psl.noaa.gov/thredds/catalog/Datasets/ncep.reanalysis/Dailies/"
 
 ## define list of years
 ## FOR REPRODUCABILITY, ONLY THE YEARS OF INTEREST WOULD NEED TO BE CHANGED ##
@@ -44,18 +44,40 @@ for(v in 1:length(variables)){
     
     ## download data using the system() function and 'wget' linux command
     ## save data in the 'NCEP-NCAR-Reanalysis-1' data folder
-    # system(paste0("wget --p /ddn/gs1/group/set/Projects/NRT-AP-Model/input/NCEP-NCAR-Reanalysis-1 ",
+    # system(paste0("wget -P /ddn/gs1/group/set/Projects/NRT-AP-Model/input/NCEP-NCAR-Reanalysis-1 ",
     #               url,
     #               " --no-check-certificate"))
     
     ## print url
-    print(paste0("wget --no-e-P /ddn/gs1/group/set/Projects/NRT-AP-Model/input/NCEP-NCAR-Reanalysis-1 ",
+    print(paste0("wget -P /ddn/gs1/group/set/Projects/NRT-AP-Model/input/NCEP-NCAR-Reanalysis-1 ",
                  url,
                  " --no-check-certificate"))
     
   }
 }
 
+files <- list.files("/Volumes/SET/Projects/NRT-AP-Model/input/NCEP-NCAR-Reanalysis-1",
+                    full.names = TRUE)
+files
+for(i in 1:length(files)){
+  
+  data <- terra::rast(files[i])
+  
+  lay <- names(data)
+  
+  print(lay)
+  
+  #terra::plot(data[layers[1]])
+
+}
+
+data <- terra::rast("/Volumes/SET/Projects/NRT-AP-Model/input/NCEP-NCAR-Reanalysis-1/air.2m.gauss.2022.nc")
+
+
+test <- terra::rast("/Users/manwareme/Downloads/air.2m.gauss.2022.nc")
+layers <- names(test)
+layers[1]
+terra::plot(test[["air_1"]])
 
 
 
