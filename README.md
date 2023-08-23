@@ -2,7 +2,7 @@
 
 ```mermaid
 
-flowchart TD
+flowchart LR
     A[AQS Data] --> B[Generate Covariates]--> C[Fit Base Learners]-->D[Fit Meta Learners]-->E[Summary Stats]-->F[Reanalysis Pipeline]
 
    
