@@ -22,3 +22,10 @@ flowchart LR
 
 We will utilize various testing approaches to ensure functionality and quality of code
 
+### Processes to test or check 
+1) relative paths
+2) variable names
+3) variable types
+4) variable sizes
+5) Output of one module is the expectation of the input of the next module
+   
