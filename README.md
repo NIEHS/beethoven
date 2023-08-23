@@ -18,7 +18,7 @@ flowchart LR
     end
 ```
 
-## Integrating Unit and Integration Testing 
+##  Unit and Integration Testing 
 
 We will utilize various testing approaches to ensure functionality and quality of code
 
