@@ -7,6 +7,12 @@
 3) Push to remote
 4) Kyle [or delegate] will pull to MAIN local copy on SET group ddn location
 
+## Repo Rules 
+1) To PUSH changes to the repo, the changes must be made to a non-MAIN branch
+2) Then a PULL request must be made
+3) Then it requires the REVIEW of 1 person (can be anyone)
+4) Then the change from the branch is MERGED to the MAIN branch
+   
 ## Overall Project Workflow
 
 ```mermaid
