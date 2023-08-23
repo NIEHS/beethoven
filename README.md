@@ -1,38 +1,19 @@
+# Near Real Time Air Pollution Model 
+## Group Project for the Spatiotemporal Exposures and Toxicology group with help from friends :smiley:
 
+
+## Overall Project Workflow
 
 ```mermaid
 
 flowchart LR
-    A[AQS Data] --> B[Generate Covariates]--> C[Fit Base Learners]-->D[Fit Meta Learners]-->E[Summary Stats]-->F[Reanalysis Pipeline]
-
-   
-  
+    subgraph "Baked-In Reanalysis"
+    direction LR
+    A[AQS Data] --> B[Generate Covariates]--> C[Fit Base Learners]-->D[Fit Meta Learners]-->E[Summary Stats]-->F[Predictions]
+    end
 ```
 
+## Integrating Unit and Integration Testing 
 
-```geojson
-{
-  "type": "FeatureCollection",
-  "features": [
-    {
-      "type": "Feature",
-      "id": 1,
-      "properties": {
-        "ID": 0
-      },
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [
-          [
-              [-90,35],
-              [-90,30],
-              [-85,30],
-              [-85,35],
-              [-90,35]
-          ]
-        ]
-      }
-    }
-  ]
-}
-```
+We will utilize various testing approaches to ensure functionality and quality of code
+
