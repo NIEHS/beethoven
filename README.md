@@ -23,6 +23,20 @@ flowchart LR
     A[AQS Data] --> B[Generate Covariates]--> C[Fit Base Learners]-->D[Fit Meta Learners]-->E[Summary Stats]-->F[Predictions]
     end
 ```
+### Unit Testing by Module
+
+#### AQS Data
+```mermaid
+
+---
+title: AQS Data class tests
+---
+classDiagram
+    class AirPollutionData
+    AirPollutionData : +Type  sf
+    AirPollutionData : +Type sftime
+    AirPollutionData : +Geometry point
+```
 
 ##  Unit and Integration Testing 
 
