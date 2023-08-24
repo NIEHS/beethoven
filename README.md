@@ -41,7 +41,7 @@ Each of the following are the classes of variables for the I/O that will need to
 ```mermaid
 
 ---
-title: Data Classes by Module
+title: Data Type/Class by Module
 ---
 classDiagram
     class AirPollutionData
@@ -74,7 +74,11 @@ classDiagram
 
 ```
 
-```mermaid
+```text
+
+To Do:
+1)Integration Tests from modules
+2) Test checks 2-5
 
 ```
 
