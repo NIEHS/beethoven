@@ -72,6 +72,13 @@ classDiagram
     SummaryStats : +Geometry1 point
     SummaryStats : +Geometry2 polygon
 
+    class Predictions
+    Predictions : +Type1 sf
+    Predictions : +Type2 sftime
+    Predictions : +Type3 csv
+    Predictions : +Geometry1 point
+    Predictions : +Geometry2 NA
+
 ```
 
 ```text
