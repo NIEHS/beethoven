@@ -23,6 +23,17 @@ flowchart LR
     A[AQS Data] --> B[Generate Covariates]--> C[Fit Base Learners]-->D[Fit Meta Learners]-->E[Summary Stats]-->F[Predictions]
     end
 ```
+##  Unit and Integration Testing 
+
+We will utilize various testing approaches to ensure functionality and quality of code
+
+### Processes to test or check 
+1) relative paths
+2) variable names
+3) variable types
+4) variable sizes
+5) Output of one module is the expectation of the input of the next module
+   
 ### Unit Test Relevant Class Types and Features
 
 Each of the following are the classes of variables for the I/O that will need to be tested
@@ -67,14 +78,4 @@ classDiagram
 
 ```
 
-##  Unit and Integration Testing 
 
-We will utilize various testing approaches to ensure functionality and quality of code
-
-### Processes to test or check 
-1) relative paths
-2) variable names
-3) variable types
-4) variable sizes
-5) Output of one module is the expectation of the input of the next module
-   
