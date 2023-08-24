@@ -23,19 +23,48 @@ flowchart LR
     A[AQS Data] --> B[Generate Covariates]--> C[Fit Base Learners]-->D[Fit Meta Learners]-->E[Summary Stats]-->F[Predictions]
     end
 ```
-### Unit Testing by Module
+### Unit Test Relevant Class Types and Features
 
-#### AQS Data
+Each of the following are the classes of variables for the I/O that will need to be tested
+
 ```mermaid
 
 ---
-title: AQS Data class tests
+title: Data Classes by Module
 ---
 classDiagram
     class AirPollutionData
-    AirPollutionData : +Type  sf
-    AirPollutionData : +Type sftime
+    AirPollutionData : +Type1  sf
+    AirPollutionData : +Type2 sftime
     AirPollutionData : +Geometry point
+
+    class GeographicCovariates
+    GeographicCovariates : +Type1  sf
+    GeographicCovariates : +Type2 sftime
+    GeographicCovariates : +Geometry point
+
+    class BaseLearners
+    BaseLearners : +Type1 S3.model
+    BaseLearners : +Type2 S4.model
+    BaseLearners : +Geometry1 point
+    BaseLearners : +Geometry2 NA
+
+    class MetaLearners
+    MetaLearners : +Type1 S3.model
+    MetaLearners : +Type2 S4.model
+    MetaLearners : +Geometry1 point
+    MetaLearners : +Geometry2 NA
+
+    class SummaryStats
+    SummaryStats : +Type1 sf
+    SummaryStats : +Type2 sftime
+    SummaryStats : +Geometry1 point
+    SummaryStats : +Geometry2 polygon
+
+```
+
+```mermaid
+
 ```
 
 ##  Unit and Integration Testing 
