@@ -28,13 +28,13 @@ flowchart LR
 We will utilize various testing approaches to ensure functionality and quality of code
 
 ### Processes to test or check 
-1) data names
-2) data types
-3) data sizes
+1) data type
+2) data name
+3) data size
 4) relative paths
 5) output of one module is the expectation of the input of the next module
    
-### Unit Test Relevant Class Types and Features
+### Unit Test Relevant Data Types
 
 Each of the following are the classes of variables for the I/O that will need to be tested
 
