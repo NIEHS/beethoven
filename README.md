@@ -100,8 +100,9 @@ Potential base learners we can use:
 1) PrestoGP (lasso + GP)
 2) XGBOOST
 3) RF
-4) UMAP covariates
-5) Encoder NN covariates
+4) CNN
+5) UMAP covariates
+6) Encoder NN covariates
 
 
 
