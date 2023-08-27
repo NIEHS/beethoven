@@ -76,5 +76,34 @@ test <- merra_temperature(start = "06-05-2023",
 for (i in 1:3){
   terra::plot(test, i)
 }
+###############################################################################
+
+
+###############################################################################
+## set working directory
+wd <- "/Volumes/manwareme/NRT-AP-Model/code/mitchell_tests/MERRA"
+setwd(wd)
+getwd()
+
+## read files with '.nc4' file type
+files <- list.files(paste0(wd, "/add_to_ignore"),
+                    pattern = "*.nc4",
+                    full.names = TRUE)
+
+## for loop to read '.nc4' files and plot
+for(f in 1:length(files)){
+  
+  ## read data
+  data <- terra::rast(files[f])
+  
+  ## plot data
+  plot(data$T2MMEAN)
+  
+}
+
+
+
+
+
 
 

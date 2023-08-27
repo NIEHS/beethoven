@@ -1,21 +1,32 @@
-### R ###
-
-# watershed boundary data folder
-input/
-
-
 # History files
 .Rhistory
 .Rapp.history
 
 # Session Data files
 .RData
+.RDataTmp
+
+# Ignore specific folders
+input/
+output/
+manuscript/
 
 # User-specific files
 .Ruserdata
 
 # Example code in package build process
 *-Ex.R
+
+# Other files
+../.DS_Store
+../._.DS_Store
+../._create-prediction-grid.Rmd
+../._map-nc-land-covariates.Rmd
+# Hidden folders
+.DS_Store/
+._.DS_Store/
+/.DS_Store
+/._.DS_Store
 
 # Output files from R CMD build
 /*.tar.gz
@@ -49,8 +60,10 @@ docs/
 
 # translation temp files
 po/*~
-output/
 
-# ignore items from NLCD/MERRA test
-code/mitchell_tests/NLCD/data_test
-code/mitchell_tests/MERRA/add_to_ignore
+# RStudio Connect folder
+rsconnect/
+
+
+#Mitchell test folder
+code/mitchell_tests/
