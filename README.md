@@ -104,5 +104,8 @@ Potential base learners we can use:
 5) UMAP covariates
 6) Encoder NN covariates
 
+## Open Question
+1) Publish Results to CRAN package
+
 
 
