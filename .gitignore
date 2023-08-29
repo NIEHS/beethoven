@@ -68,3 +68,4 @@ rsconnect/
 #Mitchell test folder
 code/mitchell_tests/
 ._.gitignore
+._*
