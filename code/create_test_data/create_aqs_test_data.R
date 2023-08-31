@@ -16,5 +16,5 @@ create_aqs_test_data <- function(){
   aqs.col <- aqs[idx,c("Latitude","Longitude","Arithmetic.Mean","Method.Name",
                     "ID.Code")]
   print("writing to testdata folder")
-  write.csv(aqs.col,"tests/testdata/aqs-test-data.csv")
+  write.csv(aqs.col,"tests/testdata/aqs-test-data.csv",row.names = FALSE)
 }
