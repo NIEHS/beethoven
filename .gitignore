@@ -67,5 +67,7 @@ rsconnect/
 
 #Mitchell test folder
 code/mitchell_tests/
+# Generic open or temporary files
 ._.*
+._.gitignore
 ._*

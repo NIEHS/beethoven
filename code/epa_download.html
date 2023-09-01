@@ -9,11 +9,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
-<meta name="author" content="Kyle P Messier" />
+<meta name="author" content="Mariana Alifa" />
 
-<meta name="date" content="2023-07-14" />
+<meta name="date" content="2023-08-21" />
 
-<title>Test_Group_Project</title>
+<title>EPA_data_download</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -350,20 +350,106 @@ display: none;
 
 
 
-<h1 class="title toc-ignore">Test_Group_Project</h1>
-<h4 class="author">Kyle P Messier</h4>
-<h4 class="date">2023-07-14</h4>
+<h1 class="title toc-ignore">EPA_data_download</h1>
+<h4 class="author">Mariana Alifa</h4>
+<h4 class="date">2023-08-21</h4>
 
 </div>
 
 
-<div id="test-script-for-set-group-project" class="section level2">
-<h2>Test Script for SET group project</h2>
-<p>Generate some random numbers!</p>
-<pre class="r"><code>R &lt;- rnorm(1000)+3
+<div id="downloading-and-pre-processing-pre-generated-epa-aqs-data-from-their-website" class="section level2">
+<h2>Downloading and pre-processing pre-generated EPA AQS data from their
+website</h2>
+<p>This script downloads pre-processed data from EPA’s AQS data for the
+desired variable, year(s), and temporal resolution.</p>
+<p>The script also joins multiple years’ data into a single data frame,
+and downloads a file with metadata about all the monitors included in
+the dataset.</p>
+<p>The first version of this script (August 2023) is written to download
+daily PM2.5 data for the period 2018-2022.</p>
+<p>Available datasets can be found at the website <a href="https://aqs.epa.gov/aqsweb/airdata/download_files.html" class="uri">https://aqs.epa.gov/aqsweb/airdata/download_files.html</a>.</p>
+<div id="setting-up-for-data-download" class="section level4">
+<h4>1. Setting up for data download</h4>
+<p>Specifying temporal resolution, parameter of interest, and year</p>
+<pre class="r"><code>resolution=&quot;daily&quot;
+parameter_code=88101 # Parameter Code for PM2.5 local conditions
+startyear=2018
+endyear=2022</code></pre>
+<p>Create a list of file URLs</p>
+<pre class="r"><code>file_urls=sprintf(paste(&quot;https://aqs.epa.gov/aqsweb/airdata/&quot;,resolution,&quot;_&quot;,parameter_code,&quot;_%.0f.zip&quot;, sep=&quot;&quot;),startyear:endyear)
+file_urls</code></pre>
+<pre><code>## [1] &quot;https://aqs.epa.gov/aqsweb/airdata/daily_88101_2018.zip&quot;
+## [2] &quot;https://aqs.epa.gov/aqsweb/airdata/daily_88101_2019.zip&quot;
+## [3] &quot;https://aqs.epa.gov/aqsweb/airdata/daily_88101_2020.zip&quot;
+## [4] &quot;https://aqs.epa.gov/aqsweb/airdata/daily_88101_2021.zip&quot;
+## [5] &quot;https://aqs.epa.gov/aqsweb/airdata/daily_88101_2022.zip&quot;</code></pre>
+<p>Specify download folder and desired name of the downloaded zip
+files</p>
+<pre class="r"><code>download_dir=&quot;input/aqs/&quot;
+download_names=sprintf(paste(download_dir,&quot;download_output_%.0f.zip&quot;,sep=&quot;&quot;),startyear:endyear)
+download_names</code></pre>
+<pre><code>## [1] &quot;input/aqs/download_output_2018.zip&quot; &quot;input/aqs/download_output_2019.zip&quot;
+## [3] &quot;input/aqs/download_output_2020.zip&quot; &quot;input/aqs/download_output_2021.zip&quot;
+## [5] &quot;input/aqs/download_output_2022.zip&quot;</code></pre>
+</div>
+<div id="downloading-data" class="section level4">
+<h4>2. Downloading data</h4>
+<p>Download zip files from website</p>
+<pre class="r"><code>download.file(file_urls, download_names, method = &quot;libcurl&quot;)</code></pre>
+<p>Construct string with unzipped file names</p>
+<pre class="r"><code>csv_names=sprintf(paste(download_dir,resolution,&quot;_&quot;,parameter_code,&quot;_%.0f.csv&quot;, sep=&quot;&quot;),startyear:endyear)</code></pre>
+</div>
+<div id="processing-data" class="section level4">
+<h4>3. Processing data</h4>
+<p>Unzip and read in .csv files, process and join in one dataframe. The
+unique site identifier “ID.Code” is a string with the structure
+State-County-Site-Parameter-POC</p>
+<pre class="r"><code>for(n in 1:length(file_urls)){
+  unzip(download_names[n], exdir=download_dir) # Unzips file to same folder it was downloaded to
+  
+  #Read in dataframe
+  print(paste(&quot;reading and processing file:&quot;,csv_names[n],&quot;...&quot;) )
+  data=read.csv(csv_names[n], stringsAsFactors = F)  
+  
+  #Make unique site identifier: State-County-Site-Parameter-POC
+  data$ID.Code=paste(data$State.Code,data$County.Code,data$Site.Num,data$Parameter.Code,data$POC, sep=&quot;-&quot;)
+  
+  #Concatenate with other years
+  if(n==1){
+    data_all=data
+  }else{
+    data_all=rbind(data_all, data)
+  }
+}</code></pre>
+<pre><code>## [1] &quot;reading and processing file: input/aqs/daily_88101_2018.csv ...&quot;
+## [1] &quot;reading and processing file: input/aqs/daily_88101_2019.csv ...&quot;
+## [1] &quot;reading and processing file: input/aqs/daily_88101_2020.csv ...&quot;
+## [1] &quot;reading and processing file: input/aqs/daily_88101_2021.csv ...&quot;
+## [1] &quot;reading and processing file: input/aqs/daily_88101_2022.csv ...&quot;</code></pre>
+</div>
+<div id="downloading-monitor-metadata-file-and-filter-for-relevant-sites" class="section level4">
+<h4>4. Downloading monitor metadata file and filter for relevant
+sites</h4>
+<p>Download monitors file</p>
+<pre class="r"><code>destfile = paste(download_dir,&quot;aqs_monitors.zip&quot;,sep=&quot;&quot;)
+download.file(&quot;https://aqs.epa.gov/aqsweb/airdata/aqs_monitors.zip&quot;, destfile)</code></pre>
+<p>Unzip and read in</p>
+<pre class="r"><code>unzip(destfile, exdir=download_dir) 
+monitors=read.csv(&quot;input/aqs/aqs_monitors.csv&quot;, stringsAsFactors = F)</code></pre>
+<p>Create site identifier</p>
+<pre class="r"><code>monitors$State.Code=as.numeric(monitors$State.Code) # Convert from string to numeric to get rid of leading zeros, the NAs introduced are from monitors in Canada with site number=&quot;CC&quot;</code></pre>
+<pre><code>## Warning: NAs introduced by coercion</code></pre>
+<pre class="r"><code>monitors$ID.Code=paste(monitors$State.Code,monitors$County.Code,monitors$Site.Num,monitors$Parameter.Code,monitors$POC, sep=&quot;-&quot;)</code></pre>
+<p>Filter monitors file to include only monitors in our csv</p>
+<pre class="r"><code>monitors_filter=monitors[which(monitors$ID.Code %in% data_all$ID.Code),]</code></pre>
+</div>
+<div id="uploading-data-to-desired-folder" class="section level4">
+<h4>5. Uploading data to desired folder</h4>
+<pre class="r"><code>savepath=&quot;input/aqs/&quot; #Connected to wine/SET/Projects
 
-print(mean(R))</code></pre>
-<pre><code>## [1] 3.016615</code></pre>
+write.csv(data_all,paste(savepath,resolution,&quot;_&quot;,parameter_code,&quot;_&quot;,startyear,&quot;-&quot;,endyear,&quot;.csv&quot;,sep=&quot;&quot;))
+write.csv(monitors_filter, paste(savepath,&quot;monitors_&quot;,parameter_code,&quot;_&quot;,startyear,&quot;-&quot;,endyear,&quot;.csv&quot;,sep=&quot;&quot;))</code></pre>
+</div>
 </div>
 
 

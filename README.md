@@ -36,7 +36,12 @@ We will utilize various testing approaches to ensure functionality and quality o
    
 ### Unit Test Relevant Data Types
 
-Each of the following are the classes of variables for the I/O that will need to be tested
+#### Unit/Test References
+1) https://36-750.github.io/practices/unit-testing/
+2) https://r-pkgs.org/testing-basics.html
+3) https://testthat.r-lib.org/index.html
+
+#### Each of the following are the classes of variables for the I/O that will need to be tested
 
 ```mermaid
 
