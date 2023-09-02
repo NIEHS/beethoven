@@ -10,4 +10,6 @@ Description: This will one day be a package that provides near real time air pol
 Imports: terra, sf, sftime
 Suggests: covr, knitr, rmarkdown, testthat
 License: GPL (>= 2)
+Encoding: UTF-8
 VignetteBuilder: knitr, rmarkdown
+RoxygenNote: 7.2.3
