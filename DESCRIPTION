@@ -1,13 +1,13 @@
-Package: NRTAP
-Title: A Placeholder Description File to Test Package
+Package: NRT-AP-Model
+Title: The SET group near real time air pollution model
 Version: 1.0.0
-Authors@R: 
+Authors@R:
     c(person(given = "Kyle",
              family = "Messier",
              role = c("aut", "cre"),
              email = "kyle.messier@nih.gov"))
 Description: This will one day be a package that provides near real time air pollution data
-Imports: terra, sf
+Imports: terra, sf, sftime
 Suggests: covr, knitr, rmarkdown, testthat
 License: GPL (>= 2)
 VignetteBuilder: knitr, rmarkdown
