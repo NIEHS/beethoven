@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(NRT-AP-Model)
+library(NRTAPmodel)
 
-test_check("NRT-AP-Model")
+test_check("NRTAPmodel")
