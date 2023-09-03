@@ -7,6 +7,6 @@
 #'
 test_that("dependent variable object is an sf class", {
   aqs.sftime <- sf::st_read("../testdata/aqs-test-data.gpkg") |>
-    st_as_sftime()
+    sftime::st_as_sftime()
   expect_s3_class(aqs.sftime, "sf")
 })
