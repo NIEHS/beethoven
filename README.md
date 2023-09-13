@@ -88,17 +88,31 @@ classDiagram
 
 ```
 
-### Module to Module Integration Tests
+### Frameworks for Testing of this project (with help from ChatGPT)
 
+#### Test Driven Development (TDD)- Key Steps
+1. **Write a Test**: Before you start writing any code, you write a test case for the functionality you want to implement. This test should fail initially because you haven't written the code to make it pass yet. The test defines the expected behavior of your code.
 
-```mermaid
+2. **Run the Test**: Run the test to ensure it fails. This step confirms that your test is correctly assessing the functionality you want to implement.
 
-```
-```text
+3. **Write the Minimum Code**: Write the minimum amount of code required to make the test pass. Don't worry about writing perfect or complete code at this stage; the goal is just to make the test pass.
 
-To Do:
-1)Integration Tests from modules
-2) Test checks 2-5
+4. **Run the Test Again**: After writing the code, run the test again. If it passes, it means your code now meets the specified requirements.
+
+5. **Refactor (if necessary)**: If your code is working and the test passes, you can refactor your code to improve its quality, readability, or performance. The key here is that you should have test coverage to ensure you don't introduce new bugs while refactoring.
+
+6. **Repeat**: Continue this cycle of writing a test, making it fail, writing the code to make it pass, and refactoring as needed. Each cycle should be very short and focused on a small piece of functionality.
+
+7. **Complete the Feature**: Keep repeating the process until your code meets all the requirements for the feature you're working on.
+
+TDD helps ensure that your code is reliable and that it remains functional as you make changes and updates. It also encourages a clear understanding of the requirements and promotes better code design.
+
+**In addition to TDD, we will likely need to do ATDD:**
+
+1. **Acceptance Test-Driven Development (ATDD)**: ATDD is a practice where tests are written to capture the acceptance criteria defined by stakeholders before development begins. These tests serve as a contract between developers and stakeholders, ensuring that the software meets the desired requirements.
+
+2. **Continuous Integration (CI)**: While not a development methodology per se, CI is a practice where code changes are integrated into a shared repository multiple times a day. Automated tests are run with each integration to catch issues early. CI works well in conjunction with TDD.
+
 
 ```
 
