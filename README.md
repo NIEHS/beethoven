@@ -1,5 +1,5 @@
 [![test-coverage](https://github.com/Spatiotemporal-Exposures-and-Toxicology/NRTAPmodel/actions/workflows/test-coverage.yaml/badge.svg)](https://github.com/Spatiotemporal-Exposures-and-Toxicology/NRTAPmodel/actions/workflows/test-coverage.yaml)
-
+[![Codecov test coverage](https://codecov.io/gh/r-lib/testthat/branch/main/graph/badge.svg)](https://app.codecov.io/gh/r-lib/testthat?branch=main)
 # Air Pollution Data for the Masses: An Open-Access, Tested, Updated PM<sub>2.5</sub> Hybrid Model 
  Group Project for the Spatiotemporal Exposures and Toxicology group with help from friends :smiley:
 
