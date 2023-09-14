@@ -18,8 +18,8 @@ manuscript/
 *-Ex.R
 
 # Other files
-../.DS_Store
-../._.DS_Store
+**/.DS_Store
+**/._.DS_Store
 ../._create-prediction-grid.Rmd
 ../._map-nc-land-covariates.Rmd
 # Hidden folders
