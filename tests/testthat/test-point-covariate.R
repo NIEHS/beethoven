@@ -1,16 +1,66 @@
-#' @author Kyle P Messier
+#' @author Kyle P Messier, Insang Song
 #' @description
 #' unit testing for point data geographic covariates
 #' 
 #' 
 #'
 test_that("point covariate is not NA", {
+  library(sf)
+  library(terra)
+  library(dplyr)
+  sf_use_s2(FALSE)
+  load("../testdata/epa_egrid_powerplants.RData")
+  aqs <- terra::vect("../testdata/aqs-test-data.gpkg") |>
+    terra::project("EPSG:4326")
 
-  aqs.sftime <- sf::st_read("../testdata/aqs-test-data.gpkg") |>
-    sftime::st_as_sftime()
+  # example 1: distance to the nearest coastline
+  coastline = readRDS("../testdata/us_coastline.rds")
+  coastline = terra::vect(coastline) |>
+    terra::project("EPSG:4326")
+
+  d_nearest_coastline = terra::nearest(aqs, coastline)
+
+
+  # example 2: Calculate the sum of exponentially decaying contributions
+  # range: arbitrarily set 100000 (meters)
+  sedc_range_m = 1e5L
+  # define sources, set SEDC exponential decay range
+  egrid_v = egrid |>
+    select(SEQPLT, YEAR, PNAME, UTLSRVID, LON, LAT, UNNOX:UNHG) |>
+    sf::st_as_sf(coords = c("LON", "LAT"), crs = 4269) |>
+    mutate(to_id = seq_len(nrow(egrid))) |>
+    sf::st_transform(4326) |>
+    terra::vect()
   
-  # Calculate the sum of exponentially decaying contributions
-  point.var <- calc_SEDC_covariate(aqs.sftime)
+
+  aqs_a = aqs
+  aqs_a$from_id = seq_len(nrow(aqs))
+  # select egrid_v only if closer than 3e5 meters from each aqs
+  aqs_buf = terra::buffer(aqs_a, width = 3e5L, quadsegs = 90)
+  egrid_vs = egrid_v[aqs_buf,]
+  egrid_vs$to_id = seq_len(nrow(egrid_vs))
+
+  # near features with distance argument: only returns integer indices
+  near_egrid = terra::nearby(aqs, egrid_vs, distance = 3e5L)
+  # attaching actual distance
+  dist_near_egrid = terra::distance(aqs, egrid_vs)
+  dist_near_egrid_df = as.vector(dist_near_egrid)
+  # adding integer indices
+  dist_near_egrid_tdf = expand.grid(from_id = seq_len(nrow(aqs)), to_id = seq_len(nrow(egrid_vs)))
+  dist_near_egrid_df = cbind(dist_near_egrid_tdf, dist = dist_near_egrid_df)
+
+  # summary
+  near_egrid_a = near_egrid |>
+    as_tibble() |>
+    left_join(data.frame(aqs_a)) |>
+    left_join(data.frame(egrid_vs)) |>
+    left_join(dist_near_egrid_df) |>
+    mutate(w_sedc = exp((-3 * dist) / sedc_range_m)) |>
+    group_by(ID.Code) |>
+    summarize(across(starts_with("UN"), list(sedc = ~sum(w_sedc * ., na.rm = TRUE)))) |>
+    ungroup() |>
+    select(-UNHG_sedc)
   
-  expect_equal(sum(is.na(point.var))==0, TRUE)
+  expect_equal(any(is.na(d_nearest_coastline$distance)), FALSE)
+  expect_equal(any(apply(near_egrid_a[,-1], 2, function(x) sum(any(x==0)))), FALSE)
 })
