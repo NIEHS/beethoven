@@ -61,7 +61,27 @@ Geographic
 2. Coordinate names (e.g. lat/lon)
 3. Time in acceptable format 
 #### Summary Statistics
+File Type
+1. NetCDF
+2. csv
+3. NA
+4. Variable Names Exist
+5. Naming Convention
 
+Stats 
+1. Non-negative variance ($\sigma^2$)
+2. Mean is reasonable ($\mu$)
+3. SI Units
+
+Domain 
+1. In the US (+ buffer)
+2. In Time range (2018-2022)
+
+Geographic 
+1. Projections
+2. Coordinate names (e.g. lat/lon)
+3. Time in acceptable format
+   
 #### Meta Learners
 
 #### Base Learners
