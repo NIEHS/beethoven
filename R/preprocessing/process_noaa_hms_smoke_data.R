@@ -38,6 +38,8 @@ process_noaa_hms_smoke_data <- function(
     directory_to_save = paste(directory_to_save, "/", sep="")
   }
   
+  #### 0. load dependencies
+  library(terra)
   
   #### 1. define date sequence in character format
   date_start_date_format = as.Date(date_start, format = "%Y-%m-%d")
@@ -75,7 +77,45 @@ process_noaa_hms_smoke_data <- function(
     }
     smoke_data$Density = factor(smoke_data$Density, levels = c("Light", "Medium", "Heavy"))
   } else if(data_format == "KML"){
-    print("Functionality for file type KML not complete.")
+    
+    dens = c("Smoke (Light)", "Smoke (Medium)", "Smoke (Heavy)")
+    dens_labels = c("Light", "Medium", "Heavy")
+    
+    for(h in 1:length(hms_files)){
+      if(h == 1){
+        for(d in 1:length(dens)){
+          if(d == 1){
+            smoke_data = terra::vect(hms_files[h], layer = paste0(dens[d]))
+            smoke_data = terra::aggregate(smoke_data, dissolve = TRUE)
+            smoke_data$Date = paste0(date_sequence[h])
+            smoke_data$Density = paste0(dens_labels[d])
+          } else if(d > 1){
+            smoke_data_2 = terra::vect(hms_files[h], layer = paste0(dens[d]))
+            smoke_data_2 = terra::aggregate(smoke_data_2, dissolve = TRUE)
+            smoke_data_2$Date = paste0(date_sequence[h])
+            smoke_data_2$Density = paste0(dens_labels[d])
+            smoke_data = rbind(smoke_data, smoke_data_2)
+          }
+        }
+      } else if(h > 1){
+        for(d in 1:length(dens)){
+          if(d == 1){
+            smoke_data_3 = terra::vect(hms_files[h], layer = paste0(dens[d]))
+            smoke_data_3 = terra::aggregate(smoke_data, dissolve = TRUE)
+            smoke_data_3$Date = paste0(date_sequence[h])
+            smoke_data_3$Density = paste0(dens_labels[d])
+          } else if(d > 1){
+            smoke_data_4 = terra::vect(hms_files[h], layer = paste0(dens[d]))
+            smoke_data_4 = terra::aggregate(smoke_data_4, dissolve = TRUE)
+            smoke_data_4$Date = paste0(date_sequence[h])
+            smoke_data_4$Density = paste0(dens_labels[d])
+            smoke_data_3 = rbind(smoke_data_3, smoke_data_4)
+          }
+        }
+      }
+    }
+    smoke_data = rbind(smoke_data, smoke_data_3)
+    smoke_data$Density = factor(smoke_data$Density, levels = c("Light", "Medium", "Heavy"))
   }
 
   

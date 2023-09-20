@@ -7,8 +7,8 @@
 #' download_noaa_hms_smoke_data: download daily wildfire smoke plume data from NOAA Hazard Mapping System Fire and Smoke Product
 #' 
 #' @param date_start character(1). length of 10. Start date for downloading data. Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
-#' @param date_end character(1). length of 10. End date for donwloading data. Format YYYY-MM-DD (ex. September 10, 2023 = "2023-09-10").
-#' @param data_format character(1). #### EXPLANATION"Shapefile" or "KML" file type. ####
+#' @param date_end character(1). length of 10. End date for downloading data. Format YYYY-MM-DD (ex. September 10, 2023 = "2023-09-10").
+#' @param data_format character(1). #### EXPLANATION "Shapefile" or "KML" file type. ####
 #' @param directory_to_download character(1). Directory to download zip files from NOAA Hazard Mapping System Fire and Smoke Product.
 #' @param directory_to_save character(1). Directory to decompress zip files.
 #' @param url_noaa_hms_smoke_data character(1). URL to the NOAA Hazard Mapping System Fire and Smoke Product data.
@@ -24,7 +24,7 @@ download_noaa_hms_smoke_data <- function(
     directory_to_download = "./input/noaa_hms/",
     directory_to_save = "./input/noaa_hms/",
     url_noaa_hms_smoke_data = "https://satepsanone.nesdis.noaa.gov/pub/FIRE/web/HMS/Smoke_Polygons/",
-    remove_download = TRUE
+    remove_download = TRUE,
     time_wait_download = 2L
 ) {
    chars_dir_download = nchar(directory_to_download)
