@@ -38,8 +38,10 @@ jobs:
     - name: Install dependencies using remotes
       run: R -e 'remotes::install_deps()'
 
-    - name: Install devtools using remotes
-      run: R -e 'remotes::install_github("r-lib/devtools")'
+    - name: Specify GitHub PAT and Install devtools using remotes
+      run: R -e 'Sys.setenv(GITHUB_PAT = "YOUR_PAT_HERE"); remotes::install_github("r-lib/devtools")'
+      env:
+        GITHUB_PAT: ${{ secrets.GITHUB_PAT }}  # Add your GitHub PAT secret to your repository secrets
 
     - name: Run tests and calculate coverage
       run: |
