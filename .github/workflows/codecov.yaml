@@ -43,6 +43,8 @@ jobs:
       env:
         GITHUB_PAT: ${{ secrets.GH_PAT }}  # Add your GitHub PAT secret to your repository secrets
 
+    - name: Install covr package
+      run: R -e 'install.packages("covr")'
 
     - name: Run tests and calculate coverage
       run: |
