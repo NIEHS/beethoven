@@ -33,7 +33,7 @@ jobs:
           r-packages-${{ runner.os }}-
 
     - name: Install remotes package
-      run: R -e 'install.packages("remotes")'
+      run: R -e 'install.packages("remotes", dependencies = TRUE)'
 
     - name: Install dependencies using remotes
       run: R -e 'remotes::install_deps()'
@@ -44,7 +44,7 @@ jobs:
         GITHUB_PAT: ${{ secrets.GH_PAT }}  # Add your GitHub PAT secret to your repository secrets
 
     - name: Install covr package
-      run: R -e 'install.packages("covr")'
+      run: R -e 'install.packages("covr", dependencies = TRUE)'
 
     - name: Run tests and calculate coverage
       run: |
