@@ -24,9 +24,11 @@ jobs:
       with:
         r-version: 4.1  # You can change this to the R version you need
 
+    - name: Install devtools
+      run: R -e 'install.packages("devtools")'
+
     - name: Install dependencies
       run: |
-        R -e 'install.packages("devtools")'
         R -e 'devtools::install_deps()'
 
     - name: Run tests and calculate coverage
@@ -37,7 +39,7 @@ jobs:
       run: |
         R -e 'library(covr); covr::codecov()'
       env:
-        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}  # Make sure you have added this secret to your repository
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
     - name: Cleanup
       run: |
