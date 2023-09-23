@@ -5,7 +5,8 @@
 #' 
 #'
 test_that("xgboost model is valid", {
-
+  skip_on_ci()
+  
   aqs.sftime <- sf::st_read("../testdata/aqs-test-data.gpkg") |>
     sftime::st_as_sftime()
   

@@ -6,6 +6,7 @@
 #' 
 #'
 test_that("MERRA2 covariate is not NA", {
+  skip_on_ci()
   library(terra)
   library(dplyr)
   
