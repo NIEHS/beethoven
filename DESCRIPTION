@@ -8,8 +8,9 @@ Authors@R:
              email = "kyle.messier@nih.gov"))
 Description: This will one day be a package that provides near real time air pollution data
 Imports: terra, sf, sftime
-Suggests: covr, knitr, rmarkdown, testthat
-License: GPL (>= 2)
+Suggests: covr, knitr, rmarkdown, testthat (>= 3.0.0)
 Encoding: UTF-8
 VignetteBuilder: knitr, rmarkdown
 RoxygenNote: 7.2.3
+Config/testhat/edition: 3
+License: GPL-2 | MIT + file LICENSE
