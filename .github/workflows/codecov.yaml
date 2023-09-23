@@ -24,6 +24,17 @@ jobs:
       with:
         r-version: 4.1  # You can change this to the R version you need
 
+    - name: Cache R packages
+      uses: actions/cache@v2
+      with:
+        path: ~/.cache/R
+        key: r-packages-${{ runner.os }}-${{ hashFiles('**/DESCRIPTION') }}
+        restore-keys: |
+          r-packages-${{ runner.os }}-
+
+    - name: Install devtools dependencies
+      run: R -e 'install.packages(c("usethis", "pkgdown", "rcmdcheck", "rversions", "urlchecker"))'
+
     - name: Install devtools
       run: R -e 'install.packages("devtools")'
 
