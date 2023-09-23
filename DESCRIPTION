@@ -14,5 +14,4 @@ VignetteBuilder: knitr, rmarkdown
 RoxygenNote: 7.2.3
 Config/testhat/edition: 3
 License: GPL-2 | MIT + file LICENSE
-Remotes:
-  - rstudio/covr
+
