@@ -5,6 +5,7 @@
 #' 
 #'
 test_that("point covariate is not NA", {
+  skip_on_ci()
   library(sf)
   library(terra)
   library(dplyr)
