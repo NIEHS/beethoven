@@ -43,6 +43,12 @@ jobs:
       env:
         GITHUB_PAT: ${{ secrets.GH_PAT }}  # Add your GitHub PAT secret to your repository secrets
 
+    - name: Install libcurl development library
+      run: sudo apt-get install -y libcurl4-openssl-dev  # For Ubuntu/Debian
+
+    - name: Install dependencies for covr
+      run: R -e 'install.packages(c("curl", "httr"),dependencies = TRUE)'
+
     - name: Install covr package
       run: R -e 'install.packages("covr", dependencies = TRUE)'
 
