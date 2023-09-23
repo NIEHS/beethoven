@@ -3,11 +3,10 @@ name: R Package CI
 on:
   push:
     branches:
-      - main  
+      - main
   pull_request:
     branches:
-      - main 
-
+      - main
 
 jobs:
   build:
@@ -17,8 +16,8 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Add CRAN repository
-      run: sudo add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
+    - name: Add R Repository Key
+      run: sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 51716619E084DAB9
 
     - name: Set up R
       uses: r-lib/actions/setup-r@v2
