@@ -32,15 +32,14 @@ jobs:
         restore-keys: |
           r-packages-${{ runner.os }}-
 
-    - name: Install devtools dependencies
-      run: R -e 'install.packages(c("usethis", "pkgdown", "rcmdcheck", "rversions", "urlchecker"))'
+    - name: Install remotes package
+      run: R -e 'install.packages("remotes")'
 
-    - name: Install devtools
-      run: R -e 'install.packages("devtools")'
+    - name: Install dependencies using remotes
+      run: R -e 'remotes::install_deps()'
 
-    - name: Install dependencies
-      run: |
-        R -e 'devtools::install_deps()'
+    - name: Install devtools using remotes
+      run: R -e 'remotes::install_github("r-lib/devtools")'
 
     - name: Run tests and calculate coverage
       run: |
@@ -54,4 +53,4 @@ jobs:
 
     - name: Cleanup
       run: |
-        R -e 'remove.packages("devtools")'
+        R -e 'remove.packages("remotes")'
