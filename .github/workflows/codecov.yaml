@@ -17,6 +17,9 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
+    - name: Add CRAN repository
+      run: sudo add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
+
     - name: Set up R
       uses: r-lib/actions/setup-r@v1
       with:
