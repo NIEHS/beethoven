@@ -1,0 +1,42 @@
+name: R Package CI
+
+on:
+  push:
+    branches:
+      - main  
+  pull_request:
+    branches:
+      - main 
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up R
+      uses: r-lib/actions/setup-r@v1
+      with:
+        r-version: 4.1  # You can change this to the R version you need
+
+    - name: Install dependencies
+      run: |
+        R -e 'install.packages("devtools")'
+        R -e 'devtools::install_deps()'
+
+    - name: Run tests and calculate coverage
+      run: |
+        R -e 'library(covr); covr::package_coverage()'
+
+    - name: Upload coverage to Codecov
+      run: |
+        R -e 'library(covr); covr::codecov()'
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}  # Make sure you have added this secret to your repository
+
+    - name: Cleanup
+      run: |
+        R -e 'remove.packages("devtools")'
