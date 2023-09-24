@@ -47,10 +47,13 @@ jobs:
       run: sudo apt-get install -y libcurl4-openssl-dev  # For Ubuntu/Debian
 
     - name: Install dependencies for covr
-      run: R -e 'install.packages(c("curl", "httr"),dependencies = TRUE)'
+      run: R -e 'install.packages(c("curl", "httr"), dependencies = TRUE)'
 
     - name: Install covr package
       run: R -e 'install.packages("covr", dependencies = TRUE)'
+
+    - name: Install NRTAPmodel package
+      run: R -e 'devtools::install()'
 
     - name: Run tests and calculate coverage
       run: |
