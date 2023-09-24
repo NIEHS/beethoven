@@ -53,7 +53,7 @@ jobs:
       run: R -e 'install.packages("covr", dependencies = TRUE)'
 
     - name: Install NRTAPmodel package
-      run: R -e 'devtools::install()'
+      run: R -e 'remotes::install_github("Spatiotemporal-Exposures-and-Toxicology/NRTAPmodel")'
 
     - name: Run tests and calculate coverage
       run: |
