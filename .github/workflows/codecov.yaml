@@ -20,6 +20,16 @@ jobs:
       with:
         r-version: 4.1  # You can change this to the R version you need
 
+    - name: Cache C++ and R dependencies
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/.cache/R
+          ~/.local/share/R
+        key: dependencies-${{ runner.os }}-${{ hashFiles('**/DESCRIPTION') }}
+        restore-keys: |
+          dependencies-${{ runner.os }}-
+
     - name: Install system dependencies
       run: |
         sudo apt-get update
