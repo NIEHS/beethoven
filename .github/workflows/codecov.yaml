@@ -7,7 +7,6 @@ on:
   pull_request:
     branches:
       - main
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -16,44 +15,15 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Add R Repository Key
-      run: sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 51716619E084DAB9
-
     - name: Set up R
       uses: r-lib/actions/setup-r@v2
       with:
         r-version: 4.1  # You can change this to the R version you need
 
-    - name: Cache R packages
-      uses: actions/cache@v2
-      with:
-        path: ~/.cache/R
-        key: r-packages-${{ runner.os }}-${{ hashFiles('**/DESCRIPTION') }}
-        restore-keys: |
-          r-packages-${{ runner.os }}-
-
-    - name: Install remotes package
-      run: R -e 'install.packages("remotes", dependencies = TRUE)'
-
-    - name: Install dependencies using remotes
-      run: R -e 'remotes::install_deps()'
-
-    - name: Specify GitHub PAT and Install devtools using remotes
-      run: R -e 'Sys.setenv(GITHUB_PAT = "${{ secrets.GH_PAT }}"); remotes::install_github("r-lib/devtools")'
-      env:
-        GITHUB_PAT: ${{ secrets.GH_PAT }}  # Add your GitHub PAT secret to your repository secrets
-
-    - name: Install libcurl development library
-      run: sudo apt-get install -y libcurl4-openssl-dev  # For Ubuntu/Debian
-
-    - name: Install dependencies for covr
-      run: R -e 'install.packages(c("curl", "httr"), dependencies = TRUE)'
-
-    - name: Install covr package
-      run: R -e 'install.packages("covr", dependencies = TRUE)'
-
-    - name: Install NRTAPmodel package
-      run: R -e 'Sys.setenv(GITHUB_PAT = "${{ secrets.GH_PAT }}"); remotes::install_github("Spatiotemporal-Exposures-and-Toxicology/NRTAPmodel")'
+    - name: Install dependencies
+      run: |
+        R -e 'install.packages("remotes")'
+        R -e 'remotes::install_deps()'
 
     - name: Run tests and calculate coverage
       run: |
@@ -63,7 +33,7 @@ jobs:
       run: |
         R -e 'library(covr); covr::codecov()'
       env:
-        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}  # Make sure you have added this secret to your repository
 
     - name: Cleanup
       run: |
