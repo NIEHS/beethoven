@@ -24,8 +24,8 @@ process_noaa_hms_smoke_data <- function(
     data_format = "Shapefile",
     separate_output = FALSE,
     output_format = "Shapefile",
-    directory_with_downloaded_data = "./input/noaa_hms/",
-    directory_to_save = "./input/noaa_hms/",
+    directory_with_downloaded_data = "./input/noaa_hms/raw/",
+    directory_to_save = "./input/noaa_hms/processed/",
     remove_downloaded = TRUE
 ) {
   chars_dir_download = nchar(directory_with_downloaded_data)
