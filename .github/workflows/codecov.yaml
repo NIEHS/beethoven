@@ -32,7 +32,7 @@ jobs:
         R -e 'remotes::install_deps()'
         
     - name: Install covr package
-      run: R -e 'install.packages("covr")'
+      run: R -e 'install.packages("covr","testthat")'
         
 
     - name: Run tests and calculate coverage
