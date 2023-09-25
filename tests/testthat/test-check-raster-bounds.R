@@ -5,7 +5,6 @@
 #' 
 #'
 test_that("raster is bounded within project domain", {
-  skip_on_ci()
   # read and get US with 300km buffer bounding box  
   us_bbox <- sf::st_read("../testdata/US-mainland-boundary.gpkg") |> 
     sf::st_transform("EPSG:4326") |>
