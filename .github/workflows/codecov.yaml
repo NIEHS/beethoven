@@ -41,10 +41,10 @@ jobs:
 
     - name: Upload coverage to Codecov
       run: |
-        echo "CODECOV_TOKEN: $CODECOV_TOKEN"
-        R -e 'library(covr); covr::codecov(token = Sys.getenv("CODECOV_TOKEN"))'
+        echo "CODECOV_TOKEN: $CODE_COV"
+        R -e 'library(covr); covr::codecov(token = Sys.getenv("CODE_COV"))'
       env:
-        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        CODECOV_TOKEN: ${{ secrets.CODE_COV }}
 
         
 
