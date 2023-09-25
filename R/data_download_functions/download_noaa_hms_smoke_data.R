@@ -6,23 +6,30 @@
 ################################################################################
 #' download_noaa_hms_smoke_data: download daily wildfire smoke plume data from NOAA Hazard Mapping System Fire and Smoke Product
 #' 
+#' @description
+#' The `download_noaa_hms_smoke_data()` function accesses and downloads wildfire
+#' smoke plume coverage data from the National Oceanic and Atmospheric
+#' Administration's (NOAA) [Hazard Mapping System Fire and Smoke Product](https://www.ospo.noaa.gov/Products/land/hms.html#0).
+#' 
 #' @param date_start character(1). length of 10. Start date for downloading data. Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
 #' @param date_end character(1). length of 10. End date for downloading data. Format YYYY-MM-DD (ex. September 10, 2023 = "2023-09-10").
-#' @param data_format character(1). #### EXPLANATION "Shapefile" or "KML" file type. ####
+#' @param data_format character(1). "Shapefile" or "KML". Download data in shapefile or keyhole markup language format.
 #' @param directory_to_download character(1). Directory to download zip files from NOAA Hazard Mapping System Fire and Smoke Product.
 #' @param directory_to_save character(1). Directory to decompress zip files.
+#' @param data_download_acknowledgement logical(1). By setting `= TRUE` the user acknolwedge that the data downloaded using this function may be very large and use lots of machine storage and memory.
 #' @param url_noaa_hms_smoke_data character(1). URL to the NOAA Hazard Mapping System Fire and Smoke Product data.
 #' @param remove_download logical(1). Remove download files in directory_to_download.
-#' @param time_wait_download integer(1). #### EXPLANATION ####
+#' @param time_wait_download integer(1).
 #' @author Mitchell Manware, Insang Song
-#' @return NULL; Separate shapefile or KML files of wildfire smoke plume polygon data will be stored in directory_to_save.
+#' @return NULL; NOAA Hazard Mapping System Fire and Smoke Product data will be returned to the designated saving directory in the indicated format.
 #' @export
 download_noaa_hms_smoke_data <- function(
     date_start = "2023-09-01",
-    date_end = "2023-09-02",
+    date_end = "2023-09-01",
     data_format = "Shapefile",
     directory_to_download = "./input/noaa_hms/",
     directory_to_save = "./input/noaa_hms/",
+    data_download_acknowledgement = FALSE,
     url_noaa_hms_smoke_data = "https://satepsanone.nesdis.noaa.gov/pub/FIRE/web/HMS/Smoke_Polygons/",
     remove_download = TRUE,
     time_wait_download = 2L
@@ -35,6 +42,11 @@ download_noaa_hms_smoke_data <- function(
    }
    if (substr(directory_to_save, chars_dir_save, chars_dir_save) != "/") {
      directory_to_save = paste(directory_to_save, "/", sep="")
+   }
+   
+   #### 0. test for data download acknowledgement
+   if (data_download_acknowledgement == FALSE){
+     stop("Data download acknowledgement is set to FALSE. Please acknowledge that the data downloaded using this function may be very large and use lots of machine storage and memory.")
    }
    
    #### 1. define date sequence in character format
