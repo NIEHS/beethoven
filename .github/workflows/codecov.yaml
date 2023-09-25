@@ -31,9 +31,9 @@ jobs:
         R -e 'install.packages("remotes")'
         R -e 'remotes::install_deps()'
         
-    - name: Install covr package
-      run: R -e 'install.packages("covr","testthat")'
-        
+    - name: Install dependencies for covr and testthat
+      run: R -e 'install.packages(c("covr", "testthat"), dependencies = TRUE)'
+
 
     - name: Run tests and calculate coverage
       run: |
