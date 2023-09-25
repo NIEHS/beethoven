@@ -20,10 +20,20 @@ jobs:
       with:
         r-version: 4.1  # You can change this to the R version you need
 
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libudunits2-dev libgdal-dev
+        
+
     - name: Install dependencies
       run: |
         R -e 'install.packages("remotes")'
         R -e 'remotes::install_deps()'
+        
+    - name: Install covr package
+      run: R -e 'install.packages("covr")'
+        
 
     - name: Run tests and calculate coverage
       run: |
