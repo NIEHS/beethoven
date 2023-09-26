@@ -8,15 +8,14 @@
 #' 
 #' @param date_start character(1). length of 10. Start date of downloaded data. Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
 #' @param date_end character(1). length of 10. End date of downloaded data. Format YYYY-MM-DD (ex. September 10, 2023 = "2023-09-10").
-#' @param data_format character(1). "Shapefile" or "KML" file type. ####
-#' @param separate_output logical(1). Export separate processed files for "light", "medium", "heavy" smoke density classification or one file with all classifications.
-#' @param output_format character(1). "Shapefile" or "Geopackage" file type. ####
+#' @param data_format character(1). "Shapefile" or "KML". Format of downloaded (raw) data.
+#' @param separate_output logical(1). Export separate files for "light", "medium", "heavy" smoke density classification. If `TRUE` one file containing all density classification data is saved.
+#' @param output_format character(1). "Shapefile" or "Geopackage". Format to save processed data.
 #' @param directory_with_downloaded_data character(1). Directory storing downloaded ".shp" or ".kml" files downloaded from NOAA Hazard Mapping System Fire and Smoke Product.
 #' @param directory_to_save character(1). Directory to save processed files.
 #' @param remove_downloaded logical(1). Remove downloaded data files in directory_with_downloaded_data.
 #' @author Mitchell Manware.
-#' @return NULL; Separate ### TERRA SPATVECTOR FILE TYPE ### for each smoke density classification
-#'                        ##################################
+#' @return NULL; Processed NOAA Hazard Mapping System Fire and Smoke Product data will be returned to the designated saving directory in the indicated format.
 #' @export
 process_noaa_hms_smoke_data <- function(
     date_start = "2023-09-01",
@@ -63,6 +62,7 @@ process_noaa_hms_smoke_data <- function(
 
   #### 3. import and aggregate data
   if(data_format == "Shapefile"){
+    cat("Processing shapefiles...\n")
     for(h in 1:length(hms_files_shp)){
       if(h == 1){
         smoke_data = terra::vect(hms_files_shp[h])
@@ -76,11 +76,11 @@ process_noaa_hms_smoke_data <- function(
       }
     }
     smoke_data$Density = factor(smoke_data$Density, levels = c("Light", "Medium", "Heavy"))
+    cat("Shapefiles successfully processed.\n")
   } else if(data_format == "KML"){
-    
+    cat("Processing KML files...\n")
     dens = c("Smoke (Light)", "Smoke (Medium)", "Smoke (Heavy)")
     dens_labels = c("Light", "Medium", "Heavy")
-    
     for(h in 1:length(hms_files)){
       if(h == 1){
         for(d in 1:length(dens)){
@@ -116,36 +116,47 @@ process_noaa_hms_smoke_data <- function(
     }
     smoke_data = rbind(smoke_data, smoke_data_3)
     smoke_data$Density = factor(smoke_data$Density, levels = c("Light", "Medium", "Heavy"))
+    cat("KML files successfully processed.\n")
   }
 
   
   #### 4. export files based on separate_output selection 
   if(separate_output == FALSE){
     if(output_format == "Shapefile"){
+      cat("Saving processed data as single shapefile...\n")
       terra::writeVector(smoke_data, filename = paste0(directory_to_save, "hms_smoke_processed_", gsub("-", "", date_start), "_", gsub("-", "", date_end), ".shp"), "ESRI Shapefile", overwrite=TRUE)
+      cat("Shapefile saved.\n")
     } else if(output_format == "Geopackage"){
+      cat("Saving processed data as single geopackage...\n")
       terra::writeVector(smoke_data, filename = paste0(directory_to_save, "hms_smoke_processed_", gsub("-", "", date_start), "_", gsub("-", "", date_end), ".gpkg"), "GPKG", overwrite=TRUE)
+      cat("Geopackage saved.\n")
     }
   } else if(separate_output == TRUE){
     dens = unique(smoke_data$Density)
     if(output_format == "Shapefile"){
+      cat("Saving processed data as separate shapefiles...\n")
       for(d in 1:length(dens)){
         smoke_data_dens = subset(smoke_data, smoke_data$Density==dens[d])
         terra::writeVector(smoke_data_dens, filename = paste0(directory_to_save, "hms_smoke_processed_", dens[d], "_", gsub("-", "", date_start), "_", gsub("-", "", date_end), ".shp"), "ESRI Shapefile", overwrite=TRUE)
       }
+      cat(paste0("Separate shapefiles saved in ", directory_to_save, ".\n"))
     } else if(output_format == "Geopackage"){
+      cat("Saving processed data as separate geopackages...\n")
       for(d in 1:length(dens)){
         smoke_data_dens = subset(smoke_data, smoke_data$Density==dens[d])
         terra::writeVector(smoke_data_dens, filename = paste0(directory_to_save, "hms_smoke_processed_", dens[d], "_", gsub("-", "", date_start), "_", gsub("-", "", date_end), ".gpkg"), "GPKG", overwrite=TRUE)
       }
+      cat(paste0("Separate geopackages saved in ", directory_to_save, ".\n"))
     }
   }
   
   
   #### 5. remove raw data.
   if(remove_downloaded == TRUE){
+    cat(paste0("Removing downloaded data files from ", directory_with_downloaded_data, "...\n")
     for(z in 1:length(hms_files)){
       file.remove(hms_files[z])
     }
+    cat(paste0("Data files removed from ", directory_with_downloaded_data, ".\n")
   }
 }

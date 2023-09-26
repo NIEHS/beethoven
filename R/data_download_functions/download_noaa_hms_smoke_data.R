@@ -46,7 +46,8 @@ download_noaa_hms_smoke_data <- function(
    
    #### 0. test for data download acknowledgement
    if (data_download_acknowledgement == FALSE){
-     stop("Data download acknowledgement is set to FALSE. Please acknowledge that the data downloaded using this function may be very large and use lots of machine storage and memory.")
+     cat("Data download acknowledgement is set to FALSE. Please acknowledge that the data downloaded using this function may be very large and use lots of machine storage and memory.")
+     stop()
    }
    
    #### 1. define date sequence in character format
@@ -57,10 +58,8 @@ download_noaa_hms_smoke_data <- function(
    
    #### 2. define data download URLs and download names
    for(f in 1:length(date_sequence)){
-     
      year = substr(date_sequence[f], 1, 4)
      month = substr(date_sequence[f], 5, 6)
-     
      if (data_format == "Shapefile"){
        file_urls = paste0(url_noaa_hms_smoke_data, data_format, "/", year, "/", month, "/hms_smoke", date_sequence, ".zip")
        download_names = paste0(directory_to_download, "hms_smoke_", data_format, "_", date_sequence, ".zip")
@@ -70,6 +69,7 @@ download_noaa_hms_smoke_data <- function(
      }
    }
    
+   
    #### 3. Downloading data
    if(!any(file.exists(download_names))){
      cat(paste0("Downloading requested files...\n"))
@@ -78,9 +78,10 @@ download_noaa_hms_smoke_data <- function(
      cat(paste0("Requested files downloaded.\n"))
    }
    
+   
    #### 4. Unzip "Shapefile" or copy "KML" files
-   cat(paste0("Saving files in ", directory_to_save, ".\n"))
    if(data_format == "Shapefile"){
+     cat(paste0("Unzipping shapefiles to ", directory_to_save, "...\n"))
      for(u in 1:length(download_names)){
        unzip(download_names[u], exdir = directory_to_save)
      }
@@ -90,12 +91,14 @@ download_noaa_hms_smoke_data <- function(
      names_new = gsub("hms_smoke", "hms_smoke_Shapefile_", names_to_change)
      file.rename(names_to_change, names_new)
    } else if(data_format == "KML"){
+     cat(paste0("Unzipping KML files to "), directory_to_save, "...\n")
      for(u in 1:length(download_names)){
        file.copy(from = download_names[u], to = directory_to_save)
      }
    }
-   cat(paste0("Files saves.\n"))
+   cat(paste0("Files unzipped and saved in", directory_to_save, ".\n"))
 
+   
    #### 5. Remove zip and .kml files from download directory
    if(remove_download == TRUE & data_format == "KML" & directory_to_download == directory_to_save){
      cat(paste0("Downloading directory and saving directory are the same. Downloaded KML files will not be deleted.\n"))
