@@ -55,7 +55,8 @@ jobs:
       uses: codecov/codecov-action@v3
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-
+        coverage_reports: "/home/runner/work/NRTAPmodel/NRTAPmodel/coverage.xml"
+        
     - name: Cleanup
       run: |
         R -e 'remove.packages("remotes")'
