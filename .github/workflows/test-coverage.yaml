@@ -42,10 +42,16 @@ jobs:
           find ${{ runner.temp }}/package -name 'testthat.Rout*' -exec cat '{}' \; || true
         shell: bash
 
+      - name: Save test results as artifact
+        run: |
+          find ${{ runner.temp }}/package -name 'testthat.Rout*' -exec cat '{}' \; > test-results.txt
+          echo "::set-output name=test-results::test-results.txt"
+        shell: bash
+      
       - name: Upload test results
-        if: failure()
         uses: actions/upload-artifact@v3
         with:
-          name: coverage-test-failures
-          path: ${{ runner.temp }}/package
+          name: coverage-test-results
+          path: test-results.txt
+
 
