@@ -36,6 +36,11 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y libudunits2-dev libgdal-dev
 
+    - name: Debug Info
+      run: |
+        echo "CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}"
+        ls -l ~/.cache/R
+      shell: bash
         
     - name: Install dependencies
       run: |
