@@ -1,2 +1,4 @@
 ^\.github$
 tools/
+^.*\.Rproj$
+^\.Rproj\.user$

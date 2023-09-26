@@ -1,7 +1,7 @@
 [![test-coverage](https://github.com/Spatiotemporal-Exposures-and-Toxicology/NRTAPmodel/actions/workflows/test-coverage.yaml/badge.svg)](https://github.com/Spatiotemporal-Exposures-and-Toxicology/NRTAPmodel/actions/workflows/test-coverage.yaml)
-
+[![codecov](https://codecov.io/gh/Spatiotemporal-Exposures-and-Toxicology/NRTAPmodel/graph/badge.svg?token=T6QZW69X55)](https://codecov.io/gh/Spatiotemporal-Exposures-and-Toxicology/NRTAPmodel)
 # Air Pollution Data for the Masses: An Open-Access, Tested, Updated PM<sub>2.5</sub> Hybrid Model 
- Group Project for the Spatiotemporal Exposures and Toxicology group with help from friends :smiley:
+ Group Project for the Spatiotemporal Exposures and Toxicology group with help from friends :smiley: :cowboy_hat_face:
 
 ## GitHub Push/Pull Workflow
 1) Each collaborator has a local copy of the github repo - suggested location is ddn/gs1/username/home
@@ -35,13 +35,61 @@ We will utilize various testing approaches to ensure functionality and quality o
 3) data size
 4) relative paths
 5) output of one module is the expectation of the input of the next module
-   
-### Unit Test Relevant Data Types
 
-#### Unit/Test References
-1) https://36-750.github.io/practices/unit-testing/
-2) https://r-pkgs.org/testing-basics.html
-3) https://testthat.r-lib.org/index.html
+### Test Drive Development
+Starting from the end product, we work backwards while articulating the tests needed at each stage.
+
+#### Final Product
+File Type
+1. NetCDF
+2. Numeric, double precision
+3. NA
+4. Variable Names Exist
+5. Naming Convention
+
+Stats 
+1. Non-negative variance ($\sigma^2$)
+2. Mean is reasonable ($\mu$)
+3. SI Units
+
+Domain 
+1. In the US (+ buffer)
+2. In Time range (2018-2022)
+
+Geographic 
+1. Projections
+2. Coordinate names (e.g. lat/lon)
+3. Time in acceptable format 
+#### Summary Statistics
+File Type
+1. NetCDF
+2. csv
+3. NA
+4. Variable Names Exist
+5. Naming Convention
+
+Stats 
+1. Non-negative variance ($\sigma^2$)
+2. Mean is reasonable ($\mu$)
+3. SI Units
+
+Domain 
+1. In the US (+ buffer)
+2. In Time range (2018-2022)
+
+Geographic 
+1. Projections
+2. Coordinate names (e.g. lat/lon)
+3. Time in acceptable format
+   
+#### Meta Learners
+
+#### Base Learners
+
+#### Geographic Covariates
+
+#### AQS Data
+    
 
 #### Each of the following are the classes of variables for the I/O that will need to be tested
 
