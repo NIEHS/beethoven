@@ -26,21 +26,12 @@ jobs:
           extra-packages: any::covr
           needs: coverage
 
-      - name: Test coverage
+      - name: Run tests
+        run: R CMD check .
+      
+      - name: Generate coverage reports
         run: |
-          covr::codecov(
-            quiet = FALSE,
-            clean = FALSE,
-            install_path = file.path(Sys.getenv("RUNNER_TEMP"), "package")
-          )
-        shell: Rscript {0}
-
-      - name: Show testthat output
-        if: always()
-        run: |
-          ## --------------------------------------------------------------------
-          find ${{ runner.temp }}/package -name 'testthat.Rout*' -exec cat '{}' \; || true
-        shell: bash
+          R -e 'covr::package_coverage(type = "all")'
 
       - name: Upload test results
         if: failure()
@@ -48,4 +39,3 @@ jobs:
         with:
           name: coverage-test-failures
           path: ${{ runner.temp }}/package
-
