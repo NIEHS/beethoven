@@ -50,6 +50,10 @@ jobs:
         echo "Current working directory: $(pwd)"
         R -e 'library(covr); covr::package_coverage()'
 
+    - name: Print Working Directory
+      run: |
+        echo "Current working directory: $(pwd)"
+
     - name: Check if coverage report exists
       run: |
         if [ -f "${{ github.workspace }}/coverage.xml" ]; then
