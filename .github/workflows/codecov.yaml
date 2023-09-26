@@ -7,6 +7,7 @@ on:
   pull_request:
     branches:
       - main
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -34,29 +35,23 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y libudunits2-dev libgdal-dev
-        
 
     - name: Install dependencies
       run: |
         R -e 'install.packages("remotes")'
         R -e 'remotes::install_deps()'
-        
+
     - name: Install dependencies for covr and testthat
       run: R -e 'install.packages(c("covr", "testthat"), dependencies = TRUE)'
-
 
     - name: Run tests and calculate coverage
       run: |
         R -e 'library(covr); covr::package_coverage()'
 
     - name: Upload coverage to Codecov
-      run: |
-        echo "CODECOV_TOKEN: $CODECOV_TOKEN"
-        R -e 'library(covr); covr::codecov(token = Sys.getenv("CODECOV_TOKEN"))'
-      env:
-        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-
-        
+      uses: codecov/codecov-action@v3
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
 
     - name: Cleanup
       run: |
