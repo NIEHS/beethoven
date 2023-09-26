@@ -51,6 +51,12 @@ jobs:
         echo "Current working directory: $(pwd)"
         R -e 'library(covr); covr::package_coverage()'
 
+    - name: Debug Info
+      run: |
+        echo "CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}"
+        ls -l ~/.cache/R
+      shell: bash
+      
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
       with:
