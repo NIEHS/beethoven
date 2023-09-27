@@ -54,6 +54,29 @@ jobs:
       run: |
         echo "Current working directory: $(pwd)"
 
+    - name: Search for Coverage Report
+      run: |
+        # Array of possible coverage report filenames/extensions
+        declare -a coverage_files=("coverage.xml" "coverage.covr.xml" "other_coverage.xml")
+
+        # Iterate over possible filenames/extensions
+        for file in "${coverage_files[@]}"; do
+          # Search for the coverage report
+          found_file=$(find "${{ github.workspace }}" -name "$file" -print -quit)
+
+          # If the file is found, print its location and break the loop
+          if [ -n "$found_file" ]; then
+            echo "Coverage report found: $found_file"
+            break
+          fi
+        done
+
+        # If the file is not found, exit with an error
+        if [ -z "$found_file" ]; then
+          echo "Coverage report not found."
+          exit 1
+        fi
+
     - name: Check if coverage report exists
       run: |
         if [ -f "${{ github.workspace }}/coverage.xml" ]; then
