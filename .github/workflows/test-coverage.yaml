@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      CODECOV_TOKEN: ${{ secrets.CODECOV_API_TOKEN }} # Add your codecov.io API token secret
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }} # Add your codecov.io API token secret
 
     steps:
       - uses: actions/checkout@v3
