@@ -48,7 +48,8 @@ jobs:
     - name: Run tests and calculate coverage
       run: |
         echo "Current working directory: $(pwd)"
-        R -e 'library(covr); covr::package_coverage()'
+        R -e 'library(covr); covr::package_coverage(coverage_file = "coverage.xml")'
+
 
     - name: Print Working Directory
       run: |
