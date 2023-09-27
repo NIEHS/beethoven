@@ -37,4 +37,7 @@ jobs:
     
     - name: Upload Coverage to Codecov
       run: |
-        Rscript -e 'covr::codecov()'
+        Rscript -e 'covr::codecov(token = Sys.getenv("CODECOV_TOKEN"))'
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
