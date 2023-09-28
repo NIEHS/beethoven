@@ -5,9 +5,9 @@
 #' 
 #'
 test_that("Predicted means are within a proper range", {
-  library(stars)
-  library(sf)
-  library(dplyr)
+  withr::local_package("stars")
+  withr::local_package("sf")
+  withr::local_package("dplyr")
 
   # 1. read netcdf output file and observation file
     # dummy path. correct path should be added to pass
