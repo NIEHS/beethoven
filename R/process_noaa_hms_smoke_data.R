@@ -152,11 +152,11 @@ process_noaa_hms_smoke_data <- function(
   
   
   #### 5. remove raw data.
-  if(remove_downloaded == TRUE){
-    cat(paste0("Removing downloaded data files from ", directory_with_downloaded_data, "...\n")
-    for(z in 1:length(hms_files)){
-      file.remove(hms_files[z])
-    }
-    cat(paste0("Data files removed from ", directory_with_downloaded_data, ".\n")
-  }
+#  if(remove_downloaded == TRUE){
+#    cat(paste0("Removing downloaded data files from ", directory_with_downloaded_data, "...\n")
+#    for(z in 1:length(hms_files)){
+#      file.remove(hms_files[z])
+#    }
+#    cat(paste0("Data files removed from ", directory_with_downloaded_data, ".\n")
+#  }
 }
