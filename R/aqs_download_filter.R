@@ -3,8 +3,8 @@
 # September 2023
 
 # Source functions
-source("R/data_download_preprocess/download_aqs_data.R")
-source("R/data_download_preprocess/filter_minimum_poc.R")
+source("R/download_aqs_data.R")
+source("R/filter_minimum_poc.R")
 
 # Define parameters of interest for download
 parameter_code = 88101
