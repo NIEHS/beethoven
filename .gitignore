@@ -7,7 +7,6 @@
 .RDataTmp
 
 # Ignore specific folders
-input/
 output/
 manuscript/
 
@@ -27,6 +26,7 @@ manuscript/
 ._.DS_Store/
 /.DS_Store
 /._.DS_Store
+*.zip
 
 # Output files from R CMD build
 /*.tar.gz
