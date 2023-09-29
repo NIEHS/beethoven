@@ -26,6 +26,13 @@ jobs:
           extra-packages: any::covr
           needs: coverage
 
+      - name: Install Package Dependencies
+	run: |
+	  install.packages("remotes")
+	  remotes::install_deps()
+	shell: Rscript {0}
+
+
       - name: Test coverage
         run: |
           covr::codecov(
