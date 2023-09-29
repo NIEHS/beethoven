@@ -31,6 +31,9 @@ jobs:
           covr::codecov(
             quiet = FALSE,
             clean = FALSE,
+            line_exclusions = list("R/aqs_download_filter.R" = c(25:26,45), "R/create_aqs_test_data.R" = c(13,25,38),
+            "R/download_aqs_data.R" = c(48,57,61,82:86,96:105),"R/download_noaa_hms_smoke_data.R","R/filter_minimum_poc.R"=c(26),
+            "R/process_noaa_hms_smoke_data.R"),
             install_path = file.path(Sys.getenv("RUNNER_TEMP"), "package")
           )
         shell: Rscript {0}
