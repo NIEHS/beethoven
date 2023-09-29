@@ -36,7 +36,6 @@ join_point_receptor_to_polygon_source <- function(receptor_sf = NULL,
                                                   write_log_to_file = TRUE) {
 
   # Check input arguments format ----------------------------------------------
-  #nocov start
   if(is.null(receptor_sf)) {
     stop("Required argument 'receptor_sf' is missing.")
   }
@@ -160,5 +159,4 @@ join_point_receptor_to_polygon_source <- function(receptor_sf = NULL,
   
   # Return data frame with point receptor id and source receptor polygon id
   receptor_point_to_source_polygon_crosswalk
-  #nocov end
 }
