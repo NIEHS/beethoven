@@ -30,7 +30,7 @@ jobs:
 
       - name: Test coverage
         run: |
-          Rscript -e "library(covr); covr::codecov(quiet = FALSE, clean = FALSE, line_exclusions = c('R/aqs_download_filter.R', 'R/create_aqs_test_data.R', 'R/download_aqs_data.R', 'R/download_noaa_hms_smoke_data.R', 'R/filter_minimum_poc.R', 'R/process_noaa_hms_smoke_data.R', 'vignettes/epa_download.Rmd'), install_path = file.path(Sys.getenv('RUNNER_TEMP'), 'package'))"
+          Rscript -e "library(covr); covr::codecov(quiet = FALSE, clean = FALSE), install_path = file.path(Sys.getenv('RUNNER_TEMP'), 'package'))"
 
       - name: Show testthat output
         if: always()

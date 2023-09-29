@@ -6,7 +6,7 @@
 source("R/download_aqs_data.R")
 source("R/filter_minimum_poc.R")
 
-
+#nocov start
 # Define parameters of interest for download
 parameter_code = 88101
 year_start = 2018
@@ -43,4 +43,6 @@ url_aqs_download = "https://aqs.epa.gov/aqsweb/airdata/"
   # output_name
   # [1] "./input/aqs/filtered_daily_88101_2018-2022.csv"
   write.csv(data_filtered, output_name)
+  
+  #nocov end
   

@@ -27,6 +27,7 @@ process_noaa_hms_smoke_data <- function(
     directory_to_save = "./input/noaa_hms/processed/",
     remove_downloaded = TRUE
 ) {
+  #nocov start
   chars_dir_download = nchar(directory_with_downloaded_data)
   chars_dir_save = nchar(directory_to_save)
   
@@ -159,4 +160,5 @@ process_noaa_hms_smoke_data <- function(
 #    }
 #    cat(paste0("Data files removed from ", directory_with_downloaded_data, ".\n")
 #  }
+  #nocov end
 }

@@ -9,6 +9,7 @@ create_aqs_test_data <- function(){
   require(sftime)
   require(dplyr)
   print("loading full dataset")
+  #nocov start
   # Read full AQS dataset from input folder and create dataframe
   aqs <- read.csv("input/aqs/daily_88101_2018-2022.csv")
   print("subsetting")
@@ -36,6 +37,6 @@ create_aqs_test_data <- function(){
   
   # write the data to an sftime object
   st_write(aqs.sftime,"tests/testdata/aqs-test-data.gpkg",append = FALSE)
-  
+  #nocov end
   
 }
