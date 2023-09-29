@@ -37,7 +37,8 @@ jobs:
               "R/download_aqs_data.R",
               "R/download_noaa_hms_smoke_data.R",
               "R/filter_minimum_poc.R",
-              "R/process_noaa_hms_smoke_data.R"
+              "R/process_noaa_hms_smoke_data.R",
+              "vignettes/epa_download.Rmd"
             ),
             install_path = file.path(Sys.getenv("RUNNER_TEMP"), "package")
           )
