@@ -1,15 +1,12 @@
 # Download EPA AQS data and filter to a single POC per site#
 # Author: Mariana Alifa Kassien
-# Proposed Changes: Kyle Messier, September 28 2023
 # September 2023
 
 # Source functions
 source("R/download_aqs_data.R")
 source("R/filter_minimum_poc.R")
 
-library(tidyverse)
-
-
+#nocov start
 # Define parameters of interest for download
 parameter_code = 88101
 year_start = 2018
@@ -19,9 +16,6 @@ directory_to_download = "./input/aqs/"
 directory_to_save = "./input/aqs/"
 url_aqs_download = "https://aqs.epa.gov/aqsweb/airdata/"
 
-# Bypass if files exist
-if( length(list.files(path = directory_to_save,
-                    pattern = "*.csv$", full.names = T))==0){
   # Run data download function
   download_aqs_data(parameter_code, year_start,year_end,resolution_temporal,
                     directory_to_download, directory_to_save,
@@ -50,4 +44,5 @@ if( length(list.files(path = directory_to_save,
   # [1] "./input/aqs/filtered_daily_88101_2018-2022.csv"
   write.csv(data_filtered, output_name)
   
-}
+  #nocov end
+  

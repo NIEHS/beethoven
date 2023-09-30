@@ -1,6 +1,8 @@
 # Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
 # Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
 on:
+  push:
+    branches: [main, master]
   pull_request:
     branches: [main, master]
 
@@ -11,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }} # Add this line
 
     steps:
       - uses: actions/checkout@v3
@@ -46,3 +49,7 @@ jobs:
         with:
           name: coverage-test-failures
           path: ${{ runner.temp }}/package
+
+      - name: Upload coverage to Codecov # Add this step
+        run: |
+          Rscript -e "covr::codecov(token = Sys.getenv('CODECOV_TOKEN'))"

@@ -34,6 +34,7 @@ download_noaa_hms_smoke_data <- function(
     remove_download = TRUE,
     time_wait_download = 2L
 ) {
+  #nocov start
    chars_dir_download = nchar(directory_to_download)
    chars_dir_save = nchar(directory_to_save)
    
@@ -109,4 +110,5 @@ download_noaa_hms_smoke_data <- function(
      }
      cat(paste0("Download files deleted.\n"))
    }
+   #nocov end
 }

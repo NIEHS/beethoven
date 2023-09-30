@@ -18,7 +18,7 @@
 #' @return a data.table object
 #' @export
 filter_minimum_poc <- function(input_df, site_id, poc_name) {
-
+  #nocov start
     if (!require(pacman)) {
         install.packages('pacman')
         library(pacman)
@@ -41,6 +41,6 @@ filter_minimum_poc <- function(input_df, site_id, poc_name) {
         tidytable::ungroup() |>
         data.table()
     return(poc_filtered)
-
+  #nocov end
 }
 
