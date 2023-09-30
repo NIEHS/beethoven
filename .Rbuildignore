@@ -72,7 +72,7 @@
 ^\\.*\\.fdb_latexmk$
 ^\\.*\\.synctex\\.gz$
 ^\\.*\\.utf8\\.md$
-vignette/
+vignettes/
 tests/
 tools/
 input/
