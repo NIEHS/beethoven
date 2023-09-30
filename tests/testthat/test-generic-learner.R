@@ -6,11 +6,11 @@
 #' 
 #'
 
-# Load the function you want to test
-source("R/generic_pipeline_example.R")
-
 # Define a test case
 test_that("generic_base_learner returns valid predictions", {
+
+  # Load the function you want to test
+source("R/generic_pipeline_example.R")
   
   aqs.sftime <- sf::st_read("../testdata/aqs-test-data.gpkg") |>
     sftime::st_as_sftime()
