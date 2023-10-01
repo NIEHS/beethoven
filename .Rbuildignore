@@ -1,0 +1,6 @@
+^vignettes/
+^input/
+^tools/
+^manuscript/
+^output/
+^\.github/workflows/
