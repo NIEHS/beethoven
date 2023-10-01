@@ -77,4 +77,6 @@ tests/
 tools/
 input/
 ^\\.gitignore$
+.github
+^\\.*\\.github$
 
