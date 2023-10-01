@@ -76,3 +76,5 @@ vignettes/
 tests/
 tools/
 input/
+^\\.gitignore$
+
