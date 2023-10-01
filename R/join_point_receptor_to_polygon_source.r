@@ -124,8 +124,8 @@ join_point_receptor_to_polygon_source <- function(receptor_sf = NULL,
   
   # Add a flag for receptor points not within a polygon
   receptor_point_to_source_polygon_crosswalk <- 
-    sf::st_drop_geometry(receptor_point_to_source_polygon_join) %>%
-    dplyr::mutate(not_in_polygon = dplyr::if_else(is.na(get(source_polygon_id)), 1, 0)) %>%
+    sf::st_drop_geometry(receptor_point_to_source_polygon_join) |>
+    dplyr::mutate(not_in_polygon = dplyr::if_else(is.na(get(source_polygon_id)), 1, 0)) |>
     dplyr::arrange(id)
   
   receptors_not_joined <- sum(receptor_point_to_source_polygon_crosswalk$not_in_polygon)
@@ -153,7 +153,7 @@ join_point_receptor_to_polygon_source <- function(receptor_sf = NULL,
   # Remove extra columns from output
   if(add_all_to_output == FALSE) {
     receptor_point_to_source_polygon_crosswalk <-  
-      receptor_point_to_source_polygon_crosswalk %>%
+      receptor_point_to_source_polygon_crosswalk |>
       dplyr::select(all_of(c(receptor_id, source_polygon_id, "not_in_polygon")))
   }
   
