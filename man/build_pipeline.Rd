@@ -15,19 +15,19 @@ build_pipeline(
 )
 }
 \arguments{
-\item{base_learner_list}{}
+\item{base_learner_list}{list of the base predictor output}
 
-\item{base_attr_list}{}
+\item{base_attr_list}{list of the base predictor attributes}
 
-\item{meta_learner}{}
+\item{meta_learner}{list of meta learner attributes}
 
-\item{response}{}
+\item{response}{the dependent variable, numeric, vector}
 
-\item{covariate}{}
+\item{covariate}{independent variables, design matrix, numeric}
 
-\item{obs_locs}{}
+\item{obs_locs}{geospatial locations as sf object}
 
-\item{pred_locs}{}
+\item{pred_locs}{geospatial information on the locations for predicting}
 }
 \value{
 put it all together

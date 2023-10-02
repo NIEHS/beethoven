@@ -7,9 +7,9 @@
 generic_meta_learner(base_predictor_list, pred_loc)
 }
 \arguments{
-\item{base_predictor_list}{}
+\item{base_predictor_list}{list of the base predictor output}
 
-\item{pred_loc}{}
+\item{pred_loc}{geospatial information on the locations for predicting}
 }
 \value{
 mean and variance of the meta learner at prediction locations

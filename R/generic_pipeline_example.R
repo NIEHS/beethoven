@@ -3,10 +3,10 @@
 #' define a base learner dummy: this illustrates one way to wrap a learning
 #' algorithm and return an object that makes predictions
 #'
-#' @param response 
-#' @param covariate 
-#' @param obs_locs 
-#' @param model_attr 
+#' @param response the dependent variable, numeric, vector
+#' @param covariate independent variables, design matrix, numeric
+#' @param obs_locs geospatial locations as sf object
+#' @param model_attr option model attributes or metadata
 #' @export
 
 generic_base_learner <- function(response, covariate, obs_locs, model_attr){
@@ -29,8 +29,8 @@ generic_base_learner <- function(response, covariate, obs_locs, model_attr){
 # and a set of locations at which to make predictions
 #' Title Generic_Meta_Learner
 #'
-#' @param base_predictor_list 
-#' @param pred_loc 
+#' @param base_predictor_list list of the base predictor output
+#' @param pred_loc geospatial information on the locations for predicting
 #'
 #' @return 
 #' mean and variance of the meta learner at prediction locations
@@ -65,13 +65,13 @@ generic_meta_learner <- function(base_predictor_list, pred_loc){
 # at the prediction locations
 #' Title Build_Pipeline
 #'
-#' @param base_learner_list 
-#' @param base_attr_list 
-#' @param meta_learner 
-#' @param response 
-#' @param covariate 
-#' @param obs_locs 
-#' @param pred_locs 
+#' @param base_learner_list list of the base predictor output
+#' @param base_attr_list list of the base predictor attributes
+#' @param meta_learner list of meta learner attributes
+#' @param response  the dependent variable, numeric, vector
+#' @param covariate  independent variables, design matrix, numeric
+#' @param obs_locs geospatial locations as sf object
+#' @param pred_locs geospatial information on the locations for predicting
 #'
 #' @return put it all together
 #' @export
