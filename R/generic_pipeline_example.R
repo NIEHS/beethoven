@@ -1,10 +1,16 @@
 # Generic script to apply a base learner to data and then a meta learner
 #
-
 #' define a base learner dummy: this illustrates one way to wrap a learning
 #' algorithm and return an object that makes predictions
+#'
+#' @param response 
+#' @param covariate 
+#' @param obs_locs 
+#' @param model_attr 
+#' @export
 
 generic_base_learner <- function(response, covariate, obs_locs, model_attr){
+  
   # check that all required parameters are present
   if(any(is.na(model_attr))) print("Null attributes")
   # fit the learner to the data
@@ -21,7 +27,18 @@ generic_base_learner <- function(response, covariate, obs_locs, model_attr){
 
 # a generic meta learner that takes as input the set of fitted base predictors
 # and a set of locations at which to make predictions
+#' Title Generic_Meta_Learner
+#'
+#' @param base_predictor_list 
+#' @param pred_loc 
+#'
+#' @return 
+#' mean and variance of the meta learner at prediction locations
+#' @export
+#'
+#' @examples NULL
 generic_meta_learner <- function(base_predictor_list, pred_loc){
+  
   # check that inputs are as expected
   if(any(is.na(base_predictor_list)) || any(is.na(pred_loc))) print("Null input")
   # for each prediction location, compute the set of predictions then apply meta
@@ -46,8 +63,23 @@ generic_meta_learner <- function(base_predictor_list, pred_loc){
 # a function that takes a set of base learners and a meta learner, 
 # fits the base learners, and then makes predictions with the meta learner 
 # at the prediction locations
+#' Title Build_Pipeline
+#'
+#' @param base_learner_list 
+#' @param base_attr_list 
+#' @param meta_learner 
+#' @param response 
+#' @param covariate 
+#' @param obs_locs 
+#' @param pred_locs 
+#'
+#' @return put it all together
+#' @export
+#'
+#' @examples NULL
 build_pipeline <-  function(base_learner_list, base_attr_list, meta_learner, 
                             response, covariate, obs_locs, pred_locs){
+  
   base_predictor_list = list()
   # each entry in base learner list is a function
   for(bl_idx in 1:length(base_learner_list)){

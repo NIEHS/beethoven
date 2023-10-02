@@ -25,8 +25,7 @@
 #'
 #' @return a data frame: receptor_point_to_source_polygon_crosswalk 
 #' @export
-#'
-#' @examples
+#' @examples NULL
 join_point_receptor_to_polygon_source <- function(receptor_sf = NULL,
                                                   receptor_id = NULL,
                                                   source_polygon_sf = NULL,
@@ -95,15 +94,15 @@ join_point_receptor_to_polygon_source <- function(receptor_sf = NULL,
   # Spatial join points to polygons --------------------------------------------
   
   # Transform point receptor coordinate reference system to match source polygons
-  if(st_crs(receptor_sf) != st_crs(source_polygon_sf)) {
-    receptor_sf <- sf::st_transform(receptor_sf, crs = st_crs(source_polygon_sf))
+  if(sf::st_crs(receptor_sf) != sf::st_crs(source_polygon_sf)) {
+    receptor_sf <- sf::st_transform(receptor_sf, crs = sf::st_crs(source_polygon_sf))
     if(write_log_to_file == TRUE) {
       logr::log_print("Point receptor coordinate reference system transformed to match source.",
                 console = print_log_to_console)
     } else if(print_log_to_console == TRUE) {
       message("Point receptor coordinate reference system transformed to match source.")
     }
-  } else if(st_crs(receptor_sf) != st_crs(source_polygon_sf)) {
+  } else if(sf::st_crs(receptor_sf) != sf::st_crs(source_polygon_sf)) {
     stop("Unable to transform point receptor coordinate reference system to match source.")
   }
   
@@ -124,9 +123,10 @@ join_point_receptor_to_polygon_source <- function(receptor_sf = NULL,
   
   # Add a flag for receptor points not within a polygon
   receptor_point_to_source_polygon_crosswalk <- 
-    sf::st_drop_geometry(receptor_point_to_source_polygon_join) |>
-    dplyr::mutate(not_in_polygon = dplyr::if_else(is.na(get(source_polygon_id)), 1, 0)) |>
-    dplyr::arrange(id)
+    sf::st_drop_geometry(receptor_point_to_source_polygon_join) %>%
+    dplyr::mutate(not_in_polygon = dplyr::if_else(is.na(get(source_polygon_id)), 1, 0)) %>%
+    dplyr::arrange(receptor_id) #confirm with Lara this is the correct id - there was no id defined
+
   
   receptors_not_joined <- sum(receptor_point_to_source_polygon_crosswalk$not_in_polygon)
   
