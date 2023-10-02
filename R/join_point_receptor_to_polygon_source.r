@@ -126,6 +126,7 @@ join_point_receptor_to_polygon_source <- function(receptor_sf = NULL,
     sf::st_drop_geometry(receptor_point_to_source_polygon_join) %>%
     dplyr::mutate(not_in_polygon = dplyr::if_else(is.na(get(source_polygon_id)), 1, 0)) %>%
     dplyr::arrange(receptor_id) #confirm with Lara this is the correct id - there was no id defined
+
   
   receptors_not_joined <- sum(receptor_point_to_source_polygon_crosswalk$not_in_polygon)
   
@@ -152,8 +153,8 @@ join_point_receptor_to_polygon_source <- function(receptor_sf = NULL,
   # Remove extra columns from output
   if(add_all_to_output == FALSE) {
     receptor_point_to_source_polygon_crosswalk <-  
-      receptor_point_to_source_polygon_crosswalk %>%
-      dplyr::select(all_of(c(receptor_id, source_polygon_id, "not_in_polygon")))
+      receptor_point_to_source_polygon_crosswalk |>
+      dplyr::select(dplyr::all_of(c(receptor_id, source_polygon_id, "not_in_polygon")))
   }
   
   # Return data frame with point receptor id and source receptor polygon id

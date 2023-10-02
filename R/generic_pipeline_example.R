@@ -18,7 +18,7 @@ generic_base_learner <- function(response, covariate, obs_locs, model_attr){
   # return a function that makes predictions?
   predict_fun <- function(pred_locs){
     # apply the learner to the data
-    preds = rnorm(1, mean = length(params)+length(pred_locs))
+    preds = stats::rnorm(1, mean = length(params)+length(pred_locs))
     return(preds)
   }
   return(predict_fun)
@@ -103,7 +103,7 @@ base_learner_list = list(generic_base_learner, generic_base_learner)
 base_learner_attr = list(list("bins" = 10, "threshold" = .1), 
                          list("NN_depth" = 4, "NN_width" = 100, "learn_rate"=.1))
 # simulating some made up data
-covariate = rnorm(100)
+covariate = stats::rnorm(100)
 obs_locs = seq(0, 10, length.out=100)
 response = covariate*5+runif(100)
 # specifying the locations for predictions
