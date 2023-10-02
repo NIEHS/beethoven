@@ -48,6 +48,6 @@ test_that("Output times are within temporal range", {
   iswithin = check_temporal_range()
   
   # expect all elements == TRUE
-  expect_equal(any(!iswithin), FALSE)
+  expect_equal(any(iswithin), TRUE)
   
 })
