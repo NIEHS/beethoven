@@ -3,4 +3,3 @@
 export(build_pipeline)
 export(generic_base_learner)
 export(generic_meta_learner)
-export(join_point_receptor_to_polygon_source)
