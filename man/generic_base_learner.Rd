@@ -8,13 +8,13 @@ algorithm and return an object that makes predictions}
 generic_base_learner(response, covariate, obs_locs, model_attr)
 }
 \arguments{
-\item{response}{}
+\item{response}{the dependent variable, numeric, vector}
 
-\item{covariate}{}
+\item{covariate}{independent variables, design matrix, numeric}
 
-\item{obs_locs}{}
+\item{obs_locs}{geospatial locations as sf object}
 
-\item{model_attr}{}
+\item{model_attr}{option model attributes or metadata}
 }
 \description{
 define a base learner dummy: this illustrates one way to wrap a learning
