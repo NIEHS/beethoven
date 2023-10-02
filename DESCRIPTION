@@ -7,8 +7,9 @@ Authors@R:
              role = c("aut", "cre"),
              email = "kyle.messier@nih.gov"))
 Description: This will one day be a package that provides near real time air pollution data
-Imports: terra, sf, sftime
-Suggests: covr, knitr, rmarkdown, testthat (>= 3.0.0)
+Depends: R (>= 3.5.0)
+Imports: dplyr, sf, stats
+Suggests: covr, knitr, rmarkdown, testthat (>= 3.0.0),terra, sftime
 Encoding: UTF-8
 VignetteBuilder: knitr, rmarkdown
 RoxygenNote: 7.2.3

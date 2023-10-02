@@ -27,6 +27,7 @@ download_aqs_data <- function(
     url_aqs_download = "https://aqs.epa.gov/aqsweb/airdata/",
     remove_zips = FALSE
 ) {
+  #nocov start
     chars_dir_download = nchar(directory_to_download)
     chars_dir_save = nchar(directory_to_save)
     
@@ -105,4 +106,5 @@ download_aqs_data <- function(
             file.remove(zipfile)
         }
     }
+    #nocov end
 }

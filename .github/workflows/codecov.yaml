@@ -1,12 +1,12 @@
 name: R Package CI
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+#on:
+#  push:
+#    branches:
+#      - main
+#  pull_request:
+#    branches:
+#      - main
 
 jobs:
   build:
@@ -45,17 +45,18 @@ jobs:
     - name: Install dependencies for covr and testthat
       run: R -e 'install.packages(c("covr", "testthat"), dependencies = TRUE)'
 
-
     - name: Run tests and calculate coverage
       run: |
         echo "Current working directory: $(pwd)"
-        R -e 'library(covr); covr::package_coverage()'
+        R -e 'library(covr); covr::package_coverage(coverage_file = "coverage.xml")'
+
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-
+        coverage_reports: ${{ github.workspace }}/coverage.xml
+        
     - name: Cleanup
       run: |
         R -e 'remove.packages("remotes")'

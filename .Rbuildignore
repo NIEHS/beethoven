@@ -1,4 +1,8 @@
-^\.github$
-tools/
-^.*\.Rproj$
-^\.Rproj\.user$
+^vignettes/
+^input/
+^tools/
+^manuscript/
+^output/
+^\.github/workflows/
+^NRTAPmodel\.Rproj$
+^R/join_point_receptor_to_polygon_source\\.r$ # Add this line
