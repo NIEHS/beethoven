@@ -9,7 +9,7 @@ Authors@R:
 Description: This will one day be a package that provides near real time air pollution data
 Depends: R (>= 3.5.0)
 Imports: dplyr, sf, stats
-Suggests: covr, knitr, rmarkdown, testthat (>= 3.0.0), terra, stars, sftime
+Suggests: covr, withr, knitr, rmarkdown, testthat (>= 3.0.0), terra, stars, sftime
 Encoding: UTF-8
 VignetteBuilder: knitr, rmarkdown
 RoxygenNote: 7.2.3

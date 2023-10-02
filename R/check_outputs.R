@@ -33,7 +33,7 @@ check_output_locations_are_valid <- function(
 
 #' Check if the output prediction mean values are in the valid range
 #' 
-#' @param model_output stars object of model output
+#' @param model_output sf/sftime object of model output
 #' @param model_mean_name character(1). the name of layer where mean values are stored
 #' @param observation a data.frame with observations
 #' @param observation_mean_name character(1). field name of observations in observation object.
@@ -73,7 +73,7 @@ check_means_are_valid <- function(
 
 #' Check if the output is with the valid coordinate reference system
 #' 
-#' @param model_output stars object of model output.
+#' @param model_output sf/sftime object of model output.
 #' @param crs_list a character/integer vector of acceptable CRS. Default is c("EPSG:4326", "EPSG:5070")
 #' @return A logical value indicating the model is compliant to one of elements in crs_list.
 #' @author Insang Song
@@ -83,7 +83,7 @@ check_crs_is_valid <- function(
     crs_list = c("EPSG:4326", "EPSG:5070")
 ) {
     crs_output = sf::st_crs(model_output)
-    checked <- sapply(crs_list, function(x) identical(crs_output, sf::st_crs(x)))
+    checked <- sapply(crs_list, function(x) crs_output == sf::st_crs(x))
     checked <- any(checked)
 
     return(checked)
@@ -97,7 +97,7 @@ check_crs_is_valid <- function(
 #' @param model_output sf/sftime object of model output.
 #' @param fields_to_check character(varying). Field names where completeness will be checked.
 #' @param report_fields_na logical(1). If any fields have NA values, report the field names which gave the errors. Default is FALSE.
-#' @return A logical (when report_fields_na is FALSE) or a list (when report_fields_na is TRUE) object. A list includes the list of fields that include NAs.
+#' @return A logical (when report_fields_na is FALSE; TRUE means there are NA values at least one data value) or a list (when report_fields_na is TRUE) object. A list includes the list of fields that include NAs.
 #' @export
 #' @author Insang Song
 check_data_completeness <- function(
@@ -132,8 +132,3 @@ check_data_completeness <- function(
     }
     return(result_eval)
 }
-
-
-aqs.sftime <- terra::vect("./tests/testdata/aqs-test-data.gpkg")
-merra = terra::rast("./tests/testdata/merra2_tavg2_US_mainland_20220820_daily.tif")
-merrast = stars::read_stars("./tests/testdata/merra2_tavg2_US_mainland_20220820_daily.tif")
