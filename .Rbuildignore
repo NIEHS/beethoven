@@ -4,3 +4,4 @@
 ^manuscript/
 ^output/
 ^\.github/workflows/
+^NRTAPmodel\.Rproj$
