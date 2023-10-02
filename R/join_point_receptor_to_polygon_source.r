@@ -154,7 +154,7 @@ join_point_receptor_to_polygon_source <- function(receptor_sf = NULL,
   if(add_all_to_output == FALSE) {
     receptor_point_to_source_polygon_crosswalk <-  
       receptor_point_to_source_polygon_crosswalk |>
-      dplyr::select(all_of(c(receptor_id, source_polygon_id, "not_in_polygon")))
+      dplyr::select(dplyr::all_of(c(receptor_id, source_polygon_id, "not_in_polygon")))
   }
   
   # Return data frame with point receptor id and source receptor polygon id
