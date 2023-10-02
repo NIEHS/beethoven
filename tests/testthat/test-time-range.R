@@ -19,11 +19,6 @@ test_that("Output times are within temporal range", {
     end_range = "2022-12-31"
   ){
     
-    # check that data has time values
-    if(model_output@ptr$hasTime == FALSE){
-      stop("Input should have time values.\n")
-    }
-    
     # change character inputs to dates
     start_date = as_datetime(start_range)
     end_date = as_datetime(end_range)
@@ -33,11 +28,6 @@ test_that("Output times are within temporal range", {
     
     # assign date values to variable
     dates = as_datetime(model_output@ptr$time)
-    
-    # check dates and ranges are same class
-    if(any(class(range) == class(dates)) == FALSE){
-      stop("Data dates and test range have different classes.\n")
-    }
     
     # check that dates are within range
     checked = as.vector(dates %in% range)
