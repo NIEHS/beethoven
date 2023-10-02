@@ -9,13 +9,19 @@ test_that("Output CRS is valid", {
     withr::local_package("sf")
 
     # 1. read netcdf output file
-    path_results = "./output/model_output.nc"
+    path_results = "../../output/model_output.nc"
     model_results <- stars::read_stars(path_results)
 
     # 2. main evaluation
     iscrsvalid = check_crs_is_valid(model_results)
 
     expect_equal(iscrsvalid, TRUE)
+
+    model_results_2163 = st_transform(model_results, "EPSG:2163")
+    crsnotvalid = check_crs_is_valid(model_results_2163)
+
+    expect_equal(crsnotvalid, FALSE)
+
 })
 
 
@@ -32,7 +38,7 @@ test_that("Predicted means are within a proper range", {
 
     # 1. read netcdf output file and observation file
     # dummy path. correct path should be added to pass
-    path_results = "./output/model_output.nc"
+    path_results = "../../output/model_output.nc"
     path_observation = "./input/aqs_pm25_cleaned_2018_2022.csv"
     model_results <- stars::read_stars(path_results)
     observations <- read.csv(path_observation)
