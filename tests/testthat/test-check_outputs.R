@@ -38,13 +38,13 @@ test_that("Predicted means are within a proper range", {
 
     # 1. read netcdf output file and observation file
     path_results = "../testdata/test_nc_output.nc"
-    path_observation = "../../input/data/aqs/daily_88101_2018-2022.csv"
+    path_observation = "../testdata/daily_88101_2018-2022.rds"
     model_results <- sf::read_sf(path_results)
-    observations <- read.csv(path_observation)
+    observations <- base::readRDS(path_observation)
     model_results$prediction_mean = rgamma(nrow(model_results), 8, 0.3)
 
     # 2. main evaluation
-    ismeanvalid = check_means_are_valid(model_results, observation = observations)
+    ismeanvalid = check_means_are_valid(model_results, observation = observations, observation_mean_name = "Arithmetic.Mean")
 
     expect_equal(ismeanvalid, TRUE)
 })

@@ -49,7 +49,7 @@ check_means_are_valid <- function(
     tolerance_factor = 3
 ) {
     # clean observation values
-    obs_values <- observations[[observation_mean_name]]
+    obs_values <- observation[[observation_mean_name]]
     obs_min <- min(obs_values)
     obs_max <- max(obs_values)
 
@@ -57,7 +57,7 @@ check_means_are_valid <- function(
     threshold_upper <- obs_max * tolerance_factor
 
     # clean output
-    model_output <- model_output[model_mean_name]
+    model_output <- model_output[[model_mean_name]]
     # "flatten" the mean layer
     vec_output <- unlist(model_output)
     # undetermined: whether or not NA values are allowed in the model output
