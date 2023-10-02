@@ -123,8 +123,8 @@ join_point_receptor_to_polygon_source <- function(receptor_sf = NULL,
   
   # Add a flag for receptor points not within a polygon
   receptor_point_to_source_polygon_crosswalk <- 
-    sf::st_drop_geometry(receptor_point_to_source_polygon_join) %>%
-    dplyr::mutate(not_in_polygon = dplyr::if_else(is.na(get(source_polygon_id)), 1, 0)) %>%
+    sf::st_drop_geometry(receptor_point_to_source_polygon_join) |>
+    dplyr::mutate(not_in_polygon = dplyr::if_else(is.na(get(source_polygon_id)), 1, 0)) |>
     dplyr::arrange(receptor_id) #confirm with Lara this is the correct id - there was no id defined
 
   
