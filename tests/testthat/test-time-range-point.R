@@ -1,17 +1,17 @@
 #' @author Mitchell Manware
 #' @description
 #' unit test for model output is within desired temporal range (2018 - 2022 inclusive)
-#' assumes `test_nc_output.nc` is raster data
+#' assumes `test_nc_output.nc` is point data
 #' 
 test_that("Output times are within temporal range", {
   
   library(terra)
   library(lubridate)
-
+  
   # 1. import model output
   # path_results = "./output/model_output.nc"
   path_results = "./testdata/test_nc_output.nc"
-  model_results = terra::rast(path_results)
+  model_results = terra::vect(path_results)
   
   # 2. function
   check_temporal_range = function(
@@ -28,12 +28,12 @@ test_that("Output times are within temporal range", {
     range = seq(start_date, end_date, 86400)
     
     # assign date values to variable
-    dates = as_datetime(model_output@ptr$time)
+    dates = as_datetime(model_results$Date)
     
     # check that dates are within range
     checked = as.vector(dates %in% range)
     return(checked)
-
+    
   }
   
   iswithin = check_temporal_range()
@@ -42,3 +42,4 @@ test_that("Output times are within temporal range", {
   expect_equal(any(iswithin), TRUE)
   
 })
+
