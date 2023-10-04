@@ -31,7 +31,7 @@ jobs:
       - name: Install gdebi-core (Rocky Linux)
         run: |
           sudo dnf install -y gdebi-core
-        if: runner.os == 'Linux' && runner.os_version == '8'  # Check for Rocky Linux 8
+        if: runner.os == 'Linux' && runner.os_version == '8.7'  # Check for Rocky Linux 8
 
       - uses: r-lib/actions/setup-pandoc@v2
 
