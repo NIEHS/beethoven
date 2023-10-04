@@ -12,13 +12,14 @@ jobs:
   R-CMD-check:
     runs-on: self-hosted
 
-    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
+    name: Rocky Linux 8.7 (${{ matrix.config.r }})
+
 
     strategy:
       fail-fast: false
       matrix:
         config:
-          - {os: ubuntu-latest,   r: 'release'}
+          - {os: rocky, r: 'release'}
 
 
     env:
@@ -31,7 +32,7 @@ jobs:
       - name: Install gdebi-core (Rocky Linux)
         run: |
           sudo dnf install -y gdebi-core
-        if: runner.os == 'Linux' && runner.os_version == '8.7'  # Check for Rocky Linux 8
+        if: runner.os == 'Linux' && runner.os_version == '8'  # Check for Rocky Linux 8
 
       - uses: r-lib/actions/setup-pandoc@v2
 
