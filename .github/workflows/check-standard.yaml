@@ -11,42 +11,25 @@ name: R-CMD-check
 jobs:
   R-CMD-check:
     runs-on: self-hosted
-
-    name: Rocky Linux 8.7 (${{ matrix.config.r }})
-
-
     strategy:
-      fail-fast: false
       matrix:
-        config:
-          - {os: rocky, r: 'release'}
-
-
+        runner-os: [linux-rocky8]  # Specify the desired runner OS here
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
-
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v2  # Update to the latest version of the 'actions/checkout' action
 
-      - name: Install gdebi-core (Rocky Linux)
-        run: |
-          sudo dnf install -y gdebi-core
-        if: runner.os == 'Linux' && runner.os_version == '8'  # Check for Rocky Linux 8
-
-      - uses: r-lib/actions/setup-pandoc@v2
-
-      - uses: r-lib/actions/setup-r@v2
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
         with:
-          r-version: ${{ matrix.config.r }}
-          http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
-      - uses: r-lib/actions/setup-r-dependencies@v2
+      - name: Set up R Dependencies
+        uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck
           needs: check
 
-      - uses: r-lib/actions/check-r-package@v2
-        with:
-          upload-snapshots: true
+      - name: Check R Package
+        uses: r-lib/actions/check-r-package@v2
