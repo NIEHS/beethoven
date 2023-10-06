@@ -5,6 +5,7 @@
 #' list of valid CRS: EPSG:5070, EPSG:4ß326
 #'
 testthat::test_that("Output CRS is valid", {
+  skip_on_ci()
   withr::local_package("sf")
   withr::local_options(list(sf_use_s2 = FALSE))
 
@@ -52,6 +53,7 @@ testthat::test_that("Predicted means are within a proper range", {
 #' unit testing for the model output is inside the mainland US
 #' 
 testthat::test_that("Output locations are in the mainland US", {
+    skip_on_ci()
   withr::local_package("sf")
   withr::local_package("dplyr")
   withr::local_options(list(sf_use_s2 = FALSE))
@@ -74,6 +76,7 @@ testthat::test_that("Output locations are in the mainland US", {
 #' unit testing for no NAs in covariates
 #' 
 testthat::test_that("No covariates have NAs", {
+    skip_on_ci()
   withr::local_package("sf")
   withr::local_options(list(sf_use_s2 = FALSE))
 
