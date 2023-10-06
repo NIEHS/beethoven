@@ -2,10 +2,9 @@
 #' @description
 #' unit testing for the output has a valid CRS
 #'
-#' list of valid CRS: EPSG:5070, EPSG:4ß326
+#' list of valid CRS: EPSG:5070, EPSG:4326
 #'
 testthat::test_that("Output CRS is valid", {
-  skip_on_ci()
   withr::local_package("sf")
   withr::local_options(list(sf_use_s2 = FALSE))
 
@@ -42,7 +41,11 @@ testthat::test_that("Predicted means are within a proper range", {
   model_results$prediction_mean <- stats::rgamma(nrow(model_results), 8, 0.3)
 
   # 2. main evaluation
-  ismeanvalid <- check_means_are_valid(model_results, observation = observations, observation_mean_name = "Arithmetic.Mean")
+  ismeanvalid <- 
+    check_means_are_valid(
+      model_results,
+      observation = observations,
+      observation_mean_name = "Arithmetic.Mean")
   testthat::expect_equal(ismeanvalid, TRUE)
 })
 
@@ -53,7 +56,6 @@ testthat::test_that("Predicted means are within a proper range", {
 #' unit testing for the model output is inside the mainland US
 #' 
 testthat::test_that("Output locations are in the mainland US", {
-    skip_on_ci()
   withr::local_package("sf")
   withr::local_package("dplyr")
   withr::local_options(list(sf_use_s2 = FALSE))
@@ -76,7 +78,6 @@ testthat::test_that("Output locations are in the mainland US", {
 #' unit testing for no NAs in covariates
 #' 
 testthat::test_that("No covariates have NAs", {
-    skip_on_ci()
   withr::local_package("sf")
   withr::local_options(list(sf_use_s2 = FALSE))
 
@@ -99,7 +100,8 @@ testthat::test_that("No covariates have NAs", {
 #' unit testing for MERRA2 covariates
 #' test that the covariate calculation does not have unexpected NA
 #' 
-#' We switched to the generic check_data_completeness. This test is subject to change
+#' We switched to the generic check_data_completeness. 
+#' This test is subject to change
 #'
 testthat::test_that("MERRA2 covariate is not NA", {
   withr::local_package("terra")
@@ -139,3 +141,5 @@ testthat::test_that("MERRA2 covariate is not NA", {
   MERRA2_null <- character(0)
   testthat::expect_error(check_data_completeness(MERRA2_null, MERRA_name, TRUE))
 })
+
+
