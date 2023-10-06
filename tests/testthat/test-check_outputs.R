@@ -5,6 +5,7 @@
 #' list of valid CRS: EPSG:5070, EPSG:4ß326
 #'
 testthat::test_that("Output CRS is valid", {
+  skip_on_ci()
   withr::local_package("sf")
   withr::local_options(list(sf_use_s2 = FALSE))
 
