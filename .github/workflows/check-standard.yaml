@@ -23,14 +23,16 @@ jobs:
       - name: Install R and R dependencies
         run: |
 
-          sudo R
+          sudo R --no-save <<EOF
           
           # Install R packages using Rscript or R -e
           Rscript -e "install.packages('dplyr', dependencies=TRUE)"
           Rscript -e "install.packages('sf', dependencies=TRUE)"
           Rscript -e "install.packages('stats', dependencies=TRUE)"
           Rscript -e "install.packages('terra', dependencies=TRUE)"
-          Rscript -e "install.packages('stars', dependencies=TRUE)"        
+          Rscript -e "install.packages('stars', dependencies=TRUE)"   
+          quit()
+          EOF          
         shell: bash
 
       - name: Check R Package
