@@ -21,10 +21,10 @@ jobs:
       - uses: actions/checkout@v2  # Update to the latest version of the 'actions/checkout' action
 
       - name: Set up R Dependencies
-        uses: r-lib/actions/setup-r-dependencies@v3
+        uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck
           needs: check
           
       - name: Check R Package
-        uses: r-lib/actions/check-r-package@v2
+        uses: r-lib/actions/check-r-package@v3
