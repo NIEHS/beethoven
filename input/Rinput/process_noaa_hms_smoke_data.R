@@ -75,7 +75,7 @@ process_noaa_hms_smoke_data <- function(
   }
   #### 3. import and aggregate data
   if (data_format == "Shapefile") {
-    cat("Processing shapefiles...\n")
+    cat(paste0("Processing shapefiles...\n"))
     for (h in seq_along(hms_files_shp)) {
       if (h == 1) {
         smoke_data <- terra::vect(hms_files_shp[h])
@@ -94,9 +94,9 @@ process_noaa_hms_smoke_data <- function(
     }
     smoke_data$Density <- factor(smoke_data$Density,
                                  levels = c("Light", "Medium", "Heavy"))
-    cat("Shapefiles successfully processed.\n")
+    cat(paste0("Shapefiles successfully processed.\n"))
   } else if (data_format == "KML") {
-    cat("Processing KML files...\n")
+    cat(paste0("Processing KML files...\n"))
     dens <- c("Smoke (Light)", "Smoke (Medium)", "Smoke (Heavy)")
     dens_labels <- c("Light", "Medium", "Heavy")
     for (h in seq_along(hms_files)) {
@@ -135,13 +135,13 @@ process_noaa_hms_smoke_data <- function(
     smoke_data <- rbind(smoke_data, smoke_data_3)
     smoke_data$Density <- factor(smoke_data$Density,
                                  levels = c("Light", "Medium", "Heavy"))
-    cat("KML files successfully processed.\n")
+    cat(paste0("KML files successfully processed.\n"))
   }
 
   #### 4. export files based on separate_output selection
   if (separate_output == FALSE) {
     if (output_format == "Shapefile") {
-      cat("Saving processed data as single shapefile...\n")
+      cat(paste0("Saving processed data as single shapefile...\n"))
       terra::writeVector(smoke_data,
                          filename = paste0(directory_to_save,
                                            "hms_smoke_processed_",
@@ -155,7 +155,7 @@ process_noaa_hms_smoke_data <- function(
                                            ".shp"),
                          "ESRI Shapefile",
                          overwrite = TRUE)
-      cat("Shapefile saved.\n")
+      cat(paste0("Shapefile saved.\n"))
     } else if (output_format == "Geopackage") {
       cat("Saving processed data as single geopackage...\n")
       terra::writeVector(smoke_data,
@@ -171,12 +171,12 @@ process_noaa_hms_smoke_data <- function(
                                            ".gpkg"),
                          "GPKG",
                          overwrite = TRUE)
-      cat("Geopackage saved.\n")
+      cat(paste0("Geopackage saved.\n"))
     }
   } else if (separate_output == TRUE) {
     dens <- unique(smoke_data$Density)
     if (output_format == "Shapefile") {
-      cat("Saving processed data as separate shapefiles...\n")
+      cat(paste0("Saving processed data as separate shapefiles...\n"))
       for (d in seq_along(dens)) {
         smoke_data_dens <- subset(smoke_data, smoke_data$Density == dens[d])
         terra::writeVector(smoke_data_dens,
@@ -197,7 +197,7 @@ process_noaa_hms_smoke_data <- function(
       }
       cat(paste0("Separate shapefiles saved in ", directory_to_save, ".\n"))
     } else if (output_format == "Geopackage") {
-      cat("Saving processed data as separate geopackages...\n")
+      cat(paste0("Saving processed data as separate geopackages...\n"))
       for (d in seq_along(dens)) {
         smoke_data_dens <- subset(smoke_data, smoke_data$Density == dens[d])
         terra::writeVector(smoke_data_dens,
@@ -221,7 +221,7 @@ process_noaa_hms_smoke_data <- function(
   }
   #### 5. remove raw data.
   # if (remove_downloaded == TRUE) {
-  #   cat(paste0("Removing downloaded data files from ",
+  #   cat(paste0("Removing downloaded (raw) data files from ",
   #              directory_with_downloaded_data,
   #              "...\n"))
   #   for (z in seq_along(hms_files)) {

@@ -59,9 +59,10 @@ download_noaa_hms_smoke_data <- function(
   }
   #### 0. test for data download acknowledgement
   if (data_download_acknowledgement == FALSE) {
-    cat("Data download acknowledgement is set to FALSE. Please acknowledge 
-         that the data downloaded using this function may be very large and use 
-         lots of machine storage and memory.")
+    cat(paste0("Data download acknowledgement is set to FALSE.",
+               "Please acknowledge that the data downloaded using this",
+               "function may be very large and use lots of machine storage",
+               "and memory."))
     stop()
   }
   #### 1. define date sequence in character format
@@ -145,8 +146,8 @@ download_noaa_hms_smoke_data <- function(
   #### 5. Remove zip and .kml files from download directory
   if (remove_download == TRUE && data_format == "KML" &&
         directory_to_download == directory_to_save) {
-    cat(paste0("Downloading directory and saving directory are the same. 
-               Downloaded KML files will not be deleted.\n"))
+    cat(paste0("Downloading directory and saving directory are the same.",
+               " Downloaded KML files will not be deleted.\n"))
   } else if (remove_download == TRUE) {
     cat(paste0("Deleting download files...\n"))
     for (z in seq_along(download_names)) {
