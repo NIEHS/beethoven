@@ -6,7 +6,7 @@ Authors@R:
              family = "Messier",
              role = c("aut", "cre"),
              email = "kyle.messier@nih.gov"))
-Description: This will one day be a package that provides near real time air pollution data
+Description: Near Real Time air pollution model results and code produced by the SET group. It is fully tested, versioned, and open source and open access.
 Depends: R (>= 3.5.0)
 Imports: dplyr, sf, stats
 Suggests: covr, withr, knitr, rmarkdown, testthat (>= 3.0.0), terra, stars, sftime
