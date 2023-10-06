@@ -27,4 +27,4 @@ jobs:
           needs: check
           
       - name: Check R Package
-        uses: r-lib/actions/check-r-package@v3
+        uses: r-lib/actions/check-r-package@v2
