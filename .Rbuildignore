@@ -8,3 +8,4 @@
 ^R/join_point_receptor_to_polygon_source\\.r$ # Add this line
 ^\.Rproj\.user$
 ^\.github$
+^LICENSE\.md$
