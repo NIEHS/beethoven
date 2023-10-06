@@ -1,6 +1,7 @@
 #' @author Mitchell Manware
 #' @description
-#' unit test for model output is within desired temporal range (2018 - 2022 inclusive)
+#' unit test for model output is within desired temporal range 
+#' (2018 - 2022 inclusive)
 #' assumes `test_nc_output.nc` is point data
 #' 
 test_that("Output times are within temporal range", {
@@ -9,9 +10,9 @@ test_that("Output times are within temporal range", {
   library(lubridate)
   
   # 1. import model output
-  # path_results = "./output/model_output.nc"
-  path_results = "./testdata/test_nc_output.nc"
-  model_results = terra::vect(path_results)
+  # path_results <- "./output/model_output.nc"
+  path_results <- "./testdata/test_nc_output.nc"
+  model_results <- terra::vect(path_results)
   
   # 2. function
   check_temporal_range = function(
@@ -21,22 +22,22 @@ test_that("Output times are within temporal range", {
   ){
     
     # change character inputs to dates
-    start_date = as_datetime(start_range)
-    end_date = as_datetime(end_range)
+    start_date <- as_datetime(start_range)
+    end_date <- as_datetime(end_range)
     
     # create sequence of dates
-    range = seq(start_date, end_date, 86400)
+    range <- seq(start_date, end_date, 86400)
     
     # assign date values to variable
-    dates = as_datetime(model_results$Date)
+    dates <- as_datetime(model_results$Date)
     
     # check that dates are within range
-    checked = as.vector(dates %in% range)
+    checked <- as.vector(dates %in% range)
     return(checked)
     
   }
   
-  iswithin = check_temporal_range()
+  iswithin <- check_temporal_range()
   
   # expect all elements == TRUE
   expect_equal(any(iswithin), TRUE)
