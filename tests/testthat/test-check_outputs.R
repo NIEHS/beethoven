@@ -14,7 +14,7 @@ testthat::test_that("Output CRS is valid", {
 
   # 2. main evaluation
   iscrsvalid <- check_crs_is_valid(model_results)
-  tesetthat::expect_equal(iscrsvalid, TRUE)
+  testthat::expect_equal(iscrsvalid, TRUE)
 
   model_results_2163 <- sf::st_transform(model_results, "EPSG:2163")
   crsnotvalid <- check_crs_is_valid(model_results_2163)
@@ -38,10 +38,10 @@ testthat::test_that("Predicted means are within a proper range", {
   path_observation <- "../testdata/daily_88101_2018-2022.rds"
   model_results <- sf::read_sf(path_results)
   observations <- base::readRDS(path_observation)
-  model_results$prediction_mean = rgamma(nrow(model_results), 8, 0.3)
+  model_results$prediction_mean <- stats::rgamma(nrow(model_results), 8, 0.3)
 
   # 2. main evaluation
-  ismeanvalid = check_means_are_valid(model_results, observation = observations, observation_mean_name = "Arithmetic.Mean")
+  ismeanvalid <- check_means_are_valid(model_results, observation = observations, observation_mean_name = "Arithmetic.Mean")
   testthat::expect_equal(ismeanvalid, TRUE)
 })
 
