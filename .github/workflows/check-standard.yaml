@@ -25,6 +25,8 @@ jobs:
           # Install R
           sudo dnf install -y R
 
+          sudo R
+
           # Install R packages using Rscript or R -e
           Rscript -e "install.packages('dplyr', dependencies=TRUE)"
           Rscript -e "install.packages('sf', dependencies=TRUE)"
