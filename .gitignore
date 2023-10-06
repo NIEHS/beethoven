@@ -71,3 +71,6 @@ code/mitchell_tests/
 ._.*
 ._.gitignore
 ._*
+
+# Insang's negative value exploration script
+tools/negative_exploration
