@@ -10,7 +10,7 @@
 #' @return A numeric value reporting the extent of input_raster is within the extent of spatial_domain
 #' @author Kyle Messier, Insang Song
 #' @export
-check_input_raster_in_extent = function(
+check_input_raster_in_extent <- function(
   input_raster,
   spatial_domain,
   domain_tolerance = 3e5L
@@ -20,9 +20,9 @@ check_input_raster_in_extent = function(
     sf::st_bbox() |>
     sf::st_as_sfc()
 
-  domain_bbox <- spatial_domain |> 
+  domain_bbox <- spatial_domain |>
     sf::st_transform("EPSG:4326") |>
-    sf::st_buffer(domain_tolerance) |> 
+    sf::st_buffer(domain_tolerance) |>
     sf::st_bbox() |>
     sf::st_as_sfc()
 

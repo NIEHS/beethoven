@@ -8,7 +8,7 @@ Authors@R:
              email = "kyle.messier@nih.gov"))
 Description: This will one day be a package that provides near real time air pollution data
 Depends: R (>= 3.5.0)
-Imports: dplyr, sf, stats
+Imports: dplyr, sf, stats, methods
 Suggests: covr, withr, knitr, rmarkdown, testthat (>= 3.0.0), terra, stars, sftime
 Encoding: UTF-8
 VignetteBuilder: knitr, rmarkdown

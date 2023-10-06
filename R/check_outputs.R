@@ -103,16 +103,19 @@ check_data_completeness <- function(
   fields_to_check,
   report_fields_na = FALSE
 ) {
-  if (!any(is(model_output, "sf"), is(model_output, "sftime"))) {
+  if (!any(methods::is(model_output, "sf"),
+           methods::is(model_output, "sftime"))) {
     stop("Input should be sf/sftime object")
   }
-  # 1. subset fields 
+  # 1. subset fields
   model_output_sub <- model_output[,fields_to_check]
   model_output_sub <- sf::st_drop_geometry(model_output_sub)
 
   # 2. na evaluation
-  model_output_field_nas <- sapply(model_output_sub, 
-    function(cl) { any(is.na(cl)) })
+  model_output_field_nas <-
+    sapply(model_output_sub,
+           function(cl) {
+             any(is.na(cl)) })
 
   # 3. return results
   result_eval <- any(model_output_field_nas)
@@ -120,9 +123,9 @@ check_data_completeness <- function(
 
   if (report_fields_na) {
     cat(paste(
-      "Some fields in the model_output are incomplete. Please check:\n",
-        paste0(result_field_names, collapse = ", "),
-        "\n"))
+              "Some fields in the model_output are incomplete. Please check:\n",
+              paste0(result_field_names, collapse = ", "),
+              "\n"))
     result_eval <- list(
       NA_present = result_eval,
       NA_fields = result_field_names

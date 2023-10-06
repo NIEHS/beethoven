@@ -14,11 +14,11 @@ testthat::test_that("Output CRS is valid", {
 
   # 2. main evaluation
   iscrsvalid <- check_crs_is_valid(model_results)
-  expect_equal(iscrsvalid, TRUE)
+  tesetthat::expect_equal(iscrsvalid, TRUE)
 
   model_results_2163 <- sf::st_transform(model_results, "EPSG:2163")
   crsnotvalid <- check_crs_is_valid(model_results_2163)
-  expect_equal(crsnotvalid, FALSE)
+  testthat::expect_equal(crsnotvalid, FALSE)
 })
 
 
@@ -42,7 +42,7 @@ testthat::test_that("Predicted means are within a proper range", {
 
   # 2. main evaluation
   ismeanvalid = check_means_are_valid(model_results, observation = observations, observation_mean_name = "Arithmetic.Mean")
-  expect_equal(ismeanvalid, TRUE)
+  testthat::expect_equal(ismeanvalid, TRUE)
 })
 
 
@@ -65,7 +65,7 @@ testthat::test_that("Output locations are in the mainland US", {
   # 2. main evaluation
   iswithin <- check_output_locations_are_valid(model_results, mainland)
   # we expect all elements in the vector are TRUE
-  expect_equal(any(!iswithin), FALSE)
+  testthat::expect_equal(any(!iswithin), FALSE)
 })
 
 
@@ -86,7 +86,7 @@ testthat::test_that("No covariates have NAs", {
   # 2. main evaluation
   iswithin <- check_output_locations_are_valid(model_results, mainland)
   # we expect all elements in the vector are TRUE
-  expect_equal(any(!iswithin), FALSE)
+  testthat::expect_equal(any(!iswithin), FALSE)
 })
 
 
@@ -128,11 +128,11 @@ testthat::test_that("MERRA2 covariate is not NA", {
   # }
   #   MERRA2.var <- extract_with_buffer.flat(aqs.sftime, merra, 2e4L, "ID.Code", 90L)
   MERRA2_check <- check_data_completeness(model_results, MERRA_name)
-  expect_equal(MERRA2_check, FALSE)
+  testthat::expect_equal(MERRA2_check, FALSE)
 
   MERRA2_check_T <- check_data_completeness(model_results, MERRA_name, TRUE)
-  expect_equal(is(MERRA2_check_T, "list"), TRUE)
+  testthat::expect_equal(methods::is(MERRA2_check_T, "list"), TRUE)
 
   MERRA2_null <- character(0)
-  expect_error(check_data_completeness(MERRA2_null, MERRA_name, TRUE))
+  testthat::expect_error(check_data_completeness(MERRA2_null, MERRA_name, TRUE))
 })
