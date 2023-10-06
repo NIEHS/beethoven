@@ -20,11 +20,18 @@ jobs:
     steps:
       - uses: actions/checkout@v2  # Update to the latest version of the 'actions/checkout' action
 
-      - name: Set up R Dependencies
-        uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: any::rcmdcheck
-          needs: check
-          
+      - name: Install R and R dependencies
+        run: |
+          # Install R
+          sudo dnf install -y R
+
+          # Install R packages using Rscript or R -e
+          Rscript -e "install.packages('dplyr', dependencies=TRUE)"
+          Rscript -e "install.packages('sf', dependencies=TRUE)"
+          Rscript -e "install.packages('stats', dependencies=TRUE)"
+          Rscript -e "install.packages('terra', dependencies=TRUE)"
+          Rscript -e "install.packages('stars', dependencies=TRUE)"        
+        shell: bash
+
       - name: Check R Package
         uses: r-lib/actions/check-r-package@v2
