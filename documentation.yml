@@ -29,6 +29,6 @@
 - (^|/)[Ll]icen[cs]e(\.|$)
 - (^|/)README(\.|$)
 - (^|/)[Rr]eadme(\.|$)
-
+- input/data/NCEP-NCAR-Reanalysis-1/tdc.eatm.gauss.2022.nc
 # Samples folders
 - ^[Ss]amples?/
