@@ -1,5 +1,4 @@
 *.csv filter=lfs diff=lfs merge=lfs -text
 *.nc filter=lfs diff=lfs merge=lfs -text
 
-input/** linguist-documentation
-input/data/NCEP-NCAR-Reanalysis-1/tdc.eatm.gauss.2022.nc linguist-generated
+input/* linguist-vendored
