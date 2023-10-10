@@ -53,3 +53,47 @@ jobs:
       - name: Upload coverage to Codecov # Add this step
         run: |
           Rscript -e "covr::codecov(token = Sys.getenv('CODECOV_TOKEN'))"
+
+      - name: test-coverage
+         id: coverage
+         run: |
+           markdown_cov_diff <- function(head, main) {
+             group <- "filename"
+             by = "line"
+             sig_num <- 2
+
+             tally_head <- covr::tally_coverage(head, by = by)
+             tally_main <- covr::tally_coverage(main, by = by)
+
+             percs_head <- tapply(tally_head$value, tally_head[[group]], FUN = function(x) sum(x > 0) / length(x) * 100)
+             percs_main <- tapply(tally_main$value, tally_main[[group]], FUN = function(x) sum(x > 0) / length(x) * 100)
+             percs_diff <- unname(percs_head - percs_main)
+
+             ttl_perc_head <- covr::percent_coverage(tally_head, by = by)
+             ttl_perc_main <- covr::percent_coverage(tally_main, by = by)
+             ttl_perc_diff <- ttl_perc_head - ttl_perc_main
+
+             percs_head <- format(percs_head, digits = sig_num)
+             percs_main <- format(percs_main, digits = sig_num)
+             percs_diff <- paste0(ifelse(percs_diff < 0, ":small_red_triangle_down: ", ""), ifelse(percs_diff > 0, ":arrow_up: ", ""), format(percs_diff, digits = sig_num))
+
+             ttl_perc_head <- format(ttl_perc_head, digits = sig_num)
+             ttl_perc_main <- format(ttl_perc_main, digits = sig_num)
+             ttl_perc_diff <- paste0(ifelse(ttl_perc_diff < 0, ":small_red_triangle_down: ", ""), ifelse(ttl_perc_diff > 0, ":arrow_up: ", ""), format(ttl_perc_diff, digits = sig_num))
+
+             paste0(
+               "<details>\n",
+               "<summary>Coverage Report</summary>\n\n", 
+               "|file|head|main|diff|\n|", 
+               " :-- | --: | --: | --: |\n",
+               paste0("|Overall|", ttl_perc_head, "%|", ttl_perc_main, "%|", ttl_perc_diff, "%|", "\n"),
+               paste0("|", names(percs_head), "|", percs_head, "%|", percs_main, "%|", percs_diff, "%|", collapse = "\n"),
+               "\n",
+               "</details>"
+             )
+           }
+           head <- covr::package_coverage()
+           system2("git", c("checkout", "main"))
+           main <- covr::package_coverage()
+           writeLines(markdown_cov_diff(head, main), "coverage-report.md")
+         shell: Rscript {0}
