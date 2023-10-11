@@ -2,7 +2,7 @@
 #' Fit our meta learner. It takes predictions of other models such as
 #' kriging, GLM, machine learning models as input and fits a new model
 #' @param base_predictor_list - a list where each
-#' @param meta_learner_obj
+#' @param meta_learner_obj an exported S3/S4/function that is the meta learner
 #' @param train_loc sf geospatial information on training locations
 #' @param kfolds integer, index of k-folds for cross-validation. This should be
 #' produced with regards to spatial and/or temporal considerations
@@ -22,8 +22,8 @@ meta_learner_fit <- function(base_predictor_list, meta_learner_obj,
 #' meta_learner_predict - take the meta_fit_obj and prediction location info
 #' to create meta_learner predictions
 #'
-#' @param meta_fit_obj
-#' @param pred_grid
+#' @param meta_fit_obj S3/S4 object from meta_learner_fit
+#' @param pred_grid sf or dataframe grid of prediction locations
 #' @return meta_pred_nc NetCDF (nc) file of the final meta learner predictions
 #' @export
 #'

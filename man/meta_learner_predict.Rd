@@ -7,6 +7,11 @@ to create meta_learner predictions}
 \usage{
 meta_learner_predict(meta_fit_obj, pred_loc)
 }
+\arguments{
+\item{meta_fit_obj}{S3/S4 object from meta_learner_fit}
+
+\item{pred_grid}{sf or dataframe grid of prediction locations}
+}
 \value{
 meta_pred_nc NetCDF (nc) file of the final meta learner predictions
 }

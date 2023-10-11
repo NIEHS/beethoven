@@ -11,6 +11,8 @@ meta_learner_fit(base_predictor_list, meta_learner_obj, train_loc, kfolds)
 \arguments{
 \item{base_predictor_list}{- a list where each}
 
+\item{meta_learner_obj}{an exported S3/S4/function that is the meta learner}
+
 \item{train_loc}{sf geospatial information on training locations}
 
 \item{kfolds}{integer, index of k-folds for cross-validation. This should be
