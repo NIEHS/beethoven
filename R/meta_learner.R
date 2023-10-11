@@ -23,11 +23,11 @@ meta_learner_fit <- function(base_predictor_list, meta_learner_obj,
 #' to create meta_learner predictions
 #'
 #' @param meta_fit_obj S3/S4 object from meta_learner_fit
-#' @param pred_grid sf or dataframe grid of prediction locations
+#' @param pred_loc sf or dataframe grid of prediction locations
 #' @return meta_pred_nc NetCDF (nc) file of the final meta learner predictions
 #' @export
 #'
-#' @examples
+#' @examples NULL
 meta_learner_predict <- function(meta_fit_obj, pred_loc) {
 
   #Use the predict method
