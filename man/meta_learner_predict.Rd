@@ -10,7 +10,7 @@ meta_learner_predict(meta_fit_obj, pred_loc)
 \arguments{
 \item{meta_fit_obj}{S3/S4 object from meta_learner_fit}
 
-\item{pred_grid}{sf or dataframe grid of prediction locations}
+\item{pred_loc}{sf or dataframe grid of prediction locations}
 }
 \value{
 meta_pred_nc NetCDF (nc) file of the final meta learner predictions
@@ -18,4 +18,7 @@ meta_pred_nc NetCDF (nc) file of the final meta learner predictions
 \description{
 meta_learner_predict - take the meta_fit_obj and prediction location info
 to create meta_learner predictions
+}
+\examples{
+NULL
 }
