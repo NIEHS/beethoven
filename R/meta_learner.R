@@ -34,7 +34,7 @@ meta_learner_predict <- function(meta_fit_obj, pred_loc) {
   meta_pred_vec <- predict(meta_fit_obj, new = pred_loc)
   # Call the vec2nc function to create a NetCDF (nc) file from the
   # vector predictions
-  meta_pred_nc <- NRTAPmodel::vec2nc(meta_pred_vec)
+  meta_pred_nc <- vec2nc(meta_pred_vec)
   return(meta_pred_nc)
 
 }
