@@ -31,7 +31,7 @@ meta_learner_fit <- function(base_predictor_list,
     x.te <- x.design[i == n.k,]
     y.tr <- y[i != n.k]
     # Fit the BART model
-    bart.fit[[i]] <- BART::mc.wbart(x.tr, y.tr, x.test = x.te)
+    bart.fit[[i]] <- mc.wbart(x.tr, y.tr, x.test = x.te)
   }
   return(meta_fit_obj)
 }
@@ -50,7 +50,7 @@ meta_learner_fit <- function(base_predictor_list,
 meta_learner_predict <- function(meta_fit_obj, pred_loc) {
 
   #Use the predict method
-  meta_pred_vec <- BART::predict(meta_fit_obj, new = pred_loc)
+  meta_pred_vec <- predict(meta_fit_obj, new = pred_loc)
   # Call the vec2nc function to create a NetCDF (nc) file from the
   # vector predictions
   meta_pred_nc <- vec2nc(meta_pred_vec)
@@ -69,6 +69,7 @@ meta_learner_predict <- function(meta_fit_obj, pred_loc) {
 #'
 #' @examples NULL
 vec2nc <- function(pred_vec, pred_bbox, field_names) {
-  
-  
+  nc_out <- pred_vec + pred_bbox
+  names(nc_out) <- field_names
+  return(nc_out)
 }
