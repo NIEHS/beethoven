@@ -63,7 +63,7 @@ meta_learner_predict <- function(meta_fit_obj, pred_loc) {
 #' and create a NetCDF
 #' @param pred_vec vector/matrix of predictions
 #' @param pred_bbox an sf bounding box defining the domain of the NetCDF
-#' 
+#' @param field_names vector of field names for each layer in the NetCDF
 #' @return nc_out a NetCDF file
 #' @export
 #'

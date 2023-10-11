@@ -11,6 +11,8 @@ vec2nc(pred_vec, pred_bbox, field_names)
 \item{pred_vec}{vector/matrix of predictions}
 
 \item{pred_bbox}{an sf bounding box defining the domain of the NetCDF}
+
+\item{field_names}{vector of field names for each layer in the NetCDF}
 }
 \value{
 nc_out a NetCDF file
