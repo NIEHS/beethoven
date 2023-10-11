@@ -49,57 +49,85 @@ download.file(file_urls, download_names, method = "libcurl")
 ```
 Construct string with unzipped file names 
 ```{r}
-csv_names=sprintf(paste(download_dir,resolution,"_",parameter_code,"_%.0f.csv", sep=""),startyear:endyear)
+csv_names <- sprintf(paste(download_dir,resolution,"_",parameter_code,"_%.0f.csv", sep=""),startyear:endyear)
 ```
 #### 3. Processing data
 Unzip and read in .csv files, process and join in one dataframe.
 The unique site identifier "ID.Code" is a string with the structure State-County-Site-Parameter-POC
 ```{r}
-for(n in 1:length(file_urls)){
-  unzip(download_names[n], exdir=download_dir) # Unzips file to same folder it was downloaded to
+for(n in seq(1, length(file_urls))) {
+  unzip(download_names[n],
+    exdir = download_dir) 
+  # Unzips file to same folder it was downloaded to
   
-  #Read in dataframe
-  print(paste("reading and processing file:",csv_names[n],"...") )
-  data=read.csv(csv_names[n], stringsAsFactors = F)  
+  # Read in dataframe
+  print(paste("reading and processing file:",
+    csv_names[n], "..."))
+  data <- read.csv(csv_names[n], stringsAsFactors = F)
   
   #Make unique site identifier: State-County-Site-Parameter-POC
-  data$ID.Code=paste(data$State.Code,data$County.Code,data$Site.Num,data$Parameter.Code,data$POC, sep="-")
+  data$ID.Code <- paste(
+    data$State.Code,
+    data$County.Code,
+    data$Site.Num,
+    data$Parameter.Code,
+    data$POC,
+    sep = "-")
   
   #Concatenate with other years
-  if(n==1){
-    data_all=data
-  }else{
-    data_all=rbind(data_all, data)
+  if (n == 1) {
+    data_all <- data
+  } else {
+    data_all <- rbind(data_all, data)
   }
 }
 
 ```
 #### 4. Downloading monitor metadata file and filter for relevant sites
 Download monitors file 
+
 ``` {r}
-destfile = paste(download_dir,"aqs_monitors.zip",sep="")
+destfile <- paste(download_dir,
+  "aqs_monitors.zip",
+  sep = "")
 download.file("https://aqs.epa.gov/aqsweb/airdata/aqs_monitors.zip", destfile)
 ```
- Unzip and read in
+Unzip and read in
 ```{r} 
-unzip(destfile, exdir=download_dir) 
-monitors=read.csv("input/aqs/aqs_monitors.csv", stringsAsFactors = F)
+unzip(destfile, exdir = download_dir)
+monitors <- read.csv("input/aqs/aqs_monitors.csv",
+  stringsAsFactors = FALSE)
 ```
 Create site identifier
 ```{r}
-monitors$State.Code=as.numeric(monitors$State.Code) # Convert from string to numeric to get rid of leading zeros, the NAs introduced are from monitors in Canada with site number="CC"
-monitors$ID.Code=paste(monitors$State.Code,monitors$County.Code,monitors$Site.Num,monitors$Parameter.Code,monitors$POC, sep="-")
+monitors$State.Code <- as.numeric(monitors$State.Code) # Convert from string to numeric to get rid of leading zeros, the NAs introduced are from monitors in Canada with site number="CC"
+monitors$ID.Code <- paste(monitors$State.Code,
+  monitors$County.Code,
+  monitors$Site.Num,
+  monitors$Parameter.Code,
+  monitors$POC,
+  sep = "-")
 ```
 Filter monitors file to include only monitors in our csv
 ```{r}
-monitors_filter=monitors[which(monitors$ID.Code %in% data_all$ID.Code),]
+monitors_filter <- monitors[which(monitors$ID.Code %in% data_all$ID.Code), ]
 ```
 #### 5. Uploading data to desired folder
-```{r }
-savepath="input/aqs/" #Connected to wine/SET/Projects
+```{r}
+savepath <- "input/aqs/" #Connected to wine/SET/Projects
 
-write.csv(data_all,paste(savepath,resolution,"_",parameter_code,"_",startyear,"-",endyear,".csv",sep=""))
-write.csv(monitors_filter, paste(savepath,"monitors_",parameter_code,"_",startyear,"-",endyear,".csv",sep=""))
-
+write.csv(data_all,
+  paste(savepath,
+  resolution, "_",
+  parameter_code, "_",
+  startyear, "-",
+  endyear, ".csv",
+  sep = ""))
+write.csv(monitors_filter,
+  paste(savepath,
+    "monitors_",
+    parameter_code, "_",
+    startyear, "-",
+    endyear, ".csv",
+    sep = ""))
 ```
-

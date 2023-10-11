@@ -110,36 +110,16 @@ testthat::test_that("MERRA2 covariate is not NA", {
 
   path_results <- "../testdata/test_nc_output.nc"
   model_results <- sf::read_sf(path_results)
-    
-  MERRA_name <- "merra_tavg_sim"
+  merra_name <- "merra_tavg_sim"
 
-  # extract_with_buffer.flat <- function(
-  #         points, surf, radius, id, qsegs, func = mean, kernel = NULL, bandwidth = NULL
-  #     ) {
-  #     # generate buffers
-  #     bufs <- terra::buffer(points, width = radius, quadsegs = qsegs)
-  #     # crop raster
-  #     bufs_extent <- terra::ext(bufs)
-  #     surf_cropped <- terra::crop(surf, bufs_extent)
-  #     name_surf_val <- names(surf)
-  #     # extract raster values
-  #     surf_at_bufs <- terra::extract(surf_cropped, bufs)
-  #     surf_at_bufs_summary <-
-  #         surf_at_bufs |>
-  #             group_by(ID) |>
-  #             summarize(across(all_of(name_surf_val), ~mean(.x, na.rm = TRUE))) |> 
-  #             ungroup()
-  #     return(surf_at_bufs_summary)
-  # }
-  #   MERRA2.var <- extract_with_buffer.flat(aqs.sftime, merra, 2e4L, "ID.Code", 90L)
-  MERRA2_check <- check_data_completeness(model_results, MERRA_name)
-  testthat::expect_equal(MERRA2_check, FALSE)
+  merra2_check <- check_data_completeness(model_results, merra_name)
+  testthat::expect_equal(merra2_check, FALSE)
 
-  MERRA2_check_T <- check_data_completeness(model_results, MERRA_name, TRUE)
-  testthat::expect_equal(methods::is(MERRA2_check_T, "list"), TRUE)
+  merra2_check_t <- check_data_completeness(model_results, merra_name, TRUE)
+  testthat::expect_equal(methods::is(merra2_check_t, "list"), TRUE)
 
-  MERRA2_null <- character(0)
-  testthat::expect_error(check_data_completeness(MERRA2_null, MERRA_name, TRUE))
+  merra2_null <- character(0)
+  testthat::expect_error(check_data_completeness(merra2_null, merra_name, TRUE))
 })
 
 

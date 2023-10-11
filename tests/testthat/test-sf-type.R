@@ -1,6 +1,7 @@
 #' @author Kyle P Messier
 #' @description
-#' unit testing that the dependent variable is read and converted to the expected sf/sftime class
+#' unit testing that the dependent variable is read and converted to 
+#' the expected sf/sftime class
 #'
 #'
 testthat::test_that("dependent variable object is an sf class", {
