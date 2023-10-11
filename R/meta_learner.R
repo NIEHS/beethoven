@@ -10,12 +10,12 @@
 #' @export
 #' @examples NULL
 meta_learner_fit <- function(base_predictor_list,
-                             train_loc, kfolds) {
+                             kfolds, y) {
   
   # check lengths of each base predictor 
   if (sapply(base_predictor_list, length, simplify = TRUE) |> 
-      var() != 0) {
-    error("base predictors need to be the same length")
+      stats::var() != 0) {
+    print("WARNING: base predictors need to be the same length")
   }
   
   # convert list to data.frame
@@ -69,5 +69,6 @@ meta_learner_predict <- function(meta_fit_obj, pred_loc) {
 #'
 #' @examples NULL
 vec2nc <- function(pred_vec, pred_bbox, field_names) {
+  
   
 }

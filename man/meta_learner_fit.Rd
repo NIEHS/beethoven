@@ -7,7 +7,7 @@ Fit a BART (Bayesian Additive Regression Tree) meta learner. It takes
 predictions of other models such as kriging, GLM, machine learning models as
 input and fits a BART Model}
 \usage{
-meta_learner_fit(base_predictor_list, train_loc, kfolds)
+meta_learner_fit(base_predictor_list, kfolds, y)
 }
 \arguments{
 \item{base_predictor_list}{- a list where each}
