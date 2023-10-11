@@ -2,13 +2,13 @@
 % Please edit documentation in R/meta_learner.R
 \name{meta_learner_predict}
 \alias{meta_learner_predict}
-\title{meta_learner_predict - take the meta_fit_obj and prediction location info
-to create meta_learner predictions}
+\title{meta_learner_predict - take the list of BART fit objects and prediction 
+location info to create meta_learner predictions}
 \usage{
 meta_learner_predict(meta_fit_obj, pred_loc)
 }
 \arguments{
-\item{meta_fit_obj}{S3/S4 object from meta_learner_fit}
+\item{meta_fit_obj}{list of BART objects from meta_learner_fit}
 
 \item{pred_loc}{sf or dataframe grid of prediction locations}
 }
@@ -16,8 +16,8 @@ meta_learner_predict(meta_fit_obj, pred_loc)
 meta_pred_nc NetCDF (nc) file of the final meta learner predictions
 }
 \description{
-meta_learner_predict - take the meta_fit_obj and prediction location info
-to create meta_learner predictions
+meta_learner_predict - take the list of BART fit objects and prediction 
+location info to create meta_learner predictions
 }
 \examples{
 NULL
