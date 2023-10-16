@@ -1,3 +1,0 @@
-lint:
-  exclude:
-    - "trailing_whitespace_linter"
