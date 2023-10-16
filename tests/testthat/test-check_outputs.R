@@ -89,7 +89,7 @@ testthat::test_that("No covariates have NAs", {
   mainland <- sf::read_sf(path_mainland)
 
   # 2. main evaluation
-  iswithin <- check_output_locations_are_valid(model_results, mainland)
+  iswithin <- check_output_locs_are_valid(model_results, mainland)
   # we expect all elements in the vector are TRUE
   testthat::expect_equal(any(!iswithin), FALSE)
 })
