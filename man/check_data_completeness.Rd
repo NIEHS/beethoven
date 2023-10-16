@@ -13,12 +13,17 @@ check_data_completeness(
 \arguments{
 \item{model_output}{sf/sftime object of model output.}
 
-\item{fields_to_check}{character(varying). Field names where completeness will be checked.}
+\item{fields_to_check}{character(varying).
+Field names where completeness will be checked.}
 
-\item{report_fields_na}{logical(1). If any fields have NA values, report the field names which gave the errors. Default is FALSE.}
+\item{report_fields_na}{logical(1). If any fields have NA values,
+report the field names which gave the errors. Default is FALSE.}
 }
 \value{
-A logical (when report_fields_na is FALSE; TRUE means there are NA values at least one data value) or a list (when report_fields_na is TRUE) object. A list includes the list of fields that include NAs.
+A logical (when report_fields_na is FALSE;
+TRUE means there are NA values at least one data value) or a list
+(when report_fields_na is TRUE) object.
+A list includes the list of fields that include NAs.
 }
 \description{
 Check if the output covariates are complete (TODO)

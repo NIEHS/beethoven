@@ -10,7 +10,9 @@ input and fits a BART Model}
 meta_learner_fit(base_predictor_list, kfolds, y)
 }
 \arguments{
-\item{base_predictor_list}{- a list where each}
+\item{base_predictor_list}{- P x 1 list where P = p is a base predictor
+vector (numeric). Each predictor vector should be the same length and
+named.}
 
 \item{kfolds}{integer, index of k-folds for cross-validation. This should be
 produced with regards to spatial and/or temporal considerations}

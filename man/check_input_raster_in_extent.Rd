@@ -15,10 +15,12 @@ check_input_raster_in_extent(
 
 \item{spatial_domain}{sf/sftime object of spatial domain}
 
-\item{domain_tolerance}{numeric(1). Extrusion (in meters) from the bbox of spatial_domain.}
+\item{domain_tolerance}{numeric(1). Extrusion (in meters) from the bbox
+of spatial_domain.}
 }
 \value{
-A numeric value reporting the extent of input_raster is within the extent of spatial_domain
+A numeric value reporting the extent of input_raster is
+within the extent of spatial_domain
 }
 \description{
 Check if the input raster is in the expected extent
