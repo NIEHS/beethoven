@@ -11,10 +11,9 @@
 #' @author Kyle Messier, Insang Song
 #' @export
 check_input_raster_in_extent <- function(
-  input_raster,
-  spatial_domain,
-  domain_tolerance = 3e5L
-) {
+    input_raster,
+    spatial_domain,
+    domain_tolerance = 3e5L) {
   input_extent <- input_raster |>
     sf::st_transform("EPSG:4326") |>
     sf::st_bbox() |>
