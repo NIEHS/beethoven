@@ -2,7 +2,9 @@
 #' Fit a BART (Bayesian Additive Regression Tree) meta learner. It takes
 #' predictions of other models such as kriging, GLM, machine learning models as
 #' input and fits a BART Model
-#' @param base_predictor_list - a list where each
+#' @param base_predictor_list - P x 1 list where P = p is a base predictor
+#' vector (numeric). Each predictor vector should be the same length and 
+#' named.
 #' @param y dependent variable
 #' @param kfolds integer, index of k-folds for cross-validation. This should be
 #' produced with regards to spatial and/or temporal considerations
@@ -12,14 +14,13 @@
 meta_learner_fit <- function(base_predictor_list,
                              kfolds, y) {
   
-  # check lengths of each base predictor 
+  # check lengths of each base predictor #add a test for names
   if (sapply(base_predictor_list, length, simplify = TRUE) |> 
       stats::var() != 0) {
     print("WARNING: base predictors need to be the same length")
   }
-  
   # convert list to data.frame
-  x.design <- as.data.frame(base_learner_list)
+  x.design <- as.data.frame(base_predictor_list)
   
   # Unique k-folds (typically 5 or 10)
   n.k <- length(unique(kfolds))
@@ -31,7 +32,7 @@ meta_learner_fit <- function(base_predictor_list,
     x.te <- x.design[i == n.k,]
     y.tr <- y[i != n.k]
     # Fit the BART model
-    bart.fit[[i]] <- mc.wbart(x.tr, y.tr, x.test = x.te)
+    meta_fit_obj[[i]] <- BART::mc.wbart(x.tr, y.tr, x.test = x.te)
   }
   return(meta_fit_obj)
 }
