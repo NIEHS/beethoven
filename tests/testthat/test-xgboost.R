@@ -11,7 +11,6 @@ testthat::test_that("xgboost model is valid", {
     sftime::st_as_sftime()
 
   # fit the xgboost model
-  # mdl <- xgboost::xgboost(aqs.sftime,covariate)
 
   # update with the needed tests
   a <- 1

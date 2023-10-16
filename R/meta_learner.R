@@ -15,23 +15,23 @@ meta_learner_fit <- function(base_predictor_list,
                              kfolds, y) {
   # check lengths of each base predictor #add a test for names
   if (sapply(base_predictor_list, length, simplify = TRUE) |>
-    stats::var() != 0) {
+        stats::var() != 0) {
     print("WARNING: base predictors need to be the same length")
   }
   # convert list to data.frame
-  x.design <- as.data.frame(base_predictor_list)
+  x_design <- as.data.frame(base_predictor_list)
 
   # Unique k-folds (typically 5 or 10)
-  n.k <- length(unique(kfolds))
+  nk <- length(unique(kfolds))
   # Pre-allocate list of meta objects
-  meta_fit_obj <- vector(mode = "list", length = n.k)
-  for (i in 1:n.k) {
+  meta_fit_obj <- vector(mode = "list", length = nk)
+  for (i in 1:nk) {
     # get the training and test sets
-    x.tr <- x.design[i != n.k, ]
-    x.te <- x.design[i == n.k, ]
-    y.tr <- y[i != n.k]
+    x_tr <- x_design[i != nk, ]
+    x_te <- x_design[i == nk, ]
+    y_tr <- y[i != nk]
     # Fit the BART model
-    meta_fit_obj[[i]] <- BART::mc.wbart(x.tr, y.tr, x.test = x.te)
+    meta_fit_obj[[i]] <- BART::mc.wbart(x_tr, y_tr, x.test = x_te)
   }
   return(meta_fit_obj)
 }

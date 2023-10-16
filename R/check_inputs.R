@@ -6,8 +6,10 @@
 #'
 #' @param input_raster stars object
 #' @param spatial_domain sf/sftime object of spatial domain
-#' @param domain_tolerance numeric(1). Extrusion (in meters) from the bbox of spatial_domain.
-#' @return A numeric value reporting the extent of input_raster is within the extent of spatial_domain
+#' @param domain_tolerance numeric(1). Extrusion (in meters) from the bbox
+#' of spatial_domain.
+#' @return A numeric value reporting the extent of input_raster is
+#' within the extent of spatial_domain
 #' @author Kyle Messier, Insang Song
 #' @export
 check_input_raster_in_extent <- function(

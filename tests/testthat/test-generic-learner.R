@@ -1,12 +1,12 @@
 #' @author Kyle P Messier
 #' @description
-#' unit testing that the dependent variable is read and converted to the expected sf/sftime class
+#' unit testing that the dependent variable is read and converted to the
+#' expected sf/sftime class
 #'
 #'
 # Define a test case
 testthat::test_that("generic_base_learner returns valid predictions", {
   # Load the function you want to test
-  # source("R/generic_pipeline_example.R")
 
   aqs_sftime <- sf::st_read("../testdata/aqs-test-data.gpkg") |>
     sftime::st_as_sftime()

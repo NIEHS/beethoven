@@ -63,7 +63,8 @@ near_egrid <- terra::nearby(aqs, egrid_vs, distance = 3e5L)
 dist_near_egrid <- terra::distance(aqs, egrid_vs)
 dist_near_egrid_df <- as.vector(dist_near_egrid)
 # adding integer indices
-dist_near_egrid_tdf <- expand.grid(from_id = seq_len(nrow(aqs)), to_id = seq_len(nrow(egrid_vs)))
+dist_near_egrid_tdf <- expand.grid(from_id = seq_len(nrow(aqs)),
+                                   to_id = seq_len(nrow(egrid_vs)))
 dist_near_egrid_df <- cbind(dist_near_egrid_tdf, dist = dist_near_egrid_df)
 
 # summary
@@ -74,7 +75,8 @@ near_egrid_a <- near_egrid |>
   left_join(dist_near_egrid_df) |>
   mutate(w_sedc = exp((-3 * dist) / sedc_range_m)) |>
   group_by(ID.Code) |>
-  summarize(across(starts_with("UN"), list(sedc = ~ sum(w_sedc * ., na.rm = TRUE)))) |>
+  summarize(across(starts_with("UN"), list(sedc = ~ sum(w_sedc * .,
+                                                        na.rm = TRUE)))) |>
   ungroup() |>
   select(-UNHG_sedc)
 

@@ -9,7 +9,7 @@
 #' @return A logical vector of length nrow(model_output)
 #' @author Insang Song
 #' @export
-check_output_locations_are_valid <- function(
+check_output_locs_are_valid <- function(
     model_output,
     spatial_domain) {
   if (is.na(sf::st_crs(model_output)) || is.na(sf::st_crs(spatial_domain))) {
@@ -24,7 +24,8 @@ check_output_locations_are_valid <- function(
   model_output <- sf::st_geometry(model_output)
   # evaluate if the model output is within the spatial domain
   # sparse argument chooses if return will be a list (TRUE) or a matrix (FALSE)
-  checked <- as.vector(sf::st_within(model_output, spatial_domain, sparse = FALSE))
+  checked <- as.vector(sf::st_within(model_output,
+                                     spatial_domain, sparse = FALSE))
   return(checked)
 }
 
@@ -33,9 +34,11 @@ check_output_locations_are_valid <- function(
 #' Check if the output prediction mean values are in the valid range
 #'
 #' @param model_output sf/sftime object of model output
-#' @param model_mean_name character(1). the name of layer where mean values are stored
+#' @param model_mean_name character(1). the name of layer where mean
+#' values are stored
 #' @param observation a data.frame with observations
-#' @param observation_mean_name character(1). field name of observations in observation object.
+#' @param observation_mean_name character(1). field name of observations
+#' in observation object.
 #' @param tolerance_factor numeric(1). denominator(min) multiplier(max)
 #' @return Logical value indicating the mean values are within the range or not.
 #' @author Insang Song
@@ -62,7 +65,8 @@ check_means_are_valid <- function(
   min_vec_output <- min(vec_output)
   max_vec_output <- max(vec_output)
   # evaluate if the output means are within the bounds
-  checked <- (min_vec_output >= threshold_lower && max_vec_output <= threshold_upper)
+  checked <- (min_vec_output >= threshold_lower &&
+                max_vec_output <= threshold_upper)
   return(checked)
 }
 
@@ -71,8 +75,10 @@ check_means_are_valid <- function(
 #' Check if the output is with the valid coordinate reference system
 #'
 #' @param model_output sf/sftime object of model output.
-#' @param crs_list a character/integer vector of acceptable CRS. Default is c("EPSG:4326", "EPSG:5070")
-#' @return A logical value indicating the model is compliant to one of elements in crs_list.
+#' @param crs_list a character/integer vector of acceptable CRS.
+#' Default is c("EPSG:4326", "EPSG:5070")
+#' @return A logical value indicating the model is compliant to one of
+#'  elements in crs_list.
 #' @author Insang Song
 #' @export
 check_crs_is_valid <- function(
@@ -90,9 +96,14 @@ check_crs_is_valid <- function(
 #' Check if the output covariates are complete (TODO)
 #'
 #' @param model_output sf/sftime object of model output.
-#' @param fields_to_check character(varying). Field names where completeness will be checked.
-#' @param report_fields_na logical(1). If any fields have NA values, report the field names which gave the errors. Default is FALSE.
-#' @return A logical (when report_fields_na is FALSE; TRUE means there are NA values at least one data value) or a list (when report_fields_na is TRUE) object. A list includes the list of fields that include NAs.
+#' @param fields_to_check character(varying).
+#' Field names where completeness will be checked.
+#' @param report_fields_na logical(1). If any fields have NA values,
+#' report the field names which gave the errors. Default is FALSE.
+#' @return A logical (when report_fields_na is FALSE;
+#' TRUE means there are NA values at least one data value) or a list
+#' (when report_fields_na is TRUE) object.
+#' A list includes the list of fields that include NAs.
 #' @export
 #' @author Insang Song
 check_data_completeness <- function(

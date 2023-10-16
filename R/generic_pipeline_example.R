@@ -38,7 +38,8 @@ generic_base_learner <- function(response, covariate, obs_locs, model_attr) {
 #' @examples NULL
 generic_meta_learner <- function(base_predictor_list, pred_loc) {
   # check that inputs are as expected
-  if (any(is.na(base_predictor_list)) || any(is.na(pred_loc))) print("Null input")
+  if (any(is.na(base_predictor_list)) || any(is.na(pred_loc)))
+    print("Null input")
   # for each prediction location, compute the set of predictions then apply meta
   n_predictors <- length(base_predictor_list)
   n_pred_locs <- length(pred_loc)
@@ -85,7 +86,7 @@ build_pipeline <- function(
     pred_locs) {
   base_predictor_list <- list()
   # each entry in base learner list is a function
-  for (bl_idx in 1:length(base_learner_list)) {
+  for (bl_idx in seq_along(base_learner_list)) {
     curr_base_learner <- base_learner_list[[bl_idx]]
     model_attr <- base_attr_list[[bl_idx]]
     curr_base_predictor <- curr_base_learner(
