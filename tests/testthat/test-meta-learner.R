@@ -7,6 +7,7 @@
 
 
 test_that("the meta learner fitting", {
+
   skip()
   aqs_sftime <- sf::st_read("../testdata/aqs-test-data.gpkg") |>
     sftime::st_as_sftime()
@@ -55,5 +56,6 @@ test_that("the meta learner output is netcdf", {
 
   # the test is running on the object named "output"
   expect_type(model.output, 'ncdf4')
+
 })
 
