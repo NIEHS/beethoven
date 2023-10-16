@@ -41,11 +41,12 @@ testthat::test_that("Predicted means are within a proper range", {
   model_results$prediction_mean <- stats::rgamma(nrow(model_results), 8, 0.3)
 
   # 2. main evaluation
-  ismeanvalid <- 
+  ismeanvalid <-
     check_means_are_valid(
       model_results,
       observation = observations,
-      observation_mean_name = "Arithmetic.Mean")
+      observation_mean_name = "Arithmetic.Mean"
+    )
   testthat::expect_equal(ismeanvalid, TRUE)
 })
 
@@ -54,7 +55,7 @@ testthat::test_that("Predicted means are within a proper range", {
 #' @author Insang Song
 #' @description
 #' unit testing for the model output is inside the mainland US
-#' 
+#'
 testthat::test_that("Output locations are in the mainland US", {
   withr::local_package("sf")
   withr::local_package("dplyr")
@@ -76,7 +77,7 @@ testthat::test_that("Output locations are in the mainland US", {
 #' @author Insang Song
 #' @description
 #' unit testing for no NAs in covariates
-#' 
+#'
 testthat::test_that("No covariates have NAs", {
   withr::local_package("sf")
   withr::local_options(list(sf_use_s2 = FALSE))
@@ -99,8 +100,8 @@ testthat::test_that("No covariates have NAs", {
 #' @description
 #' unit testing for MERRA2 covariates
 #' test that the covariate calculation does not have unexpected NA
-#' 
-#' We switched to the generic check_data_completeness. 
+#'
+#' We switched to the generic check_data_completeness.
 #' This test is subject to change
 #'
 testthat::test_that("MERRA2 covariate is not NA", {
@@ -110,7 +111,7 @@ testthat::test_that("MERRA2 covariate is not NA", {
 
   path_results <- "../testdata/test_nc_output.nc"
   model_results <- sf::read_sf(path_results)
-    
+
   MERRA_name <- "merra_tavg_sim"
 
   # extract_with_buffer.flat <- function(
@@ -127,7 +128,7 @@ testthat::test_that("MERRA2 covariate is not NA", {
   #     surf_at_bufs_summary <-
   #         surf_at_bufs |>
   #             group_by(ID) |>
-  #             summarize(across(all_of(name_surf_val), ~mean(.x, na.rm = TRUE))) |> 
+  #             summarize(across(all_of(name_surf_val), ~mean(.x, na.rm = TRUE))) |>
   #             ungroup()
   #     return(surf_at_bufs_summary)
   # }
@@ -141,5 +142,3 @@ testthat::test_that("MERRA2 covariate is not NA", {
   MERRA2_null <- character(0)
   testthat::expect_error(check_data_completeness(MERRA2_null, MERRA_name, TRUE))
 })
-
-

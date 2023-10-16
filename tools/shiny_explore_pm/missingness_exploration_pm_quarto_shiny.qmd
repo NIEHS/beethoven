@@ -18,10 +18,10 @@ server: shiny
 ```{r init, echo=F, include=F}
 #| context: setup
 options(repos = "https://archive.linux.duke.edu/cran/")
-knitr::opts_chunk$set(message=FALSE, warning=FALSE)
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 if (!require(pacman)) {
-    install.packages('pacman')
-    library(pacman)
+  install.packages("pacman")
+  library(pacman)
 }
 
 # to knit a static html file, add two lines in the YAML header:
@@ -33,15 +33,16 @@ p_load(sfarrow, dplyr, sf, shiny, mapview, lubridate, data.table, tidytable, lea
 
 
 ```{r monitor annual pm2.5}
-datadir = "~/Documents/AQ/"
-fips_conus = seq(1, 56)[-c(2,7,14,15,43,52)]
+datadir <- "~/Documents/AQ/"
+fips_conus <- seq(1, 56)[-c(2, 7, 14, 15, 43, 52)]
 
-mons_yr_df = readRDS("./data/monitors.rds")
+mons_yr_df <- readRDS("./data/monitors.rds")
 
 
-mons_yr_df = mons_yr_df %>%
-    filter(`State Code` %in% fips_conus) %>%
-    transmute(uniqueid = sprintf("%02d-%03d-%04d-%05d-%02d", `State Code`, `County Code`, `Site Num`, `Parameter Code`, `POC`),
+mons_yr_df <- mons_yr_df %>%
+  filter(`State Code` %in% fips_conus) %>%
+  transmute(
+    uniqueid = sprintf("%02d-%03d-%04d-%05d-%02d", `State Code`, `County Code`, `Site Num`, `Parameter Code`, `POC`),
     long = Longitude,
     lat = Latitude,
     datum = Datum,
@@ -57,42 +58,42 @@ mons_yr_df = mons_yr_df %>%
     n_below_mdl = `Num Obs Below MDL`,
     state_nm = `State Name`,
     county_nm = `County Name`,
-    city_nm = `City Name`)
-mons_yr_df_pm = mons_yr_df %>%
-    filter(grepl("88101", uniqueid))
-mons_yr_df_no = mons_yr_df %>%
-    filter(grepl("42602", uniqueid))
+    city_nm = `City Name`
+  )
+mons_yr_df_pm <- mons_yr_df %>%
+  filter(grepl("88101", uniqueid))
+mons_yr_df_no <- mons_yr_df %>%
+  filter(grepl("42602", uniqueid))
 
 
-# is every number of observations the same for all standards? 
-mons_yr_df_pm_s =
-    mons_yr_df_pm %>%
-    group_by(uniqueid, year) %>%
-    summarize(n_obs_identical = (var(n_obs) == 0)) %>%
-    ungroup() %>%
-    filter(n_obs_identical == TRUE)
-# is every required number of days the same for all standards? 
-mons_yr_df_pm_r =
-    mons_yr_df_pm %>%
-    group_by(uniqueid, year) %>%
-    summarize(n_req_identical = (var(n_req) == 0)) %>%
-    ungroup() %>%
-    filter(n_req_identical == TRUE)
+# is every number of observations the same for all standards?
+mons_yr_df_pm_s <-
+  mons_yr_df_pm %>%
+  group_by(uniqueid, year) %>%
+  summarize(n_obs_identical = (var(n_obs) == 0)) %>%
+  ungroup() %>%
+  filter(n_obs_identical == TRUE)
+# is every required number of days the same for all standards?
+mons_yr_df_pm_r <-
+  mons_yr_df_pm %>%
+  group_by(uniqueid, year) %>%
+  summarize(n_req_identical = (var(n_req) == 0)) %>%
+  ungroup() %>%
+  filter(n_req_identical == TRUE)
 
-# is every number of observations the same for all standards? 
-mons_yr_df_no_s =
-    mons_yr_df_no %>%
-    group_by(uniqueid, year) %>%
-    summarize(n_obs_identical = (var(n_obs) == 0)) %>%
-    ungroup() %>%
-    filter(n_obs_identical == TRUE)
-mons_yr_df_no_r =
-    mons_yr_df_no %>%
-    group_by(uniqueid, year) %>%
-    summarize(n_req_identical = (var(n_req) == 0)) %>%
-    ungroup() %>%
-    filter(n_req_identical == TRUE)
-
+# is every number of observations the same for all standards?
+mons_yr_df_no_s <-
+  mons_yr_df_no %>%
+  group_by(uniqueid, year) %>%
+  summarize(n_obs_identical = (var(n_obs) == 0)) %>%
+  ungroup() %>%
+  filter(n_obs_identical == TRUE)
+mons_yr_df_no_r <-
+  mons_yr_df_no %>%
+  group_by(uniqueid, year) %>%
+  summarize(n_req_identical = (var(n_req) == 0)) %>%
+  ungroup() %>%
+  filter(n_req_identical == TRUE)
 ```
 
 
@@ -102,95 +103,99 @@ mons_yr_df_no_r =
 
 ```{r}
 # reclean the entire data: only select the latest standard
-mons_yr_df_pm0 = mons_yr_df_pm %>%
-    arrange(uniqueid, year, standard, metric) %>%
-    mutate(standard_year = as.integer(str_extract(standard, "\\d{4,4}"))) %>%
-    group_by(uniqueid, year, metric) %>%
-    filter(standard == standard[length(unique(standard))]) %>%
-    ungroup() %>%
-    filter(metric == "Daily Mean")
+mons_yr_df_pm0 <- mons_yr_df_pm %>%
+  arrange(uniqueid, year, standard, metric) %>%
+  mutate(standard_year = as.integer(str_extract(standard, "\\d{4,4}"))) %>%
+  group_by(uniqueid, year, metric) %>%
+  filter(standard == standard[length(unique(standard))]) %>%
+  ungroup() %>%
+  filter(metric == "Daily Mean")
 ```
 
 ```{r load data}
 #| context: data
 
-dailydir = sprintf("%sdaily", datadir)
+dailydir <- sprintf("%sdaily", datadir)
 
 ## 88101 (PM2.5 FRM/FEM), 42602 (NO2)
-path_pm = list.files(path = dailydir, pattern = "_88101_\\d+{4,4}.csv", full.names = TRUE)
-path_no = list.files(path = dailydir, pattern = "_42602_\\d+{4,4}.csv", full.names = TRUE)
+path_pm <- list.files(path = dailydir, pattern = "_88101_\\d+{4,4}.csv", full.names = TRUE)
+path_no <- list.files(path = dailydir, pattern = "_42602_\\d+{4,4}.csv", full.names = TRUE)
 
 # tbls_pmx = lapply(path_pm, data.table::fread)
 # tbls_nox = lapply(path_no, data.table::fread)
 # saveRDS(tbls_pmx, file = "./daily/pm25_FRM.rds", compress = TRUE)
 # saveRDS(tbls_nox, file = "./daily/no2.rds", compress = TRUE)
 
-tbls_pm = #lapply(psath_pm, data.table::fread) %>%
-    readRDS("./data/daily/pm25_FRM.rds") %>%
-    do.call(what = rbind, args = .) %>%
-    filter(`State Code` %in% fips_conus) %>%
-    transmute(
-        state = factor(`State Name`),
-        county = `County Name`,
-        long = Longitude,
-        lat = Latitude,
-        year = lubridate::year(`Date Local`),
-        month = lubridate::month(`Date Local`),
-        date_local = `Date Local`,
-        duration = factor(`Sample Duration`),
-        count_obs = `Observation Count`,
-        value = `Arithmetic Mean`,
-        method_measure = factor(`Method Name`),
-        method_measure_samp = str_extract(as.character(method_measure), "(Gravimetric|GRAVIMETRIC|Beta|Laser|spectroscopy)"),
-        method_measure_prod = str_extract(as.character(method_measure), "(R...P|Teledyne|Met.One|BGI|Thermo)"),
-        method_measure_samp = plyr::mapvalues(tolower(method_measure_samp), c("gravimetric", "beta", "laser", "spectroscopy"), c("gm", "ba", "lls", "bbss")),
-        method_measure_prod = plyr::mapvalues(tolower(method_measure_prod), c("r & p", "teledyne", "met one", "bgi", "thermo"), c("rp", "td", "mo", "bg", "tf")), 
-        method_measure_samp = ifelse(is.na(method_measure_samp), "ns", method_measure_samp),
-        method_measure_prod = ifelse(is.na(method_measure_prod), "ns", method_measure_prod),
-        method_measure_samp = factor(method_measure_samp),
-        method_measure_prod = factor(method_measure_prod),
-        poc = POC,
-        weekday = lubridate::wday(`Date Local`),
-        weekday_n = plyr::mapvalues(weekday, 1:7, c("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")),
-        weekday_n = factor(weekday_n),
-        month_week = (5 + day(date_local) +
-                         wday(floor_date(date_local, 'month'))) %/% 7,
-        uniqueid = factor(sprintf("%02d-%03d-%04d-%05d-%02d_%s_%s", `State Code`, `County Code`, `Site Num`, 88101, poc, method_measure_prod, method_measure_samp)))
-tbls_no = #lapply(path_no, data.table::fread) %>%
-    readRDS("./data/daily/no2.rds") %>%
-    do.call(what = rbind, args = .) %>%
-    filter(`State Code` %in% fips_conus) %>%
-    transmute(
-        state = factor(`State Name`),
-        county = `County Name`,
-        long = Longitude,
-        lat = Latitude,
-        year = lubridate::year(`Date Local`),
-        month = lubridate::month(`Date Local`),
-        date_local = `Date Local`,
-        duration = factor(`Sample Duration`),
-        count_obs = `Observation Count`,
-        value = `Arithmetic Mean`,
-        method_measure = factor(`Method Name`),
-        method_measure_samp = str_extract(as.character(method_measure), "(GAS.PHASE|scopy|Photolytic-Chemiluminescence|Chemiluminescence|CHEMILUMINESCENCE)"),
-        method_measure_samp = plyr::mapvalues(tolower(as.character(method_measure_samp)), c("gas-phase", "gas phase", "photolytic-chemiluminescence", "chemiluminescence", "scopy"), c("cig", "cig", "cip", "ci", "caps")),
-        method_measure_samp = ifelse(is.na(method_measure_samp), "ns", method_measure_samp),
-        method_measure_samp = factor(method_measure_samp),
-        poc = POC,
-        weekday = lubridate::wday(`Date Local`),
-        weekday_n = plyr::mapvalues(weekday, 1:7, c("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")),
-        weekday_n = factor(weekday_n),
-        month_week = (5 + day(date_local) +
-                         wday(floor_date(date_local, 'month'))) %/% 7,
-        uniqueid = factor(sprintf("%02d-%03d-%04d-%05d-%02d_%s", `State Code`, `County Code`, `Site Num`, 42602, poc, method_measure_samp)))
+tbls_pm <- # lapply(psath_pm, data.table::fread) %>%
+  readRDS("./data/daily/pm25_FRM.rds") %>%
+  do.call(what = rbind, args = .) %>%
+  filter(`State Code` %in% fips_conus) %>%
+  transmute(
+    state = factor(`State Name`),
+    county = `County Name`,
+    long = Longitude,
+    lat = Latitude,
+    year = lubridate::year(`Date Local`),
+    month = lubridate::month(`Date Local`),
+    date_local = `Date Local`,
+    duration = factor(`Sample Duration`),
+    count_obs = `Observation Count`,
+    value = `Arithmetic Mean`,
+    method_measure = factor(`Method Name`),
+    method_measure_samp = str_extract(as.character(method_measure), "(Gravimetric|GRAVIMETRIC|Beta|Laser|spectroscopy)"),
+    method_measure_prod = str_extract(as.character(method_measure), "(R...P|Teledyne|Met.One|BGI|Thermo)"),
+    method_measure_samp = plyr::mapvalues(tolower(method_measure_samp), c("gravimetric", "beta", "laser", "spectroscopy"), c("gm", "ba", "lls", "bbss")),
+    method_measure_prod = plyr::mapvalues(tolower(method_measure_prod), c("r & p", "teledyne", "met one", "bgi", "thermo"), c("rp", "td", "mo", "bg", "tf")),
+    method_measure_samp = ifelse(is.na(method_measure_samp), "ns", method_measure_samp),
+    method_measure_prod = ifelse(is.na(method_measure_prod), "ns", method_measure_prod),
+    method_measure_samp = factor(method_measure_samp),
+    method_measure_prod = factor(method_measure_prod),
+    poc = POC,
+    weekday = lubridate::wday(`Date Local`),
+    weekday_n = plyr::mapvalues(weekday, 1:7, c("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")),
+    weekday_n = factor(weekday_n),
+    month_week = (5 + day(date_local) +
+      wday(floor_date(date_local, "month"))) %/% 7,
+    uniqueid = factor(sprintf("%02d-%03d-%04d-%05d-%02d_%s_%s", `State Code`, `County Code`, `Site Num`, 88101, poc, method_measure_prod, method_measure_samp))
+  )
+tbls_no <- # lapply(path_no, data.table::fread) %>%
+  readRDS("./data/daily/no2.rds") %>%
+  do.call(what = rbind, args = .) %>%
+  filter(`State Code` %in% fips_conus) %>%
+  transmute(
+    state = factor(`State Name`),
+    county = `County Name`,
+    long = Longitude,
+    lat = Latitude,
+    year = lubridate::year(`Date Local`),
+    month = lubridate::month(`Date Local`),
+    date_local = `Date Local`,
+    duration = factor(`Sample Duration`),
+    count_obs = `Observation Count`,
+    value = `Arithmetic Mean`,
+    method_measure = factor(`Method Name`),
+    method_measure_samp = str_extract(as.character(method_measure), "(GAS.PHASE|scopy|Photolytic-Chemiluminescence|Chemiluminescence|CHEMILUMINESCENCE)"),
+    method_measure_samp = plyr::mapvalues(tolower(as.character(method_measure_samp)), c("gas-phase", "gas phase", "photolytic-chemiluminescence", "chemiluminescence", "scopy"), c("cig", "cig", "cip", "ci", "caps")),
+    method_measure_samp = ifelse(is.na(method_measure_samp), "ns", method_measure_samp),
+    method_measure_samp = factor(method_measure_samp),
+    poc = POC,
+    weekday = lubridate::wday(`Date Local`),
+    weekday_n = plyr::mapvalues(weekday, 1:7, c("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")),
+    weekday_n = factor(weekday_n),
+    month_week = (5 + day(date_local) +
+      wday(floor_date(date_local, "month"))) %/% 7,
+    uniqueid = factor(sprintf("%02d-%03d-%04d-%05d-%02d_%s", `State Code`, `County Code`, `Site Num`, 42602, poc, method_measure_samp))
+  )
 
-method_measure_lookup = 
-    data.frame(
-        Pollutant = c(rep("PM2.5", 5), rep("NO2", 5)),
-        Method = c("Gravimetric", "Beta Attenuation", "Laser Light Scattering", "Broadband Spectroscopy", "Not Specified",
-                   "Chemiluminescence (Unspecified)", "Chemiluminescence (Gas phase)", "Chemiluminescence (Photolytic)", "Cavity Attenuated Phase-shift Spectroscopy", "Not Specified"),
-        Abbreviation = c("gm", "ba", "lls", "bbss", "ns", "ci", "cig", "cip", "caps", "ns")
-    )
+method_measure_lookup <-
+  data.frame(
+    Pollutant = c(rep("PM2.5", 5), rep("NO2", 5)),
+    Method = c(
+      "Gravimetric", "Beta Attenuation", "Laser Light Scattering", "Broadband Spectroscopy", "Not Specified",
+      "Chemiluminescence (Unspecified)", "Chemiluminescence (Gas phase)", "Chemiluminescence (Photolytic)", "Cavity Attenuated Phase-shift Spectroscopy", "Not Specified"
+    ),
+    Abbreviation = c("gm", "ba", "lls", "bbss", "ns", "ci", "cig", "cip", "caps", "ns")
+  )
 cat("Measurement methods are abbreviated as below.\n")
 method_measure_lookup
 
@@ -200,50 +205,55 @@ method_measure_lookup
 # mons = fread(file = paste(datadir, "aqs_monitors.csv", sep = ""))
 # saveRDS(mons, "./aqs_monitors.rds", compress = TRUE)
 
-mons_pm = #fread(file = paste(datadir, "aqs_monitors.csv", sep = "")) %>%
-    readRDS("./data/aqs_monitors.rds") %>%
-    .[`Parameter Code` == 88101, ] %>%
-    .[`Last Sample Date` >= as.Date("2018-01-01") &
-      `Last Sample Date` <= as.Date("2022-12-31"), ] %>%
-    .[, `:=`(method_measure = factor(`Last Method`))] %>%
-    .[, `:=`(
-        method_measure_samp = str_extract(as.character(method_measure), "(Gravimetric|GRAVIMETRIC|Beta|Laser|spectroscopy)"),
-        method_measure_prod = str_extract(as.character(method_measure), "(R...P|Teledyne|Met.One|BGI|Thermo)"))] %>%
-    .[, `:=`(
-        method_measure_samp = plyr::mapvalues(tolower(method_measure_samp), c("gravimetric", "beta", "laser", "spectroscopy"), c("gm", "ba", "lls", "bbss")),
-        method_measure_prod = plyr::mapvalues(tolower(method_measure_prod), c("r & p", "teledyne", "met one", "bgi", "thermo"), c("rp", "td", "mo", "bg", "tf")))] %>%
-    .[, `:=`( 
-        method_measure_samp = factor(method_measure_samp),
-        method_measure_prod = factor(method_measure_prod))] %>%
-    .[, `:=`(uniqueid = factor(sprintf("%02d-%03d-%05d_%s_%s", as.integer(`State Code`), as.integer(`County Code`), as.integer(`Site Number`), as.character(method_measure_prod), as.character(method_measure_samp))))]
+mons_pm <- # fread(file = paste(datadir, "aqs_monitors.csv", sep = "")) %>%
+  readRDS("./data/aqs_monitors.rds") %>%
+  .[`Parameter Code` == 88101, ] %>%
+  .[`Last Sample Date` >= as.Date("2018-01-01") &
+    `Last Sample Date` <= as.Date("2022-12-31"), ] %>%
+  .[, `:=`(method_measure = factor(`Last Method`))] %>%
+  .[, `:=`(
+    method_measure_samp = str_extract(as.character(method_measure), "(Gravimetric|GRAVIMETRIC|Beta|Laser|spectroscopy)"),
+    method_measure_prod = str_extract(as.character(method_measure), "(R...P|Teledyne|Met.One|BGI|Thermo)")
+  )] %>%
+  .[, `:=`(
+    method_measure_samp = plyr::mapvalues(tolower(method_measure_samp), c("gravimetric", "beta", "laser", "spectroscopy"), c("gm", "ba", "lls", "bbss")),
+    method_measure_prod = plyr::mapvalues(tolower(method_measure_prod), c("r & p", "teledyne", "met one", "bgi", "thermo"), c("rp", "td", "mo", "bg", "tf"))
+  )] %>%
+  .[, `:=`(
+    method_measure_samp = factor(method_measure_samp),
+    method_measure_prod = factor(method_measure_prod)
+  )] %>%
+  .[, `:=`(uniqueid = factor(sprintf("%02d-%03d-%05d_%s_%s", as.integer(`State Code`), as.integer(`County Code`), as.integer(`Site Number`), as.character(method_measure_prod), as.character(method_measure_samp))))]
 
-mons_no = #fread(file = paste(datadir, "aqs_monitors.csv", sep = "")) %>%
-    readRDS("./data/aqs_monitors.rds") %>%
-    .[`Parameter Code` == 42602, ] %>%
-    .[`Last Sample Date` >= as.Date("2018-01-01") &
-      `Last Sample Date` <= as.Date("2022-12-31"), ] %>%
-    .[, `:=`(method_measure = factor(`Last Method`))] %>%
-    .[, `:=`(
-        method_measure_samp = str_extract(as.character(method_measure), "(GAS.PHASE|scopy|Photolytic-Chemiluminescence|Chemiluminescence|CHEMILUMINESCENCE)"))] %>%
-    .[, `:=`(
-        method_measure_samp = plyr::mapvalues(tolower(as.character(method_measure_samp)), c("gas-phase", "gas phase", "photolytic-chemiluminescence", "chemiluminescence", "scopy"), c("cig", "cig", "cip", "ci", "caps")))] %>%
-    .[, `:=`(
-        method_measure_samp = factor(method_measure_samp))] %>%
-    .[, `:=`(uniqueid = factor(sprintf("%02d-%03d-%05d_%s", as.integer(`State Code`), as.integer(`County Code`), as.integer(`Site Number`), as.character(method_measure_samp))))]
-sites = fread(file = "./data/aqs_sites.csv")
+mons_no <- # fread(file = paste(datadir, "aqs_monitors.csv", sep = "")) %>%
+  readRDS("./data/aqs_monitors.rds") %>%
+  .[`Parameter Code` == 42602, ] %>%
+  .[`Last Sample Date` >= as.Date("2018-01-01") &
+    `Last Sample Date` <= as.Date("2022-12-31"), ] %>%
+  .[, `:=`(method_measure = factor(`Last Method`))] %>%
+  .[, `:=`(
+    method_measure_samp = str_extract(as.character(method_measure), "(GAS.PHASE|scopy|Photolytic-Chemiluminescence|Chemiluminescence|CHEMILUMINESCENCE)")
+  )] %>%
+  .[, `:=`(
+    method_measure_samp = plyr::mapvalues(tolower(as.character(method_measure_samp)), c("gas-phase", "gas phase", "photolytic-chemiluminescence", "chemiluminescence", "scopy"), c("cig", "cig", "cip", "ci", "caps"))
+  )] %>%
+  .[, `:=`(
+    method_measure_samp = factor(method_measure_samp)
+  )] %>%
+  .[, `:=`(uniqueid = factor(sprintf("%02d-%03d-%05d_%s", as.integer(`State Code`), as.integer(`County Code`), as.integer(`Site Number`), as.character(method_measure_samp))))]
+sites <- fread(file = "./data/aqs_sites.csv")
 
 
-nameStates = sapply(unique(tbls_pm[["state"]]), \(x) x = x)
+nameStates <- sapply(unique(tbls_pm[["state"]]), \(x) x <- x)
 ```
 
 
 ```{r, eval = F, include = F}
-
 tbls_pm %>%
-    tidytable::group_by(uniqueid) %>%
-    summarize(N = n()) %>%
-    ungroup() %>%
-    summary()
+  tidytable::group_by(uniqueid) %>%
+  summarize(N = n()) %>%
+  ungroup() %>%
+  summary()
 # tbl_pm_exceeds = tbls_pm %>%
 #     tidytable::group_by(uniqueid) %>%
 #     summarize(N = n()) %>%
@@ -259,16 +269,16 @@ tbls_pm %>%
 #     filter(duplicated(date_local) | duplicated(date_local, fromLast = TRUE)) %>%
 #     arrange(uniqueid, date_local) %>%
 #     select(17, 1,7,9,10,11,12)
-tbls_pm_dup = tbls_pm %>%
-    mutate(siteid = str_sub(uniqueid, 1, 10)) %>%
-    tidytable::group_by(siteid) %>%
-    summarize(Nduplicates = length(unique(poc))) %>%
-    ungroup()
-tbls_no_dup = tbls_no %>%
-    mutate(siteid = str_sub(uniqueid, 1, 10)) %>%
-    tidytable::group_by(siteid) %>%
-    summarize(Nduplicates = length(unique(poc))) %>%
-    ungroup()
+tbls_pm_dup <- tbls_pm %>%
+  mutate(siteid = str_sub(uniqueid, 1, 10)) %>%
+  tidytable::group_by(siteid) %>%
+  summarize(Nduplicates = length(unique(poc))) %>%
+  ungroup()
+tbls_no_dup <- tbls_no %>%
+  mutate(siteid = str_sub(uniqueid, 1, 10)) %>%
+  tidytable::group_by(siteid) %>%
+  summarize(Nduplicates = length(unique(poc))) %>%
+  ungroup()
 
 
 # cat("Summary of duplicate PM2.5 monitors\n")
@@ -281,7 +291,7 @@ tbls_no_dup = tbls_no %>%
 ### Relationship between durations and observation counts
 ```{r}
 unique(tbls_pm %>% dplyr::select(duration, count_obs)) %>%
-    arrange(count_obs, duration)
+  arrange(count_obs, duration)
 # tbls_pm %>% filter(`Sample Duration` == "1 HOUR" & `Observation Count` == 1)
 # tbls_pm %>% filter(`Sample Duration` == "24-HR BLK AVG" & `Observation Count` == 1)
 # tbls_pm %>% filter(`Sample Duration` == "24 HOUR" & `Observation Count` == 1)
@@ -290,16 +300,16 @@ unique(tbls_pm %>% dplyr::select(duration, count_obs)) %>%
 ### Sampling methods vs sampling durations
 ```{r}
 cat("PM2.5: sampling methods vs durations\n")
-tbls_pm %>% 
-    tidytable::group_by(method_measure, duration) %>% 
-    summarize(N = n()) %>% 
-    ungroup()
+tbls_pm %>%
+  tidytable::group_by(method_measure, duration) %>%
+  summarize(N = n()) %>%
+  ungroup()
 
 cat("NO2: sampling methods vs durations\n")
-tbls_no %>% 
-    tidytable::group_by(method_measure, duration) %>% 
-    summarize(N = n()) %>% 
-    ungroup()
+tbls_no %>%
+  tidytable::group_by(method_measure, duration) %>%
+  summarize(N = n()) %>%
+  ungroup()
 ```
 
 
@@ -401,66 +411,72 @@ $$
 
 
 ```{r}
-mons_yr_df_pm_unique = mons_yr_df_pm %>%
-    filter(metric == "Daily Mean") %>%
-    arrange(uniqueid, year, standard) %>%
-    tidytable::group_by(uniqueid) %>%
-    filter(standard == standard[length(standard)]) %>%
-    # ungroup() %>%
-    summarize(year_start = min(year),
-              year_end = max(year),
-              standard = unique(standard),
-              n_obs_yr = sum(n_obs, na.rm = T),
-              n_valid_yr = sum(n_valid, na.rm = T),
-              n_req_yr = sum(n_req, na.rm = T),
-              n_below_mdl_yr = sum(n_below_mdl, na.rm = T)) %>%
-    ungroup() 
-mons_yr_df_no_unique = mons_yr_df_no %>%
-    filter(grepl("^Observed", metric)) %>%
-    arrange(uniqueid, year, standard) %>%
-    tidytable::group_by(uniqueid) %>%
-    filter(standard == standard[length(standard)]) %>%
-    ungroup() %>%
-    tidytable::group_by(uniqueid) %>%
-    summarize(n_obs_yr = sum(n_obs, na.rm = T),
-              n_valid_yr = sum(n_valid, na.rm = T),
-              n_req_yr = sum(n_req, na.rm = T),
-              n_below_mdl_yr = sum(n_below_mdl, na.rm = T)) %>%
-    ungroup() #%>%
+mons_yr_df_pm_unique <- mons_yr_df_pm %>%
+  filter(metric == "Daily Mean") %>%
+  arrange(uniqueid, year, standard) %>%
+  tidytable::group_by(uniqueid) %>%
+  filter(standard == standard[length(standard)]) %>%
+  # ungroup() %>%
+  summarize(
+    year_start = min(year),
+    year_end = max(year),
+    standard = unique(standard),
+    n_obs_yr = sum(n_obs, na.rm = T),
+    n_valid_yr = sum(n_valid, na.rm = T),
+    n_req_yr = sum(n_req, na.rm = T),
+    n_below_mdl_yr = sum(n_below_mdl, na.rm = T)
+  ) %>%
+  ungroup()
+mons_yr_df_no_unique <- mons_yr_df_no %>%
+  filter(grepl("^Observed", metric)) %>%
+  arrange(uniqueid, year, standard) %>%
+  tidytable::group_by(uniqueid) %>%
+  filter(standard == standard[length(standard)]) %>%
+  ungroup() %>%
+  tidytable::group_by(uniqueid) %>%
+  summarize(
+    n_obs_yr = sum(n_obs, na.rm = T),
+    n_valid_yr = sum(n_valid, na.rm = T),
+    n_req_yr = sum(n_req, na.rm = T),
+    n_below_mdl_yr = sum(n_below_mdl, na.rm = T)
+  ) %>%
+  ungroup() # %>%
 
 
-tbls_pm_daily_year_comp = 
-    tbls_pm %>%
-    mutate(uniqueid = gsub("_\\w+{2,3}_\\w+{2,3}", "", uniqueid)) %>%
-    tidytable::group_by(uniqueid) %>%
-    summarize(long = unique(long),
-              lat = unique(lat),
-              date_start = min(date_local),
-              date_end = max(date_local),
-              n_obs = n(),
-              n_obs_below_mdl = sum(value < 0),
-              n_valid = n() - sum(is.na(value))) %>%
-    ungroup() %>%
-    mutate(n_eq_obs_valid = (n_obs == n_valid)) %>%
-    left_join(mons_yr_df_pm_unique, by = "uniqueid") %>%
-    mutate()
+tbls_pm_daily_year_comp <-
+  tbls_pm %>%
+  mutate(uniqueid = gsub("_\\w+{2,3}_\\w+{2,3}", "", uniqueid)) %>%
+  tidytable::group_by(uniqueid) %>%
+  summarize(
+    long = unique(long),
+    lat = unique(lat),
+    date_start = min(date_local),
+    date_end = max(date_local),
+    n_obs = n(),
+    n_obs_below_mdl = sum(value < 0),
+    n_valid = n() - sum(is.na(value))
+  ) %>%
+  ungroup() %>%
+  mutate(n_eq_obs_valid = (n_obs == n_valid)) %>%
+  left_join(mons_yr_df_pm_unique, by = "uniqueid") %>%
+  mutate()
 
-tbls_no_daily_year_comp = 
-    tbls_no %>%
-    mutate(uniqueid = gsub("_\\w+{2,3}", "", uniqueid)) %>%
-    tidytable::group_by(uniqueid) %>%
-    summarize(long = unique(long),
-              lat = unique(lat),
-              date_start = min(date_local),
-              date_end = max(date_local),
-              n_obs = n(),
-              n_obs_below_mdl = sum(value < 0),
-              n_valid = n() - sum(is.na(value))) %>%
-    ungroup() %>%
-    mutate(n_eq_obs_valid = (n_obs == n_valid)) %>%
-    left_join(mons_yr_df_no_unique, by = "uniqueid")
-
-
+tbls_no_daily_year_comp <-
+  tbls_no %>%
+  mutate(uniqueid = gsub("_\\w+{2,3}", "", uniqueid)) %>%
+  tidytable::group_by(uniqueid) %>%
+  summarize(
+    long = unique(long),
+    lat = unique(lat),
+    date_start = min(date_local),
+    date_end = max(date_local),
+    n_obs = n(),
+    n_obs_below_mdl = sum(value < 0),
+    n_valid = n() - sum(is.na(value))
+  ) %>%
+  ungroup() %>%
+  mutate(n_eq_obs_valid = (n_obs == n_valid)) %>%
+  left_join(mons_yr_df_no_unique, by = "uniqueid")
 ```
 
 
@@ -475,51 +491,53 @@ tbls_no_daily_year_comp =
 
 ```{r}
 ## is there inconsistency between 1-hr and 24-hr time series when both are present in the data?
-tbls_pm_start_end_by_duration = 
-    tbls_pm %>%
-    mutate(unique2 = gsub("_\\w+{2,4}_\\w+{2,4}", "", uniqueid)) %>%
-    tidytable::group_by(unique2, duration) %>%
-    summarize(date_start= min(date_local),
-              date_end = max(date_local)) %>%
-    ungroup()
+tbls_pm_start_end_by_duration <-
+  tbls_pm %>%
+  mutate(unique2 = gsub("_\\w+{2,4}_\\w+{2,4}", "", uniqueid)) %>%
+  tidytable::group_by(unique2, duration) %>%
+  summarize(
+    date_start = min(date_local),
+    date_end = max(date_local)
+  ) %>%
+  ungroup()
 
 ## start or end dates of the series are 7 days apart
 ## the table is converted back to tibble to utilize grouped filter as intended
 ## tidytable seems not to support the grouped filter properly
-tbls_pm_start_end_by_duration %>% 
-    as_tibble() %>%
-    dplyr::group_by(unique2) %>%
-    filter(length(unique(duration)) > 1) %>%
-    filter(any(as.vector(dist(as.Date(date_start))) >= 7) |
-            any(as.vector(dist(as.Date(date_end))) >= 7)) %>%
-    ungroup() %>%
-    arrange(unique2, date_start)
+tbls_pm_start_end_by_duration %>%
+  as_tibble() %>%
+  dplyr::group_by(unique2) %>%
+  filter(length(unique(duration)) > 1) %>%
+  filter(any(as.vector(dist(as.Date(date_start))) >= 7) |
+    any(as.vector(dist(as.Date(date_end))) >= 7)) %>%
+  ungroup() %>%
+  arrange(unique2, date_start)
 
 ## if there are any intersections between "24 HOUR" and "24-HR BLK AVG" series, if both present in the same monitor
-tbls_pm_start_end_by_duration %>% 
-    as_tibble() %>%
-    dplyr::group_by(unique2) %>%
-    filter(length(unique(duration)) > 1) %>%
-    dplyr::filter(dplyr::n() > 2) %>%
-    filter(length(intersect(seq(date_start[2], date_end[2], 1), seq(date_start[3], date_end[3], 1))) > 0) %>%
-    ungroup()
-
-
+tbls_pm_start_end_by_duration %>%
+  as_tibble() %>%
+  dplyr::group_by(unique2) %>%
+  filter(length(unique(duration)) > 1) %>%
+  dplyr::filter(dplyr::n() > 2) %>%
+  filter(length(intersect(seq(date_start[2], date_end[2], 1), seq(date_start[3], date_end[3], 1))) > 0) %>%
+  ungroup()
 ```
 
 
 ```{r}
 cat(paste("Investigating the presence of multiple sampling durations\n"))
 ## summarize data by prioritizing 24-hr and 24-hr blk avg if present
-lookup_pm_uniques =
-    tbls_pm %>%
-    mutate(unique2 = gsub("_\\w+{2,4}_\\w+{2,4}", "", uniqueid)) %>%
-    arrange(unique2, duration, date_local) %>% 
-    tidytable::group_by(unique2) %>%
-    summarize(duration1 = unique(duration)[1],
-              duration2 = unique(duration)[2],
-              duration3 = unique(duration)[3]) %>%
-    ungroup()
+lookup_pm_uniques <-
+  tbls_pm %>%
+  mutate(unique2 = gsub("_\\w+{2,4}_\\w+{2,4}", "", uniqueid)) %>%
+  arrange(unique2, duration, date_local) %>%
+  tidytable::group_by(unique2) %>%
+  summarize(
+    duration1 = unique(duration)[1],
+    duration2 = unique(duration)[2],
+    duration3 = unique(duration)[3]
+  ) %>%
+  ungroup()
 
 lookup_pm_uniques
 
@@ -528,99 +546,106 @@ table(tbls_pm$method_measure_samp, tbls_pm$duration)
 
 ## Check if there are monitors with "1 HOUR" duration only
 cat(paste("Below checks if there are monitors only with '1 HOUR' duration\n"))
-lookup_pm_uniques %>% 
-    filter((duration1 == "1 HOUR" & is.na(duration2)) | duration2 == "1 HOUR") %>%
-    nrow()
+lookup_pm_uniques %>%
+  filter((duration1 == "1 HOUR" & is.na(duration2)) | duration2 == "1 HOUR") %>%
+  nrow()
 
-lenunique = \(x) length(unique(x))
+lenunique <- \(x) length(unique(x))
 
 # history of measurement method changes by monitors
-pm_monitor_change = 
-    tbls_pm %>%
-    mutate(unique2 = gsub("_\\w+{2,4}_\\w+{2,4}", "", uniqueid)) %>%
-    mutate(method_measure_samp = as.character(method_measure_samp)) %>%
-    arrange(unique2, date_local) %>% 
-    as_tibble() %>%
-    dplyr::group_by(unique2) %>%
-    dplyr::summarize(methods_all = paste(unique(method_measure_samp[which(method_measure_samp != "ns")]), collapse = "|")) %>%
-    dplyr::ungroup() 
+pm_monitor_change <-
+  tbls_pm %>%
+  mutate(unique2 = gsub("_\\w+{2,4}_\\w+{2,4}", "", uniqueid)) %>%
+  mutate(method_measure_samp = as.character(method_measure_samp)) %>%
+  arrange(unique2, date_local) %>%
+  as_tibble() %>%
+  dplyr::group_by(unique2) %>%
+  dplyr::summarize(methods_all = paste(unique(method_measure_samp[which(method_measure_samp != "ns")]), collapse = "|")) %>%
+  dplyr::ungroup()
 
 # check if there is "overlapping" periods between different measurement methods
 cat(paste("Below checks whether measurement periods overlap between different measurement methods.\n"))
-pm_monitor_change_periods = 
-    tbls_pm %>%
-    mutate(unique2 = gsub("_\\w+{2,4}_\\w+{2,4}", "", uniqueid)) %>%
-    arrange(unique2, duration, method_measure_samp, date_local) %>% 
-    as_tibble() %>%
-    mutate(method_measure_samp = as.character(method_measure_samp)) %>%
-    dplyr::group_by(unique2, method_measure_samp) %>%
-    dplyr::summarize(date_start = min(date_local),
-                     date_end = max(date_local)) %>%
-    ungroup() %>%
-    filter(method_measure_samp != "ns") %>%
-    group_by(unique2) %>%
-    filter(length(method_measure_samp)>1) %>%
-    arrange(unique2, date_start)
+pm_monitor_change_periods <-
+  tbls_pm %>%
+  mutate(unique2 = gsub("_\\w+{2,4}_\\w+{2,4}", "", uniqueid)) %>%
+  arrange(unique2, duration, method_measure_samp, date_local) %>%
+  as_tibble() %>%
+  mutate(method_measure_samp = as.character(method_measure_samp)) %>%
+  dplyr::group_by(unique2, method_measure_samp) %>%
+  dplyr::summarize(
+    date_start = min(date_local),
+    date_end = max(date_local)
+  ) %>%
+  ungroup() %>%
+  filter(method_measure_samp != "ns") %>%
+  group_by(unique2) %>%
+  filter(length(method_measure_samp) > 1) %>%
+  arrange(unique2, date_start)
 
-generate_fullts = \(vstart, vend, index) length(unique(index)) %>% split(., .) %>% lapply(\(x) seq(vstart[x], vend[x], 1)) 
+generate_fullts <- \(vstart, vend, index) length(unique(index)) %>%
+  split(., .) %>%
+  lapply(\(x) seq(vstart[x], vend[x], 1))
 
 
-cat(sprintf("%d monitors have the history of method changes during the study period.\n",
-    lenunique(pm_monitor_change_periods$unique2)))
+cat(sprintf(
+  "%d monitors have the history of method changes during the study period.\n",
+  lenunique(pm_monitor_change_periods$unique2)
+))
 
 # cat("One monitor reported the overlapping periods between two sampling methods (Beta Attenuation - Broadband Spectroscopy, overlaps from 2020-09-16 to 2021-08-01).\n")
 
 ## inspecting the presence of intersection: monitors for two entries
-pm_monitor_change_periods %>% 
-    as_tibble() %>%
-    dplyr::group_by(unique2) %>%
-    # filtering two entries only
-    filter(length(method_measure_samp) == 2) %>%
-    # inspecting overlaps in time series
-    filter(length(intersect(seq(date_start[1], date_end[1], 1), seq(date_start[2], date_end[2], 1))) > 0) %>%
-    ungroup()
+pm_monitor_change_periods %>%
+  as_tibble() %>%
+  dplyr::group_by(unique2) %>%
+  # filtering two entries only
+  filter(length(method_measure_samp) == 2) %>%
+  # inspecting overlaps in time series
+  filter(length(intersect(seq(date_start[1], date_end[1], 1), seq(date_start[2], date_end[2], 1))) > 0) %>%
+  ungroup()
 
 ## inspecting the presence of intersection: monitors with three sampling device entries
-pm_monitor_change_periods %>% 
-    as_tibble() %>%
-    dplyr::group_by(unique2) %>%
-    filter(length(method_measure_samp) == 3) %>%
-    filter(length(intersect(seq(date_start[2], date_end[2], 1), seq(date_start[3], date_end[3], 1))) > 0 | length(intersect(seq(date_start[1], date_end[1], 1), seq(date_start[2], date_end[2], 1))) > 0) %>%
-    ungroup()
-
+pm_monitor_change_periods %>%
+  as_tibble() %>%
+  dplyr::group_by(unique2) %>%
+  filter(length(method_measure_samp) == 3) %>%
+  filter(length(intersect(seq(date_start[2], date_end[2], 1), seq(date_start[3], date_end[3], 1))) > 0 | length(intersect(seq(date_start[1], date_end[1], 1), seq(date_start[2], date_end[2], 1))) > 0) %>%
+  ungroup()
 ```
 
 
 ```{r recleaning}
-old = options(pillar.sigfig = 7)
+old <- options(pillar.sigfig = 7)
 
 
 ## Data recleaning: prioritizing 24-hour block average while retaining all histories
-tbls_pm_cleaned =
-    tbls_pm %>%
-    mutate(unique2 = gsub("_\\w+{2,4}_\\w+{2,4}", "", uniqueid)) %>%
-    mutate(method_measure_samp = as.character(method_measure_samp)) %>%
-    arrange(unique2, duration, date_local) %>% 
-    as_tibble() %>%
-    dplyr::group_by(unique2) %>%
-    dplyr::mutate(methods_all = paste(unique(method_measure_samp[which(method_measure_samp != "ns")]), collapse = "|"),
-                methods_all_ns = paste(unique(method_measure_samp), collapse = "|")) %>%
-    ungroup()
+tbls_pm_cleaned <-
+  tbls_pm %>%
+  mutate(unique2 = gsub("_\\w+{2,4}_\\w+{2,4}", "", uniqueid)) %>%
+  mutate(method_measure_samp = as.character(method_measure_samp)) %>%
+  arrange(unique2, duration, date_local) %>%
+  as_tibble() %>%
+  dplyr::group_by(unique2) %>%
+  dplyr::mutate(
+    methods_all = paste(unique(method_measure_samp[which(method_measure_samp != "ns")]), collapse = "|"),
+    methods_all_ns = paste(unique(method_measure_samp), collapse = "|")
+  ) %>%
+  ungroup()
 
-tbls_pm_cleaned %>% 
-    filter(methods_all_ns == "ba|gm|ns") %>%
-    arrange(date_local, duration, unique2) %>%
-    filter(method_measure_samp %in% c("ba", "ns")) %>%
-    # 35.5 is air quality standard for PM2.5 for 24 hours
-    filter(value > 35.5) %>%
-    .[,c("unique2", "date_local", "method_measure_samp", "value", "count_obs")]
+tbls_pm_cleaned %>%
+  filter(methods_all_ns == "ba|gm|ns") %>%
+  arrange(date_local, duration, unique2) %>%
+  filter(method_measure_samp %in% c("ba", "ns")) %>%
+  # 35.5 is air quality standard for PM2.5 for 24 hours
+  filter(value > 35.5) %>%
+  .[, c("unique2", "date_local", "method_measure_samp", "value", "count_obs")]
 
 cat(paste("Existing combinations of measurement methods and sampling durations.\n"))
 table(tbls_pm_cleaned$duration, tbls_pm_cleaned$methods_all_ns)
 
 cat(paste("Below is the example of three measurement methods being employed in one monitor\n"))
 tbls_pm_cleaned %>%
-    filter(methods_all_ns == "bbss|ba|gm|ns" & duration == "24 HOUR")
+  filter(methods_all_ns == "bbss|ba|gm|ns" & duration == "24 HOUR")
 
 # Pull up some examples for inspection
 # tbls_pm_cleaned %>%
@@ -633,70 +658,73 @@ tbls_pm_cleaned %>%
 #     ggplot(data = _, mapping = aes(x = date_local, y = method_measure_samp)) +
 #         geom_point()
 
-tbls_pm_cleaned_qa = 
-    tbls_pm_cleaned %>%
-    mutate(method_measure_samp = as.character(method_measure_samp)) %>%
-    arrange(unique2, date_local, method_measure_samp) %>%
-    as_tibble() %>%
-    dplyr::group_by(unique2, date_local) %>%
-    dplyr::mutate(method_measure_samp = ifelse(method_measure_samp == "ns", sort(unique(method_measure_samp))[1], method_measure_samp)) %>%
-    ungroup() %>%
-    filter(grepl("^24", duration))
+tbls_pm_cleaned_qa <-
+  tbls_pm_cleaned %>%
+  mutate(method_measure_samp = as.character(method_measure_samp)) %>%
+  arrange(unique2, date_local, method_measure_samp) %>%
+  as_tibble() %>%
+  dplyr::group_by(unique2, date_local) %>%
+  dplyr::mutate(method_measure_samp = ifelse(method_measure_samp == "ns", sort(unique(method_measure_samp))[1], method_measure_samp)) %>%
+  ungroup() %>%
+  filter(grepl("^24", duration))
 
 
 # original sampling methods vs original duration vs observation counts
 table(paste(tbls_pm$method_measure_samp, tbls_pm$duration, sep = " / "), tbls_pm$count_obs)
 table(paste(tbls_pm_cleaned_qa$method_measure_samp, tbls_pm_cleaned_qa$duration, sep = " / "), tbls_pm_cleaned_qa$count_obs)
-
 ```
 
 
 ```{r, include=F, eval=F}
-
-tbls_pm_exceed = tbls_pm %>%
-    mutate(unique2 = gsub("_\\w+{2,4}_\\w+{2,4}", "", uniqueid)) %>%
-    filter(unique2 %in% pm_exceed_daily_year) %>%
-    filter(method_measure_samp == "gm")
+tbls_pm_exceed <- tbls_pm %>%
+  mutate(unique2 = gsub("_\\w+{2,4}_\\w+{2,4}", "", uniqueid)) %>%
+  filter(unique2 %in% pm_exceed_daily_year) %>%
+  filter(method_measure_samp == "gm")
 cat(paste("Below compares the number of observations per day and sampling durations.\n"))
 table(tbls_pm_exceed[["duration"]], tbls_pm_exceed[["count_obs"]])
 
-tbls_pm_multiple_durations = tbls_pm %>%
-    mutate(unique2 = gsub("_\\w+{2,4}_\\w+{2,4}", "", uniqueid)) %>%
-    group_by(unique2) %>%
-    filter(all(sum(grepl("^1.H", duration))>0, sum(grepl("^24.H", duration))>0)) %>%
-    ungroup()
-
+tbls_pm_multiple_durations <- tbls_pm %>%
+  mutate(unique2 = gsub("_\\w+{2,4}_\\w+{2,4}", "", uniqueid)) %>%
+  group_by(unique2) %>%
+  filter(all(sum(grepl("^1.H", duration)) > 0, sum(grepl("^24.H", duration)) > 0)) %>%
+  ungroup()
 ```
 
 ### Monitors by states after cleaning
 ```{r}
-mon_state = 
-    tbls_pm_cleaned_qa %>%
-    dplyr::group_by(state) %>%
-    dplyr::summarize(Nmonitors = length(unique(unique2)),
-              Nsites = length(unique(gsub("-[0-9]+{2,2}$", "", unique2)))) %>%
-    ungroup %>%
-    dplyr::mutate(state = str_replace(state, "Of ", "of"),
-           state = str_replace(state, " ", ""))
+mon_state <-
+  tbls_pm_cleaned_qa %>%
+  dplyr::group_by(state) %>%
+  dplyr::summarize(
+    Nmonitors = length(unique(unique2)),
+    Nsites = length(unique(gsub("-[0-9]+{2,2}$", "", unique2)))
+  ) %>%
+  ungroup() %>%
+  dplyr::mutate(
+    state = str_replace(state, "Of ", "of"),
+    state = str_replace(state, " ", "")
+  )
 
-statesbase = read_sf("./data/gadm41_USA_1.json")
-states_nmons = statesbase %>%
-    dplyr::left_join(data.frame(mon_state), by = c("NAME_1" = "state")) %>%
-    filter(!is.na(Nmonitors)) %>%
-    select(NAME_1, Nmonitors, Nsites) %>%
-    rename(State = NAME_1,
-           `# Monitors` = Nmonitors,
-           `# Sites` = Nsites)
-tbls_pm_sf = tbls_pm_cleaned_qa %>%
-    select(unique2, methods_all, state, long, lat) %>%
-    unique %>%
-    rename(
-        `Monitor ID` = unique2,
-        State = state,
-        `Sampling method` = methods_all
-    ) %>%
-    st_as_sf(coords = c("long", "lat"), crs = 4326) %>%
-    st_jitter(0.01)
+statesbase <- read_sf("./data/gadm41_USA_1.json")
+states_nmons <- statesbase %>%
+  dplyr::left_join(data.frame(mon_state), by = c("NAME_1" = "state")) %>%
+  filter(!is.na(Nmonitors)) %>%
+  select(NAME_1, Nmonitors, Nsites) %>%
+  rename(
+    State = NAME_1,
+    `# Monitors` = Nmonitors,
+    `# Sites` = Nsites
+  )
+tbls_pm_sf <- tbls_pm_cleaned_qa %>%
+  select(unique2, methods_all, state, long, lat) %>%
+  unique() %>%
+  rename(
+    `Monitor ID` = unique2,
+    State = state,
+    `Sampling method` = methods_all
+  ) %>%
+  st_as_sf(coords = c("long", "lat"), crs = 4326) %>%
+  st_jitter(0.01)
 cat(paste("PM2.5 monitors:", nrow(tbls_pm_sf), "\n"))
 cat(paste("PM2.5 sites:", sum(mon_state$Nsites), "\n"))
 
@@ -708,16 +736,17 @@ cat(paste("PM2.5 sites:", sum(mon_state$Nsites), "\n"))
 # cat(paste("NO2 monitors:", nrow(tbls_no_sf), "\n"))
 
 
-mapview::mapview(states_nmons, 
-        layer.name = "# Monitors by states", 
-        zcol = c("# Monitors")) +
-    mapview::mapview(tbls_pm_sf, 
-        size = 1, 
-        layer.name = "PM2.5 monitors",
-        zcol = "State", 
-        col.regions = RColorBrewer::brewer.pal(7,"Set3"), 
-        legend = FALSE)# +
-
+mapview::mapview(states_nmons,
+  layer.name = "# Monitors by states",
+  zcol = c("# Monitors")
+) +
+  mapview::mapview(tbls_pm_sf,
+    size = 1,
+    layer.name = "PM2.5 monitors",
+    zcol = "State",
+    col.regions = RColorBrewer::brewer.pal(7, "Set3"),
+    legend = FALSE
+  ) # +
 ```
 
 
@@ -727,93 +756,109 @@ mapview::mapview(states_nmons,
 
 
 ```{r us_conus_gg, fig.width=20, fig.height = 14, res='retina'}
+us_conus_grid <- us_state_grid2 %>%
+  filter(!code %in% c("HI", "AK"))
+us_conus_grid[49, 4] <- "District Of Columbia"
 
-us_conus_grid = us_state_grid2 %>%
-    filter(!code %in% c("HI", "AK"))
-us_conus_grid[49, 4] = "District Of Columbia"
 
+lvs_pm <- c(
+  "Beta Attenuation", "Broadband Spectroscopy", "Gravimetric",
+  "Laser Light Scattering"
+)
 
-lvs_pm = c("Beta Attenuation", "Broadband Spectroscopy", "Gravimetric",
-            "Laser Light Scattering") 
-
-tbls_pm_summary = tbls_pm_cleaned_qa %>%
-    mutate(date_local = as.Date(date_local),
-           method = factor(str_extract(method_measure_samp, '(gm|ba|lls|bbss)'),
-                        labels = lvs_pm),
-           method_linewidth = case_when(
-                        as.character(method) == "Gravimetric" ~ 0.5, 
-                        TRUE ~ 0.4)) %>%
-    as_tibble() %>%
-    dplyr::group_by(state, unique2) %>%
-    dplyr::mutate(date_local_diff = date_local - lag(date_local)) %>%
-    dplyr::mutate(date_local_diff = if_else(is.na(date_local_diff) | date_local_diff > 1, 1, 0)) %>%
-    dplyr::mutate(series = cumsum(date_local_diff)) %>%
-    tidytable::ungroup() %>%
-    tidytable::group_by(state, unique2, series) %>%
-    tidytable::summarize(date_start = min(date_local),
-              date_end = max(date_local),
-              method = unique(method),
-              method_linewidth = mean(method_linewidth)) %>%
-    tidytable::ungroup()
+tbls_pm_summary <- tbls_pm_cleaned_qa %>%
+  mutate(
+    date_local = as.Date(date_local),
+    method = factor(str_extract(method_measure_samp, "(gm|ba|lls|bbss)"),
+      labels = lvs_pm
+    ),
+    method_linewidth = case_when(
+      as.character(method) == "Gravimetric" ~ 0.5,
+      TRUE ~ 0.4
+    )
+  ) %>%
+  as_tibble() %>%
+  dplyr::group_by(state, unique2) %>%
+  dplyr::mutate(date_local_diff = date_local - lag(date_local)) %>%
+  dplyr::mutate(date_local_diff = if_else(is.na(date_local_diff) | date_local_diff > 1, 1, 0)) %>%
+  dplyr::mutate(series = cumsum(date_local_diff)) %>%
+  tidytable::ungroup() %>%
+  tidytable::group_by(state, unique2, series) %>%
+  tidytable::summarize(
+    date_start = min(date_local),
+    date_end = max(date_local),
+    method = unique(method),
+    method_linewidth = mean(method_linewidth)
+  ) %>%
+  tidytable::ungroup()
 
 # tbls_pm_summary_pnts = tbls_pm_summary %>%
 #     filter(date_start == date_end)
 # tbls_pm_summary_line = tbls_pm_summary %>%
 #     filter(date_start != date_end)
-tbls_pm_summary = tbls_pm_summary %>%
+tbls_pm_summary <- tbls_pm_summary %>%
   as.data.frame() %>%
   as_tibble() %>%
-  mutate(date_start = as.Date(date_start),
-         date_end = as.Date(date_end)) %>%
+  mutate(
+    date_start = as.Date(date_start),
+    date_end = as.Date(date_end)
+  ) %>%
   mutate(date_end_line = as.Date(ifelse(date_start == date_end, date_end + 1, date_end), origin = "1970-01-01"))
-
-
 ```
 
 <!--![]("./us_conus_gg.png")-->
 
 ```{r facetplot large, fig.height=20, fig.width=25, fig.retina=TRUE}
-tbls_pm_summary_gg = 
-    ggplot(data = tbls_pm_summary) +
-        geom_segment(data = tbls_pm_summary, 
-                    mapping = aes(x = date_start, xend = date_end_line, y = unique2, yend = unique2, color = method, 
-                    linewidth = method_linewidth)) +
-        # geom_point(data = tbls_pm_summary_pnts,
-        #            mapping = aes(x = date_start, y = uniqueid, color = method), shape = 19, cex = 0.005) +
-        geofacet::facet_geo(~ state, grid = us_conus_grid, scales = "free_y") +
-        ggthemes::scale_color_tableau(palette = "Classic 10", name = "Measurement method") +
-        ylab("Monitor") + xlab("Date") +
-        scale_linewidth(range = c(0.4, 0.72)) +
-        theme_bw() +
-        theme(text = element_text(family = "Helvetica"),
-              title = element_text(size = 24, face = "bold"),
-              plot.caption = element_text(size = 15, face = "plain"),
-              axis.text.y = element_blank(),
-              axis.text.x = element_text(size = 12),
-              axis.title.x = element_text(size = 24),
-              axis.title.y = element_text(size = 24),
-              panel.grid.major.y = element_blank(),
-              legend.key.width = unit(0.4, 'in'),
-              legend.text = element_text(size = 20),
-              legend.title = element_text(size = 22, face = "bold"),
-              legend.position = c(0.48, 0.86)) +
-        guides(color = guide_legend(override.aes = list(linewidth = unit(1, 'cm'))),
-               linewidth = "none")
+tbls_pm_summary_gg <-
+  ggplot(data = tbls_pm_summary) +
+  geom_segment(
+    data = tbls_pm_summary,
+    mapping = aes(
+      x = date_start, xend = date_end_line, y = unique2, yend = unique2, color = method,
+      linewidth = method_linewidth
+    )
+  ) +
+  # geom_point(data = tbls_pm_summary_pnts,
+  #            mapping = aes(x = date_start, y = uniqueid, color = method), shape = 19, cex = 0.005) +
+  geofacet::facet_geo(~state, grid = us_conus_grid, scales = "free_y") +
+  ggthemes::scale_color_tableau(palette = "Classic 10", name = "Measurement method") +
+  ylab("Monitor") +
+  xlab("Date") +
+  scale_linewidth(range = c(0.4, 0.72)) +
+  theme_bw() +
+  theme(
+    text = element_text(family = "Helvetica"),
+    title = element_text(size = 24, face = "bold"),
+    plot.caption = element_text(size = 15, face = "plain"),
+    axis.text.y = element_blank(),
+    axis.text.x = element_text(size = 12),
+    axis.title.x = element_text(size = 24),
+    axis.title.y = element_text(size = 24),
+    panel.grid.major.y = element_blank(),
+    legend.key.width = unit(0.4, "in"),
+    legend.text = element_text(size = 20),
+    legend.title = element_text(size = 22, face = "bold"),
+    legend.position = c(0.48, 0.86)
+  ) +
+  guides(
+    color = guide_legend(override.aes = list(linewidth = unit(1, "cm"))),
+    linewidth = "none"
+  )
 # ggsave(plot = tbls_pm_summary_gg, filename = "bystate.png",
 #         width = 24, height = 15, units = "in", dpi = 508)
-tbls_pm_summary_gg  + 
-  labs(title = bquote(atop("PM"[2.5]~ "measurement patterns by methods","       across 48 mainland states and D.C.")),
-  caption = "24-hour or 24-hour block averages [reference: 40 CFR Part 50 and USEPA]. Data source: USEPA AQS Datamart.")
+tbls_pm_summary_gg +
+  labs(
+    title = bquote(atop("PM"[2.5] ~ "measurement patterns by methods", "       across 48 mainland states and D.C.")),
+    caption = "24-hour or 24-hour block averages [reference: 40 CFR Part 50 and USEPA]. Data source: USEPA AQS Datamart."
+  )
 
 
 
 
-fast_ggplotly = function(gplot_in) {
-        plotly::partial_bundle(plotly::toWebGL(plotly::ggplotly(gplot_in, tooltip = c("color"))))
-    }
+fast_ggplotly <- function(gplot_in) {
+  plotly::partial_bundle(plotly::toWebGL(plotly::ggplotly(gplot_in, tooltip = c("color"))))
+}
 # fast_ggplotly(tbls_pm_summary_gg)
-
-
 ```
 
 ## Missing rates
@@ -827,22 +872,24 @@ fast_ggplotly = function(gplot_in) {
 
 
 ```{r}
-tbls_pm_daily_year_comp = 
-    tbls_pm_cleaned_qa %>%
-    tidytable::group_by(unique2) %>%
-    summarize(long = unique(long),
-              lat = unique(lat),
-              state = unique(state),
-              date_start = min(date_local),
-              date_end = max(date_local),
-              n_obs = n(),
-              n_obs_below_mdl = sum(value < 0),
-              n_valid = n() - sum(is.na(value)),
-              methods = unique(methods_all)) %>%
-    ungroup() %>%
-    mutate(n_eq_obs_valid = (n_obs == n_valid)) %>%
-    left_join(mons_yr_df_pm_unique, by = c("unique2" = "uniqueid"))
-# tbls_no_daily_year_comp = 
+tbls_pm_daily_year_comp <-
+  tbls_pm_cleaned_qa %>%
+  tidytable::group_by(unique2) %>%
+  summarize(
+    long = unique(long),
+    lat = unique(lat),
+    state = unique(state),
+    date_start = min(date_local),
+    date_end = max(date_local),
+    n_obs = n(),
+    n_obs_below_mdl = sum(value < 0),
+    n_valid = n() - sum(is.na(value)),
+    methods = unique(methods_all)
+  ) %>%
+  ungroup() %>%
+  mutate(n_eq_obs_valid = (n_obs == n_valid)) %>%
+  left_join(mons_yr_df_pm_unique, by = c("unique2" = "uniqueid"))
+# tbls_no_daily_year_comp =
 #     tbls_no_cleaned_qa %>%
 #     tidytable::group_by(unique2) %>%
 #     summarize(long = unique(long),
@@ -856,95 +903,102 @@ tbls_pm_daily_year_comp =
 #     mutate(n_eq_obs_valid = (n_obs == n_valid)) %>%
 #     left_join(mons_yr_df_pm_unique, by = c("unique2" = "uniqueid"))
 
-tbls_pm_daily_year_rate = tbls_pm_daily_year_comp %>%
-    transmute(
-            `Monitor ID` = unique2,
-            State = state,
-            `Measurement types` = methods,
-            `Start date` = `date_start`,
-            `End date` = `date_end`,
-            `Observation rate` = 100 * n_obs / n_req_yr,
-           `Missing rate` = ifelse(`Observation rate` > 100, 0, 100 * (n_req_yr - n_obs)/n_req_yr),
-           `Below MDL rate` = 100 * n_obs_below_mdl / n_obs,
-           `# Observations` = n_obs,
-           `# Required` = n_req_yr,
-           `# Below MDL` = n_obs_below_mdl,
-           long = long,
-           lat = lat
-           )
+tbls_pm_daily_year_rate <- tbls_pm_daily_year_comp %>%
+  transmute(
+    `Monitor ID` = unique2,
+    State = state,
+    `Measurement types` = methods,
+    `Start date` = `date_start`,
+    `End date` = `date_end`,
+    `Observation rate` = 100 * n_obs / n_req_yr,
+    `Missing rate` = ifelse(`Observation rate` > 100, 0, 100 * (n_req_yr - n_obs) / n_req_yr),
+    `Below MDL rate` = 100 * n_obs_below_mdl / n_obs,
+    `# Observations` = n_obs,
+    `# Required` = n_req_yr,
+    `# Below MDL` = n_obs_below_mdl,
+    long = long,
+    lat = lat
+  )
 
-tbls_pm_daily_year_rate_site = tbls_pm_daily_year_comp %>%
-    mutate(
-            `Site ID` = gsub("-[0-9]+{2,2}$", "", unique2),
-            poc = as.integer(substr(unique2, 19, 20))) %>%
-    group_by(`Site ID`) %>%
-    filter(poc == min(poc)) %>%
-    ungroup() %>%
-    transmute(
-            `Site ID` = `Site ID`,
-            State = state,
-            `Measurement types` = methods,
-            `Start date` = `date_start`,
-            `End date` = `date_end`,
-            `Observation rate` = 100 * n_obs / n_req_yr,
-           `Missing rate` = ifelse(`Observation rate` > 100, 0, 100 * (n_req_yr - n_obs)/n_req_yr),
-           `Below MDL rate` = 100 * n_obs_below_mdl / n_obs,
-           `# Observations` = n_obs,
-           `# Required` = n_req_yr,
-           `# Below MDL` = n_obs_below_mdl,
-           long = long,
-           lat = lat
-           )
+tbls_pm_daily_year_rate_site <- tbls_pm_daily_year_comp %>%
+  mutate(
+    `Site ID` = gsub("-[0-9]+{2,2}$", "", unique2),
+    poc = as.integer(substr(unique2, 19, 20))
+  ) %>%
+  group_by(`Site ID`) %>%
+  filter(poc == min(poc)) %>%
+  ungroup() %>%
+  transmute(
+    `Site ID` = `Site ID`,
+    State = state,
+    `Measurement types` = methods,
+    `Start date` = `date_start`,
+    `End date` = `date_end`,
+    `Observation rate` = 100 * n_obs / n_req_yr,
+    `Missing rate` = ifelse(`Observation rate` > 100, 0, 100 * (n_req_yr - n_obs) / n_req_yr),
+    `Below MDL rate` = 100 * n_obs_below_mdl / n_obs,
+    `# Observations` = n_obs,
+    `# Required` = n_req_yr,
+    `# Below MDL` = n_obs_below_mdl,
+    long = long,
+    lat = lat
+  )
 
-sf_pm_daily_year_rate = tbls_pm_daily_year_rate %>%
-    sf::st_as_sf(coords = c("long", "lat"), crs = 4326)
-sf_pm_daily_year_rate_site = tbls_pm_daily_year_rate_site %>%
-    sf::st_as_sf(coords = c("long", "lat"), crs = 4326)
+sf_pm_daily_year_rate <- tbls_pm_daily_year_rate %>%
+  sf::st_as_sf(coords = c("long", "lat"), crs = 4326)
+sf_pm_daily_year_rate_site <- tbls_pm_daily_year_rate_site %>%
+  sf::st_as_sf(coords = c("long", "lat"), crs = 4326)
 
 
-mapview::mapview(states_nmons, 
-        layer.name = "States", 
-        col.regions = "#C0E0A0EE",
-        legend = FALSE) +
-    mapview::mapview(sf_pm_daily_year_rate, 
-        size = 0.75, 
-        layer.name = "Missing rate\nby monitors\n(PM_2.5, %)",
-        zcol = "Missing rate", 
-        at = seq(0, 100, 25),
-        col.regions = rev(scico::scico(n = 4, palette = "bilbao")), 
-        legend = TRUE) +
-    mapview::mapview(sf_pm_daily_year_rate_site, 
-        size = 0.75, 
-        layer.name = "Missing rate\nby sites\n(PM_2.5, %)",
-        zcol = "Missing rate", 
-        at = seq(0, 100, 25),
-        col.regions = scico::scico(n = 4, palette = "imola"), 
-        legend = TRUE)
+mapview::mapview(states_nmons,
+  layer.name = "States",
+  col.regions = "#C0E0A0EE",
+  legend = FALSE
+) +
+  mapview::mapview(sf_pm_daily_year_rate,
+    size = 0.75,
+    layer.name = "Missing rate\nby monitors\n(PM_2.5, %)",
+    zcol = "Missing rate",
+    at = seq(0, 100, 25),
+    col.regions = rev(scico::scico(n = 4, palette = "bilbao")),
+    legend = TRUE
+  ) +
+  mapview::mapview(sf_pm_daily_year_rate_site,
+    size = 0.75,
+    layer.name = "Missing rate\nby sites\n(PM_2.5, %)",
+    zcol = "Missing rate",
+    at = seq(0, 100, 25),
+    col.regions = scico::scico(n = 4, palette = "imola"),
+    legend = TRUE
+  )
 
 ## calculate missing rates from contextual information derived from the data:
-tbls_pm_frequency = 
-    tbls_pm_cleaned_qa %>%
-    tidytable::group_by(unique2, method_measure_samp) %>%
-    summarize(long = unique(long),
-              lat = unique(lat),
-              date_start = as.Date(min(date_local)),
-              date_end = as.Date(max(date_local)),
-              n_obs = n(),
-              intervals = paste(sort(unique(diff(as.Date(date_local)))), collapse = "|"),
-              interval_min = min(unique(diff(as.Date(date_local))), na.rm = T)) %>%
-    ungroup() %>%
-    mutate(n_schedule = (as.integer(date_end - date_start) %/% interval_min) + 1) %>%
-    as_tibble() %>%
-    dplyr::group_by(unique2) %>%
-    dplyr::summarize(long = unique(long),
-              lat = unique(lat),
-              date_start = min(date_start),
-              date_end = max(date_end),
-              n_obs = sum(n_obs),
-              n_schedule = sum(n_schedule),
-              r_missing_derived = 100 * (n_schedule - n_obs)/n_schedule) %>%
-    ungroup()
-
+tbls_pm_frequency <-
+  tbls_pm_cleaned_qa %>%
+  tidytable::group_by(unique2, method_measure_samp) %>%
+  summarize(
+    long = unique(long),
+    lat = unique(lat),
+    date_start = as.Date(min(date_local)),
+    date_end = as.Date(max(date_local)),
+    n_obs = n(),
+    intervals = paste(sort(unique(diff(as.Date(date_local)))), collapse = "|"),
+    interval_min = min(unique(diff(as.Date(date_local))), na.rm = T)
+  ) %>%
+  ungroup() %>%
+  mutate(n_schedule = (as.integer(date_end - date_start) %/% interval_min) + 1) %>%
+  as_tibble() %>%
+  dplyr::group_by(unique2) %>%
+  dplyr::summarize(
+    long = unique(long),
+    lat = unique(lat),
+    date_start = min(date_start),
+    date_end = max(date_end),
+    n_obs = sum(n_obs),
+    n_schedule = sum(n_schedule),
+    r_missing_derived = 100 * (n_schedule - n_obs) / n_schedule
+  ) %>%
+  ungroup()
 ```
 
 
@@ -957,47 +1011,55 @@ tbls_pm_frequency =
 ```{r left mappanel}
 #| layout: [[50, 50]]
 
-state_fips = read.csv("./data/state_fips.csv") %>%
-    mutate(FIPS = sprintf("%02d", FIPS))
+state_fips <- read.csv("./data/state_fips.csv") %>%
+  mutate(FIPS = sprintf("%02d", FIPS))
 
 # data definition
-sf_pm_daily_year_rate_site = as_tibble(tbls_pm_daily_year_rate) %>%
-    mutate(`Site ID` = gsub("-[0-9]+{2,2}$", "", `Monitor ID`)) %>%
-    dplyr::group_by(`Site ID`, State) %>%
-    dplyr::summarize(`Measurement types` = paste(`Measurement types`, collapse = "|"),
-              across(ends_with('rate'), list(~mean(., na.rm = TRUE))),
-              across(starts_with("#"), list(~sum(., na.rm = TRUE))),
-              long = unique(long), lat = unique(lat)) %>%
-    ungroup() %>%
-    as_tibble() %>%
-    sf::st_as_sf(coords = c("long", "lat"), crs = 4326)
+sf_pm_daily_year_rate_site <- as_tibble(tbls_pm_daily_year_rate) %>%
+  mutate(`Site ID` = gsub("-[0-9]+{2,2}$", "", `Monitor ID`)) %>%
+  dplyr::group_by(`Site ID`, State) %>%
+  dplyr::summarize(
+    `Measurement types` = paste(`Measurement types`, collapse = "|"),
+    across(ends_with("rate"), list(~ mean(., na.rm = TRUE))),
+    across(starts_with("#"), list(~ sum(., na.rm = TRUE))),
+    long = unique(long), lat = unique(lat)
+  ) %>%
+  ungroup() %>%
+  as_tibble() %>%
+  sf::st_as_sf(coords = c("long", "lat"), crs = 4326)
 
-tbls_pm_nest = as_tibble(tbls_pm_cleaned_qa) %>%
-    mutate(siteid = gsub("-[0-9]+{2,2}$", "", unique2)) %>%
-    mutate(date_local = as.Date(date_local),
-           method = factor(str_extract(method_measure_samp, '(gm|ba|lls|bbss)'),
-                        labels = lvs_pm),
-           method_linewidth = case_when(
-                        as.character(method) == "Gravimetric" ~ 0.5, 
-                        TRUE ~ 0.4)) %>%
-    as_tibble() %>%
-    dplyr::group_by(state, unique2, date_local) %>%
-    dplyr::summarize(siteid = unique(siteid),
-                     method_monitor = unique(method),
-                     method = paste(as.character(method), collapse = "|"),
-                     value = mean(value, na.rm = TRUE)) %>%
-    ungroup() %>%
-    mutate(state = substr(unique2, 1, 2)) %>%
-    dplyr::group_by(siteid) %>%
-    tidyr::nest()
+tbls_pm_nest <- as_tibble(tbls_pm_cleaned_qa) %>%
+  mutate(siteid = gsub("-[0-9]+{2,2}$", "", unique2)) %>%
+  mutate(
+    date_local = as.Date(date_local),
+    method = factor(str_extract(method_measure_samp, "(gm|ba|lls|bbss)"),
+      labels = lvs_pm
+    ),
+    method_linewidth = case_when(
+      as.character(method) == "Gravimetric" ~ 0.5,
+      TRUE ~ 0.4
+    )
+  ) %>%
+  as_tibble() %>%
+  dplyr::group_by(state, unique2, date_local) %>%
+  dplyr::summarize(
+    siteid = unique(siteid),
+    method_monitor = unique(method),
+    method = paste(as.character(method), collapse = "|"),
+    value = mean(value, na.rm = TRUE)
+  ) %>%
+  ungroup() %>%
+  mutate(state = substr(unique2, 1, 2)) %>%
+  dplyr::group_by(siteid) %>%
+  tidyr::nest()
 
-sf_pm_rate_packed = sf_pm_daily_year_rate_site %>%
-    mutate(siteid = `Site ID`) %>%
-    left_join(tbls_pm_nest, by = "siteid") %>%
-    st_as_sf(sf_column_name = "geometry")
+sf_pm_rate_packed <- sf_pm_daily_year_rate_site %>%
+  mutate(siteid = `Site ID`) %>%
+  left_join(tbls_pm_nest, by = "siteid") %>%
+  st_as_sf(sf_column_name = "geometry")
 
-fast_ggplotly = function(gplot_in) {
-    plotly::partial_bundle(plotly::toWebGL(plotly::ggplotly(gplot_in, tooltip = c("color"))))
+fast_ggplotly <- function(gplot_in) {
+  plotly::partial_bundle(plotly::toWebGL(plotly::ggplotly(gplot_in, tooltip = c("color"))))
 }
 
 
@@ -1008,44 +1070,42 @@ plotlyOutput(outputId = "p2")
 
 
 ```{r pm2.5 init}
+days_available_all <- length(unique(tbls_pm$date_local))
+days_available <- unique(tbls_pm$date_local)
+sites_available_all <- length(levels(tbls_pm$uniqueid))
 
+gen_gg_bars <- function(dat, targ_sort, targ_val, titletext, ytitle = targ_val, no_xtext = FALSE) {
+  # dat = dat %>%
+  #     mutate(!!sym(targ_sort) := factor(!!sym(targ_sort), levels = !!sym(targ_sort)[order(!!sym(targ_val), decreasing = TRUE)]))
+  dat[[targ_sort]] <- factor(dat[[targ_sort]], levels = dat[[targ_sort]][order(dat[[targ_val]], decreasing = TRUE)])
+  gg_in <-
+    ggplot(
+      data = dat,
+      mapping = aes(x = !!sym(targ_sort), y = !!sym(targ_val))
+    ) +
+    geom_col() +
+    labs(title = titletext) +
+    ylab(paste(ytitle, "(per cent)")) +
+    theme_minimal() +
+    theme(
+      axis.text.x = element_text(angle = 60, hjust = 1)
+    ) +
+    scico::scale_colour_scico()
 
-days_available_all = length(unique(tbls_pm$date_local))
-days_available = unique(tbls_pm$date_local)
-sites_available_all = length(levels(tbls_pm$uniqueid))
-
-gen_gg_bars = function(dat, targ_sort, targ_val, titletext, ytitle = targ_val, no_xtext = FALSE) {
-    # dat = dat %>% 
-    #     mutate(!!sym(targ_sort) := factor(!!sym(targ_sort), levels = !!sym(targ_sort)[order(!!sym(targ_val), decreasing = TRUE)]))
-    dat[[targ_sort]] = factor(dat[[targ_sort]], levels = dat[[targ_sort]][order(dat[[targ_val]], decreasing = TRUE)])
-    gg_in = 
-    ggplot(data = dat,
-            mapping = aes(x = !!sym(targ_sort), y = !!sym(targ_val))
-           ) +
-        geom_col() +
-        labs(title = titletext) +
-        ylab(paste(ytitle, "(per cent)")) +
-        theme_minimal() +
-        theme(
-            axis.text.x = element_text(angle = 60, hjust = 1)
-        ) +
-        scico::scale_colour_scico()
-    
-    if (no_xtext) {
-        gg_in = gg_in + 
-            theme(axis.text.x = element_blank())
-    }
-    gg_in
+  if (no_xtext) {
+    gg_in <- gg_in +
+      theme(axis.text.x = element_blank())
+  }
+  gg_in
 }
 
 
 # number of the days of the week for five years
-wdays_all = lubridate::wday(seq(as.Date("2018-01-01"), as.Date("2022-10-31"), 1))
+wdays_all <- lubridate::wday(seq(as.Date("2018-01-01"), as.Date("2022-10-31"), 1))
 ```
 
 
 ```{r plotly_geofacet (TODO), eval=F, include=F}
-
 # test plotly
 # tbls_pm_summary_pnts %>%
 #     group_by(state) %>%
@@ -1057,60 +1117,69 @@ wdays_all = lubridate::wday(seq(as.Date("2018-01-01"), as.Date("2022-10-31"), 1)
 # tbls_pm_summary_line %>%
 #     group_by(state) %>%
 #     do(
-#         p = plot_ly(., 
+#         p = plot_ly(.,
 #         color = ~method, type = "scatter", legendgroup = ~state) %>%
-#             add_segments(x = ~date_start, xend = ~date_end, y = ~uniqueid, yend = ~uniqueid, showlegend = F) %>% 
+#             add_segments(x = ~date_start, xend = ~date_end, y = ~uniqueid, yend = ~uniqueid, showlegend = F) %>%
 #             layout(yaxis = list(showticklabels = FALSE))) %>%
 #     subplot(nrows = 7, shareX = TRUE, shareY = FALSE)
 
 ## function: geo_facet_ly
-geo_facet_ly = function(data, grid_df) {
-    # ... data munging
-    # ... TODO: how to pass the symbol after tilde
-    # ... TODO: derive a full grid from the input grid, identify null positions
-    # ... TODO: fill plotly_empty() at null positions, 
-    # ... TODO: how to connect do(plot_ly(...)) and subplot 
-    # ... Maybe there are two approaches for geofacet_plot_ly
-    # ...    stack subplots
-    # ...    directly leverage group_by and do(plot_ly(...)) plus layout
+geo_facet_ly <- function(data, grid_df) {
+  # ... data munging
+  # ... TODO: how to pass the symbol after tilde
+  # ... TODO: derive a full grid from the input grid, identify null positions
+  # ... TODO: fill plotly_empty() at null positions,
+  # ... TODO: how to connect do(plot_ly(...)) and subplot
+  # ... Maybe there are two approaches for geofacet_plot_ly
+  # ...    stack subplots
+  # ...    directly leverage group_by and do(plot_ly(...)) plus layout
 }
 
 
 ## Define plot arrangement (input order)
 
 ## read grid ref.
-conus_yr = seq(1, max(us_conus_grid$row))
-conus_xr = seq(1, max(us_conus_grid$col))
-conus_xyr_full = expand.grid(row = conus_yr, col = conus_xr)
-conus_null_idx = setdiff(conus_xyr_full, us_conus_grid[,1:2]) %>%
-    mutate(nullplot = 1)
-us_conus_grid_bare = bind_rows(us_conus_grid, conus_null_idx) %>%
-    mutate(lst_idx = (row-1) * 12 + col)
+conus_yr <- seq(1, max(us_conus_grid$row))
+conus_xr <- seq(1, max(us_conus_grid$col))
+conus_xyr_full <- expand.grid(row = conus_yr, col = conus_xr)
+conus_null_idx <- setdiff(conus_xyr_full, us_conus_grid[, 1:2]) %>%
+  mutate(nullplot = 1)
+us_conus_grid_bare <- bind_rows(us_conus_grid, conus_null_idx) %>%
+  mutate(lst_idx = (row - 1) * 12 + col)
 
-blankdf = data.frame(state=NA,method=NA,date_start="2020-01-01",date_end="2020-01-01",unique2=100000)
-plot_empty <- plotly_empty() %>% layout(plot_bgcolor = "rgba(0,0,0,0)",
-                       paper_bgcolor = "rgba(0,0,0,0)")
+blankdf <- data.frame(state = NA, method = NA, date_start = "2020-01-01", date_end = "2020-01-01", unique2 = 100000)
+plot_empty <- plotly_empty() %>% layout(
+  plot_bgcolor = "rgba(0,0,0,0)",
+  paper_bgcolor = "rgba(0,0,0,0)"
+)
 
-plotly_us_conus_facet = 
-    us_conus_grid_bare %>%
-    split(., .$lst_idx) %>%
-    lapply(function(x) {
-        if (!is.na(x$nullplot)) {
-            plot_empty
-            } else {
-            tbls_pm_summary %>%
-                filter(state == x$name) %>%
-                # plot_ly(color = ~method, legendgroup = ~state, showlegend = F) %>% 
-                plot_ly(color = ~method, showlegend = F) %>% 
-                add_segments(x = ~date_start, y = ~unique2, xend = ~date_end_line, yend = ~unique2,
-                             hovertemplate = "Monitor: %{y}",
-                             hoverinfo = 'y') %>%
-                layout(yaxis = list(showticklabels = FALSE),
-                       xaxis = list(title=""),
-                       annotations = list(orientation = "h", align = "left", x=0.5, y = 1.05, 
-                       text = I(unique(x$name)), showarrow = F, xref='paper', yref='paper'))
-        }}) %>%
-    subplot(nrows = 7, shareX = T, shareY = F, margin = 0.01)
+plotly_us_conus_facet <-
+  us_conus_grid_bare %>%
+  split(., .$lst_idx) %>%
+  lapply(function(x) {
+    if (!is.na(x$nullplot)) {
+      plot_empty
+    } else {
+      tbls_pm_summary %>%
+        filter(state == x$name) %>%
+        # plot_ly(color = ~method, legendgroup = ~state, showlegend = F) %>%
+        plot_ly(color = ~method, showlegend = F) %>%
+        add_segments(
+          x = ~date_start, y = ~unique2, xend = ~date_end_line, yend = ~unique2,
+          hovertemplate = "Monitor: %{y}",
+          hoverinfo = "y"
+        ) %>%
+        layout(
+          yaxis = list(showticklabels = FALSE),
+          xaxis = list(title = ""),
+          annotations = list(
+            orientation = "h", align = "left", x = 0.5, y = 1.05,
+            text = I(unique(x$name)), showarrow = F, xref = "paper", yref = "paper"
+          )
+        )
+    }
+  }) %>%
+  subplot(nrows = 7, shareX = T, shareY = F, margin = 0.01)
 
 plotly_us_conus_facet
 ```
@@ -1122,7 +1191,7 @@ plotly_us_conus_facet
 p_load(gstat, spacetime, autoSTK, sftime)
 
 # build stf
-#stf_pm_cleaned_qa = tbls_pm_cleaned_qa %>%
+# stf_pm_cleaned_qa = tbls_pm_cleaned_qa %>%
 #    mutate(siteid = gsub("-[0-9]+{2,2}$", "", unique2)) %>%
 #    group_by(siteid) %>%
 #    filter(poc == min(poc)) %>%
@@ -1135,22 +1204,20 @@ p_load(gstat, spacetime, autoSTK, sftime)
 #    as(object = ., "STFDF")
 # saveRDS(stf_pm_cleaned_qa, file = "./data/STFDF_pm25_site.rds")
 # stf_pm_cleaned_qa = readRDS("./data/STFDF_pm25.rds")
-# stv_pm = 
+# stv_pm =
 # autoSTK::autofitVariogramST(stf = stf_pm_cleaned_qa, formula = value ~ 1,
 #                             tlags = 0:14, cutoff = 500000, width = 25000, cores = 10)
 # saveRDS(stv_pm, file = "./data/STVariogram_pm25_site.rds")
-stv_pm = readRDS(file = "./data/STVariogram_pm25_site.rds")
+stv_pm <- readRDS(file = "./data/STVariogram_pm25_site.rds")
 
 cat("Figures below are based on minimum-POC site PM2.5 values.\n")
-plot(stv_pm$empSTV, wireframe = TRUE,  main = "Empirical spatiotemporal semivariogram\n(Timelags=0-14 days, distance=0-500 km [25 km interval])")
-stv_pm_fit = variogramSurface(stv_pm$jointSTV, stv_pm$empSTV[, c("timelag", "spacelag")])
-stv_pm_mod = stv_pm$empSTV
-stv_pm_mod$gamma = stv_pm_fit$gamma
-plot(stv_pm_mod, wireframe = TRUE,  main = "Modeled spatiotemporal semivariogram\n(Timelags=0-14 days, distance=0-500 km [25 km interval])")
+plot(stv_pm$empSTV, wireframe = TRUE, main = "Empirical spatiotemporal semivariogram\n(Timelags=0-14 days, distance=0-500 km [25 km interval])")
+stv_pm_fit <- variogramSurface(stv_pm$jointSTV, stv_pm$empSTV[, c("timelag", "spacelag")])
+stv_pm_mod <- stv_pm$empSTV
+stv_pm_mod$gamma <- stv_pm_fit$gamma
+plot(stv_pm_mod, wireframe = TRUE, main = "Modeled spatiotemporal semivariogram\n(Timelags=0-14 days, distance=0-500 km [25 km interval])")
 cat("Modeled STVariogram parameters:\n")
 print(stv_pm$jointSTV)
-
-
 ```
 
 :::
@@ -1158,67 +1225,77 @@ print(stv_pm$jointSTV)
 ```{r}
 #| context: server
 
-sites = sf::read_sf( 
-        "./data/SharedData_sf.gpkg")
-sites_m = sf::read_sf("./data/Site_missingrate.gpkg")
+sites <- sf::read_sf(
+  "./data/SharedData_sf.gpkg"
+)
+sites_m <- sf::read_sf("./data/Site_missingrate.gpkg")
 
-tbls_pm_nest = arrow::read_parquet("./data/SharedLongData.parquet")
-states_nmons = sf::read_sf("./data/States_NMonitors.gpkg")
+tbls_pm_nest <- arrow::read_parquet("./data/SharedLongData.parquet")
+states_nmons <- sf::read_sf("./data/States_NMonitors.gpkg")
 
 
-sites_combined = sites
+sites_combined <- sites
 options(warn = -1)
-fast_ggplotly = function(gplot_in) {
-        plotly::partial_bundle(plotly::toWebGL(plotly::ggplotly(gplot_in, tooltip = c("color"))))
-    }
+fast_ggplotly <- function(gplot_in) {
+  plotly::partial_bundle(plotly::toWebGL(plotly::ggplotly(gplot_in, tooltip = c("color"))))
+}
 
 
-output$p1 = renderPlotly({
-    ggx = plotly::ggplotly({
-        ggplot() +
-            geom_sf(data = states_nmons, fill = 'beige', color = "black", alpha = 0.5) +
-            geom_sf(data = sites_m, mapping = aes(color = `Missing rate`, customdata = `Site ID`)) +
-            theme_bw() +
-            theme(legend.title = element_blank(),
-                  legend.text = element_text(size = 7),
-                  axis.text = element_text(size = 6),
-                  rect = element_rect(color = 'transparent')) +
-            scico::scale_color_scico(begin = 1, end = 0, name = "Missing\nrate (%)")
-    }) 
-    ggx %>%
-        layout(dragmode = "select") %>%
-        event_register("plotly_brushing")   
+output$p1 <- renderPlotly({
+  ggx <- plotly::ggplotly({
+    ggplot() +
+      geom_sf(data = states_nmons, fill = "beige", color = "black", alpha = 0.5) +
+      geom_sf(data = sites_m, mapping = aes(color = `Missing rate`, customdata = `Site ID`)) +
+      theme_bw() +
+      theme(
+        legend.title = element_blank(),
+        legend.text = element_text(size = 7),
+        axis.text = element_text(size = 6),
+        rect = element_rect(color = "transparent")
+      ) +
+      scico::scale_color_scico(begin = 1, end = 0, name = "Missing\nrate (%)")
+  })
+  ggx %>%
+    layout(dragmode = "select") %>%
+    event_register("plotly_brushing")
 })
 
-output$p2 = renderPlotly({
-    res_data = event_data("plotly_selected")
-    if (is.null(res_data)) {print("Selected sites data will appear here (drag to select)\n" )}
-    else { 
-        subdata = tbls_pm_nest %>% dplyr::filter(siteid %in% res_data$customdata) %>%
-            mutate(label = paste("Monitor: ", unique2, "\nPM2.5: ", value, sep = ""))
-        target_fullts = unique(subdata$date_local)
-        target_fullts = seq(as.Date(target_fullts[1]), as.Date(target_fullts[which.max(target_fullts)]), 1)
-        target_fulldf = expand.grid(unique2 = unique(subdata$unique2), date_local = target_fullts)
-        target_full = left_join(target_fulldf, subdata, by = c("unique2", "date_local"))
-        target_fulltype = unique(subdata$method_monitor)
+output$p2 <- renderPlotly({
+  res_data <- event_data("plotly_selected")
+  if (is.null(res_data)) {
+    print("Selected sites data will appear here (drag to select)\n")
+  } else {
+    subdata <- tbls_pm_nest %>%
+      dplyr::filter(siteid %in% res_data$customdata) %>%
+      mutate(label = paste("Monitor: ", unique2, "\nPM2.5: ", value, sep = ""))
+    target_fullts <- unique(subdata$date_local)
+    target_fullts <- seq(as.Date(target_fullts[1]), as.Date(target_fullts[which.max(target_fullts)]), 1)
+    target_fulldf <- expand.grid(unique2 = unique(subdata$unique2), date_local = target_fullts)
+    target_full <- left_join(target_fulldf, subdata, by = c("unique2", "date_local"))
+    target_fulltype <- unique(subdata$method_monitor)
 
-        ggt = ggplot(data = target_full,
-                     mapping = aes(x = date_local, y = value, color = method_monitor, group = unique2)) +
-            geom_line(linewidth = 0.22) +
-            geom_point(pch = 19, cex = 0.1) +
-            labs(x = "Date", y = "PM2.5") +
-            theme_bw() +
-            ggthemes::scale_color_tableau(limits = target_fulltype) +
-            theme(
-              legend.key.width = unit(0.4, 'in'),
-              legend.text = element_text(size = 7),
-              legend.position = "bottom",
-              legend.background = element_rect(fill = "transparent")) +
-            guides(color = guide_legend(override.aes = list(linewidth = unit(0.5, 'cm'))),
-               linewidth = "none")
-        plotly::ggplotly(ggt) %>%
-            layout(legend = list(x = 0.03, y = 0.9, title = list(text = "")))
-    }
+    ggt <- ggplot(
+      data = target_full,
+      mapping = aes(x = date_local, y = value, color = method_monitor, group = unique2)
+    ) +
+      geom_line(linewidth = 0.22) +
+      geom_point(pch = 19, cex = 0.1) +
+      labs(x = "Date", y = "PM2.5") +
+      theme_bw() +
+      ggthemes::scale_color_tableau(limits = target_fulltype) +
+      theme(
+        legend.key.width = unit(0.4, "in"),
+        legend.text = element_text(size = 7),
+        legend.position = "bottom",
+        legend.background = element_rect(fill = "transparent")
+      ) +
+      guides(
+        color = guide_legend(override.aes = list(linewidth = unit(0.5, "cm"))),
+        linewidth = "none"
+      )
+    plotly::ggplotly(ggt) %>%
+      layout(legend = list(x = 0.03, y = 0.9, title = list(text = "")))
+  }
 })
 
 
@@ -1226,7 +1303,7 @@ output$p2 = renderPlotly({
 # output$p2 = renderDygraph({
 #     res_data = event_data("plotly_selected")
 #     if (is.null(res_data)) {print("Selected sites data will appear here (drag to select)\n" )}
-#     else { 
+#     else {
 #         subdata = tbls_pm_nest %>% dplyr::filter(siteid %in% res_data$customdata)
 #         target_fullts = unique(subdata$date_local)
 #         target_fullts = seq(as.Date(target_fullts[1]), as.Date(target_fullts[which.max(target_fullts)]))
@@ -1244,9 +1321,8 @@ output$p2 = renderPlotly({
 #     res_data
 # })
 
-## shiny errormessage when the chosen features are larger than 50 
+## shiny errormessage when the chosen features are larger than 50
 ## select map points
 ## site-based approach
-
 ```
 

@@ -2,61 +2,58 @@
 #' @description
 #' @title testing subsuite for the meta learner model
 #' unit testing: is the model output netcdf?
-#' 
+#'
 #'
 
-<<<<<<< HEAD
-test_that("the meta learner output is netcdf", {
-=======
-test_that("the meta learner fitting", {
 
-  skip()  
+test_that("the meta learner fitting", {
+  skip()
   aqs_sftime <- sf::st_read("../testdata/aqs-test-data.gpkg") |>
     sftime::st_as_sftime()
-  
+
   # Test data
   response <- aqs_sftime$Arithmetic.Mean
-  kfolds = sample(rep(1:2, length.out = length(response)))
-  predictor.list <- list(runif(length(response),min = 1,max = 10),
-                         rnorm(length(response)))
-  names(predictor.list) <- c("var1","var2")
+  kfolds <- sample(rep(1:2, length.out = length(response)))
+  predictor.list <- list(
+    runif(length(response), min = 1, max = 10),
+    rnorm(length(response))
+  )
+  names(predictor.list) <- c("var1", "var2")
 
-  #Fit learner
-  meta.learner.output <- meta_learner_fit(base_predictor_list = predictor.list,
-    kfolds = kfolds, y = response) 
-  
+  # Fit learner
+  meta.learner.output <- meta_learner_fit(
+    base_predictor_list = predictor.list,
+    kfolds = kfolds, y = response
+  )
+
   # the test is running on the object named "output"
-  expect_type(meta.learner.output, 'list')
+  expect_type(meta.learner.output, "list")
 })
 
 
 
 test_that("the meta learner output is netcdf", {
   skip()
->>>>>>> d2788fbbb5ad5baa3e23a555b5256460dd82b806
   withr::local_package("ncdf4")
   withr::local_package("RNetCDF")
   withr::local_package("BART")
-  
+
   aqs_sftime <- sf::st_read("../testdata/aqs-test-data.gpkg") |>
     sftime::st_as_sftime()
-  
+
   # Test data
   response <- aqs_sftime$Arithmetic.Mean
-  covariate <- matrix(data = rnorm(length(response)*3),ncol = 3) 
+  covariate <- matrix(data = rnorm(length(response) * 3), ncol = 3)
 
   locs <- runif(length(response))
-  
+
   # generate simple BART object
   bart.obj <- mc.wbart(covariate, response)
-  
+
   # Call the meta learner prediction function
-  model.output <- meta_learner_predict(bart.obj,locs)
-  
+  model.output <- meta_learner_predict(bart.obj, locs)
+
   # the test is running on the object named "output"
-<<<<<<< HEAD
-  expect_is(model.output, 'ncdf4')
-=======
   expect_type(model.output, 'ncdf4')
->>>>>>> d2788fbbb5ad5baa3e23a555b5256460dd82b806
 })
+
