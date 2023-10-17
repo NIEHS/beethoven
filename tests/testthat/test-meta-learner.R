@@ -25,7 +25,7 @@ test_that("the meta learner fitting", {
 
   # test the output of the metalearner is a list
   expect_type(meta_learner_output, "list")
-  
+
   # test that it throws an error when base learners are different length
   predictor_list <- list(
     runif(length(response), min = 1, max = 10),
@@ -39,7 +39,7 @@ test_that("the meta learner fitting", {
     kfolds = kfolds, y = response
   ), "Error in meta_learner_fit: 
          Base predictors need to be the same length")
-  
+
 })
 
 
