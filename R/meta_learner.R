@@ -35,7 +35,7 @@ meta_learner_fit <- function(base_predictor_list,
     meta_fit_obj[[i]] <- BART::mc.wbart(x.train = x_tr,
                                         y.train = y_tr,
                                         x.test = x_te)
-    }
+  }
   return(meta_fit_obj)
 }
 
