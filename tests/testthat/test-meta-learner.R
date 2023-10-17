@@ -5,7 +5,7 @@
 #'
 
 
-test_that("the meta learner fitting", {
+test_that("the meta learner fitting abides", {
 
   # Test data
   response <- 3 + rnorm(100)
@@ -23,8 +23,20 @@ test_that("the meta learner fitting", {
     kfolds = kfolds, y = response
   )
 
-  # test the output of the metalearner is a list
+  # test the output of the meta-learner fit is a list
   expect_type(meta_learner_output, "list")
+
+  # test that the meta-learner fit test-mean does not produce NA
+  expect_true(sum(is.na(meta_learner_output[[1]]$yhat.test.mean)) == 0)
+
+  # test that the meta-learner fit test does not produce NA
+  expect_true(sum(is.na(meta_learner_output[[1]]$yhat.test)) == 0)
+
+  # test that the meta-learner fit train-mean does not produce NA
+  expect_true(sum(is.na(meta_learner_output[[1]]$yhat.train.mean)) == 0)
+
+  # test that the meta-learner fit train set does not produce NA
+  expect_true(sum(is.na(meta_learner_output[[1]]$yhat.train)) == 0)
 
   # test that it throws an error when base learners are different length
   predictor_list <- list(
@@ -44,7 +56,7 @@ test_that("the meta learner fitting", {
 
 
 
-test_that("the meta learner output is netcdf", {
+test_that("the meta learner prediction abides", {
   skip()
   withr::local_package("ncdf4")
   withr::local_package("RNetCDF")
