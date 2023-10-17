@@ -1,25 +1,21 @@
-#' @author Ranadeep Daw and Eva Marques and Kyle Messier
+#' @author SETgroup
 #' @description
-#' @title testing subsuite for the meta learner model
-#' unit testing: is the model output netcdf?
+#' @title meta learner unit test
 #'
 #'
 
 
 test_that("the meta learner fitting", {
 
-  skip()
-  aqs_sftime <- sf::st_read("../testdata/aqs-test-data.gpkg") |>
-    sftime::st_as_sftime()
-
   # Test data
-  response <- aqs_sftime$Arithmetic.Mean
-  kfolds <- sample(rep(1:2, length.out = length(response)))
+  response <- 3 + rnorm(100)
+  kfolds <- sample(rep(1:5, length.out = length(response)))
   predictor_list <- list(
     runif(length(response), min = 1, max = 10),
+    rnorm(length(response)),
     rnorm(length(response))
   )
-  names(predictor_list) <- c("var1", "var2")
+  names(predictor_list) <- c("var1", "var2", "var3")
 
   # Fit learner
   meta_learner_output <- meta_learner_fit(
@@ -27,8 +23,23 @@ test_that("the meta learner fitting", {
     kfolds = kfolds, y = response
   )
 
-  # the test is running on the object named "output"
+  # test the output of the metalearner is a list
   expect_type(meta_learner_output, "list")
+  
+  # test that it throws an error when base learners are different length
+  predictor_list <- list(
+    runif(length(response), min = 1, max = 10),
+    rnorm(length(response) - 1),
+    rnorm(length(response))
+  )
+  names(predictor_list) <- c("var1", "var2", "var3")
+
+  expect_error(meta_learner_fit(
+    base_predictor_list = predictor_list,
+    kfolds = kfolds, y = response
+  ), "Error in meta_learner_fit: 
+         Base predictors need to be the same length")
+  
 })
 
 

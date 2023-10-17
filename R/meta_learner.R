@@ -16,7 +16,8 @@ meta_learner_fit <- function(base_predictor_list,
   # check lengths of each base predictor #add a test for names
   if (sapply(base_predictor_list, length, simplify = TRUE) |>
         stats::var() != 0) {
-    print("WARNING: base predictors need to be the same length")
+    stop("Error in meta_learner_fit: 
+         Base predictors need to be the same length")
   }
   # convert list to data.frame
   x_design <- as.data.frame(base_predictor_list)
@@ -27,11 +28,14 @@ meta_learner_fit <- function(base_predictor_list,
   meta_fit_obj <- vector(mode = "list", length = nk)
   for (i in 1:nk) {
     # get the training and test sets
-    x_tr <- x_design[i != nk, ]
-    x_te <- x_design[i == nk, ]
-    y_tr <- y[i != nk]
+    x_tr <- x_design[kfolds != i, ]
+    x_te <- x_design[kfolds == i, ]
+    y_tr <- y[kfolds != i]
     # Fit the BART model
-    meta_fit_obj[[i]] <- BART::mc.wbart(x_tr, y_tr, x.test = x_te)
+    meta_fit_obj[[i]] <- BART::mc.wbart(x.train = x_tr,
+                                        y.train = y_tr,
+                                        x.test = x_te,
+                                        rho = 3)
   }
   return(meta_fit_obj)
 }
