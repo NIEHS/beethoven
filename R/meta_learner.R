@@ -42,35 +42,27 @@ meta_learner_fit <- function(base_predictor_list,
 
 
 #' meta_learner_predict - take the list of BART fit objects and prediction
-#' location info to create meta_learner predictions
+#' location info to create meta_learner predictions. NOTE that the BART 
+#' meta learner is not explicitly a spatiotemporal model. The S-T comes in 
+#' from the covariate being S-T based
 #'
 #' @param meta_fit_obj list of BART objects from meta_learner_fit
-#' @param pred_loc sf or dataframe grid of prediction locations
+#' @param cov_pred dataframe of covariates at prediction locations
+#' @param pred_rast The terra rast file for the cov_pred locations. If it is 
+#' not NULL, then the predictions willl be returned as a NetCDF (nc). If
+#' NULL, then the predictions will be return as a dataframe
 #' @return meta_pred_nc NetCDF (nc) file of the final meta learner predictions
 #' @export
 #'
 #' @examples NULL
-meta_learner_predict <- function(meta_fit_obj, pred_loc) {
+meta_learner_predict <- function(meta_fit_obj, cov_pred, pred_rast = NULL) {
+  
   # Use the predict method
-  meta_pred_vec <- predict(meta_fit_obj, new = pred_loc)
-  # Call the vec2nc function to create a NetCDF (nc) file from the
-  # vector predictions
-  meta_pred_nc <- vec2nc(meta_pred_vec)
-  return(meta_pred_nc)
-}
-
-
-#' vec2nc takes a vector or matrix of predictions, some spatial information,
-#' and create a NetCDF
-#' @param pred_vec vector/matrix of predictions
-#' @param pred_bbox an sf bounding box defining the domain of the NetCDF
-#' @param field_names vector of field names for each layer in the NetCDF
-#' @return nc_out a NetCDF file
-#' @export
-#'
-#' @examples NULL
-vec2nc <- function(pred_vec, pred_bbox, field_names) {
-  nc_out <- pred_vec + pred_bbox
-  names(nc_out) <- field_names
-  return(nc_out)
+  meta_pred_vec <- predict(meta_fit_obj, new = cov_pred)
+  
+  # If the output is to be a netCDF (nc file)
+  # Create a terra::rast file
+  meta_pred <- terra::rast(pred_loc)
+  sf::crs(meta_pred_nc) <- crs
+  return(meta_pred)
 }

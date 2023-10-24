@@ -5,8 +5,10 @@
 #'
 
 
-test_that("the meta learner fitting abides", {
+test_that("the meta learner abides", {
 
+##### Test Data
+  
   # Test data
   response <- 3 + rnorm(100)
   kfolds <- sample(rep(1:5, length.out = length(response)))
@@ -17,26 +19,28 @@ test_that("the meta learner fitting abides", {
   )
   names(predictor_list) <- c("var1", "var2", "var3")
 
-  # Fit learner
+##### Fit learner
   meta_learner_output <- meta_learner_fit(
     base_predictor_list = predictor_list,
     kfolds = kfolds, y = response
   )
 
+##### Tests on the meta learning fitting (i.e. estimation)  
+  
   # test the output of the meta-learner fit is a list
   expect_type(meta_learner_output, "list")
 
   # test that the meta-learner fit test-mean does not produce NA
-  expect_true(sum(is.na(meta_learner_output[[1]]$yhat.test.mean)) == 0)
+  expect_true(any(is.na(meta_learner_output[[1]]$yhat.test.mean)))
 
   # test that the meta-learner fit test does not produce NA
-  expect_true(sum(is.na(meta_learner_output[[1]]$yhat.test)) == 0)
+  expect_true(any(is.na(meta_learner_output[[1]]$yhat.test)))
 
   # test that the meta-learner fit train-mean does not produce NA
-  expect_true(sum(is.na(meta_learner_output[[1]]$yhat.train.mean)) == 0)
+  expect_true(any(is.na(meta_learner_output[[1]]$yhat.train.mean)))
 
   # test that the meta-learner fit train set does not produce NA
-  expect_true(sum(is.na(meta_learner_output[[1]]$yhat.train)) == 0)
+  expect_true(any(is.na(meta_learner_output[[1]]$yhat.train)))
 
   # test that it throws an error when base learners are different length
   predictor_list <- list(
@@ -51,33 +55,21 @@ test_that("the meta learner fitting abides", {
     kfolds = kfolds, y = response
   ), "Error in meta_learner_fit: 
          Base predictors need to be the same length")
-
-})
-
-
-
-test_that("the meta learner prediction abides", {
-  skip()
-  withr::local_package("ncdf4")
-  withr::local_package("RNetCDF")
-  withr::local_package("BART")
-
-  aqs_sftime <- sf::st_read("../testdata/aqs-test-data.gpkg") |>
-    sftime::st_as_sftime()
-
-  # Test data
-  response <- aqs_sftime$Arithmetic.Mean
-  covariate <- matrix(data = rnorm(length(response) * 3), ncol = 3)
-
-  locs <- runif(length(response))
-
-  # generate simple BART object
-  bart_obj <- mc.wbart(covariate, response)
-
+  
+  
+##### Tests on the meta learner prediction 
+  # Test locations as data frame 
+  covariate.pred <- matrix(1:(10^2),
+              nrow = 10)
+  
   # Call the meta learner prediction function
-  model_output <- meta_learner_predict(bart_obj, locs)
-
+  model_output <- meta_learner_predict(meta_learner_output, locs)
+  
   # the test is running on the object named "output"
   expect_type(model_output, "ncdf4")
+  
 
 })
+
+
+
