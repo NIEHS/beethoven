@@ -1,0 +1,135 @@
+################################################################################
+# Date created: 2023-10-24
+# Packages required: none
+################################################################################
+
+################################################################################
+#' download_gmted_data: download global elevation data from the Global Multi-
+#' resolution Terrain Elevation Data (GMTED2010).
+#' @description
+#' The `download_gmted_data()` download Global Multi-resolution Terrain
+#' Elevation Data (GMTED2010) from 
+#' [U.S. Geological Survey and National Geospatial-Intelligence Agency]
+#' (https://www.usgs.gov/coastal-changes-and-impacts/gmted2010).
+#' @param statistic character(1). Available statistics include "Breakline
+#' Emphasis", "Systematic Subsample", "Median Statistic", "Minimum Statistic",
+#' "Mean Statistic", "Maximum Statistic", and "Standard Deviation Statistic".
+#' @param resolution character(1). Available resolutions include "7.5 arc-
+#' seconds", "15 arc-seconds", and "30 arc-seconds".
+#' @param directory_to_download character(1). Directory to download zip files
+#' from Global Multi-resolution Terrain Elevation Data (GMTED2010).
+#' @param directory_to_save character(1). Directory to decompress zip files.
+#' @param data_download_acknowledgement logical(1). By setting `= TRUE` the
+#' user acknowledge that the data downloaded using this function may be very
+#' large and use lots of machine storage and memory.
+#' @param remove_download logical(1). Remove download files in
+#' directory_to_download.
+#' @author Mitchell Manware
+#' @return NULL;
+#' @export
+download_gmted_data <- function(
+  statistic = NULL,
+  resolution = NULL,
+  directory_to_download = "./input/gmted2010/raw/",
+  directory_to_save = "./input/gmted2010/raw/",
+  data_download_acknowledgement = FALSE,
+  remove_download = FALSE
+) {
+  #### 1. directory setup
+  chars_dir_download <- nchar(directory_to_download)
+  chars_dir_save <- nchar(directory_to_save)
+  if (substr(directory_to_download,
+             chars_dir_download,
+             chars_dir_download) != "/") {
+    directory_to_download <- paste(directory_to_download,
+                                   "/",
+                                   sep = "")
+  }
+  if (substr(directory_to_save, chars_dir_save, chars_dir_save) != "/") {
+    directory_to_save <- paste(directory_to_save, "/", sep = "")
+  }
+  #### 2. check for data download acknowledgement
+  if (data_download_acknowledgement == FALSE) {
+    cat(paste0("Data download acknowledgement is set to FALSE.",
+               "Please acknowledge that the data downloaded using this",
+               "function may be very large and use lots of machine storage",
+               "and memory."))
+    stop()
+  }
+  #### 3. check for statistic
+  if (is.null(statistic) == TRUE) {
+    cat(paste0("Please select a GMTED2010 statistic.\n"))
+    stop()
+  }
+  #### 4. check for valid statistic
+  valid_statistics <- c("Breakline Emphasis", "Systematic Subsample",
+                        "Median Statistic", "Minimum Statistic",
+                        "Mean Statistic", "Maximum Statistic",
+                        "Standard Deviation Statistic")
+  if (!(statistic %in% valid_statistics)) {
+    cat(paste0("Requested statistic is not recognized.\n"))
+    stop()
+  }
+  #### 5. check for resolution
+  if (is.null(resolution) == TRUE) {
+    cat(paste0("Please select a data resolution.\n"))
+    stop()
+  }
+  #### 6. check for valid resolution
+  valid_resolutions <- c("7.5 arc-seconds", "15 arc-seconds", "30 arc-seconds")
+  if (!(resolution %in% valid_resolutions)) {
+    cat(paste0("Requested resolution is not recognized.\n"))
+    stop()
+  }
+  #### 7. define URL base
+  base <- paste0("https://edcintl.cr.usgs.gov/downloads/sciweb1/shared/topo",
+                 "/downloads/GMTED/Grid_ZipFiles/")
+  #### 8. define URL statistic code
+  statistics <- c("Breakline Emphasis", "Systematic Subsample",
+                  "Median Statistic", "Minimum Statistic",
+                  "Mean Statistic", "Maximum Statistic",
+                  "Standard Deviation Statistic")
+  statistic_codes <- c("be", "ds", "md", "mi", "mn", "mx", "sd")
+  statistic_codes <- cbind(statistics, statistic_codes)
+  statistic_code <- subset(statistic_codes, statistics == statistic)[2]
+  #### 9. define URL resolution code
+  resolutions <- c("7.5 arc-seconds", "15 arc-seconds", "30 arc-seconds")
+  resolution_codes <- c("75", "15", "30")
+  resolution_codes <- cbind(resolutions, resolution_codes)
+  resolution_code <- subset(resolution_codes, resolutions == resolution)[2]
+  #### 10. build url
+  download_url <- paste0(base,
+                         statistic_code,
+                         resolution_code,
+                         "_grd.zip")
+  #### 11. build download file name
+  download_name <- paste0(directory_to_download,
+                          "gmted2010_",
+                          statistic_code,
+                          resolution_code,
+                          "_grd.zip")
+  #### 12. build system command
+  system_command <- paste0("curl -s -o ",
+                           download_name,
+                           " --url ",
+                           download_url)
+  #### 13. download data
+  cat(paste0("Downloading requested file...\n"))
+  system(command = system_command)
+  Sys.sleep(5L)
+  cat(paste0("Requested file downloaded.\n"))
+  #### 14. unzip downlaoded data
+  cat(paste0("Unzipping files...\n"))
+  unzip(download_name,
+        exdir = directory_to_save)
+  cat(paste0("Files unzipped and saved in ",
+             directory_to_save,
+             ".\n"))
+  #### 15. remove zip files
+  if (remove_download == TRUE) {
+    cat(paste0("Removing download files...\n"))
+    file.remove(download_name)
+    cat(paste0("Download files removed.\n"))
+  }
+}
+  
