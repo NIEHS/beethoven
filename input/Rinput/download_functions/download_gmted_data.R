@@ -8,7 +8,7 @@
 #' resolution Terrain Elevation Data (GMTED2010).
 #' @description
 #' The `download_gmted_data()` download Global Multi-resolution Terrain
-#' Elevation Data (GMTED2010) from 
+#' Elevation Data (GMTED2010) from
 #' [U.S. Geological Survey and National Geospatial-Intelligence Agency]
 #' (https://www.usgs.gov/coastal-changes-and-impacts/gmted2010).
 #' @param statistic character(1). Available statistics include "Breakline
@@ -132,4 +132,3 @@ download_gmted_data <- function(
     cat(paste0("Download files removed.\n"))
   }
 }
-  
