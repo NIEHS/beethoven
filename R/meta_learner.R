@@ -42,14 +42,14 @@ meta_learner_fit <- function(base_predictor_list,
 
 
 #' meta_learner_predict - take the list of BART fit objects and prediction
-#' location info to create meta_learner predictions. The BART 
-#' meta learner is not explicitly a S-T model, but the input covariates are 
-#' S-T based. Therefore, the cov_pred input should be either an sf::sf-point or 
+#' location info to create meta_learner predictions. The BART
+#' meta learner is not explicitly a S-T model, but the input covariates are
+#' S-T based. Therefore, the cov_pred input should be either an sf::sf-point or
 #' a terra::rast file format
-#' 
+#'
 #' @param meta_fit_obj list of BART objects from meta_learner_fit
 #' @param cov_pred dataframe of covariates at prediction locations
-#' @note  The predictions can be a rast or sf, which depends on the same 
+#' @note  The predictions can be a rast or sf, which depends on the same
 #' respective format of the covariance matrix input - cov_pred
 #' @return meta_pred file of the final meta learner predictions, can be rast
 #' or sf file
@@ -58,22 +58,24 @@ meta_learner_fit <- function(base_predictor_list,
 #' @examples NULL
 #' @references https://rspatial.github.io/terra/reference/predict.html
 meta_learner_predict <- function(meta_fit_obj, cov_pred) {
-  
-  
-  # Check prediction output type, which is 
-  valid_file_formats <- c("rast","sf")
-  
-  if (typeof(cov_pred) != "sf") {
-    
-    stop("Error in cov_pred: 
-         Meta Learner Predictor Matrix (and output) should by 'rast' or 'sf' ")
-    
+
+  # Check prediction output type
+  valid_file_formats <- c("rast", "sf")
+
+  cov_pred_format <- class(cov_pred)[[1]]
+
+  # Check if the file extension is one of the expected formats
+  if (!(cov_pred_format %in% valid_file_formats)) {
+    stop("Invalid Metalearner Predictor Matrix file format. 
+         Expected one of: ", paste(valid_file_formats, collapse = ", "))
   }
-  
+
+
   # Use the predict method, which is valid in terra for both
   # rast based covariates and sf based covariates
+
   meta_pred <- predict(model = meta_fit_obj, object = cov_pred)
-  
+
 
   return(meta_pred)
 }

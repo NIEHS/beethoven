@@ -3,22 +3,36 @@
 \name{meta_learner_predict}
 \alias{meta_learner_predict}
 \title{meta_learner_predict - take the list of BART fit objects and prediction
-location info to create meta_learner predictions}
+location info to create meta_learner predictions. The BART
+meta learner is not explicitly a S-T model, but the input covariates are
+S-T based. Therefore, the cov_pred input should be either an sf::sf-point or
+a terra::rast file format}
 \usage{
-meta_learner_predict(meta_fit_obj, pred_loc)
+meta_learner_predict(meta_fit_obj, cov_pred)
 }
 \arguments{
 \item{meta_fit_obj}{list of BART objects from meta_learner_fit}
 
-\item{pred_loc}{sf or dataframe grid of prediction locations}
+\item{cov_pred}{dataframe of covariates at prediction locations}
 }
 \value{
-meta_pred_nc NetCDF (nc) file of the final meta learner predictions
+meta_pred file of the final meta learner predictions, can be rast
+or sf file
 }
 \description{
 meta_learner_predict - take the list of BART fit objects and prediction
-location info to create meta_learner predictions
+location info to create meta_learner predictions. The BART
+meta learner is not explicitly a S-T model, but the input covariates are
+S-T based. Therefore, the cov_pred input should be either an sf::sf-point or
+a terra::rast file format
+}
+\note{
+The predictions can be a rast or sf, which depends on the same
+respective format of the covariance matrix input - cov_pred
 }
 \examples{
 NULL
+}
+\references{
+https://rspatial.github.io/terra/reference/predict.html
 }
