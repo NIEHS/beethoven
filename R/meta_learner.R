@@ -42,27 +42,38 @@ meta_learner_fit <- function(base_predictor_list,
 
 
 #' meta_learner_predict - take the list of BART fit objects and prediction
-#' location info to create meta_learner predictions. NOTE that the BART 
-#' meta learner is not explicitly a spatiotemporal model. The S-T comes in 
-#' from the covariate being S-T based
-#'
+#' location info to create meta_learner predictions. The BART 
+#' meta learner is not explicitly a S-T model, but the input covariates are 
+#' S-T based. Therefore, the cov_pred input should be either an sf::sf-point or 
+#' a terra::rast file format
+#' 
 #' @param meta_fit_obj list of BART objects from meta_learner_fit
 #' @param cov_pred dataframe of covariates at prediction locations
-#' @param pred_rast The terra rast file for the cov_pred locations. If it is 
-#' not NULL, then the predictions willl be returned as a NetCDF (nc). If
-#' NULL, then the predictions will be return as a dataframe
-#' @return meta_pred_nc NetCDF (nc) file of the final meta learner predictions
+#' @note  The predictions can be a rast or sf, which depends on the same 
+#' respective format of the covariance matrix input - cov_pred
+#' @return meta_pred file of the final meta learner predictions, can be rast
+#' or sf file
 #' @export
 #'
 #' @examples NULL
-meta_learner_predict <- function(meta_fit_obj, cov_pred, pred_rast = NULL) {
+#' @references https://rspatial.github.io/terra/reference/predict.html
+meta_learner_predict <- function(meta_fit_obj, cov_pred) {
   
-  # Use the predict method
-  meta_pred_vec <- predict(meta_fit_obj, new = cov_pred)
   
-  # If the output is to be a netCDF (nc file)
-  # Create a terra::rast file
-  meta_pred <- terra::rast(pred_loc)
-  sf::crs(meta_pred_nc) <- crs
+  # Check prediction output type, which is 
+  valid_file_formats <- c("rast","sf")
+  
+  if (typeof(cov_pred) != "sf") {
+    
+    stop("Error in cov_pred: 
+         Meta Learner Predictor Matrix (and output) should by 'rast' or 'sf' ")
+    
+  }
+  
+  # Use the predict method, which is valid in terra for both
+  # rast based covariates and sf based covariates
+  meta_pred <- predict(model = meta_fit_obj, object = cov_pred)
+  
+
   return(meta_pred)
 }
