@@ -32,7 +32,7 @@ meta_learner_fit <- function(base_predictor_list,
     x_te <- x_design[kfolds == i, ]
     y_tr <- y[kfolds != i]
     # Fit the BART model
-    meta_fit_obj[[i]] <- BART::mc.wbart(x.train = x_tr,
+    meta_fit_obj[[i]] <- BART::wbart(x.train = x_tr,
                                         y.train = y_tr,
                                         x.test = x_te)
   }
@@ -71,11 +71,18 @@ meta_learner_predict <- function(meta_fit_obj, cov_pred) {
   }
 
 
-  # Use the predict method, which is valid in terra for both
-  # rast based covariates and sf based covariates
-
-  meta_pred <- predict(model = meta_fit_obj, object = cov_pred)
+# Use the predict method, which is valid in terra for both
+# rast based covariates and sf based covariates
+#
+  
+for (seq_along(meta_fit_obj)) {
+    
+  meta_pred <- predict(model = meta_fit_obj, object = cov_pred) |> 
+    apply(2, mean)
+    
+}
 
 
   return(meta_pred)
+  
 }
