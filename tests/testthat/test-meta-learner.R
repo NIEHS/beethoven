@@ -7,8 +7,8 @@
 
 test_that("the meta learner abides", {
 
-##### Test Data
-  
+  ##### Test Data
+
   # Test data
   response <- 3 + rnorm(100)
   kfolds <- sample(rep(1:5, length.out = length(response)))
@@ -19,14 +19,14 @@ test_that("the meta learner abides", {
   )
   names(predictor_list) <- c("var1", "var2", "var3")
 
-##### Fit learner
+  ##### Fit learner
   meta_learner_output <- meta_learner_fit(
     base_predictor_list = predictor_list,
     kfolds = kfolds, y = response
   )
 
-##### Tests on the meta learning fitting (i.e. estimation)  
-  
+  ##### Tests on the meta learning fitting (i.e. estimation)
+
   # test the output of the meta-learner fit is a list
   expect_type(meta_learner_output, "list")
 
@@ -56,12 +56,11 @@ test_that("the meta learner abides", {
     kfolds = kfolds, y = response
   ), "Error in meta_learner_fit: 
          Base predictors need to be the same length")
-  
-  
-##### Tests on the meta learner prediction 
-  
+
+  ##### Tests on the meta learner prediction
+
   ### Test locations as sf
-  
+
   #Predictor list
   predictor_list <- list(
     runif(100, min = 1, max = 10),
@@ -69,26 +68,23 @@ test_that("the meta learner abides", {
     pi + rnorm(100)
   )
   names(predictor_list) <- c("var1", "var2", "var3")
-  
+
   #Convert predictors to sf - requires multiple steps
   x_df <- as.data.frame(predictor_list) # convert to data frame
   lon <- seq(-112, -101, length.out = 10) # create lon sequence
   lat <-  seq(33.5, 40.9, length.out = 10) # create lat sequence
-  lon_lat <- expand.grid(lon, lat) # expand to regular grid 
+  lon_lat <- expand.grid(lon, lat) # expand to regular grid
   x_df$longitude <- lon_lat$Var1 # add lon/lat to dataframe
   x_df$latitude <- lon_lat$Var2
-  cov_pred_sf <- sf::st_as_sf(x_df,coords = c("longitude","latitude")) #convert
+  cov_pred_sf <- sf::st_as_sf(x_df, coords = c("longitude", "latitude"))
   sf::st_crs(cov_pred_sf) <- sf::st_crs("EPSG:4326") # add coordinate ref sys
-  
+
   # Get meta learner prediction
   model_output <- meta_learner_predict(meta_learner_output,
                                        cov_pred = cov_pred_sf)
-  
+
   # Testthat model output is an sf
   expect_true(class(model_output)[[1]] == "sf")
-  
+
 
 })
-
-
-
