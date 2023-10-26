@@ -79,8 +79,9 @@ for (n in seq_along(file_urls)) {
   data$ID.Code <- paste(data$State.Code, data$County.Code,
                         data$Site.Num, data$Parameter.Code,
                         data$POC, sep = "-")
-  # Concatenate with other years
-  if (n == 1) {
+
+# Concatenate with other years
+if (n == 1) {
     data_all <- data
   } else {
     data_all <- rbind(data_all, data)
@@ -89,11 +90,12 @@ for (n in seq_along(file_urls)) {
 ```
 #### 4. Downloading monitor metadata file and filter for relevant sites
 Download monitors file 
+
 ``` {r}
 destfile <- paste(download_dir, "aqs_monitors.zip", sep = "")
 download.file("https://aqs.epa.gov/aqsweb/airdata/aqs_monitors.zip", destfile)
 ```
- Unzip and read in
+Unzip and read in
 ```{r} 
 unzip(destfile, exdir = download_dir)
 monitors <- read.csv("input/aqs/aqs_monitors.csv", stringsAsFactors = FALSE)
@@ -106,7 +108,10 @@ monitors$State.Code <- as.numeric(monitors$State.Code)
 monitors$ID.Code <- paste(monitors$State.Code, monitors$County.Code,
                           monitors$Site.Num, monitors$Parameter.Code,
                           monitors$POC, sep = "-")
+monitors <- read.csv("input/aqs/aqs_monitors.csv",
+  stringsAsFactors = FALSE)
 ```
+
 Filter monitors file to include only monitors in our csv
 ```{r}
 monitors_filter <- monitors[which(monitors$ID.Code %in% data_all$ID.Code), ]
@@ -119,5 +124,5 @@ write.csv(data_all, paste(savepath, resolution, "_", parameter_code, "_",
                           startyear, "-", endyear, ".csv", sep = ""))
 write.csv(monitors_filter, paste(savepath, "monitors_", parameter_code, "_",
                                  startyear, "-", endyear, ".csv", sep = ""))
-```
 
+```

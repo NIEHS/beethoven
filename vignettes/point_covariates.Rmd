@@ -9,7 +9,6 @@ date: "2023-10-02"
 author: "Insang Song"
 ---
 
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE)
 
@@ -48,13 +47,12 @@ egrid_v <- egrid |>
   mutate(to_id = seq_len(nrow(egrid))) |>
   sf::st_transform(4326) |>
   terra::vect()
-
 aqs_a <- aqs
 aqs_a$from_id <- seq_len(nrow(aqs))
 
 # select egrid_v only if closer than 3e5 meters from each aqs
 aqs_buf <- terra::buffer(aqs_a, width = 3e5L, quadsegs = 90)
-egrid_vs <- egrid_v[aqs_buf, ]
+egrid_vs <- egrid_v[aqs_buf,]
 egrid_vs$to_id <- seq_len(nrow(egrid_vs))
 
 # near features with distance argument: only returns integer indices
@@ -63,6 +61,7 @@ near_egrid <- terra::nearby(aqs, egrid_vs, distance = 3e5L)
 dist_near_egrid <- terra::distance(aqs, egrid_vs)
 dist_near_egrid_df <- as.vector(dist_near_egrid)
 # adding integer indices
+
 dist_near_egrid_tdf <- expand.grid(from_id = seq_len(nrow(aqs)),
                                    to_id = seq_len(nrow(egrid_vs)))
 dist_near_egrid_df <- cbind(dist_near_egrid_tdf, dist = dist_near_egrid_df)
@@ -77,6 +76,8 @@ near_egrid_a <- near_egrid |>
   group_by(ID.Code) |>
   summarize(across(starts_with("UN"), list(sedc = ~ sum(w_sedc * .,
                                                         na.rm = TRUE)))) |>
+  summarize(across(starts_with("UN"), 
+    list(sedc = ~sum(w_sedc * ., na.rm = TRUE)))) |>
   ungroup() |>
   select(-UNHG_sedc)
 
