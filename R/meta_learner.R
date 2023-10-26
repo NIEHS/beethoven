@@ -61,16 +61,24 @@ meta_learner_fit <- function(base_predictor_list,
 #' @references https://rspatial.github.io/terra/reference/predict.html
 meta_learner_predict <- function(meta_fit_obj, cov_pred) {
 
-  valid_file_formats <- c("rast", "sf", "matrix")
+  valid_file_formats <- c("SpatRaster", "sf")
   
   # Check prediction output type
   cov_pred_format <- class(cov_pred)[[1]]
 
-  if (cov_pred_format == "rast") {
+  if (cov_pred_format == "SpatRaster") {
 
-    # some stuff
+    # pre-allocate
+    meta_pred_i <- matrix(nrow = nrow(cov_pred), ncol = length(meta_fit_obj))
+    
+    for (i in seq_along(meta_fit_obj)) {
+      print("I'm here")
+      meta_pred_i[, i] <- predict(object = cov_pred, 
+                                  model = meta_fit_obj[[i]],
+                                  fun = predict) |> apply(2, mean)
+    }
 
-  } else if (cov_pred_format == "matrix") {
+  } else if (cov_pred_format == "sf") {
 
     # pre-allocate
     meta_pred_i <- matrix(nrow = nrow(cov_pred), ncol = length(meta_fit_obj))

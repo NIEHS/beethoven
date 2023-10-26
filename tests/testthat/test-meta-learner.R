@@ -70,21 +70,31 @@ test_that("the meta learner abides", {
   names(predictor_list) <- c("var1", "var2", "var3")
 
   #Convert predictors to sf - requires multiple steps
-  x_df <- as.matrix(as.data.frame(predictor_list)) # convert to data frame
-  # lon <- seq(-112, -101, length.out = 10) # create lon sequence
-  # lat <-  seq(33.5, 40.9, length.out = 10) # create lat sequence
-  # lon_lat <- expand.grid(lon, lat) # expand to regular grid
-  # x_df$longitude <- lon_lat$Var1 # add lon/lat to dataframe
-  # x_df$latitude <- lon_lat$Var2
-  # cov_pred_sf <- sf::st_as_sf(x_df, coords = c("longitude", "latitude"))
-  # sf::st_crs(cov_pred_sf) <- sf::st_crs("EPSG:4326") # add coordinate ref sys
+  x_df <- as.data.frame(predictor_list) # convert to data frame
+  lon <- seq(-112, -101, length.out = 10) # create lon sequence
+  lat <-  seq(33.5, 40.9, length.out = 10) # create lat sequence
+  lon_lat <- expand.grid(lon, lat) # expand to regular grid
+  x_df$longitude <- lon_lat$Var1 # add lon/lat to dataframe
+  x_df$latitude <- lon_lat$Var2
+  cov_pred_sf <- sf::st_as_sf(x_df, coords = c("longitude", "latitude"))
+  sf::st_crs(cov_pred_sf) <- sf::st_crs("EPSG:4326") # add coordinate ref sys
 
+  # # Get meta learner prediction
+  # model_output <- meta_learner_predict(meta_learner_output,
+  #                                      cov_pred = cov_pred_sf)
+  # 
+  
+  # # Testthat model output is an sf
+  # expect_true(class(model_output)[[1]] == "sf")
+  
+  ## Test locations as a SpatRaster
   # Get meta learner prediction
+  cov_SpatVect <- terra::vect(cov_pred_sf)
+  cov_SpatRast <- terra::rast(cov_SpatVect)
   model_output <- meta_learner_predict(meta_learner_output,
-                                       cov_pred = x_df)
-
+                                       cov_pred = cov_SpatRast)
+  
   # Testthat model output is an sf
-  expect_true(class(model_output)[[1]] == "sf")
-
+  expect_true(class(model_output)[[1]] == "SpatRaster")
 
 })
