@@ -44,7 +44,7 @@ test_that("the meta learner abides", {
 
   # test that it throws an error when base learners are different length
   predictor_list <- list(
-    runif(length(response), mi
+    runif(length(response),
           n = 1, max = 10),
     rnorm(length(response) - 1),
     pi + rnorm(length(response))
@@ -84,8 +84,8 @@ test_that("the meta learner abides", {
   model_output <- meta_learner_predict(meta_learner_output,
                                        cov_pred = cov_pred_sf)
   
-  # the test is running on the object named "output"
-  expect_type(model_output, "ncdf4")
+  # Testthat model output is an sf
+  expect_true(class(model_output)[[1]] == "sf")
   
 
 })

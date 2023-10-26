@@ -16,7 +16,7 @@ meta_learner_fit <- function(base_predictor_list,
   # check lengths of each base predictor #add a test for names
   if (sapply(base_predictor_list, length, simplify = TRUE) |>
         stats::var() != 0) {
-    stop("Error in meta_learner_fit: 
+    stop("Error in meta_learner_fit:
          Base predictors need to be the same length")
   }
   # convert list to data.frame
@@ -32,9 +32,11 @@ meta_learner_fit <- function(base_predictor_list,
     x_te <- x_design[kfolds == i, ]
     y_tr <- y[kfolds != i]
     # Fit the BART model
-    meta_fit_obj[[i]] <- BART::wbart(x.train = x_tr,
-                                        y.train = y_tr,
-                                        x.test = x_te)
+    meta_fit_obj[[i]] <- BART::wbart(
+      x.train = x_tr,
+      y.train = y_tr,
+      x.test = x_te
+    )
   }
   return(meta_fit_obj)
 }
@@ -60,29 +62,35 @@ meta_learner_fit <- function(base_predictor_list,
 meta_learner_predict <- function(meta_fit_obj, cov_pred) {
 
   # Check prediction output type
-  valid_file_formats <- c("rast", "sf")
-
   cov_pred_format <- class(cov_pred)[[1]]
 
-  # Check if the file extension is one of the expected formats
-  if (!(cov_pred_format %in% valid_file_formats)) {
-    stop("Invalid Metalearner Predictor Matrix file format. 
+  if (cov_pred_format == "rast") {
+
+    # some stuff
+
+  } else if (cov_pred_format == "sf") {
+
+    # pre-allocate
+    meta_pred_i <- matrix(nrow = nrow(cov_pred), ncol = length(meta_fit_obj))
+
+    for (i in seq_along(meta_fit_obj)) {
+      meta_pred_i[, i] <- predict(model = meta_fit_obj[[i]],
+                                  object = sf::st_drop_geometry(cov_pred) |>
+                                    as.matrix()) |>
+        apply(2, mean)
+    }
+
+    meta_pred <- apply(meta_pred_i, 1, mean)
+
+    #add back the geometry
+    st_geometry(meta_pred) <- st_geometry(cov_pred)
+
+  } else {
+
+    stop("Invalid Metalearner Predictor Matrix file format.
          Expected one of: ", paste(valid_file_formats, collapse = ", "))
+
   }
 
-
-# Use the predict method, which is valid in terra for both
-# rast based covariates and sf based covariates
-#
-  
-for (seq_along(meta_fit_obj)) {
-    
-  meta_pred <- predict(model = meta_fit_obj, object = cov_pred) |> 
-    apply(2, mean)
-    
-}
-
-
   return(meta_pred)
-  
 }
