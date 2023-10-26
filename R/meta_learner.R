@@ -61,6 +61,8 @@ meta_learner_fit <- function(base_predictor_list,
 #' @references https://rspatial.github.io/terra/reference/predict.html
 meta_learner_predict <- function(meta_fit_obj, cov_pred) {
 
+  valid_file_formats <- c("rast", "sf", "matrix")
+  
   # Check prediction output type
   cov_pred_format <- class(cov_pred)[[1]]
 
@@ -68,22 +70,17 @@ meta_learner_predict <- function(meta_fit_obj, cov_pred) {
 
     # some stuff
 
-  } else if (cov_pred_format == "sf") {
+  } else if (cov_pred_format == "matrix") {
 
     # pre-allocate
     meta_pred_i <- matrix(nrow = nrow(cov_pred), ncol = length(meta_fit_obj))
 
     for (i in seq_along(meta_fit_obj)) {
       meta_pred_i[, i] <- predict(model = meta_fit_obj[[i]],
-                                  object = sf::st_drop_geometry(cov_pred) |>
-                                    as.matrix()) |>
-        apply(2, mean)
+                                  object = cov_pred) |> apply(2, mean)
     }
 
     meta_pred <- apply(meta_pred_i, 1, mean)
-
-    #add back the geometry
-    st_geometry(meta_pred) <- st_geometry(cov_pred)
 
   } else {
 
