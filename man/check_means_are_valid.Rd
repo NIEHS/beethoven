@@ -15,11 +15,13 @@ check_means_are_valid(
 \arguments{
 \item{model_output}{sf/sftime object of model output}
 
-\item{model_mean_name}{character(1). the name of layer where mean values are stored}
+\item{model_mean_name}{character(1). the name of layer where mean
+values are stored}
 
 \item{observation}{a data.frame with observations}
 
-\item{observation_mean_name}{character(1). field name of observations in observation object.}
+\item{observation_mean_name}{character(1). field name of observations
+in observation object.}
 
 \item{tolerance_factor}{numeric(1). denominator(min) multiplier(max)}
 }

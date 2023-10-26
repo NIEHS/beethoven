@@ -15,7 +15,7 @@ generic_base_learner <- function(response, covariate, obs_locs, model_attr) {
   # fit the learner to the data
   params <- c(length(response), length(covariate), length(model_attr))
   # return a function that makes predictions?
-  predict_fun <- function(pred_locs){
+  predict_fun <- function(pred_locs) {
     # apply the learner to the data
     preds <- stats::rnorm(1, mean = length(params) + length(pred_locs))
     return(preds)
@@ -31,14 +31,15 @@ generic_base_learner <- function(response, covariate, obs_locs, model_attr) {
 #' @param base_predictor_list list of the base predictor output
 #' @param pred_loc geospatial information on the locations for predicting
 #'
-#' @return 
+#' @return
 #' mean and variance of the meta learner at prediction locations
 #' @export
 #'
 #' @examples NULL
 generic_meta_learner <- function(base_predictor_list, pred_loc) {
   # check that inputs are as expected
-  if (any(is.na(base_predictor_list)) || any(is.na(pred_loc))) print("Null input")
+  if (any(is.na(base_predictor_list)) || any(is.na(pred_loc)))
+    print("Null input")
   # for each prediction location, compute the set of predictions then apply meta
   n_predictors <- length(base_predictor_list)
   n_pred_locs <- length(pred_loc)
@@ -76,27 +77,29 @@ generic_meta_learner <- function(base_predictor_list, pred_loc) {
 #'
 #' @examples NULL
 build_pipeline <- function(
-  base_learner_list,
-  base_attr_list,
-  meta_learner,
-  response,
-  covariate,
-  obs_locs,
-  pred_locs) {
-  
+    base_learner_list,
+    base_attr_list,
+    meta_learner,
+    response,
+    covariate,
+    obs_locs,
+    pred_locs) {
   base_predictor_list <- list()
   # each entry in base learner list is a function
-  for (bl_idx in 1:length(base_learner_list)) {
+  for (bl_idx in seq_along(base_learner_list)) {
     curr_base_learner <- base_learner_list[[bl_idx]]
     model_attr <- base_attr_list[[bl_idx]]
-    curr_base_predictor <- curr_base_learner(response = response, 
-                                       covariate = covariate,
-                                       obs_locs = obs_locs,
-                                       model_attr = model_attr)
+    curr_base_predictor <- curr_base_learner(
+      response = response,
+      covariate = covariate,
+      obs_locs = obs_locs,
+      model_attr = model_attr
+    )
     base_predictor_list <- c(base_predictor_list, curr_base_predictor)
   }
-  predictions <- sapply(pred_locs, 
-                       FUN = function(p_loc) meta_learner(base_predictor_list, p_loc))
+  predictions <- sapply(pred_locs,
+    FUN = function(p_loc) meta_learner(base_predictor_list, p_loc)
+  )
   return(predictions)
 }
 
@@ -104,8 +107,10 @@ build_pipeline <- function(
 # creating a list of generic base learners
 base_learner_list <- list(generic_base_learner, generic_base_learner)
 # populating the model attributes:  depends on the type of model used
-base_learner_attr <- list(list("bins" = 10, "threshold" = .1),
-                         list("NN_depth" = 4, "NN_width" = 100, "learn_rate"=.1))
+base_learner_attr <- list(
+  list("bins" = 10, "threshold" = .1),
+  list("NN_depth" = 4, "NN_width" = 100, "learn_rate" = .1)
+)
 # simulating some made up data
 covariate <- stats::rnorm(100)
 obs_locs <- seq(0, 10, length.out = 100)
@@ -113,10 +118,12 @@ response <- covariate * 5 + stats::runif(100)
 # specifying the locations for predictions
 pred_locs <- -5:15
 # building the pipeline and outputting predictions
-build_pipeline(base_learner_list,
-               base_learner_attr,
-               generic_meta_learner,
-               response,
-               covariate,
-               obs_locs,
-               pred_locs)
+build_pipeline(
+  base_learner_list,
+  base_learner_attr,
+  generic_meta_learner,
+  response,
+  covariate,
+  obs_locs,
+  pred_locs
+)
