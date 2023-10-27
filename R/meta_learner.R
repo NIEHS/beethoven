@@ -49,8 +49,9 @@ meta_learner_fit <- function(base_predictor_list,
 #' S-T based. Therefore, the cov_pred input should be either an sf::sf-point or
 #' a terra::rast file format
 #'
-#' @param meta_fit_obj list of BART objects from meta_learner_fit
-#' @param cov_pred dataframe of covariates at prediction locations
+#' @param obj_meta_pred list of BART objects from meta_learner_fit
+#' @param obj_pred dataframe of covariates at prediction locations
+#' @param nthreads integer(1). Number of threads used in BART::predict.wbart
 #' @note  The predictions can be a rast or sf, which depends on the same
 #' respective format of the covariance matrix input - cov_pred
 #' @return meta_pred file of the final meta learner predictions, can be rast
@@ -59,43 +60,95 @@ meta_learner_fit <- function(base_predictor_list,
 #'
 #' @examples NULL
 #' @references https://rspatial.github.io/terra/reference/predict.html
-meta_learner_predict <- function(meta_fit_obj, cov_pred) {
+meta_learner_predict <- function(obj_meta_fit, obj_pred, nthreads = 2) {
 
-  valid_file_formats <- c("SpatRaster", "sf")
-  
   # Check prediction output type
-  cov_pred_format <- class(cov_pred)[[1]]
+  pred_format <- class(obj_pred)[[1]]
+  valid_file_formats <- c("SpatRaster", "SpatVector", "sf")
 
-  if (cov_pred_format == "SpatRaster") {
-
-    # pre-allocate
-    meta_pred_i <- matrix(nrow = nrow(cov_pred), ncol = length(meta_fit_obj))
-    
-    for (i in seq_along(meta_fit_obj)) {
-      print("I'm here")
-      meta_pred_i[, i] <- predict(object = cov_pred, 
-                                  model = meta_fit_obj[[i]],
-                                  fun = predict) |> apply(2, mean)
-    }
-
-  } else if (cov_pred_format == "sf") {
-
-    # pre-allocate
-    meta_pred_i <- matrix(nrow = nrow(cov_pred), ncol = length(meta_fit_obj))
-
-    for (i in seq_along(meta_fit_obj)) {
-      meta_pred_i[, i] <- predict(model = meta_fit_obj[[i]],
-                                  object = cov_pred) |> apply(2, mean)
-    }
-
-    meta_pred <- apply(meta_pred_i, 1, mean)
-
-  } else {
-
+  if (!any(pred_format %in% valid_file_formats)) {
     stop("Invalid Metalearner Predictor Matrix file format.
-         Expected one of: ", paste(valid_file_formats, collapse = ", "))
-
+          Expected one of: ", paste(valid_file_formats, collapse = ", "))
   }
 
-  return(meta_pred)
+  # matrix where values are predicted
+  mat_pred <- switch(pred_format,
+    SpatRaster = as.matrix(obj_pred),
+    SpatVector = as.matrix(as.data.frame(obj_pred)),
+    sf = as.matrix(obj_pred)[,-ncol(obj_pred)])
+  # pre-allocate
+  meta_pred <- matrix(nrow = nrow(mat_pred), ncol = length(obj_meta_fit))
+
+  # return(mat_pred)
+  # approach: convert SpatRaster and sf to N-by-K matrices
+  # where K denotes the number of base learners
+  # we assume df_pred is pre-cleaned and only includes the 
+  # base learner predictions
+  # then putting them into predict function.
+  # SpatRaster: convert each layer to column vector then cbind
+  #    double check if the vector conversion results are
+  #    column or row ordered
+  # sf: select fields then as.matrix
+
+  # structure assumption:
+  # multilayer SpatRaster -- row-order conversion in as.data.frame
+  # multicolumn SpatVector -- long format
+  # multicolumn sf -- long format
+
+  iter_pred <- function(
+    obj_meta_fit_in = obj_meta_fit,
+    mat_pred_in,
+    meta_pred_in = meta_pred,
+    nthreads_in = nthreads) {
+
+    for (i in seq_along(obj_meta_fit_in)) {
+      meta_pred_in[, i] <- BART:::predict.wbart(
+        object = obj_meta_fit_in[[i]],
+        newdata = mat_pred_in,
+        mc.cores = nthreads_in) |>
+        apply(2, mean)
+    }
+    meta_pred_out <- apply(meta_pred_in, 1, mean)
+    return(meta_pred_out)
+  }
+
+  # conserve the input object class
+  # a more succinct way is possible...
+  temp_pred <- obj_pred
+
+  if (pred_format == "SpatRaster") {
+    # numeric vector to raster
+    meta_pred_out <- iter_pred(mat_pred_in = mat_pred)
+    # meta_pred_out <- matrix(meta_pred_out, nrow = dim(obj_pred)[1], byrow = TRUE)
+    result_pred <- terra::setValues(temp_pred[[1]], meta_pred_out)
+
+  } else if (pred_format == "SpatVector") {
+
+    meta_pred_out <- iter_pred(mat_pred_in = mat_pred) |>
+      data.frame()
+    names(meta_pred_out) <- "meta_pred_pm2.5"
+    # meta_pred_out <- meta_pred_out |>
+    #   matrix(ncol = 1) |>
+    #   as.data.frame()
+    temp_pred[] <- NULL
+    result_pred <- cbind(temp_pred, meta_pred_out)
+    
+  } else if (pred_format == "sf") {
+
+    mat_pred <- sf::st_drop_geometry(obj_pred)
+    mat_pred <- as.matrix(mat_pred)
+    meta_pred_out <- iter_pred(mat_pred_in = mat_pred)
+    meta_pred_out <- meta_pred_out |>
+      matrix(ncol = 1) |>
+      as.data.frame()
+    names(meta_pred_out) <- "meta_pred_pm2.5"
+    temp_pred[] <- NULL
+    result_pred <- cbind(temp_pred, meta_pred_out)
+
+  } else {
+    stop("Invalid Metalearner Predictor Matrix file format.
+         Expected one of: ", paste(valid_file_formats, collapse = ", "))
+  }
+
+  return(result_pred)
 }

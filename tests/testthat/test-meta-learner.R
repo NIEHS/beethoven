@@ -45,7 +45,7 @@ test_that("the meta learner abides", {
   # test that it throws an error when base learners are different length
   predictor_list <- list(
     runif(length(response),
-          n = 1, max = 10),
+          max = 10),
     rnorm(length(response) - 1),
     pi + rnorm(length(response))
   )
@@ -79,22 +79,29 @@ test_that("the meta learner abides", {
   cov_pred_sf <- sf::st_as_sf(x_df, coords = c("longitude", "latitude"))
   sf::st_crs(cov_pred_sf) <- sf::st_crs("EPSG:4326") # add coordinate ref sys
 
-  # # Get meta learner prediction
-  # model_output <- meta_learner_predict(meta_learner_output,
-  #                                      cov_pred = cov_pred_sf)
-  # 
-  
-  # # Testthat model output is an sf
-  # expect_true(class(model_output)[[1]] == "sf")
+  # Get meta learner prediction
+  model_output <- meta_learner_predict(meta_learner_output,
+                                       obj_pred = cov_pred_sf)
+  # Testthat model output is an sf
+  expect_true(class(model_output)[1] == "sf")
   
   ## Test locations as a SpatRaster
   # Get meta learner prediction
   cov_SpatVect <- terra::vect(cov_pred_sf)
-  cov_SpatRast <- terra::rast(cov_SpatVect)
   model_output <- meta_learner_predict(meta_learner_output,
-                                       cov_pred = cov_SpatRast)
-  
-  # Testthat model output is an sf
-  expect_true(class(model_output)[[1]] == "SpatRaster")
+                                       obj_pred = cov_SpatVect)
+  expect_true(class(model_output)[1] == "SpatVector")
+
+  # SpatRaster
+  svnames <- names(cov_SpatVect)
+  cov_SpatRast <- lapply(split(svnames, svnames),
+    function(x) {
+      terra::rasterize(cov_SpatVect, terra::rast(cov_SpatVect), field = x)}) |>
+      Reduce(f = c, x = _)
+  names(cov_SpatRast) <- svnames
+  model_output <- meta_learner_predict(meta_learner_output,
+                                       obj_pred = cov_SpatRast)
+  # Testthat model output is an SpatRaster when the input is SpatRaster
+  expect_true(class(model_output)[1] == "SpatRaster")
 
 })
