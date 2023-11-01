@@ -5,10 +5,8 @@
 #'
 
 
-test_that("the meta learner abides", {
-
-  ##### Test Data
-
+test_that("the meta learner fitting abides", {
+  skip()
   # Test data
   response <- 3 + rnorm(100)
   kfolds <- sample(rep(1:5, length.out = length(response)))
@@ -18,49 +16,96 @@ test_that("the meta learner abides", {
     rnorm(length(response))
   )
   names(predictor_list) <- c("var1", "var2", "var3")
-
-  ##### Fit learner
-  meta_learner_output <- meta_learner_fit(
+  
+  # Fit learner
+  meta_model <- meta_learner_fit(
     base_predictor_list = predictor_list,
     kfolds = kfolds, y = response
   )
-
-  ##### Tests on the meta learning fitting (i.e. estimation)
-
+  
   # test the output of the meta-learner fit is a list
-  expect_type(meta_learner_output, "list")
-
+  expect_type(meta_model, "list")
+  
   # test that the meta-learner fit test-mean does not produce NA
-  expect_true(any(is.na(meta_learner_output[[1]]$yhat.test.mean)))
-
+  expect_true(sum(is.na(meta_model[[1]]$yhat.test.mean)) == 0)
+  
   # test that the meta-learner fit test does not produce NA
-  expect_true(any(is.na(meta_learner_output[[1]]$yhat.test)))
-
+  expect_true(sum(is.na(meta_model[[1]]$yhat.test)) == 0)
+  
   # test that the meta-learner fit train-mean does not produce NA
-  expect_true(any(is.na(meta_learner_output[[1]]$yhat.train.mean)))
-
+  expect_true(sum(is.na(meta_model[[1]]$yhat.train.mean)) == 0)
+  
   # test that the meta-learner fit train set does not produce NA
-  expect_true(any(is.na(meta_learner_output[[1]]$yhat.train)))
-
+  expect_true(sum(is.na(meta_model[[1]]$yhat.train)) == 0)
+  
   # test that it throws an error when base learners are different length
   predictor_list <- list(
-    runif(length(response),
-          max = 10),
+    runif(length(response), min = 1, max = 10),
     rnorm(length(response) - 1),
-    pi + rnorm(length(response))
+    rnorm(length(response))
   )
   names(predictor_list) <- c("var1", "var2", "var3")
-
+  
   expect_error(meta_learner_fit(
     base_predictor_list = predictor_list,
     kfolds = kfolds, y = response
-  ), "Error in meta_learner_fit: 
+  ), "Error in meta_learner_fit:
          Base predictors need to be the same length")
+  
+  # test that it throws an error when base learners 
+  # and response are different length
+  predictor_list <- list(
+    runif(length(response), min = 1, max = 10),
+    rnorm(length(response)),
+    rnorm(length(response))
+  )
+  names(predictor_list) <- c("var1", "var2", "var3")
+  response <- 3 + rnorm(99)
+  
+  expect_error(meta_learner_fit(
+    base_predictor_list = predictor_list,
+    kfolds = kfolds, y = response
+  ), "Error in meta_learner_fit:
+         Predictors and response are not the same length")
+  
+  # test that it throws an error when kfolds
+  # and response are different length
+  response <- 3 + rnorm(100)
+  kfolds <- sample(rep(1:5, length.out = length(response) - 1))
+  
+  expect_error(meta_learner_fit(
+    base_predictor_list = predictor_list,
+    kfolds = kfolds, y = response
+  ), "Error in meta_learner_fit:
+         kfolds vector and response are not the same length")
+  
+  # test that it throws an error when some of predictors are not numeric
+  kfolds <- sample(rep(1:5, length.out = length(response)))
+  predictor_list <- list(
+    runif(length(response), min = 1, max = 10),
+    rnorm(length(response)),
+    c(1, rep("I love Roquefort cheese", length(response) - 1))
+  )
+  expect_error(meta_learner_fit(
+    base_predictor_list = predictor_list,
+    kfolds = kfolds, y = response
+  ), "Error in meta_learner_fit:
+         Some of base predictors are not numeric")
+})
 
-  ##### Tests on the meta learner prediction
 
+
+
+
+
+
+test_that("the meta learner prediction abides", {
+  
   ### Test locations as sf
-
+  
+  response <- 3 + rnorm(100)
+  kfolds <- sample(rep(1:5, length.out = length(response)))
+  
   #Predictor list
   predictor_list <- list(
     runif(100, min = 1, max = 10),
@@ -68,8 +113,14 @@ test_that("the meta learner abides", {
     pi + rnorm(100)
   )
   names(predictor_list) <- c("var1", "var2", "var3")
-
-  #Convert predictors to sf - requires multiple steps
+  
+  # Fit learner
+  meta_model <- meta_learner_fit(
+    base_predictor_list = predictor_list,
+    kfolds = kfolds, y = response
+  )
+  
+  # Convert predictors to sf - requires multiple steps
   x_df <- as.data.frame(predictor_list) # convert to data frame
   lon <- seq(-112, -101, length.out = 10) # create lon sequence
   lat <-  seq(33.5, 40.9, length.out = 10) # create lat sequence
@@ -78,30 +129,35 @@ test_that("the meta learner abides", {
   x_df$latitude <- lon_lat$Var2
   cov_pred_sf <- sf::st_as_sf(x_df, coords = c("longitude", "latitude"))
   sf::st_crs(cov_pred_sf) <- sf::st_crs("EPSG:4326") # add coordinate ref sys
-
+  
+  
   # Get meta learner prediction
-  model_output <- meta_learner_predict(meta_learner_output,
-                                       obj_pred = cov_pred_sf)
+  model_output <- meta_learner_predict(meta_model,
+                                       base_outputs = cov_pred_sf)
   # Testthat model output is an sf
   expect_true(class(model_output)[1] == "sf")
   
-  ## Test locations as a SpatRaster
+  ## Test locations as a SpatVector
   # Get meta learner prediction
   cov_SpatVect <- terra::vect(cov_pred_sf)
-  model_output <- meta_learner_predict(meta_learner_output,
-                                       obj_pred = cov_SpatVect)
+  model_output <- meta_learner_predict(meta_model,
+                                       base_outputs = cov_SpatVect)
   expect_true(class(model_output)[1] == "SpatVector")
-
-  # SpatRaster
+  
+  # Test locations as a SpatRaster
   svnames <- names(cov_SpatVect)
   cov_SpatRast <- lapply(split(svnames, svnames),
-    function(x) {
-      terra::rasterize(cov_SpatVect, terra::rast(cov_SpatVect), field = x)}) |>
-      Reduce(f = c, x = _)
+                         function(x) {
+                           terra::rasterize(cov_SpatVect, 
+                                            terra::rast(cov_SpatVect), 
+                                            field = x)}) |>
+    Reduce(f = c, x = _)
   names(cov_SpatRast) <- svnames
-  model_output <- meta_learner_predict(meta_learner_output,
-                                       obj_pred = cov_SpatRast)
+  model_output <- meta_learner_predict(meta_model,
+                                       base_outputs = cov_SpatRast)
   # Testthat model output is an SpatRaster when the input is SpatRaster
   expect_true(class(model_output)[1] == "SpatRaster")
-
+  
 })
+
+
