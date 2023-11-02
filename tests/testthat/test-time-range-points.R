@@ -4,6 +4,8 @@
 #' (2018 - 2022 inclusive).
 #' assumes `test_nc_output.nc` is point data.
 test_that("Output times are within temporal range", {
+  withr::local_package("terra")
+  withr::local_package("lubridate")
   # 1. import model output
   path_results <- "../testdata/test_nc_output.nc"
   model_results <- terra::vect(path_results)
