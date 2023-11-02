@@ -5,7 +5,7 @@
 #' assumes `test_nc_output.nc` is point data.
 test_that("Output times are within temporal range", {
   # 1. import model output
-  path_results <- "./testdata/test_nc_output.nc"
+  path_results <- "../testdata/test_nc_output.nc"
   model_results <- terra::vect(path_results)
   # 2. function
   check_temporal_range <- function(
