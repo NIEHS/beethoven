@@ -5,6 +5,38 @@
 #'
 
 
+test_that("the convert_stobj_to_stdt works well", {
+
+  # create space-time SpatVector
+  lon <- seq(-112, -101, length.out = 5) # create lon sequence
+  lat <-  seq(33.5, 40.9, length.out = 5) # create lat sequence
+  df <- expand.grid("lon" = lon, "lat" = lat) # expand to regular grid
+  df <- rbind(df, df)
+  df$time <- c(rep("2023-11-02", 25), rep("2023-11-03", 25))
+  df$var1 <- 1:50
+  df$var2 <- 51:100
+  stobj <- vect(df, geom=c("lon", "lat"), crs="EPSG:4326", keepgeom=FALSE)
+  
+  # create SpatRastDataset from 2 SpatRast (i.e. 2 variables) 
+  # with 3 layers (i.e. 3 timestamps)
+  var1 <- rast(extent = c(-112, -101, 33.5, 40.9), ncol = 5, nrow = 5, crs = "epsg:4326")
+  values(var1) <- seq(-5, 19)
+  add(var1) <- c(var1**2, var1**3)
+  names(var1) <- c("2023-11-01", "2023-11-02", "2023-11-03")
+
+  var2 <- rast(extent = c(-112, -101, 33.5, 40.9), ncol = 5, nrow = 5, crs = "epsg:4326")
+  values(var2) <- seq(-15, 9)
+  add(var2) <- c(var2**2, var2**3)
+  names(var2) <- c("2023-11-01", "2023-11-02", "2023-11-03")
+  
+  stobj <- terra::sds(var1, var2)
+  names(stobj) <- c("var1", "var2")
+  
+  expect_no_error(convert_stobj_to_stdt(stobj))
+  
+  
+})
+
 test_that("the meta learner fitting abides", {
   skip()
   # Test data

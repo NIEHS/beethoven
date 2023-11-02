@@ -62,6 +62,67 @@ meta_learner_fit <- function(base_predictor_list,
   return(meta_fit_obj)
 }
 
+convert_stobj_to_stdt <- function(stobj) {
+  
+  format <- class(stobj)[[1]]
+  
+  if (format == "data.frame" || format == "data.table") {
+    if (any(!(c("lon", "lat", "time") %in% colnames(stobj)))) {
+      stop("stobj does not contain lon, lat, time columns")
+    }
+    stdt <- data.table::as.data.table(stobj) 
+  }
+  
+  if (format == "sf" || format == "sftime") {
+    if (any(!(c("geometry", "time") %in% colnames(stobj)))) {
+      stop("stobj does not contain geometry and time columns")
+    }
+    crs <- crs(stobj)
+    stobj$lon <- sf::st_coordinates(st_obj[,1]) 
+    stobj$lat <- sf::st_coordinates(st_obj[,2]) 
+    stdt <- as.data.frame(stobj)
+    stdt <- stdt[, geometry := NULL]
+  }
+  
+  if (format == "SpatVector") {
+    if (!("time") %in% names(stobj)) {
+      stop("stobj does not contain time column")
+    }
+    crs <- crs(stobj)
+    stdf <- as.data.frame(stobj, geom = "XY")
+    names(stdf)[names(stdf) == 'x'] <- "lon"
+    names(stdf)[names(stdf) == 'y'] <- "lat"
+    stdt <- as.data.table(stdf)
+  }
+  
+  if (format == "SpatRasterDataset") {
+    crs <- crs(stobj)
+    stdf <- as.data.frame(stobj[1], xy=T)
+    colnames(stdf)[1] <- "lon"
+    colnames(stdf)[2] <- "lat"
+    # -- tranform from wide to long format
+    stdf <- stdf %>% pivot_longer(cols=3:ncol(stdf),
+                                           names_to='time',
+                                           values_to=names(stobj)[1])
+
+    for (var in names(stobj)[2:length(names(stobj))]){
+      # test that the ts is identical to the ts of the 1st variable
+      if (!(identical(names(stobj[var]), names(stobj[1])))) {
+        stop("Error in SpatRastDataset: timeserie is different for at least 
+             2 variables - or not ordered for one of these.")
+      }
+      df_var <- as.data.frame(stobj[var], xy=T)
+      # -- tranform from wide to long format
+      df_var <- df_var %>% pivot_longer(cols=3:ncol(df_var),
+                                     names_to='time',
+                                     values_to=var)
+      stdf[, var] <- df_var[, var]
+    }
+    stdt <- as.data.table(stdf)
+  }
+  
+  return(list("crs" = crs, "stdt" = stdt))
+} 
 
 
 #' meta_learner_predict - take the list of BART fit objects and prediction
@@ -172,23 +233,6 @@ meta_learner_predict <- function(meta_fit, base_outputs, nthreads = 2) {
     stop("Invalid Metalearner Predictor Matrix file format.
          Expected one of: ", paste(valid_file_formats, collapse = ", "))
   }
-  
-  # check output
-  source("R/check_outputs.R")
-  
-  path_mainland <- "/tests/testdata/US-mainland-boundary.gpkg"
-  mainland <- sf::read_sf(paste0(getwd(), path_mainland))
-  #check_output_locs_are_valid(result_pred, spatial_domain = mainland)
-  #check_means_are_valid(model_output = result_pred, 
-  #                      model_mean_name = "meta_pred_pm2.5",
-  #                      observation = ??,
-  #                      observation_mean_name = ??)
-  if (!check_crs_is_valid(model_output = result_pred)){
-    stop("Output crs is not valid.")
-  }
-  #check_data_completeness(model_output = result_pred, 
-  #                        fields_to_check = "meta_pred_pm2.5")
-  
-  
+
   return(result_pred)
 }
