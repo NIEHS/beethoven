@@ -1,9 +1,9 @@
 #' @author Mitchell Manware
 #' @description
-#' unit test for model output is within desired temporal range
+#' unit tests for covariates and model data within desired temporal range
 #' (2018 - 2022 inclusive).
-#' assumes `test_nc_output.nc` is point data.
-test_that("Output times are within temporal range", {
+
+test_that("test_nc_output.nc is within temporal range.", {
   # run check_temporal_range() function
   iswithin <- check_temporal_range(data = "../testdata/test_nc_output.nc",
                                    start_range = "2018-01-01",
@@ -12,4 +12,3 @@ test_that("Output times are within temporal range", {
   # expect all elements == TRUE
   expect_equal(any(iswithin), TRUE)
 })
-
