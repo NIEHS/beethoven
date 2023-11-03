@@ -58,15 +58,21 @@ download_noaa_hms_smoke_data <- function(
    date_sequence = gsub("-", "", as.character(date_sequence))
    
    #### 2. define data download URLs and download names
+   file_urls <- NULL
+   download_names <- NULL
    for(f in 1:length(date_sequence)){
      year = substr(date_sequence[f], 1, 4)
      month = substr(date_sequence[f], 5, 6)
      if (data_format == "Shapefile"){
-       file_urls = paste0(url_noaa_hms_smoke_data, data_format, "/", year, "/", month, "/hms_smoke", date_sequence, ".zip")
-       download_names = paste0(directory_to_download, "hms_smoke_", data_format, "_", date_sequence, ".zip")
+       file_urls_add = paste0(url_noaa_hms_smoke_data, data_format, "/", year, "/", month, "/hms_smoke", date_sequence[f], ".zip")
+       file_urls <- c(file_urls, file_urls_add)
+       download_names_add = paste0(directory_to_download, "hms_smoke_", data_format, "_", date_sequence[f], ".zip")
+       download_names <- c(download_names, download_names_add)
      } else if (data_format == "KML"){
-       file_urls = paste0(url_noaa_hms_smoke_data, data_format, "/", year, "/", month, "/hms_smoke", date_sequence, ".kml")
-       download_names = paste0(directory_to_download, "hms_smoke_", data_format, "_", date_sequence, ".kml")
+       file_urls = paste0(url_noaa_hms_smoke_data, data_format, "/", year, "/", month, "/hms_smoke", date_sequence[f], ".kml")
+       file_urls <- c(file_urls, file_urls_add)
+       download_names = paste0(directory_to_download, "hms_smoke_", data_format, "_", date_sequence[f], ".kml")
+       download_names <- c(download_names, download_names_add)
      }
    }
    
