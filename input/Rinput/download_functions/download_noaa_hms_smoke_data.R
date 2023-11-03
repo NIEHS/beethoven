@@ -16,7 +16,7 @@
 #' @param data_format character(1). "Shapefile" or "KML". Download data in shapefile or keyhole markup language format.
 #' @param directory_to_download character(1). Directory to download zip files from NOAA Hazard Mapping System Fire and Smoke Product.
 #' @param directory_to_save character(1). Directory to decompress zip files.
-#' @param data_download_acknowledgement logical(1). By setting `= TRUE` the user acknolwedge that the data downloaded using this function may be very large and use lots of machine storage and memory.
+#' @param data_download_acknowledgement logical(1). By setting `= TRUE` the user acknowledge that the data downloaded using this function may be very large and use lots of machine storage and memory.
 #' @param url_noaa_hms_smoke_data character(1). URL to the NOAA Hazard Mapping System Fire and Smoke Product data.
 #' @param remove_download logical(1). Remove download files in directory_to_download.
 #' @param time_wait_download integer(1).
@@ -47,8 +47,7 @@ download_noaa_hms_smoke_data <- function(
    
    #### 0. test for data download acknowledgement
    if (data_download_acknowledgement == FALSE){
-     cat("Data download acknowledgement is set to FALSE. Please acknowledge that the data downloaded using this function may be very large and use lots of machine storage and memory.")
-     stop()
+     stop("Data download acknowledgement is set to FALSE. Please acknowledge that the data downloaded using this function may be very large and use lots of machine storage and memory.\n")
    }
    
    #### 1. define date sequence in character format
@@ -81,7 +80,6 @@ download_noaa_hms_smoke_data <- function(
    if(!any(file.exists(download_names))){
      cat(paste0("Downloading requested files...\n"))
      download.file(file_urls, download_names, method = "libcurl", quiet = TRUE)
-     Sys.sleep(time_wait_download)
      cat(paste0("Requested files downloaded.\n"))
    }
    
