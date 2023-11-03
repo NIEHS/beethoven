@@ -62,41 +62,52 @@ meta_learner_fit <- function(base_predictor_list,
   return(meta_fit_obj)
 }
 
+
+#' Convert spatio-temporal object to a datatable with lon, lat, time, predictors
+#' columns. It also returns the crs. 
+#'
+#' @param stobj object containing space-time data. It can be a data.frame, 
+#' a data.table, an sf or sftime, a SpatVector or a SpatRastDataset. 
+#' @return a list with a "stdt" a data.table of locations identified by 
+#' lat, lon, time columns and "crs_dt" the crs of the data. 
+#' @author Eva Marques
+#' @export
 convert_stobj_to_stdt <- function(stobj) {
   
   format <- class(stobj)[[1]]
   
   if (format == "data.frame" || format == "data.table") {
     if (any(!(c("lon", "lat", "time") %in% colnames(stobj)))) {
-      stop("stobj does not contain lon, lat, time columns")
+      stop("Error: stobj does not contain lon, lat, time columns")
     }
     stdt <- data.table::as.data.table(stobj) 
+    crs_dt <- NA
   }
   
-  if (format == "sf" || format == "sftime") {
+  else if (format == "sf" || format == "sftime") {
     if (any(!(c("geometry", "time") %in% colnames(stobj)))) {
-      stop("stobj does not contain geometry and time columns")
+      stop("Error: stobj does not contain geometry and time columns")
     }
-    crs <- crs(stobj)
-    stobj$lon <- sf::st_coordinates(st_obj[,1]) 
-    stobj$lat <- sf::st_coordinates(st_obj[,2]) 
-    stdt <- as.data.frame(stobj)
+    crs_dt <- crs(stobj)
+    stobj$lon <- sf::st_coordinates(stobj)[,1]
+    stobj$lat <- sf::st_coordinates(stobj)[,2] 
+    stdt <- data.table::as.data.table(stobj)
     stdt <- stdt[, geometry := NULL]
   }
   
-  if (format == "SpatVector") {
+  else if (format == "SpatVector") {
     if (!("time") %in% names(stobj)) {
       stop("stobj does not contain time column")
     }
-    crs <- crs(stobj)
+    crs_dt <- crs(stobj)
     stdf <- as.data.frame(stobj, geom = "XY")
     names(stdf)[names(stdf) == 'x'] <- "lon"
     names(stdf)[names(stdf) == 'y'] <- "lat"
-    stdt <- as.data.table(stdf)
+    stdt <- data.table::as.data.table(stdf)
   }
   
-  if (format == "SpatRasterDataset") {
-    crs <- crs(stobj)
+  else if (format == "SpatRasterDataset") {
+    crs_dt <- crs(stobj)
     stdf <- as.data.frame(stobj[1], xy=T)
     colnames(stdf)[1] <- "lon"
     colnames(stdf)[2] <- "lat"
@@ -118,10 +129,12 @@ convert_stobj_to_stdt <- function(stobj) {
                                      values_to=var)
       stdf[, var] <- df_var[, var]
     }
-    stdt <- as.data.table(stdf)
+    stdt <- data.table::as.data.table(stdf)
   }
   
-  return(list("crs" = crs, "stdt" = stdt))
+  else {stop("Error: stobj class not accepted")}
+  
+  return(list("stdt" = stdt, "crs_dt" = crs_dt))
 } 
 
 
