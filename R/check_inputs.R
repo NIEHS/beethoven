@@ -1,6 +1,21 @@
 ## A suite of functions to check input data
-## Last edited 10/05/2023
-## Insang Song
+## Last edited 11/03/2023
+
+#' Type check of internal class stdt
+#' @param input data.frame or data.table
+#' @return logical(1). TRUE (stdt is in one of class names) or
+#' FALSE (otherwise)
+#' @author Insang Song
+#' @description Detects the class whether it is subject to stdt.
+#' @export
+check_input_is_stdt <- function(
+  input
+) {
+  input_class <- class(input)
+  detected <- any(grepl("stdt", input_class))
+  return(detected)
+}
+
 
 #' Check if the input raster is in the expected extent
 #'
