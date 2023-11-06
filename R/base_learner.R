@@ -26,7 +26,6 @@
 #' @importFrom 
 #' @export
 
-sf:::.
 
 fit_base_learner <- function(
   covars,
@@ -49,7 +48,7 @@ fit_base_learner <- function(
   switch(learner,
     randomforest = fit_base_learner_ranger(),
     xgboost = fit_base_learner_xgboost(),
-    cnn = fit_base_learner_keras()
+    cnn = fit_base_learner_cnn()
     # add more options with learner argument ...
   )
 }
@@ -81,7 +80,7 @@ fit_base_learner_ranger <- function(){
 
 
 
-#' Fit convolutional neural networks with keras
+#' Fit convolutional neural networks with neural network library
 #' @param covars
 #' @param dependent_name character(1). Name of the dependent variable.
 #' @param independent_name character(1). Names of independent variables.
@@ -99,12 +98,13 @@ fit_base_learner_ranger <- function(){
 #' @author Insang Song
 #' @description 
 #' @import torch
+#' @import reticulate
 #' @export
 
-fit_base_learner_torch <- function(){
+fit_base_learner_cnn <- function(){
   # ...
   # keras or torch ...
-  # check if CUDA is available ...
+  # check if MPS (for Apple Silicon) / CUDA is available ...
   # fit model (spt-array and 3d-pooling)
   # cv
 

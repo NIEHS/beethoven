@@ -19,9 +19,7 @@ convert_stobj_to_stdt <- function(stobj) {
     }
     stdt <- data.table::as.data.table(stobj)
     crs_dt <- NA
-  } else if (format == "sf" || format == "sftime") {
-  }
-
+  } 
   else if (format == "sf" || format == "sftime") {
     if (any(!(c("geometry", "time") %in% colnames(stobj)))) {
       stop("Error: stobj does not contain geometry and time columns")
@@ -36,8 +34,6 @@ convert_stobj_to_stdt <- function(stobj) {
     }
     crs_dt <- terra::crs(stobj)
     stdf <- as.data.frame(stobj, geom = "XY")
-    names(stdf)[names(stdf) == "x"] <- "lon"
-    names(stdf)[names(stdf) == "y"] <- "lat"
     names(stdf)[names(stdf) == "x"] <- "lon"
     names(stdf)[names(stdf) == "y"] <- "lat"
     stdt <- data.table::as.data.table(stdf)

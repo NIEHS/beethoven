@@ -77,6 +77,8 @@ meta_learner_fit <- function(base_predictor_list,
 #' @note  The predictions can be a rast or sf, which depends on the same
 #' respective format of the covariance matrix input - cov_pred
 #' @return meta_pred: the final meta learner predictions
+#' @import BART
+#' @import data.table
 #' @export
 #'
 #' @examples NULL
