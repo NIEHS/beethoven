@@ -95,13 +95,13 @@ test_that("convert_stobj_to_stdt works well", {
   stobj <- terra::sds(var1, var2)
   names(stobj) <- c("var1", "var2")
   expect_no_error(convert_stobj_to_stdt(stobj))
-  stdt <- convert_stobj_to_stdt(stobj)$stdt
-  expect_equal(class(stdt)[[1]], "data.table")
-  expect_equal(class(convert_stobj_to_stdt(stobj)$crs_dt), "character")
-  expect_true(terra::same.crs(convert_stobj_to_stdt(stobj)$crs_dt, "EPSG:4326"))
-  expect_false(any(!(c("lon", "lat", "time") %in% colnames(stdt))))
-  expect_equal(stdt[lon == -106.5 & lat == 37.2 & time == "2023-11-02", var1],
+  stdt_converted <- convert_stobj_to_stdt(stobj)
+  expect_equal(class(stdt_converted$stdt)[[1]], "data.table")
+  expect_equal(class(stdt_converted$crs_dt), "character")
+  expect_true(terra::same.crs(stdt_converted$crs_dt, "EPSG:4326"))
+  expect_false(any(!(c("lon", "lat", "time") %in% colnames(stdt_converted$stdt))))
+  expect_equal(stdt_converted$stdt[lon == -106.5 & lat == stdt_converted$stdt$lat[37] & time == "2023-11-02", var1],
                49)
-  expect_equal(stdt[lon == -106.5 & lat == 37.2 & time == "2023-11-02", var2], 
+  expect_equal(stdt_converted$stdt[lon == -106.5 & lat == stdt_converted$stdt$lat[37] & time == "2023-11-02", var2], 
                9)
 })

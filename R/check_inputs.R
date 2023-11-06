@@ -1,8 +1,8 @@
 ## A suite of functions to check input data
-## Last edited 11/03/2023
+## Last edited 11/06/2023
 
 #' Type check of internal class stdt
-#' @param input data.frame or data.table
+#' @param input stdt object, which is a result of convert_stobj_to_stdt
 #' @return logical(1). TRUE (stdt is in one of class names) or
 #' FALSE (otherwise)
 #' @author Insang Song

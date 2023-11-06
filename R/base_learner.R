@@ -1,31 +1,7 @@
 ### Base learner fit
 ## Design: generic function and switch to each function type
 ## Other else: integrating tidymodels + CAST for spatiotemporal CV
-#' Generate cross-validation indices
-#' @param covars
-#' @param dependent_name
-#' @param independent_name
-#' @param cv_mode
-#' @param cv_fold
-#' @param sp_index
-#' @param t_index
-#' 
-#' @return 
-#' @author Insang Song
-#' @description 
-#' @importFrom CAST 
-#' @export
 
-generate_cv_index <- function(
-  covars,
-  dependent_name = "pm2.5",
-  independent_name,
-  cv_mode = c("lolo", "loto", "lolto", "random", "lblo", "lbto"),
-  cv_fold = 5L,
-  sp_index = "Site.ID",
-  t_index = "date"
-) {
-}
 
 
 #' Fit base learner
@@ -49,6 +25,8 @@ generate_cv_index <- function(
 #' @description 
 #' @importFrom 
 #' @export
+
+sf:::.
 
 fit_base_learner <- function(
   covars,
@@ -129,7 +107,7 @@ fit_base_learner_torch <- function(){
   # check if CUDA is available ...
   # fit model (spt-array and 3d-pooling)
   # cv
-  
+
 }
 
 
