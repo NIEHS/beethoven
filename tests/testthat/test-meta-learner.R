@@ -118,21 +118,24 @@ test_that("the meta learner prediction abides", {
   df$baselearner2 <- pi + rnorm(50)
   df$baselearner3 <- rnorm(50)
   base_outputs <- data.table::as.data.table(df)
+  base_outputs_stdt <- list("stdt" = base_outputs, 
+                            "crs_dt" = "EPSG:4326") 
+  class(base_outputs_stdt) <- c("list", "stdt")
   
-  expect_no_error(meta_learner_predict(meta_model,
-                                       base_outputs = base_outputs))
-  model_output <- meta_learner_predict(meta_model,
-                                       base_outputs = base_outputs)
-  expect_true(class(model_output)[1] == "data.table")
-  
-  expect_true(all(c("lon", "lat", "time") %in% colnames(model_output)))
+  expect_no_error(meta_learner_predict(meta_model, base_outputs_stdt))
+  model_output <- meta_learner_predict(meta_model, base_outputs_stdt)
+  expect_identical(class(model_output), c("list", "stdt"))
+  expect_true(all(c("lon", "lat", "time") %in% colnames(model_output$stdt)))
   
   # check that datatable input is not changed by the function
-  expect_identical(base_outputs, data.table::as.data.table(df))
+  expect_identical(base_outputs_stdt$stdt, data.table::as.data.table(df))
   
   # check it does not work when one baselearner is missing
   base_outputs[, baselearner3 := NULL]
-  expect_error(meta_learner_predict(meta_model, base_outputs = base_outputs), 
+  base_outputs_stdt <- list("stdt" = base_outputs, 
+                            "crs_dt" = "EPSG:4326") 
+  class(base_outputs_stdt) <- c("list", "stdt")
+  expect_error(meta_learner_predict(meta_model, base_outputs_stdt), 
                "Error: baselearners list incomplete or with wrong names")
   
   # check it does not work when baselearner names are not the same
@@ -142,7 +145,10 @@ test_that("the meta learner prediction abides", {
     kfolds = kfolds, y = response
   )
   base_outputs <- data.table::as.data.table(df)
-  expect_error(meta_learner_predict(meta_model, base_outputs = base_outputs), 
+  base_outputs_stdt <- list("stdt" = base_outputs, 
+                            "crs_dt" = "EPSG:4326") 
+  class(base_outputs_stdt) <- c("list", "stdt")
+  expect_error(meta_learner_predict(meta_model, base_outputs_stdt), 
                "Error: baselearners list incomplete or with wrong names")
   
 })

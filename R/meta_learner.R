@@ -71,8 +71,8 @@ meta_learner_fit <- function(base_predictor_list,
 #' (outputs of each base learner) are S-T based.
 #'
 #' @param meta_fit list of BART objects from meta_learner_fit
-#' @param base_outputs datatable containing lat, lon, time and the covariates
-#' (outputs of each base learner) at prediction locations. 
+#' @param base_outputs stdt object (see convert_spacetime_data.R): list with datatable containing lat, lon, time and the covariates
+#' (outputs of each base learner) at prediction locations and crs. 
 #' @param nthreads integer(1). Number of threads used in BART::predict.wbart
 #' @note  The predictions can be a rast or sf, which depends on the same
 #' respective format of the covariance matrix input - cov_pred
@@ -81,7 +81,13 @@ meta_learner_fit <- function(base_predictor_list,
 #'
 #' @examples NULL
 #' @references https://rspatial.github.io/terra/reference/predict.html
-meta_learner_predict <- function(meta_fit, base_outputs, nthreads = 2) {
+meta_learner_predict <- function(meta_fit, base_outputs_stdt, nthreads = 2) {
+  
+  if (!(identical(class(base_outputs_stdt), c("list", "stdt")))) {
+    stop("Error: param base_outputs_stdt is not in stdt format.")
+  }
+  
+  base_outputs <- base_outputs_stdt$stdt
   
   if (any(!(colnames(meta_fit[[1]]$varcount) %in% colnames(base_outputs)))) {
     stop("Error: baselearners list incomplete or with wrong names")
@@ -117,6 +123,9 @@ meta_learner_predict <- function(meta_fit, base_outputs, nthreads = 2) {
     as.data.table()
   names(meta_pred_out) <- "meta_pred"
   meta_pred_out <- cbind(base_outputs[,.(lon, lat, time)], meta_pred_out)
-
+  meta_pred_out <- list("stdt" = meta_pred_out, 
+                        "crs_dt" = base_outputs_stdt$crs_dt) 
+  class(meta_pred_out) <- c("list", "stdt")
+  
   return(meta_pred_out)
 }
