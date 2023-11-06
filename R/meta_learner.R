@@ -1,5 +1,3 @@
-library(data.table)
-
 #' meta_learner_fit
 #' Fit a BART (Bayesian Additive Regression Tree) meta learner. It takes
 #' predictions of other models such as kriging, GLM, machine learning models as
