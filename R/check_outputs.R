@@ -1,6 +1,6 @@
 ## A suite of functions to check output data
-## Last edited 10/05/2023
-## Insang Song
+## Output data refers to outputs of base/meta learners
+## Last edited 11/03/2023
 
 #' Check output locations are in the reference spatial domain of the mainland US
 #'

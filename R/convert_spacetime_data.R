@@ -24,11 +24,14 @@ convert_stobj_to_stdt <- function(stobj) {
     }
     stdt <- data.table::as.data.table(stobj)
     crs_dt <- NA
-  } else if (format == "sf" || format == "sftime") {
+  } 
+  else if (format == "sf" || format == "sftime") {
     if (any(!(c("geometry", "time") %in% colnames(stobj)))) {
       stop("Error: stobj does not contain geometry and time columns")
     }
     crs_dt <- as.character(sf::st_crs(stobj))[1]
+    stobj[, c("lon", "lat")] <- sf::st_coordinates(stobj)
+    stobj <- sf::st_drop_geometry(stobj)
     stobj[, c("lon", "lat")] <- sf::st_coordinates(stobj)
     stobj <- sf::st_drop_geometry(stobj)
     stdt <- data.table::as.data.table(stobj)
@@ -36,6 +39,7 @@ convert_stobj_to_stdt <- function(stobj) {
     if (!("time") %in% names(stobj)) {
       stop("stobj does not contain time column")
     }
+    crs_dt <- terra::crs(stobj)
     crs_dt <- terra::crs(stobj)
     stdf <- as.data.frame(stobj, geom = "XY")
     names(stdf)[names(stdf) == "x"] <- "lon"

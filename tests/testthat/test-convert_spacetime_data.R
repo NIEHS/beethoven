@@ -1,4 +1,11 @@
 test_that("convert_stobj_to_stdt works well", {
+  withr::local_package("sf")
+  withr::local_package("terra")
+  withr::local_package("data.table")
+  withr::local_package("tidyr")
+  withr::local_package("dplyr")
+  withr::local_options(list(sf_use_s2 = FALSE))
+  
   lon <- seq(-112, -101, length.out = 5) # create lon sequence
   lat <- seq(33.5, 40.9, length.out = 5) # create lat sequence
   df <- expand.grid("lon" = lon, "lat" = lat) # expand to regular grid
@@ -35,9 +42,10 @@ test_that("convert_stobj_to_stdt works well", {
   stobj <- sf::st_as_sf(df, coords = c("lon", "lat"), crs = "EPSG:4326")
   expect_no_error(convert_stobj_to_stdt(stobj))
   stdt <- convert_stobj_to_stdt(stobj)$stdt
+  crsdt <- convert_stobj_to_stdt(stobj)$crs_dt
   expect_equal(class(stdt)[[1]], "data.table")
-  expect_equal(class(convert_stobj_to_stdt(stobj)$crs_dt), "character")
-  expect_true(terra::same.crs(convert_stobj_to_stdt(stobj)$crs_dt, "EPSG:4326"))
+  expect_equal(class(crsdt), "character")
+  expect_true(terra::same.crs(crsdt, "EPSG:4326"))
   expect_false(any(!(c("lon", "lat", "time") %in% colnames(stdt))))
   expect_equal(
     stdt[lon == -112 & lat == 35.35 & time == "2023-11-02", var1],
@@ -56,7 +64,7 @@ test_that("convert_stobj_to_stdt works well", {
   expect_no_error(convert_stobj_to_stdt(stobj))
   expect_equal(class(convert_stobj_to_stdt(stobj)$crs_dt), "character")
   # 2) it should fail because time columns is misspelled
-  stobj$tjme <- stobj$time
+  stobj$time <- stobj$time
   stobj$time <- NULL
   expect_error(
     convert_stobj_to_stdt(stobj),
@@ -65,7 +73,7 @@ test_that("convert_stobj_to_stdt works well", {
 
   # test with SpatVector objects
   # 1) it should work
-  stobj <- vect(df, geom = c("lon", "lat"), crs = "EPSG:4326", keepgeom = FALSE)
+  stobj <- terra::vect(df, geom = c("lon", "lat"), crs = "EPSG:4326", keepgeom = FALSE)
   expect_no_error(convert_stobj_to_stdt(stobj))
   stdt <- convert_stobj_to_stdt(stobj)$stdt
   expect_equal(class(stdt)[[1]], "data.table")
@@ -84,6 +92,12 @@ test_that("convert_stobj_to_stdt works well", {
   # test with SpatRastDataset created from 2 SpatRast (i.e. 2 variables)
   # with 3 layers (i.e. 3 timestamps)
   # 1) it should work
+  var1 <- terra::rast(extent = c(-112, -101, 33.5, 40.9), 
+               ncol = 5, 
+               nrow = 5, 
+               crs = "epsg:4326")
+  terra::values(var1) <- seq(-5, 19)
+  terra::add(var1) <- c(var1**2, var1**3)
   var1 <- rast(
     extent = c(-112, -101, 33.5, 40.9),
     ncol = 5,
@@ -105,17 +119,13 @@ test_that("convert_stobj_to_stdt works well", {
   stobj <- terra::sds(var1, var2)
   names(stobj) <- c("var1", "var2")
   expect_no_error(convert_stobj_to_stdt(stobj))
-  stdt <- convert_stobj_to_stdt(stobj)$stdt
-  expect_equal(class(stdt)[[1]], "data.table")
-  expect_equal(class(convert_stobj_to_stdt(stobj)$crs_dt), "character")
-  expect_true(terra::same.crs(convert_stobj_to_stdt(stobj)$crs_dt, "EPSG:4326"))
-  expect_false(any(!(c("lon", "lat", "time") %in% colnames(stdt))))
-  expect_equal(
-    stdt[lon == -106.5 & lat == 37.2 & time == "2023-11-02", var1],
-    49
-  )
-  expect_equal(
-    stdt[lon == -106.5 & lat == 37.2 & time == "2023-11-02", var2],
-    9
-  )
+  stdt_converted <- convert_stobj_to_stdt(stobj)
+  expect_equal(class(stdt_converted$stdt)[[1]], "data.table")
+  expect_equal(class(stdt_converted$crs_dt), "character")
+  expect_true(terra::same.crs(stdt_converted$crs_dt, "EPSG:4326"))
+  expect_false(any(!(c("lon", "lat", "time") %in% colnames(stdt_converted$stdt))))
+  expect_equal(stdt_converted$stdt[lon == -106.5 & lat == stdt_converted$stdt$lat[37] & time == "2023-11-02", var1],
+               49)
+  expect_equal(stdt_converted$stdt[lon == -106.5 & lat == stdt_converted$stdt$lat[37] & time == "2023-11-02", var2], 
+               9)
 })
