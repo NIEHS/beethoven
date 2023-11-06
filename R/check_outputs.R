@@ -8,6 +8,7 @@
 #' @param spatial_domain sf/sftime object of spatial domain
 #' @return A logical vector of length nrow(model_output)
 #' @author Insang Song
+#' @import sf
 #' @export
 check_output_locs_are_valid <- function(
     model_output,
@@ -39,7 +40,7 @@ check_output_locs_are_valid <- function(
 #' @param observation a data.frame with observations
 #' @param observation_mean_name character(1). field name of observations
 #' in observation object.
-#' @param tolerance_factor numeric(1). denominator(min) multiplier(max)
+#' @param tolerance_factor numeric(1). denominator (min) or multiplier (max)
 #' @return Logical value indicating the mean values are within the range or not.
 #' @author Insang Song
 #' @export
@@ -74,18 +75,30 @@ check_means_are_valid <- function(
 
 #' Check if the output is with the valid coordinate reference system
 #'
-#' @param model_output sf/sftime object of model output.
+#' @param model_output Spat*/sf* object of model output.
 #' @param crs_list a character/integer vector of acceptable CRS.
 #' Default is c("EPSG:4326", "EPSG:5070")
 #' @return A logical value indicating the model is compliant to one of
 #'  elements in crs_list.
 #' @author Insang Song
+#' @importFrom methods is
+#' @import sf
+#' @import terra
 #' @export
 check_crs_is_valid <- function(
     model_output,
     crs_list = c("EPSG:4326", "EPSG:5070")) {
-  crs_output <- sf::st_crs(model_output)
-  checked <- sapply(crs_list, function(x) crs_output == sf::st_crs(x))
+  detected_class <- class(model_output)[[1]]
+  detect_fun <- switch(detected_class,
+    sf = sf::st_crs,
+    sftime = sf::st_crs,
+    SpatVector = terra::crs,
+    SpatRaster = terra::crs,
+    SpatRasterDataset = terra::crs)
+
+  crs_output <- detect_fun(model_output)
+  checked <- sapply(crs_list, 
+    function(x) detect_fun(crs_output) == detect_fun(x)$wkt)
   checked <- any(checked)
   return(checked)
 }
@@ -93,7 +106,7 @@ check_crs_is_valid <- function(
 
 
 
-#' Check if the output covariates are complete (TODO)
+#' Check if the output covariates are complete
 #'
 #' @param model_output sf/sftime object of model output.
 #' @param fields_to_check character(varying).
@@ -104,6 +117,8 @@ check_crs_is_valid <- function(
 #' TRUE means there are NA values at least one data value) or a list
 #' (when report_fields_na is TRUE) object.
 #' A list includes the list of fields that include NAs.
+#' @importFrom sf st_drop_geometry
+#' @importFrom methods is
 #' @export
 #' @author Insang Song
 check_data_completeness <- function(

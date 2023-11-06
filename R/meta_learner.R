@@ -14,32 +14,37 @@
 meta_learner_fit <- function(base_predictor_list,
                              kfolds, y) {
   
-  
+  # Unnamed base_predictor_list is not accepted
+  if (is.null(names(base_predictor_list)) ||
+    any(is.na(names(base_predictor_list)))) {
+      stop("base_predictor_list should be a named list.\n")
+  }
+
   # check lengths of each base predictor #add a test for names
   if (sapply(base_predictor_list, length, simplify = TRUE) |>
         stats::var() != 0) {
     stop("Error in meta_learner_fit:
          Base predictors need to be the same length")
   }
-  
+
   # check that length of base predictors is the same than y
   if(lengths(base_predictor_list)[1] != length(y)) {
     stop("Error in meta_learner_fit:
          Predictors and response are not the same length")
   }
-     
+
   # check that length of kfolds is the same than y
   if(length(kfolds) != length(y)) {
     stop("Error in meta_learner_fit:
          kfolds vector and response are not the same length")
   }
-   
+
   # check that base_predictor_list only contains only numeric
   if (any(sapply(base_predictor_list, class) != "numeric")) {
     stop("Error in meta_learner_fit:
          Some of base predictors are not numeric")
   }
-    
+
   # convert list to data.frame
   x_design <- as.data.frame(base_predictor_list)
 
@@ -75,26 +80,34 @@ meta_learner_fit <- function(base_predictor_list,
 #' @note  The predictions can be a rast or sf, which depends on the same
 #' respective format of the covariance matrix input - cov_pred
 #' @return meta_pred: the final meta learner predictions
+#' @importFrom BART predict.wbart
+#' @importFrom data.table .SD
+#' @importFrom data.table .SDcols
+#' @importFrom data.table as.data.table
 #' @export
 #'
 #' @examples NULL
 #' @references https://rspatial.github.io/terra/reference/predict.html
 meta_learner_predict <- function(meta_fit, base_outputs_stdt, nthreads = 2) {
-  
+
   if (!(identical(class(base_outputs_stdt), c("list", "stdt")))) {
     stop("Error: param base_outputs_stdt is not in stdt format.")
   }
-  
+
   base_outputs <- base_outputs_stdt$stdt
-  
+
   if (any(!(colnames(meta_fit[[1]]$varcount) %in% colnames(base_outputs)))) {
     stop("Error: baselearners list incomplete or with wrong names")
   }
-  
+
   # extract baselearners predictions used in metalearner
-  base_names <- colnames(meta_fit[[1]]$varcount)
-  mat_pred <- as.matrix(base_outputs[, ..base_names])
-  
+  base_name_index <- seq(1, ncol(base_outputs$stdt))
+  # changed to integer indices
+  # as we impose the fixed column order in stdt objects.
+  spt_name_index <- grep("(lon|lat|time)", colnames(base_outputs$stdt))
+  base_name_index <- base_name_index[-spt_name_index]
+  mat_pred <- as.matrix(base_outputs[, .SD, .SDcols = base_name_index])
+
   # pre-allocate
   meta_pred <- matrix(nrow = nrow(mat_pred), ncol = length(meta_fit))
 
@@ -118,12 +131,12 @@ meta_learner_predict <- function(meta_fit, base_outputs_stdt, nthreads = 2) {
   meta_pred_out <- iter_pred(mat_pred_in = mat_pred)
   meta_pred_out <- meta_pred_out |>
     matrix(ncol = 1) |>
-    as.data.table()
+    data.table::as.data.table()
   names(meta_pred_out) <- "meta_pred"
-  meta_pred_out <- cbind(base_outputs[,.(lon, lat, time)], meta_pred_out)
-  meta_pred_out <- list("stdt" = meta_pred_out, 
-                        "crs_dt" = base_outputs_stdt$crs_dt) 
+  meta_pred_out <- cbind(base_outputs[, spt_name_index], meta_pred_out)
+  meta_pred_out <- list("stdt" = meta_pred_out,
+                        "crs_dt" = base_outputs_stdt$crs_dt)
   class(meta_pred_out) <- c("list", "stdt")
-  
+
   return(meta_pred_out)
 }

@@ -16,6 +16,18 @@ testthat::test_that("Output CRS is valid", {
   iscrsvalid <- check_crs_is_valid(model_results)
   testthat::expect_equal(iscrsvalid, TRUE)
 
+  # terra case:
+  # due to WKT2/WKT version discrepancy and file export
+  # behavior in GDAL, the system-default EPSG:4326 (ensemble)
+  # is different from what we get at importing (EPSG:4326 plain)
+  # In this test, we assume that the crs is EPSG:4326,
+  # then "EPSG:4326" is explicitly declared in crs argument in vect.
+  # TODO: follow issues in WKT2/CRS handling in different file formats
+  # Will consider "OGC:CRS84" (non-3D GCS)
+  model_results_t <- terra::vect(path_results, crs = "EPSG:4326")
+  iscrsvalid_t <- check_crs_is_valid(model_results_t)
+  testthat::expect_equal(iscrsvalid_t, TRUE)
+
   model_results_2163 <- sf::st_transform(model_results, "EPSG:2163")
   crsnotvalid <- check_crs_is_valid(model_results_2163)
   testthat::expect_equal(crsnotvalid, FALSE)
