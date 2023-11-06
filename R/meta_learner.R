@@ -1,3 +1,5 @@
+library(data.table)
+
 #' meta_learner_fit
 #' Fit a BART (Bayesian Additive Regression Tree) meta learner. It takes
 #' predictions of other models such as kriging, GLM, machine learning models as
@@ -63,58 +65,34 @@ meta_learner_fit <- function(base_predictor_list,
 }
 
 
-#' meta_learner_predict - take the list of BART fit objects and prediction
-#' location info to create meta_learner predictions. The BART
+#' meta_learner_predict - take the list of BART fit objects and 
+#' predictions of baselearners to create meta_learner predictions. The BART
 #' meta learner is not explicitly a S-T model, but the input covariates 
-#' (outputs of each base learner) are S-T based. Therefore, the base_outputs 
-#' input should be either an sf::sf-point or a terra::rast file format
+#' (outputs of each base learner) are S-T based.
 #'
 #' @param meta_fit list of BART objects from meta_learner_fit
-#' @param base_outputs spatial data format containing the covariates (outputs of each base learner)
-#' at prediction locations. Can be a SpatRaster, a SpatVector or an sf object.
+#' @param base_outputs datatable containing lat, lon, time and the covariates
+#' (outputs of each base learner) at prediction locations. 
 #' @param nthreads integer(1). Number of threads used in BART::predict.wbart
 #' @note  The predictions can be a rast or sf, which depends on the same
 #' respective format of the covariance matrix input - cov_pred
-#' @return meta_pred file of the final meta learner predictions, can be rast
-#' or sf file
+#' @return meta_pred: the final meta learner predictions
 #' @export
 #'
 #' @examples NULL
 #' @references https://rspatial.github.io/terra/reference/predict.html
 meta_learner_predict <- function(meta_fit, base_outputs, nthreads = 2) {
-
-  # Check prediction output type
-  pred_format <- class(base_outputs)[[1]]
-  valid_file_formats <- c("SpatRaster", "SpatVector", "sf")
-
-  if (!any(pred_format %in% valid_file_formats)) {
-    stop("Invalid Metalearner Predictor Matrix file format.
-          Expected one of: ", paste(valid_file_formats, collapse = ", "))
+  
+  if (any(!(colnames(meta_fit[[1]]$varcount) %in% colnames(base_outputs)))) {
+    stop("Error: baselearners list incomplete or with wrong names")
   }
-
-  # matrix where values are predicted
-  mat_pred <- switch(pred_format,
-    SpatRaster = as.matrix(base_outputs),
-    SpatVector = as.matrix(as.data.frame(base_outputs)),
-    sf = as.matrix(base_outputs)[,-ncol(base_outputs)])
+  
+  # extract baselearners predictions used in metalearner
+  base_names <- colnames(meta_fit[[1]]$varcount)
+  mat_pred <- as.matrix(base_outputs[, ..base_names])
+  
   # pre-allocate
   meta_pred <- matrix(nrow = nrow(mat_pred), ncol = length(meta_fit))
-
-  # return(mat_pred)
-  # approach: convert SpatRaster and sf to N-by-K matrices
-  # where K denotes the number of base learners
-  # we assume df_pred is pre-cleaned and only includes the 
-  # base learner predictions
-  # then putting them into predict function.
-  # SpatRaster: convert each layer to column vector then cbind
-  #    double check if the vector conversion results are
-  #    column or row ordered
-  # sf: select fields then as.matrix
-
-  # structure assumption:
-  # multilayer SpatRaster -- row-order conversion in as.data.frame
-  # multicolumn SpatVector -- long format
-  # multicolumn sf -- long format
 
   iter_pred <- function(
     meta_fit_in = meta_fit,
@@ -133,44 +111,12 @@ meta_learner_predict <- function(meta_fit, base_outputs, nthreads = 2) {
     return(meta_pred_out)
   }
 
-  # conserve the input object class
-  # a more succinct way is possible...
-  temp_pred <- base_outputs
+  meta_pred_out <- iter_pred(mat_pred_in = mat_pred)
+  meta_pred_out <- meta_pred_out |>
+    matrix(ncol = 1) |>
+    as.data.table()
+  names(meta_pred_out) <- "meta_pred"
+  meta_pred_out <- cbind(base_outputs[,.(lon, lat, time)], meta_pred_out)
 
-  if (pred_format == "SpatRaster") {
-    # numeric vector to raster
-    meta_pred_out <- iter_pred(mat_pred_in = mat_pred)
-    # meta_pred_out <- matrix(meta_pred_out, 
-    #nrow = dim(base_outputs)[1], byrow = TRUE)
-    result_pred <- terra::setValues(temp_pred[[1]], meta_pred_out)
-
-  } else if (pred_format == "SpatVector") {
-
-    meta_pred_out <- iter_pred(mat_pred_in = mat_pred) |>
-      data.frame()
-    names(meta_pred_out) <- "meta_pred_pm2.5"
-    # meta_pred_out <- meta_pred_out |>
-    #   matrix(ncol = 1) |>
-    #   as.data.frame()
-    temp_pred[] <- NULL
-    result_pred <- cbind(temp_pred, meta_pred_out)
-    
-  } else if (pred_format == "sf") {
-
-    mat_pred <- sf::st_drop_geometry(base_outputs)
-    mat_pred <- as.matrix(mat_pred)
-    meta_pred_out <- iter_pred(mat_pred_in = mat_pred)
-    meta_pred_out <- meta_pred_out |>
-      matrix(ncol = 1) |>
-      as.data.frame()
-    names(meta_pred_out) <- "meta_pred_pm2.5"
-    temp_pred[] <- NULL
-    result_pred <- cbind(temp_pred, meta_pred_out)
-
-  } else {
-    stop("Invalid Metalearner Predictor Matrix file format.
-         Expected one of: ", paste(valid_file_formats, collapse = ", "))
-  }
-
-  return(result_pred)
+  return(meta_pred_out)
 }

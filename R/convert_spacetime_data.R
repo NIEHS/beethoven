@@ -1,4 +1,3 @@
-
 #' Convert spatio-temporal object to a datatable with lon, lat, time, predictors
 #' columns. It also returns the crs.
 #'
@@ -13,11 +12,6 @@
 convert_stobj_to_stdt <- function(stobj) {
   
   format <- class(stobj)[[1]]
-  if (!format %in%
-  c("data.frame", "data.table", "sf",
-  "sftime", "SpatVector", "SpatRasterDataset")) {
-    stop("Error: stobj class not accepted")
-  }
 
   if (format == "data.frame" || format == "data.table") {
     if (any(!(c("lon", "lat", "time") %in% colnames(stobj)))) {
@@ -25,6 +19,7 @@ convert_stobj_to_stdt <- function(stobj) {
     }
     stdt <- data.table::as.data.table(stobj)
     crs_dt <- NA
+  } else if (format == "sf" || format == "sftime") {
   }
 
   else if (format == "sf" || format == "sftime") {
@@ -35,14 +30,14 @@ convert_stobj_to_stdt <- function(stobj) {
     stobj[, c("lon", "lat")] <- sf::st_coordinates(stobj)
     stobj <- sf::st_drop_geometry(stobj)
     stdt <- data.table::as.data.table(stobj)
-  }
-  
-  else if (format == "SpatVector") {
+  } else if (format == "SpatVector") {
     if (!("time") %in% names(stobj)) {
       stop("stobj does not contain time column")
     }
     crs_dt <- terra::crs(stobj)
     stdf <- as.data.frame(stobj, geom = "XY")
+    names(stdf)[names(stdf) == "x"] <- "lon"
+    names(stdf)[names(stdf) == "y"] <- "lat"
     names(stdf)[names(stdf) == "x"] <- "lon"
     names(stdf)[names(stdf) == "y"] <- "lat"
     stdt <- data.table::as.data.table(stdf)
@@ -77,6 +72,8 @@ convert_stobj_to_stdt <- function(stobj) {
       stdf[, varname_original] <- df_var[, varname_original]
     }
     stdt <- data.table::as.data.table(stdf)
+  } else {
+    stop("Error: stobj class not accepted")
   }
 
   # sort stdt
