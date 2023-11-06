@@ -4,9 +4,8 @@
 #'
 #'
 
-
 test_that("the meta learner fitting abides", {
-  skip()
+  #skip()
   # Test data
   response <- 3 + rnorm(100)
   kfolds <- sample(rep(1:5, length.out = length(response)))
@@ -122,8 +121,14 @@ test_that("the meta learner prediction abides", {
   
   expect_no_error(meta_learner_predict(meta_model,
                                        base_outputs = base_outputs))
+  model_output <- meta_learner_predict(meta_model,
+                                       base_outputs = base_outputs)
   expect_true(class(model_output)[1] == "data.table")
-  # TODOOOO check output columns (add lat lon time columns to output)
+  
+  expect_true(all(c("lon", "lat", "time") %in% colnames(model_output)))
+  
+  # check that datatable input is not changed by the function
+  expect_identical(base_outputs, data.table::as.data.table(df))
   
   # check it does not work when one baselearner is missing
   base_outputs[, baselearner3 := NULL]

@@ -1,3 +1,5 @@
+library(data.table)
+
 #' meta_learner_fit
 #' Fit a BART (Bayesian Additive Regression Tree) meta learner. It takes
 #' predictions of other models such as kriging, GLM, machine learning models as
@@ -109,17 +111,12 @@ meta_learner_predict <- function(meta_fit, base_outputs, nthreads = 2) {
     return(meta_pred_out)
   }
 
-  # conserve the input object class
-  # a more succinct way is possible...
-  temp_pred <- base_outputs
-
   meta_pred_out <- iter_pred(mat_pred_in = mat_pred)
   meta_pred_out <- meta_pred_out |>
     matrix(ncol = 1) |>
-    as.data.frame()
-  names(meta_pred_out) <- "meta_pred_pm2.5"
-  temp_pred[] <- NULL
-  result_pred <- cbind(temp_pred, meta_pred_out)
+    as.data.table()
+  names(meta_pred_out) <- "meta_pred"
+  meta_pred_out <- cbind(base_outputs[,.(lon, lat, time)], meta_pred_out)
 
-  return(result_pred)
+  return(meta_pred_out)
 }
