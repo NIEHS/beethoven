@@ -80,10 +80,8 @@ meta_learner_fit <- function(base_predictor_list,
 #' @note  The predictions can be a rast or sf, which depends on the same
 #' respective format of the covariance matrix input - cov_pred
 #' @return meta_pred: the final meta learner predictions
-#' @importFrom BART predict.wbart
-#' @importFrom data.table .SD
-#' @importFrom data.table .SDcols
-#' @importFrom data.table as.data.table
+#' @import data.table
+#' @import BART
 #' @export
 #'
 #' @examples NULL
@@ -101,10 +99,10 @@ meta_learner_predict <- function(meta_fit, base_outputs_stdt, nthreads = 2) {
   }
 
   # extract baselearners predictions used in metalearner
-  base_name_index <- seq(1, ncol(base_outputs$stdt))
+  base_name_index <- seq(1, ncol(base_outputs))
   # changed to integer indices
   # as we impose the fixed column order in stdt objects.
-  spt_name_index <- grep("(lon|lat|time)", colnames(base_outputs$stdt))
+  spt_name_index <- grep("(lon|lat|time)", colnames(base_outputs))
   base_name_index <- base_name_index[-spt_name_index]
   mat_pred <- as.matrix(base_outputs[, .SD, .SDcols = base_name_index])
 
@@ -131,9 +129,9 @@ meta_learner_predict <- function(meta_fit, base_outputs_stdt, nthreads = 2) {
   meta_pred_out <- iter_pred(mat_pred_in = mat_pred)
   meta_pred_out <- meta_pred_out |>
     matrix(ncol = 1) |>
-    data.table::as.data.table()
+    as.data.frame()
   names(meta_pred_out) <- "meta_pred"
-  meta_pred_out <- cbind(base_outputs[, spt_name_index], meta_pred_out)
+  meta_pred_out <- cbind(base_outputs[, ..spt_name_index], meta_pred_out)
   meta_pred_out <- list("stdt" = meta_pred_out,
                         "crs_dt" = base_outputs_stdt$crs_dt)
   class(meta_pred_out) <- c("list", "stdt")

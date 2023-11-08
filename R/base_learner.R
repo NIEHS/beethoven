@@ -7,7 +7,7 @@
 #' Fit base learner
 #' @param learner character(1). Currently one of 'randomforest', 'xgboost',
 #' and 'cnn'
-#' @param covars
+#' @param covars stdt. See \link{convert_stobj_to_stdt}
 #' @param dependent_name character(1). Name of the dependent variable.
 #' @param independent_name character(1). Names of independent variables.
 #' @param cv_mode character(1). One of 'lolo (leave-one-location-out)',
@@ -22,11 +22,8 @@
 #' Name of the unique time identifier
 #' @return data.frame
 #' @author Insang Song
-#' @description 
-#' @importFrom 
+#' @description This function fits a selected base learner, which is supposed to be one of random forest, XGBoost, and convolutional neural network, using one of spatiotemporal cross-validation approaches.
 #' @export
-
-
 fit_base_learner <- function(
   covars,
   learner = c("randomforest", "xgboost", "cnn"),
@@ -54,34 +51,7 @@ fit_base_learner <- function(
 }
 
 #' Fit random forests with ranger
-#' @param covars
-#' @param dependent_name character(1). Name of the dependent variable.
-#' @param independent_name character(1). Names of independent variables.
-#' @param cv_mode character(1). One of 'lolo (leave-one-location-out)',
-#' 'loto (leave-one-time-out)',
-#' 'lolto (leave-one-location-time-out)',
-#' 'lblo (leave-block-location-out)',
-#' 'lbto (leave-block-time-out)',
-#' 'random (full random selection)'
-#' @param cv_fold integer(1). Number of folds for cross-validation.
-#' @param sp_index character(1). Name of the unique spatial identifier
-#' @param t_index character(2). Default is 'time'. 
-#' Name of the unique time identifier
-#' @return data.frame
-#' @author 
-#' @description fit base learner using covariate data.frame/matrix
-#' @import ranger
-#' @export
-
-fit_base_learner_ranger <- function(){
-    ranger::ranger()
-
-}
-
-
-
-#' Fit convolutional neural networks with neural network library
-#' @param covars
+#' @param covars stdt. See \link{convert_stobj_to_stdt}
 #' @param dependent_name character(1). Name of the dependent variable.
 #' @param independent_name character(1). Names of independent variables.
 #' @param cv_mode character(1). One of 'lolo (leave-one-location-out)',
@@ -96,7 +66,33 @@ fit_base_learner_ranger <- function(){
 #' Name of the unique time identifier
 #' @return data.frame
 #' @author Insang Song
-#' @description 
+#' @import ranger
+#' @export
+
+fit_base_learner_ranger <- function(){
+    ranger::ranger()
+
+}
+
+
+
+#' Fit convolutional neural networks with neural network library
+#' @param covars stdt. See \link{convert_stobj_to_stdt}
+#' @param dependent_name character(1). Name of the dependent variable.
+#' @param independent_name character(1). Names of independent variables.
+#' @param cv_mode character(1). One of 'lolo (leave-one-location-out)',
+#' 'loto (leave-one-time-out)',
+#' 'lolto (leave-one-location-time-out)',
+#' 'lblo (leave-block-location-out)',
+#' 'lbto (leave-block-time-out)',
+#' 'random (full random selection)'
+#' @param cv_fold integer(1). Number of folds for cross-validation.
+#' @param sp_index character(1). Name of the unique spatial identifier
+#' @param t_index character(2). Default is 'time'. 
+#' Name of the unique time identifier
+#' @return data.frame
+#' @author Insang Song
+#' @description This function uses torch as a backend. Torch currently supports CPU, CUDA, and Metal (Apple Silicon graphics), thus users can leverage available computational assets to accelerate the model fitting.
 #' @import torch
 #' @import reticulate
 #' @export
@@ -113,7 +109,7 @@ fit_base_learner_cnn <- function(){
 
 
 #' Fit XGBoost model
-#' @param covars
+#' @param covars stdt. See \link{convert_stobj_to_stdt}
 #' @param dependent_name character(1). Name of the dependent variable.
 #' @param independent_name character(1). Names of independent variables.
 #' @param cv_mode character(1). One of 'lolo (leave-one-location-out)',
@@ -128,7 +124,6 @@ fit_base_learner_cnn <- function(){
 #' Name of the unique time identifier
 #' @return data.frame
 #' @author Insang Song
-#' @description 
 #' @importFrom xgboost xgb.train
 #' @export
 

@@ -20,5 +20,5 @@ Convert spatio-temporal object to a datatable with lon, lat, time, predictors
 columns. It also returns the crs.
 }
 \author{
-Eva Marques
+Eva Marques, Insang Song
 }

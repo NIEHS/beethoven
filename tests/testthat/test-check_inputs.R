@@ -11,7 +11,7 @@ testthat::test_that("raster is bounded within project domain", {
   reference_polygon <- sf::st_read("../testdata/US-mainland-boundary.gpkg")
   sf::st_crs(example_raster) <- sf::st_crs("EPSG:4326")
 
-  iswithin <- check_input_raster_in_extent(example_raster, reference_polygon)
+  suppressWarnings(iswithin <- check_input_raster_in_extent(example_raster, reference_polygon))
   # Add checks for raster data is at least a subset of US+buffer bbox
   testthat::expect_equal(iswithin, 1)
 })

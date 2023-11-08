@@ -80,11 +80,9 @@ test_that("the meta learner fitting abides", {
   
   # test that it throws an error when some of predictors are not numeric
   kfolds <- sample(rep(1:5, length.out = length(response)))
-  predictor_list <- list(
-    runif(length(response), min = 1, max = 10),
-    rnorm(length(response)),
+  predictor_list[[3]] <-
     c(1, rep("I love Roquefort cheese", length(response) - 1))
-  )
+  
   expect_error(meta_learner_fit(
     base_predictor_list = predictor_list,
     kfolds = kfolds, y = response

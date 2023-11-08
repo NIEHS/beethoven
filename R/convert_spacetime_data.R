@@ -5,11 +5,8 @@
 #' a data.table, an sf or sftime, a SpatVector or a SpatRastDataset.
 #' @return a list with a "stdt" a data.table of locations identified by
 #' lat, lon, time columns and "crs_dt" the crs of the data.
+#' @import data.table
 #' @importFrom terra crs
-#' @importFrom data.table as.data.table
-#' @importFrom data.table melt
-#' @importFrom data.table .SD
-#' @importFrom data.table .SDcols
 #' @importFrom sf st_drop_geometry
 #' @importFrom sf st_crs
 #' @author Eva Marques, Insang Song
@@ -32,8 +29,6 @@ convert_stobj_to_stdt <- function(stobj) {
     crs_dt <- as.character(sf::st_crs(stobj))[1]
     stobj[, c("lon", "lat")] <- sf::st_coordinates(stobj)
     stobj <- sf::st_drop_geometry(stobj)
-    stobj[, c("lon", "lat")] <- sf::st_coordinates(stobj)
-    stobj <- sf::st_drop_geometry(stobj)
     stdt <- data.table::as.data.table(stobj)
   } else if (format == "SpatVector") {
     if (!("time") %in% names(stobj)) {
@@ -52,6 +47,7 @@ convert_stobj_to_stdt <- function(stobj) {
     colnames(stdf)[2] <- "lat"
     # -- tranform from wide to long format
     stdf <- stdf |>
+      data.table::as.data.table() |>
       data.table::melt(
         measure.vars = names(stdf)[-1:-2],
         variable.name = "time",
@@ -70,12 +66,13 @@ convert_stobj_to_stdt <- function(stobj) {
       df_var <- as.data.frame(stobj[var], xy = TRUE)
       # -- tranform from wide to long format
       df_var <- df_var |>
+        data.table::as.data.table() |>
         data.table::melt(
           measure.vars = names(df_var)[-1:-2],
           variable.name = "time",
-          value.name = varname_original)
-      stdf[, .SD, .SDcols = varname_original] <-
-        df_var[, .SD, .SDcols = varname_original]
+          value.name = varname_original) |>
+        as.data.frame()
+      stdf[, varname_original] <- df_var[, 4]
     }
     stdt <- data.table::as.data.table(stdf)
   } else {

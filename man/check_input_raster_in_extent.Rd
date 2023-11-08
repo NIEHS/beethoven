@@ -11,9 +11,9 @@ check_input_raster_in_extent(
 )
 }
 \arguments{
-\item{input_raster}{stars object}
+\item{input_raster}{SpatRaster/stars object}
 
-\item{spatial_domain}{sf/sftime object of spatial domain}
+\item{spatial_domain}{sf/sftime/SpatVector object of spatial domain}
 
 \item{domain_tolerance}{numeric(1). Extrusion (in meters) from the bbox
 of spatial_domain.}
@@ -23,7 +23,7 @@ A numeric value reporting the extent of input_raster is
 within the extent of spatial_domain
 }
 \description{
-Check if the input raster is in the expected extent
+\code{domain_tolerance} will have "meters" is converted to arc degrees approximately 100,000 meters = 1 arc degree
 }
 \author{
 Kyle Messier, Insang Song

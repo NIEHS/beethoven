@@ -98,7 +98,7 @@ check_crs_is_valid <- function(
 
   crs_output <- detect_fun(model_output)
   checked <- sapply(crs_list, 
-    function(x) detect_fun(crs_output) == detect_fun(x)$wkt)
+    function(x) detect_fun(crs_output) == detect_fun(x))
   checked <- any(checked)
   return(checked)
 }
