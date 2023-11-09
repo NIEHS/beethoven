@@ -9,7 +9,7 @@ fit_base_learner(
   learner = c("randomforest", "xgboost", "cnn"),
   dependent_name = "pm2.5",
   independent_name,
-  cv_mode = c("lolo", "loto", "lolto", "random", "lblo", "lbto"),
+  cv_mode = c("lolo", "loto", "lolto", "random", "lblo", "lbto", "lblto"),
   cv_fold = 5L,
   sp_index = "Site.ID",
   t_index = "time",
@@ -37,14 +37,23 @@ and 'cnn'}
 
 \item{sp_index}{character(1). Name of the unique spatial identifier}
 
-\item{t_index}{character(2). Default is 'time'. 
+\item{t_index}{character(2). Default is 'time'.
 Name of the unique time identifier}
+
+\item{return_full_object}{logical(1).
+TRUE will return the object whose class is dependent on the package in use,
+whereas FALSE will only return the prediction with
+spatial/temporal information. Full object is potentially helpful for
+debugging.}
 }
 \value{
 data.frame
 }
 \description{
-This function fits a selected base learner, which is supposed to be one of random forest, XGBoost, and convolutional neural network, using one of spatiotemporal cross-validation approaches.
+This function fits a selected base learner,
+which is supposed to be one of random forest, XGBoost,
+and convolutional neural network,
+using one of spatiotemporal cross-validation approaches.
 }
 \author{
 Insang Song

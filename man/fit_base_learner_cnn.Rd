@@ -24,14 +24,17 @@ fit_base_learner_cnn()
 
 \item{sp_index}{character(1). Name of the unique spatial identifier}
 
-\item{t_index}{character(2). Default is 'time'. 
+\item{t_index}{character(2). Default is 'time'.
 Name of the unique time identifier}
 }
 \value{
 data.frame
 }
 \description{
-This function uses torch as a backend. Torch currently supports CPU, CUDA, and Metal (Apple Silicon graphics), thus users can leverage available computational assets to accelerate the model fitting.
+This function uses torch as a backend.
+Torch currently supports CPU, CUDA, and Metal (Apple Silicon graphics),
+thus users can leverage available computational assets
+to accelerate the model fitting.
 }
 \author{
 Insang Song
