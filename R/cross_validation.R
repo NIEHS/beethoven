@@ -71,12 +71,14 @@ generate_cv_index <- function(
 
   index_cv <- switch(
     cv_mode,
-    loto = generate_cv_index_loto(),
-    lolto = generate_cv_index_lolto(),
-    lblo = generate_cv_index_lblo(),
-    lbto = generate_cv_index_lbto(),
-    lblto = generate_cv_index_lblto(),
-    random = generate_cv_index_random()
+    lolo = generate_cv_index_lolo(covars),
+    loto = generate_cv_index_loto(covars),
+    lolto = generate_cv_index_lolto(covars),
+    lblo = generate_cv_index_lblo(covars, cv_fold, blocks, block_id),
+    lbto = generate_cv_index_lbto(covars, cv_fold),
+    lblto = generate_cv_index_lblto(covars, sp_fold = sp_fold, t_fold = t_fold,
+      blocks = blocks, block_id = block_id),
+    random = generate_cv_index_random(covars, cv_fold)
   )
 
   return(index_cv)
@@ -211,8 +213,8 @@ generate_block_sp_index <- function(
 #' Generate spatio-temporal cross-validation index (leave-one-time-out)
 #' @param covars stdt. See \link[NRTAPModel]{convert_stobj_to_stdt}
 #' for details.
-#' @param cv_fold integer(1). Number of folds for cross-validation.
 #' @author Insang Song
+#' @return An integer vector.
 #' @import data.table
 #' @export
 #' @noRd
@@ -229,6 +231,7 @@ generate_cv_index_loto <- function(
 #' @param covars stdt. See \link[NRTAPModel]{convert_stobj_to_stdt}
 #' for details.
 #' @author Insang Song
+#' @return An integer vector.
 #' @import data.table
 #' @export
 #' @noRd
@@ -250,6 +253,8 @@ generate_cv_index_lolo <- function(
 #' (leave-one-location-time-out)
 #' @param covars stdt. See \link[NRTAPModel]{convert_stobj_to_stdt}
 #' for details.
+#' @author Insang Song
+#' @return An integer vector.
 #' @import data.table
 #' @export
 #' @noRd
@@ -269,6 +274,8 @@ generate_cv_index_lolto <- function(
 #' @param cv_fold integer(1). Number of folds for cross-validation.
 #' @param blocks integer(2)/sf/SpatVector object.
 #' @param block_id character(1). The unique identifier of each block.
+#' @author Insang Song
+#' @return An integer vector.
 #' @import data.table
 #' @export
 #' @noRd
@@ -297,6 +304,8 @@ generate_cv_index_lblo <- function(
 #' @param covars stdt. See \link[NRTAPModel]{convert_stobj_to_stdt}
 #' for details.
 #' @param cv_fold integer(1). Number of folds for cross-validation.
+#' @author Insang Song
+#' @return An integer vector.
 #' @import data.table
 #' @export
 #' @noRd
@@ -333,6 +342,8 @@ generate_cv_index_lbto <- function(
 #' @param t_fold integer(1). Number of subfolds for temporal blocks.
 #' @param blocks integer(2)/sf/SpatVector object.
 #' @param block_id character(1). The unique identifier of each block.
+#' @author Insang Song
+#' @return An integer vector.
 #' @details The maximum of results is \code{sp_fold * t_fold}.
 #' @import data.table
 #' @export
@@ -362,6 +373,7 @@ generate_cv_index_lblto <- function(
 #' @param covars stdt. See \link[NRTAPModel]{convert_stobj_to_stdt}
 #' for details.
 #' @param cv_fold integer(1). Number of folds for cross-validation.
+#' @author Insang Song
 #' @return An integer vector with unique values of \code{seq(1, cv_fold)}
 #' @export
 #' @noRd
