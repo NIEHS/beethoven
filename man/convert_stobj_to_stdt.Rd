@@ -13,7 +13,8 @@ a data.table, an sf or sftime, a SpatVector or a SpatRastDataset.}
 }
 \value{
 a list with a "stdt" a data.table of locations identified by
-lat, lon, time columns and "crs_dt" the crs of the data.
+lat, lon, time columns and "crs_dt" the crs of the data in well-known text
+format.
 }
 \description{
 Convert spatio-temporal object to a datatable with lon, lat, time, predictors

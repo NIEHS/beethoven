@@ -11,8 +11,6 @@ fit_base_learner(
   independent_name,
   cv_mode = c("lolo", "loto", "lolto", "random", "lblo", "lbto", "lblto"),
   cv_fold = 5L,
-  sp_index = "Site.ID",
-  t_index = "time",
   return_full_object = FALSE
 )
 }
@@ -26,19 +24,16 @@ and 'cnn'}
 
 \item{independent_name}{character(1). Names of independent variables.}
 
-\item{cv_mode}{character(1). One of 'lolo (leave-one-location-out)',
+\item{cv_mode}{character(1). One of
+'lolo (leave-one-location-out)',
 'loto (leave-one-time-out)',
 'lolto (leave-one-location-time-out)',
 'lblo (leave-block-location-out)',
 'lbto (leave-block-time-out)',
+'lblto (leave-block-location-time-out)', and
 'random (full random selection)'}
 
 \item{cv_fold}{integer(1). Number of folds for cross-validation.}
-
-\item{sp_index}{character(1). Name of the unique spatial identifier}
-
-\item{t_index}{character(2). Default is 'time'.
-Name of the unique time identifier}
 
 \item{return_full_object}{logical(1).
 TRUE will return the object whose class is dependent on the package in use,

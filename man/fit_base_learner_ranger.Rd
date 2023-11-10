@@ -21,11 +21,6 @@ fit_base_learner_ranger()
 'random (full random selection)'}
 
 \item{cv_fold}{integer(1). Number of folds for cross-validation.}
-
-\item{sp_index}{character(1). Name of the unique spatial identifier}
-
-\item{t_index}{character(2). Default is 'time'.
-Name of the unique time identifier}
 }
 \value{
 data.frame

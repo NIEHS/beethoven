@@ -1,0 +1,186 @@
+---
+title: "Spatiotemporal cross validation types"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{cross-validation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+date: "2023-11-10"
+author: "Insang Song"
+---
+
+
+```{r init, echo = FALSE, include = FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+pkgs <- c("data.table", "sf", "terra", "sftime", "dplyr", "ggplot2")
+invisible(sapply(pkgs, library, character.only = TRUE, quietly = TRUE))
+options(sf_use_s2 = FALSE)
+
+source("../R/manipulate_spacetime_data.R")
+source("../R/cross_validation.R")
+```
+
+```{r data conversion}
+set.seed(202311)
+nco <- sf::st_read("./tests/testdata/test_nc_output.nc") |>
+  unique()
+nco_s <- nco |>
+  dplyr::sample_n(10)
+ncost <-
+  split(x = seq(1, 10), f = seq(1, 10)) |>
+  lapply(function(x) as.POSIXct("2022-11-30") + (x * 8.64e4)) |>
+  lapply(function(x) mutate(nco_s, time = x)) |>
+  Reduce(rbind, x = _)
+dim(ncost)
+
+ncost <- sftime::st_as_sftime(ncost,
+    time_column_name = "time")
+
+# to stdt
+ncostdt <- convert_stobj_to_stdt(ncost)
+
+# random-ordered sftime -> stdt: is ordering working well?
+ncost_dis <- ncost[sample(1:100, 100), ]
+ncostdtd <- convert_stobj_to_stdt(ncost_dis)
+
+all.equal(ncostdt$stdt, ncostdtd$stdt)
+```
+
+
+```{r lo-family}
+index_lolo <- generate_cv_index(ncostdt, "lolo")
+index_loto <- generate_cv_index(ncostdt, "loto")
+index_lolto <- generate_cv_index(ncostdt, "lolto")
+
+ncodto <- data.table::copy(ncostdtd$stdt)
+ncodto$lolo <- index_lolo
+ncodto$loto <- index_loto
+ncodto$lolto <- index_lolto
+
+ncodtol <- ncodto |>
+  data.table::melt(
+    id.vars = c("lon", "lat", "time"),
+    measure.vars = c("lolo", "loto", "lolto")
+  )
+ncodtol$value <- factor(ncodtol$value)
+
+ggplot(
+  data = ncodtol[variable != "lolto",],
+  mapping = aes(x = lon, y = lat, color = value)) +
+  geom_point() +
+  labs(title = "LOLO and LOTO") +
+  facet_grid(variable ~ time)
+
+ggplot(
+  data = ncodtol[variable == "lolto",],
+  mapping = aes(x = lon, y = lat, color = value)) +
+  geom_point() +
+  labs(title = "LOLTO") +
+  facet_wrap(~ time)
+```
+
+
+```{r lb-family}
+# data preparation for larger stdt than the previous example
+ncost <-
+  split(x = seq(1, 10), f = seq(1, 10)) |>
+  lapply(function(x) as.POSIXct("2022-11-30") + (x * 8.64e4)) |>
+  lapply(function(x) mutate(nco, time = x)) |>
+  Reduce(rbind, x = _)
+dim(ncost)
+
+ncost <- sftime::st_as_sftime(
+  ncost,
+  time_column_name = "time")
+
+# to stdt
+ncostdt <- convert_stobj_to_stdt(ncost)
+
+index_lblo <- generate_cv_index(ncostdt, "lblo", cv_fold = 5L)
+index_lbto <- generate_cv_index(ncostdt, "lbto", cv_fold = 5L)
+index_lblto <- generate_cv_index(ncostdt, "lblto", sp_fold = 3, t_fold = 5)
+
+```
+
+```{r lb-family plot}
+
+ncodt <- data.table::copy(ncostdt$stdt)
+ncodt$lblo <- index_lblo
+ncodt$lbto <- index_lbto
+ncodt$lblto <- index_lblto
+
+ncodtl <- ncodt |>
+  data.table::melt(
+    id.vars = c("lon", "lat", "time"),
+    measure.vars = c("lblo", "lbto", "lblto")
+  )
+ncodtl$value <- factor(ncodtl$value)
+
+ggplot(
+  data = ncodtl[variable != "lblto",],
+  mapping = aes(x = lon, y = lat, color = value)) +
+  geom_point() +
+  labs(title = "Leave-block-location-out and\nLeave-block-time-out") +
+  facet_grid(variable ~ time)
+
+ggplot(
+  data = ncodtl[variable == "lblto",],
+  mapping = aes(x = lon, y = lat, color = value)) +
+  geom_point() +
+  labs(title = "Leave-block-location-time-out") +
+  facet_wrap(~ time)
+
+
+```
+
+```{r lb-external}
+
+eco4 <- readRDS("../tests/testdata/ecoregion_lv4.rds")
+eco4d <- eco4 |>
+  group_by(US_L3CODE, US_L3NAME) |>
+  dplyr::summarize(nsubregions = n()) |>
+  ungroup()
+
+
+ncodt <- data.table::copy(ncostdt$stdt)
+index_lblo_sf <- generate_cv_index(ncostdt, "lblo", blocks = eco4d, block_id = "US_L3NAME")
+ncodt$lblo_bl <- factor(index_lblo_sf)
+
+index_lblo_tr <- generate_cv_index(ncostdt, "lblo", blocks = terra::vect(eco4d), block_id = "US_L3NAME")
+ncodt$lblo_blt <- factor(index_lblo_tr)
+
+all.equal(index_lblo_sf, index_lblo_tr)
+gc()
+
+ggplot(
+  data = ncodt,
+  mapping = aes(x = lon, y = lat, color = lblo_bl)) +
+  geom_point() +
+  labs(title = "Leave-block-location-out (Ecoregion level 3)") +
+  facet_wrap(~ time)
+
+# TODO: spatial blocks and temporal folds
+# TODO: irregular temporal blocks
+# index_lblto <- generate_cv_index(ncostdt, "lblto", sp_fold = 3, t_fold = 5)
+
+
+```
+
+
+
+```{r random-family}
+
+index_random <- generate_cv_index(ncostdt, "random", cv_fold = 10L)
+ncodt$random <- factor(index_random)
+
+
+ggplot(
+  data = ncodt,
+  mapping = aes(x = lon, y = lat, color = random)) +
+  geom_point() +
+  labs(title = "Random") +
+  facet_wrap(~ time)
+
+
+
+```

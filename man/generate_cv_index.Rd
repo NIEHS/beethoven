@@ -23,7 +23,7 @@ for details.}
 'lolto (leave-one-location-time-out)',
 'lblo (leave-block-location-out)',
 'lbto (leave-block-time-out)',
-'lblto (leave-block-location-time-out; not implemented)'
+'lblto (leave-block-location-time-out)'
 'random (full random selection)'}
 
 \item{cv_fold}{integer(1). Number of folds for cross-validation.}

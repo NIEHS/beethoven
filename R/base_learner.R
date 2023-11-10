@@ -1,6 +1,6 @@
 ### Base learner fit
 ## Design: generic function and switch to each function type
-## Other else: integrating tidymodels + spatialsample for spatiotemporal CV
+## Potential improvement: integration to tidymodels
 
 #' Fit base learner
 #' @param learner character(1). Currently one of 'randomforest', 'xgboost',
@@ -8,16 +8,15 @@
 #' @param covars stdt. See \link{convert_stobj_to_stdt}
 #' @param dependent_name character(1). Name of the dependent variable.
 #' @param independent_name character(1). Names of independent variables.
-#' @param cv_mode character(1). One of 'lolo (leave-one-location-out)',
+#' @param cv_mode character(1). One of
+#' 'lolo (leave-one-location-out)',
 #' 'loto (leave-one-time-out)',
 #' 'lolto (leave-one-location-time-out)',
 #' 'lblo (leave-block-location-out)',
 #' 'lbto (leave-block-time-out)',
+#' 'lblto (leave-block-location-time-out)', and
 #' 'random (full random selection)'
 #' @param cv_fold integer(1). Number of folds for cross-validation.
-#' @param sp_index character(1). Name of the unique spatial identifier
-#' @param t_index character(2). Default is 'time'.
-#' Name of the unique time identifier
 #' @param return_full_object logical(1).
 #' TRUE will return the object whose class is dependent on the package in use,
 #' whereas FALSE will only return the prediction with
@@ -37,8 +36,6 @@ fit_base_learner <- function(
   independent_name,
   cv_mode = c("lolo", "loto", "lolto", "random", "lblo", "lbto", "lblto"),
   cv_fold = 5L,
-  sp_index = "Site.ID",
-  t_index = "time",
   return_full_object = FALSE
 ) {
   learner <- match.arg(learner)
@@ -67,13 +64,9 @@ fit_base_learner <- function(
 #' 'lbto (leave-block-time-out)',
 #' 'random (full random selection)'
 #' @param cv_fold integer(1). Number of folds for cross-validation.
-#' @param sp_index character(1). Name of the unique spatial identifier
-#' @param t_index character(2). Default is 'time'.
-#' Name of the unique time identifier
 #' @return data.frame
 #' @author Insang Song
 #' @import ranger
-#' @import spatialsample
 #' @export
 
 fit_base_learner_ranger <- function() {
@@ -94,9 +87,6 @@ fit_base_learner_ranger <- function() {
 #' 'lbto (leave-block-time-out)',
 #' 'random (full random selection)'
 #' @param cv_fold integer(1). Number of folds for cross-validation.
-#' @param sp_index character(1). Name of the unique spatial identifier
-#' @param t_index character(2). Default is 'time'.
-#' Name of the unique time identifier
 #' @return data.frame
 #' @author Insang Song
 #' @description This function uses torch as a backend.
@@ -105,7 +95,6 @@ fit_base_learner_ranger <- function() {
 #' to accelerate the model fitting.
 #' @import torch
 #' @import reticulate
-#' @import spatialsample
 #' @export
 
 fit_base_learner_cnn <- function() {
@@ -130,13 +119,9 @@ fit_base_learner_cnn <- function() {
 #' 'lbto (leave-block-time-out)',
 #' 'random (full random selection)'
 #' @param cv_fold integer(1). Number of folds for cross-validation.
-#' @param sp_index character(1). Name of the unique spatial identifier
-#' @param t_index character(2). Default is 'time'.
-#' Name of the unique time identifier
 #' @return data.frame
 #' @author Insang Song
 #' @importFrom xgboost xgb.train
-#' @import spatialsample
 #' @export
 
 fit_base_learner_xgboost <- function() {

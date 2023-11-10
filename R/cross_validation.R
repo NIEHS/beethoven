@@ -6,7 +6,7 @@
 #' 'lolto (leave-one-location-time-out)',
 #' 'lblo (leave-block-location-out)',
 #' 'lbto (leave-block-time-out)',
-#' 'lblto (leave-block-location-time-out; not implemented)'
+#' 'lblto (leave-block-location-time-out)'
 #' 'random (full random selection)'
 #' @param cv_fold integer(1). Number of folds for cross-validation.
 #' @param sp_fold integer(1). Number of subfolds for spatial blocks.
@@ -48,19 +48,22 @@ generate_cv_index <- function(
     stop("Only stdt object is acceptable. Please consider
     using convert_stobj_to_stdt.\n")
   }
-  if (is.null(sp_index)) {
-    warning("No sp_index is present in the covars.
-    We will make 'sp_index' field based on coordinates...\n")
-  }
+  # if (is.null(sp_index)) {
+  #   warning("No sp_index is present in the covars.
+  #   We will make 'sp_index' field based on coordinates...\n")
+  # }
   cv_mode <- match.arg(cv_mode)
 
   # block check
-  if (!((is.numeric(blocks) & length(blocks) != 2) ||
+  if (startsWith(cv_mode, "lb") &&
+  (is.null(cv_fold) &&
+  !((is.numeric(blocks) && length(blocks) == 2) ||
     methods::is(blocks, "sf") ||
-    methods::is(blocks, "SpatVector"))) {
+    methods::is(blocks, "sftime") ||
+    methods::is(blocks, "SpatVector")))) {
     stop("Inputs for blocks argument are invalid.
     Please revisit the help page of this function
-    for the details of proper setting of blocks\n")
+    for the details of proper setting of blocks.\n")
   }
 
   if ((!is.null(sp_fold) || !is.null(t_fold)) && cv_mode != "lblto") {
@@ -103,8 +106,12 @@ generate_spt_index <- function(
   mode <- match.arg(mode)
   # generate unique sp_index
   covar_dt <- covars$stdt
+
+  if ("sp_index" %in% colnames(covar_dt)) {
+    return(covars)
+  }
   covar_dt[["sp_index"]] <-
-    paste0(covar_dt[["long"]], "_", covar_dt[["lat"]])
+    paste0(covar_dt[["lon"]], "_", covar_dt[["lat"]])
 
   if (mode == "spatiotemporal") {
     covar_dt[["sp_index"]] <-
@@ -143,7 +150,7 @@ generate_spt_index <- function(
 generate_block_sp_index <- function(
   covars,
   cv_fold = NULL,
-  blocks,
+  blocks = NULL,
   block_id = NULL
 ) {
   detected_class <- class(blocks)[1]
@@ -151,16 +158,25 @@ generate_block_sp_index <- function(
   if (!is.null(cv_fold)) {
     # deterministic k-fold; yes, it is not elegant,
     # but is readily implemented... now
-    coords <- unique(covars[, seq(1, 2)])
-    km_index <- stats::kmeans(coords, centers = cv_fold,
-      iter.max = 100L)
-    km_index_num <- km_index$cluster
-    covars$stdt[["sp_index"]] <- km_index_num
+    coords <- unique(covars$stdt[, .SD, .SDcols = seq(1, 2)])
+    coordsm <- data.table::copy(coords)
+    coordsm <- as.matrix(coordsm)
+
+    km_index <- stats::kmeans(
+      x = coordsm,
+      centers = cv_fold,
+      iter.max = 20L)
+    # km_index_num <- km_index$cluster
+    coords$sp_index <- km_index$cluster
+    covars$stdt <- data.table::copy(
+      data.table::merge.data.table(
+        covars$stdt,
+        coords,
+        by = c("lon", "lat")))
 
     attr(covars, "kmeans_centers") <- km_index$centers
     attr(covars, "kmeans_sizes") <- km_index$size
   }
-
 
   if (methods::is(blocks, "sf")
     || methods::is(blocks, "sftime")
@@ -206,7 +222,7 @@ generate_block_sp_index <- function(
     covars$stdt[["sp_index"]] <- xy_range_num
   }
 
-  return(covars_recov_id)
+  return(covars)
 
 }
 
@@ -223,7 +239,7 @@ generate_cv_index_loto <- function(
 ) {
   origin_ts <- covars$stdt$time
   sorted_ts <- sort(unique(origin_ts))
-  cv_index <- replace(origin_ts, sorted_ts, seq_along(sorted_ts))
+  cv_index <- as.numeric(factor(origin_ts, levels = sorted_ts))
   return(cv_index)
 }
 
@@ -239,12 +255,9 @@ generate_cv_index_lolo <- function(
   covars
 ) {
   covars_sp_index <- generate_spt_index(covars, mode = "spatial")
-  sp_index_origin <- unlist(covars_sp_index[["sp_index"]])
-  sp_index_unique <- unique(sp_index_origin)
-  cv_index <- replace(
-    sp_index_unique,
-    sp_index_unique,
-    seq_along(sp_index_unique))
+  sp_index_origin <- unlist(covars_sp_index$stdt[["sp_index"]])
+  sp_index_unique <- sort(unique(sp_index_origin))
+  cv_index <- as.numeric(factor(sp_index_origin, levels = sp_index_unique))
   return(cv_index)
 }
 
@@ -285,7 +298,7 @@ generate_cv_index_lblo <- function(
   blocks = NULL,
   block_id = NULL
 ) {
-  if (is.null(cv_fold) && !is.null(blocks)) {
+  if (is.null(cv_fold) && is.null(blocks)) {
     stop("Argument cv_fold cannot be NULL unless
     valid argument for blocks is entered.
     Please set a proper number.\n")
@@ -293,7 +306,14 @@ generate_cv_index_lblo <- function(
   covars_sp_index <- generate_block_sp_index(
     covars, cv_fold = cv_fold, blocks, block_id
   )
+
   cv_index <- covars_sp_index$stdt$sp_index
+
+  # if cv_index is character (when block vector is entered)
+  # convert cv_index to factor
+  if (is.character(cv_index)) {
+    cv_index <- factor(cv_index)
+  }
   return(cv_index)
 
 }
@@ -318,18 +338,28 @@ generate_cv_index_lbto <- function(
   }
 
   origin_ts <- covars$stdt$time
+  origin_ts_min <- min(origin_ts)
+  origin_ts_diff <- as.integer(origin_ts - origin_ts_min)
+
+  # We assume that we use daily data...
+  # Since POSIX* is based on seconds, we divide
+  # 86400 (1 day) from diff
+  if (startsWith(class(origin_ts_min)[1], "POSIX")) {
+    origin_ts_diff <- origin_ts_diff / 86400
+  }
+  origin_ts_diff <- origin_ts_diff + 1
   sorted_ts <- sort(unique(origin_ts))
   length_ts <- length(sorted_ts)
 
-  if (length_ts > cv_fold) {
+  if (length_ts < cv_fold) {
     stop(sprintf("The total length of time series in the input is
     shorter than cv_fold.\n
     Length of the input time series: %d\n
     cv_fold: %d\n", length_ts, cv_fold))
   }
   unit_split <- ceiling(length_ts / cv_fold)
-  fold_index <- ceiling(seq(1, length_ts) / unit_split)
-  cv_index <- replace(origin_ts, sorted_ts, fold_index)
+  cv_index <- ceiling(origin_ts_diff / unit_split)
+  # cv_index <- replace(origin_ts, sorted_ts, fold_index)
   return(cv_index)
 }
 
