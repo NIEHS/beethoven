@@ -11,7 +11,7 @@ author: "Insang Song"
 
 
 ```{r init, echo = FALSE, include = FALSE}
-knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, fig.width = 8, fig.height = 6, res = "retina")
 pkgs <- c("data.table", "sf", "terra", "sftime", "dplyr", "ggplot2")
 invisible(sapply(pkgs, library, character.only = TRUE, quietly = TRUE))
 options(sf_use_s2 = FALSE)
@@ -22,7 +22,7 @@ source("../R/cross_validation.R")
 
 ```{r data conversion}
 set.seed(202311)
-nco <- sf::st_read("./tests/testdata/test_nc_output.nc") |>
+nco <- sf::st_read("../tests/testdata/test_nc_output.nc") |>
   unique()
 nco_s <- nco |>
   dplyr::sample_n(10)
