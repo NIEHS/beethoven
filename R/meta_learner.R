@@ -13,11 +13,11 @@
 #' @examples NULL
 meta_learner_fit <- function(base_predictor_list,
                              kfolds, y) {
-  
+
   # Unnamed base_predictor_list is not accepted
   if (is.null(names(base_predictor_list)) ||
     any(is.na(names(base_predictor_list)))) {
-      stop("base_predictor_list should be a named list.\n")
+    stop("base_predictor_list should be a named list.\n")
   }
 
   # check lengths of each base predictor #add a test for names
@@ -74,7 +74,8 @@ meta_learner_fit <- function(base_predictor_list,
 #' (outputs of each base learner) are S-T based.
 #'
 #' @param meta_fit list of BART objects from meta_learner_fit
-#' @param base_outputs stdt object (see convert_spacetime_data.R): list with datatable containing lat, lon, time and the covariates
+#' @param base_outputs stdt object (see convert_spacetime_data.R): 
+#' list with datatable containing lat, lon, time and the covariates
 #' (outputs of each base learner) at prediction locations and crs. 
 #' @param nthreads integer(1). Number of threads used in BART::predict.wbart
 #' @note  The predictions can be a rast or sf, which depends on the same

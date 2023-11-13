@@ -39,9 +39,9 @@ generate_cv_index <- function(
   blocks = NULL,
   block_id = NULL
 ) {
-    # param sp_index character(1). Name of the unique spatial identifier
-    # param t_index character(2). Default is 'time'.
-    # Name of the unique time identifier
+  # param sp_index character(1). Name of the unique spatial identifier
+  # param t_index character(2). Default is 'time'.
+  # Name of the unique time identifier
 
   # type check
   if (!any("stdt" %in% class(covars))) {
@@ -208,7 +208,7 @@ generate_block_sp_index <- function(
     step_ver <- blocks[2]
 
     covars_recov_id <- data.table::copy(covars$stdt)
-    # 
+
     x_range <-
       cut(unlist(covars_recov_id[["lon"]]), step_hor)
     y_range <-
@@ -359,7 +359,6 @@ generate_cv_index_lbto <- function(
   }
   unit_split <- ceiling(length_ts / cv_fold)
   cv_index <- ceiling(origin_ts_diff / unit_split)
-  # cv_index <- replace(origin_ts, sorted_ts, fold_index)
   return(cv_index)
 }
 

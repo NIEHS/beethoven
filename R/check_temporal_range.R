@@ -3,11 +3,15 @@
 # Mitchell Manware
 
 #' Check if input data is within user defined temporal range
-#' 
+#'
 #' @param data file path to data
 #' @param start_range beginning of temporal range
 #' @param end_range end of temporal range
 #' @param data_type Point, Polygon, or Raster data
+#' @param timezone character.
+#' Time zone in three uppercase letters (e.g., UTC, EST, etc.)
+#' @param time_column character. Name of the column storing
+#' time information.
 #' @return A logical vector reporting whether time observations in data are
 #' within defined temporal range
 #' @author Mitchell Manware
@@ -16,19 +20,21 @@ check_temporal_range <- function(
   data = NULL,
   start_range = "2018-01-01",
   end_range = "2022-12-31",
-  data_type = NULL
+  data_type = NULL,
+  timezone = "UTC",
+  time_column = "Date"
 ) {
   #### 1. create sequence of dates
-  start_date <- as.POSIXlt(start_range, tz = "UTC")
-  end_date <- as.POSIXlt(end_range, tz = "UTC")
+  start_date <- as.POSIXlt(start_range, tz = timezone)
+  end_date <- as.POSIXlt(end_range, tz = timezone)
   range <- seq(start_date, end_date, 86400)
   #### 2. import data and define `dates` vector
   if (data_type %in% c("Point", "Polygon")) {
     data <- terra::vect(data)
-    dates <- as.POSIXlt(data$Date, tz = "UTC")
+    dates <- as.POSIXlt(unlist(data[[time_column]]), tz = timezone)
   } else if (data_type == "Raster") {
     data <- terra::rast(data)
-    dates <- as.POSIXlt(data@ptr$time, tz = "UTC")
+    dates <- as.POSIXlt(time(data), tz = timezone)
   }
   #### 3. check `dates` are within `range`
   checked <- data.frame(dates %in% range)
