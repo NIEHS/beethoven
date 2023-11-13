@@ -5,13 +5,17 @@ vignette: >
   %\VignetteIndexEntry{cross-validation}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
-date: "2023-11-10"
+date: "2023-11-13"
 author: "Insang Song"
 ---
 
-
 ```{r init, echo = FALSE, include = FALSE}
-knitr::opts_chunk$set(warning = FALSE, message = FALSE, fig.width = 8, fig.height = 6, res = "retina")
+knitr::opts_chunk$set(
+  warning = FALSE,
+  message = FALSE,
+  fig.width = 8,
+  fig.height = 6,
+  res = "retina")
 pkgs <- c("data.table", "sf", "terra", "sftime", "dplyr", "ggplot2")
 invisible(sapply(pkgs, library, character.only = TRUE, quietly = TRUE))
 options(sf_use_s2 = FALSE)
@@ -33,7 +37,8 @@ ncost <-
   Reduce(rbind, x = _)
 dim(ncost)
 
-ncost <- sftime::st_as_sftime(ncost,
+ncost <-
+  sftime::st_as_sftime(ncost,
     time_column_name = "time")
 
 # to stdt
@@ -89,9 +94,10 @@ ncost <-
   Reduce(rbind, x = _)
 dim(ncost)
 
-ncost <- sftime::st_as_sftime(
-  ncost,
-  time_column_name = "time")
+ncost <-
+  sftime::st_as_sftime(
+    ncost,
+    time_column_name = "time")
 
 # to stdt
 ncostdt <- convert_stobj_to_stdt(ncost)
@@ -143,14 +149,23 @@ eco4d <- eco4 |>
 
 
 ncodt <- data.table::copy(ncostdt$stdt)
-index_lblo_sf <- generate_cv_index(ncostdt, "lblo", blocks = eco4d, block_id = "US_L3NAME")
+index_lblo_sf <-
+  generate_cv_index(
+    ncostdt,
+    "lblo",
+    blocks = eco4d,
+    block_id = "US_L3NAME")
 ncodt$lblo_bl <- factor(index_lblo_sf)
 
-index_lblo_tr <- generate_cv_index(ncostdt, "lblo", blocks = terra::vect(eco4d), block_id = "US_L3NAME")
+index_lblo_tr <-
+  generate_cv_index(
+    ncostdt,
+    "lblo",
+    blocks = terra::vect(eco4d),
+    block_id = "US_L3NAME")
 ncodt$lblo_blt <- factor(index_lblo_tr)
 
 all.equal(index_lblo_sf, index_lblo_tr)
-gc()
 
 ggplot(
   data = ncodt,
@@ -159,9 +174,7 @@ ggplot(
   labs(title = "Leave-block-location-out (Ecoregion level 3)") +
   facet_wrap(~ time)
 
-# TODO: spatial blocks and temporal folds
 # TODO: irregular temporal blocks
-# index_lblto <- generate_cv_index(ncostdt, "lblto", sp_fold = 3, t_fold = 5)
 
 
 ```
@@ -169,10 +182,8 @@ ggplot(
 
 
 ```{r random-family}
-
 index_random <- generate_cv_index(ncostdt, "random", cv_fold = 10L)
 ncodt$random <- factor(index_random)
-
 
 ggplot(
   data = ncodt,
@@ -180,7 +191,4 @@ ggplot(
   geom_point() +
   labs(title = "Random") +
   facet_wrap(~ time)
-
-
-
 ```

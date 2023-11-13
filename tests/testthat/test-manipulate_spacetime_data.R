@@ -2,7 +2,6 @@ test_that("convert_stobj_to_stdt works well", {
   withr::local_package("sf")
   withr::local_package("terra")
   withr::local_package("data.table")
-  withr::local_package("tidyr")
   withr::local_package("dplyr")
   withr::local_options(list(sf_use_s2 = FALSE))
 
@@ -73,12 +72,17 @@ test_that("convert_stobj_to_stdt works well", {
 
   # test with SpatVector objects
   # 1) it should work
-  stobj <- terra::vect(df, geom = c("lon", "lat"), crs = "EPSG:4326", keepgeom = FALSE)
+  stobj <-
+    terra::vect(df,
+      geom = c("lon", "lat"),
+      crs = "EPSG:4326", keepgeom = FALSE)
   expect_no_error(convert_stobj_to_stdt(stobj))
   stdt <- convert_stobj_to_stdt(stobj)$stdt
   expect_equal(class(stdt)[[1]], "data.table")
   expect_equal(class(convert_stobj_to_stdt(stobj)$crs_stdt), "character")
-  expect_true(terra::same.crs(convert_stobj_to_stdt(stobj)$crs_stdt, "EPSG:4326"))
+  expect_true(
+    terra::same.crs(convert_stobj_to_stdt(stobj)$crs_stdt,
+    "EPSG:4326"))
   expect_false(any(!(c("lon", "lat", "time") %in% colnames(stdt))))
   expect_equal(
     stdt[lon == -112 & lat == 35.35 & time == "2023-11-02", var1],
@@ -92,26 +96,26 @@ test_that("convert_stobj_to_stdt works well", {
   # test with SpatRastDataset created from 2 SpatRast (i.e. 2 variables)
   # with 3 layers (i.e. 3 timestamps)
   # 1) it should work
-  var1 <- terra::rast(extent = c(-112, -101, 33.5, 40.9), 
-               ncol = 5, 
-               nrow = 5, 
-               crs = "epsg:4326")
+  var1 <- terra::rast(extent = c(-112, -101, 33.5, 40.9),
+    ncol = 5, 
+    nrow = 5, 
+    crs = "EPSG:4326")
   terra::values(var1) <- seq(-5, 19)
-  terra::add(var1) <- c(var1**2, var1**3)
+  terra::add(var1) <- c(var1 ** 2, var1 ** 3)
   var1 <- rast(
     extent = c(-112, -101, 33.5, 40.9),
     ncol = 5,
     nrow = 5,
-    crs = "epsg:4326"
+    crs = "EPSG:4326"
   )
   values(var1) <- seq(-5, 19)
-  add(var1) <- c(var1**2, var1**3)
+  add(var1) <- c(var1 ** 2, var1 ** 3)
   names(var1) <- c("2023-11-01", "2023-11-02", "2023-11-03")
   var2 <- rast(
     extent = c(-112, -101, 33.5, 40.9),
     ncol = 5,
     nrow = 5,
-    crs = "epsg:4326"
+    crs = "EPSG:4326"
   )
   values(var2) <- seq(-15, 9)
   add(var2) <- c(var2**2, var2**3)
@@ -123,9 +127,15 @@ test_that("convert_stobj_to_stdt works well", {
   expect_equal(class(stdt_converted$stdt)[[1]], "data.table")
   expect_equal(class(stdt_converted$crs_stdt), "character")
   expect_true(terra::same.crs(stdt_converted$crs_stdt, "EPSG:4326"))
-  expect_false(any(!(c("lon", "lat", "time") %in% colnames(stdt_converted$stdt))))
-  expect_equal(stdt_converted$stdt[lon == -106.5 & lat == stdt_converted$stdt$lat[37] & time == "2023-11-02", var1],
-               49)
-  expect_equal(stdt_converted$stdt[lon == -106.5 & lat == stdt_converted$stdt$lat[37] & time == "2023-11-02", var2], 
-               9)
+  expect_false(
+    any(!(c("lon", "lat", "time") %in% colnames(stdt_converted$stdt))))
+  expect_equal(
+    stdt_converted$stdt[lon == -106.5 & lat == stdt_converted$stdt$lat[37] &
+    time == "2023-11-02", var1],
+    49)
+  expect_equal(
+    stdt_converted$stdt[lon == -106.5 &
+    lat == stdt_converted$stdt$lat[37] &
+    time == "2023-11-02", var2],
+    9)
 })

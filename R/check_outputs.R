@@ -19,7 +19,8 @@ check_output_locs_are_valid <- function(
   # check if two inputs have the same crs,
   # then transform spatial domain if the two crs are different
   if (!identical(sf::st_crs(model_output), sf::st_crs(spatial_domain))) {
-    spatial_domain <- sf::st_transform(spatial_domain, sf::st_crs(model_output))
+    spatial_domain <-
+      sf::st_transform(spatial_domain, sf::st_crs(model_output))
   }
 
   model_output <- sf::st_geometry(model_output)

@@ -69,8 +69,6 @@ fit_base_learner <- function(
 #' @export
 
 fit_base_learner_ranger <- function() {
-  # ranger::ranger()
-
 }
 
 
@@ -121,5 +119,4 @@ fit_base_learner_cnn <- function() {
 #' @export
 
 fit_base_learner_xgboost <- function() {
-  # xgboost::xgb.train()
 }

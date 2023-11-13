@@ -73,9 +73,10 @@ testthat::test_that("leave-block-outs work as expected", {
     lapply(function(x) mutate(nco, time = x)) |>
     Reduce(rbind, x = _)
 
-  ncost <- sftime::st_as_sftime(
-    ncost,
-    time_column_name = "time")
+  ncost <-
+    sftime::st_as_sftime(
+      ncost,
+      time_column_name = "time")
 
   # to stdt
   ncostdt <- convert_stobj_to_stdt(ncost)
@@ -87,7 +88,12 @@ testthat::test_that("leave-block-outs work as expected", {
   index_lblo <- generate_cv_index(ncostdt, "lblo", cv_fold = ncv_fold)
   ret_spblock <- generate_block_sp_index(ncostdt, cv_fold = ncv_fold)
   index_lbto <- generate_cv_index(ncostdt, "lbto", cv_fold = ncv_fold)
-  index_lblto <- generate_cv_index(ncostdt, "lblto", sp_fold = ncv_sp, t_fold = ncv_t)
+  index_lblto <-
+    generate_cv_index(
+      ncostdt,
+      "lblto",
+      sp_fold = ncv_sp,
+      t_fold = ncv_t)
 
   # max value test
   testthat::expect_equal(max(index_lblo), ncv_fold)
@@ -110,13 +116,15 @@ testthat::test_that("leave-block-outs work as expected", {
 
   ncodt <- data.table::copy(ncostdt$stdt)
   # when sf input is entered
-  index_lblo_sf <- generate_cv_index(
-    ncostdt, "lblo",
-    blocks = eco4d, block_id = "US_L3NAME")
+  index_lblo_sf <-
+    generate_cv_index(
+      ncostdt, "lblo",
+      blocks = eco4d, block_id = "US_L3NAME")
   # when SpatVector input is entered
-  index_lblo_tr <- generate_cv_index(
-    ncostdt, "lblo",
-    blocks = terra::vect(eco4d), block_id = "US_L3NAME")
+  index_lblo_tr <-
+    generate_cv_index(
+      ncostdt, "lblo",
+      blocks = terra::vect(eco4d), block_id = "US_L3NAME")
 
   # If returned index is character, convert to integer via factor
   if (any(is.factor(index_lblo_sf), is.factor(index_lblo_tr))) {
@@ -136,9 +144,10 @@ testthat::test_that("leave-block-outs work as expected", {
   # intentional duplicates in block name
   eco4e <- eco4d
   eco4e$US_L3NAME[2] <- eco4e$US_L3NAME[1]
-  testthat::expect_error(generate_cv_index(
-    ncostdt, "lblo",
-    blocks = terra::vect(eco4e), block_id = "US_L3NAME")
+  testthat::expect_error(
+    generate_cv_index(
+      ncostdt, "lblo",
+      blocks = terra::vect(eco4e), block_id = "US_L3NAME")
   )
 
 }
@@ -169,9 +178,7 @@ testthat::test_that("random cross-validation abides", {
 
   # to stdt
   ncostdt <- convert_stobj_to_stdt(ncost)
-
   ncv_fold <- 10L
-
   index_random <- generate_cv_index(ncostdt, "random", cv_fold = ncv_fold)
 
   testthat::expect_true(is.numeric(index_random))
