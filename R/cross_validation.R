@@ -27,7 +27,6 @@
 #' @author Insang Song
 #' @import data.table
 #' @import sf
-#' @import sftime
 #' @import terra
 #' @export
 generate_cv_index <- function(
@@ -143,7 +142,6 @@ generate_spt_index <- function(
 #' @importFrom methods is
 #' @importFrom stats kmeans
 #' @import sf
-#' @import sftime
 #' @import terra
 #' @export
 #' @noRd

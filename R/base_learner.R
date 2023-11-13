@@ -66,11 +66,10 @@ fit_base_learner <- function(
 #' @param cv_fold integer(1). Number of folds for cross-validation.
 #' @return data.frame
 #' @author Insang Song
-#' @import ranger
 #' @export
 
 fit_base_learner_ranger <- function() {
-  ranger::ranger()
+  # ranger::ranger()
 
 }
 
@@ -93,8 +92,6 @@ fit_base_learner_ranger <- function() {
 #' Torch currently supports CPU, CUDA, and Metal (Apple Silicon graphics),
 #' thus users can leverage available computational assets
 #' to accelerate the model fitting.
-#' @import torch
-#' @import reticulate
 #' @export
 
 fit_base_learner_cnn <- function() {
@@ -121,9 +118,8 @@ fit_base_learner_cnn <- function() {
 #' @param cv_fold integer(1). Number of folds for cross-validation.
 #' @return data.frame
 #' @author Insang Song
-#' @importFrom xgboost xgb.train
 #' @export
 
 fit_base_learner_xgboost <- function() {
-  xgboost::xgb.train()
+  # xgboost::xgb.train()
 }

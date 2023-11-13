@@ -29,7 +29,6 @@ check_input_is_stdt <- function(
 #' @author Kyle Messier, Insang Song
 #' @import sf
 #' @import terra
-#' @import units
 #' @export
 check_input_raster_in_extent <- function(
     input_raster,

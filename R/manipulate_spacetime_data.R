@@ -174,7 +174,6 @@ convert_stdt_spatvect <- function(stdt) {
 #' @param stdt A stdt object
 #' @return a sftime object
 #' @author Eva Marques
-#' @import sftime
 #' @export
 convert_stdt_sftime <- function(stdt) {
   if (!is_stdt(stdt)) {
@@ -261,7 +260,6 @@ dt_to_sf <- function(datatable, crs) {
 #' @param datatable A data.table object with columns "lat", "lon", "date"
 #' @param crs A character containing the original crs
 #' @author Eva Marques
-#' @import sftime
 #' @import sf
 #' @import data.table
 #' @return an sftime object

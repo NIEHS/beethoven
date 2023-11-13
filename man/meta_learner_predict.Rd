@@ -14,7 +14,8 @@ meta_learner_predict(meta_fit, base_outputs_stdt, nthreads = 2)
 
 \item{nthreads}{integer(1). Number of threads used in BART::predict.wbart}
 
-\item{base_outputs}{stdt object (see convert_spacetime_data.R): list with datatable containing lat, lon, time and the covariates
+\item{base_outputs}{stdt object (see convert_spacetime_data.R): 
+list with datatable containing lat, lon, time and the covariates
 (outputs of each base learner) at prediction locations and crs.}
 }
 \value{
