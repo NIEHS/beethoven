@@ -4,7 +4,13 @@
 \alias{fit_base_learner_ranger}
 \title{Fit random forests with ranger}
 \usage{
-fit_base_learner_ranger()
+fit_base_learner_ranger(
+  covars,
+  dependent_name,
+  independent_name,
+  cv_mode,
+  cv_fold
+)
 }
 \arguments{
 \item{covars}{stdt. See \link{convert_stobj_to_stdt}}

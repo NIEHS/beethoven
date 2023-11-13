@@ -281,11 +281,12 @@ dt_to_sftime <- function(datatable, crs) {
   }
 
   datatable$date <- as.Date(datatable$date)
-  data_sft <- sf::st_as_sftime(datatable,
-                           coords = c("lon", "lat"),
-                           remove = FALSE,
-                           crs = crs,
-                           time_column_name = "date"
+  data_sft <- sftime::st_as_sftime(
+    datatable,
+    coords = c("lon", "lat"),
+    remove = FALSE,
+    crs = crs,
+    time_column_name = "date"
   )
   return(data_sft = data_sft)
 }

@@ -4,7 +4,13 @@
 \alias{fit_base_learner_xgboost}
 \title{Fit XGBoost model}
 \usage{
-fit_base_learner_xgboost()
+fit_base_learner_xgboost(
+  covars,
+  dependent_name,
+  independent_name,
+  cv_mode,
+  cv_fold
+)
 }
 \arguments{
 \item{covars}{stdt. See \link{convert_stobj_to_stdt}}

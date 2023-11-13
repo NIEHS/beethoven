@@ -2,9 +2,9 @@
 % Please edit documentation in R/meta_learner.R
 \name{meta_learner_predict}
 \alias{meta_learner_predict}
-\title{meta_learner_predict - take the list of BART fit objects and 
+\title{meta_learner_predict - take the list of BART fit objects and
 predictions of baselearners to create meta_learner predictions. The BART
-meta learner is not explicitly a S-T model, but the input covariates 
+meta learner is not explicitly a S-T model, but the input covariates
 (outputs of each base learner) are S-T based.}
 \usage{
 meta_learner_predict(meta_fit, base_outputs_stdt, nthreads = 2)
@@ -12,19 +12,19 @@ meta_learner_predict(meta_fit, base_outputs_stdt, nthreads = 2)
 \arguments{
 \item{meta_fit}{list of BART objects from meta_learner_fit}
 
-\item{nthreads}{integer(1). Number of threads used in BART::predict.wbart}
-
-\item{base_outputs}{stdt object (see convert_spacetime_data.R): 
+\item{base_outputs_stdt}{stdt object (see convert_spacetime_data.R):
 list with datatable containing lat, lon, time and the covariates
 (outputs of each base learner) at prediction locations and crs.}
+
+\item{nthreads}{integer(1). Number of threads used in BART::predict.wbart}
 }
 \value{
 meta_pred: the final meta learner predictions
 }
 \description{
-meta_learner_predict - take the list of BART fit objects and 
+meta_learner_predict - take the list of BART fit objects and
 predictions of baselearners to create meta_learner predictions. The BART
-meta learner is not explicitly a S-T model, but the input covariates 
+meta learner is not explicitly a S-T model, but the input covariates
 (outputs of each base learner) are S-T based.
 }
 \note{

@@ -28,6 +28,7 @@
 #' @import data.table
 #' @import sf
 #' @import terra
+#' @import dplyr
 #' @export
 generate_cv_index <- function(
   covars,
@@ -87,6 +88,7 @@ generate_cv_index <- function(
 }
 
 
+#' Generate unique spatiotemporal identifier from stdt object
 #' @param covars stdt.
 #' @param mode One of "spatial" or "spatiotemporal"
 #' @description It generates unique spatiotemporal identifier in the
@@ -97,7 +99,6 @@ generate_cv_index <- function(
 #' @return stdt with a new index named "sp_index"
 #' @author Insang Song
 #' @export
-#' @noRd
 generate_spt_index <- function(
   covars,
   mode = c("spatial", "spatiotemporal")
@@ -121,7 +122,7 @@ generate_spt_index <- function(
   return(covars)
 }
 
-
+#' Generate blocked spatial index
 #' @param covars stdt.
 #' @param blocks numeric(2)/sf/SpatVector configuration of blocks.
 #' @param block_id character(1). The unique identifier of each block.
@@ -144,7 +145,6 @@ generate_spt_index <- function(
 #' @import sf
 #' @import terra
 #' @export
-#' @noRd
 generate_block_sp_index <- function(
   covars,
   cv_fold = NULL,
@@ -231,7 +231,6 @@ generate_block_sp_index <- function(
 #' @return An integer vector.
 #' @import data.table
 #' @export
-#' @noRd
 generate_cv_index_loto <- function(
   covars
 ) {
@@ -248,7 +247,6 @@ generate_cv_index_loto <- function(
 #' @return An integer vector.
 #' @import data.table
 #' @export
-#' @noRd
 generate_cv_index_lolo <- function(
   covars
 ) {
@@ -268,7 +266,6 @@ generate_cv_index_lolo <- function(
 #' @return An integer vector.
 #' @import data.table
 #' @export
-#' @noRd
 generate_cv_index_lolto <- function(
   covars
 ) {
@@ -289,7 +286,6 @@ generate_cv_index_lolto <- function(
 #' @return An integer vector.
 #' @import data.table
 #' @export
-#' @noRd
 generate_cv_index_lblo <- function(
   covars,
   cv_fold = NULL,
@@ -326,7 +322,6 @@ generate_cv_index_lblo <- function(
 #' @return An integer vector.
 #' @import data.table
 #' @export
-#' @noRd
 generate_cv_index_lbto <- function(
   covars,
   cv_fold = NULL
@@ -374,7 +369,6 @@ generate_cv_index_lbto <- function(
 #' @details The maximum of results is \code{sp_fold * t_fold}.
 #' @import data.table
 #' @export
-#' @noRd
 generate_cv_index_lblto <- function(
   covars,
   sp_fold,
@@ -403,7 +397,6 @@ generate_cv_index_lblto <- function(
 #' @author Insang Song
 #' @return An integer vector with unique values of \code{seq(1, cv_fold)}
 #' @export
-#' @noRd
 generate_cv_index_random <- function(
   covars,
   cv_fold = NULL

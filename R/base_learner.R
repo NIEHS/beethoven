@@ -68,7 +68,13 @@ fit_base_learner <- function(
 #' @author Insang Song
 #' @export
 
-fit_base_learner_ranger <- function() {
+fit_base_learner_ranger <- function(
+  covars,
+  dependent_name,
+  independent_name,
+  cv_mode,
+  cv_fold
+) {
 }
 
 
@@ -92,7 +98,13 @@ fit_base_learner_ranger <- function() {
 #' to accelerate the model fitting.
 #' @export
 
-fit_base_learner_cnn <- function() {
+fit_base_learner_cnn <- function(
+  covars,
+  dependent_name,
+  independent_name,
+  cv_mode,
+  cv_fold
+) {
   # ...
   # keras or torch ...
   # check if MPS (for Apple Silicon) / CUDA is available ...
@@ -118,5 +130,11 @@ fit_base_learner_cnn <- function() {
 #' @author Insang Song
 #' @export
 
-fit_base_learner_xgboost <- function() {
+fit_base_learner_xgboost <- function(
+  covars,
+  dependent_name,
+  independent_name,
+  cv_mode,
+  cv_fold
+) {
 }

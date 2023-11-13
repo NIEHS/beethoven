@@ -68,15 +68,15 @@ meta_learner_fit <- function(base_predictor_list,
 }
 
 
-#' meta_learner_predict - take the list of BART fit objects and 
+#' meta_learner_predict - take the list of BART fit objects and
 #' predictions of baselearners to create meta_learner predictions. The BART
-#' meta learner is not explicitly a S-T model, but the input covariates 
+#' meta learner is not explicitly a S-T model, but the input covariates
 #' (outputs of each base learner) are S-T based.
 #'
 #' @param meta_fit list of BART objects from meta_learner_fit
-#' @param base_outputs stdt object (see convert_spacetime_data.R): 
+#' @param base_outputs_stdt stdt object (see convert_spacetime_data.R):
 #' list with datatable containing lat, lon, time and the covariates
-#' (outputs of each base learner) at prediction locations and crs. 
+#' (outputs of each base learner) at prediction locations and crs.
 #' @param nthreads integer(1). Number of threads used in BART::predict.wbart
 #' @note  The predictions can be a rast or sf, which depends on the same
 #' respective format of the covariance matrix input - cov_pred
@@ -117,10 +117,11 @@ meta_learner_predict <- function(meta_fit, base_outputs_stdt, nthreads = 2) {
     nthreads_in = nthreads) {
 
     for (i in seq_along(meta_fit_in)) {
-      meta_pred_in[, i] <- BART:::predict.wbart(
-        object = meta_fit_in[[i]],
-        newdata = mat_pred_in,
-        mc.cores = nthreads_in) |>
+      meta_pred_in[, i] <-
+        predict(
+          object = meta_fit_in[[i]],
+          newdata = mat_pred_in,
+          mc.cores = nthreads_in) |>
         apply(2, mean)
     }
     meta_pred_out <- apply(meta_pred_in, 1, mean)

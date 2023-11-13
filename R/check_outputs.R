@@ -2,7 +2,8 @@
 ## Output data refers to outputs of base/meta learners
 ## Last edited 11/03/2023
 
-#' Check output locations are in the reference spatial domain of the mainland US
+#' Check output locations are in
+#' the reference spatial domain of the mainland US
 #'
 #' @param model_output sf/sftime object of the model output
 #' @param spatial_domain sf/sftime object of spatial domain
@@ -26,8 +27,9 @@ check_output_locs_are_valid <- function(
   model_output <- sf::st_geometry(model_output)
   # evaluate if the model output is within the spatial domain
   # sparse argument chooses if return will be a list (TRUE) or a matrix (FALSE)
-  checked <- as.vector(sf::st_within(model_output,
-                                     spatial_domain, sparse = FALSE))
+  checked <- as.vector(
+    sf::st_within(model_output,
+      spatial_domain, sparse = FALSE))
   return(checked)
 }
 
@@ -103,8 +105,6 @@ check_crs_is_valid <- function(
   checked <- any(checked)
   return(checked)
 }
-
-
 
 
 #' Check if the output covariates are complete

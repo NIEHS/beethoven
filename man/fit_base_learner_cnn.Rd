@@ -4,7 +4,13 @@
 \alias{fit_base_learner_cnn}
 \title{Fit convolutional neural networks with neural network library}
 \usage{
-fit_base_learner_cnn()
+fit_base_learner_cnn(
+  covars,
+  dependent_name,
+  independent_name,
+  cv_mode,
+  cv_fold
+)
 }
 \arguments{
 \item{covars}{stdt. See \link{convert_stobj_to_stdt}}
