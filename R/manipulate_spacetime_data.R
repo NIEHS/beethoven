@@ -6,9 +6,12 @@
 #' @return a list with a "stdt" a data.table of locations identified by
 #' lat, lon, time columns and "crs_dt" the crs of the data in well-known text
 #' format.
-#' @import data.table
+#' @importFrom data.table as.data.table
 #' @importFrom terra crs
 #' @importFrom sf st_drop_geometry
+#' @importFrom sf st_coordinates
+#' @importFrom data.table melt
+#' @importFrom data.table .SD
 #' @importFrom sf st_crs
 #' @author Eva Marques, Insang Song
 #' @export
@@ -109,20 +112,15 @@ convert_stobj_to_stdt <- function(stobj) {
 is_stdt <- function(obj) {
   if (!(identical(class(obj), c("list", "stdt")))){
     return(FALSE)
-  }
-  else if (!(identical(names(obj), c("stdt", "crs_stdt")))) {
+  } else if (!(identical(names(obj), c("stdt", "crs_stdt")))) {
     return(FALSE)
-  } 
-  else if (!(identical(class(obj$stdt)[1], "data.table"))) {
+  } else if (!(identical(class(obj$stdt)[1], "data.table"))) {
     return(FALSE)
-  }
-  else if (!(all(c("lon", "lat", "time") %in% colnames(obj$stdt)))) {
+  } else if (!(all(c("lon", "lat", "time") %in% colnames(obj$stdt)))) {
     return(FALSE)
-  }
-  else if (!(identical(class(obj$crs_stdt)[1], "character"))) {
+  } else if (!is.character(obj$crs_stdt)) {
     return(FALSE)
-  }
-  else {
+  } else {
     return(TRUE)
   }
 }
@@ -133,6 +131,9 @@ is_stdt <- function(obj) {
 #' @param class_to character(1). Should be one of
 #' "sf", "sftime", "SpatRasterDataset", or "SpatVector"
 #' @return a sf/sftime/SpatRasterDataset/SpatVector
+#' @importFrom sf st_as_sf
+#' @importFrom terra vect
+#' @importFrom terra sds
 #' @author Insang Song
 #' @export
 convert_stdt <- function(
@@ -156,16 +157,17 @@ convert_stdt <- function(
 #' @param stdt A stdt object
 #' @return a SpatVector
 #' @author Eva Marques
-#' @import terra
+#' @importFrom terra vect
 #' @export
 convert_stdt_spatvect <- function(stdt) {
   if (!is_stdt(stdt)) {
     stop("The input for stdt argument is not an stdt object")
   }
-  vect_obj <- terra::vect(stdt$stdt, 
-                   geom = c("lon", "lat"),
-                   crs = stdt$crs_stdt,
-                   keepgeom = FALSE)
+  vect_obj <-
+    terra::vect(stdt$stdt, 
+      geom = c("lon", "lat"),
+      crs = stdt$crs_stdt,
+      keepgeom = FALSE)
   return(vect_obj)
 }
 
@@ -181,11 +183,13 @@ convert_stdt_sftime <- function(stdt) {
   }
   stdt_stdt <- stdt$stdt
   stdt_stdt$time <- as.Date(stdt_stdt$time)
-  sftime_obj <- sftime::st_as_sftime(stdt_stdt,
-                                     coords = c("lon", "lat"),
-                                     time_column_name = "time",
-                                     crs = stdt$crs_stdt
-  )
+  sftime_obj <-
+    sftime::st_as_sftime(
+      stdt_stdt,
+      coords = c("lon", "lat"),
+      time_column_name = "time",
+      crs = stdt$crs_stdt
+    )
   return(sftime_obj)
 }
 
@@ -197,7 +201,7 @@ convert_stdt_sftime <- function(stdt) {
 #' (layers are the time series)
 #' @author Eva Marques
 #' @importFrom stats reshape
-#' @import terra
+#' @importFrom terra sds
 #' @export
 convert_stdt_spatrastdataset <- function(stdt) {
   if (!is_stdt(stdt)) {
@@ -208,10 +212,11 @@ convert_stdt_spatrastdataset <- function(stdt) {
   variables <- col[!(col %in% c("lon", "lat", "time"))]
   rast_list <- list()
   for (var in variables) {
-    newdf <- stats::reshape(df[, c("lon", "lat", "time", var)],
-                     idvar = c("lon", "lat"),
-                     timevar = "time",
-                     direction = "wide")
+    newdf <- stats::reshape(
+      df[, c("lon", "lat", "time", var)],
+      idvar = c("lon", "lat"),
+      timevar = "time",
+      direction = "wide")
     colnames(newdf) <- gsub(
       paste0(var, "."),
       "",
@@ -230,13 +235,13 @@ convert_stdt_spatrastdataset <- function(stdt) {
 #' @param datatable A data.table object with columns "lat", "lon"
 #' @param crs A character containing the original crs
 #' @author Eva Marques
-#' @import sf
+#' @importFrom sf st_as_sf
 #' @return an sf object
 dt_to_sf <- function(datatable, crs) {
   if (!("data.table" %in% class(datatable))) {
     stop("datatable is not a data.table")
   }
-  if (class(crs) != "character") {
+  if (!is.character(crs)) {
     stop("crs is not a character")
   }
   if (!("lon" %in% colnames(datatable))) {
@@ -246,10 +251,11 @@ dt_to_sf <- function(datatable, crs) {
     stop("datatable does not contain lat column")
   }
 
-  data_sf <- sf::st_as_sf(datatable,
-                      coords = c("lon", "lat"),
-                      remove = FALSE,
-                      crs = crs
+  data_sf <- sf::st_as_sf(
+    datatable,
+    coords = c("lon", "lat"),
+    remove = FALSE,
+    crs = crs
   )
   return(data_sf)
 }
@@ -260,14 +266,12 @@ dt_to_sf <- function(datatable, crs) {
 #' @param datatable A data.table object with columns "lat", "lon", "date"
 #' @param crs A character containing the original crs
 #' @author Eva Marques
-#' @import sf
-#' @import data.table
 #' @return an sftime object
 dt_to_sftime <- function(datatable, crs) {
   if (!("data.table" %in% class(datatable))) {
     stop("datatable is not a data.table")
   }
-  if (class(crs) != "character") {
+  if (!is.character(crs)) {
     stop("crs is not a character")
   }
   if (!("lon" %in% colnames(datatable))) {
@@ -299,12 +303,16 @@ dt_to_sftime <- function(datatable, crs) {
 #' @param crs_dest A character containing the destination crs of spatial data
 #' @note This function assumes that users have point geometry.
 #' @author Eva Marques
-#' @import sf
-#' @import data.table
+#' @importFrom sf st_coordinates
+#' @importFrom sf st_transform
+#' @importFrom sf st_drop_geometry
+#' @importFrom data.table as.data.table
+#' @importFrom data.table merge.data.table
+#' @importFrom methods is
 #' @return same datatable object with "lon", "lat",
 #' "lon_ori", "lat_ori" columns
 project_dt <- function(datatable, crs_ori, crs_dest) {
-  if (class(crs_ori) != "character" || class(crs_dest) != "character") {
+  if (!is.character(crs_ori) || !is.character(crs_dest)) {
     stop("crs are not characters")
   }
   if (!("data.table" %in% class(datatable))) {

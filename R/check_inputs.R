@@ -27,8 +27,16 @@ check_input_is_stdt <- function(
 #' within the extent of spatial_domain
 #' @description \code{domain_tolerance} will have "meters" is converted to arc degrees approximately 100,000 meters = 1 arc degree
 #' @author Kyle Messier, Insang Song
-#' @import sf
-#' @import terra
+#' @importFrom sf st_bbox
+#' @importFrom sf st_as_sfc
+#' @importFrom sf st_transform
+#' @importFrom sf st_as_sf
+#' @importFrom sf st_sf
+#' @importFrom sf st_buffer
+#' @importFrom sf st_covered_by
+#' @importClassesFrom terra SpatVector
+#' @importClassesFrom terra SpatRaster
+#' @importClassesFrom terra SpatRasterDataset
 #' @export
 check_input_raster_in_extent <- function(
     input_raster,

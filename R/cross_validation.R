@@ -25,10 +25,7 @@
 #' The maximum of results in this case is \code{sp_fold * t_fold}.
 #' @return A numeric vector with length of the number of input rows
 #' @author Insang Song
-#' @import data.table
-#' @import sf
-#' @import terra
-#' @import dplyr
+#' @importFrom dplyr sample_n
 #' @export
 generate_cv_index <- function(
   covars,
@@ -143,8 +140,10 @@ generate_spt_index <- function(
 #' @author Insang Song
 #' @importFrom methods is
 #' @importFrom stats kmeans
-#' @import sf
-#' @import terra
+#' @importFrom sf st_join
+#' @importFrom terra intersect
+#' @importFrom data.table .SD
+#' @importFrom data.table copy
 #' @export
 generate_block_sp_index <- function(
   covars,
@@ -230,7 +229,6 @@ generate_block_sp_index <- function(
 #' for details.
 #' @author Insang Song
 #' @return An integer vector.
-#' @import data.table
 #' @export
 generate_cv_index_loto <- function(
   covars
@@ -246,7 +244,6 @@ generate_cv_index_loto <- function(
 #' for details.
 #' @author Insang Song
 #' @return An integer vector.
-#' @import data.table
 #' @export
 generate_cv_index_lolo <- function(
   covars
@@ -265,7 +262,6 @@ generate_cv_index_lolo <- function(
 #' for details.
 #' @author Insang Song
 #' @return An integer vector.
-#' @import data.table
 #' @export
 generate_cv_index_lolto <- function(
   covars
@@ -285,7 +281,6 @@ generate_cv_index_lolto <- function(
 #' @param block_id character(1). The unique identifier of each block.
 #' @author Insang Song
 #' @return An integer vector.
-#' @import data.table
 #' @export
 generate_cv_index_lblo <- function(
   covars,
@@ -321,7 +316,6 @@ generate_cv_index_lblo <- function(
 #' @param cv_fold integer(1). Number of folds for cross-validation.
 #' @author Insang Song
 #' @return An integer vector.
-#' @import data.table
 #' @export
 generate_cv_index_lbto <- function(
   covars,
@@ -368,7 +362,6 @@ generate_cv_index_lbto <- function(
 #' @author Insang Song
 #' @return An integer vector.
 #' @details The maximum of results is \code{sp_fold * t_fold}.
-#' @import data.table
 #' @export
 generate_cv_index_lblto <- function(
   covars,

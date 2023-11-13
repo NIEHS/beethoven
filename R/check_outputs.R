@@ -1,6 +1,6 @@
 ## A suite of functions to check output data
 ## Output data refers to outputs of base/meta learners
-## Last edited 11/03/2023
+## Last edited 11/13/2023
 
 #' Check output locations are in
 #' the reference spatial domain of the mainland US
@@ -9,7 +9,9 @@
 #' @param spatial_domain sf/sftime object of spatial domain
 #' @return A logical vector of length nrow(model_output)
 #' @author Insang Song
-#' @import sf
+#' @importFrom sf st_transform
+#' @importFrom sf st_geometry
+#' @importFrom sf st_within
 #' @export
 check_output_locs_are_valid <- function(
     model_output,
@@ -85,8 +87,8 @@ check_means_are_valid <- function(
 #'  elements in crs_list.
 #' @author Insang Song
 #' @importFrom methods is
-#' @import sf
-#' @import terra
+#' @importFrom sf st_crs
+#' @importFrom terra crs
 #' @export
 check_crs_is_valid <- function(
     model_output,

@@ -14,6 +14,9 @@
 #' time information.
 #' @return A logical vector reporting whether time observations in data are
 #' within defined temporal range
+#' @importFrom terra rast
+#' @importFrom terra vect
+#' @importFrom terra time
 #' @author Mitchell Manware
 #' @export
 check_temporal_range <- function(

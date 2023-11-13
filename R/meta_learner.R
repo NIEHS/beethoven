@@ -81,8 +81,9 @@ meta_learner_fit <- function(base_predictor_list,
 #' @note  The predictions can be a rast or sf, which depends on the same
 #' respective format of the covariance matrix input - cov_pred
 #' @return meta_pred: the final meta learner predictions
-#' @import data.table
+#' @importFrom data.table .SD
 #' @import BART
+#' @importFrom stats predict
 #' @export
 #'
 #' @examples NULL
@@ -133,7 +134,12 @@ meta_learner_predict <- function(meta_fit, base_outputs_stdt, nthreads = 2) {
     matrix(ncol = 1) |>
     as.data.frame()
   names(meta_pred_out) <- "meta_pred"
-  meta_pred_out <- cbind(base_outputs[, ..spt_name_index], meta_pred_out)
+  spt_names <- grep("(lon|lat|time)", colnames(base_outputs), value = TRUE)
+
+  meta_pred_out <-
+    cbind(
+      base_outputs[, .SD, .SDcols = spt_names],
+      meta_pred_out)
   meta_pred_out <- list("stdt" = meta_pred_out,
                         "crs_dt" = base_outputs_stdt$crs_dt)
   class(meta_pred_out) <- c("list", "stdt")
