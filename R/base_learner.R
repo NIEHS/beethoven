@@ -30,14 +30,13 @@
 #' using one of spatiotemporal cross-validation approaches.
 #' @export
 fit_base_learner <- function(
-  covars,
-  learner = c("randomforest", "xgboost", "cnn"),
-  dependent_name = "pm2.5",
-  independent_name,
-  cv_mode = c("lolo", "loto", "lolto", "random", "lblo", "lbto", "lblto"),
-  cv_fold = 5L,
-  return_full_object = FALSE
-) {
+    covars,
+    learner = c("randomforest", "xgboost", "cnn"),
+    dependent_name = "pm2.5",
+    independent_name,
+    cv_mode = c("lolo", "loto", "lolto", "random", "lblo", "lbto", "lblto"),
+    cv_fold = 5L,
+    return_full_object = FALSE) {
   learner <- match.arg(learner)
   cv_mode <- match.arg(cv_mode)
   # type check
@@ -69,12 +68,11 @@ fit_base_learner <- function(
 #' @export
 
 fit_base_learner_ranger <- function(
-  covars,
-  dependent_name,
-  independent_name,
-  cv_mode,
-  cv_fold
-) {
+    covars,
+    dependent_name,
+    independent_name,
+    cv_mode,
+    cv_fold) {
 }
 
 
@@ -99,18 +97,16 @@ fit_base_learner_ranger <- function(
 #' @export
 
 fit_base_learner_cnn <- function(
-  covars,
-  dependent_name,
-  independent_name,
-  cv_mode,
-  cv_fold
-) {
+    covars,
+    dependent_name,
+    independent_name,
+    cv_mode,
+    cv_fold) {
   # ...
   # keras or torch ...
   # check if MPS (for Apple Silicon) / CUDA is available ...
   # fit model (spt-array and 3d-pooling)
   # cv
-
 }
 
 
@@ -131,10 +127,9 @@ fit_base_learner_cnn <- function(
 #' @export
 
 fit_base_learner_xgboost <- function(
-  covars,
-  dependent_name,
-  independent_name,
-  cv_mode,
-  cv_fold
-) {
+    covars,
+    dependent_name,
+    independent_name,
+    cv_mode,
+    cv_fold) {
 }

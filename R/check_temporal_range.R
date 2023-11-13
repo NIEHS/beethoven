@@ -20,13 +20,12 @@
 #' @author Mitchell Manware
 #' @export
 check_temporal_range <- function(
-  data = NULL,
-  start_range = "2018-01-01",
-  end_range = "2022-12-31",
-  data_type = NULL,
-  timezone = "UTC",
-  time_column = "Date"
-) {
+    data = NULL,
+    start_range = "2018-01-01",
+    end_range = "2022-12-31",
+    data_type = NULL,
+    timezone = "UTC",
+    time_column = "Date") {
   #### 1. create sequence of dates
   start_date <- as.POSIXlt(start_range, tz = timezone)
   end_date <- as.POSIXlt(end_range, tz = timezone)

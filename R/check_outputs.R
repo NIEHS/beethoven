@@ -31,7 +31,10 @@ check_output_locs_are_valid <- function(
   # sparse argument chooses if return will be a list (TRUE) or a matrix (FALSE)
   checked <- as.vector(
     sf::st_within(model_output,
-      spatial_domain, sparse = FALSE))
+      spatial_domain,
+      sparse = FALSE
+    )
+  )
   return(checked)
 }
 
@@ -72,7 +75,7 @@ check_means_are_valid <- function(
   max_vec_output <- max(vec_output)
   # evaluate if the output means are within the bounds
   checked <- (min_vec_output >= threshold_lower &&
-                max_vec_output <= threshold_upper)
+    max_vec_output <= threshold_upper)
   return(checked)
 }
 
@@ -99,11 +102,14 @@ check_crs_is_valid <- function(
     sftime = sf::st_crs,
     SpatVector = terra::crs,
     SpatRaster = terra::crs,
-    SpatRasterDataset = terra::crs)
+    SpatRasterDataset = terra::crs
+  )
 
   crs_output <- detect_fun(model_output)
-  checked <- sapply(crs_list, 
-    function(x) detect_fun(crs_output) == detect_fun(x))
+  checked <- sapply(
+    crs_list,
+    function(x) detect_fun(crs_output) == detect_fun(x)
+  )
   checked <- any(checked)
   return(checked)
 }

@@ -13,7 +13,6 @@
 #' @examples NULL
 meta_learner_fit <- function(base_predictor_list,
                              kfolds, y) {
-
   # Unnamed base_predictor_list is not accepted
   if (is.null(names(base_predictor_list)) ||
     any(is.na(names(base_predictor_list)))) {
@@ -22,19 +21,19 @@ meta_learner_fit <- function(base_predictor_list,
 
   # check lengths of each base predictor #add a test for names
   if (sapply(base_predictor_list, length, simplify = TRUE) |>
-        stats::var() != 0) {
+    stats::var() != 0) {
     stop("Error in meta_learner_fit:
          Base predictors need to be the same length")
   }
 
   # check that length of base predictors is the same than y
-  if(lengths(base_predictor_list)[1] != length(y)) {
+  if (lengths(base_predictor_list)[1] != length(y)) {
     stop("Error in meta_learner_fit:
          Predictors and response are not the same length")
   }
 
   # check that length of kfolds is the same than y
-  if(length(kfolds) != length(y)) {
+  if (length(kfolds) != length(y)) {
     stop("Error in meta_learner_fit:
          kfolds vector and response are not the same length")
   }
@@ -89,7 +88,6 @@ meta_learner_fit <- function(base_predictor_list,
 #' @examples NULL
 #' @references https://rspatial.github.io/terra/reference/predict.html
 meta_learner_predict <- function(meta_fit, base_outputs_stdt, nthreads = 2) {
-
   if (!(identical(class(base_outputs_stdt), c("list", "stdt")))) {
     stop("Error: param base_outputs_stdt is not in stdt format.")
   }
@@ -112,17 +110,17 @@ meta_learner_predict <- function(meta_fit, base_outputs_stdt, nthreads = 2) {
   meta_pred <- matrix(nrow = nrow(mat_pred), ncol = length(meta_fit))
 
   iter_pred <- function(
-    meta_fit_in = meta_fit,
-    mat_pred_in,
-    meta_pred_in = meta_pred,
-    nthreads_in = nthreads) {
-
+      meta_fit_in = meta_fit,
+      mat_pred_in,
+      meta_pred_in = meta_pred,
+      nthreads_in = nthreads) {
     for (i in seq_along(meta_fit_in)) {
       meta_pred_in[, i] <-
         predict(
           object = meta_fit_in[[i]],
           newdata = mat_pred_in,
-          mc.cores = nthreads_in) |>
+          mc.cores = nthreads_in
+        ) |>
         apply(2, mean)
     }
     meta_pred_out <- apply(meta_pred_in, 1, mean)
@@ -139,9 +137,12 @@ meta_learner_predict <- function(meta_fit, base_outputs_stdt, nthreads = 2) {
   meta_pred_out <-
     cbind(
       base_outputs[, .SD, .SDcols = spt_names],
-      meta_pred_out)
-  meta_pred_out <- list("stdt" = meta_pred_out,
-                        "crs_dt" = base_outputs_stdt$crs_dt)
+      meta_pred_out
+    )
+  meta_pred_out <- list(
+    "stdt" = meta_pred_out,
+    "crs_dt" = base_outputs_stdt$crs_dt
+  )
   class(meta_pred_out) <- c("list", "stdt")
 
   return(meta_pred_out)

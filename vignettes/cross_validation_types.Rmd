@@ -15,7 +15,8 @@ knitr::opts_chunk$set(
   message = FALSE,
   fig.width = 8,
   fig.height = 6,
-  res = "retina")
+  res = "retina"
+)
 pkgs <- c("data.table", "sf", "terra", "sftime", "dplyr", "ggplot2")
 invisible(sapply(pkgs, library, character.only = TRUE, quietly = TRUE))
 options(sf_use_s2 = FALSE)
@@ -39,7 +40,8 @@ dim(ncost)
 
 ncost <-
   sftime::st_as_sftime(ncost,
-    time_column_name = "time")
+    time_column_name = "time"
+  )
 
 # to stdt
 ncostdt <- convert_stobj_to_stdt(ncost)
@@ -70,18 +72,20 @@ ncodtol <- ncodto |>
 ncodtol$value <- factor(ncodtol$value)
 
 ggplot(
-  data = ncodtol[variable != "lolto",],
-  mapping = aes(x = lon, y = lat, color = value)) +
+  data = ncodtol[variable != "lolto", ],
+  mapping = aes(x = lon, y = lat, color = value)
+) +
   geom_point() +
   labs(title = "LOLO and LOTO") +
   facet_grid(variable ~ time)
 
 ggplot(
-  data = ncodtol[variable == "lolto",],
-  mapping = aes(x = lon, y = lat, color = value)) +
+  data = ncodtol[variable == "lolto", ],
+  mapping = aes(x = lon, y = lat, color = value)
+) +
   geom_point() +
   labs(title = "LOLTO") +
-  facet_wrap(~ time)
+  facet_wrap(~time)
 ```
 
 
@@ -97,7 +101,8 @@ dim(ncost)
 ncost <-
   sftime::st_as_sftime(
     ncost,
-    time_column_name = "time")
+    time_column_name = "time"
+  )
 
 # to stdt
 ncostdt <- convert_stobj_to_stdt(ncost)
@@ -105,11 +110,9 @@ ncostdt <- convert_stobj_to_stdt(ncost)
 index_lblo <- generate_cv_index(ncostdt, "lblo", cv_fold = 5L)
 index_lbto <- generate_cv_index(ncostdt, "lbto", cv_fold = 5L)
 index_lblto <- generate_cv_index(ncostdt, "lblto", sp_fold = 3, t_fold = 5)
-
 ```
 
 ```{r lb-family plot}
-
 ncodt <- data.table::copy(ncostdt$stdt)
 ncodt$lblo <- index_lblo
 ncodt$lbto <- index_lbto
@@ -123,24 +126,23 @@ ncodtl <- ncodt |>
 ncodtl$value <- factor(ncodtl$value)
 
 ggplot(
-  data = ncodtl[variable != "lblto",],
-  mapping = aes(x = lon, y = lat, color = value)) +
+  data = ncodtl[variable != "lblto", ],
+  mapping = aes(x = lon, y = lat, color = value)
+) +
   geom_point() +
   labs(title = "Leave-block-location-out and\nLeave-block-time-out") +
   facet_grid(variable ~ time)
 
 ggplot(
-  data = ncodtl[variable == "lblto",],
-  mapping = aes(x = lon, y = lat, color = value)) +
+  data = ncodtl[variable == "lblto", ],
+  mapping = aes(x = lon, y = lat, color = value)
+) +
   geom_point() +
   labs(title = "Leave-block-location-time-out") +
-  facet_wrap(~ time)
-
-
+  facet_wrap(~time)
 ```
 
 ```{r lb-external}
-
 eco4 <- readRDS("../tests/testdata/ecoregion_lv4.rds")
 eco4d <- eco4 |>
   group_by(US_L3CODE, US_L3NAME) |>
@@ -154,7 +156,8 @@ index_lblo_sf <-
     ncostdt,
     "lblo",
     blocks = eco4d,
-    block_id = "US_L3NAME")
+    block_id = "US_L3NAME"
+  )
 ncodt$lblo_bl <- factor(index_lblo_sf)
 
 index_lblo_tr <-
@@ -162,21 +165,21 @@ index_lblo_tr <-
     ncostdt,
     "lblo",
     blocks = terra::vect(eco4d),
-    block_id = "US_L3NAME")
+    block_id = "US_L3NAME"
+  )
 ncodt$lblo_blt <- factor(index_lblo_tr)
 
 all.equal(index_lblo_sf, index_lblo_tr)
 
 ggplot(
   data = ncodt,
-  mapping = aes(x = lon, y = lat, color = lblo_bl)) +
+  mapping = aes(x = lon, y = lat, color = lblo_bl)
+) +
   geom_point() +
   labs(title = "Leave-block-location-out (Ecoregion level 3)") +
-  facet_wrap(~ time)
+  facet_wrap(~time)
 
 # TODO: irregular temporal blocks
-
-
 ```
 
 
@@ -187,8 +190,9 @@ ncodt$random <- factor(index_random)
 
 ggplot(
   data = ncodt,
-  mapping = aes(x = lon, y = lat, color = random)) +
+  mapping = aes(x = lon, y = lat, color = random)
+) +
   geom_point() +
   labs(title = "Random") +
-  facet_wrap(~ time)
+  facet_wrap(~time)
 ```

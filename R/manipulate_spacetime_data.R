@@ -16,7 +16,6 @@
 #' @author Eva Marques, Insang Song
 #' @export
 convert_stobj_to_stdt <- function(stobj) {
-
   format <- class(stobj)[[1]]
   names_stcols <- c("lon", "lat")
 
@@ -36,7 +35,6 @@ convert_stobj_to_stdt <- function(stobj) {
     stobj[, names_stcols] <- sf::st_coordinates(stobj)
     stobj <- sf::st_drop_geometry(stobj)
     stdt <- data.table::as.data.table(stobj)
-
   } else if (format == "SpatVector") {
     if (!("time") %in% names(stobj)) {
       stop("stobj does not contain time column")
@@ -48,7 +46,6 @@ convert_stobj_to_stdt <- function(stobj) {
     names(stdf)[names(stdf) == "y"] <- "lat"
 
     stdt <- data.table::as.data.table(stdf)
-
   } else if (format == "SpatRasterDataset") {
     crs_dt <- terra::crs(stobj)
     stdf <- as.data.frame(stobj[1], xy = TRUE)
@@ -64,11 +61,11 @@ convert_stobj_to_stdt <- function(stobj) {
         value.name = names(stobj)[1]
       )
 
-    for (var in seq(2, length(names(stobj)))){
+    for (var in seq(2, length(names(stobj)))) {
       # test that the ts is identical to the ts of the 1st variable
       if (!(identical(names(stobj[var]), names(stobj[1])))) {
-        stop("Error in SpatRastDataset: 
-        time series is different for at least 
+        stop("Error in SpatRastDataset:
+        time series is different for at least
              2 variables - or not ordered for one of these.")
       }
 
@@ -80,7 +77,8 @@ convert_stobj_to_stdt <- function(stobj) {
         data.table::melt(
           measure.vars = names(df_var)[-1:-2],
           variable.name = "time",
-          value.name = varname_original) |>
+          value.name = varname_original
+        ) |>
         as.data.frame()
       stdf[, varname_original] <- df_var[, 4]
     }
@@ -100,7 +98,6 @@ convert_stobj_to_stdt <- function(stobj) {
   stdt_result <- list("stdt" = stdt, "crs_stdt" = crs_dt)
   class(stdt_result) <- c("list", "stdt")
   return(stdt_result)
-
 }
 
 #' Boolean to know if an object correspond to a stdtobj
@@ -110,7 +107,7 @@ convert_stobj_to_stdt <- function(stobj) {
 #' @author Eva Marques
 #' @export
 is_stdt <- function(obj) {
-  if (!(identical(class(obj), c("list", "stdt")))){
+  if (!(identical(class(obj), c("list", "stdt")))) {
     return(FALSE)
   } else if (!(identical(names(obj), c("stdt", "crs_stdt")))) {
     return(FALSE)
@@ -137,8 +134,8 @@ is_stdt <- function(obj) {
 #' @author Insang Song
 #' @export
 convert_stdt <- function(
-  stdt,
-  class_to = c("sf", "sftime", "SpatVector", "SpatRasterDataset")) {
+    stdt,
+    class_to = c("sf", "sftime", "SpatVector", "SpatRasterDataset")) {
   if (!is_stdt(stdt)) {
     stop("The input for stdt argument is not an stdt object")
   }
@@ -148,7 +145,8 @@ convert_stdt <- function(
     sf = sf::st_as_sf(convert_stdt_sftime(stdt)),
     sftime = convert_stdt_sftime(stdt),
     SpatRasterDataset = convert_stdt_spatrastdataset(stdt),
-    SpatVector = convert_stdt_spatvect(stdt))
+    SpatVector = convert_stdt_spatvect(stdt)
+  )
   return(converted)
 }
 
@@ -164,10 +162,11 @@ convert_stdt_spatvect <- function(stdt) {
     stop("The input for stdt argument is not an stdt object")
   }
   vect_obj <-
-    terra::vect(stdt$stdt, 
+    terra::vect(stdt$stdt,
       geom = c("lon", "lat"),
       crs = stdt$crs_stdt,
-      keepgeom = FALSE)
+      keepgeom = FALSE
+    )
   return(vect_obj)
 }
 
@@ -195,7 +194,7 @@ convert_stdt_sftime <- function(stdt) {
 
 
 #' Convert a stdtobj to SpatRasterDataset
-#' 
+#'
 #' @param stdt A stdt object
 #' @return a SpatRasterDataset with each raster corresponding to one variable
 #' (layers are the time series)
@@ -216,7 +215,8 @@ convert_stdt_spatrastdataset <- function(stdt) {
       df[, c("lon", "lat", "time", var)],
       idvar = c("lon", "lat"),
       timevar = "time",
-      direction = "wide")
+      direction = "wide"
+    )
     colnames(newdf) <- gsub(
       paste0(var, "."),
       "",
@@ -324,7 +324,7 @@ project_dt <- function(datatable, crs_ori, crs_dest) {
   if (!("lon" %in% colnames(datatable))) {
     stop("datatable does not contain lon column")
   }
-  
+
   loc <- unique(datatable[, c("lon", "lat")])
   loc_sf <- dt_to_sf(loc, crs_ori)
   loc_sf <- sf::st_transform(loc_sf, crs_dest)

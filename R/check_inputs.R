@@ -9,8 +9,7 @@
 #' @description Detects the class whether it is subject to stdt.
 #' @export
 check_input_is_stdt <- function(
-  input
-) {
+    input) {
   input_class <- class(input)
   detected <- any(grepl("stdt", input_class))
   return(detected)
@@ -42,7 +41,6 @@ check_input_raster_in_extent <- function(
     input_raster,
     spatial_domain,
     domain_tolerance = 3e5L) {
-  
   if (methods::is(spatial_domain, "SpatVector")) {
     message("The spatial_domain is SpatVector. We will convert it to sf...\n")
     spatial_domain <- sf::st_as_sf(spatial_domain)
