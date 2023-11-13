@@ -8,7 +8,7 @@
 generate_cv_index_lblto(covars, sp_fold, t_fold, blocks, block_id = NULL)
 }
 \arguments{
-\item{covars}{stdt. See \link[NRTAPModel]{convert_stobj_to_stdt}
+\item{covars}{stdt. See \code{\link{convert_stobj_to_stdt}}
 for details.}
 
 \item{sp_fold}{integer(1). Number of subfolds for spatial blocks.}

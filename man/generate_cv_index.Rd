@@ -15,7 +15,7 @@ generate_cv_index(
 )
 }
 \arguments{
-\item{covars}{stdt. See \link[NRTAPModel]{convert_stobj_to_stdt}
+\item{covars}{stdt. See \code{\link{convert_stobj_to_stdt}}
 for details.}
 
 \item{cv_mode}{character(1). One of 'lolo (leave-one-location-out)',

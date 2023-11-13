@@ -9,6 +9,8 @@ generate_block_sp_index(covars, cv_fold = NULL, blocks = NULL, block_id = NULL)
 \arguments{
 \item{covars}{stdt.}
 
+\item{cv_fold}{integer(1). Number of folds for cross-validation.}
+
 \item{blocks}{numeric(2)/sf/SpatVector configuration of blocks.}
 
 \item{block_id}{character(1). The unique identifier of each block.}

@@ -8,7 +8,7 @@
 generate_cv_index_lolto(covars)
 }
 \arguments{
-\item{covars}{stdt. See \link[NRTAPModel]{convert_stobj_to_stdt}
+\item{covars}{stdt. See \code{\link{convert_stobj_to_stdt}}
 for details.}
 }
 \value{

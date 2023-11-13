@@ -8,7 +8,7 @@
 generate_cv_index_lblo(covars, cv_fold = NULL, blocks = NULL, block_id = NULL)
 }
 \arguments{
-\item{covars}{stdt. See \link[NRTAPModel]{convert_stobj_to_stdt}
+\item{covars}{stdt. See \code{\link{convert_stobj_to_stdt}}
 for details.}
 
 \item{cv_fold}{integer(1). Number of folds for cross-validation.}

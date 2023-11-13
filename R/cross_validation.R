@@ -1,5 +1,5 @@
 #' Generate spatio-temporal cross-validation index
-#' @param covars stdt. See \link[NRTAPModel]{convert_stobj_to_stdt}
+#' @param covars stdt. See \code{\link{convert_stobj_to_stdt}}
 #' for details.
 #' @param cv_mode character(1). One of 'lolo (leave-one-location-out)',
 #' 'loto (leave-one-time-out)',
@@ -124,6 +124,7 @@ generate_spt_index <- function(
 
 #' Generate blocked spatial index
 #' @param covars stdt.
+#' @param cv_fold integer(1). Number of folds for cross-validation.
 #' @param blocks numeric(2)/sf/SpatVector configuration of blocks.
 #' @param block_id character(1). The unique identifier of each block.
 #' @details "Block" in this function refers to
@@ -225,7 +226,7 @@ generate_block_sp_index <- function(
 }
 
 #' Generate spatio-temporal cross-validation index (leave-one-time-out)
-#' @param covars stdt. See \link[NRTAPModel]{convert_stobj_to_stdt}
+#' @param covars stdt. See \code{\link{convert_stobj_to_stdt}}
 #' for details.
 #' @author Insang Song
 #' @return An integer vector.
@@ -241,7 +242,7 @@ generate_cv_index_loto <- function(
 }
 
 #' Generate spatio-temporal cross-validation index (leave-one-location-out)
-#' @param covars stdt. See \link[NRTAPModel]{convert_stobj_to_stdt}
+#' @param covars stdt. See \code{\link{convert_stobj_to_stdt}}
 #' for details.
 #' @author Insang Song
 #' @return An integer vector.
@@ -260,7 +261,7 @@ generate_cv_index_lolo <- function(
 
 #' Generate spatio-temporal cross-validation index
 #' (leave-one-location-time-out)
-#' @param covars stdt. See \link[NRTAPModel]{convert_stobj_to_stdt}
+#' @param covars stdt. See \code{\link{convert_stobj_to_stdt}}
 #' for details.
 #' @author Insang Song
 #' @return An integer vector.
@@ -277,7 +278,7 @@ generate_cv_index_lolto <- function(
 
 #' Generate spatio-temporal cross-validation index
 #' (leave-block-location-out)
-#' @param covars stdt. See \link[NRTAPModel]{convert_stobj_to_stdt}
+#' @param covars stdt. See \code{\link{convert_stobj_to_stdt}}
 #' for details.
 #' @param cv_fold integer(1). Number of folds for cross-validation.
 #' @param blocks integer(2)/sf/SpatVector object.
@@ -315,7 +316,7 @@ generate_cv_index_lblo <- function(
 
 #' Generate spatio-temporal cross-validation index
 #' (leave-block-time-out)
-#' @param covars stdt. See \link[NRTAPModel]{convert_stobj_to_stdt}
+#' @param covars stdt. See \code{\link{convert_stobj_to_stdt}}
 #' for details.
 #' @param cv_fold integer(1). Number of folds for cross-validation.
 #' @author Insang Song
@@ -358,7 +359,7 @@ generate_cv_index_lbto <- function(
 
 #' Generate spatio-temporal cross-validation index
 #' (leave-block-location-time-out)
-#' @param covars stdt. See \link[NRTAPModel]{convert_stobj_to_stdt}
+#' @param covars stdt. See \code{\link{convert_stobj_to_stdt}}
 #' for details.
 #' @param sp_fold integer(1). Number of subfolds for spatial blocks.
 #' @param t_fold integer(1). Number of subfolds for temporal blocks.
@@ -391,7 +392,7 @@ generate_cv_index_lblto <- function(
 
 #' Generate spatio-temporal cross-validation index
 #' (random)
-#' @param covars stdt. See \link[NRTAPModel]{convert_stobj_to_stdt}
+#' @param covars stdt. See \code{\link{convert_stobj_to_stdt}}
 #' for details.
 #' @param cv_fold integer(1). Number of folds for cross-validation.
 #' @author Insang Song
