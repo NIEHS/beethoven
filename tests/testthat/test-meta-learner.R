@@ -5,7 +5,6 @@
 #'
 
 test_that("the meta learner fitting abides", {
-  #skip()
   # Test data
   response <- 3 + rnorm(100)
   kfolds <- sample(rep(1:5, length.out = length(response)))
@@ -93,7 +92,6 @@ test_that("the meta learner fitting abides", {
 
 
 test_that("the meta learner prediction abides", {
-  
   response <- 3 + rnorm(100)
   kfolds <- sample(rep(1:5, length.out = length(response)))
   predictor_list <- list(
@@ -150,5 +148,3 @@ test_that("the meta learner prediction abides", {
                "Error: baselearners list incomplete or with wrong names")
   
 })
-
-

@@ -5,7 +5,7 @@ test_that("convert_stobj_to_stdt works well", {
   withr::local_package("tidyr")
   withr::local_package("dplyr")
   withr::local_options(list(sf_use_s2 = FALSE))
-  
+
   lon <- seq(-112, -101, length.out = 5) # create lon sequence
   lat <- seq(33.5, 40.9, length.out = 5) # create lat sequence
   df <- expand.grid("lon" = lon, "lat" = lat) # expand to regular grid
@@ -25,7 +25,7 @@ test_that("convert_stobj_to_stdt works well", {
   # 1) it should work
   expect_no_error(convert_stobj_to_stdt(df))
   expect_no_error(convert_stobj_to_stdt(data.table::as.data.table(df)))
-  expect_equal(convert_stobj_to_stdt(df)$crs_dt, NA)
+  expect_true(is.na(convert_stobj_to_stdt(df)$crs_stdt))
   expect_equal(class(convert_stobj_to_stdt(df)$stdt)[[1]], "data.table")
   expect_false(any(!(c("lon", "lat", "time") %in%
     colnames(convert_stobj_to_stdt(df)$stdt))))
@@ -42,7 +42,7 @@ test_that("convert_stobj_to_stdt works well", {
   stobj <- sf::st_as_sf(df, coords = c("lon", "lat"), crs = "EPSG:4326")
   expect_no_error(convert_stobj_to_stdt(stobj))
   stdt <- convert_stobj_to_stdt(stobj)$stdt
-  crsdt <- convert_stobj_to_stdt(stobj)$crs_dt
+  crsdt <- convert_stobj_to_stdt(stobj)$crs_stdt
   expect_equal(class(stdt)[[1]], "data.table")
   expect_equal(class(crsdt), "character")
   expect_true(terra::same.crs(crsdt, "EPSG:4326"))
@@ -62,7 +62,7 @@ test_that("convert_stobj_to_stdt works well", {
     crs = "EPSG:4326"
   )
   expect_no_error(convert_stobj_to_stdt(stobj))
-  expect_equal(class(convert_stobj_to_stdt(stobj)$crs_dt), "character")
+  expect_equal(class(convert_stobj_to_stdt(stobj)$crs_stdt), "character")
   # 2) it should fail because time columns is misspelled
   stobj$time <- stobj$time
   stobj$time <- NULL
@@ -77,8 +77,8 @@ test_that("convert_stobj_to_stdt works well", {
   expect_no_error(convert_stobj_to_stdt(stobj))
   stdt <- convert_stobj_to_stdt(stobj)$stdt
   expect_equal(class(stdt)[[1]], "data.table")
-  expect_equal(class(convert_stobj_to_stdt(stobj)$crs_dt), "character")
-  expect_true(terra::same.crs(convert_stobj_to_stdt(stobj)$crs_dt, "EPSG:4326"))
+  expect_equal(class(convert_stobj_to_stdt(stobj)$crs_stdt), "character")
+  expect_true(terra::same.crs(convert_stobj_to_stdt(stobj)$crs_stdt, "EPSG:4326"))
   expect_false(any(!(c("lon", "lat", "time") %in% colnames(stdt))))
   expect_equal(
     stdt[lon == -112 & lat == 35.35 & time == "2023-11-02", var1],
@@ -121,8 +121,8 @@ test_that("convert_stobj_to_stdt works well", {
   expect_no_error(convert_stobj_to_stdt(stobj))
   stdt_converted <- convert_stobj_to_stdt(stobj)
   expect_equal(class(stdt_converted$stdt)[[1]], "data.table")
-  expect_equal(class(stdt_converted$crs_dt), "character")
-  expect_true(terra::same.crs(stdt_converted$crs_dt, "EPSG:4326"))
+  expect_equal(class(stdt_converted$crs_stdt), "character")
+  expect_true(terra::same.crs(stdt_converted$crs_stdt, "EPSG:4326"))
   expect_false(any(!(c("lon", "lat", "time") %in% colnames(stdt_converted$stdt))))
   expect_equal(stdt_converted$stdt[lon == -106.5 & lat == stdt_converted$stdt$lat[37] & time == "2023-11-02", var1],
                49)
