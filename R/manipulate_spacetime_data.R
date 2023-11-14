@@ -263,8 +263,10 @@ dt_to_sf <- function(datatable, crs) {
 
 #' Create a sftime object from a data.table
 #'
-#' @param datatable A data.table object with columns "lat", "lon", "date"
+#' @param datatable A data.table object with columns "lat", "lon", "time"
 #' @param crs A character containing the original crs
+#' @note "time" column in datatable argument should be in date format,
+#' e.g., "2023-01-01", "01/01/2023", etc.
 #' @author Eva Marques
 #' @return an sftime object
 dt_to_sftime <- function(datatable, crs) {
@@ -280,19 +282,19 @@ dt_to_sftime <- function(datatable, crs) {
   if (!("lat" %in% colnames(datatable))) {
     stop("datatable does not contain lat column")
   }
-  if (!("date" %in% colnames(datatable))) {
-    stop("datatable does not contain date column")
+  if (!("time" %in% colnames(datatable))) {
+    stop("datatable does not contain time column")
   }
 
-  datatable$date <- as.Date(datatable$date)
+  datatable$date <- as.Date(datatable$time)
   data_sft <- sftime::st_as_sftime(
     datatable,
     coords = c("lon", "lat"),
     remove = FALSE,
     crs = crs,
-    time_column_name = "date"
+    time_column_name = "time"
   )
-  return(data_sft = data_sft)
+  return(data_sft)
 }
 
 
@@ -334,7 +336,7 @@ project_dt <- function(datatable, crs_ori, crs_dest) {
   loc_sf[["lon"]] <- loc_sf_coords[, 1]
   loc_sf[["lat"]] <- loc_sf_coords[, 2]
 
-  loc_proj <- sf::st_drop_geometry(loc_proj)
+  loc_proj <- sf::st_drop_geometry(loc_sf)
   loc_proj <- data.table::as.data.table(loc_proj)
 
   # renaming is only valid within the function

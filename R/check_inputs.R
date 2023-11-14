@@ -1,21 +1,6 @@
 ## A suite of functions to check input data
 ## Last edited 11/06/2023
 
-#' Type check of internal class stdt
-#' @param input stdt object, which is a result of convert_stobj_to_stdt
-#' @return logical(1). TRUE (stdt is in one of class names) or
-#' FALSE (otherwise)
-#' @author Insang Song
-#' @description Detects the class whether it is subject to stdt.
-#' @export
-check_input_is_stdt <- function(
-    input) {
-  input_class <- class(input)
-  detected <- any(grepl("stdt", input_class))
-  return(detected)
-}
-
-
 #' Check if the input raster is in the expected extent
 #'
 #' @param input_raster SpatRaster/stars object
