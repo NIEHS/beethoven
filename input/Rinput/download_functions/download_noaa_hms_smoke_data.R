@@ -43,11 +43,12 @@ download_noaa_hms_smoke_data <- function(
   directory_to_download = "./input/noaa_hms/raw/",
   directory_to_save = "./input/noaa_hms/raw/",
   data_download_acknowledgement = FALSE,
-  remove_zip = FALSE,
   unzip = TRUE,
+  remove_zip = FALSE,
   time_wait_download = 2L
 ) {
   # nocov start
+  #### 1. directory setup
   chars_dir_download <- nchar(directory_to_download)
   chars_dir_save <- nchar(directory_to_save)
   if (substr(directory_to_download,
@@ -58,7 +59,7 @@ download_noaa_hms_smoke_data <- function(
   if (substr(directory_to_save, chars_dir_save, chars_dir_save) != "/") {
     directory_to_save <- paste(directory_to_save, "/", sep = "")
   }
-  #### 0. test for data download acknowledgement
+  #### 2. check for data download acknowledgement
   if (data_download_acknowledgement == FALSE) {
     stop(paste0(
       "Data download acknowledgement is set to FALSE. Please ",
@@ -66,15 +67,17 @@ download_noaa_hms_smoke_data <- function(
       "be very large and use lots of machine storage and memory.\n"
     ))
   }
-  #### 1. define date sequence in character format
+  #### 3. define date sequence
   date_start_date_format <- as.Date(date_start, format = "%Y-%m-%d")
   date_end_date_format <- as.Date(date_end, format = "%Y-%m-%d")
   date_sequence <- seq(date_start_date_format, date_end_date_format, "day")
   date_sequence <- gsub("-", "", as.character(date_sequence))
-  #### 2. define data download URLs and download names
+  #### 4. define URL base
   base <- "https://satepsanone.nesdis.noaa.gov/pub/FIRE/web/HMS/Smoke_Polygons/"
+  #### 5. define empty vectors
   file_urls <- NULL
   download_names <- NULL
+  #### 6. add download URLs and file names to empty vectors
   for (f in seq_along(date_sequence)) {
     year <- substr(date_sequence[f], 1, 4)
     month <- substr(date_sequence[f], 5, 6)
@@ -124,31 +127,31 @@ download_noaa_hms_smoke_data <- function(
       download_names <- c(download_names, download_names_add)
     }
   }
-  #### 3. Downloading data
+  #### 7. download data
   if (!any(file.exists(download_names))) {
     cat(paste0("Downloading requested files...\n"))
     download.file(file_urls, download_names, method = "libcurl", quiet = TRUE)
     cat(paste0("Requested files downloaded.\n"))
   }
-  #### 4. End function if unzip == FALSE && data_format == "Shapefile"
+  #### 8. end if unzip == FALSE
   if (unzip == FALSE && data_format == "Shapefile") {
     return(cat(paste0("Downloaded files will not be unzipped.\n")))
   }
-  #### 5. Unzip "Shapefile"
+  #### 9. unzip files
   if (unzip == TRUE && data_format == "Shapefile") {
-    cat(paste0("Unzipping shapefiles to ", directory_to_save, "...\n"))
+    cat(paste0("Unzipping zip files to ", directory_to_save, "...\n"))
     for (u in seq_along(download_names)) {
       unzip(download_names[u], exdir = directory_to_save)
     }
-    cat(paste0("Shapefiles unzipped.\n"))
+    cat(paste0("Zip files unzipped.\n"))
   }
-  #### 5. Remove zip files from download directory
+  #### 10. remove zip files
   if (remove_zip == TRUE && data_format == "Shapefile") {
-    cat(paste0("Deleting download files...\n"))
+    cat(paste0("Removing zip files...\n"))
     for (z in seq_along(download_names)) {
       file.remove(download_names[z])
     }
-    cat(paste0("Download files deleted.\n"))
+    cat(paste0("Zip files removed\n"))
   }
   # nocov end
 }
