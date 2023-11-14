@@ -43,7 +43,7 @@ download_noaa_hms_smoke_data <- function(
     data_download_acknowledgement = FALSE,
     url_noaa_hms_smoke_data =
         "https://satepsanone.nesdis.noaa.gov/pub/FIRE/web/HMS/Smoke_Polygons/",
-    remove_download = TRUE,
+    remove_download = FALSE,
     time_wait_download = 2L) {
   # nocov start
   chars_dir_download <- nchar(directory_to_download)
