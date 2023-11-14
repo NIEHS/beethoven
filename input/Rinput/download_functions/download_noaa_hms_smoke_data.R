@@ -27,6 +27,7 @@
 #' and use lots of machine storage and memory.
 #' @param url_noaa_hms_smoke_data character(1). URL to the NOAA Hazard Mapping
 #' System Fire and Smoke Product data.
+#' @param unzip logical(1). Unzip downloaded zip files. Default = `TRUE`.
 #' @param remove_download logical(1). Remove download files in
 #' directory_to_download.
 #' @param time_wait_download integer(1).
@@ -44,6 +45,7 @@ download_noaa_hms_smoke_data <- function(
     url_noaa_hms_smoke_data =
         "https://satepsanone.nesdis.noaa.gov/pub/FIRE/web/HMS/Smoke_Polygons/",
     remove_download = FALSE,
+    unzip = TRUE,
     time_wait_download = 2L) {
   # nocov start
   chars_dir_download <- nchar(directory_to_download)
@@ -98,7 +100,7 @@ download_noaa_hms_smoke_data <- function(
       )
       download_names <- c(download_names, download_names_add)
     } else if (data_format == "KML") {
-      file_urls <- paste0(
+      file_urls_add <- paste0(
         url_noaa_hms_smoke_data,
         data_format,
         "/",
@@ -110,7 +112,7 @@ download_noaa_hms_smoke_data <- function(
         ".kml"
       )
       file_urls <- c(file_urls, file_urls_add)
-      download_names <- paste0(
+      download_names_add <- paste0(
         directory_to_download,
         "hms_smoke_",
         data_format,
@@ -127,6 +129,10 @@ download_noaa_hms_smoke_data <- function(
     download.file(file_urls, download_names, method = "libcurl", quiet = TRUE)
     cat(paste0("Requested files downloaded.\n"))
   }
+  #### 4. End function if unzip == FALSE && data_format == "Shapefile"
+  if (unzip == FALSE && data_format == "Shapefile") {
+    return(cat(paste0("Downloaded files will not be unzipped.\n")))
+  }
   #### 4. Unzip "Shapefile" or copy "KML" files
   if (data_format == "Shapefile") {
     cat(paste0("Unzipping shapefiles to ", directory_to_save, "...\n"))
@@ -134,7 +140,7 @@ download_noaa_hms_smoke_data <- function(
       unzip(download_names[u], exdir = directory_to_save)
     }
   } else if (data_format == "KML") {
-    cat(paste0("Unzipping KML files to "), directory_to_save, "...\n")
+    cat(paste0("Copying KML files to "), directory_to_save, "...\n")
     for (u in seq_along(download_names)) {
       file.copy(from = download_names[u], to = directory_to_save)
     }
