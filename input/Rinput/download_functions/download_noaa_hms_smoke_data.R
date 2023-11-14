@@ -21,16 +21,15 @@
 #' @param directory_to_download character(1). Directory to download zip files
 #' from NOAA Hazard Mapping System Fire and Smoke Product. (Ignored if
 #' `data_format = "KML"`.)
-#' @param directory_to_save character(1). Directory to decompress zip files.
-#' KML files do not need to be unzipped and will be downloaded directly into
-#' `directory_to_save`.
+#' @param directory_to_save character(1). Directory to save unzipped shapefiles
+#' and KML files.
 #' @param data_download_acknowledgement logical(1). By setting `= TRUE` the user
 #' acknowledge that the data downloaded using this function may be very large
 #' and use lots of machine storage and memory.
 #' @param unzip logical(1). Unzip zip files. Default = `TRUE`. (Ignored if
 #' `data_format = "KML"`.)
 #' @param remove_zip logical(1). Remove zip files from
-#' directory_to_download. (Ignored if `data_format = "KML"`.)
+#' directory_to_download. Default = `FALSE`. (Ignored if `data_format = "KML"`.)
 #' @param time_wait_download integer(1).
 #' @author Mitchell Manware, Insang Song
 #' @return NULL; NOAA Hazard Mapping System Fire and Smoke Product data will be
