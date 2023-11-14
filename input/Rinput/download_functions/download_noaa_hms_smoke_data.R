@@ -67,17 +67,22 @@ download_noaa_hms_smoke_data <- function(
       "be very large and use lots of machine storage and memory.\n"
     ))
   }
-  #### 3. define date sequence
+  #### 3. check for unzip == FALSE && remove_zip == TRUE
+  if (unzip == FALSE && remove_zip == TRUE) {
+    stop(paste0("Arguments `unzip = FALSE` and `remove_zip = TRUE` are not ",
+                "acceptable together. Please change one.\n"))
+  }
+  #### 4. define date sequence
   date_start_date_format <- as.Date(date_start, format = "%Y-%m-%d")
   date_end_date_format <- as.Date(date_end, format = "%Y-%m-%d")
   date_sequence <- seq(date_start_date_format, date_end_date_format, "day")
   date_sequence <- gsub("-", "", as.character(date_sequence))
-  #### 4. define URL base
+  #### 5. define URL base
   base <- "https://satepsanone.nesdis.noaa.gov/pub/FIRE/web/HMS/Smoke_Polygons/"
-  #### 5. define empty vectors
+  #### 6. define empty vectors
   file_urls <- NULL
   download_names <- NULL
-  #### 6. add download URLs and file names to empty vectors
+  #### 7. add download URLs and file names to empty vectors
   for (f in seq_along(date_sequence)) {
     year <- substr(date_sequence[f], 1, 4)
     month <- substr(date_sequence[f], 5, 6)
@@ -127,17 +132,17 @@ download_noaa_hms_smoke_data <- function(
       download_names <- c(download_names, download_names_add)
     }
   }
-  #### 7. download data
+  #### 8. download data
   if (!any(file.exists(download_names))) {
     cat(paste0("Downloading requested files...\n"))
     download.file(file_urls, download_names, method = "libcurl", quiet = TRUE)
     cat(paste0("Requested files downloaded.\n"))
   }
-  #### 8. end if unzip == FALSE
+  #### 9. end if unzip == FALSE
   if (unzip == FALSE && data_format == "Shapefile") {
     return(cat(paste0("Downloaded files will not be unzipped.\n")))
   }
-  #### 9. unzip files
+  #### 10. unzip files
   if (unzip == TRUE && data_format == "Shapefile") {
     cat(paste0("Unzipping zip files to ", directory_to_save, "...\n"))
     for (u in seq_along(download_names)) {
@@ -145,7 +150,7 @@ download_noaa_hms_smoke_data <- function(
     }
     cat(paste0("Zip files unzipped.\n"))
   }
-  #### 10. remove zip files
+  #### 11. remove zip files
   if (remove_zip == TRUE && data_format == "Shapefile") {
     cat(paste0("Removing zip files...\n"))
     for (z in seq_along(download_names)) {
