@@ -17,36 +17,36 @@
 #' data. Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
 #' @param date_end character(1). length of 10. End date for downloading data.
 #' Format YYYY-MM-DD (ex. September 10, 2023 = "2023-09-10").
-#' @param data_format character(1). "Shapefile" or "KML". Download data in
-#' shapefile or keyhole markup language format.
+#' @param data_format character(1). "Shapefile" or "KML".
 #' @param directory_to_download character(1). Directory to download zip files
-#' from NOAA Hazard Mapping System Fire and Smoke Product.
+#' from NOAA Hazard Mapping System Fire and Smoke Product. (Ignored if
+#' `data_format = "KML"`.)
 #' @param directory_to_save character(1). Directory to decompress zip files.
+#' KML files do not need to be unzipped and will be downloaded directly into
+#' `directory_to_save`.
 #' @param data_download_acknowledgement logical(1). By setting `= TRUE` the user
 #' acknowledge that the data downloaded using this function may be very large
 #' and use lots of machine storage and memory.
-#' @param url_noaa_hms_smoke_data character(1). URL to the NOAA Hazard Mapping
-#' System Fire and Smoke Product data.
-#' @param unzip logical(1). Unzip downloaded zip files. Default = `TRUE`.
-#' @param remove_download logical(1). Remove download files in
-#' directory_to_download.
+#' @param unzip logical(1). Unzip zip files. Default = `TRUE`. (Ignored if
+#' `data_format = "KML"`.)
+#' @param remove_zip logical(1). Remove zip files from
+#' directory_to_download. (Ignored if `data_format = "KML"`.)
 #' @param time_wait_download integer(1).
 #' @author Mitchell Manware, Insang Song
 #' @return NULL; NOAA Hazard Mapping System Fire and Smoke Product data will be
 #' returned to the designated saving directory in the indicated format.
 #' @export
 download_noaa_hms_smoke_data <- function(
-    date_start = "2023-09-01",
-    date_end = "2023-09-01",
-    data_format = "Shapefile",
-    directory_to_download = "./input/noaa_hms/raw/",
-    directory_to_save = "./input/noaa_hms/raw/",
-    data_download_acknowledgement = FALSE,
-    url_noaa_hms_smoke_data =
-        "https://satepsanone.nesdis.noaa.gov/pub/FIRE/web/HMS/Smoke_Polygons/",
-    remove_download = FALSE,
-    unzip = TRUE,
-    time_wait_download = 2L) {
+  date_start = "2023-09-01",
+  date_end = "2023-09-01",
+  data_format = "Shapefile",
+  directory_to_download = "./input/noaa_hms/raw/",
+  directory_to_save = "./input/noaa_hms/raw/",
+  data_download_acknowledgement = FALSE,
+  remove_zip = FALSE,
+  unzip = TRUE,
+  time_wait_download = 2L
+) {
   # nocov start
   chars_dir_download <- nchar(directory_to_download)
   chars_dir_save <- nchar(directory_to_save)
@@ -72,6 +72,7 @@ download_noaa_hms_smoke_data <- function(
   date_sequence <- seq(date_start_date_format, date_end_date_format, "day")
   date_sequence <- gsub("-", "", as.character(date_sequence))
   #### 2. define data download URLs and download names
+  base <- "https://satepsanone.nesdis.noaa.gov/pub/FIRE/web/HMS/Smoke_Polygons/"
   file_urls <- NULL
   download_names <- NULL
   for (f in seq_along(date_sequence)) {
@@ -79,7 +80,7 @@ download_noaa_hms_smoke_data <- function(
     month <- substr(date_sequence[f], 5, 6)
     if (data_format == "Shapefile") {
       file_urls_add <- paste0(
-        url_noaa_hms_smoke_data,
+        base,
         data_format,
         "/",
         year,
@@ -101,7 +102,7 @@ download_noaa_hms_smoke_data <- function(
       download_names <- c(download_names, download_names_add)
     } else if (data_format == "KML") {
       file_urls_add <- paste0(
-        url_noaa_hms_smoke_data,
+        base,
         data_format,
         "/",
         year,
@@ -113,7 +114,7 @@ download_noaa_hms_smoke_data <- function(
       )
       file_urls <- c(file_urls, file_urls_add)
       download_names_add <- paste0(
-        directory_to_download,
+        directory_to_save,
         "hms_smoke_",
         data_format,
         "_",
@@ -133,28 +134,16 @@ download_noaa_hms_smoke_data <- function(
   if (unzip == FALSE && data_format == "Shapefile") {
     return(cat(paste0("Downloaded files will not be unzipped.\n")))
   }
-  #### 4. Unzip "Shapefile" or copy "KML" files
-  if (data_format == "Shapefile") {
+  #### 5. Unzip "Shapefile"
+  if (unzip == TRUE && data_format == "Shapefile") {
     cat(paste0("Unzipping shapefiles to ", directory_to_save, "...\n"))
     for (u in seq_along(download_names)) {
       unzip(download_names[u], exdir = directory_to_save)
     }
-  } else if (data_format == "KML") {
-    cat(paste0("Copying KML files to "), directory_to_save, "...\n")
-    for (u in seq_along(download_names)) {
-      file.copy(from = download_names[u], to = directory_to_save)
-    }
+    cat(paste0("Shapefiles unzipped.\n"))
   }
-  cat(paste0("Files unzipped and saved in", directory_to_save, ".\n"))
-  #### 5. Remove zip and .kml files from download directory
-  if (remove_download == TRUE &&
-        data_format == "KML" &&
-        directory_to_download == directory_to_save) {
-    cat(paste0(
-      "Downloading directory and saving directory are the same. ",
-      "Downloaded KML files will not be deleted.\n"
-    ))
-  } else if (remove_download == TRUE) {
+  #### 5. Remove zip files from download directory
+  if (remove_zip == TRUE && data_format == "Shapefile") {
     cat(paste0("Deleting download files...\n"))
     for (z in seq_along(download_names)) {
       file.remove(download_names[z])
