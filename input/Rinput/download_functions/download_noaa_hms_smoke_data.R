@@ -133,21 +133,6 @@ download_noaa_hms_smoke_data <- function(
     for (u in seq_along(download_names)) {
       unzip(download_names[u], exdir = directory_to_save)
     }
-    names_to_change <- list.files(
-      path = directory_to_save,
-      pattern = "hms_smoke",
-      full.names = TRUE
-    )
-    names_to_change <- names_to_change[grep(".kml",
-      names_to_change,
-      invert = TRUE
-    )]
-    names_to_change <- names_to_change[grep(".zip",
-      names_to_change,
-      invert = TRUE
-    )]
-    names_new <- gsub("hms_smoke", "hms_smoke_Shapefile_", names_to_change)
-    file.rename(names_to_change, names_new)
   } else if (data_format == "KML") {
     cat(paste0("Unzipping KML files to "), directory_to_save, "...\n")
     for (u in seq_along(download_names)) {
