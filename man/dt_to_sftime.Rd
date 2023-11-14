@@ -7,7 +7,7 @@
 dt_to_sftime(datatable, crs)
 }
 \arguments{
-\item{datatable}{A data.table object with columns "lat", "lon", "date"}
+\item{datatable}{A data.table object with columns "lat", "lon", "time"}
 
 \item{crs}{A character containing the original crs}
 }
@@ -16,6 +16,10 @@ an sftime object
 }
 \description{
 Create a sftime object from a data.table
+}
+\note{
+"time" column in datatable argument should be in date format,
+e.g., "2023-01-01", "01/01/2023", etc.
 }
 \author{
 Eva Marques
