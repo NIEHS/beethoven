@@ -30,7 +30,6 @@
 #' `data_format = "KML"`.)
 #' @param remove_zip logical(1). Remove zip files from
 #' directory_to_download. Default = `FALSE`. (Ignored if `data_format = "KML"`.)
-#' @param time_wait_download integer(1).
 #' @author Mitchell Manware, Insang Song
 #' @return NULL; NOAA Hazard Mapping System Fire and Smoke Product data will be
 #' returned to the designated saving directory in the indicated format.
@@ -43,8 +42,7 @@ download_noaa_hms_smoke_data <- function(
   directory_to_save = "./input/noaa_hms/raw/",
   data_download_acknowledgement = FALSE,
   unzip = TRUE,
-  remove_zip = FALSE,
-  time_wait_download = 2L
+  remove_zip = FALSE
 ) {
   # nocov start
   #### 1. directory setup
