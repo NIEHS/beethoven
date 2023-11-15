@@ -74,8 +74,9 @@ check_means_are_valid <- function(
   min_vec_output <- min(vec_output)
   max_vec_output <- max(vec_output)
   # evaluate if the output means are within the bounds
-  checked <- (min_vec_output >= threshold_lower &&
-    max_vec_output <= threshold_upper)
+  checked <- (
+              min_vec_output >= threshold_lower &&
+                max_vec_output <= threshold_upper)
   return(checked)
 }
 

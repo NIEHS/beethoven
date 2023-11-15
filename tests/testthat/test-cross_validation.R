@@ -20,11 +20,21 @@ testthat::test_that("leave-ones run without errors", {
     lapply(function(x) mutate(nco_s, time = x)) |>
     Reduce(rbind, x = _)
   # to sftime
-  ncost <- sftime::st_as_sftime(ncost,
-    time_column_name = "time")
+  ncost <-
+    sftime::st_as_sftime(
+                         ncost,
+                         time_column_name = "time")
+
+  expect_error(generate_cv_index(ncost, "lolo"))
+  expect_error(generate_cv_index(ncost, "lolo", sp_fold = 3L))
 
   # convert to stdt
   ncostdt <- convert_stobj_to_stdt(ncost)
+
+  ncostdte <- ncostdt
+  ncostdte$stdt$sp_index <- seq(1, nrow(ncostdte$stdt))
+  expect_no_error(sppre <- generate_spt_index(ncostdte, "spatial"))
+  expect_no_error(spprest <- generate_spt_index(ncostdt, "spatiotemporal"))
 
   # spatial and temporal unique values
   slength <- nrow(nco_s)
@@ -75,8 +85,8 @@ testthat::test_that("leave-block-outs work as expected", {
 
   ncost <-
     sftime::st_as_sftime(
-      ncost,
-      time_column_name = "time")
+                         ncost,
+                         time_column_name = "time")
 
   # to stdt
   ncostdt <- convert_stobj_to_stdt(ncost)
@@ -90,10 +100,10 @@ testthat::test_that("leave-block-outs work as expected", {
   index_lbto <- generate_cv_index(ncostdt, "lbto", cv_fold = ncv_fold)
   index_lblto <-
     generate_cv_index(
-      ncostdt,
-      "lblto",
-      sp_fold = ncv_sp,
-      t_fold = ncv_t)
+                      ncostdt,
+                      "lblto",
+                      sp_fold = ncv_sp,
+                      t_fold = ncv_t)
 
   # max value test
   testthat::expect_equal(max(index_lblo), ncv_fold)
@@ -118,13 +128,24 @@ testthat::test_that("leave-block-outs work as expected", {
   # when sf input is entered
   index_lblo_sf <-
     generate_cv_index(
-      ncostdt, "lblo",
-      blocks = eco4d, block_id = "US_L3NAME")
+                      ncostdt, "lblo",
+                      blocks = eco4d,
+                      block_id = "US_L3NAME")
   # when SpatVector input is entered
   index_lblo_tr <-
     generate_cv_index(
-      ncostdt, "lblo",
-      blocks = terra::vect(eco4d), block_id = "US_L3NAME")
+                      ncostdt, "lblo",
+                      blocks = terra::vect(eco4d),
+                      block_id = "US_L3NAME")
+
+  # no block_id
+  expect_error(
+    generate_cv_index(
+                      ncostdt, "lblo",
+                      blocks = terra::vect(eco4d),
+                      block_id = "USS")
+  )
+
 
   # If returned index is character, convert to integer via factor
   if (any(is.factor(index_lblo_sf), is.factor(index_lblo_tr))) {
@@ -146,9 +167,19 @@ testthat::test_that("leave-block-outs work as expected", {
   eco4e$US_L3NAME[2] <- eco4e$US_L3NAME[1]
   testthat::expect_error(
     generate_cv_index(
-      ncostdt, "lblo",
-      blocks = terra::vect(eco4e), block_id = "US_L3NAME")
+                      ncostdt, "lblo",
+                      blocks = terra::vect(eco4e),
+                      block_id = "US_L3NAME")
   )
+
+  # numeric block case
+  expect_no_error(
+    generate_cv_index(
+      ncostdt, "lblo",
+      blocks = c(0.5, 0.5)
+    )
+  )
+
 
 }
 )
@@ -172,9 +203,10 @@ testthat::test_that("random cross-validation abides", {
     lapply(function(x) mutate(nco, time = x)) |>
     Reduce(rbind, x = _)
 
-  ncost <- sftime::st_as_sftime(
-    ncost,
-    time_column_name = "time")
+  ncost <-
+    sftime::st_as_sftime(
+                         ncost,
+                         time_column_name = "time")
 
   # to stdt
   ncostdt <- convert_stobj_to_stdt(ncost)

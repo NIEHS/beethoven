@@ -23,7 +23,9 @@ testthat::test_that("raster is bounded within project domain", {
 
   suppressWarnings(
     iswithin <-
-      check_input_raster_in_extent(example_raster, terra::vect(reference_polygon))
+      check_input_raster_in_extent(
+                                   example_raster,
+                                   terra::vect(reference_polygon))
   )
   testthat::expect_equal(iswithin, 1)
 

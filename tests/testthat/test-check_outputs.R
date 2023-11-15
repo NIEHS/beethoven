@@ -131,15 +131,16 @@ testthat::test_that("MERRA2 covariate is not NA", {
 
   merra2_check_true <-
     check_data_completeness(
-      model_results,
-      merra_name,
-      TRUE)
+                            model_results,
+                            merra_name,
+                            TRUE)
   testthat::expect_equal(methods::is(merra2_check_true, "list"), TRUE)
 
   merra2_null <- character(0)
-  testthat::expect_error(
+  testthat::expect_error({
     check_data_completeness(
-      merra2_null,
-      merra_name,
-      TRUE))
+                            merra2_null,
+                            merra_name,
+                            TRUE)
+  })
 })

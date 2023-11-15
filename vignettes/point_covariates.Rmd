@@ -76,9 +76,12 @@ near_egrid_a <- near_egrid |>
   left_join(dist_near_egrid_df) |>
   mutate(w_sedc = exp((-3 * dist) / sedc_range_m)) |>
   group_by(ID.Code) |>
-  summarize(across(starts_with("UN"), list(sedc = ~ sum(w_sedc * .,
-    na.rm = TRUE
-  )))) |>
+  summarize(
+    across(starts_with("UN"),
+           list(
+                sedc = ~ sum(w_sedc * .,
+                             na.rm = TRUE)))
+  ) |>
   summarize(across(
     starts_with("UN"),
     list(sedc = ~ sum(w_sedc * ., na.rm = TRUE))
