@@ -2,8 +2,6 @@
 #' @description
 #' unit testing that the dependent variable is read and converted to the
 #' expected sf/sftime class
-#'
-#'
 # Define a test case
 testthat::test_that("generic_base_learner returns valid predictions", {
   # Load the function you want to test

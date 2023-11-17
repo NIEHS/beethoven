@@ -7,7 +7,7 @@
 check_crs_is_valid(model_output, crs_list = c("EPSG:4326", "EPSG:5070"))
 }
 \arguments{
-\item{model_output}{sf/sftime object of model output.}
+\item{model_output}{Spat*/sf* object of model output.}
 
 \item{crs_list}{a character/integer vector of acceptable CRS.
 Default is c("EPSG:4326", "EPSG:5070")}
