@@ -22,8 +22,9 @@
 #' @param data_download_acknowledgement logical(1). By setting `= TRUE` the
 #' user acknowledge that the data downloaded using this function may be very
 #' large and use lots of machine storage and memory.
-#' @param remove_download logical(1). Remove download files in
-#' directory_to_download.
+#' @param unzip logical(1). Unzip zip files. Default = `TRUE`.
+#' @param remove_zip logical(1). Remove zip file from directory_to_download.
+#' Default = `FALSE`.
 #' @author Mitchell Manware
 #' @return NULL;
 #' @export
@@ -33,7 +34,8 @@ download_gmted_data <- function(
   directory_to_download = "./input/gmted2010/raw/",
   directory_to_save = "./input/gmted2010/raw/",
   data_download_acknowledgement = FALSE,
-  remove_download = FALSE
+  unzip = TRUE,
+  remove_zip = FALSE
 ) {
   #### 1. directory setup
   chars_dir_download <- nchar(directory_to_download)
@@ -50,16 +52,14 @@ download_gmted_data <- function(
   }
   #### 2. check for data download acknowledgement
   if (data_download_acknowledgement == FALSE) {
-    cat(paste0("Data download acknowledgement is set to FALSE.",
-               "Please acknowledge that the data downloaded using this",
-               "function may be very large and use lots of machine storage",
-               "and memory."))
-    stop()
+    stop(paste0("Data download acknowledgement is set to FALSE.",
+                "Please acknowledge that the data downloaded using this",
+                "function may be very large and use lots of machine storage",
+                "and memory."))
   }
   #### 3. check for statistic
   if (is.null(statistic) == TRUE) {
-    cat(paste0("Please select a GMTED2010 statistic.\n"))
-    stop()
+    stop(paste0("Please select a GMTED2010 statistic.\n"))
   }
   #### 4. check for valid statistic
   valid_statistics <- c("Breakline Emphasis", "Systematic Subsample",
@@ -67,19 +67,16 @@ download_gmted_data <- function(
                         "Mean Statistic", "Maximum Statistic",
                         "Standard Deviation Statistic")
   if (!(statistic %in% valid_statistics)) {
-    cat(paste0("Requested statistic is not recognized.\n"))
-    stop()
+    stop(paste0("Requested statistic is not recognized.\n"))
   }
   #### 5. check for resolution
   if (is.null(resolution) == TRUE) {
-    cat(paste0("Please select a data resolution.\n"))
-    stop()
+    stop(paste0("Please select a data resolution.\n"))
   }
   #### 6. check for valid resolution
   valid_resolutions <- c("7.5 arc-seconds", "15 arc-seconds", "30 arc-seconds")
   if (!(resolution %in% valid_resolutions)) {
-    cat(paste0("Requested resolution is not recognized.\n"))
-    stop()
+    stop(paste0("Requested resolution is not recognized.\n"))
   }
   #### 7. define URL base
   base <- paste0("https://edcintl.cr.usgs.gov/downloads/sciweb1/shared/topo",
@@ -118,15 +115,19 @@ download_gmted_data <- function(
   system(command = system_command)
   Sys.sleep(5L)
   cat(paste0("Requested file downloaded.\n"))
-  #### 14. unzip downlaoded data
+  #### 14. end if unzip == FALSE
+  if (unzip == FALSE) {
+    return(cat(paste0("Downloaded files will not be unzipped.\n")))
+  }
+  #### 15. unzip downloaded data
   cat(paste0("Unzipping files...\n"))
   unzip(download_name,
         exdir = directory_to_save)
   cat(paste0("Files unzipped and saved in ",
              directory_to_save,
              ".\n"))
-  #### 15. remove zip files
-  if (remove_download == TRUE) {
+  #### 16. remove zip files
+  if (remove_zip == TRUE) {
     cat(paste0("Removing download files...\n"))
     file.remove(download_name)
     cat(paste0("Download files removed.\n"))

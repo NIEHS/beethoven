@@ -23,6 +23,7 @@
 #' @author Mitchell Manware
 #' @return NULL; NCEP North American Regional Reanalysis pressure levels
 #' meteorological data will be returned to the designated saving directory.
+#' @importFrom stringr str_pad
 #' @export
 download_narr_p_levels_data <- function(
   year_start = 2022,
@@ -31,7 +32,6 @@ download_narr_p_levels_data <- function(
   directory_to_save = "./input/ncep_narr_pressure_levels/raw/",
   data_download_acknowledgement = FALSE
 ) {
-  library(stringr)
   #### 1. directory setup
   chars_dir_save <- nchar(directory_to_save)
   if (substr(directory_to_save, chars_dir_save, chars_dir_save) != "/") {
@@ -41,15 +41,14 @@ download_narr_p_levels_data <- function(
   }
   #### 2. check for data download acknowledgement
   if (data_download_acknowledgement == FALSE) {
-    cat("Data download acknowledgement is set to FALSE. Please acknowledge that
-        the data downloaded using this function may be very large and use lots 
-        of machine storage and memory.")
-    stop()
+    stop(cat(paste0("Data download acknowledgement is set to FALSE. Please ",
+                    "acknowledge that the data downloaded using this function ",
+                    "may be very large and use lots of machine storage and ",
+                    "memory.")))
   }
   #### 3. check for variables
   if (is.null(variables) == TRUE) {
-    cat(paste0("Please select an NCEP-NARR variable.\n"))
-    stop()
+    stop(paste0("Please select an NCEP-NARR variable.\n"))
   }
   #### 4. define years sequence
   years <- seq(year_start, year_end, 1)

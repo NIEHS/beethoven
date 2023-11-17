@@ -32,16 +32,14 @@ download_merra2_data <- function(
   }
   #### 2. check for data download acknowledgement
   if (data_download_acknowledgement == FALSE) {
-    cat(paste0("Data download acknowledgement is set to FALSE. ",
-               "Please acknowledge that the data downloaded using this ",
-               "function may be very large and use lots of machine storage ",
-               "and memory.\n"))
-    stop()
+    stop(paste0("Data download acknowledgement is set to FALSE. ",
+                "Please acknowledge that the data downloaded using this ",
+                "function may be very large and use lots of machine storage ",
+                "and memory.\n"))
   }
   #### 2. check for collection
   if (is.null(collection) == TRUE) {
-    cat(paste0("Please select a MERRA2 collection.\n"))
-    stop()
+    stop(paste0("Please select a MERRA2 collection.\n"))
   }
   #### 3. check if collection is recognized
   identifiers <- paste0("inst1_2d_asm_Nx M2I1NXASM 10.5067/3Z173KIE2TPD,",
@@ -91,8 +89,7 @@ download_merra2_data <- function(
   }
   colnames(identifiers_df) <- c("collection_id", "estd_name", "DOI")
   if (!(collection %in% identifiers_df$collection_id)) {
-    cat(paste0("Requested collection is not recognized.\n"))
-    stop()
+    stop(paste0("Requested collection is not recognized.\n"))
   }
   #### 4. define date sequence
   date_start_date_format <- as.Date(date_start, format = "%Y-%m-%d")

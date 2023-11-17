@@ -32,11 +32,10 @@ download_geos_cf_data <- function(
   }
   #### 2. check for data download acknowledgement
   if (data_download_acknowledgement == FALSE) {
-    cat(paste0("Data download acknowledgement is set to FALSE. ",
-               "Please acknowledge that the data downloaded using this ",
-               "function may be very large and use lots of machine storage ",
-               "and memory.\n"))
-    stop()
+    stop(paste0("Data download acknowledgement is set to FALSE. ",
+                "Please acknowledge that the data downloaded using this ",
+                "function may be very large and use lots of machine storage ",
+                "and memory.\n"))
   }
   #### 2. check for collection
   if (is.null(collection) == TRUE) {
@@ -49,8 +48,7 @@ download_geos_cf_data <- function(
                    "xgc_tavg_1hr_g1440x721_x1", "chm_inst_1hr_g1440x721_p23",
                    "met_inst_1hr_g1440x721_p23")
   if (!(collection %in% collections)) {
-    cat(paste0("Requested collection is not recognized.\n"))
-    stop()
+    stop(paste0("Requested collection is not recognized.\n"))
   }
   #### 4. define date sequence
   date_start_date_format <- as.Date(date_start, format = "%Y-%m-%d")

@@ -40,15 +40,13 @@ download_narr_monolevel_data <- function(
   }
   #### 2. check for data download acknowledgement
   if (data_download_acknowledgement == FALSE) {
-    cat(paste0("Data download acknowledgement is set to FALSE. Please",
-               "acknowledge that the data downloaded using this function may",
-               "be very large and use lots of machine storage and memory."))
-    stop()
+    stop(paste0("Data download acknowledgement is set to FALSE. Please",
+                "acknowledge that the data downloaded using this function may",
+                "be very large and use lots of machine storage and memory."))
   }
   #### 3. check for variables
   if (is.null(variables) == TRUE) {
-    cat(paste0("Please select an NCEP-NARR variable.\n"))
-    stop()
+    stop(paste0("Please select an NCEP-NARR variable.\n"))
   }
   #### 4. define years sequence
   years <- seq(year_start, year_end, 1)

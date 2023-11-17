@@ -20,8 +20,9 @@
 #' @param data_download_acknowledgement logical(1). By setting `= TRUE` the
 #' user acknowledge that the data downloaded using this function may be very
 #' large and use lots of machine storage and memory.
-#' @param remove_download logical(1). Remove download files in
-#' directory_to_download.
+#' @param unzip logical(1). Unzip zip files. Default = `TRUE`.
+#' @param remove_zip logical(1). Remove zip files from directory_to_download.
+#' Default = `FALSE`.
 #' @author Mitchell Manware
 #' @return NULL;
 #' @export
@@ -31,7 +32,8 @@ download_nlcd_data <- function(
   directory_to_download = "./input/nlcd/raw/",
   directory_to_save = "./input/nlcd/raw/",
   data_download_acknowledgement = FALSE,
-  remove_download = FALSE
+  unzip = TRUE,
+  remove_zip = FALSE
 ) {
   #### 1. directory setup
   chars_dir_download <- nchar(directory_to_download)
@@ -48,17 +50,15 @@ download_nlcd_data <- function(
   }
   #### 2. check for data download acknowledgement
   if (data_download_acknowledgement == FALSE) {
-    cat(paste0("Data download acknowledgement is set to FALSE.",
-               "Please acknowledge that the data downloaded using this",
-               "function may be very large and use lots of machine storage",
-               "and memory."))
-    stop()
+    stop(paste0("Data download acknowledgement is set to FALSE.",
+                "Please acknowledge that the data downloaded using this",
+                "function may be very large and use lots of machine storage",
+                "and memory."))
   }
   #### 2. check for valid years
   valid_years <- c(2001, 2004, 2006, 2008, 2011, 2013, 2016, 2019, 2021)
   if (!(year %in% valid_years)) {
-    cat(paste0("Requested year is not recognized.\n"))
-    stop()
+    stop(paste0("Requested year is not recognized.\n"))
   }
   #### 3. define URL base
   base <- "https://s3-us-west-2.amazonaws.com/mrlc/"
@@ -103,15 +103,19 @@ download_nlcd_data <- function(
   system(command = system_command)
   Sys.sleep(5L)
   cat(paste0("Requested file downloaded.\n"))
-  #### 10. unzip downloaded data
+  #### 10. end if unzip == FALSE
+  if (unzip == FALSE) {
+    return(cat(paste0("Downloaded files will not be unzipped.\n")))
+  }
+  #### 11. unzip downloaded data
   cat(paste0("Unzipping files...\n"))
   unzip(download_name,
         exdir = directory_to_save)
   cat(paste0("Files unzipped and saved in ",
              directory_to_save,
              ".\n"))
-  #### 11. remove zip files
-  if (remove_download == TRUE) {
+  #### 12. remove zip files
+  if (remove_zip == TRUE) {
     cat(paste0("Removing download files...\n"))
     file.remove(download_name)
     cat(paste0("Download files removed.\n"))

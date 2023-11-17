@@ -39,41 +39,35 @@ download_modis_data <- function(
   }
   #### 2. check for data download acknowledgement
   if (data_download_acknowledgement == FALSE) {
-    cat(paste0(
+    stop(paste0(
       "Data download acknowledgement is set to FALSE. ",
       "Please acknowledge that the data downloaded using this ",
       "function may be very large and use lots of machine storage ",
       "and memory.\n"
     ))
-    stop()
   }
   #### 3. check for NASA earth data token
   if (nasa_earth_data_token == FALSE) {
-    cat(paste0("Please provide NASA EarthData Login token.\n"))
-    stop()
+    stop(paste0("Please provide NASA EarthData Login token.\n"))
   }
   #### 4. check for product
   if (is.null(product) == TRUE) {
-    cat(paste0("Please select a MODIS product.\n"))
-    stop()
+    stop(paste0("Please select a MODIS product.\n"))
   }
   #### 5. check for version
   if (is.null(version) == TRUE) {
-    cat(paste0("Please select a data version.\n"))
-    stop()
+    stop(paste0("Please select a data version.\n"))
   }
   #### 6. check for valid horizontal tiles
   for (h in seq_along(horizontal_tiles)) {
     if (horizontal_tiles[h] < 0 || horizontal_tiles[h] > 35) {
-      cat(paste0("Horizontal tiles invalid.\n"))
-      stop()
+      stop(paste0("Horizontal tiles invalid.\n"))
     }
   }
   #### 7. check for valid vertical tiles
   for (v in seq_along(vertical_tiles)) {
     if (vertical_tiles[v] < 0 || vertical_tiles[v] > 17) {
-      cat(paste0("Vertical tiles invalid.\n"))
-      stop()
+      stop(paste0("Vertical tiles invalid.\n"))
     }
   }
   #### 8. define date sequence
