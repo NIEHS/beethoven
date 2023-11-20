@@ -5,7 +5,6 @@
 
 ################################################################################
 #' download_aqs_data: download daily data from AQS datamart
-#'
 #' @param parameter_code integer(1). length of 5. EPA pollutant parameter code.
 #' For details, please refer to
 #' https://aqs.epa.gov/aqsweb/documents/codetables/parameters.html

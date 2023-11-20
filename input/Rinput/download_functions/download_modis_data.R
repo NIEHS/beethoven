@@ -4,7 +4,7 @@
 ################################################################################
 
 ################################################################################
-#' download_modis_data:
+#' download_modis_data: 
 #' @description
 #' @param date_start character(1). length of 10. Start date for downloading
 #' data. Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
@@ -21,6 +21,7 @@
 #' large and use lots of machine storage and memory.
 #' @author Mitchell Manware
 #' @return NULL;
+#' @importFrom stringr str_pad
 #' @export
 download_modis_data <- function(
     date_start = "2023-09-01",

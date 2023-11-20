@@ -29,8 +29,7 @@
 #' @param remove_zip logical(1). Remove zip files from directory_to_download.
 #' Default = `FALSE`.
 #' @author Mitchell Manware
-#' @return NULL; NASA UN WPP-Adjusted Population Density, v4.11 data will be
-#' returned to the designated saving directory in the indicated format.
+#' @return NULL;
 #' @export
 download_sedac_population_data <- function(
   year = "2020",

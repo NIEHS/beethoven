@@ -4,13 +4,19 @@
 ################################################################################
 
 ################################################################################
-#' download_merra2_data:
+#' download_merra2_data: download meteorological and atmospheric data from the
+#' Modern-Era Retrospective analysis for Research and Applications, Version 2
+#' (MERRA-2) model.
 #' @description
+#' The `download_merra2_data()` function accesses and downloads various
+#' meteorological and atmospheric collections from the [Modern-Era]
+#' [Retrospective analysis for Research and Applications, Version 2 (MERRA-2)]
+#' (https://gmao.gsfc.nasa.gov/reanalysis/MERRA-2/).
 #' @param date_start character(1). length of 10. Start date for downloading
 #' data. Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
 #' @param date_end character(1). length of 10. End date for downloading data.
 #' Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
-#' @param collection character(1).
+#' @param collection character(1). MERRA-2 data collection file name.
 #' @param directory_to_save character(1). Directory to save data.
 #' @param data_download_acknowledgement logical(1). By setting `= TRUE` the
 #' user acknowledge that the data downloaded using this function may be very
