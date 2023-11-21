@@ -38,6 +38,9 @@ download_narr_p_levels_data <- function(
                                "/",
                                sep = "")
   }
+  if (dir.exists(directory_to_save) == FALSE) {
+    dir.create(directory_to_save)
+  }
   #### 2. check for data download acknowledgement
   if (data_download_acknowledgement == FALSE) {
     stop(cat(paste0("Data download acknowledgement is set to FALSE. Please ",

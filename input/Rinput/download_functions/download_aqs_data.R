@@ -32,6 +32,7 @@ download_aqs_data <- function(
   remove_zips = FALSE
 ) {
   # nocov start
+  #### 1. directory setup
   chars_dir_download <- nchar(directory_to_download)
   chars_dir_save <- nchar(directory_to_save)
   if (substr(directory_to_download,
@@ -42,7 +43,13 @@ download_aqs_data <- function(
   if (substr(directory_to_save, chars_dir_save, chars_dir_save) != "/") {
     directory_to_save <- paste(directory_to_save, "/", sep = "")
   }
-  #### 1. define measurement data paths
+  if (dir.exists(directory_to_download) == FALSE) {
+    dir.create(directory_to_download)
+  }
+  if (dir.exists(directory_to_save) == FALSE) {
+    dir.create(directory_to_save)
+  }
+  #### 2. define measurement data paths
   year_sequence <- seq(year_start, year_end, 1)
   file_urls <- sprintf(paste(url_aqs_download,
                              resolution_temporal,
@@ -55,7 +62,7 @@ download_aqs_data <- function(
                                   "download_output_%.0f.zip",
                                   sep = ""),
                             year_sequence)
-  #### 2. Downloading data
+  #### 3. Downloading data
   # Download zip files from website
   if (!any(file.exists(download_names))) {
     download.file(file_urls, download_names, method = "libcurl")
@@ -68,7 +75,7 @@ download_aqs_data <- function(
                              "_%.0f.csv",
                              sep = ""),
                        year_sequence)
-  #### 3. Processing data
+  #### 4. Processing data
   # Unzip and read in .csv files, process and join in one dataframe.
   # The unique site identifier "ID.Monitor" is a string with the structure
   # State-County-Site-Parameter-POC
@@ -96,7 +103,7 @@ download_aqs_data <- function(
     }
   }
   cat(paste("Downloading monitor metadata...\n"))
-  #### 4. Downloading monitor metadata file and filter for relevant sites
+  #### 5. Downloading monitor metadata file and filter for relevant sites
   # Download monitors file
   dest_monitors <- paste(directory_to_download, "aqs_monitors.zip", sep = "")
   if (!file.exists(dest_monitors)) {
