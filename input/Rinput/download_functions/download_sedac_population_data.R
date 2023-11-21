@@ -53,6 +53,12 @@ download_sedac_population_data <- function(
   if (substr(directory_to_save, chars_dir_save, chars_dir_save) != "/") {
     directory_to_save <- paste(directory_to_save, "/", sep = "")
   }
+  if (dir.exists(directory_to_download) == FALSE) {
+    dir.create(directory_to_download)
+  }
+  if (dir.exists(directory_to_save) == FALSE) {
+    dir.create(directory_to_save)
+  }
   #### 2. check for data acknowledgement
   if (data_download_acknowledgement == FALSE) {
     cat(paste0("Data download acknowledgement is set to FALSE.",
