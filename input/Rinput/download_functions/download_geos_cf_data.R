@@ -28,7 +28,7 @@ download_geos_cf_data <- function(
   date_start = "2023-09-01",
   date_end = "2023-09-01",
   collection = NULL,
-  directory_to_save = "./input/geos_cf/raw/",
+  directory_to_save = "../../data/covariates/geos_cf/",
   data_download_acknowledgement = FALSE
 ) {
   #### 1. directory setup

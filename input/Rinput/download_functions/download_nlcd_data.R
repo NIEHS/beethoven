@@ -29,8 +29,8 @@
 download_nlcd_data <- function(
   year = 2021,
   collection = "Coterminous United States",
-  directory_to_download = "./input/nlcd/raw/",
-  directory_to_save = "./input/nlcd/raw/",
+  directory_to_download = "../../data/covariates/nlcd/",
+  directory_to_save = "../../data/covariates/nlcd/",
   data_download_acknowledgement = FALSE,
   unzip = TRUE,
   remove_zip = FALSE

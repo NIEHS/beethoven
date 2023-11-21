@@ -31,8 +31,8 @@
 download_gmted_data <- function(
   statistic = NULL,
   resolution = NULL,
-  directory_to_download = "./input/gmted2010/raw/",
-  directory_to_save = "./input/gmted2010/raw/",
+  directory_to_download = "../../data/covariates/gmted/",
+  directory_to_save = "../../data/covariates/gmted/",
   data_download_acknowledgement = FALSE,
   unzip = TRUE,
   remove_zip = FALSE

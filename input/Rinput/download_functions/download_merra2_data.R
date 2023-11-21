@@ -28,7 +28,7 @@ download_merra2_data <- function(
   date_start = "2023-09-01",
   date_end = "2023-09-01",
   collection = NULL,
-  directory_to_save = "./input/merra2/raw/",
+  directory_to_save = "../../data/covariates/merra2/",
   data_download_acknowledgement = FALSE
 ) {
   #### 1. directory setup

@@ -32,8 +32,8 @@
 download_sedac_groads_data <- function(
   data_format = "Shapefile",
   data_region = "Americas",
-  directory_to_download = "./input/sedac_groads/raw/",
-  directory_to_save = "./input/sedac_groads/raw/",
+  directory_to_download = "../../data/covariates/sedac_groads/",
+  directory_to_save = "../../data/covariates/sedac_groads/",
   data_download_acknowledgement = FALSE,
   unzip = TRUE,
   remove_zip = FALSE

@@ -31,7 +31,7 @@ download_modis_data <- function(
     horizontal_tiles = c(7, 13),
     vertical_tiles = c(3, 6),
     nasa_earth_data_token = NULL,
-    directory_to_save = "./input/modis/raw/",
+    directory_to_save = "../../data/covariates/modis/",
     data_download_acknowledgement = FALSE) {
   #### 1. directory setup
   chars_dir_save <- nchar(directory_to_save)

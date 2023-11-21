@@ -27,7 +27,7 @@ download_narr_monolevel_data <- function(
   year_start = 2022,
   year_end = 2022,
   variables = NULL,
-  directory_to_save = "./input/ncep_narr_monolevel/raw/",
+  directory_to_save = "../../data/covariates/narr/",
   data_download_acknowledgement = FALSE
 ) {
   #### 1. directory setup

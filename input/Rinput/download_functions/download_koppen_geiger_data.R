@@ -34,8 +34,8 @@
 download_koppen_geiger_data <- function(
   time_period = "Present",
   data_resolution = NULL,
-  directory_to_download = "./input/koppen_geiger/raw/",
-  directory_to_save = "./input/koppen_geiger/raw/",
+  directory_to_download = "../../data/covariates/koppen_geiger/",
+  directory_to_save = "../../data/covariates/koppen_geiger/",
   data_download_acknowledgement = FALSE,
   unzip = TRUE,
   remove_zip = FALSE

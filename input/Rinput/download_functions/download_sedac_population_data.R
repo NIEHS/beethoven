@@ -35,8 +35,8 @@ download_sedac_population_data <- function(
   year = "2020",
   data_format = "GeoTIFF",
   data_resolution = "60 minute",
-  directory_to_download = "./input/nasa_sedac/raw/",
-  directory_to_save = "./input/nasa_sedac/raw/",
+  directory_to_download = "../../data/covariates/sedac_population/",
+  directory_to_save = "../../data/covariates/sedac_population/",
   data_download_acknowledgement = FALSE,
   unzip = TRUE,
   remove_zip = FALSE

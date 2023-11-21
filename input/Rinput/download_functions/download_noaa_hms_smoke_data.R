@@ -35,8 +35,8 @@ download_noaa_hms_smoke_data <- function(
   date_start = "2023-09-01",
   date_end = "2023-09-01",
   data_format = "Shapefile",
-  directory_to_download = "./input/noaa_hms/raw/",
-  directory_to_save = "./input/noaa_hms/raw/",
+  directory_to_download = "../../data/covariates/noaa_hms/",
+  directory_to_save = "../../data/covariates/noaa_hms/",
   data_download_acknowledgement = FALSE,
   unzip = TRUE,
   remove_zip = FALSE
