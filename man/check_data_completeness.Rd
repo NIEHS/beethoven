@@ -2,7 +2,7 @@
 % Please edit documentation in R/check_outputs.R
 \name{check_data_completeness}
 \alias{check_data_completeness}
-\title{Check if the output covariates are complete (TODO)}
+\title{Check if the output covariates are complete}
 \usage{
 check_data_completeness(
   model_output,
@@ -26,7 +26,7 @@ TRUE means there are NA values at least one data value) or a list
 A list includes the list of fields that include NAs.
 }
 \description{
-Check if the output covariates are complete (TODO)
+Check if the output covariates are complete
 }
 \author{
 Insang Song

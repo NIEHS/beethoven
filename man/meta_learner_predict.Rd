@@ -2,29 +2,30 @@
 % Please edit documentation in R/meta_learner.R
 \name{meta_learner_predict}
 \alias{meta_learner_predict}
-\title{meta_learner_predict - take the list of BART fit objects and prediction
-location info to create meta_learner predictions. The BART
-meta learner is not explicitly a S-T model, but the input covariates are
-S-T based. Therefore, the cov_pred input should be either an sf::sf-point or
-a terra::rast file format}
+\title{meta_learner_predict - take the list of BART fit objects and
+predictions of baselearners to create meta_learner predictions. The BART
+meta learner is not explicitly a S-T model, but the input covariates
+(outputs of each base learner) are S-T based.}
 \usage{
-meta_learner_predict(meta_fit_obj, cov_pred)
+meta_learner_predict(meta_fit, base_outputs_stdt, nthreads = 2)
 }
 \arguments{
-\item{meta_fit_obj}{list of BART objects from meta_learner_fit}
+\item{meta_fit}{list of BART objects from meta_learner_fit}
 
-\item{cov_pred}{dataframe of covariates at prediction locations}
+\item{base_outputs_stdt}{stdt object (see convert_spacetime_data.R):
+list with datatable containing lat, lon, time and the covariates
+(outputs of each base learner) at prediction locations and crs.}
+
+\item{nthreads}{integer(1). Number of threads used in BART::predict.wbart}
 }
 \value{
-meta_pred file of the final meta learner predictions, can be rast
-or sf file
+meta_pred: the final meta learner predictions
 }
 \description{
-meta_learner_predict - take the list of BART fit objects and prediction
-location info to create meta_learner predictions. The BART
-meta learner is not explicitly a S-T model, but the input covariates are
-S-T based. Therefore, the cov_pred input should be either an sf::sf-point or
-a terra::rast file format
+meta_learner_predict - take the list of BART fit objects and
+predictions of baselearners to create meta_learner predictions. The BART
+meta learner is not explicitly a S-T model, but the input covariates
+(outputs of each base learner) are S-T based.
 }
 \note{
 The predictions can be a rast or sf, which depends on the same

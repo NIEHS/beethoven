@@ -13,12 +13,37 @@
 #' @examples NULL
 meta_learner_fit <- function(base_predictor_list,
                              kfolds, y) {
+  # Unnamed base_predictor_list is not accepted
+  if (is.null(names(base_predictor_list)) ||
+        any(is.na(names(base_predictor_list)))) {
+    stop("base_predictor_list should be a named list.\n")
+  }
+
   # check lengths of each base predictor #add a test for names
   if (sapply(base_predictor_list, length, simplify = TRUE) |>
         stats::var() != 0) {
     stop("Error in meta_learner_fit:
          Base predictors need to be the same length")
   }
+
+  # check that length of base predictors is the same than y
+  if (lengths(base_predictor_list)[1] != length(y)) {
+    stop("Error in meta_learner_fit:
+         Predictors and response are not the same length")
+  }
+
+  # check that length of kfolds is the same than y
+  if (length(kfolds) != length(y)) {
+    stop("Error in meta_learner_fit:
+         kfolds vector and response are not the same length")
+  }
+
+  # check that base_predictor_list only contains only numeric
+  if (any(sapply(base_predictor_list, class) != "numeric")) {
+    stop("Error in meta_learner_fit:
+         Some of base predictors are not numeric")
+  }
+
   # convert list to data.frame
   x_design <- as.data.frame(base_predictor_list)
 
@@ -42,60 +67,83 @@ meta_learner_fit <- function(base_predictor_list,
 }
 
 
-
-#' meta_learner_predict - take the list of BART fit objects and prediction
-#' location info to create meta_learner predictions. The BART
-#' meta learner is not explicitly a S-T model, but the input covariates are
-#' S-T based. Therefore, the cov_pred input should be either an sf::sf-point or
-#' a terra::rast file format
+#' meta_learner_predict - take the list of BART fit objects and
+#' predictions of baselearners to create meta_learner predictions. The BART
+#' meta learner is not explicitly a S-T model, but the input covariates
+#' (outputs of each base learner) are S-T based.
 #'
-#' @param meta_fit_obj list of BART objects from meta_learner_fit
-#' @param cov_pred dataframe of covariates at prediction locations
+#' @param meta_fit list of BART objects from meta_learner_fit
+#' @param base_outputs_stdt stdt object (see convert_spacetime_data.R):
+#' list with datatable containing lat, lon, time and the covariates
+#' (outputs of each base learner) at prediction locations and crs.
+#' @param nthreads integer(1). Number of threads used in BART::predict.wbart
 #' @note  The predictions can be a rast or sf, which depends on the same
 #' respective format of the covariance matrix input - cov_pred
-#' @return meta_pred file of the final meta learner predictions, can be rast
-#' or sf file
+#' @return meta_pred: the final meta learner predictions
+#' @importFrom data.table .SD
+#' @import BART
+#' @importFrom stats predict
 #' @export
 #'
 #' @examples NULL
 #' @references https://rspatial.github.io/terra/reference/predict.html
-meta_learner_predict <- function(meta_fit_obj, cov_pred) {
-
-  valid_file_formats <- c("SpatRaster", "sf")
-  
-  # Check prediction output type
-  cov_pred_format <- class(cov_pred)[[1]]
-
-  if (cov_pred_format == "SpatRaster") {
-
-    # pre-allocate
-    meta_pred_i <- matrix(nrow = nrow(cov_pred), ncol = length(meta_fit_obj))
-    
-    for (i in seq_along(meta_fit_obj)) {
-      print("I'm here")
-      meta_pred_i[, i] <- predict(object = cov_pred, 
-                                  model = meta_fit_obj[[i]],
-                                  fun = predict) |> apply(2, mean)
-    }
-
-  } else if (cov_pred_format == "sf") {
-
-    # pre-allocate
-    meta_pred_i <- matrix(nrow = nrow(cov_pred), ncol = length(meta_fit_obj))
-
-    for (i in seq_along(meta_fit_obj)) {
-      meta_pred_i[, i] <- predict(model = meta_fit_obj[[i]],
-                                  object = cov_pred) |> apply(2, mean)
-    }
-
-    meta_pred <- apply(meta_pred_i, 1, mean)
-
-  } else {
-
-    stop("Invalid Metalearner Predictor Matrix file format.
-         Expected one of: ", paste(valid_file_formats, collapse = ", "))
-
+meta_learner_predict <- function(meta_fit, base_outputs_stdt, nthreads = 2) {
+  if (!(identical(class(base_outputs_stdt), c("list", "stdt")))) {
+    stop("Error: param base_outputs_stdt is not in stdt format.")
   }
 
-  return(meta_pred)
+  base_outputs <- base_outputs_stdt$stdt
+
+  if (any(!(colnames(meta_fit[[1]]$varcount) %in% colnames(base_outputs)))) {
+    stop("Error: baselearners list incomplete or with wrong names")
+  }
+
+  # extract baselearners predictions used in metalearner
+  base_name_index <- seq(1, ncol(base_outputs))
+  # changed to integer indices
+  # as we impose the fixed column order in stdt objects.
+  spt_name_index <- grep("(lon|lat|time)", colnames(base_outputs))
+  base_name_index <- base_name_index[-spt_name_index]
+  mat_pred <- as.matrix(base_outputs[, .SD, .SDcols = base_name_index])
+
+  # pre-allocate
+  meta_pred <- matrix(nrow = nrow(mat_pred), ncol = length(meta_fit))
+
+  iter_pred <- function(
+      meta_fit_in = meta_fit,
+      mat_pred_in,
+      meta_pred_in = meta_pred,
+      nthreads_in = nthreads) {
+    for (i in seq_along(meta_fit_in)) {
+      meta_pred_in[, i] <-
+        predict(
+          object = meta_fit_in[[i]],
+          newdata = mat_pred_in,
+          mc.cores = nthreads_in
+        ) |>
+        apply(2, mean)
+    }
+    meta_pred_out <- apply(meta_pred_in, 1, mean)
+    return(meta_pred_out)
+  }
+
+  meta_pred_out <- iter_pred(mat_pred_in = mat_pred)
+  meta_pred_out <- meta_pred_out |>
+    matrix(ncol = 1) |>
+    as.data.frame()
+  names(meta_pred_out) <- "meta_pred"
+  spt_names <- grep("(lon|lat|time)", colnames(base_outputs), value = TRUE)
+
+  meta_pred_out <-
+    cbind(
+      base_outputs[, .SD, .SDcols = spt_names],
+      meta_pred_out
+    )
+  meta_pred_out <- list(
+    "stdt" = meta_pred_out,
+    "crs_dt" = base_outputs_stdt$crs_dt
+  )
+  class(meta_pred_out) <- c("list", "stdt")
+
+  return(meta_pred_out)
 }

@@ -2,7 +2,8 @@
 % Please edit documentation in R/check_outputs.R
 \name{check_output_locs_are_valid}
 \alias{check_output_locs_are_valid}
-\title{Check output locations are in the reference spatial domain of the mainland US}
+\title{Check output locations are in
+the reference spatial domain of the mainland US}
 \usage{
 check_output_locs_are_valid(model_output, spatial_domain)
 }
@@ -15,7 +16,8 @@ check_output_locs_are_valid(model_output, spatial_domain)
 A logical vector of length nrow(model_output)
 }
 \description{
-Check output locations are in the reference spatial domain of the mainland US
+Check output locations are in
+the reference spatial domain of the mainland US
 }
 \author{
 Insang Song

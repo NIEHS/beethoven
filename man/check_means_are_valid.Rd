@@ -23,7 +23,7 @@ values are stored}
 \item{observation_mean_name}{character(1). field name of observations
 in observation object.}
 
-\item{tolerance_factor}{numeric(1). denominator(min) multiplier(max)}
+\item{tolerance_factor}{numeric(1). denominator (min) or multiplier (max)}
 }
 \value{
 Logical value indicating the mean values are within the range or not.
