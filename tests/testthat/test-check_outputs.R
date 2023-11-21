@@ -73,7 +73,7 @@ testthat::test_that("Predicted variances are positive", {
   prediction_variance <- stats::rgamma(100, 8, 0.3)
   isvarpositive <-
     check_variances_are_valid(
-      model_results,
+      prediction_variance,
       model_variance_name = "Prediction_Variance"
     )
   testthat::expect_equal(ismeanvalid, TRUE)
@@ -81,7 +81,7 @@ testthat::test_that("Predicted variances are positive", {
   prediction_variance[1] <- -1
   isvarpositive <-
     check_variances_are_valid(
-      model_results,
+      prediction_variance,
       model_variance_name = "Prediction_Variance"
     )
   testthat::expect_equal(ismeanvalid, FALSE)
