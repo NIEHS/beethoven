@@ -1,6 +1,6 @@
 ################################################################################
 # Date created: 2023-10-12
-# Packages required: stringr
+# Date modified: 2023-11-22
 ################################################################################
 
 ################################################################################
@@ -15,6 +15,7 @@
 #' @param horizontal_tiles integer(2).
 #' @param vertical_tiles integer(2).
 #' @param nasa_earth_data_token character(1).
+#'  Token for downloading data from NASA.
 #' @param directory_to_save character(1). Directory to save data.
 #' @param data_download_acknowledgement logical(1). By setting `= TRUE` the
 #' user acknowledge that the data downloaded using this function may be very
@@ -39,28 +40,23 @@ download_modis_data <- function(
   }
   #### 2. check for data download acknowledgement
   if (data_download_acknowledgement == FALSE) {
-    cat(paste0(
+    stop(paste0(
       "Data download acknowledgement is set to FALSE. ",
       "Please acknowledge that the data downloaded using this ",
       "function may be very large and use lots of machine storage ",
-      "and memory.\n"
-    ))
-    stop()
+      "and memory.\n"))
   }
   #### 3. check for NASA earth data token
-  if (nasa_earth_data_token == FALSE) {
-    cat(paste0("Please provide NASA EarthData Login token.\n"))
-    stop()
+  if (is.null(nasa_earth_data_token)) {
+    stop("Please provide NASA EarthData Login token.\n")
   }
   #### 4. check for product
   if (is.null(product) == TRUE) {
-    cat(paste0("Please select a MODIS product.\n"))
-    stop()
+    stop("Please select a MODIS product.\n")
   }
   #### 5. check for version
   if (is.null(version) == TRUE) {
-    cat(paste0("Please select a data version.\n"))
-    stop()
+    stop("Please select a data version.\n")
   }
   #### 6. check for valid horizontal tiles
   for (h in seq_along(horizontal_tiles)) {
@@ -135,12 +131,9 @@ download_modis_data <- function(
   )
   tiles_horizontal <- paste0(
     "h",
-    stringr::str_pad(tiles_horizontal,
-      side = "left",
-      width = 2,
-      pad = "0"
+    sprintf("%02d", tiles_horizontal)
     )
-  )
+  
   #### 16. define vertical tiles
   tiles_vertical <- seq(vertical_tiles[1],
     vertical_tiles[2],
@@ -148,11 +141,7 @@ download_modis_data <- function(
   )
   tiles_vertical <- paste0(
     "v",
-    stringr::str_pad(tiles_vertical,
-      wide = "left",
-      width = 2,
-      pad = "0"
-    )
+    sprintf("%02d", tiles_vertical)
   )
   #### 17. define requested tiles
   tiles_requested <- as.vector(NULL)
