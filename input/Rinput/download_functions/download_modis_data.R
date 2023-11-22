@@ -5,7 +5,11 @@
 
 ################################################################################
 #' download_modis_data:
-#' @description
+#' @description Need maintenance for the directory path change
+#' in NASA EOSDIS. This function first retrieves the all hdf download links
+#' on a certain day, then only selects the relevant tiles from the retrieved
+#' links. Download is only done at the queried horizontal-vertical tile number
+#' combinations.
 #' @param date_start character(1). length of 10. Start date for downloading
 #' data. Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
 #' @param date_end character(1). length of 10. End date for downloading data.
@@ -20,7 +24,8 @@
 #' @param data_download_acknowledgement logical(1). By setting `= TRUE` the
 #' user acknowledge that the data downloaded using this function may be very
 #' large and use lots of machine storage and memory.
-#' @author Mitchell Manware
+#' @author Mitchell Manware, Insang Song
+#' @import rvest
 #' @return NULL;
 #' @export
 download_modis_data <- function(
@@ -72,34 +77,78 @@ download_modis_data <- function(
       stop()
     }
   }
-  #### 8. define date sequence
+
+  #### 8. Reuse ladsweb home url
+  ladsurl <- "https://ladsweb.modaps.eosdis.nasa.gov/"
+
+  #### 9. define date sequence
   date_start_date_format <- as.Date(date_start, format = "%Y-%m-%d")
   date_end_date_format <- as.Date(date_end, format = "%Y-%m-%d")
   date_sequence <- seq(date_start_date_format, date_end_date_format, "day")
-  #### 9. initiate "..._wget_commands.txt" file
-  commands_txt <- paste0(
-    directory_to_save,
-    product,
-    "_wget_commands.txt"
+
+  #### 10. define horizontal tiles
+  tiles_horizontal <- seq(horizontal_tiles[1],
+    horizontal_tiles[2],
+    by = 1
   )
-  sink(commands_txt)
-  #### 10. concatenate and print download commands to "..._wget_commands.txt"
+  tiles_horizontal <- paste0(
+    "h",
+    sprintf("%02d", tiles_horizontal)
+    )
+  
+  #### 11. define vertical tiles
+  tiles_vertical <- seq(vertical_tiles[1],
+    vertical_tiles[2],
+    by = 1
+  )
+  tiles_vertical <- paste0(
+    "v",
+    sprintf("%02d", tiles_vertical)
+  )
+  #### 12. define requested tiles
+  tiles_df <- expand.grid(
+    h = tiles_horizontal,
+    v = tiles_vertical
+  )
+  tiles_requested <-
+    paste0(tiles_df$h, tiles_df$v)
+
+  #### 13. download
   for (d in seq_along(date_sequence)) {
     date <- date_sequence[d]
     year <- as.character(substr(date, 1, 4))
     day <- strftime(date, "%j")
-    download_url <- paste0(
-      "https://ladsweb.modaps.eosdis.nasa.gov/",
-      "archive/allData/",
-      version,
-      "/",
-      product,
-      "/",
-      year,
-      "/",
-      day,
-      "/"
-    )
+    filedir_url <- paste0(
+        ladsurl,
+        "archive/allData/",
+        version,
+        "/",
+        product,
+        "/",
+        year,
+        "/",
+        day)
+
+    filelist <-
+      rvest::read_html(filedir_url) |>
+      rvest::html_elements("tr") |>
+      rvest::html_attr("data-path")
+
+    filelist <- grep(paste("(", paste(tiles_requested, collapse = "|"), ")"),
+        filelist, value = TRUE)
+    download_url <- sprintf("%s%s", ladsurl, filelist)
+    # download_url <- paste0(
+    #   "https://ladsweb.modaps.eosdis.nasa.gov/",
+    #   "archive/allData/",
+    #   version,
+    #   "/",
+    #   product,
+    #   "/",
+    #   year,
+    #   "/",
+    #   day,
+    #   "/"
+    # )
     download_command <- paste0(
       "wget -e robots=off -m -np -R .html,.tmp ",
       "-nH --cut-dirs=3 \"",
@@ -112,75 +161,69 @@ download_modis_data <- function(
     )
     cat(download_command)
   }
-  #### 11. finish "..._wget_commands.txt"
+
+  
+
+  #### 14. initiate "..._wget_commands.txt" file
+  commands_txt <- paste0(
+    directory_to_save,
+    product,
+    "_wget_commands.txt"
+  )
+  sink(commands_txt)
+
+  #### 15. concatenate and print download commands to "..._wget_commands.txt"
+
+  #### 16. finish "..._wget_commands.txt"
   sink()
-  #### 12. build system command
+  #### 17. build system command
   system_command <- paste0(
     ". ",
     commands_txt,
     "\n"
   )
-  #### 13. download data
+  #### 18. download data
   system(command = system_command)
-  #### 14. remove "..._wget_commands.txt"
-  file.remove(commands_txt)
-  #### 15. define horizontal tiles
-  tiles_horizontal <- seq(horizontal_tiles[1],
-    horizontal_tiles[2],
-    by = 1
-  )
-  tiles_horizontal <- paste0(
-    "h",
-    sprintf("%02d", tiles_horizontal)
-    )
-  
-  #### 16. define vertical tiles
-  tiles_vertical <- seq(vertical_tiles[1],
-    vertical_tiles[2],
-    by = 1
-  )
-  tiles_vertical <- paste0(
-    "v",
-    sprintf("%02d", tiles_vertical)
-  )
-  #### 17. define requested tiles
-  tiles_requested <- as.vector(NULL)
-  for (t in seq_along(tiles_horizontal)) {
-    tile <- paste0(
-      tiles_horizontal[t],
-      tiles_vertical
-    )
-    tiles_requested <- c(tiles_requested, tile)
-  }
-  #### 18. remove data outside of requested tiles
-  for (s in seq_along(date_sequence)) {
-    date <- date_sequence[s]
-    year <- as.character(substr(date, 1, 4))
-    day <- strftime(date, "%j")
-    directory_with_data <- paste0(
-      directory_to_save,
-      product,
-      "/",
-      year,
-      "/",
-      day,
-      "/"
-    )
-    data_paths <- list.files(
-      path = directory_with_data,
-      full.names = TRUE
-    )
-    path_splitter <- paste0(
-      "A",
-      year,
-      day
-    )
-    for (p in seq_along(data_paths)) {
-      path_tiles <- as.data.frame(strsplit(data_paths[p], path_splitter))[2, ]
-      path_tiles <- substr(path_tiles, 2, 7)
-      if (!(path_tiles %in% tiles_requested)) {
-        file.remove(data_paths[p])
-      }
-    }
-  }
+  #### xx. remove "..._wget_commands.txt"
+  # file.remove(commands_txt)
+
+  # tiles_requested <- as.vector(NULL)
+  # for (t in seq_along(tiles_horizontal)) {
+  #   tile <- paste0(
+  #     tiles_horizontal[t],
+  #     tiles_vertical
+  #   )
+  #   tiles_requested <- c(tiles_requested, tile)
+  # }
+  #### xx. remove data outside of requested tiles
+  # for (s in seq_along(date_sequence)) {
+  #   date <- date_sequence[s]
+  #   year <- as.character(substr(date, 1, 4))
+  #   day <- strftime(date, "%j")
+  #   directory_with_data <- paste0(
+  #     directory_to_save,
+  #     product,
+  #     "/",
+  #     year,
+  #     "/",
+  #     day,
+  #     "/"
+  #   )
+  #   data_paths <- list.files(
+  #     path = directory_with_data,
+  #     full.names = TRUE
+  #   )
+  #   path_splitter <- paste0(
+  #     "A",
+  #     year,
+  #     day
+  #   )
+  #   for (p in seq_along(data_paths)) {
+  #     path_tiles <- as.data.frame(strsplit(data_paths[p], path_splitter))[2, ]
+  #     path_tiles <- substr(path_tiles, 2, 7)
+  #     if (!(path_tiles %in% tiles_requested)) {
+  #       file.remove(data_paths[p])
+  #     }
+  #   }
+  # }
 }
