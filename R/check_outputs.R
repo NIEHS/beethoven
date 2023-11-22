@@ -80,6 +80,30 @@ check_means_are_valid <- function(
   return(checked)
 }
 
+#' Check if the output prediction variances are non-negative
+#'
+#' @param model_output sf/sftime object of model output
+#' @param model_variance_name character(1). the name of layer where variance
+#' values are stored
+#' @return Logical value indicating the variance are valid (TRUE) or not.
+#' @author Kyle P Messier
+#' @export
+check_variances_are_valid <- function(
+  model_output,
+  model_variance_name = "prediction_variance"
+) {
+
+  # clean output
+  model_output <- model_output[[model_variance_name]]
+  # "flatten" the variance layer
+  vec_output <- unlist(model_output)
+
+  # evaluate if the output variances are non-negative
+  checked <- (
+    all(vec_output > 0)
+  )
+  return(checked)
+}
 
 
 #' Check if the output is with the valid coordinate reference system

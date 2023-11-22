@@ -62,7 +62,31 @@ testthat::test_that("Predicted means are within a proper range", {
   testthat::expect_equal(ismeanvalid, TRUE)
 })
 
-
+#' @author Kyle Messier, Insang Song, Eva Marques
+#' @description
+#' unit testing for the model output has positive variances
+testthat::test_that("Predicted variances are positive", {
+  withr::local_package("sf")
+  withr::local_package("dplyr")
+  withr::local_options(list(sf_use_s2 = FALSE))
+  # 1. expect to pass when ALL variances are positive
+  prediction_variance <- list(NA, NA)
+  names(prediction_variance) <- c("prediction_variance", "crs_dt")
+  prediction_variance[[1]] <- stats::rgamma(100, 8, 0.3)
+  prediction_variance[[2]] <- "EPSG:4326"
+  isvarpositive <-
+    check_variances_are_valid(
+      prediction_variance
+    )
+  testthat::expect_equal(isvarpositive, TRUE)
+  # 2. expect to fail when ANY variances are negative
+  prediction_variance[[1]][1] <- -1
+  isvarpositive <-
+    check_variances_are_valid(
+      prediction_variance
+    )
+  testthat::expect_equal(isvarpositive, FALSE)
+})
 
 #' @author Insang Song
 #' @description
