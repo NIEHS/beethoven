@@ -2,7 +2,6 @@
 # buffer radii and the list of target covariates
 # Insang Song
 # Updated: 11/24/2023
-
 # set base directory to ddn (provided that users ssh at triton)
 rootdir <- "/ddn/gs1"
 basedir <- "group/set/Projects/NRT-AP-model/"
@@ -24,15 +23,8 @@ if (!dir.exists(download_dir_user)) {
 # register custom library path for debugging on Triton
 .libPaths(lib_dir)
 
-# assuming that the working directory is the parent directory of the repository
-getwd()
-
 # filter unique sites
 source("./input/Rinput/processing_functions/filter_unique_sites.R")
-
-# sourcing modis data download function
-source("./input/Rinput/download_functions/download_modis_data.R")
-args(download_modis_data)
 
 
 # check if remotes package is available
@@ -50,44 +42,12 @@ pkgs <- c("terra", "sf", "future.apply", "scomps", "exactextractr", "foreach", "
 suppressMessages(invisible(sapply(pkgs, library, character.only = TRUE, quietly = TRUE)))
 tigris_cache_dir("~/tigris_cache")
 options(sf_use_s2 = FALSE, tigris_use_cache = TRUE)
+# rr <- terra::rast("...hdf")
+# summary(rr["1 km 16 days NDVI"])
 
-products <- c(
-    "MOD09GA",
-    "MOD11A1",
-    "MOD06_L2",
-    "MCD19A2",
-    "MOD13A2",
-    "VNP46A2"
-)
-# MOD06_L2 are not tiled;
-# VNP46A2 is based on h5 formats
-
-
-# Earthdata token (My Profile > Generate Token)
-# Valid for 60 days; should reauthorize
-edtoken <- readLines("~/.edtoken")[1]
-
-#
-# 1826 days
-# MOD09GA 2.0-2.5 GB/day (4.2 TB)
-# MOD11A1 80 MB/day
-# MCD19A2 160 MB/day
-# MOD13A2 300 MB/day
-# VNP46A2 110 MB/day
-# 1 TB for other four;
-download_modis_data(
-  date_start = "2018-01-01",
-  date_end = "2018-01-01",
-  product = products[6],
-  version = "61",
-  horizontal_tiles = c(7, 13),
-  vertical_tiles = c(3, 6),
-  nasa_earth_data_token = edtoken,
-  directory_to_save = download_dir_user,
-  data_download_acknowledgement = TRUE
-)
-
-
+# https://opendap.cr.usgs.gov/opendap/hyrax/MOD09GA.061/h10v07.ncml.dap.nc4?dap4.ce=/MODIS_Grid_1km_2D_eos_cf_projection;/Latitude_1[0:1:2399][0:1:2399];/Longitude_1[0:1:2399][0:1:2399];/MODIS_Grid_500m_2D_eos_cf_projection;/sur_refl_b03_1[6574:1:6574][0:1:2399][0:1:2399];/sur_refl_b07_1[6574:1:6574][0:1:2399][0:1:2399];/sur_refl_b02_1[6574:1:6574][0:1:2399][0:1:2399];/sur_refl_b05_1[6574:1:6574][0:1:2399][0:1:2399];/sur_refl_b04_1[6574:1:6574][0:1:2399][0:1:2399];/sur_refl_b06_1[6574:1:6574][0:1:2399][0:1:2399];/sur_refl_b01_1[6574:1:6574][0:1:2399][0:1:2399];/time[6574:1:6574]
+# https://opendap.cr.usgs.gov/opendap/hyrax/MOD09GA.061/h10v07.ncml.dap.nc?dap4.ce=/MODIS_Grid_1km_2D_eos_cf_projection
+# https://opendap.cr.usgs.gov/opendap/hyrax/MOD09GA.061/h10v07.ncml.dap.nc4?dap4.ce=/Latitude_1%5B0:1:2399%5D%5B0:1:2399%5D;/Longitude_1%5B0:1:2399%5D%5B0:1:2399%5D;/MODIS_Grid_500m_2D_eos_cf_projection;/sur_refl_b03_1%5B6574:1:6574%5D%5B0:1:2399%5D%5B0:1:2399%5D;/sur_refl_b07_1%5B6574:1:6574%5D%5B0:1:2399%5D%5B0:1:2399%5D;/sur_refl_b02_1%5B6574:1:6574%5D%5B0:1:2399%5D%5B0:1:2399%5D;/sur_refl_b05_1%5B6574:1:6574%5D%5B0:1:2399%5D%5B0:1:2399%5D;/sur_refl_b04_1%5B6574:1:6574%5D%5B0:1:2399%5D%5B0:1:2399%5D;/sur_refl_b06_1%5B6574:1:6574%5D%5B0:1:2399%5D%5B0:1:2399%5D;/sur_refl_b01_1%5B6574:1:6574%5D%5B0:1:2399%5D%5B0:1:2399%5D;/time%5B6574:1:6574%5D
 ## main part
 ## hierarchy (arbitrary subsets of census regions)
 states <- tigris::states(year = 2020)
