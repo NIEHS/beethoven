@@ -80,6 +80,7 @@ download_modis_data <- function(
 
   #### 8. Reuse ladsweb home url
   ladsurl <- "https://ladsweb.modaps.eosdis.nasa.gov/"
+  version <- ifelse(startsWith(product, "VNP"), "5000", version)
 
   #### 9. define date sequence
   date_start_date_format <- as.Date(date_start, format = "%Y-%m-%d")
@@ -113,7 +114,16 @@ download_modis_data <- function(
   tiles_requested <-
     paste0(tiles_df$h, tiles_df$v)
 
-  #### 13. download
+
+  #### 13. initiate "..._wget_commands.txt" file
+  commands_txt <- paste0(
+    directory_to_save,
+    product,
+    "_wget_commands.txt"
+  )
+  sink(commands_txt)
+
+  #### 14. download
   for (d in seq_along(date_sequence)) {
     date <- date_sequence[d]
     year <- as.character(substr(date, 1, 4))
@@ -162,16 +172,6 @@ download_modis_data <- function(
     cat(download_command)
   }
 
-  
-
-  #### 14. initiate "..._wget_commands.txt" file
-  commands_txt <- paste0(
-    directory_to_save,
-    product,
-    "_wget_commands.txt"
-  )
-  sink(commands_txt)
-
   #### 15. concatenate and print download commands to "..._wget_commands.txt"
 
   #### 16. finish "..._wget_commands.txt"
@@ -184,6 +184,8 @@ download_modis_data <- function(
   )
   #### 18. download data
   system(command = system_command)
+
+  message("Requests were processed.\n")
   #### xx. remove "..._wget_commands.txt"
   # file.remove(commands_txt)
 
