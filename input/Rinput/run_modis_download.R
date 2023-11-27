@@ -32,10 +32,14 @@ edtoken <- readLines("~/.edtoken")[1]
 
 
 args <- commandArgs(trailingOnly = TRUE)
-year_date <- as.character(args[1])
-product_query <- as.character(args[2])
-dstart <- paste0(year_date, "-01-01")
-dend <- paste0(year_date, "-12-31")
+product_query <- as.character(args[1])
+dstart <- as.character(args[2])
+dend <- as.character(args[3])
+
+# 2023-11-27: The shell argument should describe
+# the full dates of start and end in an appropriate format
+# dstart <- paste0(year_date, "-01-01")
+# dend <- paste0(year_date, "-12-31")
 
 #
 # 1826 days

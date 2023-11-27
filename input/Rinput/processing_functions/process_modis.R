@@ -26,6 +26,9 @@ if (!dir.exists(download_dir_user)) {
 # filter unique sites
 source("./input/Rinput/processing_functions/filter_unique_sites.R")
 
+unique_sites <- filter_unique_sites()
+unique_sites_t <- filter_unique_sites(include_time = TRUE)
+
 
 # check if remotes package is available
 if (!require(remotes)) {

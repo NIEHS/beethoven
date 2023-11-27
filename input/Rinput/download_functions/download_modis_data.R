@@ -1,6 +1,6 @@
 ################################################################################
 # Date created: 2023-10-12
-# Date modified: 2023-11-24
+# Date modified: 2023-11-27
 ################################################################################
 
 ################################################################################
@@ -12,6 +12,7 @@
 #' combinations. An exception is MOD06_L2 product, which is produced
 #' every five minutes every day.
 #' @note \code{date_start} and \code{date_end} should be in the same year.
+#' Directory structure will be input/modis/raw/[version]/[product]/[year]/[day_of_year]
 #' @param date_start character(1). length of 10. Start date for downloading
 #' data. Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
 #' @param date_end character(1). length of 10. End date for downloading data.
@@ -19,19 +20,22 @@
 #' @param product character(1). One of c("MOD09GA", "MOD11A1", "MOD06_L2",
 #'      "MCD19A2", "MOD13A2", "VNP46A2").
 #' @param version character(1). Default is "61", meaning v061.
-#' @param horizontal_tiles integer(2).
-#' @param vertical_tiles integer(2).
+#' @param horizontal_tiles integer(2). Horizontal tile numbers
+#' c([start], [end]). Default is c(7, 13).
+#' @param vertical_tiles integer(2). Vertical tile numbers
+#' c([start], [end]). Default is c(3, 6).
 #' @param nasa_earth_data_token character(1).
-#'  Token for downloading data from NASA.
+#'  Token for downloading data from NASA. Should be set before
+#'  trying running the function.
 #' @param directory_to_save character(1). Directory to save data.
 #' @param data_download_acknowledgement logical(1). By setting `= TRUE` the
 #' user acknowledge that the data downloaded using this function may be very
 #' large and use lots of machine storage and memory.
-#' @param write_command logical(1). Only return a text file
+#' @param write_command_only logical(1). Only return a text file
 #' with wget commands instead of running it
 #' @author Mitchell Manware, Insang Song
 #' @import rvest
-#' @return NULL;
+#' @returns NULL;
 #' @export
 download_modis_data <- function(
     date_start = "2023-09-01",
@@ -44,7 +48,7 @@ download_modis_data <- function(
     nasa_earth_data_token = NULL,
     directory_to_save = "./input/modis/raw/",
     data_download_acknowledgement = FALSE,
-    write_command = FALSE) {
+    write_command_only = FALSE) {
   #### 1. directory setup
   chars_dir_save <- nchar(directory_to_save)
   if (substr(directory_to_save, chars_dir_save, chars_dir_save) != "/") {
@@ -65,6 +69,7 @@ download_modis_data <- function(
   #### 4. check for product
   product <- match.arg(product)
   ismod13 <- startsWith(product, "MOD13")
+  ismod06 <- startsWith(product, "MOD06")
   # if (is.null(product) == TRUE) {
   #   stop("Please select a MODIS product.\n")
   # }
@@ -98,6 +103,7 @@ download_modis_data <- function(
   if (ismod13) {
     date_start_yearday <- as.numeric(strftime(date_start_date_format, "%j"))
     date_end_yearday <- as.numeric(strftime(date_end_date_format, "%j"))
+    year_mod13 <- strftime(date_start_date_format, "%Y")
     date_sequence <- seq(1, 366, 16)
     date_sequence <-
       date_sequence[date_sequence >= date_start_yearday &
@@ -137,6 +143,7 @@ download_modis_data <- function(
   commands_txt <- paste0(
     directory_to_save,
     product,
+    "_",
     date_start,
     "_",
     date_end,
@@ -149,8 +156,8 @@ download_modis_data <- function(
   #### 14. append download commands to text file
   for (d in seq_along(date_sequence)) {
     date <- date_sequence[d]
-    year <- as.character(substr(date, 1, 4))
-    day <- ifelse(ismod13, sprintf("%03d", d), strftime(date, "%j"))
+    year <- ifelse(ismod13, year_mod13, as.character(substr(date, 1, 4)))
+    day <- ifelse(ismod13, sprintf("%03d", date), strftime(date, "%j"))
     filedir_url <- paste0(
         ladsurl,
         "archive/allData/",
@@ -169,7 +176,7 @@ download_modis_data <- function(
 
     filelist_sub <- grep(paste("(", paste(tiles_requested, collapse = "|"), ")"),
         filelist, value = TRUE)
-    if (ismod13) {
+    if (ismod06) {
       filelist_sub <- filelist
     }
     download_url <- sprintf("%s%s", ladsurl, filelist_sub)
@@ -189,11 +196,10 @@ download_modis_data <- function(
     cat(download_command)
   }
 
-
   #### 16. finish "..._wget_commands.txt"
   sink(file = NULL)
 
-  if (!write_command) {
+  if (!write_command_only) {
     #### 17. build system command
     system_command <- paste0(
       ". ",
