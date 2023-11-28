@@ -14,14 +14,15 @@ lib_dir <- file.path(rootdir, rlibdir)
 source("./input/Rinput/download_functions/download_modis_data.R")
 
 
-products <- c(
+products <-
+  c(
     "MOD09GA",
     "MOD11A1",
     "MOD06_L2",
     "MCD19A2",
     "MOD13A2",
     "VNP46A2"
-)
+  )
 # MOD06_L2 are not tiled;
 # VNP46A2 is based on h5 formats
 
@@ -38,8 +39,6 @@ dend <- as.character(args[3])
 
 # 2023-11-27: The shell argument should describe
 # the full dates of start and end in an appropriate format
-# dstart <- paste0(year_date, "-01-01")
-# dend <- paste0(year_date, "-12-31")
 
 #
 # 1826 days

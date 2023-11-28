@@ -12,7 +12,8 @@
 #' combinations. An exception is MOD06_L2 product, which is produced
 #' every five minutes every day.
 #' @note \code{date_start} and \code{date_end} should be in the same year.
-#' Directory structure will be input/modis/raw/[version]/[product]/[year]/[day_of_year]
+#'  Directory structure looks like
+#'  input/modis/raw/[version]/[product]/[year]/[day_of_year]
 #' @param date_start character(1). length of 10. Start date for downloading
 #' data. Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
 #' @param date_end character(1). length of 10. End date for downloading data.
@@ -41,7 +42,7 @@ download_modis_data <- function(
     date_start = "2023-09-01",
     date_end = "2023-09-01",
     product = c("MOD09GA", "MOD11A1", "MOD06_L2",
-      "MCD19A2", "MOD13A2", "VNP46A2"),
+                "MCD19A2", "MOD13A2", "VNP46A2"),
     version = "61",
     horizontal_tiles = c(7, 13),
     vertical_tiles = c(3, 6),
@@ -56,11 +57,12 @@ download_modis_data <- function(
   }
   #### 2. check for data download acknowledgement
   if (data_download_acknowledgement == FALSE) {
-    stop(paste0(
-      "Data download acknowledgement is set to FALSE. ",
-      "Please acknowledge that the data downloaded using this ",
-      "function may be very large and use lots of machine storage ",
-      "and memory.\n"))
+    stop(
+         paste0(
+                "Data download acknowledgement is set to FALSE. ",
+                "Please acknowledge that the data downloaded using this ",
+                "function may be very large and use lots of machine storage ",
+                "and memory.\n"))
   }
   #### 3. check for NASA earth data token
   if (is.null(nasa_earth_data_token)) {
@@ -70,9 +72,7 @@ download_modis_data <- function(
   product <- match.arg(product)
   ismod13 <- startsWith(product, "MOD13")
   ismod06 <- startsWith(product, "MOD06")
-  # if (is.null(product) == TRUE) {
-  #   stop("Please select a MODIS product.\n")
-  # }
+
   if (substr(date_start, 1, 4) != substr(date_end, 1, 4)) {
     stop("date_start and date_end should be in the same year.\n")
   }
@@ -85,19 +85,6 @@ download_modis_data <- function(
   # revised to reduce cyclomatic complexity
   stopifnot(all(horizontal_tiles %in% seq(0, 35)))
   stopifnot(all(vertical_tiles %in% seq(0, 17)))
-  # for (h in seq_along(horizontal_tiles)) {
-  #   if (horizontal_tiles[h] < 0 || horizontal_tiles[h] > 35) {
-  #     cat(paste0("Horizontal tiles invalid.\n"))
-  #     stop()
-  #   }
-  # }
-  #### 7. check for valid vertical tiles
-  # for (v in seq_along(vertical_tiles)) {
-  #   if (vertical_tiles[v] < 0 || vertical_tiles[v] > 17) {
-  #     cat(paste0("Vertical tiles invalid.\n"))
-  #     stop()
-  #   }
-  # }
 
   #### 8. Reuse ladsweb home url
   ladsurl <- "https://ladsweb.modaps.eosdis.nasa.gov/"
@@ -119,14 +106,15 @@ download_modis_data <- function(
 
   # In a certain year, list all available dates
   year <- ifelse(ismod13, year_mod13, as.character(substr(date_start, 1, 4)))
-  filedir_year_url <- paste0(
-    ladsurl,
-    "archive/allData/",
-    version,
-    "/",
-    product,
-    "/",
-    year)
+  filedir_year_url <-
+    paste0(
+          ladsurl,
+          "archive/allData/",
+          version,
+          "/",
+          product,
+          "/",
+          year)
 
   list_available_d <-
     rvest::read_html(filedir_year_url) |>
@@ -189,11 +177,11 @@ download_modis_data <- function(
   for (d in seq_along(date_sequence)) {
     date <- date_sequence[d]
     day <- date
-    #day <- ifelse(ismod13, sprintf("%03d", date), strftime(date, "%j"))
-    filedir_url <- paste0(
-      filedir_year_url,
-      "/",
-      day)
+    filedir_url <-
+      paste0(
+             filedir_year_url,
+             "/",
+             day)
 
     filelist <-
       rvest::read_html(filedir_url) |>
@@ -202,8 +190,8 @@ download_modis_data <- function(
 
     filelist_sub <-
       grep(
-        paste("(", paste(tiles_requested, collapse = "|"), ")"),
-        filelist, value = TRUE)
+           paste("(", paste(tiles_requested, collapse = "|"), ")"),
+           filelist, value = TRUE)
     if (ismod06) {
       filelist_sub <- filelist
     }

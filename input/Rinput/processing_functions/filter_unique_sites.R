@@ -38,52 +38,49 @@ filter_unique_sites <-
     date_start = "2018-01-01",
     date_end = "2022-12-31"
   ) {
-  sites <- readRDS(path_measurement)
-  # data manipulation
-  source("./R/manipulate_spacetime_data.R")
+    sites <- readRDS(path_measurement)
+    # data manipulation
+    source("./R/manipulate_spacetime_data.R")
 
-  ## get unique sites
-  ##
-  sites$site_id <-
-    sprintf("%02d%03d%04d%05d",
-            sites$State.Code,
-            sites$County.Code,
-            sites$Site.Num,
-            sites$Parameter.Code)
+    ## get unique sites
+    ##
+    sites$site_id <-
+      sprintf("%02d%03d%04d%05d",
+              sites$State.Code,
+              sites$County.Code,
+              sites$Site.Num,
+              sites$Parameter.Code)
 
-  # select relevant fields only
-  sites_v <- unique(sites[, c("site_id", "Longitude", "Latitude", "Datum")])
-  names(sites_v)[2:3] <- c("lon", "lat")
-  sites_v <- as.data.table(sites_v)
+    # select relevant fields only
+    sites_v <- unique(sites[, c("site_id", "Longitude", "Latitude", "Datum")])
+    names(sites_v)[2:3] <- c("lon", "lat")
+    sites_v <- as.data.table(sites_v)
 
-  # subset mainland
-  sites_v <- sites_v[!grepl("^(02|15|72|78|6)", site_id), ]
+    # subset mainland
+    sites_v <- sites_v[!grepl("^(02|15|72|78|6)", site_id), ]
 
-  # NAD83 to WGS84
-  sites_v_nad <- project_dt(sites_v[Datum == "NAD83"], "EPSG:4269", "EPSG:4326")
-  sites_v_nad <- sites_v_nad[, c(3, 6, 5)]
-  sites_v_wgs <- sites_v[Datum == "WGS84"][, -4]
-  final_sites <- rbind(sites_v_wgs, sites_v_nad)
+    # NAD83 to WGS84
+    sites_v_nad <-
+      project_dt(sites_v[Datum == "NAD83"],
+                 "EPSG:4269", "EPSG:4326")
+    sites_v_nad <- sites_v_nad[, c(3, 6, 5)]
+    sites_v_wgs <- sites_v[Datum == "WGS84"][, -4]
+    final_sites <- rbind(sites_v_wgs, sites_v_nad)
 
-  if (include_time) {
-    date_start <- as.Date(date_start)
-    date_end <- as.Date(date_end)
-    date_sequence <- seq(date_start, date_end, "day")
-    final_sites <-
-      split(date_sequence, date_sequence) |>
-      lapply(function(x) {
-        fs_time <- final_sites
-        fs_time$date <- x
-        return(fs_time)
-      })
-    final_sites <- Reduce(rbind, final_sites)
-  }
+    if (include_time) {
+      date_start <- as.Date(date_start)
+      date_end <- as.Date(date_end)
+      date_sequence <- seq(date_start, date_end, "day")
+      final_sites <-
+        split(date_sequence, date_sequence) |>
+        lapply(function(x) {
+          fs_time <- final_sites
+          fs_time$date <- x
+          return(fs_time)
+        })
+      final_sites <- Reduce(rbind, final_sites)
+    }
 
-  return(final_sites)
+    return(final_sites)
 }
-
-# def <- filter_unique_sites()
-# def2 <- filter_unique_sites(include_time = TRUE)
-
-# rm(list = grep("^(?!final)", ls(), perl = TRUE, value = TRUE))
 # File ends
