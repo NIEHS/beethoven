@@ -1,0 +1,88 @@
+# needs terra and exactextractr
+
+nlcd_classes <- list(value = c(0, 11, 21, 22, 23, 24, 31, 41, 42, 43, 52,
+                               71, 81, 82, 90, 95),
+                     class = c("Unc", "WTR", "OSD", "LID", "MID", "HID", 
+                               "BRN", "DFO", "EFO", "MFO", "SHB", 
+                               "GRS", "PAS", "CRP", "WDW", "EHW"),
+                     names = c("Unclassified", 
+                               "Open Water", 
+                               "Developed, Open Space", 
+                               "Developed, Low Intensity", 
+                               "Developed, Medium Intensity",
+                               "Developed, High Intensity",
+                               "Barren Land", 
+                               "Deciduous Forest",
+                               "Evergreen Forest", 
+                               "Mixed Forest",
+                               "Shrub/Scrub", 
+                               "Herbaceous", 
+                               "Hay/Pasture", 
+                               "Cultivated Crops", 
+                               "Woody Wetlands", 
+                               "Emergent Herbaceous Wetlands"),
+                     col = c("white", "#476ba1", "#decaca", "#d99482", "#ee0000",
+                             "#ab0000", "#b3aea3", "#68ab63", "#1c6330",
+                             "#b5ca8f", "#ccba7d",  "#e3e3c2", "#dcd93d", 
+                             "#ab7028", "#bad9eb", "#70a3ba")) 
+nlcd_classes <- as.data.frame(nlcd_classes)
+
+#' Compute land cover classes ratio in circle buffers around points
+#'
+#' @param data_vect terra::SpatVector of points geometry
+#' @param nlcd national land cover dataset as a terra::SpatRaster
+#' @param buf_radius numeric giving the radius of buffer around points 
+#' @export
+add_nlcd_class_ratio <- function(data_vect, 
+                                 buf_radius = 1000, 
+                                 year = 2021) {
+  
+  # open nlcd file corresponding to the year
+  nlcd_file <- list.files("../input/nlcd/raw/", 
+                          pattern = paste0("nlcd_", year, "_.*.img"), 
+                          full.names = TRUE) 
+  nlcd <- rast(nlcd_file)
+  
+  # reproject on nlcd crs if necessary
+  data_vect_b <- data_vect
+  if (!same.crs(data_vect_b, nlcd)) {
+    data_vect_b <- project(data_vect_b, crs(nlcd))
+  }
+  
+  # create circle buffers with buf_radius 
+  bufs_pol <- terra::buffer(data_vect_b, width = buf_radius)
+  bufs_pol <- sf::st_as_sf(bufs_pol)
+  
+  # crop nlcd raster
+  extent <- terra::ext(bufs_pol)
+  nlcd_cropped <- terra::crop(nlcd, extent)
+  
+  # ratio of each nlcd class per buffer
+  nlcd_at_bufs <- exact_extract(nlcd_cropped, 
+                                st_geometry(bufs_pol), 
+                                fun = "frac",
+                                stack_apply = T, 
+                                progress = F)
+  
+  # select only the columns of interest
+  nlcd_at_bufs <- nlcd_at_bufs[names(nlcd_at_bufs)[grepl("frac_",
+                                                       names(nlcd_at_bufs))]]
+  # change column names
+  nlcd_names <- names(nlcd_at_bufs) %>%
+    sub("frac_", "", .) %>%
+    as.numeric()
+  nlcd_names[match(nlcd_names, nlcd_classes$value)] <- nlcd_classes$class
+  new_names <- sapply(
+    nlcd_names,
+    function(x) {
+      paste0("frac_", x, "_", year, "_", buf_radius, "m")
+    }
+  )
+  names(nlcd_at_bufs) <- new_names
+  # merge data_vect with nlcd classes fractions (and reproject)
+  new_data_vect <- cbind(data_vect_b, nlcd_at_bufs) %>% 
+      project(., crs(data_vect)) 
+  
+  return(new_data_vect)
+}
+

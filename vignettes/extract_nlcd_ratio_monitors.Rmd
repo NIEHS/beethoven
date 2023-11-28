@@ -1,0 +1,100 @@
+---
+title: "NLCD ratio: example in RTP area"
+output: html_document
+date: "2023-11-27"
+---
+
+```{r, message=F}
+pkgs <- c("terra", 
+          "exactextractr", 
+          "tidyverse", 
+          "data.table", 
+          "sf")
+sapply(pkgs, library, character.only = TRUE)
+```
+
+Open NLCD data 
+
+```{r}
+nlcd_2019 <- rast("../input/nlcd/raw/nlcd_2019_land_cover_l48_20210604.img")
+nlcd_2021 <- rast("../input/nlcd/raw/nlcd_2021_land_cover_l48_20230630.img")
+plot(nlcd_2019)
+plot(nlcd_2021)
+```
+
+Open monitors data 
+
+```{r}
+#path_aqs <- "/ddn/gs1/group/set/Projects/NRT-AP-Model/input/aqs/"
+path_aqs <- "/Volumes/set/Projects/NRT-AP-Model/input/aqs/"
+aqs_mon <- fread(paste0(path_aqs, "aqs_monitors.csv")) 
+aqs_mon <- aqs_mon[`Parameter Code`==88101,] # PM2.5 monitors only
+
+```
+
+Process monitors 
+
+```{r}
+aqs_mon <- aqs_mon %>% 
+  rename(lon = Longitude) %>%
+  rename(lat = Latitude)
+
+source("/Volumes/set/Projects/NRT-AP-Model/R/manipulate_spacetime_data.R")
+a <- project_dt(aqs_mon[Datum == "NAD83"], "EPSG:4269", "EPSG:4326")
+a$lon_ori <- NULL
+a$lat_ori <- NULL
+b <- aqs_mon[Datum != "NAD83"]
+aqs_mon <- rbind(a, b) %>%
+  terra::vect(.,
+              geom = c("lon", "lat"),
+              crs = "EPSG:4326",
+              keepgeom = FALSE)
+```
+
+NLCD classes
+
+```{r}
+nlcd_classes <- list(value = c(0, 11, 21, 22, 23, 24, 31, 41, 42, 43, 52,
+                               71, 81, 82, 90, 95),
+                     class = c("Unc", "WTR", "OSD", "LID", "MID", "HID", 
+                                     "BRN", "DFO", "EFO", "MFO", "SHB", 
+                                     "GRS", "PAS", "CRP", "WDW", "EHW"),
+                     names = c("Unclassified", 
+                               "Open Water", 
+                               "Developed, Open Space", 
+                               "Developed, Low Intensity", 
+                               "Developed, Medium Intensity",
+                               "Developed, High Intensity",
+                               "Barren Land", 
+                               "Deciduous Forest",
+                               "Evergreen Forest", 
+                               "Mixed Forest",
+                               "Shrub/Scrub", 
+                               "Herbaceous", 
+                               "Hay/Pasture", 
+                               "Cultivated Crops", 
+                               "Woody Wetlands", 
+                               "Emergent Herbaceous Wetlands"),
+                     col = c("white", "#476ba1", "#decaca", "#d99482", "#ee0000",
+                     "#ab0000", "#b3aea3", "#68ab63", "#1c6330",
+                     "#b5ca8f", "#ccba7d",  "#e3e3c2", "#dcd93d", 
+                     "#ab7028", "#bad9eb", "#70a3ba")) 
+nlcd_classes <- as.data.frame(nlcd_classes)
+```
+
+
+Compute NLCD ratio in 1km buffers
+
+```{r}
+source("../R/extract_nlcd_ratio.R")
+
+# check that unit is in meters
+linearUnits(nlcd_2019)
+same.crs(nlcd_2019, nlcd_2021)
+
+aqs_mon_nlcd <- add_nlcd_class_ratio(data_vect = aqs_mon, 
+                             buf_radius = 1000, 
+                             year = 2019)
+```
+
+
