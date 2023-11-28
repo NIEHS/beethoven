@@ -73,24 +73,31 @@ download_modis_data <- function(
   # if (is.null(product) == TRUE) {
   #   stop("Please select a MODIS product.\n")
   # }
+  if (substr(date_start, 1, 4) != substr(date_end, 1, 4)) {
+    stop("date_start and date_end should be in the same year.\n")
+  }
+
   #### 5. check for version
   if (is.null(version) == TRUE) {
     stop("Please select a data version.\n")
   }
   #### 6. check for valid horizontal tiles
-  for (h in seq_along(horizontal_tiles)) {
-    if (horizontal_tiles[h] < 0 || horizontal_tiles[h] > 35) {
-      cat(paste0("Horizontal tiles invalid.\n"))
-      stop()
-    }
-  }
+  # revised to reduce cyclomatic complexity
+  stopifnot(all(horizontal_tiles %in% seq(0, 35)))
+  stopifnot(all(vertical_tiles %in% seq(0, 17)))
+  # for (h in seq_along(horizontal_tiles)) {
+  #   if (horizontal_tiles[h] < 0 || horizontal_tiles[h] > 35) {
+  #     cat(paste0("Horizontal tiles invalid.\n"))
+  #     stop()
+  #   }
+  # }
   #### 7. check for valid vertical tiles
-  for (v in seq_along(vertical_tiles)) {
-    if (vertical_tiles[v] < 0 || vertical_tiles[v] > 17) {
-      cat(paste0("Vertical tiles invalid.\n"))
-      stop()
-    }
-  }
+  # for (v in seq_along(vertical_tiles)) {
+  #   if (vertical_tiles[v] < 0 || vertical_tiles[v] > 17) {
+  #     cat(paste0("Vertical tiles invalid.\n"))
+  #     stop()
+  #   }
+  # }
 
   #### 8. Reuse ladsweb home url
   ladsurl <- "https://ladsweb.modaps.eosdis.nasa.gov/"
@@ -110,6 +117,25 @@ download_modis_data <- function(
         date_sequence <= date_end_yearday]
   }
 
+  # In a certain year, list all available dates
+  year <- ifelse(ismod13, year_mod13, as.character(substr(date_start, 1, 4)))
+  filedir_year_url <- paste0(
+    ladsurl,
+    "archive/allData/",
+    version,
+    "/",
+    product,
+    "/",
+    year)
+
+  list_available_d <-
+    rvest::read_html(filedir_year_url) |>
+    rvest::html_elements("tr") |>
+    rvest::html_attr("data-name")
+  # no conditional assignment at this moment.
+  # 11/28/2023 I. Song
+  # remove NAs
+  date_sequence <- list_available_d[!is.na(list_available_d)]
 
   #### 10. define horizontal tiles
   tiles_horizontal <- seq(horizontal_tiles[1],
@@ -151,30 +177,32 @@ download_modis_data <- function(
     product,
     "_wget_commands.txt"
   )
+
+  # avoid any possible errors by removing existing command files
+  if (file.exists(commands_txt)) {
+    unlink(commands_txt)
+  }
+
   sink(commands_txt)
 
   #### 14. append download commands to text file
   for (d in seq_along(date_sequence)) {
     date <- date_sequence[d]
-    year <- ifelse(ismod13, year_mod13, as.character(substr(date, 1, 4)))
-    day <- ifelse(ismod13, sprintf("%03d", date), strftime(date, "%j"))
+    day <- date
+    #day <- ifelse(ismod13, sprintf("%03d", date), strftime(date, "%j"))
     filedir_url <- paste0(
-        ladsurl,
-        "archive/allData/",
-        version,
-        "/",
-        product,
-        "/",
-        year,
-        "/",
-        day)
+      filedir_year_url,
+      "/",
+      day)
 
     filelist <-
       rvest::read_html(filedir_url) |>
       rvest::html_elements("tr") |>
       rvest::html_attr("data-path")
 
-    filelist_sub <- grep(paste("(", paste(tiles_requested, collapse = "|"), ")"),
+    filelist_sub <-
+      grep(
+        paste("(", paste(tiles_requested, collapse = "|"), ")"),
         filelist, value = TRUE)
     if (ismod06) {
       filelist_sub <- filelist
