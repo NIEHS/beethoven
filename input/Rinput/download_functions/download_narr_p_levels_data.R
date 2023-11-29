@@ -4,34 +4,33 @@
 ################################################################################
 
 ################################################################################
-#' download_narr_p_levels_data: download daily pressure levels
-#' meteorological data from NOAA NCEP North American Regional Reanalysis
+#' download_narr_p_levels_data: download pressure level meteorological data from
+#' NOAA NCEP North American Regional Reanalysis (NARR) model.
 #' @description
 #' The `download_narr_p_levels_data` function accesses and downloads
-#' pressure levels meteorological data.
+#' pressure level meteorological data from [NOAA NCEP North American Regional]
+#' [Reanalysis (NARR)](https://psl.noaa.gov/data/gridded/data.narr.html).
 #' @param year_start integer(1). length of 4. Start of year range for
 #' downloading data.
 #' @param year_end integer(1). length of 4. End of year range for downloading
 #' data.
-#' @param variables character(1). Variable code(s) that should be downloaded.
-#' For full list of variables and variable codes see ***.
+#' @param variables character(1). Variable(s) name acronym.
 #' @param directory_to_save character(1). Directory(s) to save downloaded data
 #' files.
 #' @param data_download_acknowledgement logical(1). By setting `= TRUE` the user
 #' acknowledge that the data downloaded using this function may be very large
 #' and use lots of machine storage and memory.
 #' @author Mitchell Manware
-#' @return NULL; NCEP North American Regional Reanalysis pressure levels
-#' meteorological data will be returned to the designated saving directory.
+#' @return NULL;
+#' @importFrom stringr str_pad
 #' @export
 download_narr_p_levels_data <- function(
   year_start = 2022,
   year_end = 2022,
   variables = NULL,
-  directory_to_save = "./input/ncep_narr_pressure_levels/raw/",
+  directory_to_save = "../../data/covariates/narr/",
   data_download_acknowledgement = FALSE
 ) {
-  library(stringr)
   #### 1. directory setup
   chars_dir_save <- nchar(directory_to_save)
   if (substr(directory_to_save, chars_dir_save, chars_dir_save) != "/") {
@@ -44,15 +43,14 @@ download_narr_p_levels_data <- function(
   }
   #### 2. check for data download acknowledgement
   if (data_download_acknowledgement == FALSE) {
-    cat("Data download acknowledgement is set to FALSE. Please acknowledge that
-        the data downloaded using this function may be very large and use lots 
-        of machine storage and memory.")
-    stop()
+    stop(cat(paste0("Data download acknowledgement is set to FALSE. Please ",
+                    "acknowledge that the data downloaded using this function ",
+                    "may be very large and use lots of machine storage and ",
+                    "memory.")))
   }
   #### 3. check for variables
   if (is.null(variables) == TRUE) {
-    cat(paste0("Please select an NCEP-NARR variable.\n"))
-    stop()
+    stop(paste0("Please select an NCEP-NARR variable.\n"))
   }
   #### 4. define years sequence
   years <- seq(year_start, year_end, 1)

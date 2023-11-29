@@ -25,20 +25,21 @@
 #' @param data_download_acknowledgement logical(1). By setting `= TRUE` the user
 #' acknowledge that the data downloaded using this function may be very large
 #' and use lots of machine storage and memory.
-#' @param remove_download logical(1). Remove download files in
-#' directory_to_download.
+#' @param unzip logical(1). Unzip zip files. Default = `TRUE`.
+#' @param remove_zip logical(1). Remove zip files from directory_to_download.
+#' Default = `FALSE`.
 #' @author Mitchell Manware
-#' @return NULL; NASA UN WPP-Adjusted Population Density, v4.11 data will be
-#' returned to the designated saving directory in the indicated format.
+#' @return NULL;
 #' @export
 download_sedac_population_data <- function(
   year = "2020",
   data_format = "GeoTIFF",
   data_resolution = "60 minute",
-  directory_to_download = "./input/nasa_sedac/raw/",
-  directory_to_save = "./input/nasa_sedac/raw/",
+  directory_to_download = "../../data/covariates/sedac_population/",
+  directory_to_save = "../../data/covariates/sedac_population/",
   data_download_acknowledgement = FALSE,
-  remove_download = FALSE
+  unzip = TRUE,
+  remove_zip = FALSE
 ) {
   #### 1. directory setup
   chars_dir_download <- nchar(directory_to_download)
@@ -61,21 +62,18 @@ download_sedac_population_data <- function(
   }
   #### 2. check for data acknowledgement
   if (data_download_acknowledgement == FALSE) {
-    cat(paste0("Data download acknowledgement is set to FALSE.",
-               "Please acknowledge that the data downloaded using this",
-               "function may be very large and use lots of machine storage",
-               "and memory."))
-    stop()
+    stop(paste0("Data download acknowledgement is set to FALSE.",
+                "Please acknowledge that the data downloaded using this",
+                "function may be very large and use lots of machine storage",
+                "and memory."))
   }
   #### 3. check for data format
   if (is.null(data_format)) {
-    cat(paste0("Please select a data format.\n"))
-    stop()
+    stop(paste0("Please select a data format.\n"))
   }
   #### 4. check for data resolution
   if (is.null(data_resolution)) {
-    cat(paste0("Please select a data resolution.\n"))
-    stop()
+    stop(paste0("Please select a data resolution.\n"))
   }
   #### 5. define URL base
   base <- paste0("https://sedac.ciesin.columbia.edu/downloads/data/gpw-v4/")
@@ -145,14 +143,18 @@ download_sedac_population_data <- function(
   cat(paste0("Downloading requested file...\n"))
   system(command = download_command)
   cat(paste0("Requested file downloaded.\n"))
-  #### 13. unzip downloaded data
+  #### 13. end if unzip == FALSE
+  if (unzip == FALSE) {
+    return(cat(paste0("Downloaded files will not be unzipped.\n")))
+  }
+  #### 14. unzip downloaded data
   cat(paste0("Unzipping files...\n"))
   unzip(download_name, exdir = directory_to_save)
   cat(paste0("Files unzipped and saved in ",
              directory_to_save,
              ".\n"))
   #### 14. remove zip file from download directory
-  if (remove_download == TRUE) {
+  if (remove_zip == TRUE) {
     cat(paste0("Deleting downloaded zip files...\n"))
     file.remove(download_name)
     cat(paste0("Downloaded zip files deleted.\n"))

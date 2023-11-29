@@ -5,7 +5,10 @@
 
 ################################################################################
 #' download_aqs_data: download daily data from AQS datamart
+<<<<<<< HEAD
 #'
+=======
+>>>>>>> 4cd10ed8eecd928be3de31c7eac75866a7beaaba
 #' @param parameter_code integer(1). length of 5. EPA pollutant parameter code.
 #' For details, please refer to
 #' https://aqs.epa.gov/aqsweb/documents/codetables/parameters.html
@@ -27,8 +30,13 @@ download_aqs_data <- function(
   year_start = 2018,
   year_end = 2022,
   resolution_temporal = "daily",
+<<<<<<< HEAD
   directory_to_download = "./input/aqs/",
   directory_to_save = "./input/aqs/",
+=======
+  directory_to_download = "../../data/aqs/",
+  directory_to_save = "../../data/aqs/",
+>>>>>>> 4cd10ed8eecd928be3de31c7eac75866a7beaaba
   url_aqs_download = "https://aqs.epa.gov/aqsweb/airdata/",
   remove_zips = FALSE
 ) {

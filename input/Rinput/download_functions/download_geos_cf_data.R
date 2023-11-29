@@ -4,25 +4,31 @@
 ################################################################################
 
 ################################################################################
-#' download_geos_cf_data:
+#' download_geos_cf_data: download atmospheric composition data from the NASA
+#' Global Earth Observing System (GEOS) model.
 #' @description
+#' The `download_goes_cf_data()` function accesses and downloads various
+#' atmospheric composition collections from the [NASA Global Earth Observing]
+#' [System (GEOS) model](https://gmao.gsfc.nasa.gov/GEOS_systems/).
 #' @param date_start character(1). length of 10. Start date for downloading
 #' data. Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
 #' @param date_end character(1). length of 10. End date for downloading data.
 #' Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
-#' @param collection character(1).
+#' @param collection character(1). GEOS-CF data collection file name.
 #' @param directory_to_save character(1). Directory to save data.
 #' @param data_download_acknowledgement logical(1). By setting `= TRUE` the
 #' user acknowledge that the data downloaded using this function may be very
 #' large and use lots of machine storage and memory.
 #' @author Mitchell Manware
 #' @return NULL;
+#' @importFrom stringr str_sub
+#' @importFrom stringr str_pad
 #' @export
 download_geos_cf_data <- function(
   date_start = "2023-09-01",
   date_end = "2023-09-01",
   collection = NULL,
-  directory_to_save = "./input/geos_cf/raw/",
+  directory_to_save = "../../data/covariates/geos_cf/",
   data_download_acknowledgement = FALSE
 ) {
   #### 1. directory setup
@@ -35,16 +41,14 @@ download_geos_cf_data <- function(
   }
   #### 2. check for data download acknowledgement
   if (data_download_acknowledgement == FALSE) {
-    cat(paste0("Data download acknowledgement is set to FALSE. ",
-               "Please acknowledge that the data downloaded using this ",
-               "function may be very large and use lots of machine storage ",
-               "and memory.\n"))
-    stop()
+    stop(paste0("Data download acknowledgement is set to FALSE. ",
+                "Please acknowledge that the data downloaded using this ",
+                "function may be very large and use lots of machine storage ",
+                "and memory.\n"))
   }
   #### 2. check for collection
   if (is.null(collection) == TRUE) {
-    cat(paste0("Please select a GEOS-CF collection.\n"))
-    stop()
+    stop(paste0("Please select a GEOS-CF collection.\n"))
   }
   #### 3. check if collection is valid
   collections <- c("htf_inst_15mn_g1440x721_x1", "aqc_tavg_1hr_g1440x721_v1",
@@ -52,8 +56,7 @@ download_geos_cf_data <- function(
                    "xgc_tavg_1hr_g1440x721_x1", "chm_inst_1hr_g1440x721_p23",
                    "met_inst_1hr_g1440x721_p23")
   if (!(collection %in% collections)) {
-    cat(paste0("Requested collection is not recognized.\n"))
-    stop()
+    stop(paste0("Requested collection is not recognized.\n"))
   }
   #### 4. define date sequence
   date_start_date_format <- as.Date(date_start, format = "%Y-%m-%d")

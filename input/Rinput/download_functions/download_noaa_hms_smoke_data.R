@@ -6,13 +6,11 @@
 ################################################################################
 #' download_noaa_hms_smoke_data: download daily wildfire smoke plume data from
 #' NOAA Hazard Mapping System Fire and Smoke Product
-#'
 #' @description
 #' The `download_noaa_hms_smoke_data()` function accesses and downloads wildfire
 #' smoke plume coverage data from the National Oceanic and Atmospheric
 #' Administration's (NOAA) [Hazard Mapping System Fire and Smoke Product]
 #' (https://www.ospo.noaa.gov/Products/land/hms.html#0).
-#'
 #' @param date_start character(1). length of 10. Start date for downloading
 #' data. Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
 #' @param date_end character(1). length of 10. End date for downloading data.
@@ -31,15 +29,14 @@
 #' @param remove_zip logical(1). Remove zip files from
 #' directory_to_download. Default = `FALSE`. (Ignored if `data_format = "KML"`.)
 #' @author Mitchell Manware, Insang Song
-#' @return NULL; NOAA Hazard Mapping System Fire and Smoke Product data will be
-#' returned to the designated saving directory in the indicated format.
+#' @return NULL;
 #' @export
 download_noaa_hms_smoke_data <- function(
   date_start = "2023-09-01",
   date_end = "2023-09-01",
   data_format = "Shapefile",
-  directory_to_download = "./input/noaa_hms/raw/",
-  directory_to_save = "./input/noaa_hms/raw/",
+  directory_to_download = "../../data/covariates/noaa_hms/",
+  directory_to_save = "../../data/covariates/noaa_hms/",
   data_download_acknowledgement = FALSE,
   unzip = TRUE,
   remove_zip = FALSE

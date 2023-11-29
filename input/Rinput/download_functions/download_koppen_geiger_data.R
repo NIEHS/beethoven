@@ -25,18 +25,20 @@
 #' @param data_download_acknowledgement logical(1). By setting `= TRUE` the
 #' user acknowledge that the data downloaded using this function may be very
 #' large and use lots of machine storage and memory.
-#' @param remove_download logical(1). Remove download files in
-#' directory_to_download.
+#' @param unzip logical(1). Unzip zip files. Default = `TRUE`.
+#' @param remove_zip logical(1). Remove zip files from directory_to_download.
+#' Default = `FALSE`.
 #' @author Mitchell Manware
 #' @return NULL;
 #' @export
 download_koppen_geiger_data <- function(
   time_period = "Present",
   data_resolution = NULL,
-  directory_to_download = "./input/koppen_geiger/raw/",
-  directory_to_save = "./input/koppen_geiger/raw/",
+  directory_to_download = "../../data/covariates/koppen_geiger/",
+  directory_to_save = "../../data/covariates/koppen_geiger/",
   data_download_acknowledgement = FALSE,
-  remove_download = TRUE
+  unzip = TRUE,
+  remove_zip = FALSE
 ) {
   #### 1. directory setup
   chars_dir_download <- nchar(directory_to_download)
@@ -59,26 +61,22 @@ download_koppen_geiger_data <- function(
   }
   #### 2. check for data download acknowledgement
   if (data_download_acknowledgement == FALSE) {
-    cat(paste0("Data download acknowledgement is set to FALSE.",
-               "Please acknowledge that the data downloaded using this",
-               "function may be very large and use lots of machine storage",
-               "and memory."))
-    stop()
+    stop(paste0("Data download acknowledgement is set to FALSE.",
+                "Please acknowledge that the data downloaded using this",
+                "function may be very large and use lots of machine storage",
+                "and memory."))
   }
   #### 3. check for data resolution
   if (is.null(data_resolution)) {
-    cat(paste0("Please select a data resolution.\n"))
-    stop()
+    stop(paste0("Please select a data resolution.\n"))
   }
   #### 4. check for valid time period
   if (!(time_period %in% c("Present", "Future"))) {
-    cat(paste0("Requested time period is not recognized.\n"))
-    stop()
+    stop(paste0("Requested time period is not recognized.\n"))
   }
   #### 5. check for valid data resolution
   if (!(data_resolution %in% c("0.0083", "0.083", "0.5"))) {
-    cat(paste0("Requested time period is not recognized.\n"))
-    stop()
+    stop(paste0("Requested time period is not recognized.\n"))
   }
   #### 6. define time period
   period <- tolower(time_period)
@@ -117,7 +115,11 @@ download_koppen_geiger_data <- function(
   cat(paste0("Files unzipped and saved in ",
              directory_to_save,
              ".\n"))
-  #### 13. remove unwanted files
+  #### 13. end if unzip == FALSE
+  if (unzip == FALSE) {
+    return(cat(paste0("Downlaoded files will not be unzipped.\n")))
+  }
+  #### 14. remove unwanted files
   unwanted_names <- list.files(path = directory_to_save,
                                pattern = "Beck_KG",
                                full.names = TRUE)
@@ -134,8 +136,8 @@ download_koppen_geiger_data <- function(
                                         unwanted_names,
                                         invert = TRUE)]
   file.remove(unwanted_names)
-  #### 14. remove zip files
-  if (remove_download == TRUE) {
+  #### 15. remove zip files
+  if (remove_zip == TRUE) {
     cat(paste0("Removing download files...\n"))
     file.remove(download_name)
     cat(paste0("Download files removed.\n"))

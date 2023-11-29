@@ -4,6 +4,7 @@
 ################################################################################
 
 ################################################################################
+<<<<<<< HEAD
 #' download_modis_data:
 #' @description Need maintenance for the directory path change
 #' in NASA EOSDIS. This function first retrieves the all hdf download links
@@ -14,6 +15,10 @@
 #' @note \code{date_start} and \code{date_end} should be in the same year.
 #'  Directory structure looks like
 #'  input/modis/raw/[version]/[product]/[year]/[day_of_year]
+=======
+#' download_modis_data: 
+#' @description
+>>>>>>> 4cd10ed8eecd928be3de31c7eac75866a7beaaba
 #' @param date_start character(1). length of 10. Start date for downloading
 #' data. Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
 #' @param date_end character(1). length of 10. End date for downloading data.
@@ -32,11 +37,17 @@
 #' @param data_download_acknowledgement logical(1). By setting `= TRUE` the
 #' user acknowledge that the data downloaded using this function may be very
 #' large and use lots of machine storage and memory.
+<<<<<<< HEAD
 #' @param write_command_only logical(1). Only return a text file
 #' with wget commands instead of running it
 #' @author Mitchell Manware, Insang Song
 #' @import rvest
 #' @returns NULL;
+=======
+#' @author Mitchell Manware
+#' @return NULL;
+#' @importFrom stringr str_pad
+>>>>>>> 4cd10ed8eecd928be3de31c7eac75866a7beaaba
 #' @export
 download_modis_data <- function(
     date_start = "2023-09-01",
@@ -47,9 +58,14 @@ download_modis_data <- function(
     horizontal_tiles = c(7, 13),
     vertical_tiles = c(3, 6),
     nasa_earth_data_token = NULL,
+<<<<<<< HEAD
     directory_to_save = "./input/modis/raw/",
     data_download_acknowledgement = FALSE,
     write_command_only = FALSE) {
+=======
+    directory_to_save = "../../data/covariates/modis/",
+    data_download_acknowledgement = FALSE) {
+>>>>>>> 4cd10ed8eecd928be3de31c7eac75866a7beaaba
   #### 1. directory setup
   chars_dir_save <- nchar(directory_to_save)
   if (substr(directory_to_save, chars_dir_save, chars_dir_save) != "/") {
@@ -60,6 +76,7 @@ download_modis_data <- function(
   }
   #### 2. check for data download acknowledgement
   if (data_download_acknowledgement == FALSE) {
+<<<<<<< HEAD
     stop(
          paste0(
                 "Data download acknowledgement is set to FALSE. ",
@@ -78,10 +95,27 @@ download_modis_data <- function(
 
   if (substr(date_start, 1, 4) != substr(date_end, 1, 4)) {
     stop("date_start and date_end should be in the same year.\n")
+=======
+    stop(paste0(
+      "Data download acknowledgement is set to FALSE. ",
+      "Please acknowledge that the data downloaded using this ",
+      "function may be very large and use lots of machine storage ",
+      "and memory.\n"
+    ))
+  }
+  #### 3. check for NASA earth data token
+  if (nasa_earth_data_token == FALSE) {
+    stop(paste0("Please provide NASA EarthData Login token.\n"))
+  }
+  #### 4. check for product
+  if (is.null(product) == TRUE) {
+    stop(paste0("Please select a MODIS product.\n"))
+>>>>>>> 4cd10ed8eecd928be3de31c7eac75866a7beaaba
   }
 
   #### 5. check for version
   if (is.null(version) == TRUE) {
+<<<<<<< HEAD
     stop("Please select a data version.\n")
   }
   #### 6. check for valid horizontal tiles
@@ -94,6 +128,23 @@ download_modis_data <- function(
   version <- ifelse(startsWith(product, "VNP"), "5000", version)
 
   #### 9. define date sequence
+=======
+    stop(paste0("Please select a data version.\n"))
+  }
+  #### 6. check for valid horizontal tiles
+  for (h in seq_along(horizontal_tiles)) {
+    if (horizontal_tiles[h] < 0 || horizontal_tiles[h] > 35) {
+      stop(paste0("Horizontal tiles invalid.\n"))
+    }
+  }
+  #### 7. check for valid vertical tiles
+  for (v in seq_along(vertical_tiles)) {
+    if (vertical_tiles[v] < 0 || vertical_tiles[v] > 17) {
+      stop(paste0("Vertical tiles invalid.\n"))
+    }
+  }
+  #### 8. define date sequence
+>>>>>>> 4cd10ed8eecd928be3de31c7eac75866a7beaaba
   date_start_date_format <- as.Date(date_start, format = "%Y-%m-%d")
   date_end_date_format <- as.Date(date_end, format = "%Y-%m-%d")
   date_sequence <- seq(date_start_date_format, date_end_date_format, "day")
