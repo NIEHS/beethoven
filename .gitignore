@@ -75,3 +75,9 @@ code/mitchell_tests/
 # Insang's negative value exploration script
 tools/negative_exploration
 tools/metalearner_test
+
+# NASA Earthdata login credentials
+.dodsrc
+
+# MODIS raw data
+input/data/modis
