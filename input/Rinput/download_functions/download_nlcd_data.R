@@ -23,7 +23,9 @@
 #' @param unzip logical(1). Unzip zip files. Default = `TRUE`.
 #' @param remove_zip logical(1). Remove zip files from directory_to_download.
 #' Default = `FALSE`.
-#' @param download logical(1).
+#' @param download logical(1). `= FALSE` will generate a `.txt` file containing
+#' all download commands. By setting `= TRUE` the function will download all of
+#' the requested data files.
 #' @author Mitchell Manware
 #' @return NULL;
 #' @export
@@ -101,12 +103,25 @@ download_nlcd_data <- function(
                           release_date,
                           ".zip")
   #### 8. build system command
-  system_command <- paste0("curl -o ",
-                           download_name,
-                           " --url ",
-                           download_url,
+  download_command <- paste0("curl -o ",
+                             download_name,
+                             " --url ",
+                             download_url,
+                             "\n")
+  #### 9. initiate "..._curl_command.txt"
+  commands_txt <- paste0(directory_to_download,
+                         collection_code,
+                         "curl_command.txt")
+  sink(commands_txt)
+  #### 10. concatenate and print download command to "..._curl_commands.txt"
+  cat(download_command)
+  #### 11. finish "..._curl_command.txt"
+  sink()
+  #### 12. build system command
+  system_command <- paste0(". ",
+                           commands_txt,
                            "\n")
-  #### 9. download data
+  #### 13. download data
   if (download == TRUE) {
     cat(paste0("Downloading requested file...\n"))
     system(command = system_command)
@@ -115,18 +130,18 @@ download_nlcd_data <- function(
   } else if (download == FALSE) {
     return(cat(paste0("Skipping data download.\n")))
   }
-  #### 10. end if unzip == FALSE
+  #### 14. end if unzip == FALSE
   if (unzip == FALSE) {
     return(cat(paste0("Downloaded files will not be unzipped.\n")))
   }
-  #### 11. unzip downloaded data
+  #### 15. unzip downloaded data
   cat(paste0("Unzipping files...\n"))
   unzip(download_name,
         exdir = directory_to_save)
   cat(paste0("Files unzipped and saved in ",
              directory_to_save,
              ".\n"))
-  #### 12. remove zip files
+  #### 16. remove zip files
   if (remove_zip == TRUE) {
     cat(paste0("Removing download files...\n"))
     file.remove(download_name)

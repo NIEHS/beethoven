@@ -26,7 +26,9 @@
 #' @param unzip logical(1). Unzip zip files. Default = `TRUE`.
 #' @param remove_zip logical(1). Remove zip files from directory_to_download.
 #' Default = `FALSE`.
-#' @param download logical(1).
+#' @param download logical(1). `= FALSE` will generate a `.txt` file containing
+#' all download commands. By setting `= TRUE` the function will download all of
+#' the requested data files.
 #' @author Mitchell Manware
 #' @return NULL;
 #' @export
@@ -95,25 +97,39 @@ download_sedac_groads_data <- function(
   region <- tolower(data_region)
   #### 9. build download URL
   download_url <- paste0(base,
-                         region,
+                         gsub(" ", "-", region),
                          "-",
                          format,
                          ".zip")
   #### 10. build download file name
   download_name <- paste0(directory_to_download,
                           "groads_v1_",
-                          region,
+                          gsub(" ", "-", region),
                           "_",
                           format,
                           ".zip")
   #### 11. build system command
-  system_command <- paste0("curl -n -c ~/.urs_cookies -b ~/.urs_cookies -LJ",
-                           " -o ",
-                           download_name,
-                           " --url ",
-                           download_url,
+  download_command <- paste0("curl -n -c ~/.urs_cookies -b ~/.urs_cookies -LJ",
+                             " -o ",
+                             download_name,
+                             " --url ",
+                             download_url,
+                             "\n")
+  #### 12. initiate "..._curl_commands.txt"
+  commands_txt <- paste0(directory_to_download,
+                         "sedac_groads_",
+                         gsub(" ", "_", region),
+                         "_curl_command.txt")
+  sink(commands_txt)
+  #### 13. concatenate and print download command to "..._curl_commands.txt"
+  cat(download_command)
+  #### 14. finish "..._curl_commands.txt" file
+  sink()
+  #### 15. build system command
+  system_command <- paste0(". ",
+                           commands_txt,
                            "\n")
-  #### 12. download data
+  #### 16. download data
   if (download == TRUE) {
     cat(paste0("Downloading requested file...\n"))
     system(command = system_command)
@@ -121,17 +137,17 @@ download_sedac_groads_data <- function(
   } else if (download == FALSE) {
     return(cat(paste0("Skipping data download.\n")))
   }
-  #### 13. end if unzip == FALSE
+  #### 17. end if unzip == FALSE
   if (unzip == FALSE) {
     return(cat(paste0("Downloaded files will not be unzipped.\n")))
   }
-  #### 14. unzip downloaded data
+  #### 18. unzip downloaded data
   cat(paste0("Unzipping files...\n"))
   unzip(download_name, exdir = directory_to_save)
   cat(paste0("Files unzipped and saved in ",
              directory_to_save,
              ".\n"))
-  #### 14. remove zip file
+  #### 19. remove zip file
   if (remove_zip == TRUE) {
     cat(paste0("Removing downloaded zip file...\n"))
     file.remove(download_name)

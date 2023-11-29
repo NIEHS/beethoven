@@ -28,6 +28,9 @@
 #' @param unzip logical(1). Unzip zip files. Default = `TRUE`.
 #' @param remove_zip logical(1). Remove zip files from directory_to_download.
 #' Default = `FALSE`.
+#' @param download logical(1). `= FALSE` will generate a `.txt` file containing
+#' all download commands. By setting `= TRUE` the function will download all of
+#' the requested data files.
 #' @author Mitchell Manware
 #' @return NULL;
 #' @export
@@ -38,7 +41,8 @@ download_koppen_geiger_data <- function(
   directory_to_save = "../../data/covariates/koppen_geiger/",
   data_download_acknowledgement = FALSE,
   unzip = TRUE,
-  remove_zip = FALSE
+  remove_zip = FALSE,
+  download = FALSE
 ) {
   #### 1. directory setup
   chars_dir_download <- nchar(directory_to_download)
@@ -103,23 +107,39 @@ download_koppen_geiger_data <- function(
                              " -O ",
                              download_name,
                              "\n")
-  #### 11. download data
-  cat(paste0("Downloading requested file...\n"))
-  system(command = download_command)
-  Sys.sleep(2L)
-  cat(paste0("Requested file downloaded.\n"))
-  #### 12. unzip downloaded data
+  #### 11. initiate "..._wget_commands.txt"
+  commands_txt <- paste0(directory_to_download,
+                         "koppen_geiger_wget_command.txt")
+  sink(commands_txt)
+  #### 12. concatenate and print download command to "..._wget_commands.txt"
+  cat(download_command)
+  #### 13. finish "..._wget_commands.txt" file
+  sink()
+  #### 14. build system command
+  system_command <- paste0(". ",
+                           commands_txt,
+                           "\n")
+  #### 15. download data
+  if (download == TRUE) {
+    cat(paste0("Downloading requested file...\n"))
+    system(command = download_command)
+    Sys.sleep(2L)
+    cat(paste0("Requested file downloaded.\n"))
+  } else if (download == FALSE) {
+    return(cat(paste0("Skipping data download.\n")))
+  }
+  #### 16. unzip downloaded data
   cat(paste0("Unzipping files...\n"))
   unzip(download_name,
         exdir = directory_to_save)
   cat(paste0("Files unzipped and saved in ",
              directory_to_save,
              ".\n"))
-  #### 13. end if unzip == FALSE
+  #### 17. end if unzip == FALSE
   if (unzip == FALSE) {
     return(cat(paste0("Downlaoded files will not be unzipped.\n")))
   }
-  #### 14. remove unwanted files
+  #### 18. remove unwanted files
   unwanted_names <- list.files(path = directory_to_save,
                                pattern = "Beck_KG",
                                full.names = TRUE)
@@ -136,7 +156,7 @@ download_koppen_geiger_data <- function(
                                         unwanted_names,
                                         invert = TRUE)]
   file.remove(unwanted_names)
-  #### 15. remove zip files
+  #### 19. remove zip files
   if (remove_zip == TRUE) {
     cat(paste0("Removing download files...\n"))
     file.remove(download_name)
