@@ -20,6 +20,9 @@
 #' @param data_download_acknowledgement logical(1). By setting `= TRUE` the user
 #' acknowledge that the data downloaded using this function may be very large
 #' and use lots of machine storage and memory.
+#' @param download logical(1). `= FALSE` will generate a `.txt` file containing
+#' all download commands. By setting `= TRUE` the function will download all of
+#' the requested data files.
 #' @author Mitchell Manware
 #' @return NULL;
 #' @export
@@ -28,7 +31,8 @@ download_narr_monolevel_data <- function(
   year_end = 2022,
   variables = NULL,
   directory_to_save = "../../data/covariates/narr/",
-  data_download_acknowledgement = FALSE
+  data_download_acknowledgement = FALSE,
+  download = FALSE
 ) {
   #### 1. directory setup
   chars_dir_save <- nchar(directory_to_save)
@@ -91,15 +95,17 @@ download_narr_monolevel_data <- function(
   }
   #### 9. finish "..._curl_commands.txt"
   sink()
-  cat(paste0("Downloading requested files...\n"))
   #### 10. build system command
   system_command <- paste0(". ",
                            commands_txt,
                            "\n")
   #### 11. download data
-  system(command = system_command)
-  cat(paste0("Requested files have been downloaded.\n"))
-  #### 12. remove "..._curl_commands.txt"
-  Sys.sleep(5L)
-  file.remove(commands_txt)
+  if (download == TRUE) {
+    cat(paste0("Downloading requested files...\n"))
+    system(command = system_command)
+    cat(paste0("Requested files have been downloaded.\n"))
+    file.remove(commands_txt)
+  } else if (download == FALSE) {
+    return(cat(paste0("Skipping data download.\n")))
+  }
 }

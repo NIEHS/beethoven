@@ -23,6 +23,7 @@
 #' @param unzip logical(1). Unzip zip files. Default = `TRUE`.
 #' @param remove_zip logical(1). Remove zip files from directory_to_download.
 #' Default = `FALSE`.
+#' @param download logical(1).
 #' @author Mitchell Manware
 #' @return NULL;
 #' @export
@@ -33,7 +34,8 @@ download_nlcd_data <- function(
   directory_to_save = "../../data/covariates/nlcd/",
   data_download_acknowledgement = FALSE,
   unzip = TRUE,
-  remove_zip = FALSE
+  remove_zip = FALSE,
+  download = FALSE
 ) {
   #### 1. directory setup
   chars_dir_download <- nchar(directory_to_download)
@@ -105,10 +107,14 @@ download_nlcd_data <- function(
                            download_url,
                            "\n")
   #### 9. download data
-  cat(paste0("Downloading requested file...\n"))
-  system(command = system_command)
-  Sys.sleep(5L)
-  cat(paste0("Requested file downloaded.\n"))
+  if (download == TRUE) {
+    cat(paste0("Downloading requested file...\n"))
+    system(command = system_command)
+    Sys.sleep(5L)
+    cat(paste0("Requested file downloaded.\n"))
+  } else if (download == FALSE) {
+    return(cat(paste0("Skipping data download.\n")))
+  }
   #### 10. end if unzip == FALSE
   if (unzip == FALSE) {
     return(cat(paste0("Downloaded files will not be unzipped.\n")))

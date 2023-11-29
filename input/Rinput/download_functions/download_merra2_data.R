@@ -21,6 +21,9 @@
 #' @param data_download_acknowledgement logical(1). By setting `= TRUE` the
 #' user acknowledge that the data downloaded using this function may be very
 #' large and use lots of machine storage and memory.
+#' @param download logical(1). `= FALSE` will generate a `.txt` file containing
+#' all download commands. By setting `= TRUE` the function will download all of
+#' the requested data files.
 #' @author Mitchell Manware
 #' @return NULL;
 #' @export
@@ -29,7 +32,8 @@ download_merra2_data <- function(
   date_end = "2023-09-01",
   collection = NULL,
   directory_to_save = "../../data/covariates/merra2/",
-  data_download_acknowledgement = FALSE
+  data_download_acknowledgement = FALSE,
+  download = FALSE
 ) {
   #### 1. directory setup
   chars_dir_save <- nchar(directory_to_save)
@@ -213,7 +217,10 @@ download_merra2_data <- function(
                            commands_txt,
                            "\n")
   #### 11. download data
-  system(command = system_command)
-  #### 12. remove "..._wget_commands.txt"
-  file.remove(commands_txt)
+  if (download == TRUE) {
+    system(command = system_command)
+    file.remove(commands_txt)
+  } else if (download == FALSE) {
+    return(cat(paste0("Skipping data download.\n")))
+  }
 }
