@@ -34,13 +34,14 @@ options(sf_use_s2 = FALSE)
 filter_unique_sites <-
   function(
     path_measurement = "./tests/testdata/daily_88101_2018-2022.rds",
+    path_stdt_functions = "./R/manipulate_spacetime_data.R",
     include_time = FALSE,
     date_start = "2018-01-01",
     date_end = "2022-12-31"
   ) {
     sites <- readRDS(path_measurement)
-    # data manipulation
-    source("./R/manipulate_spacetime_data.R")
+    # data manipulation functions
+    source(path_stdt_functions)
 
     ## get unique sites
     ##
