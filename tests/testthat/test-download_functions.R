@@ -145,7 +145,49 @@ testthat::test_that("NCEP NARR monolevel download URLs exist.", {
   file.remove(commands_path)
 })
 
-
+testthat::test_that("NCEP NARR pressure levels download URLs exist.", {
+  # function parameters
+  year_start <- 2018
+  year_end <- 2022
+  variables <- c("shum", "omega")
+  directory_to_save <- "../testdata/"
+  # run download function
+  download_narr_p_levels_data(year_start = year_start,
+                              year_end = year_end,
+                              variables = variables,
+                              directory_to_save = directory_to_save,
+                              data_download_acknowledgement = TRUE,
+                              download = FALSE)
+  # TEST that directory_to_save exists
+  expect_true(dir.exists(directory_to_save))
+  # path with commands
+  commands_path <- paste0(directory_to_save,
+                          "narr_p_levels_curl_commands.txt")
+  # TEST that path with commands exists
+  expect_true(file.exists(commands_path))
+  # import curl commands
+  curl_commands <- read.csv(commands_path,
+                            header = FALSE)
+  # convert to character
+  curl_commands <- curl_commands[seq_len(nrow(curl_commands)), ]
+  # extract URLs from `wget_commands`
+  url_list <- NULL
+  for (w in seq_along(curl_commands)) {
+    command <- curl_commands[w]
+    url <- stringr::str_split_i(command, " ", 6)
+    url_list <- c(url_list, url)
+  }
+  # sample URLs
+  url_sample <- sample(url_list, 30L, replace = FALSE)
+  # apply check_url_file_exist to sample of urls
+  url_status <- sapply(url_sample, check_url_file_exist)
+  # TEST that URLs are character
+  expect_true(is.character(url_list))
+  # TEST that URLs exist
+  expect_true(all(url_status))
+  # remove path with commands after test
+  file.remove(commands_path)
+})
 
 
 
