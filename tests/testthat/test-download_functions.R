@@ -6,8 +6,8 @@ testthat::test_that("GEOS-CF download URLs exist.", {
   # function parameters
   date_start <- "2018-01-01"
   date_end <- "2022-12-31"
-  collections <- c("chm_tavg_1hr_g1440x721_v1",
-                   "aqc_tavg_1hr_g1440x721_v1")
+  collections <- c("aqc_tavg_1hr_g1440x721_v1",
+                   "chm_inst_1hr_g1440x721_p23")
   directory_to_save <- "../testdata/"
   for (c in seq_along(collections)) {
     # run download function
