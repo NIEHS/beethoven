@@ -81,12 +81,12 @@ testthat::test_that("GMTED download URLs exist.", {
                             "_",
                             gsub(" ", "", resolution),
                             "_curl_command.txt")
-    # TEST that that path with command exists
+    # TEST that path with command exists
     expect_true(file.exists(commands_path))
     # import curl command
     curl_command <- read.csv(commands_path,
                              header = FALSE)
-    # convert to characer
+    # convert to character
     curl_command <- curl_command[seq_len(nrow(curl_command)), ]
     # extract URL from `curl_command`
     url <- stringr::str_split_i(curl_command, " ", 6)
@@ -100,3 +100,148 @@ testthat::test_that("GMTED download URLs exist.", {
     file.remove(commands_path)
   }
 })
+
+testthat::test_that("MERRA-2 download URLs exist.", {
+  withr::local_package("httr")
+  # function parameters
+  date_start <- "2018-01-01"
+  date_end <- "2022-12-31"
+  collections <- c("inst1_2d_asm_Nx",
+                   "tavg3_3d_cld_Np")
+  directory_to_save <- "../testdata/"
+  for (c in seq_along(collections)) {
+    # run download function
+    download_merra2_data(date_start = date_start,
+                         date_end = date_end,
+                         collection = collections[c],
+                         directory_to_save = directory_to_save,
+                         data_download_acknowledgement = TRUE,
+                         download = FALSE)
+    # TEST that directory_to_save exists
+    expect_true(dir.exists(directory_to_save))
+    # path with commands
+    commands_path <- paste0(directory_to_save,
+                            collections[c],
+                            "_wget_commands.txt")
+    # TEST that path with commands exists
+    expect_true(file.exists(commands_path))
+    # import wget commands
+    wget_commands <- read.csv(commands_path,
+                              header = FALSE)
+    # convert to character
+    wget_commands <- wget_commands[seq_len(nrow(wget_commands)), ]
+    # extract URLs from `wget_commands`
+    url_list <- NULL
+    for (w in seq_along(wget_commands)) {
+      command <- wget_commands[w]
+      url <- stringr::str_split_i(command, " ", 2)
+      url_list <- c(url_list, url)
+    }
+    # sample URLs
+    url_sample <- sample(url_list, 30L, replace = FALSE)
+    # apply check_url_file_exist to sample of urls
+    url_status <- sapply(url_sample, check_url_file_exist)
+    # TEST that URLs are character
+    expect_true(is.character(url_list))
+    # TEST that URLs exist
+    expect_true(all(url_status))
+    # remove path with commands after test
+    file.remove(commands_path)
+  }
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# NOTE
+# URL produced by download_koppen_geiger_data.R does not pass check #
+# testthat::test_that("Koppen Geiger URLs exist.", {
+#   withr::local_package("httr")
+#   # function parameters
+#   time_periods <- c("Present", "Future")
+#   data_resolutions <- c("0.0083", "0.083", "0.5")
+#   directory_to_download <- "../testdata/"
+#   directory_to_save <- "../testdata/"
+#   for (t in seq_along(time_periods)) {
+#     time_period <- time_periods[t]
+#     for (d in seq_along(data_resolutions)) {
+#       # run download function
+#       download_koppen_geiger_data(time_period = time_period,
+#                                   data_resolution = data_resolutions[d],
+#                                   directory_to_download = directory_to_download,
+#                                   directory_to_save = directory_to_save,
+#                                   data_download_acknowledgement = TRUE,
+#                                   unzip = FALSE,
+#                                   remove_zip = FALSE,
+#                                   download = FALSE)
+#       # TEST that directory_to_download exists
+#       expect_true(dir.exists(directory_to_download))
+#       # TEST that directory_to_save exists
+#       expect_true(dir.exists(directory_to_save))
+#       # path with commands
+#       commands_path <- paste0(directory_to_download,
+#                               "koppen_geiger_wget_command.txt")
+#       # TEST that path with command exists
+#       expect_true(file.exists(commands_path))
+#       # import wget command
+#       wget_command <- read.csv(commands_path,
+#                                header = FALSE)
+#       # convert to character
+#       wget_command <- wget_command[seq_len(nrow(wget_command)), ]
+#       # extract URL from `wget_command`
+#       url <- stringr::str_split_i(wget_command, " ", 2)
+#       cat(url)
+#       # apply check_url_file_exist to URL
+#       url_status <- check_url_file_exist(url)
+#       # TEST that URLs are character
+#       expect_true(is.character(url))
+#       # TEST that URLs exist
+#       expect_true(all(url_status))
+#       # remove path with commands after test
+#       file.remove(commands_path)
+#     }
+#   }
+# })
