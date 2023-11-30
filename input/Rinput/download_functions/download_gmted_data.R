@@ -119,7 +119,8 @@ download_gmted_data <- function(
   download_command <- paste0("curl -s -o ",
                              download_name,
                              " --url ",
-                             download_url)
+                             download_url,
+                             "\n")
   #### 13. initiate "..._curl_commands.txt"
   commands_txt <- paste0(directory_to_download,
                          "gmted_",
