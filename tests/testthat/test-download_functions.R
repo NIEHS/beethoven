@@ -1,6 +1,10 @@
 #' @author Mitchell Manware
 #' @description Unit test for for checking data download functions.
-#' 
+#'
+
+getwd()
+setwd("/Volumes/manwareme/NRT-AP-Model/tests/testthat/")
+
 testthat::test_that("GEOS-CF download URLs exist.", {
   withr::local_package("httr")
   # function parameters
@@ -8,7 +12,7 @@ testthat::test_that("GEOS-CF download URLs exist.", {
   date_end <- "2022-12-31"
   collections <- c("chm_tavg_1hr_g1440x721_v1",
                    "aqc_tavg_1hr_g1440x721_v1")
-  directory_to_save <- "../../input/data/covariates/geos_cf/"
+  directory_to_save <- "../testdata/"
   for (c in seq_along(collections)) {
     # run download function
     download_geos_cf_data(date_start = date_start,
@@ -29,7 +33,7 @@ testthat::test_that("GEOS-CF download URLs exist.", {
     wget_commands <- read.csv(commands_path,
                               header = FALSE)
     # convert to character
-    wget_commands <- wget_commands[1:nrow(wget_commands),]
+    wget_commands <- wget_commands[seq_len(nrow(wget_commands)), ]
     # extract URLs from `wget_commands`
     url_list <- NULL
     for (w in seq_along(wget_commands)) {
@@ -39,8 +43,8 @@ testthat::test_that("GEOS-CF download URLs exist.", {
     }
     # sample URLs
     url_sample <- sample(url_list, 30L, replace = FALSE)
-    # apply urlFileExist to sample of urls
-    url_status <- sapply(url_sample, urlFileExist)
+    # apply check_url_file_exist to sample of urls
+    url_status <- sapply(url_sample, check_url_file_exist)
     # TEST that URLs are character
     testthat::expect_true(is.character(url_list))
     # TEST that URLs exist
