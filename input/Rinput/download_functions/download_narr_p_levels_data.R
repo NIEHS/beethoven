@@ -59,7 +59,10 @@ download_narr_p_levels_data <- function(
   #### 4. define years sequence
   years <- seq(year_start, year_end, 1)
   #### 5. define months sequence
-  months <- str_pad(seq(1, 12, by = 1), width = 2, pad = "0", side = "left")
+  months <- stringr::str_pad(seq(1, 12, by = 1),
+                             width = 2,
+                             pad = "0",
+                             side = "left")
   #### 6. define variables
   variables_list <- as.vector(variables)
   #### 7. define URL base
