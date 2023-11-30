@@ -45,5 +45,7 @@ testthat::test_that("GEOS-CF download URLs exist.", {
     testthat::expect_true(is.character(url_list))
     # TEST that URLs exist
     testthat::expect_true(all(url_status))
+    # remove path with commands after test
+    file.remove(commands_path)
   }
 })
