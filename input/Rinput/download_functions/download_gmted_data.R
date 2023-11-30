@@ -123,9 +123,9 @@ download_gmted_data <- function(
   #### 13. initiate "..._curl_commands.txt"
   commands_txt <- paste0(directory_to_download,
                          "gmted_",
-                         statistic_code,
+                         gsub(" ", "", statistic),
                          "_",
-                         resolution_code,
+                         gsub(" ", "", resolution),
                          "_curl_command.txt")
   sink(commands_txt)
   #### 14. concatenate and print download command to "..._curl_commands.txt"
