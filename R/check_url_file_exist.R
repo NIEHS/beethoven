@@ -8,7 +8,7 @@
 #' @param url Download URL to be checked.
 #' @author Insang Song; Mitchell Manware
 #' @export
-check_url_file_exist <- function(url){
+check_url_file_exist <- function(url) {
   http_status_ok <- 200
   hd <- httr::HEAD(url)
   status <- hd$all_headers[[1]]$status

@@ -1,10 +1,6 @@
 #' @author Mitchell Manware
 #' @description Unit test for for checking data download functions.
 #'
-
-getwd()
-setwd("/Volumes/manwareme/NRT-AP-Model/tests/testthat/")
-
 testthat::test_that("GEOS-CF download URLs exist.", {
   withr::local_package("httr")
   # function parameters
