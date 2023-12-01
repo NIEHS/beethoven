@@ -31,7 +31,7 @@
 #' @author Mitchell Manware
 #' @return NULL;
 #' @export
-download_gmted_data <- function(
+download_gmted_data <- function( # nolint: cyclocomp_linter.
   statistic = NULL,
   resolution = NULL,
   directory_to_download = "../../data/covariates/gmted/",
@@ -41,7 +41,6 @@ download_gmted_data <- function(
   remove_zip = FALSE,
   download = FALSE
 ) {
-  # nolint start: cyclocomp_linter
   #### 1. directory setup
   chars_dir_download <- nchar(directory_to_download)
   chars_dir_save <- nchar(directory_to_save)
@@ -164,5 +163,4 @@ download_gmted_data <- function(
     file.remove(download_name)
     cat(paste0("Download files removed.\n"))
   }
-  # nolint end
 }

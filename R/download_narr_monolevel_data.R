@@ -26,7 +26,7 @@
 #' @author Mitchell Manware
 #' @return NULL;
 #' @export
-download_narr_monolevel_data <- function(
+download_narr_monolevel_data <- function( # nolint: cyclocomp_linter.
   year_start = 2022,
   year_end = 2022,
   variables = NULL,
@@ -34,7 +34,6 @@ download_narr_monolevel_data <- function(
   data_download_acknowledgement = FALSE,
   download = FALSE
 ) {
-  # nolint start: cyclocomp_linter
   #### 1. directory setup
   chars_dir_save <- nchar(directory_to_save)
   if (substr(directory_to_save, chars_dir_save, chars_dir_save) != "/") {
@@ -109,5 +108,4 @@ download_narr_monolevel_data <- function(
   } else if (download == FALSE) {
     return(cat(paste0("Skipping data download.\n")))
   }
-  # nolint end
 }

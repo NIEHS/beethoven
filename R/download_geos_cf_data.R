@@ -27,7 +27,7 @@
 #' @importFrom stringr str_sub
 #' @importFrom stringr str_pad
 #' @export
-download_geos_cf_data <- function(
+download_geos_cf_data <- function( # nolint: cyclocomp_linter.
   date_start = "2023-09-01",
   date_end = "2023-09-01",
   collection = NULL,
@@ -35,7 +35,6 @@ download_geos_cf_data <- function(
   data_download_acknowledgement = FALSE,
   download = FALSE
 ) {
-  # nolint start: cyclocomp_linter
   #### 1. directory setup
   chars_dir_save <- nchar(directory_to_save)
   if (substr(directory_to_save, chars_dir_save, chars_dir_save) != "/") {
@@ -132,5 +131,4 @@ download_geos_cf_data <- function(
   } else if (download == FALSE) {
     return(cat(paste0("Skipping data download.\n")))
   }
-  # nolint end
 }
