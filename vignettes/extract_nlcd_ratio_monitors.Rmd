@@ -1,35 +1,61 @@
 ---
 title: "NLCD ratio: example in RTP area"
-output: html_document
+author: "Eva Marques"
+output: rmarkdown::html_vignette
 date: "2023-11-27"
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
+
+
+
 
 ```{r, message=F}
 pkgs <- c("terra", 
           "exactextractr", 
           "tidyverse", 
           "data.table", 
-          "sf")
+          "sf", 
+          "gdalUtilities")
 sapply(pkgs, library, character.only = TRUE)
 ```
 
+
 Open NLCD data 
 
-```{r}
-nlcd_2019 <- rast("../input/nlcd/raw/nlcd_2019_land_cover_l48_20210604.img")
-nlcd_2021 <- rast("../input/nlcd/raw/nlcd_2021_land_cover_l48_20230630.img")
-plot(nlcd_2019)
-plot(nlcd_2021)
+```{r, eval = F}
+nlcd_2019 <- rast("/Volumes/set/NLCD/nlcd_2019_land_cover_l48_20210604.tif")
+nlcd_2021 <- rast("/Volumes/set/NLCD/nlcd_2021_land_cover_l48_20230630.tif")
 ```
+
+Test to see if data is well loaded
+
+```{r, echo = F}
+lat <- c(1900000, 2000000, 2000000, 1900000) 
+lon <- c(-1600000, -1600000, -1500000, -1500000) 
+ext <- vect(cbind(lon, lat), type = "polygons", crs=crs(nlcd_2021)) 
+nlcd_small <- terra::crop(nlcd_2021, ext, mask=T) 
+plot(nlcd_2021) 
+plot(ext, add=T, col="black") 
+plot(nlcd_small)
+
+point1 <- cbind(-2e6, 3e6)
+terra::extract(nlcd_2021, point1)
+
+point2 <- cbind(0, 1500000)
+terra::extract(nlcd_2021, point2)
+```
+
+
 
 Open monitors data 
 
 ```{r}
-#path_aqs <- "/ddn/gs1/group/set/Projects/NRT-AP-Model/input/aqs/"
 path_aqs <- "/Volumes/set/Projects/NRT-AP-Model/input/aqs/"
 aqs_mon <- fread(paste0(path_aqs, "aqs_monitors.csv")) 
 aqs_mon <- aqs_mon[`Parameter Code`==88101,] # PM2.5 monitors only
-
 ```
 
 Process monitors 
@@ -51,50 +77,48 @@ aqs_mon <- rbind(a, b) %>%
               keepgeom = FALSE)
 ```
 
+
+
 NLCD classes
 
 ```{r}
-nlcd_classes <- list(value = c(0, 11, 21, 22, 23, 24, 31, 41, 42, 43, 52,
-                               71, 81, 82, 90, 95),
-                     class = c("Unc", "WTR", "OSD", "LID", "MID", "HID", 
-                                     "BRN", "DFO", "EFO", "MFO", "SHB", 
-                                     "GRS", "PAS", "CRP", "WDW", "EHW"),
-                     names = c("Unclassified", 
-                               "Open Water", 
-                               "Developed, Open Space", 
-                               "Developed, Low Intensity", 
-                               "Developed, Medium Intensity",
-                               "Developed, High Intensity",
-                               "Barren Land", 
-                               "Deciduous Forest",
-                               "Evergreen Forest", 
-                               "Mixed Forest",
-                               "Shrub/Scrub", 
-                               "Herbaceous", 
-                               "Hay/Pasture", 
-                               "Cultivated Crops", 
-                               "Woody Wetlands", 
-                               "Emergent Herbaceous Wetlands"),
-                     col = c("white", "#476ba1", "#decaca", "#d99482", "#ee0000",
-                     "#ab0000", "#b3aea3", "#68ab63", "#1c6330",
-                     "#b5ca8f", "#ccba7d",  "#e3e3c2", "#dcd93d", 
-                     "#ab7028", "#bad9eb", "#70a3ba")) 
-nlcd_classes <- as.data.frame(nlcd_classes)
+source("../R/extract_nlcd_ratio.R")
+nlcd_classes
 ```
 
 
-Compute NLCD ratio in 1km buffers
+Compute NLCD ratio in 150 buffers
 
 ```{r}
-source("../R/extract_nlcd_ratio.R")
-
 # check that unit is in meters
-linearUnits(nlcd_2019)
+linearUnits(nlcd_2021)
 same.crs(nlcd_2019, nlcd_2021)
 
 aqs_mon_nlcd <- add_nlcd_class_ratio(data_vect = aqs_mon, 
-                             buf_radius = 1000, 
-                             year = 2019)
+                             buf_radius = 150, 
+                             year = 2021)
+```
+
+Select in north Carolina and plot pie chart
+
+```{r}
+library(ggplot2)
+library(scatterpie)
+map <- map_data("county")
+nc <- subset(map, region == "north carolina")
+df <- as.data.frame(aqs_mon_nlcd, geom = "XY")
+names(df)[names(df) == "x"] <- "long"
+names(df)[names(df) == "y"] <- "lat"
+frac <- df[names(df)[grepl("frac_", names(df))]]
+df <- cbind(df[, c("long", "lat")], frac)
+ggplot() + 
+  geom_polygon(data = map, aes(x = long, y = lat, group = group)) +
+  geom_scatterpie(aes(x=long, y=lat, r = .5), data=df,
+                                cols = names(df)[3:ncol(df)], color=NA) +
+  scale_fill_manual(values = nlcd_classes$col, labels = nlcd_classes$names) +
+  
+  coord_equal()
+
 ```
 
 

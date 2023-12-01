@@ -1,4 +1,4 @@
-# needs terra and exactextractr
+# needs terra, exactextractr, spData
 
 nlcd_classes <- list(value = c(0, 11, 21, 22, 23, 24, 31, 41, 42, 43, 52,
                                71, 81, 82, 90, 95),
@@ -37,14 +37,41 @@ add_nlcd_class_ratio <- function(data_vect,
                                  buf_radius = 1000, 
                                  year = 2021) {
   
+  # check inputs 
+  if (!is.numeric(buf_radius)){
+    stop("buf_radius is not a numeric.")
+  }
+  if (buf_radius <= 0) {
+    stop("buf_radius has not a likely value.")
+  }
+  if (!is.numeric(year)){
+    stop("year is not a numeric.")
+  }
+  if (class(data_vect)[1] != "SpatVector") {
+    stop("data_vect is not a terra::SpatVector")
+  }
+  
   # open nlcd file corresponding to the year
-  nlcd_file <- list.files("../input/nlcd/raw/", 
-                          pattern = paste0("nlcd_", year, "_.*.img"), 
+  #nlcd_file <- list.files("../input/nlcd/raw/", 
+  #                        pattern = paste0("nlcd_", year, "_.*.img"), 
+  #                        full.names = TRUE) 
+  nlcd_file <- list.files("/Volumes/set/NLCD/", 
+                          pattern = paste0("nlcd_", year, "_.*.tif$"), 
                           full.names = TRUE) 
+  if (length(nlcd_file) == 0) {
+    stop("NLCD data not available for this year.")
+  }
   nlcd <- rast(nlcd_file)
   
-  # reproject on nlcd crs if necessary
-  data_vect_b <- data_vect
+  # select points within mainland US and reproject on nlcd crs if necessary
+  # need spData library
+  data(us_states)
+  us_main <- st_union(us_states) %>%
+    terra::vect() %>%
+    terra::project(x = ., y = crs(eg_data))
+  data_vect_b <- data_vect %>%
+    terra::intersect(us_main, .)
+  
   if (!same.crs(data_vect_b, nlcd)) {
     data_vect_b <- project(data_vect_b, crs(nlcd))
   }
@@ -54,11 +81,11 @@ add_nlcd_class_ratio <- function(data_vect,
   bufs_pol <- sf::st_as_sf(bufs_pol)
   
   # crop nlcd raster
-  extent <- terra::ext(bufs_pol)
-  nlcd_cropped <- terra::crop(nlcd, extent)
+  #extent <- terra::ext(bufs_pol)
+  #nlcd_cropped <- terra::crop(nlcd, extent)
   
   # ratio of each nlcd class per buffer
-  nlcd_at_bufs <- exact_extract(nlcd_cropped, 
+  nlcd_at_bufs <- exact_extract(nlcd, 
                                 st_geometry(bufs_pol), 
                                 fun = "frac",
                                 stack_apply = T, 
@@ -71,7 +98,9 @@ add_nlcd_class_ratio <- function(data_vect,
   nlcd_names <- names(nlcd_at_bufs) %>%
     sub("frac_", "", .) %>%
     as.numeric()
-  nlcd_names[match(nlcd_names, nlcd_classes$value)] <- nlcd_classes$class
+  #nlcd_names[match(nlcd_names, nlcd_classes$value)] <- nlcd_classes$class
+  nlcd_names <- nlcd_classes[nlcd_classes$value %in% nlcd_names, c("class")]
+  
   new_names <- sapply(
     nlcd_names,
     function(x) {
@@ -85,4 +114,5 @@ add_nlcd_class_ratio <- function(data_vect,
   
   return(new_data_vect)
 }
+
 
