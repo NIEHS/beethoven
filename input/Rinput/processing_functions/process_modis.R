@@ -1,7 +1,9 @@
 # description: process modis data with
 # buffer radii and the list of target covariates
 # Insang Song
-# Updated: 11/30/2023
+# Updated: 12/01/2023
+# packages: parallelly, doParallel, scomps, terra, sf, exactextractr, foreach, data.table.
+#   tigris
 # set base directory to ddn (provided that users ssh at triton)
 rootdir <- "/ddn/gs1"
 basedir <- "group/set/Projects/NRT-AP-model/"
@@ -45,42 +47,23 @@ if (!require(scomps)) {
   pak::pak("Spatiotemporal-Exposures-and-Toxicology/Scalable_GIS")
 }
 
-pkgs <- c("terra", "sf", "future", "future.apply", "scomps", "exactextractr", "foreach", "data.table", "tigris", "doRNG")
+pkgs <- c("terra", "sf", "doParallel", "parallel", "parallelly", "future.apply", "scomps", "exactextractr", "foreach", "data.table", "tigris", "doRNG")
 suppressMessages(invisible(sapply(pkgs, library, character.only = TRUE, quietly = TRUE)))
 tigris_cache_dir("~/tigris_cache")
 options(sf_use_s2 = FALSE, tigris_use_cache = TRUE)
-# rr <- terra::rast("...hdf")
-# summary(rr["1 km 16 days NDVI"])
 
-# https://opendap.cr.usgs.gov/opendap/hyrax/MOD09GA.061/h10v07.ncml.dap.nc4?dap4.ce=/MODIS_Grid_1km_2D_eos_cf_projection;/Latitude_1[0:1:2399][0:1:2399];/Longitude_1[0:1:2399][0:1:2399];/MODIS_Grid_500m_2D_eos_cf_projection;/sur_refl_b03_1[6574:1:6574][0:1:2399][0:1:2399];/sur_refl_b07_1[6574:1:6574][0:1:2399][0:1:2399];/sur_refl_b02_1[6574:1:6574][0:1:2399][0:1:2399];/sur_refl_b05_1[6574:1:6574][0:1:2399][0:1:2399];/sur_refl_b04_1[6574:1:6574][0:1:2399][0:1:2399];/sur_refl_b06_1[6574:1:6574][0:1:2399][0:1:2399];/sur_refl_b01_1[6574:1:6574][0:1:2399][0:1:2399];/time[6574:1:6574]
-# https://opendap.cr.usgs.gov/opendap/hyrax/MOD09GA.061/h10v07.ncml.dap.nc?dap4.ce=/MODIS_Grid_1km_2D_eos_cf_projection
-# https://opendap.cr.usgs.gov/opendap/hyrax/MOD09GA.061/h10v07.ncml.dap.nc4?dap4.ce=/Latitude_1%5B0:1:2399%5D%5B0:1:2399%5D;/Longitude_1%5B0:1:2399%5D%5B0:1:2399%5D;/MODIS_Grid_500m_2D_eos_cf_projection;/sur_refl_b03_1%5B6574:1:6574%5D%5B0:1:2399%5D%5B0:1:2399%5D;/sur_refl_b07_1%5B6574:1:6574%5D%5B0:1:2399%5D%5B0:1:2399%5D;/sur_refl_b02_1%5B6574:1:6574%5D%5B0:1:2399%5D%5B0:1:2399%5D;/sur_refl_b05_1%5B6574:1:6574%5D%5B0:1:2399%5D%5B0:1:2399%5D;/sur_refl_b04_1%5B6574:1:6574%5D%5B0:1:2399%5D%5B0:1:2399%5D;/sur_refl_b06_1%5B6574:1:6574%5D%5B0:1:2399%5D%5B0:1:2399%5D;/sur_refl_b01_1%5B6574:1:6574%5D%5B0:1:2399%5D%5B0:1:2399%5D;/time%5B6574:1:6574%5D
-## main part
+radius <- c(0L, 1e3L, 1e4L, 5e4L)
+
+
+
 ## hierarchy (arbitrary subsets of census regions)
-# states <- tigris::states(year = 2020)
-# states <- vect(states)
-# states_main <- states[!states$GEOID %in% c("02", "15", "60", "66", "68", "69", "72", "78"), ]
-# mod_cenreg <- read.csv("./input/data/regional_divisions.csv")
-# mod_cenreg <- mod_cenreg |>
-#   tidyr::separate_wider_delim(
-#     col = "States",
-#     delim = "-",
-#     names = paste0("state_", sprintf("%02d", 1:6)),
-#     too_few = "align_start") |>
-#   tidyr::pivot_longer(cols = 2:7) |>
-#   dplyr::filter(!is.na(value)) |>
-#   dplyr::select(-name)
-# states_m <- merge(states_main, mod_cenreg, by.x = "STUSPS", by.y = "value")
-# mod_cr <- terra::aggregate(states_m, by = "Region") |>
-#   terra::project("EPSG:5070")
-
-
+# 
 ## path setting
-modis_mod13 <-
-  list.files(path = "~/projects/NRTAPModel/input/data/modis/raw/61/MOD13A2",
-             pattern = "*.hdf$",
-             recursive = TRUE,
-             full.names = TRUE)
+# modis_mod13 <-
+#   list.files(path = "~/projects/NRTAPModel/input/data/modis/raw/61/MOD13A2",
+#              pattern = "*.hdf$",
+#              recursive = TRUE,
+#              full.names = TRUE)
 
 # virtual raster on the same date
 # should run terra::describe(..., sds = TRUE)
@@ -95,8 +78,6 @@ modis_mod13 <-
 # modis_mod13vrt <- lapply(
 #   modis_mod13, \(x) terra::rast(x, lyrs = 1)) |>
 #   do.call(what = terra::vrt, args = _)
-
-# modis_mod13vrt <- terra::vrt(modis_mod13, options = c("-sd", 1), set_names = TRUE)
 
 
 #' @param flist character. All full hdf paths from list.files
@@ -120,7 +101,7 @@ get_vrt_old <- function(
 #' @param foo closure. A function compatible with \code{SpatRaster}.
 #' @returns A SpatRaster object.
 get_vrt <- function(
-  flist, index_sds, date_in, foo = mean) {
+  flist, index_sds = NULL, date_in, foo = mean) {
   today <- as.character(date_in)
   year_today <- strftime(today, "%Y")
   jul_today <- strftime(today, "%j")
@@ -130,28 +111,15 @@ get_vrt <- function(
   layer_target <- sapply(layer_descr, \(x) x[[1]])
   layer_number <- sapply(layer_descr, \(x) as.integer(x[[2]]))
   if (any(layer_number > 1)) {
-    layer_target <- lapply(layer_target, terra::rast)
+    layer_target <- lapply(layer_target, \(x) terra::rast(x))
     layer_target <- lapply(layer_target, foo, na.rm = TRUE)
-    do.call(terra::mosaic, layer_target)
-    #Reduce(terra::mosaic, layer_target)
+    # 12012023: terra::merge instead of terra::vrt due to C++ error
+    do.call(terra::merge, layer_target)
   } else {
     terra::vrt(layer_target)
   }
-  }
+}
 
-
-
-## e.g., MCD19A2 AOD has multiple values by overpass freqs
-
-# kk <- get_vrt(modis_mcd19, 2, as.Date("2022-01-31"))
-# kx <- rast("/ddn/gs1/home/songi2/projects/NRTAPModel/input/data/modis/raw/61/MCD19A2/2022/031/MCD19A2.A2022031.h11v05.061.2022349204233.hdf", opt = c("-sds", 1))
-# suba <- grep("2020031", modis_mcd19, value = TRUE)
-# describe(suba[2], sds= TRUE)
-
-# kod <- describe(suba[2], sds= TRUE)[1,"name"]
-# kod <- describe(suba[2], sds= TRUE)[1,c("name", "nlyr")]
-
-# plot(rast(kod))
 
 
 modis_worker <- function(
@@ -160,20 +128,26 @@ modis_worker <- function(
   sites_in = sites,
   name_extracted = NULL,
   subdataset = NULL,
+  layers = NULL,
   foo = scomps::extract_with_buffer,
+  ismod09 = FALSE,
   ...
 ) {
-  if (is.null(name_extracted)) {
-    stop("No name of target raster is specified.\n")
-  }
-  # files_today <- list.files(path = dir_today, pattern = "*.hdf$", full.names = TRUE)
-  if (is.null(subdataset)) {
-    terra::describe(paths[1], sds = TRUE)
-    stop("Please put relevant index for subdataset. The full list of subdatasets is above.\n")
-  }
-  vrt_today <- get_vrt(flist = paths, index_sds = subdataset, date_in = date)
+  # if (is.null(name_extracted)) {
+  #   stop("No name of target raster is specified.\n")
+  # }
 
-  if (grepl("00000", name_extracted)) {
+  if (ismod09) {
+    vrt_today <- mod09get(flist = paths, date_in = date, layers = 2:8)
+  } else {
+    if (is.null(subdataset)) {
+      terra::describe(paths[1], sds = TRUE)
+      stop("Please put relevant index for subdataset. The full list of subdatasets is above.\n")
+    }
+    vrt_today <- get_vrt(flist = paths, index_sds = subdataset, date_in = date, layers = layers)
+  }
+
+  if (any(grepl("00000", name_extracted))) {
     sites_in <- terra::vect(sites_in)
     sites_in <- terra::project(sites_in, terra::crs(vrt_today))
     extracted <- terra::extract(x = vrt_today, y = sites_in)
@@ -185,189 +159,181 @@ modis_worker <- function(
 
   # assuming that extracted is a data.frame
   extracted$date <- date
-  names(extracted)[ncol(extracted)-1] <- name_extracted
+  name_offset <- terra::nlyr(vrt_today)
+  name_range <- seq(ncol(extracted) - name_offset, ncol(extracted) - 1, 1)
+  names(extracted)[name_range] <- name_extracted
   return(extracted)
 }
 
 
+cl <-
+  parallelly::makeClusterPSOCK(
+    100L, rscript_libs = .libPaths())
+registerDoParallel(cl)
 
-# plan(multicore, workers = 23L)
-# doFuture::registerDoFuture()
-# set.seed(202311)
 
-# mod13dates <- seq(1, 366, 16)
-# mod13_2018 <- sprintf("%d%03d", 2018, mod13dates)
-# mod13_2018 <- as.Date(mod13_2018, format = "%Y%j")
-# mod13_2018
+mod13dates <- seq(1, 366, 16)
+mod13_2018 <- sprintf("%d%03d", 2018, mod13dates)
+mod13_2018 <- as.Date(mod13_2018, format = "%Y%j")
+mod13_2018
 
-# resdf_ndvi <-
-# foreach(
-#   datei = seq_along(mod13dates),
-#   .packages = c("sf", "terra", "exactextractr", "foreach", "scomps", "dplyr"),
-#   .export = c("sites", "modis_mod13", "mod13dates", "modis_worker", "get_vrt", "radius"),
-#   .combine = "rbind"
-# ) %dorng% {
-#   foreach(
-#     year = seq(2018, 2022),
-#     .packages = c("sf", "terra", "exactextractr", "foreach", "scomps", "dplyr"),
-#     .export = c("sites", "modis_mod13", "mod13dates", "modis_worker", "datei", "get_vrt"),
-#     .combine = "rbind"
-#   ) %do% {
-#     options(sf_use_s2 = FALSE)
-#     radius = c(0L, 1e3L, 1e4L, 5e4L)
+resdf_ndvi <-
+foreach(
+  datei = seq_along(mod13dates),
+  .packages = c("sf", "terra", "exactextractr", "foreach", "scomps", "dplyr"),
+  .export = c("sites", "modis_mod13", "mod13dates", "modis_worker", "get_vrt", "radius"),
+  .combine = "rbind"
+) %dorng% {
+  foreach(
+    year = seq(2018, 2022),
+    .packages = c("sf", "terra", "exactextractr", "foreach", "scomps", "dplyr"),
+    .export = c("sites", "modis_mod13", "mod13dates", "modis_worker", "datei", "get_vrt"),
+    .combine = "rbind"
+  ) %do% {
+    options(sf_use_s2 = FALSE)
+    radius = c(0L, 1e3L, 1e4L, 5e4L)
     
-#     mod13_thisyear <- sprintf("%d%03d", year, mod13dates)
-#     mod13_thisyear <- as.Date(mod13_thisyear, format = "%Y%j")
+    mod13_thisyear <- sprintf("%d%03d", year, mod13dates)
+    mod13_thisyear <- as.Date(mod13_thisyear, format = "%Y%j")
 
-#     #dateindex <- seq_along(mod13dates)
-#     radiusindex <- seq_along(radius)
-#     radiuslist <- split(radiusindex, radiusindex)
+    #dateindex <- seq_along(mod13dates)
+    radiusindex <- seq_along(radius)
+    radiuslist <- split(radiusindex, radiusindex)
 
-#     res0 <-
-#     lapply(radiuslist,
-#       function(k) {
-#         extracted <- modis_worker(
-#           paths = modis_mod13,
-#           date = mod13_thisyear[datei],
-#           subdataset = 1,
-#           name_extracted = sprintf("MOD_NDVIV_0_%05d", radius[k]),
-#           points = terra::vect(sites),
-#           id = "site_id",
-#           radius = radius[k]
-#           )
-#       })
-#     res <- Reduce(dplyr::left_join, res0)
-#     return(res)
-#   }
-# }
-# resdf_ndvi_c <- resdf_ndvi
-# resdf_ndvi_c[, c(3,5,6,7)] <- resdf_ndvi_c[, c(3,5,6,7)] / 1e8
+    res0 <-
+    lapply(radiuslist,
+      function(k) {
+        extracted <- modis_worker(
+          paths = modis_mod13,
+          date = mod13_thisyear[datei],
+          subdataset = 1,
+          name_extracted = sprintf("MOD_NDVIV_0_%05d", radius[k]),
+          points = terra::vect(sites),
+          id = "site_id",
+          radius = radius[k]
+          )
+      })
+    res <- Reduce(dplyr::left_join, res0)
+    return(res)
+  }
+}
+resdf_ndvi_c <- resdf_ndvi
+resdf_ndvi_c[, c(3,5,6,7)] <- resdf_ndvi_c[, c(3,5,6,7)] / 1e8
 
-# saveRDS(resdf_ndvi,
-#   file = "/ddn/gs1/home/songi2/NRTAP_Covar_MOD13A2_NDVI.rds")
-
-
-
-# plan(multicore, workers = 100L)
-# doFuture::registerDoFuture()
-# #set.seed(202311)
-# ### MOD11A1
-# modis_mod11 <-
-#   list.files(path = "~/projects/NRTAPModel/input/data/modis/raw/61/MOD11A1",
-#              pattern = "*.hdf$",
-#              recursive = TRUE,
-#              full.names = TRUE)
-# # stringi::stri_extract_first(modis_mod11, regex = "\\d{4,4}/\\d{3,3}")
-# # TODO (11302023): identify subdataset and run extract operation
-# # in HPC
-# # terra::describe(modis_mod11[1], sds = T)
-
-# mod11dates <- stringi::stri_extract_first(modis_mod11, regex = "\\d{4,4}/\\d{3,3}")
-# mod11dates <- unique(mod11dates)
-# mod11dates <- stringi::stri_replace_all(mod11dates, fixed = "/", "")
-
-# resdf_mod11day <-
-# foreach(
-#   datei = seq_along(mod11dates),
-#   .packages = c("sf", "terra", "exactextractr", "foreach", "scomps", "dplyr"),
-#   .export = c("sites", "modis_mod11", "mod11dates", "modis_worker", "get_vrt", "radius"),
-#   .combine = dplyr::bind_rows,
-#   .errorhandling = "pass"
-# ) %dorng% {
-#     options(sf_use_s2 = FALSE)
-#     radius = c(0L, 1e3L, 1e4L, 5e4L)
-    
-#     #mod11_thisyear <- sprintf("%d%03d", year, mod11dates)
-#     mod11_thisyear <- mod11dates[datei]
-#     mod11_thisyear <- as.Date(mod11_thisyear, format = "%Y%j")
-
-#     #dateindex <- seq_along(mod13dates)
-#     radiusindex <- seq_along(radius)
-#     radiuslist <- split(radiusindex, radiusindex)
-
-#     res0 <-
-#     lapply(radiuslist,
-#       function(k) {
-#         tryCatch({
-#           extracted <- modis_worker(
-#             paths = modis_mod11,
-#             date = mod11_thisyear,
-#             subdataset = 1,
-#             name_extracted = sprintf("MOD_SFCTD_0_%05d", radius[k]),
-#             points = terra::vect(sites),
-#             id = "site_id",
-#             radius = radius[k]
-#             )
-#         }, error = function(e) {
-#           error_df <- sf::st_drop_geometry(sites)
-#           error_df$date <- mod11_thisyear
-#           error_df$remarks <- -99999
-#           names(error_df)[which(names(error_df) == "remarks")] <- sprintf("MOD_SFCTD_0_%05d", radius[k])
-#           return(error_df)
-#         })
-#       })
-#     res <- Reduce(\(x, y) dplyr::left_join(x, y, by = c("site_id", "date")), res0)
-#     return(res)
-#   }
-
-# saveRDS(resdf_mod11day,
-#   file = "/ddn/gs1/home/songi2/NRTAP_Covar_MOD11A2_Day.rds")
-# gc()
-
-# plan(multicore, workers = 100L)
-
-# resdf_mod11night <-
-# foreach(
-#   datei = seq_along(mod11dates),
-#   .packages = c("sf", "terra", "exactextractr", "foreach", "scomps", "dplyr"),
-#   .export = c("sites", "modis_mod11", "mod11dates", "modis_worker", "get_vrt", "radius"),
-#   .combine = dplyr::bind_rows,
-#   .errorhandling = "pass"
-# ) %dorng% {
-#     options(sf_use_s2 = FALSE)
-#     radius = c(0L, 1e3L, 1e4L, 5e4L)
-    
-#     #mod11_thisyear <- sprintf("%d%03d", year, mod11dates)
-#     mod11_thisyear <- mod11dates[datei]
-#     mod11_thisyear <- as.Date(mod11_thisyear, format = "%Y%j")
-
-#     #dateindex <- seq_along(mod13dates)
-#     radiusindex <- seq_along(radius)
-#     radiuslist <- split(radiusindex, radiusindex)
-
-#     res0 <-
-#     lapply(radiuslist,
-#       function(k) {
-#         tryCatch({
-#         extracted <- modis_worker(
-#           paths = modis_mod11,
-#           date = mod11_thisyear,
-#           subdataset = 5,
-#           name_extracted = sprintf("MOD_SFCTN_0_%05d", radius[k]),
-#           points = terra::vect(sites),
-#           id = "site_id",
-#           radius = radius[k]
-#           )
-#         }, error = function(e) {
-#           error_df <- sf::st_drop_geometry(sites)
-#           error_df$date <- mod11_thisyear
-#           error_df$remarks <- -99999
-#           names(error_df)[which(names(error_df) == "remarks")] <- sprintf("MOD_SFCTN_0_%05d", radius[k])
-#           return(error_df)
-#         })
-#       })
-#     res <- Reduce(\(x, y) dplyr::left_join(x, y, by = c("site_id", "date")), res0)
-#     return(res)
-#   }
-# saveRDS(resdf_mod11night,
-#   file = "/ddn/gs1/home/songi2/NRTAP_Covar_MOD11A2_Night.rds")
+saveRDS(resdf_ndvi,
+  file = "/ddn/gs1/home/songi2/NRTAP_Covar_MOD13A2_NDVI.rds")
 
 
+
+
+### MOD11A1
+modis_mod11 <-
+  list.files(path = "~/projects/NRTAPModel/input/data/modis/raw/61/MOD11A1",
+             pattern = "*.hdf$",
+             recursive = TRUE,
+             full.names = TRUE)
+# stringi::stri_extract_first(modis_mod11, regex = "\\d{4,4}/\\d{3,3}")
+# terra::describe(modis_mod11[1], sds = T)
+
+mod11dates <- stringi::stri_extract_first(modis_mod11, regex = "\\d{4,4}/\\d{3,3}")
+mod11dates <- unique(mod11dates)
+mod11dates <- stringi::stri_replace_all(mod11dates, fixed = "/", "")
+
+resdf_mod11day <-
+foreach(
+  datei = seq_along(mod11dates),
+  .packages = c("sf", "terra", "exactextractr", "foreach", "scomps", "dplyr"),
+  .export = c("sites", "modis_mod11", "mod11dates", "modis_worker", "get_vrt", "radius"),
+  .combine = dplyr::bind_rows,
+  .errorhandling = "pass"
+) %dorng% {
+    options(sf_use_s2 = FALSE)
+    radius = c(0L, 1e3L, 1e4L, 5e4L)
+
+    mod11_thisyear <- mod11dates[datei]
+    mod11_thisyear <- as.Date(mod11_thisyear, format = "%Y%j")
+
+    radiusindex <- seq_along(radius)
+    radiuslist <- split(radiusindex, radiusindex)
+
+    res0 <-
+    lapply(radiuslist,
+      function(k) {
+        tryCatch({
+          extracted <- modis_worker(
+            paths = modis_mod11,
+            date = mod11_thisyear,
+            subdataset = 1,
+            name_extracted = sprintf("MOD_SFCTD_0_%05d", radius[k]),
+            points = terra::vect(sites),
+            id = "site_id",
+            radius = radius[k]
+            )
+        }, error = function(e) {
+          error_df <- sf::st_drop_geometry(sites)
+          error_df$date <- mod11_thisyear
+          error_df$remarks <- -99999
+          names(error_df)[which(names(error_df) == "remarks")] <- sprintf("MOD_SFCTD_0_%05d", radius[k])
+          return(error_df)
+        })
+      })
+    res <- Reduce(\(x, y) dplyr::left_join(x, y, by = c("site_id", "date")), res0)
+    return(res)
+  }
+
+saveRDS(resdf_mod11day,
+  file = "/ddn/gs1/home/songi2/NRTAP_Covar_MOD11A2_Day.rds")
 gc()
-## MCD19A2 elements ####
-plan(multicore, workers = 100L)
-doFuture::registerDoFuture()
 
+
+
+
+resdf_mod11night <-
+foreach(
+  datei = seq_along(mod11dates),
+  .packages = c("sf", "terra", "exactextractr", "foreach", "scomps", "dplyr"),
+  .export = c("sites", "modis_mod11", "mod11dates", "modis_worker", "get_vrt", "radius"),
+  .combine = dplyr::bind_rows,
+  .errorhandling = "pass"
+) %dorng% {
+    options(sf_use_s2 = FALSE)
+    radius = c(0L, 1e3L, 1e4L, 5e4L)
+
+    mod11_thisyear <- mod11dates[datei]
+    mod11_thisyear <- as.Date(mod11_thisyear, format = "%Y%j")
+
+    radiusindex <- seq_along(radius)
+    radiuslist <- split(radiusindex, radiusindex)
+
+    res0 <-
+    lapply(radiuslist,
+      function(k) {
+        tryCatch({
+        extracted <- modis_worker(
+          paths = modis_mod11,
+          date = mod11_thisyear,
+          subdataset = 5,
+          name_extracted = sprintf("MOD_SFCTN_0_%05d", radius[k]),
+          points = terra::vect(sites),
+          id = "site_id",
+          radius = radius[k]
+          )
+        }, error = function(e) {
+          error_df <- sf::st_drop_geometry(sites)
+          error_df$date <- mod11_thisyear
+          error_df$remarks <- -99999
+          names(error_df)[which(names(error_df) == "remarks")] <- sprintf("MOD_SFCTN_0_%05d", radius[k])
+          return(error_df)
+        })
+      })
+    res <- Reduce(\(x, y) dplyr::left_join(x, y, by = c("site_id", "date")), res0)
+    return(res)
+  }
+saveRDS(resdf_mod11night,
+  file = "/ddn/gs1/home/songi2/NRTAP_Covar_MOD11A2_Night.rds")
+
+
+## MCD19A2 elements ####
 modis_mcd19 <-
   list.files(path = "~/projects/NRTAPModel/input/data/modis/raw/61/MCD19A2",
              pattern = "*.hdf$",
@@ -389,58 +355,7 @@ mcd19dates <- unique(mcd19dates)
 mcd19dates <- stringi::stri_replace_all(mcd19dates, fixed = "/", "")
 
 
-# resdf_mcd19_aod047 <-
-# foreach(
-#   datei = seq_along(mcd19dates),
-#   .packages = c("sf", "terra", "exactextractr", "foreach", "scomps", "dplyr"),
-#   .export = c("sites", "modis_mcd19", "mcd19dates", "modis_worker", "get_vrt"),
-#   .combine = dplyr::bind_rows,
-#   .errorhandling = "pass"
-# ) %dorng% {
-#     options(sf_use_s2 = FALSE)
-#     radius = c(0L, 1e3L, 1e4L, 5e4L)
-    
-#     #mod11_thisyear <- sprintf("%d%03d", year, mod11dates)
-#     mcd19_thisyear <- mcd19dates[datei]
-#     mcd19_thisyear <- as.Date(mcd19_thisyear, format = "%Y%j")
-
-#     #dateindex <- seq_along(mod13dates)
-#     radiusindex <- seq_along(radius)
-#     radiuslist <- split(radiusindex, radiusindex)
-#     nameflag <- "MOD_AD4TA_0_"
-#     res0 <-
-#     lapply(radiuslist,
-#       function(k) {
-#         name_radius <- sprintf("%s%05d", nameflag, radius[k])
-#         tryCatch({
-#         extracted <- modis_worker(
-#           paths = modis_mcd19,
-#           date = mcd19_thisyear,
-#           subdataset = 1,
-#           name_extracted = name_radius,
-#           points = terra::vect(sites),
-#           id = "site_id",
-#           radius = radius[k]
-#           )
-#         return(extracted)
-#         }, error = function(e) {
-#           error_df <- sf::st_drop_geometry(sites)
-#           error_df$date <- mod19_thisyear
-#           error_df$remarks <- -99999
-#           names(error_df)[which(names(error_df) == "remarks")] <- name_radius
-#           return(error_df)
-#         })
-#       })
-#     res <- Reduce(\(x, y) dplyr::left_join(x, y, by = c("site_id", "date")), res0)
-#     return(res)
-#   }
-
-# saveRDS(resdf_mcd19_aod047,
-#   file = "/ddn/gs1/home/songi2/NRTAP_Covar_MCD19A2_AOD047.rds")
-
-
-###
-resdf_mcd19_aod055 <-
+resdf_mcd19_aod047 <-
 foreach(
   datei = seq_along(mcd19dates),
   .packages = c("sf", "terra", "exactextractr", "foreach", "scomps", "dplyr"),
@@ -451,11 +366,58 @@ foreach(
     options(sf_use_s2 = FALSE)
     radius = c(0L, 1e3L, 1e4L, 5e4L)
     
-    #mod11_thisyear <- sprintf("%d%03d", year, mod11dates)
     mcd19_thisyear <- mcd19dates[datei]
     mcd19_thisyear <- as.Date(mcd19_thisyear, format = "%Y%j")
 
-    #dateindex <- seq_along(mod13dates)
+    radiusindex <- seq_along(radius)
+    radiuslist <- split(radiusindex, radiusindex)
+    nameflag <- "MOD_AD4TA_0_"
+    res0 <-
+    lapply(radiuslist,
+      function(k) {
+        name_radius <- sprintf("%s%05d", nameflag, radius[k])
+        tryCatch({
+        extracted <- modis_worker(
+          paths = modis_mcd19,
+          date = mcd19_thisyear,
+          subdataset = 1,
+          name_extracted = name_radius,
+          points = terra::vect(sites),
+          id = "site_id",
+          radius = radius[k]
+          )
+        return(extracted)
+        }, error = function(e) {
+          error_df <- sf::st_drop_geometry(sites)
+          error_df$date <- mcd19_thisyear
+          error_df$remarks <- -99999
+          names(error_df)[which(names(error_df) == "remarks")] <- name_radius
+          return(error_df)
+        })
+      })
+    res <- Reduce(\(x, y) dplyr::left_join(x, y, by = c("site_id", "date")), res0)
+    return(res)
+  }
+
+saveRDS(resdf_mcd19_aod047,
+  file = "/ddn/gs1/home/songi2/NRTAP_Covar_MCD19A2_AOD047.rds")
+
+
+##
+resdf_mcd19_aod055 <-
+foreach(
+  datei = seq_along(mcd19dates),
+  .packages = c("sf", "terra", "exactextractr", "foreach", "scomps", "dplyr"),
+  .export = c("sites", "modis_mcd19", "mcd19dates", "modis_worker", "get_vrt", "radius"),
+  .combine = dplyr::bind_rows,
+  .errorhandling = "pass"
+) %dorng% {
+    options(sf_use_s2 = FALSE)
+
+    mcd19_thisyear <- mcd19dates[datei]
+    mcd19_thisyear <- as.Date(mcd19_thisyear, format = "%Y%j")
+
+
     radiusindex <- seq_along(radius)
     radiuslist <- split(radiusindex, radiusindex)
     nameflag <- "MOD_AD5TA_0_"
@@ -474,9 +436,10 @@ foreach(
           id = "site_id",
           radius = radius[k]
           )
+         return(extracted)
         }, error = function(e) {
           error_df <- sf::st_drop_geometry(sites)
-          error_df$date <- mod19_thisyear
+          error_df$date <- mcd19_thisyear
           error_df$remarks <- -99999
           names(error_df)[which(names(error_df) == "remarks")] <- name_radius
           return(error_df)
@@ -484,31 +447,26 @@ foreach(
       })
     res <- Reduce(\(x, y) dplyr::left_join(x, y, by = c("site_id", "date")), res0)
     return(res)
+    
   }
 
 saveRDS(resdf_mcd19_aod055,
   file = "/ddn/gs1/home/songi2/NRTAP_Covar_MCD19A2_AOD055.rds")
 
-
-
-
 ###
 resdf_mcd19_csz <-
 foreach(
   datei = seq_along(mcd19dates),
-  .packages = c("sf", "terra", "exactextractr", "foreach", "scomps", "dplyr"),
+  .packages = c("sf", "terra", "exactextractr", "foreach", "scomps", "dplyr", "parallelly"),
   .export = c("sites", "modis_mcd19", "mcd19dates", "modis_worker", "get_vrt", "radius"),
   .combine = dplyr::bind_rows,
   .errorhandling = "pass"
 ) %dorng% {
     options(sf_use_s2 = FALSE)
-    radius = c(0L, 1e3L, 1e4L, 5e4L)
     
-    #mod11_thisyear <- sprintf("%d%03d", year, mod11dates)
     mcd19_thisyear <- mcd19dates[datei]
     mcd19_thisyear <- as.Date(mcd19_thisyear, format = "%Y%j")
 
-    #dateindex <- seq_along(mod13dates)
     radiusindex <- seq_along(radius)
     radiuslist <- split(radiusindex, radiusindex)
     nameflag <- "MOD_CSZAN_0_"
@@ -527,9 +485,10 @@ foreach(
           id = "site_id",
           radius = radius[k]
           )
+        return(extracted)
         }, error = function(e) {
           error_df <- sf::st_drop_geometry(sites)
-          error_df$date <- mod19_thisyear
+          error_df$date <- mcd19_thisyear
           error_df$remarks <- -99999
           names(error_df)[which(names(error_df) == "remarks")] <- name_radius
           return(error_df)
@@ -553,13 +512,10 @@ foreach(
   .errorhandling = "pass"
 ) %dorng% {
     options(sf_use_s2 = FALSE)
-    radius = c(0L, 1e3L, 1e4L, 5e4L)
-    
-    #mod11_thisyear <- sprintf("%d%03d", year, mod11dates)
+
     mcd19_thisyear <- mcd19dates[datei]
     mcd19_thisyear <- as.Date(mcd19_thisyear, format = "%Y%j")
 
-    #dateindex <- seq_along(mod13dates)
     radiusindex <- seq_along(radius)
     radiuslist <- split(radiusindex, radiusindex)
     nameflag <- "MOD_CVZAN_0_"
@@ -578,9 +534,10 @@ foreach(
           id = "site_id",
           radius = radius[k]
           )
+        return(extracted)
         }, error = function(e) {
           error_df <- sf::st_drop_geometry(sites)
-          error_df$date <- mod19_thisyear
+          error_df$date <- mcd19_thisyear
           error_df$remarks <- -99999
           names(error_df)[which(names(error_df) == "remarks")] <- name_radius
           return(error_df)
@@ -602,13 +559,10 @@ foreach(
   .errorhandling = "pass"
 ) %dorng% {
     options(sf_use_s2 = FALSE)
-    radius = c(0L, 1e3L, 1e4L, 5e4L)
-    
-    #mod11_thisyear <- sprintf("%d%03d", year, mod11dates)
+
     mcd19_thisyear <- mcd19dates[datei]
     mcd19_thisyear <- as.Date(mcd19_thisyear, format = "%Y%j")
 
-    #dateindex <- seq_along(mod13dates)
     radiusindex <- seq_along(radius)
     radiuslist <- split(radiusindex, radiusindex)
     nameflag <- "MOD_RAZAN_0_"
@@ -627,9 +581,10 @@ foreach(
           id = "site_id",
           radius = radius[k]
           )
+        return(extracted)
         }, error = function(e) {
           error_df <- sf::st_drop_geometry(sites)
-          error_df$date <- mod19_thisyear
+          error_df$date <- mcd19_thisyear
           error_df$remarks <- -99999
           names(error_df)[which(names(error_df) == "remarks")] <- name_radius
           return(error_df)
@@ -643,6 +598,7 @@ saveRDS(resdf_mcd19_raz,
 
 
 
+
 resdf_mcd19_sct <-
 foreach(
   datei = seq_along(mcd19dates),
@@ -652,13 +608,10 @@ foreach(
   .errorhandling = "pass"
 ) %dorng% {
     options(sf_use_s2 = FALSE)
-    radius = c(0L, 1e3L, 1e4L, 5e4L)
-    
-    #mod11_thisyear <- sprintf("%d%03d", year, mod11dates)
+
     mcd19_thisyear <- mcd19dates[datei]
     mcd19_thisyear <- as.Date(mcd19_thisyear, format = "%Y%j")
 
-    #dateindex <- seq_along(mod13dates)
     radiusindex <- seq_along(radius)
     radiuslist <- split(radiusindex, radiusindex)
     nameflag <- "MOD_SCTAN_0_"
@@ -677,9 +630,10 @@ foreach(
           id = "site_id",
           radius = radius[k]
           )
+        return(extracted)
         }, error = function(e) {
           error_df <- sf::st_drop_geometry(sites)
-          error_df$date <- mod19_thisyear
+          error_df$date <- mcd19_thisyear
           error_df$remarks <- -99999
           names(error_df)[which(names(error_df) == "remarks")] <- name_radius
           return(error_df)
@@ -693,6 +647,7 @@ saveRDS(resdf_mcd19_sct,
 
 
 
+
 resdf_mcd19_gln <-
 foreach(
   datei = seq_along(mcd19dates),
@@ -702,13 +657,10 @@ foreach(
   .errorhandling = "pass"
 ) %dorng% {
     options(sf_use_s2 = FALSE)
-    radius = c(0L, 1e3L, 1e4L, 5e4L)
-    
-    #mod11_thisyear <- sprintf("%d%03d", year, mod11dates)
+
     mcd19_thisyear <- mcd19dates[datei]
     mcd19_thisyear <- as.Date(mcd19_thisyear, format = "%Y%j")
 
-    #dateindex <- seq_along(mod13dates)
     radiusindex <- seq_along(radius)
     radiuslist <- split(radiusindex, radiusindex)
     nameflag <- "MOD_GLNAN_0_"
@@ -727,9 +679,10 @@ foreach(
           id = "site_id",
           radius = radius[k]
           )
+        return(extracted)
         }, error = function(e) {
           error_df <- sf::st_drop_geometry(sites)
-          error_df$date <- mod19_thisyear
+          error_df$date <- mcd19_thisyear
           error_df$remarks <- -99999
           names(error_df)[which(names(error_df) == "remarks")] <- name_radius
           return(error_df)
@@ -742,68 +695,105 @@ saveRDS(resdf_mcd19_gln,
   file = "/ddn/gs1/home/songi2/NRTAP_Covar_MCD19A2_GLN.rds")
 
 
-# test <- modis_worker(
-#   paths = modis_mod13,
-#   date = mod13_2018[1],
-#   subdataset = 1,
-#   name_extracted = "MOD_NDVIV_0_10000",
-#   points = terra::vect(sites),
-#   id = "site_id",
-#   radius = 1e4L
-# )
-
-# test <- modis_worker(
-#   paths = modis_mcd19,
-#   date = "2018-03-27",
-#   subdataset = 1,
-#   name_extracted = "MOD_NDVIV_0_10000",
-#   points = terra::vect(sites),
-#   id = "site_id",
-#   radius = 1e4L
-# )
 
 
-# grep("2018/001", modis_mod13, value = TRUE)
-
-# mod13_10k <- scomps::distribute_process_hierarchy(
-#       regions = mod_cr,
-#       split_level = mod_cr$Region,
-#       fun_dist = scomps::extract_with_buffer,
-#       points = sites_v,
-#       surf = modis_mod13vrt,
-#       radius = 1e4L,
-#       id = "Site.ID",
-#       func = "mean"
-#     )
-
-# the data values in MODIS HDF files seem
-# to have 0.00000001 scale, not like 0.00001 in the documentation.
-# strange thing is that the value scale is restored after
-# running gdal_translate or h4toh5.
-# should consult NASA for details.
-# scomps::extract_with_buffer(
-#   points = sites_v,
-#   surf = modis_mod13vrt,
-#   radius = 1e4L,
-#   id = "site_id"
-# )
 
 
-# mod13_10k <- 
-#   foreach(image = modis_mod13,
-#           .combine = dplyr::bind_rows,
-#           .export = c("mod_cr", "sites_v"),
-#           .packages = c("terra", "scomps", "exactextractr", "foreach", "future", "dplyr")) %do%
-#     {
-#     modis_in <- terra::rast(image)
-#     scomps::distribute_process_hierarchy(
-#       regions = mod_cr,
-#       split_level = mod_cr$region,
-#       fun_dist = scomps::extract_with_buffer,
-#       points = final_sites,
-#       surf = modis_in,
-#       radius = 1e4L,
-#       id = "Site.ID",
-#       func = "mean"
-#     )
-#     }
+## MOD09GA elements ####
+modis_mod09 <-
+  list.files(path = "~/projects/NRTAPModel/input/data/modis/raw/61/MOD09GA",
+             pattern = "*.hdf$",
+             recursive = TRUE,
+             full.names = TRUE)
+# stringi::stri_extract_first(modis_mod11, regex = "\\d{4,4}/\\d{3,3}")
+terra::describe(modis_mod09[1], sds = T)
+# SDS 2:8 /12:18/ (Band 1 - 7)
+#  1 MOD_SFCRF_1_00000
+#  2 MOD_SFCRF_2_00000
+#  3 MOD_SFCRF_3_00000
+#  4 MOD_SFCRF_4_00000
+#  5 MOD_SFCRF_5_00000
+#  6 MOD_SFCRF_6_00000
+#  7 MOD_SFCRF_7_00000
+# terra::rast(modis_mod09[1], lyrs = 2:8) |> names()
+# terra::rast(modis_mod09[41272], subds = 4) |> summary()
+
+mod09dates <- stringi::stri_extract_first(modis_mod09, regex = "\\d{4,4}/\\d{3,3}")
+mod09dates <- unique(mod09dates)
+mod09dates <- stringi::stri_replace_all(mod09dates, fixed = "/", "")
+
+
+cl <-
+  parallelly::makeClusterPSOCK(
+    30L, rscript_libs = .libPaths())
+registerDoParallel(cl)
+
+
+mod09get <- function(
+  flist, date_in, layers = 2:8
+) {
+  today <- as.character(date_in)
+  year_today <- strftime(today, "%Y")
+  jul_today <- strftime(today, "%j")
+  dayjul <- paste0(year_today, "/", jul_today)
+  ftarget <- grep(paste0(dayjul), flist, value = TRUE)
+  layer_target <- lapply(ftarget, \(x) terra::rast(x, lyrs = layers))
+  #terra::vrt(ftarget, options = opt_list)
+  do.call(terra::merge, layer_target)
+}
+
+resdf_mod09_surfref <-
+foreach(
+  datei = seq_along(mod09dates),
+  .packages = c("sf", "terra", "exactextractr", "foreach", "scomps", "dplyr"),
+  .export = c("sites", "modis_mod09", "mod09dates", "modis_worker", "mod09get", "get_vrt", "radius"),
+  .combine = dplyr::bind_rows,
+  .errorhandling = "pass"
+) %dorng% {
+    options(sf_use_s2 = FALSE)
+    radius = c(0L, 1e3L, 1e4L, 5e4L)
+    
+    mod09_thisyear <- mod09dates[datei]
+    mod09_thisyear <- as.Date(mod09_thisyear, format = "%Y%j")
+
+    radiusindex <- seq_along(radius)
+    radiuslist <- split(radiusindex, radiusindex)
+    nameflag <- sprintf("MOD_SFCRF_%d_", seq(1, 7))
+    res0 <-
+    lapply(radiuslist,
+      function(k) {
+        name_radius <- sprintf("%s%05d", nameflag, radius[k])
+        tryCatch({
+        extracted <- modis_worker(
+          paths = modis_mod09,
+          date = mod09_thisyear,
+          subdataset = NULL,
+          name_extracted = name_radius,
+          points = terra::vect(sites),
+          id = "site_id",
+          layers = seq(2, 8),
+          radius = radius[k],
+          ismode09 = TRUE
+          )
+        return(extracted)
+        }, error = function(e) {
+          error_df <- sf::st_drop_geometry(sites)
+          error_df$date <- mod09_thisyear
+          error_df$remarks <- -99999
+          names(error_df)[which(names(error_df) == "remarks")] <- name_radius
+          return(error_df)
+        })
+      })
+    res <- Reduce(\(x, y) dplyr::left_join(x, y, by = c("site_id", "date")), res0)
+    return(res)
+  }
+
+# mod09get(modis_mod09, "2022-01-04")
+test <- modis_worker(paths = modis_mod09, 
+  "2022-01-04",
+  name_extracted = sprintf("%s%05d", paste0("B", 1:7), 1e4L),
+  layers = 2:8,
+  ismod09 = TRUE,
+  id = "site_id",
+  points = terra::vect(sites),
+  radius = 1e3)
