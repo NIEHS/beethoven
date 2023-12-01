@@ -35,6 +35,7 @@ download_narr_p_levels_data <- function(
   data_download_acknowledgement = FALSE,
   download = FALSE
 ) {
+  # nolint start: cyclocomp_linter
   #### 1. directory setup
   chars_dir_save <- nchar(directory_to_save)
   if (substr(directory_to_save, chars_dir_save, chars_dir_save) != "/") {
@@ -46,20 +47,16 @@ download_narr_p_levels_data <- function(
     dir.create(directory_to_save)
   }
   #### 2. check for data download acknowledgement
-  # check for change to complexity (if(stop()) complexity = 17)
-  stopifnot(data_download_acknowledgement == TRUE)
-  # if (data_download_acknowledgement == FALSE) {
-  #   stop(cat(paste0("Data download acknowledgement is set to FALSE. Please ",
-  #                   "acknowledge that the data downloaded using this function ",
-  #                   "may be very large and use lots of machine storage and ",
-  #                   "memory.")))
-  # }
+  if (data_download_acknowledgement == FALSE) {
+    stop(cat(paste0("Data download acknowledgement is set to FALSE. Please ",
+                    "acknowledge that the data downloaded using this function ",
+                    "may be very large and use lots of machine storage and ",
+                    "memory.")))
+  }
   #### 3. check for variables
-  # check for change to complexity (if(stop()) complexity = 17)
-  stopifnot(is.null(variables) == FALSE)
-  # if (is.null(variables) == TRUE) {
-  #   stop(paste0("Please select an NCEP-NARR variable.\n"))
-  # }
+  if (is.null(variables) == TRUE) {
+    stop(paste0("Please select an NCEP-NARR variable.\n"))
+  }
   #### 4. define years sequence
   years <- seq(year_start, year_end, 1)
   #### 5. define months sequence
@@ -124,4 +121,5 @@ download_narr_p_levels_data <- function(
   } else if (download == FALSE) {
     return(cat(paste0("Skipping data download.\n")))
   }
+  # nolint end
 }

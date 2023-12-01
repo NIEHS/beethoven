@@ -35,6 +35,7 @@ download_geos_cf_data <- function(
   data_download_acknowledgement = FALSE,
   download = FALSE
 ) {
+  # nolint start: cyclocomp_linter
   #### 1. directory setup
   chars_dir_save <- nchar(directory_to_save)
   if (substr(directory_to_save, chars_dir_save, chars_dir_save) != "/") {
@@ -55,10 +56,9 @@ download_geos_cf_data <- function(
     stop(paste0("Please select a GEOS-CF collection.\n"))
   }
   #### 3. check if collection is valid
-  collections <- c("htf_inst_15mn_g1440x721_x1", "aqc_tavg_1hr_g1440x721_v1",
-                   "chm_tavg_1hr_g1440x721_v1", "met_tavg_1hr_g1440x721_x1",
-                   "xgc_tavg_1hr_g1440x721_x1", "chm_inst_1hr_g1440x721_p23",
-                   "met_inst_1hr_g1440x721_p23")
+  collections <- c("aqc_tavg_1hr_g1440x721_v1", "chm_tavg_1hr_g1440x721_v1",
+                   "met_tavg_1hr_g1440x721_x1", "xgc_tavg_1hr_g1440x721_x1",
+                   "chm_inst_1hr_g1440x721_p23", "met_inst_1hr_g1440x721_p23")
   if (!(collection %in% collections)) {
     stop(paste0("Requested collection is not recognized.\n"))
   }
@@ -75,7 +75,7 @@ download_geos_cf_data <- function(
                                       width = 4,
                                       side = "left")
   } else if (stringr::str_sub(collection, -1, -1) == "3") {
-    time_sequence <- as.character(seq(from = 100, to = 2400, by = 100))
+    time_sequence <- as.character(seq(from = 0, to = 2300, by = 100))
     time_sequence <- stringr::str_pad(time_sequence,
                                       pad = "0",
                                       width = 4,
@@ -132,4 +132,5 @@ download_geos_cf_data <- function(
   } else if (download == FALSE) {
     return(cat(paste0("Skipping data download.\n")))
   }
+  # nolint end
 }
