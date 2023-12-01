@@ -1,8 +1,11 @@
 #' @author Mitchell Manware
 #' @description Unit test for for checking data download functions.
 #'
+setwd("/Volumes/manwareme/NRT-AP-Model/tests/testthat/")
+library(testthat)
 testthat::test_that("GEOS-CF download URLs exist.", {
   withr::local_package("httr")
+  withr::local_package("stringr")
   # function parameters
   date_start <- "2018-01-01"
   date_end <- "2022-12-31"
@@ -18,13 +21,13 @@ testthat::test_that("GEOS-CF download URLs exist.", {
                           data_download_acknowledgement = TRUE,
                           download = FALSE)
     # TEST that directory_to_save exists
-    expect_true(dir.exists(directory_to_save))
+    testthat::expect_true(dir.exists(directory_to_save))
     # path with commands
     commands_path <- paste0(directory_to_save,
                             collections[c],
                             "_wget_commands.txt")
     # TEST that path with commands exists
-    expect_true(file.exists(commands_path))
+    testthat::expect_true(file.exists(commands_path))
     # import wget commands
     wget_commands <- read.csv(commands_path,
                               header = FALSE)
@@ -42,9 +45,9 @@ testthat::test_that("GEOS-CF download URLs exist.", {
     # apply check_url_file_exist to sample of urls
     url_status <- sapply(url_sample, check_url_file_exist)
     # TEST that URLs are character
-    expect_true(is.character(url_list))
+    testthat::expect_true(is.character(url_list))
     # TEST that URLs exist
-    expect_true(all(url_status))
+    testthat::expect_true(all(url_status))
     # remove path with commands after test
     file.remove(commands_path)
   }
@@ -71,9 +74,9 @@ testthat::test_that("GMTED download URLs exist.", {
                         remove_zip = FALSE,
                         download = FALSE)
     # TEST that directory_to_download exists
-    expect_true(dir.exists(directory_to_download))
+    testthat::expect_true(dir.exists(directory_to_download))
     # TEST that directory_to_save exists
-    expect_true(dir.exists(directory_to_save))
+    testthat::expect_true(dir.exists(directory_to_save))
     # path with commands
     commands_path <- paste0(directory_to_download,
                             "gmted_",
@@ -82,7 +85,7 @@ testthat::test_that("GMTED download URLs exist.", {
                             gsub(" ", "", resolution),
                             "_curl_command.txt")
     # TEST that path with command exists
-    expect_true(file.exists(commands_path))
+    testthat::expect_true(file.exists(commands_path))
     # import curl command
     curl_command <- read.csv(commands_path,
                              header = FALSE)
@@ -93,15 +96,17 @@ testthat::test_that("GMTED download URLs exist.", {
     # apply check_url_file_exist to URL
     url_status <- check_url_file_exist(url)
     # TEST that URLs are character
-    expect_true(is.character(url))
+    testthat::expect_true(is.character(url))
     # TEST that URLs exist
-    expect_true(all(url_status))
+    testthat::expect_true(all(url_status))
     # remove path with commands after test
     file.remove(commands_path)
   }
 })
 
 testthat::test_that("NCEP NARR monolevel download URLs exist.", {
+  withr::local_package("httr")
+  withr::local_package("stringr")
   # function parameters
   year_start <- 2018
   year_end <- 2022
@@ -115,12 +120,12 @@ testthat::test_that("NCEP NARR monolevel download URLs exist.", {
                                data_download_acknowledgement = TRUE,
                                download = FALSE)
   # TEST that directory_to_save exists
-  expect_true(dir.exists(directory_to_save))
+  testthat::expect_true(dir.exists(directory_to_save))
   # path with commands
   commands_path <- paste0(directory_to_save,
                           "narr_monolevel_curl_commands.txt")
   # TEST that path with commands exists
-  expect_true(file.exists(commands_path))
+  testthat::expect_true(file.exists(commands_path))
   # import curl commands
   curl_commands <- read.csv(commands_path,
                             header = FALSE)
@@ -138,14 +143,16 @@ testthat::test_that("NCEP NARR monolevel download URLs exist.", {
   # apply check_url_file_exist to sample of urls
   url_status <- sapply(url_sample, check_url_file_exist)
   # TEST that URLs are character
-  expect_true(is.character(url_list))
+  testthat::expect_true(is.character(url_list))
   # TEST that URLs exist
-  expect_true(all(url_status))
+  testthat::expect_true(all(url_status))
   # remove path with commands after test
   file.remove(commands_path)
 })
 
 testthat::test_that("NCEP NARR pressure levels download URLs exist.", {
+  withr::local_package("httr")
+  withr::local_package("stringr")
   # function parameters
   year_start <- 2018
   year_end <- 2022
@@ -159,12 +166,12 @@ testthat::test_that("NCEP NARR pressure levels download URLs exist.", {
                               data_download_acknowledgement = TRUE,
                               download = FALSE)
   # TEST that directory_to_save exists
-  expect_true(dir.exists(directory_to_save))
+  testthat::expect_true(dir.exists(directory_to_save))
   # path with commands
   commands_path <- paste0(directory_to_save,
                           "narr_p_levels_curl_commands.txt")
   # TEST that path with commands exists
-  expect_true(file.exists(commands_path))
+  testthat::expect_true(file.exists(commands_path))
   # import curl commands
   curl_commands <- read.csv(commands_path,
                             header = FALSE)
@@ -182,9 +189,9 @@ testthat::test_that("NCEP NARR pressure levels download URLs exist.", {
   # apply check_url_file_exist to sample of urls
   url_status <- sapply(url_sample, check_url_file_exist)
   # TEST that URLs are character
-  expect_true(is.character(url_list))
+  testthat::expect_true(is.character(url_list))
   # TEST that URLs exist
-  expect_true(all(url_status))
+  testthat::expect_true(all(url_status))
   # remove path with commands after test
   file.remove(commands_path)
 })
