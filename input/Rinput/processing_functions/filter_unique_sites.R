@@ -11,8 +11,6 @@ pkgs <- c("data.table", "sf", "terra")
 invisible(suppressMessages(sapply(pkgs, check_installed_load)))
 options(sf_use_s2 = FALSE)
 
-
-
 #' Filter unique sites with or without temporal information
 #' @param path_measurement character(1). Path to daily measurement data.
 #' @param include_time logical(1). Should the output include
@@ -83,5 +81,5 @@ filter_unique_sites <-
     }
 
     return(final_sites)
-}
+  }
 # File ends

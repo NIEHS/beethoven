@@ -18,6 +18,8 @@
 #' @author Mitchell Manware
 #' @return NULL;
 #' @export
+
+# nolint start
 download_merra2_data <- function(
   date_start = "2023-09-01",
   date_end = "2023-09-01",
@@ -211,3 +213,5 @@ download_merra2_data <- function(
   #### 12. remove "..._wget_commands.txt"
   file.remove(commands_txt)
 }
+
+# nolint end

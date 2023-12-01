@@ -31,6 +31,8 @@
 #' @return NULL; NASA UN WPP-Adjusted Population Density, v4.11 data will be
 #' returned to the designated saving directory in the indicated format.
 #' @export
+
+# nolint start
 download_sedac_population_data <- function(
   year = "2020",
   data_format = "GeoTIFF",
@@ -152,3 +154,5 @@ download_sedac_population_data <- function(
     cat(paste0("Downloaded zip files deleted.\n"))
   }
 }
+
+# nolint end
