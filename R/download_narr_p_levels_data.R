@@ -27,7 +27,7 @@
 #' @return NULL;
 #' @importFrom stringr str_pad
 #' @export
-download_narr_p_levels_data <- function( # nolint: cyclocomp_linter.
+download_narr_p_levels_data <- function(
   year_start = 2022,
   year_end = 2022,
   variables = NULL,

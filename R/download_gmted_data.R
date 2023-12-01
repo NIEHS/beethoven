@@ -31,7 +31,7 @@
 #' @author Mitchell Manware
 #' @return NULL;
 #' @export
-download_gmted_data <- function( # nolint: cyclocomp_linter.
+download_gmted_data <- function(
   statistic = NULL,
   resolution = NULL,
   directory_to_download = "../../data/covariates/gmted/",

@@ -26,7 +26,7 @@
 #' @author Mitchell Manware
 #' @return NULL;
 #' @export
-download_narr_monolevel_data <- function( # nolint: cyclocomp_linter.
+download_narr_monolevel_data <- function(
   year_start = 2022,
   year_end = 2022,
   variables = NULL,

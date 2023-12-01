@@ -27,7 +27,7 @@
 #' @importFrom stringr str_sub
 #' @importFrom stringr str_pad
 #' @export
-download_geos_cf_data <- function( # nolint: cyclocomp_linter.
+download_geos_cf_data <- function(
   date_start = "2023-09-01",
   date_end = "2023-09-01",
   collection = NULL,
