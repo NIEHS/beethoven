@@ -191,7 +191,7 @@ mod09dates <- stringi::stri_replace_all(mod09dates, fixed = "/", "")
 
 cl <-
   parallelly::makeClusterPSOCK(
-    20L, rscript_libs = .libPaths())
+    30L, rscript_libs = .libPaths())
 registerDoParallel(cl)
 
 
@@ -210,7 +210,7 @@ mod09get <- function(
 
 resdf_mod09_surfref <-
 foreach(
-  datei = seq_along(mod09dates)[1:30],
+  datei = seq_along(mod09dates),
   .packages = c("sf", "terra", "exactextractr", "foreach", "scomps", "dplyr", "parallelly"),
   .export = c("sites", "modis_mod09", "mod09dates", "modis_worker", "mod09get", "get_vrt", "radius"),
   .combine = dplyr::bind_rows,
