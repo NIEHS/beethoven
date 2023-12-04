@@ -36,15 +36,7 @@ download_narr_p_levels_data <- function(
   download = FALSE
 ) {
   #### 1. directory setup
-  chars_dir_save <- nchar(directory_to_save)
-  if (substr(directory_to_save, chars_dir_save, chars_dir_save) != "/") {
-    directory_to_save <- paste(directory_to_save,
-                               "/",
-                               sep = "")
-  }
-  if (dir.exists(directory_to_save) == FALSE) {
-    dir.create(directory_to_save)
-  }
+  directory_to_save <- directory_setup(directory_to_save)
   #### 2. check for data download acknowledgement
   if (data_download_acknowledgement == FALSE) {
     stop(cat(paste0("Data download acknowledgement is set to FALSE. Please ",
