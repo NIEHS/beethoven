@@ -1,5 +1,6 @@
 # needs terra, exactextractr, spData, sf
-
+withr::local_package("dplyr")
+withr::local_package("spData")
 
 nlcd_classes <- list(value = c(0, 11, 21, 22, 23, 24, 31, 41, 42, 43, 52,
                                71, 81, 82, 90, 95),
@@ -70,7 +71,7 @@ calc_nlcd_ratio <- function(data_vect,
   data_vect_b <- data_vect %>%
     terra::intersect(x = us_main)
   if (!terra::same.crs(data_vect_b, nlcd)) {
-    data_vect_b <- project(data_vect_b, crs(nlcd))
+    data_vect_b <- terra::project(data_vect_b, crs(nlcd))
   }
   # create circle buffers with buf_radius
   bufs_pol <- terra::buffer(data_vect_b, width = buf_radius) %>%
