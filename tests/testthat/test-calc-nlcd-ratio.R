@@ -1,3 +1,5 @@
+withr::local_package("dplyr")
+
 test_that("Check extract_nlcd_ratio works", {
   point_wa <- cbind(lon = -119.88, lat = 47.709, dem = 3) # washington state
   point_nc <- cbind(lon = -78.836, lat = 35.893, dem = 10) # north carolina
