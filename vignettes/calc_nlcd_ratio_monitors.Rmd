@@ -42,9 +42,9 @@ Test to see if data is well loaded
 lat <- c(1900000, 2000000, 2000000, 1900000)
 lon <- c(-1600000, -1600000, -1500000, -1500000)
 ext <- vect(cbind(lon, lat), type = "polygons", crs = crs(nlcd_2021))
-nlcd_small <- terra::crop(nlcd_2021, ext, mask = T)
+nlcd_small <- terra::crop(nlcd_2021, ext, mask = TRUE)
 plot(nlcd_2021)
-plot(ext, add = T, col = "black")
+plot(ext, add = TRUE, col = "black")
 plot(nlcd_small)
 
 point1 <- cbind(-2e6, 3e6)

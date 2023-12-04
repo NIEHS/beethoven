@@ -63,24 +63,24 @@ calc_nlcd_ratio <- function(data_vect,
   nlcd <- rast(nlcd_file)
   # select points within mainland US and reproject on nlcd crs if necessary
   # need spData library
-  data(us_states)
-  us_main <- st_union(us_states) %>%
+  data(us_states, package = "spData")
+  us_main <- sf::st_union(us_states) %>%
     terra::vect() %>%
     terra::project(y = crs(data_vect))
   data_vect_b <- data_vect %>%
     terra::intersect(x = us_main)
-  if (!same.crs(data_vect_b, nlcd)) {
+  if (!terra::same.crs(data_vect_b, nlcd)) {
     data_vect_b <- project(data_vect_b, crs(nlcd))
   }
   # create circle buffers with buf_radius
   bufs_pol <- terra::buffer(data_vect_b, width = buf_radius) %>%
     sf::st_as_sf()
   # ratio of each nlcd class per buffer
-  nlcd_at_bufs <- exact_extract(nlcd,
-                                st_geometry(bufs_pol),
-                                fun = "frac",
-                                stack_apply = TRUE,
-                                progress = FALSE)
+  nlcd_at_bufs <- exactextractr::exact_extract(nlcd,
+                                               st_geometry(bufs_pol),
+                                               fun = "frac",
+                                               stack_apply = TRUE,
+                                               progress = FALSE)
   # select only the columns of interest
   nlcd_at_bufs <- nlcd_at_bufs[names(nlcd_at_bufs)[grepl("frac_",
                                                          names(nlcd_at_bufs))]]
@@ -98,6 +98,6 @@ calc_nlcd_ratio <- function(data_vect,
   names(nlcd_at_bufs) <- new_names
   # merge data_vect with nlcd class fractions (and reproject)
   new_data_vect <- cbind(data_vect_b, nlcd_at_bufs) %>%
-    project(crs(data_vect))
+    terra::project(crs(data_vect))
   return(new_data_vect)
 }
