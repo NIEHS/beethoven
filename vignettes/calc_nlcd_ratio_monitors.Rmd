@@ -1,5 +1,5 @@
 ---
-title: "NLCD ratio: example in RTP area"
+title: "NLCD ratio: calculation at monitor locations"
 author: "Eva Marques"
 output: rmarkdown::html_vignette
 date: "2023-11-27"
@@ -9,30 +9,34 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-
-
-
 ```{r, message=F}
 pkgs <- c("terra", 
           "exactextractr", 
           "tidyverse", 
           "data.table", 
           "sf", 
-          "gdalUtilities")
+          "spData",
+          "gdalUtilities",
+          "ggplot2",
+          "scatterpie")
 sapply(pkgs, library, character.only = TRUE)
 ```
 
 
-Open NLCD data 
+## Open NLCD data 
 
 ```{r, eval = F}
 nlcd_2019 <- rast("/Volumes/set/NLCD/nlcd_2019_land_cover_l48_20210604.tif")
 nlcd_2021 <- rast("/Volumes/set/NLCD/nlcd_2021_land_cover_l48_20230630.tif")
+
+# check that unit is in meters
+linearUnits(nlcd_2021)
+same.crs(nlcd_2019, nlcd_2021)
 ```
 
 Test to see if data is well loaded
 
-```{r, echo = F}
+```{r, eval = F}
 lat <- c(1900000, 2000000, 2000000, 1900000) 
 lon <- c(-1600000, -1600000, -1500000, -1500000) 
 ext <- vect(cbind(lon, lat), type = "polygons", crs=crs(nlcd_2021)) 
@@ -49,8 +53,7 @@ terra::extract(nlcd_2021, point2)
 ```
 
 
-
-Open monitors data 
+## Open monitors data 
 
 ```{r}
 path_aqs <- "/Volumes/set/Projects/NRT-AP-Model/input/aqs/"
@@ -78,47 +81,41 @@ aqs_mon <- rbind(a, b) %>%
 ```
 
 
-
-NLCD classes
+## NLCD classes
 
 ```{r}
-source("../R/extract_nlcd_ratio.R")
+source("../R/calc_nlcd_ratio.R")
 nlcd_classes
 ```
 
 
-Compute NLCD ratio in 150 buffers
+## Compute NLCD ratio in 150m buffers
 
 ```{r}
-# check that unit is in meters
-linearUnits(nlcd_2021)
-same.crs(nlcd_2019, nlcd_2021)
-
-aqs_mon_nlcd <- add_nlcd_class_ratio(data_vect = aqs_mon, 
-                             buf_radius = 150, 
-                             year = 2021)
+start <- Sys.time()
+aqs_mon_nlcd <- calc_nlcd_ratio(data_vect = aqs_mon, 
+                                buf_radius = 150, 
+                                year = 2021)
+end <- Sys.time()
+end - start
 ```
 
-Select in north Carolina and plot pie chart
+Plot pie chart
 
 ```{r}
-library(ggplot2)
-library(scatterpie)
 map <- map_data("county")
-nc <- subset(map, region == "north carolina")
 df <- as.data.frame(aqs_mon_nlcd, geom = "XY")
 names(df)[names(df) == "x"] <- "long"
 names(df)[names(df) == "y"] <- "lat"
 frac <- df[names(df)[grepl("frac_", names(df))]]
 df <- cbind(df[, c("long", "lat")], frac)
+
 ggplot() + 
   geom_polygon(data = map, aes(x = long, y = lat, group = group)) +
   geom_scatterpie(aes(x=long, y=lat, r = .5), data=df,
                                 cols = names(df)[3:ncol(df)], color=NA) +
   scale_fill_manual(values = nlcd_classes$col, labels = nlcd_classes$names) +
-  
   coord_equal()
-
 ```
 
 

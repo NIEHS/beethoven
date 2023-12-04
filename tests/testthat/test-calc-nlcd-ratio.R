@@ -11,34 +11,34 @@ test_that("Check extract_nlcd_ratio works", {
   # CHECK INPUT (error message)
   # -- buf_radius is numeric
   expect_error(
-    add_nlcd_class_ratio(data_vect = eg_data, buf_radius = "1000"),
+    calc_nlcd_ratio(data_vect = eg_data, buf_radius = "1000"),
     "buf_radius is not a numeric.")
   # -- buf_radius has likely value
   expect_error(
-    add_nlcd_class_ratio(data_vect = eg_data, buf_radius = -3),
+    calc_nlcd_ratio(data_vect = eg_data, buf_radius = -3),
     "buf_radius has not a likely value.")
   # -- year is numeric
   expect_error(
-    add_nlcd_class_ratio(data_vect = eg_data, year = "2019"),
+    calc_nlcd_ratio(data_vect = eg_data, year = "2019"),
     "year is not a numeric.")
   # -- year has likely value
   expect_error(
-    add_nlcd_class_ratio(data_vect = eg_data, year = 20192),
+    calc_nlcd_ratio(data_vect = eg_data, year = 20192),
     "NLCD data not available for this year.")
   expect_error(
-    add_nlcd_class_ratio(data_vect = eg_data, year = 2020),
+    calc_nlcd_ratio(data_vect = eg_data, year = 2020),
     "NLCD data not available for this year.")
   # -- data_vect is a SpatVector
-  expect_error(add_nlcd_class_ratio(data_vect = 12), 
+  expect_error(calc_nlcd_ratio(data_vect = 12), 
                "data_vect is not a terra::SpatVector")
   
   # CHECK OUTPUT
   year <- 2021
   buf_radius <- 100
-  expect_no_error(add_nlcd_class_ratio(data_vect = eg_data,
+  expect_no_error(calc_nlcd_ratio(data_vect = eg_data,
                                        year = year, 
                                        buf_radius = buf_radius))
-  output <- add_nlcd_class_ratio(data_vect = eg_data,
+  output <- calc_nlcd_ratio(data_vect = eg_data,
                                  year = year, 
                                  buf_radius = buf_radius)
   # -- returns a SpatVector 
