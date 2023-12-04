@@ -10,15 +10,17 @@ vignette: >
 ---
 
 ```{r, message=F}
-pkgs <- c("terra", 
-          "exactextractr", 
-          "tidyverse", 
-          "data.table", 
-          "sf", 
-          "spData",
-          "gdalUtilities",
-          "ggplot2",
-          "scatterpie")
+pkgs <- c(
+  "terra",
+  "exactextractr",
+  "tidyverse",
+  "data.table",
+  "sf",
+  "spData",
+  "gdalUtilities",
+  "ggplot2",
+  "scatterpie"
+)
 sapply(pkgs, library, character.only = TRUE)
 ```
 
@@ -37,12 +39,12 @@ same.crs(nlcd_2019, nlcd_2021)
 Test to see if data is well loaded
 
 ```{r, eval = F}
-lat <- c(1900000, 2000000, 2000000, 1900000) 
-lon <- c(-1600000, -1600000, -1500000, -1500000) 
-ext <- vect(cbind(lon, lat), type = "polygons", crs=crs(nlcd_2021)) 
-nlcd_small <- terra::crop(nlcd_2021, ext, mask=T) 
-plot(nlcd_2021) 
-plot(ext, add=T, col="black") 
+lat <- c(1900000, 2000000, 2000000, 1900000)
+lon <- c(-1600000, -1600000, -1500000, -1500000)
+ext <- vect(cbind(lon, lat), type = "polygons", crs = crs(nlcd_2021))
+nlcd_small <- terra::crop(nlcd_2021, ext, mask = T)
+plot(nlcd_2021)
+plot(ext, add = T, col = "black")
 plot(nlcd_small)
 
 point1 <- cbind(-2e6, 3e6)
@@ -57,14 +59,14 @@ terra::extract(nlcd_2021, point2)
 
 ```{r}
 path_aqs <- "/Volumes/set/Projects/NRT-AP-Model/input/aqs/"
-aqs_mon <- fread(paste0(path_aqs, "aqs_monitors.csv")) 
-aqs_mon <- aqs_mon[`Parameter Code`==88101,] # PM2.5 monitors only
+aqs_mon <- fread(paste0(path_aqs, "aqs_monitors.csv"))
+aqs_mon <- aqs_mon[`Parameter Code` == 88101, ] # PM2.5 monitors only
 ```
 
 Process monitors 
 
 ```{r}
-aqs_mon <- aqs_mon %>% 
+aqs_mon <- aqs_mon %>%
   rename(lon = Longitude) %>%
   rename(lat = Latitude)
 
@@ -75,9 +77,10 @@ a$lat_ori <- NULL
 b <- aqs_mon[Datum != "NAD83"]
 aqs_mon <- rbind(a, b) %>%
   terra::vect(.,
-              geom = c("lon", "lat"),
-              crs = "EPSG:4326",
-              keepgeom = FALSE)
+    geom = c("lon", "lat"),
+    crs = "EPSG:4326",
+    keepgeom = FALSE
+  )
 ```
 
 
@@ -89,20 +92,22 @@ nlcd_classes
 ```
 
 
-## Compute NLCD ratio in 150m buffers
+## Compute NLCD ratio in 100m buffers
 
 ```{r}
 start <- Sys.time()
-aqs_mon_nlcd <- calc_nlcd_ratio(data_vect = aqs_mon, 
-                                buf_radius = 150, 
-                                year = 2021)
+aqs_mon_nlcd <- calc_nlcd_ratio(
+  data_vect = aqs_mon,
+  buf_radius = 100,
+  year = 2021
+)
 end <- Sys.time()
 end - start
 ```
 
 Plot pie chart
 
-```{r}
+```{r, fig.width = 12}
 map <- map_data("county")
 df <- as.data.frame(aqs_mon_nlcd, geom = "XY")
 names(df)[names(df) == "x"] <- "long"
@@ -110,12 +115,13 @@ names(df)[names(df) == "y"] <- "lat"
 frac <- df[names(df)[grepl("frac_", names(df))]]
 df <- cbind(df[, c("long", "lat")], frac)
 
-ggplot() + 
+g <- ggplot() +
   geom_polygon(data = map, aes(x = long, y = lat, group = group)) +
-  geom_scatterpie(aes(x=long, y=lat, r = .5), data=df,
-                                cols = names(df)[3:ncol(df)], color=NA) +
+  geom_scatterpie(aes(x = long, y = lat, r = .5),
+    data = df,
+    cols = names(df)[3:ncol(df)], color = NA
+  ) +
   scale_fill_manual(values = nlcd_classes$col, labels = nlcd_classes$names) +
   coord_equal()
+g
 ```
-
-
