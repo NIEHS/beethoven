@@ -1,6 +1,7 @@
 # needs terra, exactextractr, spData, sf
 withr::local_package("dplyr")
 withr::local_package("spData")
+globalVariables(c("us_states", "%>%"))
 
 nlcd_classes <- list(value = c(0, 11, 21, 22, 23, 24, 31, 41, 42, 43, 52,
                                71, 81, 82, 90, 95),
