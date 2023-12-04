@@ -22,24 +22,11 @@
 #' @returns NULL;
 #' @export
 download_ecoregions <- function(
-  directory_to_download = "./input/koppen_geiger/raw/",
-  directory_to_save = "./input/koppen_geiger/raw/",
+  directory_to_download = "./input/ecoregions/raw/",
+  directory_to_save = "./input/ecoregions/raw/",
   data_download_acknowledgement = FALSE,
   remove_download = TRUE
 ) {
-  #### 1. directory setup
-  chars_dir_download <- nchar(directory_to_download)
-  chars_dir_save <- nchar(directory_to_save)
-  if (substr(directory_to_download,
-             chars_dir_download,
-             chars_dir_download) != "/") {
-    directory_to_download <- paste(directory_to_download,
-                                   "/",
-                                   sep = "")
-  }
-  if (substr(directory_to_save, chars_dir_save, chars_dir_save) != "/") {
-    directory_to_save <- paste(directory_to_save, "/", sep = "")
-  }
   #### 2. check for data download acknowledgement
   if (data_download_acknowledgement == FALSE) {
     cat(paste0("Data download acknowledgement is set to FALSE.",

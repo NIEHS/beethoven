@@ -11,6 +11,8 @@ download_dir_user <- file.path(rootdir, userdir, inputdir, modisdir)
 lib_dir <- file.path(rootdir, rlibdir)
 
 
+# register custom library path for debugging on Triton
+.libPaths(lib_dir)
 
 # check if remotes package is available
 if (!require(pak)) {
@@ -23,14 +25,19 @@ if (!require(scomps)) {
   pak::pak("Spatiotemporal-Exposures-and-Toxicology/Scalable_GIS")
 }
 
-pkgs <- c("terra", "sf", "doParallel", "parallel", "parallelly", "future.apply", "scomps", "exactextractr", "foreach", "data.table", "tigris", "doRNG")
-suppressMessages(invisible(sapply(pkgs, library, character.only = TRUE, quietly = TRUE)))
+pkgs <- c("terra", "sf", "doParallel", "parallel", "parallelly",
+  "future.apply", "scomps", "exactextractr", "foreach",
+  "data.table", "tigris", "doRNG")
+suppressMessages(
+  invisible(
+    sapply(pkgs,
+      library,
+      character.only = TRUE,
+      quietly = TRUE)))
 tigris_cache_dir("~/tigris_cache")
 options(sf_use_s2 = FALSE, tigris_use_cache = TRUE)
 
 
-# register custom library path for debugging on Triton
-.libPaths(lib_dir)
 
 # filter unique sites
 source(
