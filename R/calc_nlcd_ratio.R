@@ -54,12 +54,12 @@ calc_nlcd_ratio <- function(data_vect,
   }
   
   # open nlcd file corresponding to the year
-  #nlcd_file <- list.files("../input/nlcd/raw/", 
-  #                        pattern = paste0("nlcd_", year, "_.*.tif$"), 
-  #                        full.names = TRUE) 
-  nlcd_file <- list.files("/Volumes/set/NLCD/", 
+  nlcd_file <- list.files("../input/nlcd/raw/", 
                           pattern = paste0("nlcd_", year, "_.*.tif$"), 
                           full.names = TRUE) 
+  #nlcd_file <- list.files("/Volumes/set/NLCD/", 
+  #                        pattern = paste0("nlcd_", year, "_.*.tif$"), 
+  #                        full.names = TRUE) 
   if (length(nlcd_file) == 0) {
     stop("NLCD data not available for this year.")
   }
