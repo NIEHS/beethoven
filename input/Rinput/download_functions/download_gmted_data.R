@@ -138,14 +138,9 @@ download_gmted_data <- function(
                            commands_txt,
                            "\n")
   #### 17 download data
-  if (download == TRUE) {
-    cat(paste0("Downloading requested file...\n"))
-    system(command = system_command)
-    Sys.sleep(5L)
-    cat(paste0("Requested file downloaded.\n"))
-  } else if (download == FALSE) {
-    return(cat(paste0("Skipping data download.\n")))
-  }
+  execute_download(download = download,
+                   system_command = system_command,
+                   commands_txt = commands_txt)
   #### 18. end if unzip == FALSE
   if (unzip == FALSE) {
     return(cat(paste0("Downloaded files will not be unzipped.\n")))

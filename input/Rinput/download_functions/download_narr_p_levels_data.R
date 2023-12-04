@@ -112,12 +112,7 @@ download_narr_p_levels_data <- function(
                            commands_txt,
                            "\n")
   #### 12. download data
-  if (download == TRUE) {
-    cat(paste0("Downloading requested files...\n"))
-    system(command = system_command)
-    cat(paste0("Requested files have been downloaded.\n"))
-    file.remove(commands_txt)
-  } else if (download == FALSE) {
-    return(cat(paste0("Skipping data download.\n")))
-  }
+  execute_download(download = download,
+                   system_command = system_command,
+                   commands_txt = commands_txt)
 }

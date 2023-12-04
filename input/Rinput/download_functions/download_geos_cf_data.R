@@ -125,10 +125,7 @@ download_geos_cf_data <- function(
                            commands_txt,
                            "\n")
   #### 11. download data
-  if (download == TRUE) {
-    system(command = system_command)
-    file.remove(commands_txt)
-  } else if (download == FALSE) {
-    return(cat(paste0("Skipping data download.\n")))
-  }
+  execute_download(download = download,
+                   system_command = system_command,
+                   commands_txt = commands_txt)
 }
