@@ -1,13 +1,17 @@
 ## A suite of functions to check output data
-## Last edited 10/05/2023
-## Insang Song
+## Output data refers to outputs of base/meta learners
+## Last edited 11/13/2023
 
-#' Check output locations are in the reference spatial domain of the mainland US
+#' Check output locations are in
+#' the reference spatial domain of the mainland US
 #'
 #' @param model_output sf/sftime object of the model output
 #' @param spatial_domain sf/sftime object of spatial domain
 #' @return A logical vector of length nrow(model_output)
 #' @author Insang Song
+#' @importFrom sf st_transform
+#' @importFrom sf st_geometry
+#' @importFrom sf st_within
 #' @export
 check_output_locs_are_valid <- function(
     model_output,
@@ -18,14 +22,19 @@ check_output_locs_are_valid <- function(
   # check if two inputs have the same crs,
   # then transform spatial domain if the two crs are different
   if (!identical(sf::st_crs(model_output), sf::st_crs(spatial_domain))) {
-    spatial_domain <- sf::st_transform(spatial_domain, sf::st_crs(model_output))
+    spatial_domain <-
+      sf::st_transform(spatial_domain, sf::st_crs(model_output))
   }
 
   model_output <- sf::st_geometry(model_output)
   # evaluate if the model output is within the spatial domain
   # sparse argument chooses if return will be a list (TRUE) or a matrix (FALSE)
-  checked <- as.vector(sf::st_within(model_output,
-                                     spatial_domain, sparse = FALSE))
+  checked <- as.vector(
+    sf::st_within(model_output,
+      spatial_domain,
+      sparse = FALSE
+    )
+  )
   return(checked)
 }
 
@@ -39,7 +48,7 @@ check_output_locs_are_valid <- function(
 #' @param observation a data.frame with observations
 #' @param observation_mean_name character(1). field name of observations
 #' in observation object.
-#' @param tolerance_factor numeric(1). denominator(min) multiplier(max)
+#' @param tolerance_factor numeric(1). denominator (min) or multiplier (max)
 #' @return Logical value indicating the mean values are within the range or not.
 #' @author Insang Song
 #' @export
@@ -65,35 +74,73 @@ check_means_are_valid <- function(
   min_vec_output <- min(vec_output)
   max_vec_output <- max(vec_output)
   # evaluate if the output means are within the bounds
-  checked <- (min_vec_output >= threshold_lower &&
+  checked <- (
+              min_vec_output >= threshold_lower &&
                 max_vec_output <= threshold_upper)
   return(checked)
 }
 
+#' Check if the output prediction variances are non-negative
+#'
+#' @param model_output sf/sftime object of model output
+#' @param model_variance_name character(1). the name of layer where variance
+#' values are stored
+#' @return Logical value indicating the variance are valid (TRUE) or not.
+#' @author Kyle P Messier
+#' @export
+check_variances_are_valid <- function(
+  model_output,
+  model_variance_name = "prediction_variance"
+) {
+
+  # clean output
+  model_output <- model_output[[model_variance_name]]
+  # "flatten" the variance layer
+  vec_output <- unlist(model_output)
+
+  # evaluate if the output variances are non-negative
+  checked <- (
+    all(vec_output > 0)
+  )
+  return(checked)
+}
 
 
 #' Check if the output is with the valid coordinate reference system
 #'
-#' @param model_output sf/sftime object of model output.
+#' @param model_output Spat*/sf* object of model output.
 #' @param crs_list a character/integer vector of acceptable CRS.
 #' Default is c("EPSG:4326", "EPSG:5070")
 #' @return A logical value indicating the model is compliant to one of
 #'  elements in crs_list.
 #' @author Insang Song
+#' @importFrom methods is
+#' @importFrom sf st_crs
+#' @importFrom terra crs
 #' @export
 check_crs_is_valid <- function(
     model_output,
     crs_list = c("EPSG:4326", "EPSG:5070")) {
-  crs_output <- sf::st_crs(model_output)
-  checked <- sapply(crs_list, function(x) crs_output == sf::st_crs(x))
+  detected_class <- class(model_output)[[1]]
+  detect_fun <- switch(detected_class,
+    sf = sf::st_crs,
+    sftime = sf::st_crs,
+    SpatVector = terra::crs,
+    SpatRaster = terra::crs,
+    SpatRasterDataset = terra::crs
+  )
+
+  crs_output <- detect_fun(model_output)
+  checked <- sapply(
+    crs_list,
+    function(x) detect_fun(crs_output) == detect_fun(x)
+  )
   checked <- any(checked)
   return(checked)
 }
 
 
-
-
-#' Check if the output covariates are complete (TODO)
+#' Check if the output covariates are complete
 #'
 #' @param model_output sf/sftime object of model output.
 #' @param fields_to_check character(varying).
@@ -104,6 +151,8 @@ check_crs_is_valid <- function(
 #' TRUE means there are NA values at least one data value) or a list
 #' (when report_fields_na is TRUE) object.
 #' A list includes the list of fields that include NAs.
+#' @importFrom sf st_drop_geometry
+#' @importFrom methods is
 #' @export
 #' @author Insang Song
 check_data_completeness <- function(
