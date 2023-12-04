@@ -38,8 +38,9 @@ generic_base_learner <- function(response, covariate, obs_locs, model_attr) {
 #' @examples NULL
 generic_meta_learner <- function(base_predictor_list, pred_loc) {
   # check that inputs are as expected
-  if (any(is.na(base_predictor_list)) || any(is.na(pred_loc)))
+  if (any(is.na(base_predictor_list)) || any(is.na(pred_loc))) {
     print("Null input")
+  }
   # for each prediction location, compute the set of predictions then apply meta
   n_predictors <- length(base_predictor_list)
   n_pred_locs <- length(pred_loc)

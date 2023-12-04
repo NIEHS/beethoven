@@ -16,6 +16,18 @@ testthat::test_that("Output CRS is valid", {
   iscrsvalid <- check_crs_is_valid(model_results)
   testthat::expect_equal(iscrsvalid, TRUE)
 
+  # terra case:
+  # due to WKT2/WKT version discrepancy and file export
+  # behavior in GDAL, the system-default EPSG:4326 (ensemble)
+  # is different from what we get at importing (EPSG:4326 plain)
+  # In this test, we assume that the crs is EPSG:4326,
+  # then "EPSG:4326" is explicitly declared in crs argument in vect.
+  # TODO: follow issues in WKT2/CRS handling in different file formats
+  # Will consider "OGC:CRS84" (non-3D GCS)
+  model_results_t <- terra::vect(path_results, crs = "EPSG:4326")
+  iscrsvalid_t <- check_crs_is_valid(model_results_t)
+  testthat::expect_equal(iscrsvalid_t, TRUE)
+
   model_results_2163 <- sf::st_transform(model_results, "EPSG:2163")
   crsnotvalid <- check_crs_is_valid(model_results_2163)
   testthat::expect_equal(crsnotvalid, FALSE)
@@ -50,7 +62,31 @@ testthat::test_that("Predicted means are within a proper range", {
   testthat::expect_equal(ismeanvalid, TRUE)
 })
 
-
+#' @author Kyle Messier, Insang Song, Eva Marques
+#' @description
+#' unit testing for the model output has positive variances
+testthat::test_that("Predicted variances are positive", {
+  withr::local_package("sf")
+  withr::local_package("dplyr")
+  withr::local_options(list(sf_use_s2 = FALSE))
+  # 1. expect to pass when ALL variances are positive
+  prediction_variance <- list(NA, NA)
+  names(prediction_variance) <- c("prediction_variance", "crs_dt")
+  prediction_variance[[1]] <- stats::rgamma(100, 8, 0.3)
+  prediction_variance[[2]] <- "EPSG:4326"
+  isvarpositive <-
+    check_variances_are_valid(
+      prediction_variance
+    )
+  testthat::expect_equal(isvarpositive, TRUE)
+  # 2. expect to fail when ANY variances are negative
+  prediction_variance[[1]][1] <- -1
+  isvarpositive <-
+    check_variances_are_valid(
+      prediction_variance
+    )
+  testthat::expect_equal(isvarpositive, FALSE)
+})
 
 #' @author Insang Song
 #' @description
@@ -117,9 +153,18 @@ testthat::test_that("MERRA2 covariate is not NA", {
   merra2_check <- check_data_completeness(model_results, merra_name)
   testthat::expect_equal(merra2_check, FALSE)
 
-  merra2_check_true <- check_data_completeness(model_results, merra_name, TRUE)
+  merra2_check_true <-
+    check_data_completeness(
+                            model_results,
+                            merra_name,
+                            TRUE)
   testthat::expect_equal(methods::is(merra2_check_true, "list"), TRUE)
 
   merra2_null <- character(0)
-  testthat::expect_error(check_data_completeness(merra2_null, merra_name, TRUE))
+  testthat::expect_error({
+    check_data_completeness(
+                            merra2_null,
+                            merra_name,
+                            TRUE)
+  })
 })

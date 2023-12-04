@@ -4,7 +4,7 @@
 [![lint](https://github.com/Spatiotemporal-Exposures-and-Toxicology/NRTAPmodel/actions/workflows/lint.yaml/badge.svg)](https://github.com/Spatiotemporal-Exposures-and-Toxicology/NRTAPmodel/actions/workflows/lint.yaml)
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
-# Air Pollution Data for the Masses: An Open-Access, Tested, Updated PM<sub>2.5</sub> Hybrid Model 
+# Air Pollution Data for the Masses: An Open-Access, Test-Driven, and Reproducible Pipeline  PM<sub>2.5</sub> Hybrid Model 
  Group Project for the Spatiotemporal Exposures and Toxicology group with help from friends :smiley: :cowboy_hat_face: :earth_americas:
 
 ## GitHub Push/Pull Workflow
@@ -24,9 +24,9 @@ experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](h
 ```mermaid
 
 flowchart LR
-    subgraph "Baked-In Reanalysis"
+    subgraph "Targets: Make-like Reproducible Analysis Pipeline"
     direction LR
-    A[AQS Data] --> B[Generate Covariates]--> C[Fit Base Learners]-->D[Fit Meta Learners]-->E[Summary Stats]-->F[Predictions]
+    A[AQS Data] --> B[Generate Covariates]--> C[Fit Base Learners]-->D[Fit Meta Learners]-->E[Predictions]-->F[Summary Stats]
     end
 ```
 ##  Unit and Integration Testing 
