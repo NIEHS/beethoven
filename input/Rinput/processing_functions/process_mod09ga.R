@@ -255,4 +255,4 @@ foreach(
   }
 
 saveRDS(resdf_mod09_surfref,
-    file = "/ddn/gs1/home/songi2/NRTAP_Covar_MOD19GA_B1_B7.rds")
+    file = "/ddn/gs1/home/songi2/NRTAP_Covar_MOD09GA_B1_B7.rds")
