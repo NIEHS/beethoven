@@ -11,7 +11,7 @@ test_that("Check extract_nlcd_ratio works", {
     vect(., crs = "EPSG:4326")
   getwd()
   path_testdata <- "../testdata/"
-
+  
   # CHECK INPUT (error message)
   # -- buf_radius is numeric
   expect_error(
@@ -91,8 +91,8 @@ test_that("Check extract_nlcd_ratio works", {
   # -- initial names are still in the output SpatVector
   expect_true(all(names(eg_data) %in% names(output)))
   # -- check the value of some of the points in the US
-  expect_equal(output$frac_EFO_2021_3000m[1], 0.7941, tolerance = 1e-7)
-  expect_equal(output$frac_EFO_2021_3000m[2], 0.9987, tolerance = 1e-7)
+  expect_equal(output$frac_EFO_2021_3000m[1], 0.7940682, tolerance = 1e-7)
+  expect_equal(output$frac_SHB_2021_3000m[2], 0.9987249, tolerance = 1e-7)
   # -- class fraction rows should sum to 1
   expect_equal(rowSums(as.data.frame(output[, 2:ncol(output)])),
     rep(1, 2),
