@@ -37,10 +37,12 @@ nlcd_classes <- as.data.frame(nlcd_classes)
 #' @param buf_radius numeric (non-negative) giving the
 #' radius of buffer around points
 #' @param year numeric giving the year of NLCD data used
+#' @param nlcd_path character giving nlcd data path
 #' @export
 calc_nlcd_ratio <- function(data_vect,
                             buf_radius = 1000,
-                            year = 2021) {
+                            year = 2021, 
+                            nlcd_path) {
   # check inputs
   if (!is.numeric(buf_radius)) {
     stop("buf_radius is not a numeric.")
@@ -52,11 +54,16 @@ calc_nlcd_ratio <- function(data_vect,
     stop("year is not a numeric.")
   }
   if (class(data_vect)[1] != "SpatVector") {
-    stop("data_vect is not a terra::SpatVector")
+    stop("data_vect is not a terra::SpatVector.")
+  }
+  if (!is.character(nlcd_path)) {
+    stop("nlcd_path is not a character.")
+  }
+  if (!file.exists(nlcd_path)) {
+    stop("nlcd_path does not exist.")
   }
   # open nlcd file corresponding to the year
-  path_data <- "./input/nlcd/raw/"
-  nlcd_file <- list.files(path_data,
+  nlcd_file <- list.files(nlcd_path,
                           pattern = paste0("nlcd_", year, "_.*.tif$"),
                           full.names = TRUE)
   if (length(nlcd_file) == 0) {
