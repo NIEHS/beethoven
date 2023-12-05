@@ -2,33 +2,6 @@
 
 globalVariables(c("us_states", "%>%"))
 
-nlcd_classes <- list(value = c(0, 11, 21, 22, 23, 24, 31, 41, 42, 43, 52,
-                               71, 81, 82, 90, 95),
-                     class = c("Unc", "WTR", "OSD", "LID", "MID", "HID",
-                               "BRN", "DFO", "EFO", "MFO", "SHB",
-                               "GRS", "PAS", "CRP", "WDW", "EHW"),
-                     names = c("Unclassified",
-                               "Open Water",
-                               "Developed, Open Space",
-                               "Developed, Low Intensity",
-                               "Developed, Medium Intensity",
-                               "Developed, High Intensity",
-                               "Barren Land",
-                               "Deciduous Forest",
-                               "Evergreen Forest",
-                               "Mixed Forest",
-                               "Shrub/Scrub",
-                               "Herbaceous",
-                               "Hay/Pasture",
-                               "Cultivated Crops",
-                               "Woody Wetlands",
-                               "Emergent Herbaceous Wetlands"),
-                     col = c("white", "#476ba1", "#decaca", "#d99482",
-                             "#ee0000", "#ab0000", "#b3aea3", "#68ab63",
-                             "#1c6330", "#b5ca8f", "#ccba7d",  "#e3e3c2",
-                             "#dcd93d", "#ab7028", "#bad9eb", "#70a3ba"))
-nlcd_classes <- as.data.frame(nlcd_classes)
-
 
 #' Compute land cover classes ratio in circle buffers around points
 #'
@@ -93,6 +66,7 @@ calc_nlcd_ratio <- function(data_vect,
   nlcd_at_bufs <- nlcd_at_bufs[names(nlcd_at_bufs)[grepl("frac_",
                                                          names(nlcd_at_bufs))]]
   # change column names
+  nlcd_classes <- read.csv("../inst/extdata/nlcd_classes.csv")
   nlcd_names <- names(nlcd_at_bufs) %>%
     sub(pattern = "frac_", replacement = "") %>%
     as.numeric()

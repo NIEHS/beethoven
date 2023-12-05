@@ -4,7 +4,7 @@ author: "Eva Marques"
 output: rmarkdown::html_vignette
 date: "2023-11-27"
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{NLCD ratio: calculation at monitor locations}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -17,7 +17,6 @@ pkgs <- c(
   "data.table",
   "sf",
   "spData",
-  "gdalUtilities",
   "ggplot2",
   "scatterpie"
 )
@@ -87,14 +86,44 @@ aqs_mon <- rbind(a, b) %>%
 ## NLCD classes
 
 ```{r}
-source("../R/calc_nlcd_ratio.R")
+nlcd_classes <- list(value = c(0, 11, 21, 22, 23, 24, 31, 41, 42, 43, 52,
+                               71, 81, 82, 90, 95),
+                     class = c("Unc", "WTR", "OSD", "LID", "MID", "HID",
+                               "BRN", "DFO", "EFO", "MFO", "SHB",
+                               "GRS", "PAS", "CRP", "WDW", "EHW"),
+                     names = c("Unclassified",
+                               "Open Water",
+                               "Developed, Open Space",
+                               "Developed, Low Intensity",
+                               "Developed, Medium Intensity",
+                               "Developed, High Intensity",
+                               "Barren Land",
+                               "Deciduous Forest",
+                               "Evergreen Forest",
+                               "Mixed Forest",
+                               "Shrub/Scrub",
+                               "Herbaceous",
+                               "Hay/Pasture",
+                               "Cultivated Crops",
+                               "Woody Wetlands",
+                               "Emergent Herbaceous Wetlands"),
+                     col = c("white", "#476ba1", "#decaca", "#d99482",
+                             "#ee0000", "#ab0000", "#b3aea3", "#68ab63",
+                             "#1c6330", "#b5ca8f", "#ccba7d",  "#e3e3c2",
+                             "#dcd93d", "#ab7028", "#bad9eb", "#70a3ba"))
+nlcd_classes <- as.data.frame(nlcd_classes)
+
 nlcd_classes
+
+# write in ./inst/extdata
+write.csv(nlcd_classes, "../inst/extdata/nlcd_classes.csv")
 ```
 
 
 ## Compute NLCD ratio in 100m buffers
 
 ```{r}
+source("../R/calc_nlcd_ratio.R")
 start <- Sys.time()
 aqs_mon_nlcd <- calc_nlcd_ratio(
   data_vect = aqs_mon,
