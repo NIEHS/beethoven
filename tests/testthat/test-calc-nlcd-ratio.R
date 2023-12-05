@@ -10,7 +10,6 @@ test_that("Check extract_nlcd_ratio works", {
     vect(., crs = "EPSG:4326")
   getwd()
   path_testdata <- "../testdata/"
-  
   # CHECK INPUT (error message)
   # -- buf_radius is numeric
   expect_error(
