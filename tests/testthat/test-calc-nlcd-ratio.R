@@ -1,4 +1,3 @@
-withr::local_package("dplyr")
 withr::local_package("spData")
 
 test_that("Check extract_nlcd_ratio works", {
