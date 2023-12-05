@@ -48,7 +48,7 @@ download_data <-
 #' will be created.
 #' @returns NULL
 #' @export
-download_check_dir_exists <-
+download_setup_dir <-
   function(directory) {
     if (!dir.exists(directory)) {
       dir.create(directory, recursive = TRUE)
@@ -57,39 +57,22 @@ download_check_dir_exists <-
 
 
 #' Sanitize path to end with a forward slash
-#' @param directory_to_download character(1). Path
-#' @param directory_to_save character(1). Path
-#' @returns A list of length 2
-#' - \code{$directory_to_download}: directory to download data.
-#' - \code{$directory_to_save}: directory to save data.
+#' @param directory character(1). Path
+#' @returns character ending with a forward slash.
 #' @export
 download_sanitize_path <-
-  function(directory_to_download, directory_to_save) {
+  function(directory) {
     #### 1. directory setup
-    chars_dir_download <- nchar(directory_to_download)
-    chars_dir_save <- nchar(directory_to_save)
-    if (substr(directory_to_download,
-               chars_dir_download,
-               chars_dir_download) != "/") {
-      directory_to_download <-
-        paste(directory_to_download,
+    chars_dir <- nchar(directory)
+    if (substr(directory,
+               chars_dir,
+               chars_dir) != "/") {
+      directory <-
+        paste(directory,
               "/",
               sep = "")
     }
-    if (substr(directory_to_save,
-               chars_dir_save,
-               chars_dir_save) != "/") {
-      directory_to_save <-
-        paste(directory_to_save,
-              "/",
-              sep = "")
-    }
-    sanitized <-
-      list(
-        directory_to_download = directory_to_download,
-        directory_to_save = directory_to_save
-      )
-    return(sanitized)
+    return(directory)
   }
 
 
@@ -102,31 +85,69 @@ download_sanitize_path <-
 download_permit <-
   function(data_download_acknowledgement) {
     if (!data_download_acknowledgement) {
-      cat(paste0("Data download acknowledgement is set to FALSE.",
+      stop(paste0("Data download acknowledgement is set to FALSE.",
                  "Please acknowledge that the data downloaded using this",
                  "function may be very large and use lots of machine storage",
-                 "and memory."))
-      stop()
+                 "and memory.\n"))
     }
   }
 
 
 
-#' Run download commands
-#' @param download_command character. Command that can be run in
-#' console/terminal.
+
+#' download_run: execute or skip `system_command` in data download function.
+#' 
+#' @description
+#' Execute or skip the commands listed in the ...wget/curl_commands.txt file
+#' produced by one of the data download functions.
+#' @param download logical(1). Execute (`TRUE`) or skip (`FALSE`) download.
+#' @param system_command character(1). Linux command to execute downloads.
+#' Inherited from data download function.
+#' @param commands_txt character(1).
 #' @returns NULL
 #' @export
-download_run <-
+download_run <- function(
+  download = FALSE,
+  system_command = NULL,
+  commands_txt = NULL
+) {
+  if (download == TRUE) {
+    cat(paste0("Downloading requested files...\n"))
+    system(command = system_command)
+    cat(paste0("Requested files have been downloaded.\n"))
+    file.remove(commands_txt)
+  } else {
+    cat(paste0("Skipping data download.\n"))
+    return(NULL)
+  }
+}
+
+
+
+#' Start sink download commands into a text file
+#' @param command_txt character(1). file path to export commands.
+#' @returns NULL
+#' @export
+download_sink <-
   function(
-    download_command
+    command_txt
   ) {
-  cat(paste0("Downloading requested file...\n"))
-  system(command = download_command)
-  Sys.sleep(2L)
-  cat(paste0("Requested file downloaded.\n"))
+    if (file.exists(command_txt)) {
+      file.remove(command_txt)
+    }
+    sink(file = command_txt, append = FALSE)
   }
 
+#' End sink download commands into a text file
+#' @param command_txt character(1). file path to export commands.
+#' @returns NULL
+#' @export
+download_unsink <-
+  function(
+    command_txt
+  ) {
+    sink(NULL)
+  }
 
 #' Unzip downloaded data
 #' @param download_name character(1). Full zip file path
@@ -194,14 +215,13 @@ download_ecoregion <- function(
   if (!level %in% c(2, 3)) {
     stop("level should be one of 2 or 3.\n")
   }
-  download_check_dir_exists(directory_to_save)
-  download_check_dir_exists(directory_to_download)
+  download_setup_dir(directory_to_save)
+  download_setup_dir(directory_to_download)
 
-  path_sanitized <-
-    download_sanitize_path(directory_to_download = directory_to_download,
-                           directory_to_save = directory_to_save)
-  directory_to_download <- path_sanitized$directory_to_download
-  directory_to_save <- path_sanitized$directory_to_save
+  directory_to_download <-
+    download_sanitize_path(directory = directory_to_download)
+  directory_to_save <-
+    download_sanitize_path(directory = directory_to_save)
 
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
   #### 3. Check the presence of file

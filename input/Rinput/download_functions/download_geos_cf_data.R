@@ -36,14 +36,9 @@ download_geos_cf_data <- function(
   download = FALSE
 ) {
   #### 1. directory setup
-  directory_to_save <- directory_setup(directory_to_save)
+  directory_to_save <- download_setup_dir(directory_to_save)
   #### 2. check for data download acknowledgement
-  if (data_download_acknowledgement == FALSE) {
-    stop(paste0("Data download acknowledgement is set to FALSE. ",
-                "Please acknowledge that the data downloaded using this ",
-                "function may be very large and use lots of machine storage ",
-                "and memory.\n"))
-  }
+  download_permit(data_download_acknowledgement = data_download_acknowledgement)
   #### 2. check for collection
   if (is.null(collection) == TRUE) {
     stop(paste0("Please select a GEOS-CF collection.\n"))
@@ -119,7 +114,7 @@ download_geos_cf_data <- function(
                            commands_txt,
                            "\n")
   #### 11. download data
-  execute_download(download = download,
-                   system_command = system_command,
-                   commands_txt = commands_txt)
+  download_run(download = download,
+               system_command = system_command,
+               commands_txt = commands_txt)
 }
