@@ -35,7 +35,15 @@ download_narr_monolevel_data <- function(
   download = FALSE
 ) {
   #### 1. directory setup
-  directory_to_save <- directory_setup(directory_to_save)
+  chars_dir_save <- nchar(directory_to_save)
+  if (substr(directory_to_save, chars_dir_save, chars_dir_save) != "/") {
+    directory_to_save <- paste(directory_to_save,
+                               "/",
+                               sep = "")
+  }
+  if (dir.exists(directory_to_save) == FALSE) {
+    dir.create(directory_to_save)
+  }
   #### 2. check for data download acknowledgement
   if (data_download_acknowledgement == FALSE) {
     stop(paste0("Data download acknowledgement is set to FALSE. Please",
@@ -92,8 +100,12 @@ download_narr_monolevel_data <- function(
                            commands_txt,
                            "\n")
   #### 11. download data
-  execute_download(download = download,
-                   system_command = system_command,
-                   commands_txt = commands_txt)
+  if (download == TRUE) {
+    cat(paste0("Downloading requested files...\n"))
+    system(command = system_command)
+    cat(paste0("Requested files have been downloaded.\n"))
+    file.remove(commands_txt)
+  } else if (download == FALSE) {
+    return(cat(paste0("Skipping data download.\n")))
+  }
 }
-
