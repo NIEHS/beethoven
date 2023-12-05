@@ -79,5 +79,5 @@ tools/metalearner_test
 # NASA Earthdata login credentials
 .dodsrc
 
-# MODIS raw data
-input/data/modis
+# raw data
+input/data

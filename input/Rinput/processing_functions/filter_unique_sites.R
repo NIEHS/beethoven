@@ -11,8 +11,6 @@ pkgs <- c("data.table", "sf", "terra")
 invisible(suppressMessages(sapply(pkgs, check_installed_load)))
 options(sf_use_s2 = FALSE)
 
-
-
 #' Filter unique sites with or without temporal information
 #' @param path_measurement character(1). Path to daily measurement data.
 #' @param include_time logical(1). Should the output include
@@ -34,13 +32,14 @@ options(sf_use_s2 = FALSE)
 filter_unique_sites <-
   function(
     path_measurement = "./tests/testdata/daily_88101_2018-2022.rds",
+    path_stdt_functions = "./R/manipulate_spacetime_data.R",
     include_time = FALSE,
     date_start = "2018-01-01",
     date_end = "2022-12-31"
   ) {
     sites <- readRDS(path_measurement)
-    # data manipulation
-    source("./R/manipulate_spacetime_data.R")
+    # data manipulation functions
+    source(path_stdt_functions)
 
     ## get unique sites
     ##
@@ -57,7 +56,7 @@ filter_unique_sites <-
     sites_v <- as.data.table(sites_v)
 
     # subset mainland
-    sites_v <- sites_v[!grepl("^(02|15|72|78|6)", site_id), ]
+    sites_v <- sites_v[!grepl("^(02|15|72|78|6|80)", site_id), ]
 
     # NAD83 to WGS84
     sites_v_nad <-
@@ -82,5 +81,5 @@ filter_unique_sites <-
     }
 
     return(final_sites)
-}
+  }
 # File ends

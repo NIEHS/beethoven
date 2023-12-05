@@ -34,6 +34,8 @@
 #' @author Mitchell Manware
 #' @return NULL;
 #' @export
+
+# nolint start
 download_sedac_population_data <- function(
   year = "2020",
   data_format = "GeoTIFF",
@@ -184,3 +186,5 @@ download_sedac_population_data <- function(
     cat(paste0("Downloaded zip files deleted.\n"))
   }
 }
+
+# nolint end

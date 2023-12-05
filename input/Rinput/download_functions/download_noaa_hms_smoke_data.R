@@ -31,6 +31,8 @@
 #' @author Mitchell Manware, Insang Song
 #' @return NULL;
 #' @export
+
+# nolint start
 download_noaa_hms_smoke_data <- function(
   date_start = "2023-09-01",
   date_end = "2023-09-01",
@@ -160,3 +162,5 @@ download_noaa_hms_smoke_data <- function(
   }
   # nocov end
 }
+
+# nolint end

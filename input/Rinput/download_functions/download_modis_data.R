@@ -1,6 +1,6 @@
 ################################################################################
 # Date created: 2023-10-12
-# Date modified: 2023-11-27
+# Date modified: 2023-12-01
 ################################################################################
 
 ################################################################################
@@ -49,6 +49,8 @@
 #' @importFrom stringr str_pad
 >>>>>>> 4cd10ed8eecd928be3de31c7eac75866a7beaaba
 #' @export
+
+# nolint start
 download_modis_data <- function(
     date_start = "2023-09-01",
     date_end = "2023-09-01",
@@ -119,9 +121,12 @@ download_modis_data <- function(
     stop("Please select a data version.\n")
   }
   #### 6. check for valid horizontal tiles
-  # revised to reduce cyclomatic complexity
-  stopifnot(all(horizontal_tiles %in% seq(0, 35)))
-  stopifnot(all(vertical_tiles %in% seq(0, 17)))
+  if (!all(horizontal_tiles %in% seq(0, 35))) {
+    stop("Horizontal tiles are not in the proper range [0, 35].\n")
+  }
+  if (!all(vertical_tiles %in% seq(0, 17))) {
+    stop("Vertical tiles are not in the proper range [0, 17].\n")
+  }
 
   #### 8. Reuse ladsweb home url
   ladsurl <- "https://ladsweb.modaps.eosdis.nasa.gov/"
@@ -283,3 +288,5 @@ download_modis_data <- function(
   message("Requests were processed.\n")
 
 }
+
+# nolint end

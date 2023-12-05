@@ -15,32 +15,29 @@
 #' @param site_id character(1). Name of site id (not monitor id)
 #' @param poc_name character(1). Name of column containing POC values.
 #' @author Insang Song
-#' @return a data.table object
+#' @returns a data.table object
+#' @import dplyr
+#' @importFrom data.table data.table
+#' @importFrom rlang sym
 #' @export
 filter_minimum_poc <- function(input_df, site_id, poc_name) {
   #nocov start
-    if (!require(pacman)) {
-        install.packages('pacman')
-        library(pacman)
-    }
-    p_load(data.table, dplyr, rlang, tidytable)
+  if (!is(input_df, "data.frame")) {
+    stop("input_df should be data.frame/tbl_df/data.table.\n")
+  }
+  if (!is.character(site_id)) {
+    stop("site_id should be character.\n")
+  }
+  if (!is.character(poc_name)) {
+    stop("poc_name should be character.\n")
+  }
 
-    if (!is(input_df, "data.frame")) {
-        stop("input_df should be data.frame/tbl_df/data.table.\n")
-    }
-    if (!is.character(site_id)) {
-        stop("site_id should be character.\n")
-    }
-    if (!is.character(poc_name)) {
-        stop("poc_name should be character.\n")
-    }
-
-    poc_filtered = input_df |>
-        tidytable::group_by(!!sym(site_id)) |>
-        tidytable::filter(!!sym(poc_name) == min(!!sym(poc_name))) |>
-        tidytable::ungroup() |>
-        data.table()
-    return(poc_filtered)
-  #nocov end
+  poc_filtered <- input_df |>
+    dplyr::group_by(!!sym(site_id)) |>
+    dplyr::filter(!!sym(poc_name) == min(!!sym(poc_name))) |>
+    dplyr::ungroup() |>
+    data.table::data.table()
+return(poc_filtered)
+#nocov end
 }
 
