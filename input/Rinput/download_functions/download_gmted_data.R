@@ -42,24 +42,8 @@ download_gmted_data <- function(
   download = FALSE
 ) {
   #### 1. directory setup
-  chars_dir_download <- nchar(directory_to_download)
-  chars_dir_save <- nchar(directory_to_save)
-  if (substr(directory_to_download,
-             chars_dir_download,
-             chars_dir_download) != "/") {
-    directory_to_download <- paste(directory_to_download,
-                                   "/",
-                                   sep = "")
-  }
-  if (substr(directory_to_save, chars_dir_save, chars_dir_save) != "/") {
-    directory_to_save <- paste(directory_to_save, "/", sep = "")
-  }
-  if (dir.exists(directory_to_download) == FALSE) {
-    dir.create(directory_to_download)
-  }
-  if (dir.exists(directory_to_save) == FALSE) {
-    dir.create(directory_to_save)
-  }
+  directory_to_download <- directory_setup(directory_to_download)
+  directory_to_save <- directory_setup(directory_to_save)
   #### 2. check for data download acknowledgement
   if (data_download_acknowledgement == FALSE) {
     stop(paste0("Data download acknowledgement is set to FALSE.",
@@ -138,14 +122,9 @@ download_gmted_data <- function(
                            commands_txt,
                            "\n")
   #### 17 download data
-  if (download == TRUE) {
-    cat(paste0("Downloading requested file...\n"))
-    system(command = system_command)
-    Sys.sleep(5L)
-    cat(paste0("Requested file downloaded.\n"))
-  } else if (download == FALSE) {
-    return(cat(paste0("Skipping data download.\n")))
-  }
+  execute_download(download = download,
+                   system_command = system_command,
+                   commands_txt = commands_txt)
   #### 18. end if unzip == FALSE
   if (unzip == FALSE) {
     return(cat(paste0("Downloaded files will not be unzipped.\n")))
