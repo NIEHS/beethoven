@@ -66,7 +66,8 @@ calc_nlcd_ratio <- function(data_vect,
   nlcd_at_bufs <- nlcd_at_bufs[names(nlcd_at_bufs)[grepl("frac_",
                                                          names(nlcd_at_bufs))]]
   # change column names
-  nlcd_classes <- read.csv("./inst/extdata/nlcd_classes.csv")
+  fpath <- system.file("extdata", "nlcd_classes.csv", package="NRTAPmodel")
+  nlcd_classes <- read.csv(fpath)
   nlcd_names <- names(nlcd_at_bufs) %>%
     sub(pattern = "frac_", replacement = "") %>%
     as.numeric()
