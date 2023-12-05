@@ -1,8 +1,8 @@
 withr::local_package("dplyr")
 
 test_that("Check extract_nlcd_ratio works", {
-  point_us1 <- cbind(lon = -114.7, lat = 38.9, dem = 40) 
-  point_us2 <- cbind(lon = -114, lat = 39, dem = 15) 
+  point_us1 <- cbind(lon = -114.7, lat = 38.9, dem = 40)
+  point_us2 <- cbind(lon = -114, lat = 39, dem = 15)
   point_ak <- cbind(lon = -155.997, lat = 69.3884, dem = 100) # alaska
   point_fr <- cbind(lon = 2.957, lat = 43.976, dem = 15) # france
   eg_data <- rbind(point_us1, point_us2, point_ak, point_fr) %>%
@@ -13,8 +13,8 @@ test_that("Check extract_nlcd_ratio works", {
   # CHECK INPUT (error message)
   # -- buf_radius is numeric
   expect_error(
-    calc_nlcd_ratio(data_vect = eg_data, 
-                    buf_radius = "1000", 
+    calc_nlcd_ratio(data_vect = eg_data,
+                    buf_radius = "1000",
                     nlcd_path = path_testdata),
     "buf_radius is not a numeric."
   )
@@ -35,13 +35,13 @@ test_that("Check extract_nlcd_ratio works", {
   # -- year has likely value
   expect_error(
     calc_nlcd_ratio(data_vect = eg_data,
-                    year = 20192, 
+                    year = 20192,
                     nlcd_path = path_testdata),
     "NLCD data not available for this year."
   )
   expect_error(
     calc_nlcd_ratio(data_vect = eg_data,
-                    year = 2020, 
+                    year = 2020,
                     nlcd_path = path_testdata),
     "NLCD data not available for this year."
   )
@@ -57,7 +57,7 @@ test_that("Check extract_nlcd_ratio works", {
                     nlcd_path = 2),
     "nlcd_path is not a character."
   )
-  # -- nlcd_path does not exist 
+  # -- nlcd_path does not exist
   nice_sentence <- "That's one small step for a man, a giant leap for mankind."
   expect_error(
     calc_nlcd_ratio(data_vect = eg_data,
@@ -71,13 +71,13 @@ test_that("Check extract_nlcd_ratio works", {
   expect_no_error(calc_nlcd_ratio(
     data_vect = eg_data,
     year = year,
-    buf_radius = buf_radius, 
+    buf_radius = buf_radius,
     nlcd_path = path_testdata
   ))
   output <- calc_nlcd_ratio(
     data_vect = eg_data,
     year = year,
-    buf_radius = buf_radius, 
+    buf_radius = buf_radius,
     nlcd_path = path_testdata
   )
   # -- returns a SpatVector

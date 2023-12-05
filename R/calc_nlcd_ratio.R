@@ -41,7 +41,7 @@ nlcd_classes <- as.data.frame(nlcd_classes)
 #' @export
 calc_nlcd_ratio <- function(data_vect,
                             buf_radius = 1000,
-                            year = 2021, 
+                            year = 2021,
                             nlcd_path) {
   # check inputs
   if (!is.numeric(buf_radius)) {
