@@ -56,7 +56,7 @@ filter_unique_sites <-
     sites_v <- as.data.table(sites_v)
 
     # subset mainland
-    sites_v <- sites_v[!grepl("^(02|15|72|78|6)", site_id), ]
+    sites_v <- sites_v[!grepl("^(02|15|72|78|6|80)", site_id), ]
 
     # NAD83 to WGS84
     sites_v_nad <-
