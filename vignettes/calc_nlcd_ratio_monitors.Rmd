@@ -99,7 +99,7 @@ start <- Sys.time()
 aqs_mon_nlcd <- calc_nlcd_ratio(
   data_vect = aqs_mon,
   buf_radius = 100,
-  year = 2021, 
+  year = 2021,
   nlcd_path = "/Volumes/set/NLCD/"
 )
 end <- Sys.time()
