@@ -1,4 +1,5 @@
 withr::local_package("dplyr")
+withr::local_package("spData")
 
 test_that("Check extract_nlcd_ratio works", {
   point_us1 <- cbind(lon = -114.7, lat = 38.9, dem = 40)
@@ -8,7 +9,8 @@ test_that("Check extract_nlcd_ratio works", {
   eg_data <- rbind(point_us1, point_us2, point_ak, point_fr) %>%
     as.data.frame() %>%
     vect(., crs = "EPSG:4326")
-  path_testdata <- "./tests/testdata/"
+  getwd()
+  path_testdata <- "../testdata/"
 
   # CHECK INPUT (error message)
   # -- buf_radius is numeric
