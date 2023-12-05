@@ -1,0 +1,17 @@
+linters: linters_with_defaults(
+    line_length_linter(80)
+  )
+exclusions: list(
+    "R/download_geos_cf_data.R" = list(
+      cyclocomp_linter = 30
+    ),
+    "R/download_gmted_data.R" = list(
+      cyclocomp_linter = 34
+    ),
+    "R/download_narr_monolevel_data.R" = list(
+      cyclocomp_linter = 29
+    ),
+    "R/download_narr_p_levels_data.R" = list(
+      cyclocomp_linter = 30
+    )
+  )

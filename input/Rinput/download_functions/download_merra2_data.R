@@ -4,17 +4,26 @@
 ################################################################################
 
 ################################################################################
-#' download_merra2_data:
+#' download_merra2_data: download meteorological and atmospheric data from the
+#' Modern-Era Retrospective analysis for Research and Applications, Version 2
+#' (MERRA-2) model.
 #' @description
+#' The `download_merra2_data()` function accesses and downloads various
+#' meteorological and atmospheric collections from the [Modern-Era]
+#' [Retrospective analysis for Research and Applications, Version 2 (MERRA-2)]
+#' (https://gmao.gsfc.nasa.gov/reanalysis/MERRA-2/).
 #' @param date_start character(1). length of 10. Start date for downloading
 #' data. Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
 #' @param date_end character(1). length of 10. End date for downloading data.
 #' Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
-#' @param collection character(1).
+#' @param collection character(1). MERRA-2 data collection file name.
 #' @param directory_to_save character(1). Directory to save data.
 #' @param data_download_acknowledgement logical(1). By setting `= TRUE` the
 #' user acknowledge that the data downloaded using this function may be very
 #' large and use lots of machine storage and memory.
+#' @param download logical(1). `= FALSE` will generate a `.txt` file containing
+#' all download commands. By setting `= TRUE` the function will download all of
+#' the requested data files.
 #' @author Mitchell Manware
 #' @return NULL;
 #' @export
@@ -23,26 +32,28 @@ download_merra2_data <- function(
   date_start = "2023-09-01",
   date_end = "2023-09-01",
   collection = NULL,
-  directory_to_save = "./input/merra2/raw/",
-  data_download_acknowledgement = FALSE
+  directory_to_save = "../../data/covariates/merra2/",
+  data_download_acknowledgement = FALSE,
+  download = FALSE
 ) {
   #### 1. directory setup
   chars_dir_save <- nchar(directory_to_save)
   if (substr(directory_to_save, chars_dir_save, chars_dir_save) != "/") {
     directory_to_save <- paste0(directory_to_save, "/", sep = "")
   }
+  if (dir.exists(directory_to_save) == FALSE) {
+    dir.create(directory_to_save)
+  }
   #### 2. check for data download acknowledgement
   if (data_download_acknowledgement == FALSE) {
-    cat(paste0("Data download acknowledgement is set to FALSE. ",
-               "Please acknowledge that the data downloaded using this ",
-               "function may be very large and use lots of machine storage ",
-               "and memory.\n"))
-    stop()
+    stop(paste0("Data download acknowledgement is set to FALSE. ",
+                "Please acknowledge that the data downloaded using this ",
+                "function may be very large and use lots of machine storage ",
+                "and memory.\n"))
   }
   #### 2. check for collection
   if (is.null(collection) == TRUE) {
-    cat(paste0("Please select a MERRA2 collection.\n"))
-    stop()
+    stop(paste0("Please select a MERRA2 collection.\n"))
   }
   #### 3. check if collection is recognized
   identifiers <- paste0("inst1_2d_asm_Nx M2I1NXASM 10.5067/3Z173KIE2TPD,",
@@ -92,8 +103,7 @@ download_merra2_data <- function(
   }
   colnames(identifiers_df) <- c("collection_id", "estd_name", "DOI")
   if (!(collection %in% identifiers_df$collection_id)) {
-    cat(paste0("Requested collection is not recognized.\n"))
-    stop()
+    stop(paste0("Requested collection is not recognized.\n"))
   }
   #### 4. define date sequence
   date_start_date_format <- as.Date(date_start, format = "%Y-%m-%d")
@@ -208,7 +218,10 @@ download_merra2_data <- function(
                            commands_txt,
                            "\n")
   #### 11. download data
-  system(command = system_command)
-  #### 12. remove "..._wget_commands.txt"
-  file.remove(commands_txt)
+  if (download == TRUE) {
+    system(command = system_command)
+    file.remove(commands_txt)
+  } else if (download == FALSE) {
+    return(cat(paste0("Skipping data download.\n")))
+  }
 }
