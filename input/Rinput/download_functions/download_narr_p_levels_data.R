@@ -23,7 +23,9 @@
 #' @param download logical(1). `= FALSE` will generate a `.txt` file containing
 #' all download commands. By setting `= TRUE` the function will download all of
 #' the requested data files.
-#' @author Mitchell Manware
+#' @param remove_command logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
+#' the text file containing download commands.
+#' @author Mitchell Manware, Insang Song
 #' @return NULL;
 #' @importFrom stringr str_pad
 #' @export
@@ -33,17 +35,18 @@ download_narr_p_levels_data <- function(
   variables = NULL,
   directory_to_save = "../../data/covariates/narr/",
   data_download_acknowledgement = FALSE,
-  download = FALSE
+  download = FALSE,
+  remove_command = FALSE
 ) {
-  #### 1. directory setup
-  directory_to_save <- download_setup_dir(directory_to_save)
-  #### 2. check for data download acknowledgement
-  if (data_download_acknowledgement == FALSE) {
-    stop(cat(paste0("Data download acknowledgement is set to FALSE. Please ",
-                    "acknowledge that the data downloaded using this function ",
-                    "may be very large and use lots of machine storage and ",
-                    "memory.")))
-  }
+  #### 1. check for data download acknowledgement
+  download_permit(data_download_acknowledgement = data_download_acknowledgement)
+
+  #### 2. directory setup
+  download_setup_dir(directory_to_download)
+  download_setup_dir(directory_to_save)
+  directory_to_download <- download_sanitize_path(directory_to_download)
+  directory_to_save <- download_sanitize_path(directory_to_save)
+
   #### 3. check for variables
   if (is.null(variables) == TRUE) {
     stop(paste0("Please select an NCEP-NARR variable.\n"))
@@ -61,8 +64,12 @@ download_narr_p_levels_data <- function(
   base <- "https://downloads.psl.noaa.gov//Datasets/NARR/Dailies/pressure/"
   #### 8. initiate "..._curl_commands.txt"
   commands_txt <- paste0(directory_to_save,
-                         "narr_p_levels_curl_commands.txt")
-  sink(commands_txt)
+                         "narr_p_levels_",
+                         year_start,
+                         "_",
+                         year_end,
+                         "_curl_commands.txt")
+  download_sink(commands_txt)  
   #### 9. concatenate download commands to "..._curl_commands.txt"
   for (v in seq_along(variables_list)) {
     variable <- variables_list[v]
@@ -107,4 +114,8 @@ download_narr_p_levels_data <- function(
   download_run(download = download,
                system_command = system_command,
                commands_txt = commands_txt)
+  #### 13. Remove command file
+  download_remove_command(commands_txt = commands_txt,
+                          remove = remove_command)
+
 }

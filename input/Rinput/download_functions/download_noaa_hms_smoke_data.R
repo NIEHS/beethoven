@@ -31,44 +31,27 @@
 #' @author Mitchell Manware, Insang Song
 #' @return NULL;
 #' @export
-
-# nolint start
 download_noaa_hms_smoke_data <- function(
   date_start = "2023-09-01",
   date_end = "2023-09-01",
   data_format = "Shapefile",
-  directory_to_download = "../../data/covariates/noaa_hms/",
-  directory_to_save = "../../data/covariates/noaa_hms/",
+  directory_to_download = "./input/data/noaa_hms/",
+  directory_to_save = "./input/data/noaa_hms/",
   data_download_acknowledgement = FALSE,
+  download = FALSE,
   unzip = TRUE,
-  remove_zip = FALSE
+  remove_zip = FALSE,
+  remove_command = FALSE
 ) {
   # nocov start
-  #### 1. directory setup
-  chars_dir_download <- nchar(directory_to_download)
-  chars_dir_save <- nchar(directory_to_save)
-  if (substr(directory_to_download,
-             chars_dir_download,
-             chars_dir_download) != "/") {
-    directory_to_download <- paste(directory_to_download, "/", sep = "")
-  }
-  if (substr(directory_to_save, chars_dir_save, chars_dir_save) != "/") {
-    directory_to_save <- paste(directory_to_save, "/", sep = "")
-  }
-  if (dir.exists(directory_to_download) == FALSE) {
-    dir.create(directory_to_download)
-  }
-  if (dir.exists(directory_to_save) == FALSE) {
-    dir.create(directory_to_save)
-  }
-  #### 2. check for data download acknowledgement
-  if (data_download_acknowledgement == FALSE) {
-    stop(paste0(
-      "Data download acknowledgement is set to FALSE. Please ",
-      "acknowledge that the data downloaded using this function may ",
-      "be very large and use lots of machine storage and memory.\n"
-    ))
-  }
+  #### 1. check for data download acknowledgement
+  download_permit(data_download_acknowledgement = data_download_acknowledgement)
+  #### 2. directory setup
+  download_setup_dir(directory_to_download)
+  download_setup_dir(directory_to_save)
+  directory_to_download <- download_sanitize_path(directory_to_download)
+  directory_to_save <- download_sanitize_path(directory_to_save)
+
   #### 3. check for unzip == FALSE && remove_zip == TRUE
   if (unzip == FALSE && remove_zip == TRUE) {
     stop(paste0("Arguments `unzip = FALSE` and `remove_zip = TRUE` are not ",
@@ -162,5 +145,3 @@ download_noaa_hms_smoke_data <- function(
   }
   # nocov end
 }
-
-# nolint end
