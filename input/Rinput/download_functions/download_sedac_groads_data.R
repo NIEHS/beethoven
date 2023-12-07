@@ -29,60 +29,44 @@
 #' @param download logical(1). `= FALSE` will generate a `.txt` file containing
 #' all download commands. By setting `= TRUE` the function will download all of
 #' the requested data files.
-#' @author Mitchell Manware
+#' @param remove_command logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
+#' the text file containing download commands.
+#' @author Mitchell Manware, Insang Song
 #' @return NULL;
 #' @export
 download_sedac_groads_data <- function(
-  data_format = "Shapefile",
-  data_region = "Americas",
-  directory_to_download = "../../data/covariates/sedac_groads/",
-  directory_to_save = "../../data/covariates/sedac_groads/",
+  data_format = c("Shapefile", "Geodatabase"),
+  data_region = c("Americas", "Global", "Africa", "Asia",
+                  "Europe", "Oceania East", "Oceania West"),
+  directory_to_download = "./input/data/sedac_groads/",
+  directory_to_save = "./input/data/sedac_groads/",
   data_download_acknowledgement = FALSE,
   unzip = TRUE,
   remove_zip = FALSE,
   download = FALSE
 ) {
-  #### 1. directory setup
-  chars_dir_download <- nchar(directory_to_download)
-  chars_dir_save <- nchar(directory_to_save)
-  if (substr(directory_to_download,
-             chars_dir_download,
-             chars_dir_download) != "/") {
-    directory_to_download <- paste(directory_to_download,
-                                   "/",
-                                   sep = "")
-  }
-  if (substr(directory_to_save, chars_dir_save, chars_dir_save) != "/") {
-    directory_to_save <- paste(directory_to_save, "/", sep = "")
-  }
-  if (dir.exists(directory_to_download) == FALSE) {
-    dir.create(directory_to_download)
-  }
-  if (dir.exists(directory_to_save) == FALSE) {
-    dir.create(directory_to_save)
-  }
-  #### 2. check for data download acknowledgement
-  if (data_download_acknowledgement == FALSE) {
-    stop(paste0("Data download acknowledgement is set to FALSE.",
-                "Please acknowledge that the data downloaded using this",
-                "function may be very large and use lots of machine storage",
-                "and memory."))
-  }
+  #### 1. check for data download acknowledgement
+  download_permit(data_download_acknowledgement = data_download_acknowledgement)
+  #### 2. directory setup
+  download_setup_dir(directory_to_download)
+  download_setup_dir(directory_to_save)
+  directory_to_download <- download_sanitize_path(directory_to_download)
+  directory_to_save <- download_sanitize_path(directory_to_save)
+
   #### 3. check for region
-  if (is.null(data_region) == TRUE) {
+  if (is.null(data_region)) {
     stop(paste0("Please select a data region.\n"))
   }
   #### 4. check if region is valid
   regions <- c("Global", "Africa", "Asia", "Europe",
                "Americas", "Oceania East", "Oceania West")
-  if (!(data_region %in% regions)) {
-    stop(paste0("Requested region not recognized.\n"))
-  }
+  data_region <- match.arg(data_region)
   #### 5. check for data format
-  formats <- c("Shapefile", "Geodatabase")
-  if (!(data_format %in% formats)) {
-    stop(paste0("Requested data format not recognized.\n"))
-  }
+  # formats <- c("Shapefile", "Geodatabase")
+  # if (!(data_format %in% formats)) {
+  #   stop(paste0("Requested data format not recognized.\n"))
+  # }
+  formats <- match.arg(formats)
   #### 6. define URL base
   base <- paste0("https://sedac.ciesin.columbia.edu/downloads/data/groads/",
                  "groads-global-roads-open-access-v1/",
@@ -91,7 +75,7 @@ download_sedac_groads_data <- function(
   if (data_format == "Shapefile") {
     format <- "shp"
   } else if (data_format == "Geodatabase") {
-    format <- "gbd"
+    format <- "gdb"
   }
   #### 8. coerce region to lower case
   region <- tolower(data_region)
@@ -119,8 +103,10 @@ download_sedac_groads_data <- function(
   commands_txt <- paste0(directory_to_download,
                          "sedac_groads_",
                          gsub(" ", "_", region),
+                         "_",
+                         Sys.Date(),
                          "_curl_command.txt")
-  sink(commands_txt)
+  download_sink(commands_txt)
   #### 13. concatenate and print download command to "..._curl_commands.txt"
   cat(download_command)
   #### 14. finish "..._curl_commands.txt" file
@@ -130,27 +116,19 @@ download_sedac_groads_data <- function(
                            commands_txt,
                            "\n")
   #### 16. download data
-  if (download == TRUE) {
-    cat(paste0("Downloading requested file...\n"))
-    system(command = system_command)
-    cat(paste0("Requested file downloaded.\n"))
-  } else if (download == FALSE) {
-    return(cat(paste0("Skipping data download.\n")))
-  }
+  download_run(download = download,
+               system_command = system_command,
+               commands_txt = commands_txt)
   #### 17. end if unzip == FALSE
-  if (unzip == FALSE) {
-    return(cat(paste0("Downloaded files will not be unzipped.\n")))
-  }
-  #### 18. unzip downloaded data
-  cat(paste0("Unzipping files...\n"))
-  unzip(download_name, exdir = directory_to_save)
-  cat(paste0("Files unzipped and saved in ",
-             directory_to_save,
-             ".\n"))
-  #### 19. remove zip file
-  if (remove_zip == TRUE) {
-    cat(paste0("Removing downloaded zip file...\n"))
-    file.remove(download_name)
-    cat(paste0("Downloaded zip files deleted.\n"))
-  }
+  download_unzip(file_name = download_name,
+                 directory_to_unzip = directory_to_save,
+                 unzip = unzip)
+
+  #### 18. Remove command file
+  download_remove_command(commands_txt = commands_txt,
+                          remove = remove_command)
+  #### 19. remove zip files
+  download_remove_zips(remove = remove_zip,
+                       download_name = download_name)
+
 }

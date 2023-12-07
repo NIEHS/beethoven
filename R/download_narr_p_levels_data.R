@@ -36,7 +36,7 @@ download_narr_p_levels_data <- function(
   download = FALSE
 ) {
   #### 1. directory setup
-  directory_to_save <- directory_setup(directory_to_save)
+  directory_to_save <- download_setup_dir(directory_to_save)
   #### 2. check for data download acknowledgement
   if (data_download_acknowledgement == FALSE) {
     stop(cat(paste0("Data download acknowledgement is set to FALSE. Please ",
@@ -98,13 +98,13 @@ download_narr_p_levels_data <- function(
     }
   }
   #### 10. finish "..._curl_commands.txt"
-  sink()
+  download_sink(command_txt = commands_txt)
   #### 11. build system command
   system_command <- paste0(". ",
                            commands_txt,
                            "\n")
   #### 12. download data
-  execute_download(download = download,
-                   system_command = system_command,
-                   commands_txt = commands_txt)
+  download_run(download = download,
+               system_command = system_command,
+               commands_txt = commands_txt)
 }

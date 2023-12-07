@@ -27,30 +27,30 @@
 #' Default = `FALSE`.
 #' @param download logical(1). `= FALSE` will generate a `.txt` file containing
 #' all download commands. By setting `= TRUE` the function will download all of
-#' the requested data files.
-#' @author Mitchell Manware
+#' the requested data files. Default is FALSE.
+#' @param remove_command logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
+#' the text file containing download commands. Default is FALSE.
+#' @author Mitchell Manware, Insang Song
 #' @return NULL;
 #' @export
 download_gmted_data <- function(
   statistic = NULL,
   resolution = NULL,
-  directory_to_download = "../../data/covariates/gmted/",
-  directory_to_save = "../../data/covariates/gmted/",
+  directory_to_download = "./input/data/gmted/",
+  directory_to_save = "./input/data/gmted/",
   data_download_acknowledgement = FALSE,
   unzip = TRUE,
   remove_zip = FALSE,
-  download = FALSE
+  download = FALSE,
+  remove_command = FALSE
 ) {
-  #### 1. directory setup
-  directory_to_download <- directory_setup(directory_to_download)
-  directory_to_save <- directory_setup(directory_to_save)
-  #### 2. check for data download acknowledgement
-  if (data_download_acknowledgement == FALSE) {
-    stop(paste0("Data download acknowledgement is set to FALSE.",
-                "Please acknowledge that the data downloaded using this",
-                "function may be very large and use lots of machine storage",
-                "and memory."))
-  }
+  #### 1. check for data download acknowledgement
+  download_permit(data_download_acknowledgement = data_download_acknowledgement)
+  #### 2. directory setup
+  download_setup_dir(directory_to_download)
+  download_setup_dir(directory_to_save)
+  directory_to_download <- download_sanitize_path(directory_to_download)
+  directory_to_save <- download_sanitize_path(directory_to_save)
   #### 3. check for statistic
   if (is.null(statistic) == TRUE) {
     stop(paste0("Please select a GMTED2010 statistic.\n"))
@@ -111,8 +111,11 @@ download_gmted_data <- function(
                          gsub(" ", "", statistic),
                          "_",
                          gsub(" ", "", resolution),
+                         "_",
+                         Sys.Date(),
                          "_curl_command.txt")
-  sink(commands_txt)
+  download_sink(commands_txt)
+  # sink(commands_txt)
   #### 14. concatenate and print download command to "..._curl_commands.txt"
   cat(download_command)
   #### 15. finish "..._curl_commands.txt" file
@@ -122,24 +125,17 @@ download_gmted_data <- function(
                            commands_txt,
                            "\n")
   #### 17 download data
-  execute_download(download = download,
-                   system_command = system_command,
-                   commands_txt = commands_txt)
+  download_run(download = download,
+               system_command = system_command,
+               commands_txt = commands_txt)
   #### 18. end if unzip == FALSE
-  if (unzip == FALSE) {
-    return(cat(paste0("Downloaded files will not be unzipped.\n")))
-  }
-  #### 19 unzip downloaded data
-  cat(paste0("Unzipping files...\n"))
-  unzip(download_name,
-        exdir = directory_to_save)
-  cat(paste0("Files unzipped and saved in ",
-             directory_to_save,
-             ".\n"))
+  download_unzip(file_name = download_name,
+                 directory_to_unzip = directory_to_save,
+                 unzip = unzip)
+  #### 19. Remove command file
+  download_remove_command(commands_txt = commands_txt,
+                          remove = remove_command)
   #### 20. remove zip files
-  if (remove_zip == TRUE) {
-    cat(paste0("Removing download files...\n"))
-    file.remove(download_name)
-    cat(paste0("Download files removed.\n"))
-  }
+  download_remove_zips(remove = remove_zip,
+                       download_name = download_name)
 }
