@@ -345,7 +345,8 @@ download_geos_cf_data <- function(
                    "chm_inst_1hr_g1440x721_p23", "met_inst_1hr_g1440x721_p23"),
   directory_to_save = "./input/data/geos_cf/",
   data_download_acknowledgement = FALSE,
-  download = FALSE
+  download = FALSE,
+  remove_command = FALSE
 ) {
   #### 1. check for data download acknowledgement
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
@@ -372,9 +373,9 @@ download_geos_cf_data <- function(
   #### 6. define time sequence
   collection_end <- substr(collection, nchar(collection), nchar(collection))
   if (collection_end == "1") {
-    time_sequence <- as.character(seq(from = 30, to = 2330, by = 100))
+    time_sequence <- seq(from = 30, to = 2330, by = 100)
   } else if (collection_end == "3") {
-    time_sequence <- as.character(seq(from = 0, to = 2300, by = 100))
+    time_sequence <- seq(from = 0, to = 2300, by = 100)
   }
   time_sequence <- sprintf("%04d", time_sequence)
   #### 7. define URL base

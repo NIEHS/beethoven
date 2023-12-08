@@ -95,9 +95,9 @@ download_run <- function(
 download_remove_command <-
   function(
     commands_txt = NULL,
-    remove = TRUE
+    remove = FALSE
   ) {
-    if (!remove) {
+    if (remove) {
       file.remove(commands_txt)
     }
   }
