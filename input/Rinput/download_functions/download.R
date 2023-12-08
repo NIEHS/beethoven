@@ -1481,10 +1481,12 @@ download_sedac_population_data <- function(
 #' @param data_download_acknowledgement logical(1). By setting `= TRUE` the user
 #' acknowledge that the data downloaded using this function may be very large
 #' and use lots of machine storage and memory.
+#' @param download
 #' @param unzip logical(1). Unzip zip files. Default = `TRUE`. (Ignored if
 #' `data_format = "KML"`.)
 #' @param remove_zip logical(1). Remove zip files from
 #' directory_to_download. Default = `FALSE`. (Ignored if `data_format = "KML"`.)
+#' @param remove_command
 #' @author Mitchell Manware, Insang Song
 #' @return NULL;
 #' @export
@@ -1499,7 +1501,6 @@ download_noaa_hms_smoke_data <- function(
   unzip = TRUE,
   remove_zip = FALSE
 ) {
-  # nocov start
   #### 1. check for data download acknowledgement
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
   #### 2. directory setup
@@ -1507,7 +1508,7 @@ download_noaa_hms_smoke_data <- function(
   download_setup_dir(directory_to_save)
   directory_to_download <- download_sanitize_path(directory_to_download)
   directory_to_save <- download_sanitize_path(directory_to_save)
-
+  
   #### 3. check for unzip == FALSE && remove_zip == TRUE
   if (unzip == FALSE && remove_zip == TRUE) {
     stop(paste0("Arguments `unzip = FALSE` and `remove_zip = TRUE` are not ",
@@ -1520,87 +1521,81 @@ download_noaa_hms_smoke_data <- function(
   date_sequence <- gsub("-", "", as.character(date_sequence))
   #### 5. define URL base
   base <- "https://satepsanone.nesdis.noaa.gov/pub/FIRE/web/HMS/Smoke_Polygons/"
-  #### 6. define empty vectors
-  file_urls <- NULL
+  #### 6. initiate "..._curl_commands.txt"
+  commands_txt <- paste0(directory_to_download,
+                         "hms_smoke_",
+                         head(date_sequence, n = 1),
+                         "_",
+                         tail(date_sequence, n = 1),
+                         "_curl_commands.txt")
+  download_sink(commands_txt)
+  #### 7. concatenate and print download commands to "..._curl_commands.txt"
   download_names <- NULL
-  #### 7. add download URLs and file names to empty vectors
   for (f in seq_along(date_sequence)) {
     year <- substr(date_sequence[f], 1, 4)
     month <- substr(date_sequence[f], 5, 6)
     if (data_format == "Shapefile") {
-      file_urls_add <- paste0(
-        base,
-        data_format,
-        "/",
-        year,
-        "/",
-        month,
-        "/hms_smoke",
-        date_sequence[f],
-        ".zip"
-      )
-      file_urls <- c(file_urls, file_urls_add)
-      download_names_add <- paste0(
-        directory_to_download,
-        "hms_smoke_",
-        data_format,
-        "_",
-        date_sequence[f],
-        ".zip"
-      )
-      download_names <- c(download_names, download_names_add)
+      suffix <- ".zip"
+      directory_to_cat <- directory_to_download
     } else if (data_format == "KML") {
-      file_urls_add <- paste0(
-        base,
-        data_format,
-        "/",
-        year,
-        "/",
-        month,
-        "/hms_smoke",
-        date_sequence[f],
-        ".kml"
-      )
-      file_urls <- c(file_urls, file_urls_add)
-      download_names_add <- paste0(
-        directory_to_save,
-        "hms_smoke_",
-        data_format,
-        "_",
-        date_sequence[f],
-        ".kml"
-      )
-      download_names <- c(download_names, download_names_add)
+      suffix <- ".kml"
+      directory_to_cat <- directory_to_save
     }
+    url <- paste0(
+      base,
+      data_format,
+      "/",
+      year,
+      "/",
+      month,
+      "/hms_smoke",
+      date_sequence[f],
+      suffix
+    )
+    destfile <- paste0(
+      directory_to_cat,
+      "hms_smoke_",
+      data_format,
+      "_",
+      date_sequence[f],
+      suffix
+    )
+    download_names <- c(download_names, destfile)
+    command <- paste0("curl -s -o ",
+                      destfile,
+                      " --url ",
+                      url,
+                      "\n")
+    cat(command)
   }
-  #### 8. download data
-  if (!any(file.exists(download_names))) {
-    cat(paste0("Downloading requested files...\n"))
-    download.file(file_urls, download_names, method = "libcurl", quiet = TRUE)
-    cat(paste0("Requested files downloaded.\n"))
+  #### 8. finish "..._curl_commands.txt"
+  sink()
+  #### 9. build system command
+  system_command <- paste0(". ",
+                           commands_txt,
+                           "\n")
+  #### 10. download data
+  download_run(download = download,
+               system_command = system_command,
+               commands_txt = commands_txt)
+  #### 11. remove command file
+  download_remove_command(remove = remove_command,
+                          commands_txt = commands_txt)
+  #### 12. end if data_format == "KML"
+  if (data_format == "KML") {
+    return(cat(paste0("KML files cannot be unzipped.\n")))
   }
-  #### 9. end if unzip == FALSE
-  if (unzip == FALSE && data_format == "Shapefile") {
-    return(cat(paste0("Downloaded files will not be unzipped.\n")))
+  #### 13. unzip downloaded zip files
+  for (d in seq_along(download_names)) {
+    download_unzip(file_name = download_names[d],
+                   directory_to_unzip = directory_to_save,
+                   unzip = unzip)
   }
-  #### 10. unzip files
-  if (unzip == TRUE && data_format == "Shapefile") {
-    cat(paste0("Unzipping zip files to ", directory_to_save, "...\n"))
-    for (u in seq_along(download_names)) {
-      unzip(download_names[u], exdir = directory_to_save)
-    }
-    cat(paste0("Zip files unzipped.\n"))
-  }
-  #### 11. remove zip files
-  if (remove_zip == TRUE && data_format == "Shapefile") {
-    cat(paste0("Removing zip files...\n"))
-    for (z in seq_along(download_names)) {
-      file.remove(download_names[z])
-    }
-    cat(paste0("Zip files removed\n"))
-  }
-  # nocov end
+  #### 14. remove zip files
+  download_remove_zips(remove = remove_zip,
+                       download_name = download_names)
 }
+
 
 
 #' download_koppen_geiger_data: download climate classification data from the
