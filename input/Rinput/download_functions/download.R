@@ -257,15 +257,24 @@ download_aqs_data <-
 #' @param data_download_acknowledgement logical(1). By setting \code{TRUE} the
 #' user acknowledge that the data downloaded using this function may be very
 #' large and use lots of machine storage and memory.
+#' @param unzip logical(1). Unzip zip files. Default = `TRUE`.
+#' @param remove_zip logical(1). Remove zip file from directory_to_download.
+#' Default = `FALSE`.
+#' @param download logical(1). `= FALSE` will generate a `.txt` file containing
+#' all download commands. By setting `= TRUE` the function will download all of
+#' the requested data files. Default is FALSE.
 #' @param remove_download logical(1). Remove download files in
 #' directory_to_download.
 #' @author Insang Song
 #' @returns NULL;
 #' @export
 download_ecoregion_data <- function(
-  directory_to_download = "./input/data/ecoregions/raw/",
-  directory_to_save = "./input/data/ecoregions/raw/",
+  directory_to_download = "./input/data/ecoregions/",
+  directory_to_save = "./input/data/ecoregions/",
   data_download_acknowledgement = FALSE,
+  unzip = FALSE,
+  remove_zip = FALSE,
+  download = FALSE,
   remove_download = TRUE
 ) {
   if (!level %in% c(2, 3)) {
@@ -306,7 +315,8 @@ download_ecoregion_data <- function(
   download_run(download_command = download_command)
 
   download_unzip(file_name = download_name,
-    directory_to_unzip = directory_to_save)
+    directory_to_unzip = directory_to_save,
+    unzip = unzip)
   #### 9. remove zip files
   download_remove_zips(
     remove_download = remove_download,
@@ -345,7 +355,8 @@ download_geos_cf_data <- function(
                    "chm_inst_1hr_g1440x721_p23", "met_inst_1hr_g1440x721_p23"),
   directory_to_save = "./input/data/geos_cf/",
   data_download_acknowledgement = FALSE,
-  download = FALSE
+  download = FALSE,
+  remove_command = FALSE
 ) {
   #### 1. check for data download acknowledgement
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
@@ -372,9 +383,9 @@ download_geos_cf_data <- function(
   #### 6. define time sequence
   collection_end <- substr(collection, nchar(collection), nchar(collection))
   if (collection_end == "1") {
-    time_sequence <- as.character(seq(from = 30, to = 2330, by = 100))
+    time_sequence <- seq(from = 30, to = 2330, by = 100)
   } else if (collection_end == "3") {
-    time_sequence <- as.character(seq(from = 0, to = 2300, by = 100))
+    time_sequence <- seq(from = 0, to = 2300, by = 100)
   }
   time_sequence <- sprintf("%04d", time_sequence)
   #### 7. define URL base
@@ -442,8 +453,9 @@ download_geos_cf_data <- function(
 #' [U.S. Geological Survey and National Geospatial-Intelligence Agency]
 #' (https://www.usgs.gov/coastal-changes-and-impacts/gmted2010).
 #' @param statistic character(1). Available statistics include "Breakline
-#' Emphasis", "Systematic Subsample", "Median Statistic", "Minimum Statistic",
-#' "Mean Statistic", "Maximum Statistic", and "Standard Deviation Statistic".
+#' Emphasis", "Systematic Subsample", "md (Median Statistic)",
+#' "Minimum Statistic", "Mean Statistic", "Maximum Statistic", and
+#' "Standard Deviation Statistic".
 #' @param resolution character(1). Available resolutions include "7.5 arc-
 #' seconds", "15 arc-seconds", and "30 arc-seconds".
 #' @param directory_to_download character(1). Directory to download zip files
@@ -464,8 +476,11 @@ download_geos_cf_data <- function(
 #' @return NULL;
 #' @export
 download_gmted_data <- function(
-  statistic = NULL,
-  resolution = NULL,
+  statistic = c("Breakline Emphasis", "Systematic Subsample",
+                "Median Statistic", "Minimum Statistic",
+                "Mean Statistic", "Maximum Statistic",
+                "Standard Deviation Statistic"),
+  resolution = c("7.5 arc-seconds", "15 arc-seconds", "30 arc-seconds"),
   directory_to_download = "./input/data/gmted/",
   directory_to_save = "./input/data/gmted/",
   data_download_acknowledgement = FALSE,
@@ -486,22 +501,13 @@ download_gmted_data <- function(
     stop(paste0("Please select a GMTED2010 statistic.\n"))
   }
   #### 4. check for valid statistic
-  valid_statistics <- c("Breakline Emphasis", "Systematic Subsample",
-                        "Median Statistic", "Minimum Statistic",
-                        "Mean Statistic", "Maximum Statistic",
-                        "Standard Deviation Statistic")
-  if (!(statistic %in% valid_statistics)) {
-    stop(paste0("Requested statistic is not recognized.\n"))
-  }
+  statistic <- match.arg(statistic)
   #### 5. check for resolution
   if (is.null(resolution) == TRUE) {
     stop(paste0("Please select a data resolution.\n"))
   }
   #### 6. check for valid resolution
-  valid_resolutions <- c("7.5 arc-seconds", "15 arc-seconds", "30 arc-seconds")
-  if (!(resolution %in% valid_resolutions)) {
-    stop(paste0("Requested resolution is not recognized.\n"))
-  }
+  resolution <- match.arg(resolution)
   #### 7. define URL base
   base <- paste0("https://edcintl.cr.usgs.gov/downloads/sciweb1/shared/topo",
                  "/downloads/GMTED/Grid_ZipFiles/")
@@ -584,6 +590,20 @@ download_gmted_data <- function(
 #' @param date_end character(1). length of 10. End date for downloading data.
 #' Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
 #' @param collection character(1). MERRA-2 data collection file name.
+#' Should be one of
+#'  "inst1_2d_asm_Nx", "inst1_2d_int_Nx", "inst1_2d_lfo_Nx",
+#'  "inst3_3d_asm_Np", "inst3_3d_aer_Nv", "inst3_3d_asm_Nv",
+#'  "inst3_3d_chm_Nv", "inst3_3d_gas_Nv", "inst3_2d_gas_Nx",
+#'  "inst6_3d_ana_Np", "inst6_3d_ana_Nv", "statD_2d_slv_Nx",
+#'  "tavg1_2d_adg_Nx", "tavg1_2d_aer_Nx", "tavg1_2d_chm_Nx",
+#'  "tavg1_2d_csp_Nx", "tavg1_2d_flx_Nx", "tavg1_2d_int_Nx",
+#'  "tavg1_2d_lfo_Nx", "tavg1_2d_lnd_Nx", "tavg1_2d_ocn_Nx",
+#'  "tavg1_2d_rad_Nx", "tavg1_2d_slv_Nx", "tavg3_3d_mst_Ne",
+#'  "tavg3_3d_trb_Ne", "tavg3_3d_nav_Ne", "tavg3_3d_cld_Np",
+#'  "tavg3_3d_mst_Np", "tavg3_3d_rad_Np", "tavg3_3d_tdt_Np",
+#'  "tavg3_3d_trb_Np", "tavg3_3d_udt_Np", "tavg3_3d_odt_Np",
+#'  "tavg3_3d_qdt_Np", "tavg3_3d_asm_Nv", "tavg3_3d_cld_Nv",
+#'  "tavg3_3d_mst_Nv", "tavg3_3d_rad_Nv", "tavg3_2d_glc_Nx"
 #' @param directory_to_save character(1). Directory to save data.
 #' @param data_download_acknowledgement logical(1). By setting `= TRUE` the
 #' user acknowledge that the data downloaded using this function may be very
@@ -599,8 +619,20 @@ download_gmted_data <- function(
 download_merra2_data <- function(
   date_start = "2023-09-01",
   date_end = "2023-09-01",
-  collection = NULL,
-  directory_to_save = "../../data/covariates/merra2/",
+  collection = c("inst1_2d_asm_Nx", "inst1_2d_int_Nx", "inst1_2d_lfo_Nx",
+                 "inst3_3d_asm_Np", "inst3_3d_aer_Nv", "inst3_3d_asm_Nv",
+                 "inst3_3d_chm_Nv", "inst3_3d_gas_Nv", "inst3_2d_gas_Nx",
+                 "inst6_3d_ana_Np", "inst6_3d_ana_Nv", "statD_2d_slv_Nx",
+                 "tavg1_2d_adg_Nx", "tavg1_2d_aer_Nx", "tavg1_2d_chm_Nx",
+                 "tavg1_2d_csp_Nx", "tavg1_2d_flx_Nx", "tavg1_2d_int_Nx",
+                 "tavg1_2d_lfo_Nx", "tavg1_2d_lnd_Nx", "tavg1_2d_ocn_Nx",
+                 "tavg1_2d_rad_Nx", "tavg1_2d_slv_Nx", "tavg3_3d_mst_Ne",
+                 "tavg3_3d_trb_Ne", "tavg3_3d_nav_Ne", "tavg3_3d_cld_Np",
+                 "tavg3_3d_mst_Np", "tavg3_3d_rad_Np", "tavg3_3d_tdt_Np",
+                 "tavg3_3d_trb_Np", "tavg3_3d_udt_Np", "tavg3_3d_odt_Np",
+                 "tavg3_3d_qdt_Np", "tavg3_3d_asm_Nv", "tavg3_3d_cld_Nv",
+                 "tavg3_3d_mst_Nv", "tavg3_3d_rad_Nv", "tavg3_2d_glc_Nx"),
+  directory_to_save = "./input/data/merra2/",
   data_download_acknowledgement = FALSE,
   download = FALSE,
   remove_command = FALSE
@@ -891,6 +923,9 @@ download_narr_monolevel_data <- function(
   download_run(download = download,
                system_command = system_command,
                commands_txt = commands_txt)
+  #### 12. remove command text file
+  download_remove_command(command_txt = commands_txt,
+                          remove = remove_command)
 }
 
 
@@ -922,7 +957,7 @@ download_narr_p_levels_data <- function(
   year_start = 2022,
   year_end = 2022,
   variables = NULL,
-  directory_to_save = "../../data/covariates/narr/",
+  directory_to_save = "./input/data/narr/",
   data_download_acknowledgement = FALSE,
   download = FALSE,
   remove_command = FALSE
@@ -1039,8 +1074,8 @@ download_narr_p_levels_data <- function(
 download_nlcd_data <- function(
   year = 2021,
   collection = "Coterminous United States",
-  directory_to_download = "../../data/covariates/nlcd/",
-  directory_to_save = "../../data/covariates/nlcd/",
+  directory_to_download = "./input/data/nlcd/",
+  directory_to_save = "./input/data/nlcd/",
   data_download_acknowledgement = FALSE,
   unzip = TRUE,
   remove_zip = FALSE,
@@ -1131,6 +1166,9 @@ download_nlcd_data <- function(
   #### 16. remove zip files
   download_remove_zips(remove = remove_zip,
                        download_name = download_name)
+  #### 17. remove command text
+  download_remove_command(commands_txt = commands_txt,
+                          remove = remove_command)
 }
 
 
@@ -1300,8 +1338,8 @@ download_sedac_population_data <- function(
   year = "2020",
   data_format = "GeoTIFF",
   data_resolution = "60 minute",
-  directory_to_download = "../../data/covariates/sedac_population/",
-  directory_to_save = "../../data/covariates/sedac_population/",
+  directory_to_download = "./input/data/sedac_population/",
+  directory_to_save = "./input/data/sedac_population/",
   data_download_acknowledgement = FALSE,
   download = FALSE,
   unzip = TRUE,
@@ -1453,16 +1491,15 @@ download_sedac_population_data <- function(
 #' @return NULL;
 #' @export
 download_noaa_hms_smoke_data <- function(
-    date_start = "2023-09-01",
-    date_end = "2023-09-01",
-    data_format = "Shapefile",
-    directory_to_download = "./input/data/noaa_hms/",
-    directory_to_save = "./input/data/noaa_hms/",
-    data_download_acknowledgement = FALSE,
-    download = FALSE,
-    unzip = TRUE,
-    remove_zip = FALSE,
-    remove_command = FALSE
+  date_start = "2023-09-01",
+  date_end = "2023-09-01",
+  data_format = "Shapefile",
+  directory_to_download = "./input/data/noaa_hms/",
+  directory_to_save = "./input/data/noaa_hms/",
+  data_download_acknowledgement = FALSE,
+  download = FALSE,
+  unzip = TRUE,
+  remove_zip = FALSE
 ) {
   #### 1. check for data download acknowledgement
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
