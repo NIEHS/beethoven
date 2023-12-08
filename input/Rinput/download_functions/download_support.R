@@ -132,17 +132,17 @@ download_unzip <-
     directory_to_unzip,
     unzip = TRUE
   ) {
-  if (!unzip) {
-    cat(paste0("Downloaded files will not be unzipped.\n"))
-    return(NULL)
-  }
+    if (!unzip) {
+      cat(paste0("Downloaded files will not be unzipped.\n"))
+      return(NULL)
+    }
 
-  cat(paste0("Unzipping files...\n"))
-  unzip(file_name,
-        exdir = directory_to_unzip)
-  cat(paste0("Files unzipped and saved in ",
-             directory_to_unzip,
-             ".\n"))
+    cat(paste0("Unzipping files...\n"))
+    unzip(file_name,
+          exdir = directory_to_unzip)
+    cat(paste0("Files unzipped and saved in ",
+              directory_to_unzip,
+              ".\n"))
   }
 
 #' Remove downloaded zip files
@@ -155,10 +155,10 @@ download_remove_zips <-
     remove = FALSE,
     download_name
   ) {
-  #### 9. remove zip files
-  if (remove) {
-    cat(paste0("Removing download files...\n"))
-    file.remove(download_name)
-    cat(paste0("Download files removed.\n"))
-  }
+    #### remove zip files
+    if (remove) {
+      cat(paste0("Removing download files...\n"))
+      file.remove(download_name)
+      cat(paste0("Download files removed.\n"))
+    }
   }
