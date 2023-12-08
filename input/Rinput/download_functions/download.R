@@ -443,8 +443,9 @@ download_geos_cf_data <- function(
 #' [U.S. Geological Survey and National Geospatial-Intelligence Agency]
 #' (https://www.usgs.gov/coastal-changes-and-impacts/gmted2010).
 #' @param statistic character(1). Available statistics include "Breakline
-#' Emphasis", "Systematic Subsample", "Median Statistic", "Minimum Statistic",
-#' "Mean Statistic", "Maximum Statistic", and "Standard Deviation Statistic".
+#' Emphasis", "Systematic Subsample", "md (Median Statistic)",
+#' "Minimum Statistic", "Mean Statistic", "Maximum Statistic", and
+#' "Standard Deviation Statistic".
 #' @param resolution character(1). Available resolutions include "7.5 arc-
 #' seconds", "15 arc-seconds", and "30 arc-seconds".
 #' @param directory_to_download character(1). Directory to download zip files
@@ -465,8 +466,11 @@ download_geos_cf_data <- function(
 #' @return NULL;
 #' @export
 download_gmted_data <- function(
-  statistic = NULL,
-  resolution = NULL,
+  statistic = c("Breakline Emphasis", "Systematic Subsample",
+                "Median Statistic", "Minimum Statistic",
+                "Mean Statistic", "Maximum Statistic",
+                "Standard Deviation Statistic"),
+  resolution = c("7.5 arc-seconds", "15 arc-seconds", "30 arc-seconds"),
   directory_to_download = "./input/data/gmted/",
   directory_to_save = "./input/data/gmted/",
   data_download_acknowledgement = FALSE,
@@ -487,22 +491,13 @@ download_gmted_data <- function(
     stop(paste0("Please select a GMTED2010 statistic.\n"))
   }
   #### 4. check for valid statistic
-  valid_statistics <- c("Breakline Emphasis", "Systematic Subsample",
-                        "Median Statistic", "Minimum Statistic",
-                        "Mean Statistic", "Maximum Statistic",
-                        "Standard Deviation Statistic")
-  if (!(statistic %in% valid_statistics)) {
-    stop(paste0("Requested statistic is not recognized.\n"))
-  }
+  statistic <- match.arg(statistic)
   #### 5. check for resolution
   if (is.null(resolution) == TRUE) {
     stop(paste0("Please select a data resolution.\n"))
   }
   #### 6. check for valid resolution
-  valid_resolutions <- c("7.5 arc-seconds", "15 arc-seconds", "30 arc-seconds")
-  if (!(resolution %in% valid_resolutions)) {
-    stop(paste0("Requested resolution is not recognized.\n"))
-  }
+  resolution <- match.arg(resolution)
   #### 7. define URL base
   base <- paste0("https://edcintl.cr.usgs.gov/downloads/sciweb1/shared/topo",
                  "/downloads/GMTED/Grid_ZipFiles/")
