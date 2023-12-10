@@ -75,7 +75,8 @@ wgs_ext <- ext(wgs_ext)
 wgs_ext <- vect(wgs_ext)
 crs(wgs_ext) <- "OGC:WGS84"
 rr <- crs("EPSG:6933")
-# wgs_extg <- rast(wgs_ext, nrows = 18, ncols = 36)
+wgs_extg <- rast(wgs_ext, nrows = 18, ncols = 36)
+wgs_extgp <- as.polygons(wgs_extg)
 
 viirs_ext <- c(-17367530, 17367530, -7324185, 7324185)
 viirs_ext <- c(-1.8e7, 1.8e7, -9e6, 9e6)
@@ -88,6 +89,8 @@ viirs_poly <- as.polygons(viirs_ext)
 data(world, package = "spData")
 world_viirs <- project(vect(world), rr)
 
+plot(wgs_extgp)
+plot(vect(world), add = TRUE, border = "blue")
 
 plot(viirs_poly)
 plot(world_viirs, add = T, border = "red")
@@ -118,14 +121,19 @@ viirs_ext <- expand.grid(
 
 #' @description This function will return a SpatRaster object with
 #' georeferenced h5 files of VNP46A2 product.
+#' @param filepaths character. Full paths of h5 files.
+#' @param date character(1). Date to query.
 #' @param tile_df prespecified data.frame with "tile" and "exts" columns,
 #' where the former stores tile number (h00v00 format) and the latter
 #' stores terra::ext output.
+#' @param crs_ref character(1). terra::crs compatible CRS.
+#' Default is "EPSG:4326"
+#' @author Insang Song
 assign_ext_vnp46 <- function(
     filepaths,
     date,
     tile_df = tile_def,
-    crs_ref = modis_crs
+    crs_ref = "EPSG:4326"
 ) {
     if (is.character(date)) {
         if (nchar(date) != 10) {
@@ -166,7 +174,67 @@ assign_ext_vnp46 <- function(
     return(vnp_all)
 }
 
-vnp46_2018001 <- assign_ext_vnp46(files_vnp46, "2018-01-01")
-vnp46_2018001[(vnp46_2018001 == 65535)] <- NA
+# vnp46_2018001 <- assign_ext_vnp46(files_vnp46, "2018-01-01")
+# vnp46_2018001[(vnp46_2018001 == 65535)] <- NA
 
-plot(vnp46_2018001)
+# plot(vnp46_2018001)
+
+
+
+###
+files_vnp46 <- list.files("./input/data/modis/test/5000", "*.h5$", recursive = TRUE, full.names = TRUE)
+# range: h05v03--h11v06
+# -130, -120, 50, 60
+# -70, -60, 20, 30
+tile_def <-
+  expand.grid(
+    vaddr = sprintf("v%02d", 3:6),
+    haddr = sprintf("h%02d", 5:11)
+  )
+tile_def$tile <- paste0(tile_def$haddr, tile_def$vaddr)
+tile_def <- data.frame(tile = tile_def$tile)
+tile_def$xmin <- rep(seq(-130, -70, 10), each = 4)
+tile_def$xmax <- tile_def$xmin + 10
+tile_def$ymin <- rep(seq(50, 20, -10), 7)
+tile_def$ymax <- tile_def$ymin + 10
+
+
+
+hm1 <- rhdf5::h5read(files_vnp46[333], "HDFEOS INFORMATION")[[1]]
+as.integer(regmatches(hm1, gregexpr("((|\\-)([1]{0,1}[0-9]{0,1}[0]{7,7}.[0]{6,6})|0.[0]{6,6})", hm1))[[1]])/1e6
+#regmatches(hm1, gregexpr("([1-9]{1,1}[0]{7,7}.[0]{6,6})", hm1))
+
+vnpext <- split(files_vnp46, seq(1, length(files_vnp46))) |>
+  lapply(\(x) {
+    hm <- rhdf5::h5read(x, "HDFEOS INFORMATION")[[1]]
+    search <- "((|\\-)([1]{0,1}[0-9]{0,1}[0]{7,7}.[0]{6,6})|0.[0]{6,6})"
+    hmext <-
+      regmatches(hm,
+                 gregexpr(search,
+                          hm))
+    hmext <- hmext[[1]][c(1, 3, 4, 2)]
+    hmext <- as.integer(hmext) / 1e6
+    names(hmext) <- c("xmin", "xmax", "ymin", "ymax")
+    rhdf5::h5closeAll()
+    return(hmext)
+
+  })
+
+vnp46 <- split(files_vnp46, seq(1, length(files_vnp46))) %>%
+  mapply(\(ras, ext0) {
+    xx <- terra::rast(ras, subds = 3)
+    terra::crs(xx) <- crs("EPSG:4326")
+    terra::ext(xx) <- ext0
+    return(xx)
+  }, ., vnpext, SIMPLIFY = FALSE)
+vnp46m <- do.call(\(x, y) terra::merge(x, y), vnp46)
+
+
+
+# plot(rast(files_vnp46[36]))
+# plot(rast(files_vnp46[42], subds = 1), colNA = 65535)
+# vnp461 <- vnp46[[66]]
+# vnp461[vnp461 == 65535] <- NA
+# plot(vnp461)
+
+# ext(vnpext[[322]])
