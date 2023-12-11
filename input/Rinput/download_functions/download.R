@@ -1745,7 +1745,8 @@ download_koppen_geiger_data <- function(
 #' @note \code{date_start} and \code{date_end} should be in the same year.
 #'  Directory structure looks like
 #'  input/modis/raw/[version]/[product]/[year]/[day_of_year]
-#' download_modis_data:
+#'  Please note that \code{date_start} and \code{date_end} are
+#'  ignored if \code{product == 'MOD06_L2'}.
 #' @description
 #' @param date_start character(1). length of 10. Start date for downloading
 #' data. Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
@@ -1765,6 +1766,8 @@ download_koppen_geiger_data <- function(
 #' @param data_download_acknowledgement logical(1). By setting `= TRUE` the
 #' user acknowledge that the data downloaded using this function may be very
 #' large and use lots of machine storage and memory.
+#' @param mod06_links character(1). CSV file path to MOD06_L2 download links
+#' from NASA LPDAAC. Default is NULL.
 #' @param download logical(1). Download data or only save wget commands.
 #' @param remove_command logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
 #' the text file containing download commands.
@@ -1783,6 +1786,7 @@ download_modis_data <- function(
     nasa_earth_data_token = NULL,
     directory_to_save = "./input/modis/raw/",
     data_download_acknowledgement = FALSE,
+    mod06_links = NULL,
     download = TRUE,
     remove_command = FALSE) {
   #### 1. check for data download acknowledgement
@@ -1797,8 +1801,6 @@ download_modis_data <- function(
   }
   #### 4. check for product
   product <- match.arg(product)
-  ismod13 <- startsWith(product, "MOD13")
-  ismod06 <- startsWith(product, "MOD06")
 
   if (substr(date_start, 1, 4) != substr(date_end, 1, 4)) {
     stop("date_start and date_end should be in the same year.\n")
@@ -1808,6 +1810,88 @@ download_modis_data <- function(
   if (is.null(version)) {
     stop("Please select a data version.\n")
   }
+
+  #### 6. Reuse ladsweb home url
+  ladsurl <- "https://ladsweb.modaps.eosdis.nasa.gov/"
+  version <- ifelse(startsWith(product, "VNP"), "5000", version)
+
+  #### 7. MOD06_L2 manual input
+  if (product == "MOD06_L2") {
+    mod06l2_url1 <-
+      "https://ladsweb.modaps.eosdis.nasa.gov/"
+    mod06l2_url2 <-
+      "search/order/4/MOD06_L2--61/"
+    mod06l2_url3 <-
+      "%s..%s/D/-130,52,-60,20"
+    mod06l2_url_template <-
+      paste0(mod06l2_url1, mod06l2_url2, mod06l2_url3)
+    mod06l2_full <-
+      sprintf(mod06l2_url_template, date_start, date_end)
+    if (is.null(mod06_links)) {
+      stop(paste("Please provide a CSV file path to MOD06_L2 download links.
+                 You may download it from the link:\n", mod06l2_full,
+                 "\nTime length up to one month is recommended.\n"))
+    }
+
+    #### 7-1. Parse urls in csv
+    file_url <- read.csv(mod06_links)
+    file_url <- unlist(file_url[, 2])
+    download_url <-
+      paste0(substr(ladsurl, 1, nchar(ladsurl) - 1),
+             file_url)
+
+    #### 7-2. Parse dates from csv
+    file_dates <-
+      regmatches(file_url,
+                 regexpr("[2][0-2][0-9]{2,2}[0-3][0-9]{2,2}", file_url))
+    file_dates <- as.integer(file_dates)
+    date_start <- as.Date(as.character(min(file_dates)), format = "%Y%j")
+    date_end <- as.Date(as.character(max(file_dates)), format = "%Y%j")
+
+    #### 7-2. initiate "..._wget_commands.txt" file
+    commands_txt <- paste0(
+      directory_to_save,
+      product,
+      "_",
+      date_start,
+      "_",
+      date_end,
+      "_wget_commands.txt"
+    )
+
+    #### 7-3. write download_command
+    download_command <- paste0(
+      "wget -e robots=off -m -np -R .html,.tmp ",
+      "-nH --cut-dirs=3 \"",
+      download_url,
+      "\" --header \"Authorization: Bearer ",
+      nasa_earth_data_token,
+      "\" -P ",
+      directory_to_save,
+      "\n"
+    )
+
+    # avoid any possible errors by removing existing command files
+    download_sink(commands_txt)
+    cat(download_command)
+    sink()
+
+    system_command <- paste0(
+      ". ",
+      commands_txt,
+      "\n"
+    )
+    download_run(download = download,
+                 system_command = system_command,
+                 commands_txt = commands_txt)
+
+    message("Requests were processed.\n")
+
+    download_remove_command(commands_txt = commands_txt,
+                            remove = remove_command)
+    return(NULL)
+  }
+
   #### 6. check for valid horizontal tiles
   if (!all(horizontal_tiles %in% seq(0, 35))) {
     stop("Horizontal tiles are not in the proper range [0, 35].\n")
@@ -1816,27 +1900,13 @@ download_modis_data <- function(
     stop("Vertical tiles are not in the proper range [0, 17].\n")
   }
 
-  #### 8. Reuse ladsweb home url
-  ladsurl <- "https://ladsweb.modaps.eosdis.nasa.gov/"
-  version <- ifelse(startsWith(product, "VNP"), "5000", version)
-
   #### 9. define date sequence
   date_start_date_format <- as.Date(date_start, format = "%Y-%m-%d")
   date_end_date_format <- as.Date(date_end, format = "%Y-%m-%d")
   date_sequence <- seq(date_start_date_format, date_end_date_format, "day")
-  # if (ismod13) {
-  #   date_start_yearday <- as.numeric(strftime(date_start_date_format, "%j"))
-  #   date_end_yearday <- as.numeric(strftime(date_end_date_format, "%j"))
-  #   year_mod13 <- strftime(date_start_date_format, "%Y")
-  #   date_sequence <- seq(1, 366, 16)
-  #   date_sequence <-
-  #     date_sequence[date_sequence >= date_start_yearday &
-  #       date_sequence <= date_end_yearday]
-  # }
 
   # In a certain year, list all available dates
   year <- as.character(substr(date_start, 1, 4))
-  # year <- ifelse(ismod13, year_mod13, as.character(substr(date_start, 1, 4)))
   filedir_year_url <-
     paste0(
           ladsurl,
@@ -1927,9 +1997,6 @@ download_modis_data <- function(
       grep(
            paste("(", paste(tiles_requested, collapse = "|"), ")"),
            filelist, value = TRUE)
-    if (ismod06) {
-      filelist_sub <- filelist
-    }
     download_url <- sprintf("%s%s", ladsurl, filelist_sub)
 
     # Main wget run
@@ -1950,19 +2017,19 @@ download_modis_data <- function(
   #### 16. finish "..._wget_commands.txt"
   sink(file = NULL)
 
-  if (download) {
-    #### 17. build system command
-    system_command <- paste0(
-      ". ",
-      commands_txt,
-      "\n"
-    )
-    #### 18. download data
-    download_run(download = download,
-                 system_command = system_command,
-                 commands_txt = commands_txt)
-  }
+  #### 17.
+  system_command <- paste0(
+    ". ",
+    commands_txt,
+    "\n"
+  )
+  download_run(download = download,
+               system_command = system_command,
+               commands_txt = commands_txt)
 
   message("Requests were processed.\n")
+
+  download_remove_command(commands_txt = commands_txt,
+                          remove = remove_command)
 
 }

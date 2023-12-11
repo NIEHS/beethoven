@@ -93,7 +93,7 @@ plot(wgs_extgp)
 plot(vect(world), add = TRUE, border = "blue")
 
 plot(viirs_poly)
-plot(world_viirs, add = T, border = "red")
+plot(world_viirs, add = TRUE, border = "red")
 
 ## Does not match the plot in User Manual...
 ## Reprojection strategy does not work
@@ -135,43 +135,44 @@ assign_ext_vnp46 <- function(
     tile_df = tile_def,
     crs_ref = "EPSG:4326"
 ) {
-    if (is.character(date)) {
-        if (nchar(date) != 10) {
-            stop("Check the date format.\n")
-        }
-        date <- as.Date(date)
+  if (is.character(date)) {
+    if (nchar(date) != 10) {
+      stop("Check the date format.\n")
     }
-    datejul <- strftime(date, format = "%Y/%j")
-    stdtile <- tile_df$tile
+    date <- as.Date(date)
+  }
+  datejul <- strftime(date, format = "%Y/%j")
+  stdtile <- tile_df$tile
 
-    filepaths_today <- grep(as.character(datejul), filepaths, value = TRUE)
-    # today's filenames
-    # filepaths_tiles <-
-    #     regmatches(filepaths_today,
-    #                regexpr("h[0-9]+{2,2}v[0-9]+{2,2}", filepaths_today))
-    filepaths_today <- grep(paste("(", paste(stdtile, collapse = "|"), ")"), filepaths_today, value = TRUE)
-    print(filepaths_today)
-    filepaths_today_tiles <-
-        regmatches(filepaths_today,
-                   regexpr("h[0-9]+{2,2}v[0-9]+{2,2}", filepaths_today))
-    # filepaths_tiles <- filepaths_tiles[which(filepaths_tiles %in% stdtile)]
-    # print(filepaths_tiles)
-    # filepaths_tiles_list <- split(filepaths_tiles, filepaths_tiles)
-    vnp46_today <- unname(split(filepaths_today, filepaths_today))
-    filepaths_today_tiles_list <-
-        unname(split(filepaths_today_tiles, filepaths_today_tiles))
+  filepaths_today <- grep(as.character(datejul), filepaths, value = TRUE)
+  # today's filenames
+  # filepaths_tiles <-
+  #     regmatches(filepaths_today,
+  #                regexpr("h[0-9]+{2,2}v[0-9]+{2,2}", filepaths_today))
+  filepaths_today <-
+    grep(paste("(", 
+               paste(stdtile, collapse = "|"), ")"),
+         filepaths_today, value = TRUE)
+  # print(filepaths_today)
+  filepaths_today_tiles <-
+    regmatches(filepaths_today,
+               regexpr("h[0-9]+{2,2}v[0-9]+{2,2}", filepaths_today))
 
-    vnp_assigned <-
-        mapply(function(vnp, tile_in) {
-            vnp_ <- terra::rast(vnp, subds = 3)
-            tile_ext <- tile_df[tile_df$tile == tile_in, -1]
-            print(tile_ext)
-            terra::crs(vnp_) <- terra::crs(crs_ref)
-            terra::ext(vnp_) <- unlist(tile_ext)
-            return(vnp_)
-        }, vnp46_today, filepaths_today_tiles_list, SIMPLIFY = FALSE)
-    vnp_all <- do.call(terra::merge, vnp_assigned)
-    return(vnp_all)
+  vnp46_today <- unname(split(filepaths_today, filepaths_today))
+  filepaths_today_tiles_list <-
+    unname(split(filepaths_today_tiles, filepaths_today_tiles))
+
+  vnp_assigned <-
+    mapply(function(vnp, tile_in) {
+      vnp_ <- terra::rast(vnp, subds = 3)
+      tile_ext <- tile_df[tile_df$tile == tile_in, -1]
+      # print(tile_ext)
+      terra::crs(vnp_) <- terra::crs(crs_ref)
+      terra::ext(vnp_) <- unlist(tile_ext)
+      return(vnp_)
+    }, vnp46_today, filepaths_today_tiles_list, SIMPLIFY = FALSE)
+  vnp_all <- do.call(terra::merge, vnp_assigned)
+  return(vnp_all)
 }
 
 # vnp46_2018001 <- assign_ext_vnp46(files_vnp46, "2018-01-01")
