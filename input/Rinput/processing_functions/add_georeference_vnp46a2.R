@@ -116,9 +116,25 @@ viirs_ext <- expand.grid(
 )
 
 
+###
+files_vnp46 <- list.files("./input/data/modis/raw/5000", "*.h5$", recursive = TRUE, full.names = TRUE)
+# range: h05v03--h11v06
+# -130, -120, 50, 60
+# -70, -60, 20, 30
+tile_def <-
+  expand.grid(
+    vaddr = sprintf("v%02d", 3:6),
+    haddr = sprintf("h%02d", 5:11)
+  )
+tile_def$tile <- paste0(tile_def$haddr, tile_def$vaddr)
+tile_def <- data.frame(tile = tile_def$tile)
+tile_def$xmin <- rep(seq(-130, -70, 10), each = 4)
+tile_def$xmax <- tile_def$xmin + 10
+tile_def$ymin <- rep(seq(50, 20, -10), 7)
+tile_def$ymax <- tile_def$ymin + 10
 
 
-
+#' Assign corner coordinates to retrieve a merged raster
 #' @description This function will return a SpatRaster object with
 #' georeferenced h5 files of VNP46A2 product.
 #' @param filepaths character. Full paths of h5 files.
@@ -130,10 +146,10 @@ viirs_ext <- expand.grid(
 #' Default is "EPSG:4326"
 #' @author Insang Song
 assign_ext_vnp46 <- function(
-    filepaths,
-    date,
-    tile_df = tile_def,
-    crs_ref = "EPSG:4326"
+  filepaths,
+  date,
+  tile_df = tile_def,
+  crs_ref = "EPSG:4326"
 ) {
   if (is.character(date)) {
     if (nchar(date) != 10) {
@@ -172,32 +188,16 @@ assign_ext_vnp46 <- function(
       return(vnp_)
     }, vnp46_today, filepaths_today_tiles_list, SIMPLIFY = FALSE)
   vnp_all <- do.call(terra::merge, vnp_assigned)
+  vnp_all[vnp_all == 65535] <- NA
   return(vnp_all)
 }
 
-# vnp46_2018001 <- assign_ext_vnp46(files_vnp46, "2018-01-01")
+vnp46_2018001 <- assign_ext_vnp46(files_vnp46, "2018-01-01")
 # vnp46_2018001[(vnp46_2018001 == 65535)] <- NA
+vnp46_2022185 <- assign_ext_vnp46(files_vnp46, "2022-07-05")
 
-# plot(vnp46_2018001)
-
-
-
-###
-files_vnp46 <- list.files("./input/data/modis/test/5000", "*.h5$", recursive = TRUE, full.names = TRUE)
-# range: h05v03--h11v06
-# -130, -120, 50, 60
-# -70, -60, 20, 30
-tile_def <-
-  expand.grid(
-    vaddr = sprintf("v%02d", 3:6),
-    haddr = sprintf("h%02d", 5:11)
-  )
-tile_def$tile <- paste0(tile_def$haddr, tile_def$vaddr)
-tile_def <- data.frame(tile = tile_def$tile)
-tile_def$xmin <- rep(seq(-130, -70, 10), each = 4)
-tile_def$xmax <- tile_def$xmin + 10
-tile_def$ymin <- rep(seq(50, 20, -10), 7)
-tile_def$ymax <- tile_def$ymin + 10
+plot(vnp46_2018001)
+plot(vnp46_2022185)
 
 
 

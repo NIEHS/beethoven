@@ -145,16 +145,18 @@ download_aqs_data <-
     #### 3. Downloading data
 
     # Download zip files from website
-    if (!any(file.exists(download_names))) {
-      download.file(file_urls, download_names, method = "libcurl")
+    if (any(!file.exists(download_names))) {
+      file_urls_nas <- file_urls[!file.exists(download_names)]
+      download_names_nas <- download_names[!file.exists(download_names)]
+      download.file(file_urls_nas, download_names_nas, method = "libcurl")
     }
     # Construct string with unzipped file names
     csv_names <- sprintf(paste(directory_to_download,
-                              resolution_temporal,
-                              "_",
-                              parameter_code,
-                              "_%.0f.csv",
-                              sep = ""),
+                               resolution_temporal,
+                               "_",
+                               parameter_code,
+                               "_%.0f.csv",
+                               sep = ""),
                         year_sequence)
     #### 4. Processing data
     # Unzip and read in .csv files, process and join in one dataframe.
@@ -248,7 +250,8 @@ download_aqs_data <-
 
 #' download_ecoregion_data: download Ecoregion Shapefiles from EPA.
 #' @description
-#' The \code{download_ecoregion_data()} function accesses and downloads Ecoregions
+#' The \code{download_ecoregion_data()}
+#' function accesses and downloads Ecoregions
 #' level 3 data, where all pieces of information in the higher levels are
 #' included.
 #' @param directory_to_download character(1). Directory to download zip file
