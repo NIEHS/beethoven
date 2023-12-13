@@ -12,8 +12,9 @@
 #' [U.S. Geological Survey and National Geospatial-Intelligence Agency]
 #' (https://www.usgs.gov/coastal-changes-and-impacts/gmted2010).
 #' @param statistic character(1). Available statistics include "Breakline
-#' Emphasis", "Systematic Subsample", "Median Statistic", "Minimum Statistic",
-#' "Mean Statistic", "Maximum Statistic", and "Standard Deviation Statistic".
+#' Emphasis", "Systematic Subsample", "md (Median Statistic)",
+#' "Minimum Statistic", "Mean Statistic", "Maximum Statistic", and
+#' "Standard Deviation Statistic".
 #' @param resolution character(1). Available resolutions include "7.5 arc-
 #' seconds", "15 arc-seconds", and "30 arc-seconds".
 #' @param directory_to_download character(1). Directory to download zip files
@@ -34,16 +35,20 @@
 #' @return NULL;
 #' @export
 download_gmted_data <- function(
-  statistic = NULL,
-  resolution = NULL,
-  directory_to_download = "./input/data/gmted/",
-  directory_to_save = "./input/data/gmted/",
-  data_download_acknowledgement = FALSE,
-  unzip = TRUE,
-  remove_zip = FALSE,
-  download = FALSE,
-  remove_command = FALSE
-) {
+    statistic = c(
+      "Breakline Emphasis", "Systematic Subsample",
+      "Median Statistic", "Minimum Statistic",
+      "Mean Statistic", "Maximum Statistic",
+      "Standard Deviation Statistic"
+    ),
+    resolution = c("7.5 arc-seconds", "15 arc-seconds", "30 arc-seconds"),
+    directory_to_download = "./input/data/gmted/",
+    directory_to_save = "./input/data/gmted/",
+    data_download_acknowledgement = FALSE,
+    unzip = TRUE,
+    remove_zip = FALSE,
+    download = FALSE,
+    remove_command = FALSE) {
   #### 1. check for data download acknowledgement
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
   #### 2. directory setup
@@ -56,30 +61,25 @@ download_gmted_data <- function(
     stop(paste0("Please select a GMTED2010 statistic.\n"))
   }
   #### 4. check for valid statistic
-  valid_statistics <- c("Breakline Emphasis", "Systematic Subsample",
-                        "Median Statistic", "Minimum Statistic",
-                        "Mean Statistic", "Maximum Statistic",
-                        "Standard Deviation Statistic")
-  if (!(statistic %in% valid_statistics)) {
-    stop(paste0("Requested statistic is not recognized.\n"))
-  }
+  statistic <- match.arg(statistic)
   #### 5. check for resolution
   if (is.null(resolution) == TRUE) {
     stop(paste0("Please select a data resolution.\n"))
   }
   #### 6. check for valid resolution
-  valid_resolutions <- c("7.5 arc-seconds", "15 arc-seconds", "30 arc-seconds")
-  if (!(resolution %in% valid_resolutions)) {
-    stop(paste0("Requested resolution is not recognized.\n"))
-  }
+  resolution <- match.arg(resolution)
   #### 7. define URL base
-  base <- paste0("https://edcintl.cr.usgs.gov/downloads/sciweb1/shared/topo",
-                 "/downloads/GMTED/Grid_ZipFiles/")
+  base <- paste0(
+    "https://edcintl.cr.usgs.gov/downloads/sciweb1/shared/topo",
+    "/downloads/GMTED/Grid_ZipFiles/"
+  )
   #### 8. define URL statistic code
-  statistics <- c("Breakline Emphasis", "Systematic Subsample",
-                  "Median Statistic", "Minimum Statistic",
-                  "Mean Statistic", "Maximum Statistic",
-                  "Standard Deviation Statistic")
+  statistics <- c(
+    "Breakline Emphasis", "Systematic Subsample",
+    "Median Statistic", "Minimum Statistic",
+    "Mean Statistic", "Maximum Statistic",
+    "Standard Deviation Statistic"
+  )
   statistic_codes <- c("be", "ds", "md", "mi", "mn", "mx", "sd")
   statistic_codes <- cbind(statistics, statistic_codes)
   statistic_code <- subset(statistic_codes, statistics == statistic)[2]
@@ -89,53 +89,70 @@ download_gmted_data <- function(
   resolution_codes <- cbind(resolutions, resolution_codes)
   resolution_code <- subset(resolution_codes, resolutions == resolution)[2]
   #### 10. build url
-  download_url <- paste0(base,
-                         statistic_code,
-                         resolution_code,
-                         "_grd.zip")
+  download_url <- paste0(
+    base,
+    statistic_code,
+    resolution_code,
+    "_grd.zip"
+  )
   #### 11. build download file name
-  download_name <- paste0(directory_to_download,
-                          "gmted2010_",
-                          statistic_code,
-                          resolution_code,
-                          "_grd.zip")
+  download_name <- paste0(
+    directory_to_download,
+    "gmted2010_",
+    statistic_code,
+    resolution_code,
+    "_grd.zip"
+  )
   #### 12. build download command
-  download_command <- paste0("curl -s -o ",
-                             download_name,
-                             " --url ",
-                             download_url,
-                             "\n")
+  download_command <- paste0(
+    "curl -s -o ",
+    download_name,
+    " --url ",
+    download_url,
+    "\n"
+  )
   #### 13. initiate "..._curl_commands.txt"
-  commands_txt <- paste0(directory_to_download,
-                         "gmted_",
-                         gsub(" ", "", statistic),
-                         "_",
-                         gsub(" ", "", resolution),
-                         "_",
-                         Sys.Date(),
-                         "_curl_command.txt")
+  commands_txt <- paste0(
+    directory_to_download,
+    "gmted_",
+    gsub(" ", "", statistic),
+    "_",
+    gsub(" ", "", resolution),
+    "_",
+    Sys.Date(),
+    "_curl_command.txt"
+  )
   download_sink(commands_txt)
-  # sink(commands_txt)
   #### 14. concatenate and print download command to "..._curl_commands.txt"
   cat(download_command)
   #### 15. finish "..._curl_commands.txt" file
   sink()
   #### 16. build system command
-  system_command <- paste0(". ",
-                           commands_txt,
-                           "\n")
+  system_command <- paste0(
+    ". ",
+    commands_txt,
+    "\n"
+  )
   #### 17 download data
-  download_run(download = download,
-               system_command = system_command,
-               commands_txt = commands_txt)
+  download_run(
+    download = download,
+    system_command = system_command,
+    commands_txt = commands_txt
+  )
   #### 18. end if unzip == FALSE
-  download_unzip(file_name = download_name,
-                 directory_to_unzip = directory_to_save,
-                 unzip = unzip)
+  download_unzip(
+    file_name = download_name,
+    directory_to_unzip = directory_to_save,
+    unzip = unzip
+  )
   #### 19. Remove command file
-  download_remove_command(commands_txt = commands_txt,
-                          remove = remove_command)
+  download_remove_command(
+    commands_txt = commands_txt,
+    remove = remove_command
+  )
   #### 20. remove zip files
-  download_remove_zips(remove = remove_zip,
-                       download_name = download_name)
+  download_remove_zips(
+    remove = remove_zip,
+    download_name = download_name
+  )
 }

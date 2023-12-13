@@ -1,5 +1,6 @@
 ################################################################################
 # Date created: 2023-10-16
+# Date edited: 2023-12-06
 # Packages required: stringr
 ################################################################################
 
@@ -22,104 +23,122 @@
 #' @param download logical(1). `= FALSE` will generate a `.txt` file containing
 #' all download commands. By setting `= TRUE` the function will download all of
 #' the requested data files.
-#' @author Mitchell Manware
+#' @param remove_command logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
+#' the text file containing download commands.
+#' @author Mitchell Manware, Insang Song
 #' @return NULL;
-#' @importFrom stringr str_sub
-#' @importFrom stringr str_pad
 #' @export
 download_geos_cf_data <- function(
-  date_start = "2023-09-01",
-  date_end = "2023-09-01",
-  collection = NULL,
-  directory_to_save = "../../data/covariates/geos_cf/",
-  data_download_acknowledgement = FALSE,
-  download = FALSE
-) {
-  #### 1. directory setup
-  directory_to_save <- download_setup_dir(directory_to_save)
-  #### 2. check for data download acknowledgement
-  if (data_download_acknowledgement == FALSE) {
-    stop(paste0("Data download acknowledgement is set to FALSE. ",
-                "Please acknowledge that the data downloaded using this ",
-                "function may be very large and use lots of machine storage ",
-                "and memory.\n"))
-  }
-  #### 2. check for collection
+    date_start = "2023-09-01",
+    date_end = "2023-09-01",
+    collection = c(
+      "aqc_tavg_1hr_g1440x721_v1", "chm_tavg_1hr_g1440x721_v1",
+      "met_tavg_1hr_g1440x721_x1", "xgc_tavg_1hr_g1440x721_x1",
+      "chm_inst_1hr_g1440x721_p23", "met_inst_1hr_g1440x721_p23"
+    ),
+    directory_to_save = "./input/data/geos_cf/",
+    data_download_acknowledgement = FALSE,
+    download = FALSE,
+    remove_command = FALSE) {
+  #### 1. check for data download acknowledgement
+  download_permit(data_download_acknowledgement = data_download_acknowledgement)
+  #### 2. directory setup
+  download_setup_dir(directory_to_save)
+  directory_to_save <- download_sanitize_path(directory_to_save)
+  #### 3. check for collection
   if (is.null(collection) == TRUE) {
     stop(paste0("Please select a GEOS-CF collection.\n"))
   }
-  #### 3. check if collection is valid
-  collections <- c("aqc_tavg_1hr_g1440x721_v1", "chm_tavg_1hr_g1440x721_v1",
-                   "met_tavg_1hr_g1440x721_x1", "xgc_tavg_1hr_g1440x721_x1",
-                   "chm_inst_1hr_g1440x721_p23", "met_inst_1hr_g1440x721_p23")
+  #### 4. check if collection is valid
+  collections <- c(
+    "aqc_tavg_1hr_g1440x721_v1", "chm_tavg_1hr_g1440x721_v1",
+    "met_tavg_1hr_g1440x721_x1", "xgc_tavg_1hr_g1440x721_x1",
+    "chm_inst_1hr_g1440x721_p23", "met_inst_1hr_g1440x721_p23"
+  )
+  collection <- match.arg(collection)
   if (!(collection %in% collections)) {
     stop(paste0("Requested collection is not recognized.\n"))
   }
-  #### 4. define date sequence
+  #### 5. define date sequence
   date_start_date_format <- as.Date(date_start, format = "%Y-%m-%d")
   date_end_date_format <- as.Date(date_end, format = "%Y-%m-%d")
   date_sequence <- seq(date_start_date_format, date_end_date_format, "day")
   date_sequence <- gsub("-", "", as.character(date_sequence))
-  #### 5. define time sequence
-  if (stringr::str_sub(collection, -1, -1) == "1") {
-    time_sequence <- as.character(seq(from = 30, to = 2330, by = 100))
-    time_sequence <- stringr::str_pad(time_sequence,
-                                      pad = "0",
-                                      width = 4,
-                                      side = "left")
-  } else if (stringr::str_sub(collection, -1, -1) == "3") {
-    time_sequence <- as.character(seq(from = 0, to = 2300, by = 100))
-    time_sequence <- stringr::str_pad(time_sequence,
-                                      pad = "0",
-                                      width = 4,
-                                      side = "left")
+  #### 6. define time sequence
+  collection_end <- substr(collection, nchar(collection), nchar(collection))
+  if (collection_end == "1") {
+    time_sequence <- seq(from = 30, to = 2330, by = 100)
+  } else if (collection_end == "3") {
+    time_sequence <- seq(from = 0, to = 2300, by = 100)
   }
-  #### 6. define URL base
+  time_sequence <- sprintf("%04d", time_sequence)
+  #### 7. define URL base
   base <- "https://portal.nccs.nasa.gov/datashare/gmao/geos-cf/v1/ana/"
-  #### 7. initiate "..._wget_commands.txt" file
-  commands_txt <- paste0(directory_to_save,
-                         collection,
-                         "_wget_commands.txt")
-  sink(commands_txt)
-  #### 8. concatenate and print download commands to "..._wget_commands.txt"
-  for (d in seq_along(date_sequence)){
+  #### 8. initiate "..._wget_commands.txt" file
+  commands_txt <- paste0(
+    directory_to_save,
+    collection,
+    "_",
+    date_start,
+    "_",
+    date_end,
+    "_wget_commands.txt"
+  )
+
+  download_sink(commands_txt)
+  #### 9. concatenate and print download commands to "..._wget_commands.txt"
+  for (d in seq_along(date_sequence)) {
     date <- date_sequence[d]
-    year <- stringr::str_sub(date, 1, 4)
-    month <- stringr::str_sub(date, 5, 6)
-    day <- stringr::str_sub(date, 7, 8)
-    for (t in seq_along(time_sequence)){
-      download_url <- paste0(base,
-                             "Y",
-                             year,
-                             "/M",
-                             month,
-                             "/D",
-                             day,
-                             "/GEOS-CF.v01.rpl.",
-                             collection,
-                             ".",
-                             date,
-                             "_",
-                             time_sequence[t],
-                             "z.nc4")
-      download_folder <- paste0(directory_to_save,
-                                collection)
-      download_command <- paste0("wget ",
-                                 download_url,
-                                 " -P ",
-                                 download_folder,
-                                 "\n")
+    year <- substr(date, 1, 4)
+    month <- substr(date, 5, 6)
+    day <- substr(date, 7, 8)
+    for (t in seq_along(time_sequence)) {
+      download_url <- paste0(
+        base,
+        "Y",
+        year,
+        "/M",
+        month,
+        "/D",
+        day,
+        "/GEOS-CF.v01.rpl.",
+        collection,
+        ".",
+        date,
+        "_",
+        time_sequence[t],
+        "z.nc4"
+      )
+      download_folder <- paste0(
+        directory_to_save,
+        collection
+      )
+      download_command <- paste0(
+        "wget ",
+        download_url,
+        " -P ",
+        download_folder,
+        "\n"
+      )
       cat(download_command)
     }
   }
   #### 9. finish "..._wget_commands.txt" file
   sink()
   #### 10. build system command
-  system_command <- paste0(". ",
-                           commands_txt,
-                           "\n")
+  system_command <- paste0(
+    ". ",
+    commands_txt,
+    "\n"
+  )
   #### 11. download data
-  download_run(download = download,
-               system_command = system_command,
-               commands_txt = commands_txt)
+  download_run(
+    download = download,
+    system_command = system_command,
+    commands_txt = commands_txt
+  )
+  download_remove_command(
+    commands_txt = commands_txt,
+    remove = remove_command
+  )
 }

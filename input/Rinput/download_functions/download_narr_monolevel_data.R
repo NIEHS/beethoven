@@ -29,14 +29,13 @@
 #' @return NULL;
 #' @export
 download_narr_monolevel_data <- function(
-  year_start = 2022,
-  year_end = 2022,
-  variables = NULL,
-  directory_to_save = "./input/data/narr/",
-  data_download_acknowledgement = FALSE,
-  download = FALSE,
-  remove_command = FALSE
-) {
+    year_start = 2022,
+    year_end = 2022,
+    variables = NULL,
+    directory_to_save = "./input/data/narr/",
+    data_download_acknowledgement = FALSE,
+    download = FALSE,
+    remove_command = FALSE) {
   #### 1. check for data download acknowledgement
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
   #### 2. directory setup
@@ -56,10 +55,12 @@ download_narr_monolevel_data <- function(
   #### 6. define URL base
   base <- "https://downloads.psl.noaa.gov/Datasets/NARR/Dailies/monolevel/"
   #### 7. initiate "..._curl_commands.txt"
-  commands_txt <- paste0(directory_to_save,
-                         "narr_monolevel_",
-                         year_start, "_", year_end,
-                         "_curl_commands.txt")
+  commands_txt <- paste0(
+    directory_to_save,
+    "narr_monolevel_",
+    year_start, "_", year_end,
+    "_curl_commands.txt"
+  )
   download_sink(commands_txt)
   #### 8. concatenate and print download commands to "..._curl_commands.txt"
   for (v in seq_along(variables_list)) {
@@ -70,34 +71,49 @@ download_narr_monolevel_data <- function(
     }
     for (y in seq_along(years)) {
       year <- years[y]
-      url <- paste0(base,
-                    variable,
-                    ".",
-                    year,
-                    ".nc")
-      destfile <- paste0(directory_to_save,
-                         variable,
-                         "/",
-                         variable,
-                         ".",
-                         year,
-                         ".nc")
-      command <- paste0("curl -s -o ",
-                        destfile,
-                        " --url ",
-                        url,
-                        "\n")
+      url <- paste0(
+        base,
+        variable,
+        ".",
+        year,
+        ".nc"
+      )
+      destfile <- paste0(
+        directory_to_save,
+        variable,
+        "/",
+        variable,
+        ".",
+        year,
+        ".nc"
+      )
+      command <- paste0(
+        "curl -s -o ",
+        destfile,
+        " --url ",
+        url,
+        "\n"
+      )
       cat(command)
     }
   }
   #### 9. finish "..._curl_commands.txt"
   sink()
   #### 10. build system command
-  system_command <- paste0(". ",
-                           commands_txt,
-                           "\n")
+  system_command <- paste0(
+    ". ",
+    commands_txt,
+    "\n"
+  )
   #### 11. download data
-  download_run(download = download,
-               system_command = system_command,
-               commands_txt = commands_txt)
+  download_run(
+    download = download,
+    system_command = system_command,
+    commands_txt = commands_txt
+  )
+  #### 12. remove command text file
+  download_remove_command(
+    commands_txt = commands_txt,
+    remove = remove_command
+  )
 }

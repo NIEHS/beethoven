@@ -924,7 +924,7 @@ download_narr_monolevel_data <- function(
                system_command = system_command,
                commands_txt = commands_txt)
   #### 12. remove command text file
-  download_remove_command(command_txt = commands_txt,
+  download_remove_command(commands_txt = commands_txt,
                           remove = remove_command)
 }
 
@@ -966,9 +966,7 @@ download_narr_p_levels_data <- function(
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
 
   #### 2. directory setup
-  download_setup_dir(directory_to_download)
   download_setup_dir(directory_to_save)
-  directory_to_download <- download_sanitize_path(directory_to_download)
   directory_to_save <- download_sanitize_path(directory_to_save)
 
   #### 3. check for variables
@@ -1077,7 +1075,7 @@ download_nlcd_data <- function(
   directory_to_download = "./input/data/nlcd/",
   directory_to_save = "./input/data/nlcd/",
   data_download_acknowledgement = FALSE,
-  unzip = TRUE,
+  unzip = FALSE,
   remove_zip = FALSE,
   download = FALSE,
   remove_command = FALSE
@@ -1124,7 +1122,7 @@ download_nlcd_data <- function(
                          ".zip")
   #### 7. build download file name
   download_name <- paste0(directory_to_download,
-                          collection_code,
+                          tolower(collection_code),
                           release_date,
                           ".zip")
   #### 8. build system command
@@ -1135,8 +1133,7 @@ download_nlcd_data <- function(
                              "\n")
   #### 9. initiate "..._curl_command.txt"
   commands_txt <- paste0(directory_to_download,
-                         collection_code,
-                         "_",
+                         tolower(collection_code),
                          Sys.Date(),
                          "_curl_command.txt")
   download_sink(commands_txt)
@@ -1156,13 +1153,6 @@ download_nlcd_data <- function(
   download_unzip(file_name = download_name,
                  directory_to_unzip = directory_to_save,
                  unzip = unzip)
-  #### 15. unzip downloaded data
-  cat(paste0("Unzipping files...\n"))
-  unzip(download_name,
-        exdir = directory_to_save)
-  cat(paste0("Files unzipped and saved in ",
-             directory_to_save,
-             ".\n"))
   #### 16. remove zip files
   download_remove_zips(remove = remove_zip,
                        download_name = download_name)
@@ -1211,7 +1201,8 @@ download_sedac_groads_data <- function(
   data_download_acknowledgement = FALSE,
   unzip = TRUE,
   remove_zip = FALSE,
-  download = FALSE
+  download = FALSE,
+  remove_command = FALSE
 ) {
   #### 1. check for data download acknowledgement
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
@@ -1234,7 +1225,7 @@ download_sedac_groads_data <- function(
   # if (!(data_format %in% formats)) {
   #   stop(paste0("Requested data format not recognized.\n"))
   # }
-  formats <- match.arg(formats)
+  # formats <- match.arg(formats)
   #### 6. define URL base
   base <- paste0("https://sedac.ciesin.columbia.edu/downloads/data/groads/",
                  "groads-global-roads-open-access-v1/",
@@ -1498,6 +1489,7 @@ download_noaa_hms_smoke_data <- function(
   directory_to_save = "./input/data/noaa_hms/",
   data_download_acknowledgement = FALSE,
   download = FALSE,
+  remove_command = FALSE,
   unzip = TRUE,
   remove_zip = FALSE
 ) {

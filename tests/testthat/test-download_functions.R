@@ -1,8 +1,6 @@
 #' @author Mitchell Manware
 #' @description Unit test for for checking data download functions.
 #'
-setwd("/Volumes/manwareme/NRT-AP-Model/tests/testthat/")
-library(testthat)
 testthat::test_that("GEOS-CF download URLs exist.", {
   withr::local_package("httr")
   withr::local_package("stringr")
@@ -20,35 +18,25 @@ testthat::test_that("GEOS-CF download URLs exist.", {
                           directory_to_save = directory_to_save,
                           data_download_acknowledgement = TRUE,
                           download = FALSE)
-    # TEST that directory_to_save exists
-    testthat::expect_true(dir.exists(directory_to_save))
-    # path with commands
+    # define file path with commands
     commands_path <- paste0(directory_to_save,
                             collections[c],
+                            "_",
+                            date_start,
+                            "_",
+                            date_end,
                             "_wget_commands.txt")
-    # TEST that path with commands exists
-    testthat::expect_true(file.exists(commands_path))
-    # import wget commands
-    wget_commands <- read.csv(commands_path,
-                              header = FALSE)
-    # convert to character
-    wget_commands <- wget_commands[seq_len(nrow(wget_commands)), ]
-    # extract URLs from `wget_commands`
-    url_list <- NULL
-    for (w in seq_along(wget_commands)) {
-      command <- wget_commands[w]
-      url <- stringr::str_split_i(command, " ", 2)
-      url_list <- c(url_list, url)
-    }
-    # sample URLs
-    url_sample <- sample(url_list, 30L, replace = FALSE)
-    # apply check_url_file_exist to sample of urls
-    url_status <- sapply(url_sample, check_url_file_exist)
-    # TEST that URLs are character
-    testthat::expect_true(is.character(url_list))
-    # TEST that URLs exist
-    testthat::expect_true(all(url_status))
-    # remove path with commands after test
+    # import commands
+    commands <- read_commands(commands_path = commands_path)
+    # extract urls
+    urls <- extract_urls(commands = commands, position = 2)
+    # check HTTP URL status
+    url_status <- check_urls(urls = urls, size = 30L)
+    # implement unit tests
+    test_download_functions(directory_to_save = directory_to_save,
+                            commands_path = commands_path,
+                            url_status = url_status)
+    # remove file with commands after test
     file.remove(commands_path)
   }
 })
@@ -73,33 +61,26 @@ testthat::test_that("GMTED download URLs exist.", {
                         unzip = FALSE,
                         remove_zip = FALSE,
                         download = FALSE)
-    # TEST that directory_to_download exists
-    testthat::expect_true(dir.exists(directory_to_download))
-    # TEST that directory_to_save exists
-    testthat::expect_true(dir.exists(directory_to_save))
-    # path with commands
+    # define file path with commands
     commands_path <- paste0(directory_to_download,
                             "gmted_",
                             gsub(" ", "", statistics[s]),
                             "_",
                             gsub(" ", "", resolution),
+                            "_",
+                            Sys.Date(),
                             "_curl_command.txt")
-    # TEST that path with command exists
-    testthat::expect_true(file.exists(commands_path))
-    # import curl command
-    curl_command <- read.csv(commands_path,
-                             header = FALSE)
-    # convert to character
-    curl_command <- curl_command[seq_len(nrow(curl_command)), ]
-    # extract URL from `curl_command`
-    url <- stringr::str_split_i(curl_command, " ", 6)
-    # apply check_url_file_exist to URL
-    url_status <- check_url_file_exist(url)
-    # TEST that URLs are character
-    testthat::expect_true(is.character(url))
-    # TEST that URLs exist
-    testthat::expect_true(all(url_status))
-    # remove path with commands after test
+    # import commands
+    commands <- read_commands(commands_path = commands_path)
+    # extract urls
+    urls <- extract_urls(commands = commands, position = 6)
+    # check HTTP URL status
+    url_status <- check_urls(urls = urls, size = 1L)
+    # implement unit tests
+    test_download_functions(directory_to_save = directory_to_save,
+                            commands_path = commands_path,
+                            url_status = url_status)
+    # remove file with commands after test
     file.remove(commands_path)
   }
 })
@@ -119,34 +100,22 @@ testthat::test_that("NCEP NARR monolevel download URLs exist.", {
                                directory_to_save = directory_to_save,
                                data_download_acknowledgement = TRUE,
                                download = FALSE)
-  # TEST that directory_to_save exists
-  testthat::expect_true(dir.exists(directory_to_save))
-  # path with commands
+  # define path with commands
   commands_path <- paste0(directory_to_save,
-                          "narr_monolevel_curl_commands.txt")
-  # TEST that path with commands exists
-  testthat::expect_true(file.exists(commands_path))
-  # import curl commands
-  curl_commands <- read.csv(commands_path,
-                            header = FALSE)
-  # convert to character
-  curl_commands <- curl_commands[seq_len(nrow(curl_commands)), ]
-  # extract URLs from `wget_commands`
-  url_list <- NULL
-  for (w in seq_along(curl_commands)) {
-    command <- curl_commands[w]
-    url <- stringr::str_split_i(command, " ", 6)
-    url_list <- c(url_list, url)
-  }
-  # sample URLs
-  url_sample <- sample(url_list, 10L, replace = FALSE)
-  # apply check_url_file_exist to sample of urls
-  url_status <- sapply(url_sample, check_url_file_exist)
-  # TEST that URLs are character
-  testthat::expect_true(is.character(url_list))
-  # TEST that URLs exist
-  testthat::expect_true(all(url_status))
-  # remove path with commands after test
+                          "narr_monolevel_",
+                          year_start, "_", year_end,
+                          "_curl_commands.txt")
+  # import commands
+  commands <- read_commands(commands_path = commands_path)
+  # extract urls
+  urls <- extract_urls(commands = commands, position = 6)
+  # check HTTP URL status
+  url_status <- check_urls(urls = urls, size = 5L)
+  # implement unit tests
+  test_download_functions(directory_to_save = directory_to_save,
+                          commands_path = commands_path,
+                          url_status = url_status)
+  # remove file with commands after test
   file.remove(commands_path)
 })
 
@@ -165,33 +134,105 @@ testthat::test_that("NCEP NARR pressure levels download URLs exist.", {
                               directory_to_save = directory_to_save,
                               data_download_acknowledgement = TRUE,
                               download = FALSE)
-  # TEST that directory_to_save exists
-  testthat::expect_true(dir.exists(directory_to_save))
-  # path with commands
+  # define file path with commands
   commands_path <- paste0(directory_to_save,
-                          "narr_p_levels_curl_commands.txt")
-  # TEST that path with commands exists
-  testthat::expect_true(file.exists(commands_path))
-  # import curl commands
-  curl_commands <- read.csv(commands_path,
-                            header = FALSE)
-  # convert to character
-  curl_commands <- curl_commands[seq_len(nrow(curl_commands)), ]
-  # extract URLs from `wget_commands`
-  url_list <- NULL
-  for (w in seq_along(curl_commands)) {
-    command <- curl_commands[w]
-    url <- stringr::str_split_i(command, " ", 6)
-    url_list <- c(url_list, url)
-  }
-  # sample URLs
-  url_sample <- sample(url_list, 30L, replace = FALSE)
-  # apply check_url_file_exist to sample of urls
-  url_status <- sapply(url_sample, check_url_file_exist)
-  # TEST that URLs are character
-  testthat::expect_true(is.character(url_list))
-  # TEST that URLs exist
-  testthat::expect_true(all(url_status))
-  # remove path with commands after test
+                          "narr_p_levels_",
+                          year_start, "_", year_end,
+                          "_curl_commands.txt")
+  # import commands
+  commands <- read_commands(commands_path = commands_path)
+  # extract urls
+  urls <- extract_urls(commands = commands, position = 6)
+  # check HTTP URL status
+  url_status <- check_urls(urls = urls, size = 30L)
+  # implement unit tests
+  test_download_functions(directory_to_save = directory_to_save,
+                          commands_path = commands_path,
+                          url_status = url_status)
+  # remove file with commands after test
   file.remove(commands_path)
+})
+
+testthat::test_that("NOAA HMS Smoke download URLs exist.", {
+  withr::local_package("httr")
+  withr::local_package("stringr")
+  # function parameters
+  date_start <- "2022-01-01"
+  date_end <- "2022-12-31"
+  directory_to_download <- "../testdata/"
+  directory_to_save <- "../testdata/"
+  # run download function
+  download_noaa_hms_smoke_data(date_start = date_start,
+                               date_end = date_end,
+                               directory_to_download = directory_to_download,
+                               directory_to_save = directory_to_save,
+                               data_download_acknowledgement = TRUE,
+                               download = FALSE,
+                               remove_command = FALSE,
+                               unzip = FALSE,
+                               remove_zip = FALSE)
+  # define file path with commands
+  commands_path <- paste0(directory_to_download,
+                          "hms_smoke_",
+                          gsub("-", "", date_start),
+                          "_",
+                          gsub("-", "", date_end),
+                          "_curl_commands.txt")
+  # import commands
+  commands <- read_commands(commands_path = commands_path)
+  # extract urls
+  urls <- extract_urls(commands = commands, position = 6)
+  # check HTTP URL status
+  url_status <- check_urls(urls = urls, size = 30L)
+  # implement unit tests
+  test_download_functions(directory_to_save = directory_to_save,
+                          commands_path = commands_path,
+                          url_status = url_status)
+  # remove file with commands after test
+  file.remove(commands_path)
+})
+
+testthat::test_that("NLCD download URLs exist.", {
+  withr::local_package("httr")
+  withr::local_package("stringr")
+  # function parameters
+  years <- c(2021, 2019, 2016)
+  collections <- c(rep("Coterminous United States", 2), "Alaska")
+  collection_codes <- c(rep("l48", 2), "ak")
+  directory_to_download <- "../testdata/"
+  directory_to_save <- "../testdata/"
+  # run download function
+  for (y in seq_along(years)) {
+    download_nlcd_data(year = years[y],
+                       collection = collections[y],
+                       directory_to_download = directory_to_download,
+                       directory_to_save = directory_to_save,
+                       data_download_acknowledgement = TRUE,
+                       download = FALSE,
+                       remove_command = FALSE,
+                       unzip = FALSE,
+                       remove_zip = FALSE)
+    # define file path with commands
+    commands_path <- paste0(directory_to_download,
+                            "nlcd_",
+                            years[y],
+                            "_land_cover_",
+                            collection_codes[y],
+                            "_",
+                            Sys.Date(),
+                            "_curl_command.txt")
+    # import commands
+    commands <- read_commands(commands_path = commands_path)
+    # extract urls
+    urls <- extract_urls(commands = commands, position = 5)
+    # check HTTP URL status
+    url_status <- check_urls(urls = urls, size = 1L)
+    # implement unit tests
+    test_download_functions(directory_to_download = directory_to_download,
+                            directory_to_save = directory_to_save,
+                            commands_path = commands_path,
+                            url_status = url_status)
+    # remove file with commands after test
+    file.remove(commands_path)
+  }
 })
