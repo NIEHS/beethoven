@@ -45,17 +45,17 @@ calc_nlcd_ratio <- function(data_vect,
   nlcd <- terra::rast(nlcd_file)
   # select points within mainland US and reproject on nlcd crs if necessary
   # need spData library
-  data(us_states, package = "spData")
-  us_main <- sf::st_union(us_states) %>%
-    terra::vect() %>%
+  utils::data("us_states", package = "spData")
+  us_main <- sf::st_union(get("us_states")) |>
+    terra::vect() |>
     terra::project(y = terra::crs(data_vect))
-  data_vect_b <- data_vect %>%
+  data_vect_b <- data_vect |>
     terra::intersect(x = us_main)
   if (!terra::same.crs(data_vect_b, nlcd)) {
     data_vect_b <- terra::project(data_vect_b, terra::crs(nlcd))
   }
   # create circle buffers with buf_radius
-  bufs_pol <- terra::buffer(data_vect_b, width = buf_radius) %>%
+  bufs_pol <- terra::buffer(data_vect_b, width = buf_radius) |>
     sf::st_as_sf()
   # ratio of each nlcd class per buffer
   nlcd_at_bufs <- exactextractr::exact_extract(nlcd,
