@@ -14,6 +14,7 @@
 #' @returns a data.frame object
 #' @author Insang Song
 #' @import terra
+#' @importFrom methods is
 #' @export
 calc_koppen_geiger <-
   function(
@@ -22,8 +23,11 @@ calc_koppen_geiger <-
       id_col = "site_id") {
     ## You will get "sites" in memory after sourcing the file above
     kg_rast <- terra::rast(path_koppen)
+    sites_tr <- sites
 
-    sites_tr <- terra::vect(sites)
+    if (!methods::is(sites, "SpatVector")) {
+      sites_tr <- terra::vect(sites)
+    }
     sites_kg <- terra::project(sites_tr, terra::crs(kg_rast))
     sites_kg_extract <- terra::extract(kg_rast, sites_kg)
 
