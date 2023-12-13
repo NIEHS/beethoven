@@ -10,6 +10,8 @@ globalVariables(c("us_states", "%>%"))
 #' radius of buffer around points
 #' @param year numeric giving the year of NLCD data used
 #' @param nlcd_path character giving nlcd data path
+#' @importFrom utils read.csv
+#' @importFrom utils data
 #' @export
 calc_nlcd_ratio <- function(data_vect,
                             buf_radius = 1000,

@@ -20,6 +20,7 @@ check_url_file_exist <- function(url) {
 #' Read commands and convert to character vector
 #' @param commands_path file path with wget/curl commands
 #' @return character vector containing download commands
+#' @importFrom utils read.csv
 #' @export
 read_commands <- function(
     commands_path = commands_path) {
