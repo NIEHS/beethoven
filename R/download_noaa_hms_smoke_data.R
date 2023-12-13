@@ -30,6 +30,8 @@
 #' @param remove_zip logical(1). Remove zip files from
 #' directory_to_download. Default = `FALSE`. (Ignored if `data_format = "KML"`.)
 #' @param remove_command
+#' @importFrom utils head
+#' @importFrom utils tail
 #' @author Mitchell Manware, Insang Song
 #' @return NULL;
 #' @export
@@ -70,9 +72,9 @@ download_noaa_hms_smoke_data <- function(
   commands_txt <- paste0(
     directory_to_download,
     "hms_smoke_",
-    head(date_sequence, n = 1),
+    utils::head(date_sequence, n = 1),
     "_",
-    tail(date_sequence, n = 1),
+    utils::tail(date_sequence, n = 1),
     "_curl_commands.txt"
   )
   download_sink(commands_txt)
