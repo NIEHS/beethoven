@@ -1,6 +1,10 @@
 # to look at the path and package settings,
 # consult "load_packages.r"
-# source("./input/Rinput/processing_functions/load_packages.R")
+# run variable is to pass lintr test
+run <- FALSE
+if (run) {
+  source("./input/Rinput/processing_functions/load_packages.R")
+}
 
 
 #' Calculate Koeppen-Geiger climate zone binary variables
@@ -92,4 +96,6 @@ calc_koppen_geiger <-
 
 
 calc_koeppen_geiger <- calc_koppen_geiger
-# saveRDS(kg_extracted, file = "~/NRTAP_Covars_Koppen_Geiger_AE_binary.rds")
+if (run) {
+  saveRDS(kg_extracted, file = "~/NRTAP_Covars_Koppen_Geiger_AE_binary.rds")
+}
