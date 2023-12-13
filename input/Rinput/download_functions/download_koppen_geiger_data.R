@@ -1,5 +1,6 @@
 ################################################################################
 # Date created: 2023-10-17
+# Date edited: 2023-12-06
 # Packages required: none
 ################################################################################
 
@@ -25,65 +26,50 @@
 #' @param data_download_acknowledgement logical(1). By setting `= TRUE` the
 #' user acknowledge that the data downloaded using this function may be very
 #' large and use lots of machine storage and memory.
-#' @param remove_download logical(1). Remove download files in
-#' directory_to_download.
-#' @author Mitchell Manware
+#' @param unzip logical(1). Unzip zip files. Default = `TRUE`.
+#' @param remove_zip logical(1). Remove zip files from directory_to_download.
+#' Default = `FALSE`.
+#' @param download logical(1). `= FALSE` will generate a `.txt` file containing
+#' all download commands. By setting `= TRUE` the function will download all of
+#' the requested data files.
+#' @param remove_command logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
+#' the text file containing download commands.
+#' @author Mitchell Manware, Insang Song
 #' @return NULL;
 #' @export
 download_koppen_geiger_data <- function(
-  time_period = "Present",
-  data_resolution = NULL,
-  directory_to_download = "./input/koppen_geiger/raw/",
-  directory_to_save = "./input/koppen_geiger/raw/",
+  time_period = c("Present", "Future"),
+  data_resolution = c("0.0083", "0.083", "0.5"),
+  directory_to_download = "./input/data/koppen_geiger/",
+  directory_to_save = "./input/data/koppen_geiger/",
   data_download_acknowledgement = FALSE,
-  remove_download = TRUE
+  download = FALSE,
+  unzip = TRUE,
+  remove_zip = FALSE,
+  remove_command = FALSE
 ) {
-  #### 1. directory setup
-  chars_dir_download <- nchar(directory_to_download)
-  chars_dir_save <- nchar(directory_to_save)
-  if (substr(directory_to_download,
-             chars_dir_download,
-             chars_dir_download) != "/") {
-    directory_to_download <- paste(directory_to_download,
-                                   "/",
-                                   sep = "")
-  }
-  if (substr(directory_to_save, chars_dir_save, chars_dir_save) != "/") {
-    directory_to_save <- paste(directory_to_save, "/", sep = "")
-  }
-  #### 2. check for data download acknowledgement
-  if (data_download_acknowledgement == FALSE) {
-    cat(paste0("Data download acknowledgement is set to FALSE.",
-               "Please acknowledge that the data downloaded using this",
-               "function may be very large and use lots of machine storage",
-               "and memory."))
-    stop()
-  }
+  #### 1. check for data download acknowledgement
+  download_permit(data_download_acknowledgement = data_download_acknowledgement)
+  #### 2. directory setup
+  download_setup_dir(directory_to_download)
+  download_setup_dir(directory_to_save)
+  directory_to_download <- download_sanitize_path(directory_to_download)
+  directory_to_save <- download_sanitize_path(directory_to_save)
+
   #### 3. check for data resolution
   if (is.null(data_resolution)) {
-    cat(paste0("Please select a data resolution.\n"))
-    stop()
+    stop(paste0("Please select a data resolution.\n"))
   }
+  data_resolution <- match.arg(data_resolution)
   #### 4. check for valid time period
-  if (!(time_period %in% c("Present", "Future"))) {
-    cat(paste0("Requested time period is not recognized.\n"))
-    stop()
+  if (is.null(time_period)) {
+    stop(paste0("Please select a time period.\n"))
   }
-  #### 5. check for valid data resolution
-  if (!(data_resolution %in% c("0.0083", "0.083", "0.5"))) {
-    cat(paste0("Requested time period is not recognized.\n"))
-    stop()
-  }
+  time_period <- match.arg(time_period)
   #### 6. define time period
   period <- tolower(time_period)
   #### 7. define data resolution
-  if (data_resolution == "0.0083") {
-    resolution <- "0p0083"
-  } else if (data_resolution == "0.083") {
-    resolution <- "0p083"
-  } else if (data_resolution == "0.5") {
-    resolution <- "0p5"
-  }
+  data_resolution <- gsub("\\.", "p", data_resolution)
   #### 8 define download URL
   download_url <- "https://figshare.com/ndownloader/files/12407516"
   #### 9 build download file name
@@ -91,7 +77,7 @@ download_koppen_geiger_data <- function(
                           "koppen_geiger_",
                           period,
                           "_",
-                          resolution,
+                          data_resolution,
                           ".zip")
   #### 10. build download command
   download_command <- paste0("wget ",
@@ -99,39 +85,57 @@ download_koppen_geiger_data <- function(
                              " -O ",
                              download_name,
                              "\n")
-  #### 11. download data
-  cat(paste0("Downloading requested file...\n"))
-  system(command = download_command)
-  Sys.sleep(2L)
-  cat(paste0("Requested file downloaded.\n"))
-  #### 12. unzip downloaded data
-  cat(paste0("Unzipping files...\n"))
-  unzip(download_name,
-        exdir = directory_to_save)
-  cat(paste0("Files unzipped and saved in ",
-             directory_to_save,
-             ".\n"))
-  #### 13. remove unwanted files
-  unwanted_names <- list.files(path = directory_to_save,
-                               pattern = "Beck_KG",
-                               full.names = TRUE)
-  unwanted_names <- as.vector(c(unwanted_names,
-                                paste0(directory_to_save,
-                                       "KoppenGeiger.m")))
-  tif <- paste0(directory_to_save,
-                "/Beck_KG_V1_",
-                period,
-                "_",
-                resolution,
-                ".tif")
-  unwanted_names <- unwanted_names[grep(pattern = tif,
-                                        unwanted_names,
-                                        invert = TRUE)]
-  file.remove(unwanted_names)
-  #### 14. remove zip files
-  if (remove_download == TRUE) {
-    cat(paste0("Removing download files...\n"))
-    file.remove(download_name)
-    cat(paste0("Download files removed.\n"))
+  #### 11. initiate "..._wget_commands.txt"
+  commands_txt <- paste0(directory_to_download,
+                         "koppen_geiger_",
+                         time_period,
+                         "_",
+                         data_resolution,
+                         "_",
+                         Sys.Date(),
+                         "_wget_command.txt")
+  download_sink(commands_txt)
+  #### 12. concatenate and print download command to "..._wget_commands.txt"
+  cat(download_command)
+  #### 13. finish "..._wget_commands.txt" file
+  sink()
+  #### 14. build system command
+  system_command <- paste0(". ",
+                           commands_txt,
+                           "\n")
+  #### 15. download data
+  download_run(download = download,
+               system_command = system_command,
+               commands_txt = commands_txt)
+  #### 16. end if unzip == FALSE
+  download_unzip(file_name = download_name,
+                 directory_to_unzip = directory_to_save,
+                 unzip = unzip)
+  if (unzip) {
+    #### 17. remove unwanted files
+    unwanted_names <- list.files(path = directory_to_save,
+                                pattern = "Beck_KG",
+                                full.names = TRUE)
+    unwanted_names <- as.vector(c(unwanted_names,
+                                  paste0(directory_to_save,
+                                        "KoppenGeiger.m")))
+    tif <- paste0(directory_to_save,
+                  "/Beck_KG_V1_",
+                  period,
+                  "_",
+                  data_resolution,
+                  ".tif")
+    unwanted_names <- unwanted_names[grep(pattern = tif,
+                                          unwanted_names,
+                                          invert = TRUE)]
+    file.remove(unwanted_names)
   }
+
+  #### 18. Remove command file
+  download_remove_command(commands_txt = commands_txt,
+                          remove = remove_command)
+  #### 19. remove zip files
+  download_remove_zips(remove = remove_zip,
+                       download_name = download_name)
+
 }

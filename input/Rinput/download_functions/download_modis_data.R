@@ -1,6 +1,6 @@
 ################################################################################
 # Date created: 2023-10-12
-# Date modified: 2023-11-27
+# Date modified: 2023-12-01
 ################################################################################
 
 ################################################################################
@@ -14,6 +14,8 @@
 #' @note \code{date_start} and \code{date_end} should be in the same year.
 #'  Directory structure looks like
 #'  input/modis/raw/[version]/[product]/[year]/[day_of_year]
+#' download_modis_data:
+#' @description
 #' @param date_start character(1). length of 10. Start date for downloading
 #' data. Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
 #' @param date_end character(1). length of 10. End date for downloading data.
@@ -32,8 +34,9 @@
 #' @param data_download_acknowledgement logical(1). By setting `= TRUE` the
 #' user acknowledge that the data downloaded using this function may be very
 #' large and use lots of machine storage and memory.
-#' @param write_command_only logical(1). Only return a text file
-#' with wget commands instead of running it
+#' @param download logical(1). Download data or only save wget commands.
+#' @param remove_command logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
+#' the text file containing download commands.
 #' @author Mitchell Manware, Insang Song
 #' @import rvest
 #' @returns NULL;
@@ -49,21 +52,14 @@ download_modis_data <- function(
     nasa_earth_data_token = NULL,
     directory_to_save = "./input/modis/raw/",
     data_download_acknowledgement = FALSE,
-    write_command_only = FALSE) {
-  #### 1. directory setup
-  chars_dir_save <- nchar(directory_to_save)
-  if (substr(directory_to_save, chars_dir_save, chars_dir_save) != "/") {
-    directory_to_save <- paste0(directory_to_save, "/", sep = "")
-  }
-  #### 2. check for data download acknowledgement
-  if (data_download_acknowledgement == FALSE) {
-    stop(
-         paste0(
-                "Data download acknowledgement is set to FALSE. ",
-                "Please acknowledge that the data downloaded using this ",
-                "function may be very large and use lots of machine storage ",
-                "and memory.\n"))
-  }
+    download = TRUE,
+    remove_command = FALSE) {
+  #### 1. check for data download acknowledgement
+  download_permit(data_download_acknowledgement = data_download_acknowledgement)
+  #### 2. directory setup
+  download_setup_dir(directory_to_save)
+  directory_to_save <- download_sanitize_path(directory_to_save)
+
   #### 3. check for NASA earth data token
   if (is.null(nasa_earth_data_token)) {
     stop("Please provide NASA EarthData Login token.\n")
@@ -78,13 +74,16 @@ download_modis_data <- function(
   }
 
   #### 5. check for version
-  if (is.null(version) == TRUE) {
+  if (is.null(version)) {
     stop("Please select a data version.\n")
   }
   #### 6. check for valid horizontal tiles
-  # revised to reduce cyclomatic complexity
-  stopifnot(all(horizontal_tiles %in% seq(0, 35)))
-  stopifnot(all(vertical_tiles %in% seq(0, 17)))
+  if (!all(horizontal_tiles %in% seq(0, 35))) {
+    stop("Horizontal tiles are not in the proper range [0, 35].\n")
+  }
+  if (!all(vertical_tiles %in% seq(0, 17))) {
+    stop("Vertical tiles are not in the proper range [0, 17].\n")
+  }
 
   #### 8. Reuse ladsweb home url
   ladsurl <- "https://ladsweb.modaps.eosdis.nasa.gov/"
@@ -94,18 +93,19 @@ download_modis_data <- function(
   date_start_date_format <- as.Date(date_start, format = "%Y-%m-%d")
   date_end_date_format <- as.Date(date_end, format = "%Y-%m-%d")
   date_sequence <- seq(date_start_date_format, date_end_date_format, "day")
-  if (ismod13) {
-    date_start_yearday <- as.numeric(strftime(date_start_date_format, "%j"))
-    date_end_yearday <- as.numeric(strftime(date_end_date_format, "%j"))
-    year_mod13 <- strftime(date_start_date_format, "%Y")
-    date_sequence <- seq(1, 366, 16)
-    date_sequence <-
-      date_sequence[date_sequence >= date_start_yearday &
-        date_sequence <= date_end_yearday]
-  }
+  # if (ismod13) {
+  #   date_start_yearday <- as.numeric(strftime(date_start_date_format, "%j"))
+  #   date_end_yearday <- as.numeric(strftime(date_end_date_format, "%j"))
+  #   year_mod13 <- strftime(date_start_date_format, "%Y")
+  #   date_sequence <- seq(1, 366, 16)
+  #   date_sequence <-
+  #     date_sequence[date_sequence >= date_start_yearday &
+  #       date_sequence <= date_end_yearday]
+  # }
 
   # In a certain year, list all available dates
-  year <- ifelse(ismod13, year_mod13, as.character(substr(date_start, 1, 4)))
+  year <- as.character(substr(date_start, 1, 4))
+  # year <- ifelse(ismod13, year_mod13, as.character(substr(date_start, 1, 4)))
   filedir_year_url <-
     paste0(
           ladsurl,
@@ -121,9 +121,21 @@ download_modis_data <- function(
     rvest::html_elements("tr") |>
     rvest::html_attr("data-name")
   # no conditional assignment at this moment.
-  # 11/28/2023 I. Song
+
   # remove NAs
+  # Queried year's available days
   date_sequence <- list_available_d[!is.na(list_available_d)]
+  date_sequence_i <- as.integer(date_sequence)
+  # Queried dates to integer range
+  date_start_i <- as.integer(strftime(date_start, "%j"))
+  date_end_i <- as.integer(strftime(date_end, "%j"))
+  date_range_julian <- seq(date_start_i, date_end_i)
+  date_sequence_in <- (date_sequence_i %in% date_range_julian)
+
+  message(sprintf("%d / %d days of data available in the queried dates.\n",
+                  sum(date_sequence_in), length(date_range_julian)))
+  date_sequence <- date_sequence[date_sequence_in]
+
 
   #### 10. define horizontal tiles
   tiles_horizontal <- seq(horizontal_tiles[1],
@@ -161,22 +173,14 @@ download_modis_data <- function(
     date_start,
     "_",
     date_end,
-    "_",
-    product,
     "_wget_commands.txt"
   )
 
   # avoid any possible errors by removing existing command files
-  if (file.exists(commands_txt)) {
-    unlink(commands_txt)
-  }
-
-  sink(commands_txt)
-
+  download_sink(commands_txt)
   #### 14. append download commands to text file
   for (d in seq_along(date_sequence)) {
-    date <- date_sequence[d]
-    day <- date
+    day <- date_sequence[d]
     filedir_url <-
       paste0(
              filedir_year_url,
@@ -215,7 +219,7 @@ download_modis_data <- function(
   #### 16. finish "..._wget_commands.txt"
   sink(file = NULL)
 
-  if (!write_command_only) {
+  if (download) {
     #### 17. build system command
     system_command <- paste0(
       ". ",
@@ -223,7 +227,9 @@ download_modis_data <- function(
       "\n"
     )
     #### 18. download data
-    system(command = system_command)
+    download_run(download = download,
+                 system_command = system_command,
+                 commands_txt = commands_txt)
   }
 
   message("Requests were processed.\n")

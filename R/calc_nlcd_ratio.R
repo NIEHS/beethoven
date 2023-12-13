@@ -1,7 +1,3 @@
-# needs terra, exactextractr, spData, sf
-
-globalVariables(c("us_states", "%>%"))
-
 
 #' Compute land cover classes ratio in circle buffers around points
 #'
@@ -10,6 +6,11 @@ globalVariables(c("us_states", "%>%"))
 #' radius of buffer around points
 #' @param year numeric giving the year of NLCD data used
 #' @param nlcd_path character giving nlcd data path
+#' @importFrom utils read.csv
+#' @importFrom utils data
+#' @import terra
+#' @import sf
+#' @import spData
 #' @export
 calc_nlcd_ratio <- function(data_vect,
                             buf_radius = 1000,
@@ -41,24 +42,24 @@ calc_nlcd_ratio <- function(data_vect,
   if (length(nlcd_file) == 0) {
     stop("NLCD data not available for this year.")
   }
-  nlcd <- rast(nlcd_file)
+  nlcd <- terra::rast(nlcd_file)
   # select points within mainland US and reproject on nlcd crs if necessary
   # need spData library
-  data(us_states, package = "spData")
-  us_main <- sf::st_union(us_states) %>%
-    terra::vect() %>%
-    terra::project(y = crs(data_vect))
-  data_vect_b <- data_vect %>%
+  utils::data("us_states", package = "spData")
+  us_main <- sf::st_union(get("us_states")) |>
+    terra::vect() |>
+    terra::project(y = terra::crs(data_vect))
+  data_vect_b <- data_vect |>
     terra::intersect(x = us_main)
   if (!terra::same.crs(data_vect_b, nlcd)) {
-    data_vect_b <- terra::project(data_vect_b, crs(nlcd))
+    data_vect_b <- terra::project(data_vect_b, terra::crs(nlcd))
   }
   # create circle buffers with buf_radius
-  bufs_pol <- terra::buffer(data_vect_b, width = buf_radius) %>%
+  bufs_pol <- terra::buffer(data_vect_b, width = buf_radius) |>
     sf::st_as_sf()
   # ratio of each nlcd class per buffer
   nlcd_at_bufs <- exactextractr::exact_extract(nlcd,
-                                               st_geometry(bufs_pol),
+                                               sf::st_geometry(bufs_pol),
                                                fun = "frac",
                                                stack_apply = TRUE,
                                                progress = FALSE)
@@ -67,10 +68,10 @@ calc_nlcd_ratio <- function(data_vect,
                                                          names(nlcd_at_bufs))]]
   # change column names
   fpath <- system.file("extdata", "nlcd_classes.csv", package = "NRTAPmodel")
-  nlcd_classes <- read.csv(fpath)
-  nlcd_names <- names(nlcd_at_bufs) %>%
-    sub(pattern = "frac_", replacement = "") %>%
-    as.numeric()
+  nlcd_classes <- utils::read.csv(fpath)
+  nlcd_names <- names(nlcd_at_bufs)
+  nlcd_names <- sub(pattern = "frac_", replacement = "", x = nlcd_names)
+  nlcd_names <- as.numeric(nlcd_names)
   nlcd_names <- nlcd_classes[nlcd_classes$value %in% nlcd_names, c("class")]
   new_names <- sapply(
     nlcd_names,
@@ -80,7 +81,7 @@ calc_nlcd_ratio <- function(data_vect,
   )
   names(nlcd_at_bufs) <- new_names
   # merge data_vect with nlcd class fractions (and reproject)
-  new_data_vect <- cbind(data_vect_b, nlcd_at_bufs) %>%
-    terra::project(crs(data_vect))
+  new_data_vect <- cbind(data_vect_b, nlcd_at_bufs)
+  new_data_vect <- terra::project(new_data_vect, terra::crs(data_vect))
   return(new_data_vect)
 }

@@ -17,6 +17,7 @@
 #' @author Mitchell Manware.
 #' @return NULL; Processed NOAA Hazard Mapping System Fire and Smoke Product data will be returned to the designated saving directory in the indicated format.
 #' @export
+
 process_noaa_hms_smoke_data <- function(
     date_start = "2023-09-01",
     date_end = "2023-09-02",
@@ -162,3 +163,4 @@ process_noaa_hms_smoke_data <- function(
 #  }
   #nocov end
 }
+
