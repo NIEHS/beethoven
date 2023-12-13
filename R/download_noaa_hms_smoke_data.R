@@ -24,12 +24,15 @@
 #' @param data_download_acknowledgement logical(1). By setting `= TRUE` the user
 #' acknowledge that the data downloaded using this function may be very large
 #' and use lots of machine storage and memory.
-#' @param download
+#' @param download logical(1). `= FALSE` will generate a `.txt` file containing
+#' all download commands. By setting `= TRUE` the function will download all of
+#' the requested data files.
 #' @param unzip logical(1). Unzip zip files. Default = `TRUE`. (Ignored if
 #' `data_format = "KML"`.)
 #' @param remove_zip logical(1). Remove zip files from
 #' directory_to_download. Default = `FALSE`. (Ignored if `data_format = "KML"`.)
-#' @param remove_command
+#' @param remove_command logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
+#' the text file containing download commands.
 #' @importFrom utils head
 #' @importFrom utils tail
 #' @author Mitchell Manware, Insang Song

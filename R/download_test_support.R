@@ -24,13 +24,13 @@ check_url_file_exist <- function(url) {
 #' @export
 read_commands <- function(
     commands_path = commands_path) {
-  commands <- read.csv(commands_path, header = FALSE)
+  commands <- utils::read.csv(commands_path, header = FALSE)
   commands <- commands[seq_len(nrow(commands)), ]
   return(commands)
 }
 
 #' Extract URLs from download commands
-#' @param commands
+#' @param commands character vector containing download commands
 #' @param position URL position in the vector
 #' @importFrom stringr str_split_i
 #' @return character vector containing download URLs
@@ -68,10 +68,10 @@ check_urls <- function(
 }
 
 #' Apply download function-specific unit tests
-#' @param directory_to_save
-#' @param directory_to_download
-#' @param commands_path
-#' @param url_status
+#' @param directory_to_save directory to test saving
+#' @param directory_to_download directory to test download
+#' @param commands_path file path with download commands
+#' @param url_status logical vector for URL status = 200
 #' @importFrom testthat expect_true
 #' @return NULL
 #' @export
