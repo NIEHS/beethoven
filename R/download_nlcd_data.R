@@ -43,20 +43,21 @@ download_nlcd_data <- function(
     remove_command = FALSE) {
   #### 1. check for data download acknowledgement
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
-  #### 2. directory setup
+  #### 2. check for null parameters
+  check_for_null_parameters(mget(ls()))
+  #### 3. directory setup
   download_setup_dir(directory_to_download)
   download_setup_dir(directory_to_save)
   directory_to_download <- download_sanitize_path(directory_to_download)
   directory_to_save <- download_sanitize_path(directory_to_save)
-
-  #### 2. check for valid years
+  #### 4. check for valid years
   valid_years <- c(2001, 2004, 2006, 2008, 2011, 2013, 2016, 2019, 2021)
   if (!(year %in% valid_years)) {
     stop(paste0("Requested year is not recognized.\n"))
   }
-  #### 3. define URL base
+  #### 5. define URL base
   base <- "https://s3-us-west-2.amazonaws.com/mrlc/"
-  #### 4. define collection code
+  #### 6. define collection code
   if (collection == "Coterminous United States") {
     collection_code <- paste0(
       "nlcd_",
@@ -70,7 +71,7 @@ download_nlcd_data <- function(
       "_Land_Cover_AK_"
     )
   }
-  #### 5. define release date
+  #### 7. define release date
   #### NOTE: release dates identified by inspecting URLs on from
   ####       https://www.mrlc.gov/data?f%5B0%5D=category%3ALand%20Cover
   if (year == 2021 && collection == "Coterminous United States") {
@@ -80,21 +81,21 @@ download_nlcd_data <- function(
   } else if (collection == "Alaska") {
     release_date <- "20200724"
   }
-  #### 6. build URL
+  #### 8. build URL
   download_url <- paste0(
     base,
     collection_code,
     release_date,
     ".zip"
   )
-  #### 7. build download file name
+  #### 9. build download file name
   download_name <- paste0(
     directory_to_download,
     tolower(collection_code),
     release_date,
     ".zip"
   )
-  #### 8. build system command
+  #### 10. build system command
   download_command <- paste0(
     "curl -o ",
     download_name,
@@ -102,7 +103,7 @@ download_nlcd_data <- function(
     download_url,
     "\n"
   )
-  #### 9. initiate "..._curl_command.txt"
+  #### 11. initiate "..._curl_command.txt"
   commands_txt <- paste0(
     directory_to_download,
     tolower(collection_code),
@@ -110,34 +111,34 @@ download_nlcd_data <- function(
     "_curl_command.txt"
   )
   download_sink(commands_txt)
-  #### 10. concatenate and print download command to "..._curl_commands.txt"
+  #### 12. concatenate and print download command to "..._curl_commands.txt"
   cat(download_command)
-  #### 11. finish "..._curl_command.txt"
+  #### 13. finish "..._curl_command.txt"
   sink()
-  #### 12. build system command
+  #### 14. build system command
   system_command <- paste0(
     ". ",
     commands_txt,
     "\n"
   )
-  #### 13. download data
+  #### 15. download data
   download_run(
     download = download,
     system_command = system_command,
     commands_txt = commands_txt
   )
-  #### 14. end if unzip == FALSE
+  #### 16. end if unzip == FALSE
   download_unzip(
     file_name = download_name,
     directory_to_unzip = directory_to_save,
     unzip = unzip
   )
-  #### 16. remove zip files
+  #### 17. remove zip files
   download_remove_zips(
     remove = remove_zip,
     download_name = download_name
   )
-  #### 17. remove command text
+  #### 18. remove command text
   download_remove_command(
     commands_txt = commands_txt,
     remove = remove_command

@@ -165,3 +165,25 @@ download_remove_zips <-
       cat(paste0("Download files removed.\n"))
     }
   }
+
+
+#' Check for null arguments
+#' @param parameters parameters passed to function (called by
+#' \code{mget(ls())}.)
+#' @returns NULL
+#' @export
+check_for_null_parameters <-
+  function(
+    parameters
+  ) {
+    parameters_status <- any(unlist(lapply(parameters, is.null)))
+    if (parameters_status) {
+      stop(paste0("One or more parameters are `NULL`\n"))
+    }
+  }
+
+
+
+
+
+

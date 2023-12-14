@@ -17,6 +17,22 @@ testthat::test_that("Error when data_download_acknowledgement = FALSE", {
   }
 })
 
+testthat::test_that("Error when one parameter is NULL.", {
+  # will be expanded to all dataset names
+  download_datasets <- c("geos", "gmted", "narr_monolevel",
+                         "narr_p_levels", "nlcd", "noaa", "plevels",
+                         "p_levels", "monolevel", "hms", "smoke")
+  for (d in seq_along(download_datasets)) {
+    expect_message(
+      download_data(dataset_name = download_datasets[d],
+                    data_download_acknowledgement = TRUE,
+                    directory_to_save = NULL),
+      paste0("Please refer to the argument list and the error message above ",
+             "to rectify the error.")
+    )
+  }
+})
+
 testthat::test_that("GEOS-CF download URLs exist.", {
   withr::local_package("httr")
   withr::local_package("stringr")

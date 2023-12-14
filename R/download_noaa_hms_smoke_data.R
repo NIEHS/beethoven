@@ -51,27 +51,28 @@ download_noaa_hms_smoke_data <- function(
     remove_zip = FALSE) {
   #### 1. check for data download acknowledgement
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
-  #### 2. directory setup
+  #### 2. check for null parameters
+  check_for_null_parameters(mget(ls()))
+  #### 3. directory setup
   download_setup_dir(directory_to_download)
   download_setup_dir(directory_to_save)
   directory_to_download <- download_sanitize_path(directory_to_download)
   directory_to_save <- download_sanitize_path(directory_to_save)
-
-  #### 3. check for unzip == FALSE && remove_zip == TRUE
+  #### 4. check for unzip == FALSE && remove_zip == TRUE
   if (unzip == FALSE && remove_zip == TRUE) {
     stop(paste0(
       "Arguments `unzip = FALSE` and `remove_zip = TRUE` are not ",
       "acceptable together. Please change one.\n"
     ))
   }
-  #### 4. define date sequence
+  #### 5. define date sequence
   date_start_date_format <- as.Date(date_start, format = "%Y-%m-%d")
   date_end_date_format <- as.Date(date_end, format = "%Y-%m-%d")
   date_sequence <- seq(date_start_date_format, date_end_date_format, "day")
   date_sequence <- gsub("-", "", as.character(date_sequence))
-  #### 5. define URL base
+  #### 6. define URL base
   base <- "https://satepsanone.nesdis.noaa.gov/pub/FIRE/web/HMS/Smoke_Polygons/"
-  #### 6. initiate "..._curl_commands.txt"
+  #### 7. initiate "..._curl_commands.txt"
   commands_txt <- paste0(
     directory_to_download,
     "hms_smoke_",
@@ -81,7 +82,7 @@ download_noaa_hms_smoke_data <- function(
     "_curl_commands.txt"
   )
   download_sink(commands_txt)
-  #### 7. concatenate and print download commands to "..._curl_commands.txt"
+  #### 8. concatenate and print download commands to "..._curl_commands.txt"
   download_names <- NULL
   for (f in seq_along(date_sequence)) {
     year <- substr(date_sequence[f], 1, 4)
@@ -122,30 +123,30 @@ download_noaa_hms_smoke_data <- function(
     )
     cat(command)
   }
-  #### 8. finish "..._curl_commands.txt"
+  #### 9. finish "..._curl_commands.txt"
   sink()
-  #### 9. build system command
+  #### 10. build system command
   system_command <- paste0(
     ". ",
     commands_txt,
     "\n"
   )
-  #### 10. download data
+  #### 11. download data
   download_run(
     download = download,
     system_command = system_command,
     commands_txt = commands_txt
   )
-  #### 11. remove command file
+  #### 12. remove command file
   download_remove_command(
     remove = remove_command,
     commands_txt = commands_txt
   )
-  #### 12. end if data_format == "KML"
+  #### 13. end if data_format == "KML"
   if (data_format == "KML") {
     return(cat(paste0("KML files cannot be unzipped.\n")))
   }
-  #### 13. unzip downloaded zip files
+  #### 14. unzip downloaded zip files
   for (d in seq_along(download_names)) {
     download_unzip(
       file_name = download_names[d],
@@ -153,7 +154,7 @@ download_noaa_hms_smoke_data <- function(
       unzip = unzip
     )
   }
-  #### 14. remove zip files
+  #### 15. remove zip files
   download_remove_zips(
     remove = remove_zip,
     download_name = download_names

@@ -42,13 +42,11 @@ download_geos_cf_data <- function(
     remove_command = FALSE) {
   #### 1. check for data download acknowledgement
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
-  #### 2. directory setup
+  #### 2. check for null parameters
+  check_for_null_parameters(mget(ls()))
+  #### 3. directory setup
   download_setup_dir(directory_to_save)
   directory_to_save <- download_sanitize_path(directory_to_save)
-  #### 3. check for collection
-  if (is.null(collection) == TRUE) {
-    stop(paste0("Please select a GEOS-CF collection.\n"))
-  }
   #### 4. check if collection is valid
   collections <- c(
     "aqc_tavg_1hr_g1440x721_v1", "chm_tavg_1hr_g1440x721_v1",

@@ -38,13 +38,11 @@ download_narr_monolevel_data <- function(
     remove_command = FALSE) {
   #### 1. check for data download acknowledgement
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
-  #### 2. directory setup
+  #### 2. check for null parameters
+  check_for_null_parameters(mget(ls()))
+  #### 3. directory setup
   download_setup_dir(directory_to_save)
   directory_to_save <- download_sanitize_path(directory_to_save)
-  #### 3. check for variables
-  if (is.null(variables)) {
-    stop(paste0("Please select an NCEP-NARR variable.\n"))
-  }
   #### 4. define years sequence
   if (any(nchar(year_start) != 4, nchar(year_end) != 4)) {
     stop("year_start and year_end should be 4-digit integers.\n")

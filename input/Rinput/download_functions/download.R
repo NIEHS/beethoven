@@ -348,29 +348,30 @@ download_ecoregion_data <- function(
 #' @return NULL;
 #' @export
 download_geos_cf_data <- function(
-  date_start = "2023-09-01",
-  date_end = "2023-09-01",
-  collection = c("aqc_tavg_1hr_g1440x721_v1", "chm_tavg_1hr_g1440x721_v1",
-                   "met_tavg_1hr_g1440x721_x1", "xgc_tavg_1hr_g1440x721_x1",
-                   "chm_inst_1hr_g1440x721_p23", "met_inst_1hr_g1440x721_p23"),
-  directory_to_save = "./input/data/geos_cf/",
-  data_download_acknowledgement = FALSE,
-  download = FALSE,
-  remove_command = FALSE
-) {
+    date_start = "2023-09-01",
+    date_end = "2023-09-01",
+    collection = c(
+      "aqc_tavg_1hr_g1440x721_v1", "chm_tavg_1hr_g1440x721_v1",
+      "met_tavg_1hr_g1440x721_x1", "xgc_tavg_1hr_g1440x721_x1",
+      "chm_inst_1hr_g1440x721_p23", "met_inst_1hr_g1440x721_p23"
+    ),
+    directory_to_save = "./input/data/geos_cf/",
+    data_download_acknowledgement = FALSE,
+    download = FALSE,
+    remove_command = FALSE) {
   #### 1. check for data download acknowledgement
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
-  #### 2. directory setup
+  #### 2. check for null parameters
+  check_for_null_parameters(mget(ls()))
+  #### 3. directory setup
   download_setup_dir(directory_to_save)
   directory_to_save <- download_sanitize_path(directory_to_save)
-  #### 3. check for collection
-  if (is.null(collection) == TRUE) {
-    stop(paste0("Please select a GEOS-CF collection.\n"))
-  }
   #### 4. check if collection is valid
-  collections <- c("aqc_tavg_1hr_g1440x721_v1", "chm_tavg_1hr_g1440x721_v1",
-                   "met_tavg_1hr_g1440x721_x1", "xgc_tavg_1hr_g1440x721_x1",
-                   "chm_inst_1hr_g1440x721_p23", "met_inst_1hr_g1440x721_p23")
+  collections <- c(
+    "aqc_tavg_1hr_g1440x721_v1", "chm_tavg_1hr_g1440x721_v1",
+    "met_tavg_1hr_g1440x721_x1", "xgc_tavg_1hr_g1440x721_x1",
+    "chm_inst_1hr_g1440x721_p23", "met_inst_1hr_g1440x721_p23"
+  )
   collection <- match.arg(collection)
   if (!(collection %in% collections)) {
     stop(paste0("Requested collection is not recognized.\n"))
@@ -391,58 +392,72 @@ download_geos_cf_data <- function(
   #### 7. define URL base
   base <- "https://portal.nccs.nasa.gov/datashare/gmao/geos-cf/v1/ana/"
   #### 8. initiate "..._wget_commands.txt" file
-  commands_txt <- paste0(directory_to_save,
-                         collection,
-                         "_",
-                         date_start,
-                         "_",
-                         date_end,
-                         "_wget_commands.txt")
-
+  commands_txt <- paste0(
+    directory_to_save,
+    collection,
+    "_",
+    date_start,
+    "_",
+    date_end,
+    "_wget_commands.txt"
+  )
+  
   download_sink(commands_txt)
   #### 9. concatenate and print download commands to "..._wget_commands.txt"
-  for (d in seq_along(date_sequence)){
+  for (d in seq_along(date_sequence)) {
     date <- date_sequence[d]
     year <- substr(date, 1, 4)
     month <- substr(date, 5, 6)
     day <- substr(date, 7, 8)
-    for (t in seq_along(time_sequence)){
-      download_url <- paste0(base,
-                             "Y",
-                             year,
-                             "/M",
-                             month,
-                             "/D",
-                             day,
-                             "/GEOS-CF.v01.rpl.",
-                             collection,
-                             ".",
-                             date,
-                             "_",
-                             time_sequence[t],
-                             "z.nc4")
-      download_folder <- paste0(directory_to_save,
-                                collection)
-      download_command <- paste0("wget ",
-                                 download_url,
-                                 " -P ",
-                                 download_folder,
-                                 "\n")
+    for (t in seq_along(time_sequence)) {
+      download_url <- paste0(
+        base,
+        "Y",
+        year,
+        "/M",
+        month,
+        "/D",
+        day,
+        "/GEOS-CF.v01.rpl.",
+        collection,
+        ".",
+        date,
+        "_",
+        time_sequence[t],
+        "z.nc4"
+      )
+      download_folder <- paste0(
+        directory_to_save,
+        collection
+      )
+      download_command <- paste0(
+        "wget ",
+        download_url,
+        " -P ",
+        download_folder,
+        "\n"
+      )
       cat(download_command)
     }
   }
   #### 9. finish "..._wget_commands.txt" file
   sink()
   #### 10. build system command
-  system_command <- paste0(". ",
-                           commands_txt,
-                           "\n")
+  system_command <- paste0(
+    ". ",
+    commands_txt,
+    "\n"
+  )
   #### 11. download data
-  download_run(download = download,
-               system_command = system_command,
-               commands_txt = commands_txt)
-  download_remove_command(commands_txt = commands_txt,
-                          remove = remove_command)
+  download_run(
+    download = download,
+    system_command = system_command,
+    commands_txt = commands_txt
+  )
+  download_remove_command(
+    commands_txt = commands_txt,
+    remove = remove_command
+  )
 }
 
 #' download_gmted_data: download global elevation data from the Global Multi-
@@ -476,106 +491,121 @@ download_geos_cf_data <- function(
 #' @return NULL;
 #' @export
 download_gmted_data <- function(
-  statistic = c("Breakline Emphasis", "Systematic Subsample",
-                "Median Statistic", "Minimum Statistic",
-                "Mean Statistic", "Maximum Statistic",
-                "Standard Deviation Statistic"),
-  resolution = c("7.5 arc-seconds", "15 arc-seconds", "30 arc-seconds"),
-  directory_to_download = "./input/data/gmted/",
-  directory_to_save = "./input/data/gmted/",
-  data_download_acknowledgement = FALSE,
-  unzip = TRUE,
-  remove_zip = FALSE,
-  download = FALSE,
-  remove_command = FALSE
-) {
+    statistic = c(
+      "Breakline Emphasis", "Systematic Subsample",
+      "Median Statistic", "Minimum Statistic",
+      "Mean Statistic", "Maximum Statistic",
+      "Standard Deviation Statistic"
+    ),
+    resolution = c("7.5 arc-seconds", "15 arc-seconds", "30 arc-seconds"),
+    directory_to_download = "./input/data/gmted/",
+    directory_to_save = "./input/data/gmted/",
+    data_download_acknowledgement = FALSE,
+    unzip = TRUE,
+    remove_zip = FALSE,
+    download = FALSE,
+    remove_command = FALSE) {
   #### 1. check for data download acknowledgement
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
-  #### 2. directory setup
+  #### 2. check for null parameters
+  check_for_null_parameters(mget(ls()))
+  #### 3. directory setup
   download_setup_dir(directory_to_download)
   download_setup_dir(directory_to_save)
   directory_to_download <- download_sanitize_path(directory_to_download)
   directory_to_save <- download_sanitize_path(directory_to_save)
-  #### 3. check for statistic
-  if (is.null(statistic) == TRUE) {
-    stop(paste0("Please select a GMTED2010 statistic.\n"))
-  }
   #### 4. check for valid statistic
   statistic <- match.arg(statistic)
-  #### 5. check for resolution
-  if (is.null(resolution) == TRUE) {
-    stop(paste0("Please select a data resolution.\n"))
-  }
-  #### 6. check for valid resolution
+  #### 5. check for valid resolution
   resolution <- match.arg(resolution)
-  #### 7. define URL base
-  base <- paste0("https://edcintl.cr.usgs.gov/downloads/sciweb1/shared/topo",
-                 "/downloads/GMTED/Grid_ZipFiles/")
-  #### 8. define URL statistic code
-  statistics <- c("Breakline Emphasis", "Systematic Subsample",
-                  "Median Statistic", "Minimum Statistic",
-                  "Mean Statistic", "Maximum Statistic",
-                  "Standard Deviation Statistic")
+  #### 6. define URL base
+  base <- paste0(
+    "https://edcintl.cr.usgs.gov/downloads/sciweb1/shared/topo",
+    "/downloads/GMTED/Grid_ZipFiles/"
+  )
+  #### 7. define URL statistic code
+  statistics <- c(
+    "Breakline Emphasis", "Systematic Subsample",
+    "Median Statistic", "Minimum Statistic",
+    "Mean Statistic", "Maximum Statistic",
+    "Standard Deviation Statistic"
+  )
   statistic_codes <- c("be", "ds", "md", "mi", "mn", "mx", "sd")
   statistic_codes <- cbind(statistics, statistic_codes)
   statistic_code <- subset(statistic_codes, statistics == statistic)[2]
-  #### 9. define URL resolution code
+  #### 8. define URL resolution code
   resolutions <- c("7.5 arc-seconds", "15 arc-seconds", "30 arc-seconds")
   resolution_codes <- c("75", "15", "30")
   resolution_codes <- cbind(resolutions, resolution_codes)
   resolution_code <- subset(resolution_codes, resolutions == resolution)[2]
-  #### 10. build url
-  download_url <- paste0(base,
-                         statistic_code,
-                         resolution_code,
-                         "_grd.zip")
-  #### 11. build download file name
-  download_name <- paste0(directory_to_download,
-                          "gmted2010_",
-                          statistic_code,
-                          resolution_code,
-                          "_grd.zip")
-  #### 12. build download command
-  download_command <- paste0("curl -s -o ",
-                             download_name,
-                             " --url ",
-                             download_url,
-                             "\n")
-  #### 13. initiate "..._curl_commands.txt"
-  commands_txt <- paste0(directory_to_download,
-                         "gmted_",
-                         gsub(" ", "", statistic),
-                         "_",
-                         gsub(" ", "", resolution),
-                         "_",
-                         Sys.Date(),
-                         "_curl_command.txt")
+  #### 9. build url
+  download_url <- paste0(
+    base,
+    statistic_code,
+    resolution_code,
+    "_grd.zip"
+  )
+  #### 10. build download file name
+  download_name <- paste0(
+    directory_to_download,
+    "gmted2010_",
+    statistic_code,
+    resolution_code,
+    "_grd.zip"
+  )
+  #### 11. build download command
+  download_command <- paste0(
+    "curl -s -o ",
+    download_name,
+    " --url ",
+    download_url,
+    "\n"
+  )
+  #### 12. initiate "..._curl_commands.txt"
+  commands_txt <- paste0(
+    directory_to_download,
+    "gmted_",
+    gsub(" ", "", statistic),
+    "_",
+    gsub(" ", "", resolution),
+    "_",
+    Sys.Date(),
+    "_curl_command.txt"
+  )
   download_sink(commands_txt)
-  # sink(commands_txt)
-  #### 14. concatenate and print download command to "..._curl_commands.txt"
+  #### 13. concatenate and print download command to "..._curl_commands.txt"
   cat(download_command)
-  #### 15. finish "..._curl_commands.txt" file
+  #### 14. finish "..._curl_commands.txt" file
   sink()
-  #### 16. build system command
-  system_command <- paste0(". ",
-                           commands_txt,
-                           "\n")
-  #### 17 download data
-  download_run(download = download,
-               system_command = system_command,
-               commands_txt = commands_txt)
-  #### 18. end if unzip == FALSE
-  download_unzip(file_name = download_name,
-                 directory_to_unzip = directory_to_save,
-                 unzip = unzip)
-  #### 19. Remove command file
-  download_remove_command(commands_txt = commands_txt,
-                          remove = remove_command)
-  #### 20. remove zip files
-  download_remove_zips(remove = remove_zip,
-                       download_name = download_name)
+  #### 15. build system command
+  system_command <- paste0(
+    ". ",
+    commands_txt,
+    "\n"
+  )
+  #### 16 download data
+  download_run(
+    download = download,
+    system_command = system_command,
+    commands_txt = commands_txt
+  )
+  #### 17. end if unzip == FALSE
+  download_unzip(
+    file_name = download_name,
+    directory_to_unzip = directory_to_save,
+    unzip = unzip
+  )
+  #### 18. Remove command file
+  download_remove_command(
+    commands_txt = commands_txt,
+    remove = remove_command
+  )
+  #### 19. remove zip files
+  download_remove_zips(
+    remove = remove_zip,
+    download_name = download_name
+  )
 }
-
 
 #' download_merra2_data: download meteorological and atmospheric data from the
 #' Modern-Era Retrospective analysis for Research and Applications, Version 2
@@ -852,23 +882,20 @@ download_merra2_data <- function(
 #' @return NULL;
 #' @export
 download_narr_monolevel_data <- function(
-  year_start = 2022,
-  year_end = 2022,
-  variables = NULL,
-  directory_to_save = "./input/data/narr/",
-  data_download_acknowledgement = FALSE,
-  download = FALSE,
-  remove_command = FALSE
-) {
+    year_start = 2022,
+    year_end = 2022,
+    variables = NULL,
+    directory_to_save = "./input/data/narr/",
+    data_download_acknowledgement = FALSE,
+    download = FALSE,
+    remove_command = FALSE) {
   #### 1. check for data download acknowledgement
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
-  #### 2. directory setup
+  #### 2. check for null parameters
+  check_for_null_parameters(mget(ls()))
+  #### 3. directory setup
   download_setup_dir(directory_to_save)
   directory_to_save <- download_sanitize_path(directory_to_save)
-  #### 3. check for variables
-  if (is.null(variables)) {
-    stop(paste0("Please select an NCEP-NARR variable.\n"))
-  }
   #### 4. define years sequence
   if (any(nchar(year_start) != 4, nchar(year_end) != 4)) {
     stop("year_start and year_end should be 4-digit integers.\n")
@@ -879,10 +906,12 @@ download_narr_monolevel_data <- function(
   #### 6. define URL base
   base <- "https://downloads.psl.noaa.gov/Datasets/NARR/Dailies/monolevel/"
   #### 7. initiate "..._curl_commands.txt"
-  commands_txt <- paste0(directory_to_save,
-                         "narr_monolevel_",
-                         year_start, "_", year_end,
-                         "_curl_commands.txt")
+  commands_txt <- paste0(
+    directory_to_save,
+    "narr_monolevel_",
+    year_start, "_", year_end,
+    "_curl_commands.txt"
+  )
   download_sink(commands_txt)
   #### 8. concatenate and print download commands to "..._curl_commands.txt"
   for (v in seq_along(variables_list)) {
@@ -893,39 +922,51 @@ download_narr_monolevel_data <- function(
     }
     for (y in seq_along(years)) {
       year <- years[y]
-      url <- paste0(base,
-                    variable,
-                    ".",
-                    year,
-                    ".nc")
-      destfile <- paste0(directory_to_save,
-                         variable,
-                         "/",
-                         variable,
-                         ".",
-                         year,
-                         ".nc")
-      command <- paste0("curl -s -o ",
-                        destfile,
-                        " --url ",
-                        url,
-                        "\n")
+      url <- paste0(
+        base,
+        variable,
+        ".",
+        year,
+        ".nc"
+      )
+      destfile <- paste0(
+        directory_to_save,
+        variable,
+        "/",
+        variable,
+        ".",
+        year,
+        ".nc"
+      )
+      command <- paste0(
+        "curl -s -o ",
+        destfile,
+        " --url ",
+        url,
+        "\n"
+      )
       cat(command)
     }
   }
   #### 9. finish "..._curl_commands.txt"
   sink()
   #### 10. build system command
-  system_command <- paste0(". ",
-                           commands_txt,
-                           "\n")
+  system_command <- paste0(
+    ". ",
+    commands_txt,
+    "\n"
+  )
   #### 11. download data
-  download_run(download = download,
-               system_command = system_command,
-               commands_txt = commands_txt)
+  download_run(
+    download = download,
+    system_command = system_command,
+    commands_txt = commands_txt
+  )
   #### 12. remove command text file
-  download_remove_command(commands_txt = commands_txt,
-                          remove = remove_command)
+  download_remove_command(
+    commands_txt = commands_txt,
+    remove = remove_command
+  )
 }
 
 
@@ -954,42 +995,39 @@ download_narr_monolevel_data <- function(
 #' @return NULL;
 #' @export
 download_narr_p_levels_data <- function(
-  year_start = 2022,
-  year_end = 2022,
-  variables = NULL,
-  directory_to_save = "./input/data/narr/",
-  data_download_acknowledgement = FALSE,
-  download = FALSE,
-  remove_command = FALSE
-) {
+    year_start = 2022,
+    year_end = 2022,
+    variables = NULL,
+    directory_to_save = "./input/data/narr/",
+    data_download_acknowledgement = FALSE,
+    download = FALSE,
+    remove_command = FALSE) {
   #### 1. check for data download acknowledgement
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
-
-  #### 2. directory setup
+  #### 2. check for null parameters
+  check_for_null_parameters(mget(ls()))
+  #### 3. directory setup
   download_setup_dir(directory_to_save)
   directory_to_save <- download_sanitize_path(directory_to_save)
-
-  #### 3. check for variables
-  if (is.null(variables) == TRUE) {
-    stop(paste0("Please select an NCEP-NARR variable.\n"))
-  }
   #### 4. define years sequence
   years <- seq(year_start, year_end, 1)
   #### 5. define months sequence
   months <- sprintf("%02d", seq(1, 12, by = 1))
-
+  
   #### 6. define variables
   variables_list <- as.vector(variables)
   #### 7. define URL base
   base <- "https://downloads.psl.noaa.gov//Datasets/NARR/Dailies/pressure/"
   #### 8. initiate "..._curl_commands.txt"
-  commands_txt <- paste0(directory_to_save,
-                         "narr_p_levels_",
-                         year_start,
-                         "_",
-                         year_end,
-                         "_curl_commands.txt")
-  download_sink(commands_txt)  
+  commands_txt <- paste0(
+    directory_to_save,
+    "narr_p_levels_",
+    year_start,
+    "_",
+    year_end,
+    "_curl_commands.txt"
+  )
+  download_sink(commands_txt)
   #### 9. concatenate download commands to "..._curl_commands.txt"
   for (v in seq_along(variables_list)) {
     variable <- variables_list[v]
@@ -1001,25 +1039,31 @@ download_narr_p_levels_data <- function(
       year <- years[y]
       for (m in seq_along(months)) {
         month <- months[m]
-        url <- paste0(base,
-                      variable,
-                      ".",
-                      year,
-                      month,
-                      ".nc")
-        destfile <- paste0(directory_to_save,
-                           variable,
-                           "/",
-                           variable,
-                           ".",
-                           year,
-                           month,
-                           ".nc")
-        command <- paste0("curl -s -o ",
-                          destfile,
-                          " --url ",
-                          url,
-                          "\n")
+        url <- paste0(
+          base,
+          variable,
+          ".",
+          year,
+          month,
+          ".nc"
+        )
+        destfile <- paste0(
+          directory_to_save,
+          variable,
+          "/",
+          variable,
+          ".",
+          year,
+          month,
+          ".nc"
+        )
+        command <- paste0(
+          "curl -s -o ",
+          destfile,
+          " --url ",
+          url,
+          "\n"
+        )
         cat(command)
       }
     }
@@ -1027,17 +1071,22 @@ download_narr_p_levels_data <- function(
   #### 10. finish "..._curl_commands.txt"
   sink()
   #### 11. build system command
-  system_command <- paste0(". ",
-                           commands_txt,
-                           "\n")
+  system_command <- paste0(
+    ". ",
+    commands_txt,
+    "\n"
+  )
   #### 12. download data
-  download_run(download = download,
-               system_command = system_command,
-               commands_txt = commands_txt)
+  download_run(
+    download = download,
+    system_command = system_command,
+    commands_txt = commands_txt
+  )
   #### 13. Remove command file
-  download_remove_command(commands_txt = commands_txt,
-                          remove = remove_command)
-
+  download_remove_command(
+    commands_txt = commands_txt,
+    remove = remove_command
+  )
 }
 
 
@@ -1070,42 +1119,46 @@ download_narr_p_levels_data <- function(
 #' @returns NULL;
 #' @export
 download_nlcd_data <- function(
-  year = 2021,
-  collection = "Coterminous United States",
-  directory_to_download = "./input/data/nlcd/",
-  directory_to_save = "./input/data/nlcd/",
-  data_download_acknowledgement = FALSE,
-  unzip = FALSE,
-  remove_zip = FALSE,
-  download = FALSE,
-  remove_command = FALSE
-) {
+    year = 2021,
+    collection = "Coterminous United States",
+    directory_to_download = "./input/data/nlcd/",
+    directory_to_save = "./input/data/nlcd/",
+    data_download_acknowledgement = FALSE,
+    unzip = FALSE,
+    remove_zip = FALSE,
+    download = FALSE,
+    remove_command = FALSE) {
   #### 1. check for data download acknowledgement
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
-  #### 2. directory setup
+  #### 2. check for null parameters
+  check_for_null_parameters(mget(ls()))
+  #### 3. directory setup
   download_setup_dir(directory_to_download)
   download_setup_dir(directory_to_save)
   directory_to_download <- download_sanitize_path(directory_to_download)
   directory_to_save <- download_sanitize_path(directory_to_save)
-
-  #### 2. check for valid years
+  #### 4. check for valid years
   valid_years <- c(2001, 2004, 2006, 2008, 2011, 2013, 2016, 2019, 2021)
   if (!(year %in% valid_years)) {
     stop(paste0("Requested year is not recognized.\n"))
   }
-  #### 3. define URL base
+  #### 5. define URL base
   base <- "https://s3-us-west-2.amazonaws.com/mrlc/"
-  #### 4. define collection code
+  #### 6. define collection code
   if (collection == "Coterminous United States") {
-    collection_code <- paste0("nlcd_",
-                              as.character(year),
-                              "_land_cover_l48_")
+    collection_code <- paste0(
+      "nlcd_",
+      as.character(year),
+      "_land_cover_l48_"
+    )
   } else if (collection == "Alaska") {
-    collection_code <- paste0("NLCD_",
-                              as.character(year),
-                              "_Land_Cover_AK_")
+    collection_code <- paste0(
+      "NLCD_",
+      as.character(year),
+      "_Land_Cover_AK_"
+    )
   }
-  #### 5. define release date
+  #### 7. define release date
   #### NOTE: release dates identified by inspecting URLs on from
   ####       https://www.mrlc.gov/data?f%5B0%5D=category%3ALand%20Cover
   if (year == 2021 && collection == "Coterminous United States") {
@@ -1115,50 +1168,68 @@ download_nlcd_data <- function(
   } else if (collection == "Alaska") {
     release_date <- "20200724"
   }
-  #### 6. build URL
-  download_url <- paste0(base,
-                         collection_code,
-                         release_date,
-                         ".zip")
-  #### 7. build download file name
-  download_name <- paste0(directory_to_download,
-                          tolower(collection_code),
-                          release_date,
-                          ".zip")
-  #### 8. build system command
-  download_command <- paste0("curl -o ",
-                             download_name,
-                             " --url ",
-                             download_url,
-                             "\n")
-  #### 9. initiate "..._curl_command.txt"
-  commands_txt <- paste0(directory_to_download,
-                         tolower(collection_code),
-                         Sys.Date(),
-                         "_curl_command.txt")
+  #### 8. build URL
+  download_url <- paste0(
+    base,
+    collection_code,
+    release_date,
+    ".zip"
+  )
+  #### 9. build download file name
+  download_name <- paste0(
+    directory_to_download,
+    tolower(collection_code),
+    release_date,
+    ".zip"
+  )
+  #### 10. build system command
+  download_command <- paste0(
+    "curl -o ",
+    download_name,
+    " --url ",
+    download_url,
+    "\n"
+  )
+  #### 11. initiate "..._curl_command.txt"
+  commands_txt <- paste0(
+    directory_to_download,
+    tolower(collection_code),
+    Sys.Date(),
+    "_curl_command.txt"
+  )
   download_sink(commands_txt)
-  #### 10. concatenate and print download command to "..._curl_commands.txt"
+  #### 12. concatenate and print download command to "..._curl_commands.txt"
   cat(download_command)
-  #### 11. finish "..._curl_command.txt"
+  #### 13. finish "..._curl_command.txt"
   sink()
-  #### 12. build system command
-  system_command <- paste0(". ",
-                           commands_txt,
-                           "\n")
-  #### 13. download data
-  download_run(download = download,
-               system_command = system_command,
-               commands_txt = commands_txt)
-  #### 14. end if unzip == FALSE
-  download_unzip(file_name = download_name,
-                 directory_to_unzip = directory_to_save,
-                 unzip = unzip)
-  #### 16. remove zip files
-  download_remove_zips(remove = remove_zip,
-                       download_name = download_name)
-  #### 17. remove command text
-  download_remove_command(commands_txt = commands_txt,
-                          remove = remove_command)
+  #### 14. build system command
+  system_command <- paste0(
+    ". ",
+    commands_txt,
+    "\n"
+  )
+  #### 15. download data
+  download_run(
+    download = download,
+    system_command = system_command,
+    commands_txt = commands_txt
+  )
+  #### 16. end if unzip == FALSE
+  download_unzip(
+    file_name = download_name,
+    directory_to_unzip = directory_to_save,
+    unzip = unzip
+  )
+  #### 17. remove zip files
+  download_remove_zips(
+    remove = remove_zip,
+    download_name = download_name
+  )
+  #### 18. remove command text
+  download_remove_command(
+    commands_txt = commands_txt,
+    remove = remove_command
+  )
 }
 
 
@@ -1472,56 +1543,65 @@ download_sedac_population_data <- function(
 #' @param data_download_acknowledgement logical(1). By setting `= TRUE` the user
 #' acknowledge that the data downloaded using this function may be very large
 #' and use lots of machine storage and memory.
-#' @param download
+#' @param download logical(1). `= FALSE` will generate a `.txt` file containing
+#' all download commands. By setting `= TRUE` the function will download all of
+#' the requested data files.
 #' @param unzip logical(1). Unzip zip files. Default = `TRUE`. (Ignored if
 #' `data_format = "KML"`.)
 #' @param remove_zip logical(1). Remove zip files from
 #' directory_to_download. Default = `FALSE`. (Ignored if `data_format = "KML"`.)
-#' @param remove_command
+#' @param remove_command logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
+#' the text file containing download commands.
+#' @importFrom utils head
+#' @importFrom utils tail
 #' @author Mitchell Manware, Insang Song
 #' @return NULL;
 #' @export
 download_noaa_hms_smoke_data <- function(
-  date_start = "2023-09-01",
-  date_end = "2023-09-01",
-  data_format = "Shapefile",
-  directory_to_download = "./input/data/noaa_hms/",
-  directory_to_save = "./input/data/noaa_hms/",
-  data_download_acknowledgement = FALSE,
-  download = FALSE,
-  remove_command = FALSE,
-  unzip = TRUE,
-  remove_zip = FALSE
-) {
+    date_start = "2023-09-01",
+    date_end = "2023-09-01",
+    data_format = "Shapefile",
+    directory_to_download = "./input/data/noaa_hms/",
+    directory_to_save = "./input/data/noaa_hms/",
+    data_download_acknowledgement = FALSE,
+    download = FALSE,
+    remove_command = FALSE,
+    unzip = TRUE,
+    remove_zip = FALSE) {
   #### 1. check for data download acknowledgement
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
-  #### 2. directory setup
+  #### 2. check for null parameters
+  check_for_null_parameters(mget(ls()))
+  #### 3. directory setup
   download_setup_dir(directory_to_download)
   download_setup_dir(directory_to_save)
   directory_to_download <- download_sanitize_path(directory_to_download)
   directory_to_save <- download_sanitize_path(directory_to_save)
-  
-  #### 3. check for unzip == FALSE && remove_zip == TRUE
+  #### 4. check for unzip == FALSE && remove_zip == TRUE
   if (unzip == FALSE && remove_zip == TRUE) {
-    stop(paste0("Arguments `unzip = FALSE` and `remove_zip = TRUE` are not ",
-                "acceptable together. Please change one.\n"))
+    stop(paste0(
+      "Arguments `unzip = FALSE` and `remove_zip = TRUE` are not ",
+      "acceptable together. Please change one.\n"
+    ))
   }
-  #### 4. define date sequence
+  #### 5. define date sequence
   date_start_date_format <- as.Date(date_start, format = "%Y-%m-%d")
   date_end_date_format <- as.Date(date_end, format = "%Y-%m-%d")
   date_sequence <- seq(date_start_date_format, date_end_date_format, "day")
   date_sequence <- gsub("-", "", as.character(date_sequence))
-  #### 5. define URL base
+  #### 6. define URL base
   base <- "https://satepsanone.nesdis.noaa.gov/pub/FIRE/web/HMS/Smoke_Polygons/"
-  #### 6. initiate "..._curl_commands.txt"
-  commands_txt <- paste0(directory_to_download,
-                         "hms_smoke_",
-                         head(date_sequence, n = 1),
-                         "_",
-                         tail(date_sequence, n = 1),
-                         "_curl_commands.txt")
+  #### 7. initiate "..._curl_commands.txt"
+  commands_txt <- paste0(
+    directory_to_download,
+    "hms_smoke_",
+    utils::head(date_sequence, n = 1),
+    "_",
+    utils::tail(date_sequence, n = 1),
+    "_curl_commands.txt"
+  )
   download_sink(commands_txt)
-  #### 7. concatenate and print download commands to "..._curl_commands.txt"
+  #### 8. concatenate and print download commands to "..._curl_commands.txt"
   download_names <- NULL
   for (f in seq_along(date_sequence)) {
     year <- substr(date_sequence[f], 1, 4)
@@ -1553,39 +1633,51 @@ download_noaa_hms_smoke_data <- function(
       suffix
     )
     download_names <- c(download_names, destfile)
-    command <- paste0("curl -s -o ",
-                      destfile,
-                      " --url ",
-                      url,
-                      "\n")
+    command <- paste0(
+      "curl -s -o ",
+      destfile,
+      " --url ",
+      url,
+      "\n"
+    )
     cat(command)
   }
-  #### 8. finish "..._curl_commands.txt"
+  #### 9. finish "..._curl_commands.txt"
   sink()
-  #### 9. build system command
-  system_command <- paste0(". ",
-                           commands_txt,
-                           "\n")
-  #### 10. download data
-  download_run(download = download,
-               system_command = system_command,
-               commands_txt = commands_txt)
-  #### 11. remove command file
-  download_remove_command(remove = remove_command,
-                          commands_txt = commands_txt)
-  #### 12. end if data_format == "KML"
+  #### 10. build system command
+  system_command <- paste0(
+    ". ",
+    commands_txt,
+    "\n"
+  )
+  #### 11. download data
+  download_run(
+    download = download,
+    system_command = system_command,
+    commands_txt = commands_txt
+  )
+  #### 12. remove command file
+  download_remove_command(
+    remove = remove_command,
+    commands_txt = commands_txt
+  )
+  #### 13. end if data_format == "KML"
   if (data_format == "KML") {
     return(cat(paste0("KML files cannot be unzipped.\n")))
   }
-  #### 13. unzip downloaded zip files
+  #### 14. unzip downloaded zip files
   for (d in seq_along(download_names)) {
-    download_unzip(file_name = download_names[d],
-                   directory_to_unzip = directory_to_save,
-                   unzip = unzip)
+    download_unzip(
+      file_name = download_names[d],
+      directory_to_unzip = directory_to_save,
+      unzip = unzip
+    )
   }
-  #### 14. remove zip files
-  download_remove_zips(remove = remove_zip,
-                       download_name = download_names)
+  #### 15. remove zip files
+  download_remove_zips(
+    remove = remove_zip,
+    download_name = download_names
+  )
 }
 
 

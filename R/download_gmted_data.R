@@ -51,29 +51,23 @@ download_gmted_data <- function(
     remove_command = FALSE) {
   #### 1. check for data download acknowledgement
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
-  #### 2. directory setup
+  #### 2. check for null parameters
+  check_for_null_parameters(mget(ls()))
+  #### 3. directory setup
   download_setup_dir(directory_to_download)
   download_setup_dir(directory_to_save)
   directory_to_download <- download_sanitize_path(directory_to_download)
   directory_to_save <- download_sanitize_path(directory_to_save)
-  #### 3. check for statistic
-  if (is.null(statistic) == TRUE) {
-    stop(paste0("Please select a GMTED2010 statistic.\n"))
-  }
   #### 4. check for valid statistic
   statistic <- match.arg(statistic)
-  #### 5. check for resolution
-  if (is.null(resolution) == TRUE) {
-    stop(paste0("Please select a data resolution.\n"))
-  }
-  #### 6. check for valid resolution
+  #### 5. check for valid resolution
   resolution <- match.arg(resolution)
-  #### 7. define URL base
+  #### 6. define URL base
   base <- paste0(
     "https://edcintl.cr.usgs.gov/downloads/sciweb1/shared/topo",
     "/downloads/GMTED/Grid_ZipFiles/"
   )
-  #### 8. define URL statistic code
+  #### 7. define URL statistic code
   statistics <- c(
     "Breakline Emphasis", "Systematic Subsample",
     "Median Statistic", "Minimum Statistic",
@@ -83,19 +77,19 @@ download_gmted_data <- function(
   statistic_codes <- c("be", "ds", "md", "mi", "mn", "mx", "sd")
   statistic_codes <- cbind(statistics, statistic_codes)
   statistic_code <- subset(statistic_codes, statistics == statistic)[2]
-  #### 9. define URL resolution code
+  #### 8. define URL resolution code
   resolutions <- c("7.5 arc-seconds", "15 arc-seconds", "30 arc-seconds")
   resolution_codes <- c("75", "15", "30")
   resolution_codes <- cbind(resolutions, resolution_codes)
   resolution_code <- subset(resolution_codes, resolutions == resolution)[2]
-  #### 10. build url
+  #### 9. build url
   download_url <- paste0(
     base,
     statistic_code,
     resolution_code,
     "_grd.zip"
   )
-  #### 11. build download file name
+  #### 10. build download file name
   download_name <- paste0(
     directory_to_download,
     "gmted2010_",
@@ -103,7 +97,7 @@ download_gmted_data <- function(
     resolution_code,
     "_grd.zip"
   )
-  #### 12. build download command
+  #### 11. build download command
   download_command <- paste0(
     "curl -s -o ",
     download_name,
@@ -111,7 +105,7 @@ download_gmted_data <- function(
     download_url,
     "\n"
   )
-  #### 13. initiate "..._curl_commands.txt"
+  #### 12. initiate "..._curl_commands.txt"
   commands_txt <- paste0(
     directory_to_download,
     "gmted_",
@@ -123,34 +117,34 @@ download_gmted_data <- function(
     "_curl_command.txt"
   )
   download_sink(commands_txt)
-  #### 14. concatenate and print download command to "..._curl_commands.txt"
+  #### 13. concatenate and print download command to "..._curl_commands.txt"
   cat(download_command)
-  #### 15. finish "..._curl_commands.txt" file
+  #### 14. finish "..._curl_commands.txt" file
   sink()
-  #### 16. build system command
+  #### 15. build system command
   system_command <- paste0(
     ". ",
     commands_txt,
     "\n"
   )
-  #### 17 download data
+  #### 16 download data
   download_run(
     download = download,
     system_command = system_command,
     commands_txt = commands_txt
   )
-  #### 18. end if unzip == FALSE
+  #### 17. end if unzip == FALSE
   download_unzip(
     file_name = download_name,
     directory_to_unzip = directory_to_save,
     unzip = unzip
   )
-  #### 19. Remove command file
+  #### 18. Remove command file
   download_remove_command(
     commands_txt = commands_txt,
     remove = remove_command
   )
-  #### 20. remove zip files
+  #### 19. remove zip files
   download_remove_zips(
     remove = remove_zip,
     download_name = download_name
