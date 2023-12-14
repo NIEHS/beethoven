@@ -51,9 +51,9 @@ download_permit <-
   function(data_download_acknowledgement) {
     if (!data_download_acknowledgement) {
       stop(paste0(
-        "Data download acknowledgement is set to FALSE.",
-        "Please acknowledge that the data downloaded using this",
-        "function may be very large and use lots of machine storage",
+        "Data download acknowledgement is set to FALSE. ",
+        "Please acknowledge that the data downloaded using this ",
+        "function may be very large and use lots of machine storage ",
         "and memory.\n"
       ))
     }

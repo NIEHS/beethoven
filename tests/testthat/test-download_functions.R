@@ -1,6 +1,22 @@
 #' @author Mitchell Manware
 #' @description Unit test for for checking data download functions.
 #'
+testthat::test_that("Error when data_download_acknowledgement = FALSE", {
+  download_datasets <- c("aqs", "ecoregion", "geos", "gmted", "koppen",
+                         "koppengeiger", "merra2", "merra", "narr_monolevel",
+                         "narr_p_levels", "nlcd", "noaa", "sedac_groads",
+                         "sedac_population", "groads", "population", "plevels",
+                         "p_levels", "monolevel", "hms", "smoke")
+  for (d in seq_along(download_datasets)) {
+    expect_message(
+      download_data(dataset_name = download_datasets[d],
+                    data_download_acknowledgement = FALSE),
+      paste0("Please refer to the argument list and the error message above ",
+             "to rectify the error.")
+    )
+  }
+})
+
 testthat::test_that("GEOS-CF download URLs exist.", {
   withr::local_package("httr")
   withr::local_package("stringr")
