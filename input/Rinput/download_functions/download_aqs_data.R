@@ -22,8 +22,17 @@
 #'  Directory to decompress zip files.
 #' @param url_aqs_download character(1).
 #'  URL to the AQS pre-generated datasets.
-#' @param remove_zips logical(1).
-#'  Remove zip files in directory_to_download.
+#' @param data_download_acknowledgement logical(1). By setting `= TRUE` the
+#' user acknowledge that the data downloaded using this function may be very
+#' large and use lots of machine storage and memory.
+#' @param unzip logical(1). Unzip zip files. Default = `TRUE`.
+#' @param remove_zip logical(1). Remove zip file from directory_to_download.
+#' Default = `FALSE`.
+#' @param download logical(1). `= FALSE` will generate a `.txt` file containing
+#' all download commands. By setting `= TRUE` the function will download all of
+#' the requested data files. Default is FALSE.
+#' @param remove_command logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
+#' the text file containing download commands. Default is FALSE.
 #' @author Mariana Kassien, Insang Song, Mitchell Manware
 #' @returns NULL; Separate comma-separated value (CSV) files of
 #'  monitors and the daily representative values
@@ -31,133 +40,115 @@
 #' @export
 download_aqs_data <-
   function(
-    parameter_code = 88101,
-    year_start = 2018,
-    year_end = 2022,
-    resolution_temporal = "daily",
-    directory_to_download = "./input/data/aqs/",
-    directory_to_save = "./input/data/aqs/",
-    url_aqs_download = "https://aqs.epa.gov/aqsweb/airdata/",
-    remove_zips = FALSE) {
-
-    #### 1. directory setup
-
+      parameter_code = 88101,
+      year_start = 2018,
+      year_end = 2022,
+      resolution_temporal = "daily",
+      directory_to_download = "../input/data/aqs/",
+      directory_to_save = "../input/data/aqs/",
+      url_aqs_download = "https://aqs.epa.gov/aqsweb/airdata/",
+      data_download_acknowledgement = FALSE,
+      unzip = TRUE,
+      remove_zip = FALSE,
+      download = FALSE,
+      remove_command = FALSE) {
+    #### 1. check for data download acknowledgement
+    download_permit(
+      data_download_acknowledgement = data_download_acknowledgement)
+    #### 2. check for null parameteres
+    check_for_null_parameters(mget(ls()))
+    #### 3. directory setup
     directory_to_download <- download_sanitize_path(directory_to_download)
     directory_to_save <- download_sanitize_path(directory_to_save)
-
     download_setup_dir(directory_to_download)
     download_setup_dir(directory_to_save)
-
-    #### 2. define measurement data paths
+    #### 4. define year sequence
     year_sequence <- seq(year_start, year_end, 1)
-    file_urls <- sprintf(paste(url_aqs_download,
-                              resolution_temporal,
-                              "_",
-                              parameter_code,
-                              "_%.0f.zip",
-                              sep = ""),
-                        year_sequence)
-    download_names <- sprintf(paste(directory_to_download,
-                                    "download_output_%.0f.zip",
-                                    sep = ""),
-                              year_sequence)
-    #### 3. Downloading data
-
-    # Download zip files from website
+    #### 5. build URLs
+    download_urls <- sprintf(
+      paste(url_aqs_download,
+        resolution_temporal,
+        "_",
+        parameter_code,
+        "_%.0f.zip",
+        sep = ""
+      ),
+      year_sequence
+    )
+    #### 5. build download file name
+    download_names <- sprintf(
+      paste(directory_to_download,
+        "aqs_",
+        resolution_temporal,
+        "_",
+        parameter_code,
+        "_%.0f.zip",
+        sep = ""
+      ),
+      year_sequence
+    )
+    #### 6. build download command
+    download_commands <- paste0("curl ",
+                                download_urls,
+                                " --output ",
+                                download_names,
+                                "\n")
+    #### 7. initiate "..._curl_commands.txt"
+    commands_txt <- paste0(
+      directory_to_download,
+      "aqs_",
+      parameter_code,
+      "_",
+      year_start, "_", year_end,
+      "_",
+      resolution_temporal,
+      "_curl_commands.txt"
+    )
+    download_sink(commands_txt)
+    #### 8. concatenate and print download commands to "..._curl_commands.txt"
+    writeLines(download_commands)
+    #### 9. finish "..._curl_commands.txt" file
+    sink()
+    #### 10. build system command
+    system_command <- paste0(
+      ". ",
+      commands_txt,
+      "\n"
+    )
+    #### 11. download data
     if (!any(file.exists(download_names))) {
-      download.file(file_urls, download_names, method = "libcurl")
+      download_run(download = download,
+                   system_command = system_command)
     }
-    # Construct string with unzipped file names
-    csv_names <- sprintf(paste(directory_to_download,
-                              resolution_temporal,
-                              "_",
-                              parameter_code,
-                              "_%.0f.csv",
-                              sep = ""),
-                        year_sequence)
-    #### 4. Processing data
-    # Unzip and read in .csv files, process and join in one dataframe.
-    # The unique site identifier "ID.Monitor" is a string with the structure
-    # State-County-Site-Parameter-POC
-    for (n in seq(1, length(file_urls))) {
-      unzip(download_names[n], exdir = directory_to_save)
-      # Read in dataframe
-      cat(paste("reading and processing file: ", csv_names[n], "...\n"))
-      data <- read.csv(csv_names[n], stringsAsFactors = FALSE)
-      # Make unique site identifier: State-County-Site-Parameter-POC
-      data$ID.Monitor <- sprintf(
-        "%02d-%03d-%04d-%05d-%02d",
-        data$State.Code,
-        data$County.Code,
-        data$Site.Num,
-        data$Parameter.Code,
-        data$POC
+    #### 12. Construct string with unzipped file names
+    csv_names <- sprintf(
+      paste(directory_to_download,
+        resolution_temporal,
+        "_",
+        parameter_code,
+        "_%.0f.csv",
+        sep = ""
+      ),
+      year_sequence
+    )
+    #### 13. unzip data
+    for (n in seq_along(download_names)) {
+      download_unzip(
+        file_name = download_names[n],
+        directory_to_unzip = directory_to_save,
+        unzip = unzip
       )
-      # Concatenate with other years
-      if (n == 1) {
-        data_all <- data
-      } else {
-        data_all <- rbind(data_all, data)
-      }
     }
-
-    cat(paste("Downloading monitor metadata...\n"))
-    #### 4. Downloading monitor metadata file and filter for relevant sites
-    # Download monitors file
-    dest_monitors <- paste(directory_to_download, "aqs_monitors.zip", sep = "")
-    if (!file.exists(dest_monitors)) {
-      download.file(
-                    sprintf(
-                            "%saqs_monitors.zip",
-                            url_aqs_download),
-                    dest_monitors)
-    }
-
-    # Unzip and read in
-    unzip(dest_monitors, exdir = directory_to_save)
-    monitors <-
-      read.csv(sprintf("%saqs_monitors.csv",
-                       directory_to_save),
-               stringsAsFactors = FALSE)
-
-    # Create site identifier
-    monitors$State.Code <- as.numeric(monitors$State.Code)
-    # Convert from string to numeric to get rid of
-    # leading zeros, the NAs introduced are from
-    # monitors in Canada with site number="CC"
-    monitors$ID.Monitor <-
-      sprintf("%02d-%03d-%04d-%05d-%02d",
-              monitors$State.Code,
-              monitors$County.Code,
-              monitors$Site.Num,
-              monitors$Parameter.Code,
-              monitors$POC)
-    # Filter monitors file to include only monitors in our csv
-    monitors_filter <-
-      monitors[which(monitors$ID.Monitor %in% data_all$ID.Monitor), ]
-    #### 5. Uploading data to desired folder
-    cat(paste("All requested files were downloaded. Write the cleaned data to ",
-              directory_to_save, "...\n", sep = ""))
-
-    write.csv(data_all,
-              paste(directory_to_save,
-                    resolution_temporal, "_",
-                    parameter_code, "_",
-                    year_start, "-",
-                    year_end, ".csv", sep = ""))
-    write.csv(monitors_filter,
-              paste(directory_to_save,
-                    "monitors_",
-                    parameter_code, "_",
-                    year_start, "-",
-                    year_end, ".csv", sep = ""))
-
-    if (remove_zips) {
-      cat(paste("Delete zip files ... \n"))
-      path_zips <- list.files(pattern = ".(zip|ZIP)$",
-                              path = directory_to_download,
-                              full.names = TRUE)
-      file.remove(path_zips)
-      cat(paste("Zip files were deleted. \n"))
+    #### 14. remove command file
+    download_remove_command(
+      commands_txt = commands_txt,
+      remove = remove_command
+    )
+    #### 15. remove zip files
+    for (d in seq_along(download_names)) {
+      download_remove_zips(
+        remove = remove_zip,
+        download_name = download_names[d]
+      )
     }
   }
