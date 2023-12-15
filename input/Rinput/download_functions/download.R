@@ -606,20 +606,6 @@ download_gmted_data <- function(
 #' @param date_end character(1). length of 10. End date for downloading data.
 #' Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
 #' @param collection character(1). MERRA-2 data collection file name.
-#' Should be one of
-#'  "inst1_2d_asm_Nx", "inst1_2d_int_Nx", "inst1_2d_lfo_Nx",
-#'  "inst3_3d_asm_Np", "inst3_3d_aer_Nv", "inst3_3d_asm_Nv",
-#'  "inst3_3d_chm_Nv", "inst3_3d_gas_Nv", "inst3_2d_gas_Nx",
-#'  "inst6_3d_ana_Np", "inst6_3d_ana_Nv", "statD_2d_slv_Nx",
-#'  "tavg1_2d_adg_Nx", "tavg1_2d_aer_Nx", "tavg1_2d_chm_Nx",
-#'  "tavg1_2d_csp_Nx", "tavg1_2d_flx_Nx", "tavg1_2d_int_Nx",
-#'  "tavg1_2d_lfo_Nx", "tavg1_2d_lnd_Nx", "tavg1_2d_ocn_Nx",
-#'  "tavg1_2d_rad_Nx", "tavg1_2d_slv_Nx", "tavg3_3d_mst_Ne",
-#'  "tavg3_3d_trb_Ne", "tavg3_3d_nav_Ne", "tavg3_3d_cld_Np",
-#'  "tavg3_3d_mst_Np", "tavg3_3d_rad_Np", "tavg3_3d_tdt_Np",
-#'  "tavg3_3d_trb_Np", "tavg3_3d_udt_Np", "tavg3_3d_odt_Np",
-#'  "tavg3_3d_qdt_Np", "tavg3_3d_asm_Nv", "tavg3_3d_cld_Nv",
-#'  "tavg3_3d_mst_Nv", "tavg3_3d_rad_Nv", "tavg3_2d_glc_Nx"
 #' @param directory_to_save character(1). Directory to save data.
 #' @param data_download_acknowledgement logical(1). By setting `= TRUE` the
 #' user acknowledge that the data downloaded using this function may be very
@@ -633,36 +619,21 @@ download_gmted_data <- function(
 #' @return NULL;
 #' @export
 download_merra2_data <- function(
-  date_start = "2023-09-01",
-  date_end = "2023-09-01",
-  collection = c("inst1_2d_asm_Nx", "inst1_2d_int_Nx", "inst1_2d_lfo_Nx",
-                 "inst3_3d_asm_Np", "inst3_3d_aer_Nv", "inst3_3d_asm_Nv",
-                 "inst3_3d_chm_Nv", "inst3_3d_gas_Nv", "inst3_2d_gas_Nx",
-                 "inst6_3d_ana_Np", "inst6_3d_ana_Nv", "statD_2d_slv_Nx",
-                 "tavg1_2d_adg_Nx", "tavg1_2d_aer_Nx", "tavg1_2d_chm_Nx",
-                 "tavg1_2d_csp_Nx", "tavg1_2d_flx_Nx", "tavg1_2d_int_Nx",
-                 "tavg1_2d_lfo_Nx", "tavg1_2d_lnd_Nx", "tavg1_2d_ocn_Nx",
-                 "tavg1_2d_rad_Nx", "tavg1_2d_slv_Nx", "tavg3_3d_mst_Ne",
-                 "tavg3_3d_trb_Ne", "tavg3_3d_nav_Ne", "tavg3_3d_cld_Np",
-                 "tavg3_3d_mst_Np", "tavg3_3d_rad_Np", "tavg3_3d_tdt_Np",
-                 "tavg3_3d_trb_Np", "tavg3_3d_udt_Np", "tavg3_3d_odt_Np",
-                 "tavg3_3d_qdt_Np", "tavg3_3d_asm_Nv", "tavg3_3d_cld_Nv",
-                 "tavg3_3d_mst_Nv", "tavg3_3d_rad_Nv", "tavg3_2d_glc_Nx"),
-  directory_to_save = "./input/data/merra2/",
-  data_download_acknowledgement = FALSE,
-  download = FALSE,
-  remove_command = FALSE
+    date_start = "2023-09-01",
+    date_end = "2023-09-01",
+    collection = NULL,
+    directory_to_save = "../../data/covariates/merra2/",
+    data_download_acknowledgement = FALSE,
+    download = FALSE,
+    remove_command = FALSE
 ) {
   #### 1. check for data download acknowledgement
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
   #### 2. directory setup
   download_setup_dir(directory_to_save)
   directory_to_save <- download_sanitize_path(directory_to_save)
-
-  #### 3. check for collection
-  if (is.null(collection) == TRUE) {
-    stop(paste0("Please select a MERRA2 collection.\n"))
-  }
+  #### 3. check for null parameters
+  check_for_null_parameters(mget(ls()))
   #### 4. check if collection is recognized
   identifiers <- c("inst1_2d_asm_Nx M2I1NXASM 10.5067/3Z173KIE2TPD",
                    "inst1_2d_int_Nx M2I1NXINT 10.5067/G0U6NGQ3BLE0",
@@ -708,18 +679,19 @@ download_merra2_data <- function(
   identifiers <- do.call(rbind, identifiers)
   identifiers_df <- as.data.frame(identifiers)
   colnames(identifiers_df) <- c("collection_id", "estd_name", "DOI")
-
   if (!(collection %in% identifiers_df$collection_id)) {
     print(identifiers_df)
     stop(paste0("Requested collection is not recognized.\n
     Please refer to the table above to find a proper collection.\n"))
   }
-  #### 4. define date sequence
+  #### 5. define date sequence
   date_start_date_format <- as.Date(date_start, format = "%Y-%m-%d")
   date_end_date_format <- as.Date(date_end, format = "%Y-%m-%d")
   date_sequence <- seq(date_start_date_format, date_end_date_format, "day")
   date_sequence <- gsub("-", "", as.character(date_sequence))
-  #### 5. define ESDT name and DOI
+  #### 6. define year + month sequence
+  yearmonth_sequence <- unique(substr(date_sequence, 1, 6))
+  #### 7. define ESDT name and DOI
   identifiers_df_requested <- subset(identifiers_df,
                                      subset =
                                        identifiers_df$collection_id ==
@@ -732,7 +704,7 @@ download_merra2_data <- function(
              " | DOI: ",
              identifiers_df_requested[, 3],
              "\n"))
-  #### 6. define URL base
+  #### 8. define URL base
   #### NOTE: sorted and defined manually according to
   ####       https://goldsmr4.gesdisc.eosdis.nasa.gov/data/MERRA2/ &
   ####       https://goldsmr5.gesdisc.eosdis.nasa.gov/data/MERRA2/
@@ -752,7 +724,36 @@ download_merra2_data <- function(
   } else if (esdt_name %in% esdt_name_5) {
     base <- "https://goldsmr5.gesdisc.eosdis.nasa.gov/data/MERRA2/"
   }
-  #### 7. initiate "..._wget_commands.txt" file
+  #### 9. identify download URLs
+  list_urls <- NULL
+  for (y in seq_along(yearmonth_sequence)) {
+    year <- substr(yearmonth_sequence[y], 1, 4)
+    month <- substr(yearmonth_sequence[y], 5, 6)
+    list_urls_month <- system(paste0("wget -q -nH -nd ",
+                                     "\"",
+                                     base,
+                                     esdt_name,
+                                     ".5.12.4/",
+                                     year,
+                                     "/",
+                                     month,
+                                     "/\"",
+                                     " -O - | grep .nc4 | awk -F'\"' ",
+                                     "'{print $4}'"),
+                              intern = TRUE)
+    list_urls <- c(list_urls, list_urls_month)
+  }
+  #### 10. match list_urls to date sequence
+  list_urls_date_sequence <- list_urls[substr(list_urls, 28, 35) %in%
+                                         date_sequence]
+  #### 11. separate data and metadata
+  list_urls_data <- list_urls_date_sequence[grep("*.xml",
+                                                 list_urls_date_sequence,
+                                                 invert = TRUE)]
+  list_urls_metadata <- list_urls_date_sequence[grep("*.xml",
+                                                     list_urls_date_sequence,
+                                                     invert = FALSE)]
+  #### 12. initiate "..._wget_commands.txt" file
   commands_txt <- paste0(directory_to_save,
                          collection,
                          "_",
@@ -761,38 +762,18 @@ download_merra2_data <- function(
                          date_end,
                          "_wget_commands.txt")
   download_sink(commands_txt)
-  #### 8. concatenate and print download commands to "..._wget_commands.txt"
-  for (d in seq_along(date_sequence)) {
-    date <- date_sequence[d]
-    year <- as.character(substr(date, 1, 4))
-    month <- as.character(substr(date, 5, 6))
-    year_num <- as.numeric(year)
-    #### 8.1 define Stream and Version number
-    #### NOTE: sorted and defined manually according
-    ####       MERRA2 File Specification
-    ####       https://gmao.gsfc.nasa.gov/pubs/docs/Bosilovich785.pdf
-    if (year_num > 2010) {
-      hundreds <- "400"
-    } else if (year_num <= 2010 && year_num > 2001) {
-      hundreds <- "300"
-    } else if (year_num <= 2001 && year_num > 1991) {
-      hundreds <- "200"
-    } else if (year_num <= 1991) {
-      hundreds <- "100"
-    }
+  #### 13. concatenate and print download commands to "..._wget_commands.txt"
+  for (l in seq_along(date_sequence)) {
+    year <- as.character(substr(date_sequence[l], 1, 4))
+    month <- as.character(substr(date_sequence[l], 5, 6))
     download_url <- paste0(base,
                            esdt_name,
                            ".5.12.4/",
                            year,
                            "/",
                            month,
-                           "/MERRA2_",
-                           hundreds,
-                           ".",
-                           collection,
-                           ".",
-                           date,
-                           ".nc4")
+                           "/",
+                           list_urls_data[l])
     download_folder <- paste0(directory_to_save,
                               collection)
     download_command <- paste0("wget ",
@@ -807,13 +788,8 @@ download_merra2_data <- function(
                                     year,
                                     "/",
                                     month,
-                                    "/MERRA2_",
-                                    hundreds,
-                                    ".",
-                                    collection,
-                                    ".",
-                                    date,
-                                    ".nc4.xml")
+                                    "/",
+                                    list_urls_metadata[l])
     download_folder_metadata <- paste0(directory_to_save,
                                        collection,
                                        "/metadata/")
@@ -824,23 +800,21 @@ download_merra2_data <- function(
                                         "\n")
     cat(download_command_metadata)
   }
-  #### 9. finish "..._wget_commands.txt"
+  #### 14. finish "..._wget_commands.txt"
   sink()
-  #### 10. build system command
+  #### 15. build system command
   system_command <- paste0(". ",
                            commands_txt,
                            "\n")
-
-  #### 11. download data
+  #### 16. download data
   download_run(download = download,
                system_command = system_command,
                commands_txt = commands_txt)
-  #### 18. Remove command file
+  #### 17. Remove command file
   download_remove_command(commands_txt = commands_txt,
                           remove = remove_command)
-
+  
 }
-
 
 
 #' download_narr_monolevel_data: download monolevel meteorological data from

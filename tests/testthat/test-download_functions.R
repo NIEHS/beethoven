@@ -161,6 +161,45 @@ testthat::test_that("GMTED download URLs exist.", {
   }
 })
 
+testthat::test_that("MERRA2 download URLs exist.", {
+  withr::local_package("httr")
+  withr::local_package("stringr")
+  # function parameters
+  date_start <- "2018-01-01"
+  date_end <- "2022-12-31"
+  collections <- c("inst1_2d_asm_Nx", "inst3_3d_asm_Np")
+  directory_to_save <- "../testdata/"
+  for (c in seq_along(collections)) {
+    # run download function
+    download_merra2_data(date_start = date_start,
+                         date_end = date_end,
+                         collection = collections[c],
+                         directory_to_save = directory_to_save,
+                         data_download_acknowledgement = TRUE,
+                         download = FALSE)
+    # define path with commands
+    commands_path <- paste0(directory_to_save,
+                            collections[c],
+                            "_",
+                            date_start,
+                            "_",
+                            date_end,
+                            "_wget_commands.txt")
+    # import commands
+    commands <- read_commands(commands_path = commands_path)
+    # extract urls
+    urls <- extract_urls(commands = commands, position = 2)
+    # check HTTP URL status
+    url_status <- check_urls(urls = urls, size = 5L)
+    # implement unit tests
+    test_download_functions(directory_to_save = directory_to_save,
+                            commands_path = commands_path,
+                            url_status = url_status)
+    # remove file with commands after test
+    file.remove(commands_path)
+  }
+})
+
 testthat::test_that("NCEP NARR monolevel download URLs exist.", {
   withr::local_package("httr")
   withr::local_package("stringr")
