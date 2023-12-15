@@ -19,7 +19,7 @@ testthat::test_that("Error when data_download_acknowledgement = FALSE", {
 
 testthat::test_that("Error when one parameter is NULL.", {
   # will be expanded to all dataset names
-  download_datasets <- c("geos", "gmted", "narr_monolevel",
+  download_datasets <- c("aqs", "geos", "gmted", "narr_monolevel",
                          "narr_p_levels", "nlcd", "noaa", "plevels",
                          "p_levels", "monolevel", "hms", "smoke")
   for (d in seq_along(download_datasets)) {
@@ -31,6 +31,50 @@ testthat::test_that("Error when one parameter is NULL.", {
              "to rectify the error.")
     )
   }
+})
+
+testthat::test_that("EPA AQS download URLs exist.", {
+  withr::local_package("httr")
+  withr::local_package("stringr")
+  # function parameters
+  year_start <- 2018
+  year_end <- 2022
+  resolution_temporal <- "daily"
+  parameter_code <- 88101
+  directory_to_download <- "../testdata/"
+  directory_to_save <- "../testdata/"
+  # run download function
+  download_aqs_data(year_start = year_start,
+                    year_end = year_end,
+                    directory_to_save = directory_to_save,
+                    directory_to_download = directory_to_download,
+                    data_download_acknowledgement = TRUE,
+                    unzip = FALSE,
+                    remove_zip = FALSE,
+                    download = FALSE,
+                    remove_command = FALSE)
+  # define file path with commands
+  commands_path <- paste0(
+    directory_to_download,
+    "aqs_",
+    parameter_code,
+    "_",
+    year_start, "_", year_end,
+    "_",
+    resolution_temporal,
+    "_curl_commands.txt")
+  # import commands
+  commands <- read_commands(commands_path = commands_path)
+  # extract urls
+  urls <- extract_urls(commands = commands, position = 2)
+  # check HTTP URL status
+  url_status <- check_urls(urls = urls, size = length(urls))
+  # implement unit tets
+  test_download_functions(directory_to_save = directory_to_save,
+                          commands_path = commands_path,
+                          url_status = url_status)
+  # remove file with commands after test
+  file.remove(commands_path)
 })
 
 testthat::test_that("GEOS-CF download URLs exist.", {
