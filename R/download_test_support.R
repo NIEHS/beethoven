@@ -22,7 +22,8 @@ check_url_file_exist <- function(
   } else if (method == "GET") {
     hd <- httr::GET(url)
   }
-  status <- hd$all_headers[[1]]$status
+  # status <- hd$all_headers[[1]]$status
+  status <- hd$status_code
   return(status == http_status_ok)
 }
 

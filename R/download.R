@@ -1708,7 +1708,7 @@ download_koppen_geiger_data <- function(
   #### 11. initiate "..._wget_commands.txt"
   commands_txt <- paste0(directory_to_download,
                          "koppen_geiger_",
-                         period,
+                         time_period,
                          "_",
                          data_resolution,
                          "_",

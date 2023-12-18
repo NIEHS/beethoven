@@ -50,21 +50,16 @@ download_koppen_geiger_data <- function(
 ) {
   #### 1. check for data download acknowledgement
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
-  #### 2. directory setup
+  #### 2. check for null parameters
+  check_for_null_parameters(mget(ls()))
+  #### 3. directory setup
   download_setup_dir(directory_to_download)
   download_setup_dir(directory_to_save)
   directory_to_download <- download_sanitize_path(directory_to_download)
   directory_to_save <- download_sanitize_path(directory_to_save)
-
-  #### 3. check for data resolution
-  if (is.null(data_resolution)) {
-    stop(paste0("Please select a data resolution.\n"))
-  }
+  #### 4. check for data resolution
   data_resolution <- match.arg(data_resolution)
-  #### 4. check for valid time period
-  if (is.null(time_period)) {
-    stop(paste0("Please select a time period.\n"))
-  }
+  #### 5. check for valid time period
   time_period <- match.arg(time_period)
   #### 6. define time period
   period <- tolower(time_period)
@@ -88,7 +83,7 @@ download_koppen_geiger_data <- function(
   #### 11. initiate "..._wget_commands.txt"
   commands_txt <- paste0(directory_to_download,
                          "koppen_geiger_",
-                         time_period,
+                         period,
                          "_",
                          data_resolution,
                          "_",
