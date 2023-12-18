@@ -1,13 +1,5 @@
 #' @author Mitchell Manware
 #' @description Unit test for for checking data download functions.
-library(testthat)
-r <- list.files("/ddn/gs1/home/manwareme/NRT-AP-Model/R/", full.names = TRUE)
-sapply(r, source)
-d <- list.files(
-  "/ddn/gs1/home/manwareme/NRT-AP-Model/input/Rinput/download_functions/",
-  full.names = TRUE)
-sapply(d, source)
-setwd("/ddn/gs1/home/manwareme/NRT-AP-Model/tests/testthat/")
 testthat::test_that("Error when data_download_acknowledgement = FALSE", {
   download_datasets <- c("aqs", "ecoregion", "geos", "gmted", "koppen",
                          "koppengeiger", "merra2", "merra", "narr_monolevel",
@@ -25,7 +17,6 @@ testthat::test_that("Error when data_download_acknowledgement = FALSE", {
 })
 
 testthat::test_that("Error when one parameter is NULL.", {
-  # will be expanded to all dataset names
   download_datasets <- c("aqs", "ecoregion", "geos", "gmted", "koppen",
                          "koppengeiger", "merra2", "merra", "narr_monolevel",
                          "narr_p_levels", "nlcd", "noaa", "sedac_groads",
