@@ -1,6 +1,5 @@
 #' @author Mitchell Manware
 #' @description Unit test for for checking data download functions.
-setwd("/Users/mitchellmanware/Documents/NIEHS/NRTAPmodel/tests/testthat/")
 testthat::test_that("Error when data_download_acknowledgement = FALSE", {
   download_datasets <- c("aqs", "ecoregion", "geos", "gmted", "koppen",
                          "koppengeiger", "merra2", "merra", "narr_monolevel",
