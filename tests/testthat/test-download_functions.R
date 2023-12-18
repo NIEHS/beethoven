@@ -1,6 +1,6 @@
 #' @author Mitchell Manware
 #' @description Unit test for for checking data download functions.
-#'
+setwd("/Users/mitchellmanware/Documents/NIEHS/NRTAPmodel/tests/testthat/")
 testthat::test_that("Error when data_download_acknowledgement = FALSE", {
   download_datasets <- c("aqs", "ecoregion", "geos", "gmted", "koppen",
                          "koppengeiger", "merra2", "merra", "narr_monolevel",
@@ -33,7 +33,7 @@ testthat::test_that("Error when one parameter is NULL.", {
   }
 })
 
-testthat::test_that("EPA AQS download URLs exist.", {
+testthat::test_that("EPA AQS download URLs have HTTP status 200.", {
   withr::local_package("httr")
   withr::local_package("stringr")
   # function parameters
@@ -68,7 +68,7 @@ testthat::test_that("EPA AQS download URLs exist.", {
   # extract urls
   urls <- extract_urls(commands = commands, position = 2)
   # check HTTP URL status
-  url_status <- check_urls(urls = urls, size = length(urls))
+  url_status <- check_urls(urls = urls, size = length(urls), method = "HEAD")
   # implement unit tets
   test_download_functions(directory_to_save = directory_to_save,
                           commands_path = commands_path,
@@ -77,7 +77,7 @@ testthat::test_that("EPA AQS download URLs exist.", {
   file.remove(commands_path)
 })
 
-testthat::test_that("GEOS-CF download URLs exist.", {
+testthat::test_that("GEOS-CF download URLs have HTTP status 200.", {
   withr::local_package("httr")
   withr::local_package("stringr")
   # function parameters
@@ -107,7 +107,7 @@ testthat::test_that("GEOS-CF download URLs exist.", {
     # extract urls
     urls <- extract_urls(commands = commands, position = 2)
     # check HTTP URL status
-    url_status <- check_urls(urls = urls, size = 30L)
+    url_status <- check_urls(urls = urls, size = 30L, method = "HEAD")
     # implement unit tests
     test_download_functions(directory_to_save = directory_to_save,
                             commands_path = commands_path,
@@ -117,7 +117,7 @@ testthat::test_that("GEOS-CF download URLs exist.", {
   }
 })
 
-testthat::test_that("GMTED download URLs exist.", {
+testthat::test_that("GMTED download URLs have HTTP status 200.", {
   withr::local_package("httr")
   # function parameters
   statistics <- c("Breakline Emphasis", "Systematic Subsample",
@@ -151,7 +151,7 @@ testthat::test_that("GMTED download URLs exist.", {
     # extract urls
     urls <- extract_urls(commands = commands, position = 6)
     # check HTTP URL status
-    url_status <- check_urls(urls = urls, size = 1L)
+    url_status <- check_urls(urls = urls, size = 1L, method = "HEAD")
     # implement unit tests
     test_download_functions(directory_to_save = directory_to_save,
                             commands_path = commands_path,
@@ -161,7 +161,7 @@ testthat::test_that("GMTED download URLs exist.", {
   }
 })
 
-testthat::test_that("MERRA2 download URLs exist.", {
+testthat::test_that("MERRA2 download URLs have HTTP status 200.", {
   withr::local_package("httr")
   withr::local_package("stringr")
   # function parameters
@@ -190,7 +190,7 @@ testthat::test_that("MERRA2 download URLs exist.", {
     # extract urls
     urls <- extract_urls(commands = commands, position = 2)
     # check HTTP URL status
-    url_status <- check_urls(urls = urls, size = 5L)
+    url_status <- check_urls(urls = urls, size = 30L, method = "HEAD")
     # implement unit tests
     test_download_functions(directory_to_save = directory_to_save,
                             commands_path = commands_path,
@@ -200,7 +200,7 @@ testthat::test_that("MERRA2 download URLs exist.", {
   }
 })
 
-testthat::test_that("NCEP NARR monolevel download URLs exist.", {
+testthat::test_that("NARR monolevel download URLs have HTTP status 200.", {
   withr::local_package("httr")
   withr::local_package("stringr")
   # function parameters
@@ -225,7 +225,7 @@ testthat::test_that("NCEP NARR monolevel download URLs exist.", {
   # extract urls
   urls <- extract_urls(commands = commands, position = 6)
   # check HTTP URL status
-  url_status <- check_urls(urls = urls, size = 5L)
+  url_status <- check_urls(urls = urls, size = 5L, method = "HEAD")
   # implement unit tests
   test_download_functions(directory_to_save = directory_to_save,
                           commands_path = commands_path,
@@ -234,7 +234,7 @@ testthat::test_that("NCEP NARR monolevel download URLs exist.", {
   file.remove(commands_path)
 })
 
-testthat::test_that("NCEP NARR pressure levels download URLs exist.", {
+testthat::test_that("NARR p-levels download URLs have HTTP status 200.", {
   withr::local_package("httr")
   withr::local_package("stringr")
   # function parameters
@@ -259,7 +259,7 @@ testthat::test_that("NCEP NARR pressure levels download URLs exist.", {
   # extract urls
   urls <- extract_urls(commands = commands, position = 6)
   # check HTTP URL status
-  url_status <- check_urls(urls = urls, size = 30L)
+  url_status <- check_urls(urls = urls, size = 30L, method = "HEAD")
   # implement unit tests
   test_download_functions(directory_to_save = directory_to_save,
                           commands_path = commands_path,
@@ -268,7 +268,7 @@ testthat::test_that("NCEP NARR pressure levels download URLs exist.", {
   file.remove(commands_path)
 })
 
-testthat::test_that("NOAA HMS Smoke download URLs exist.", {
+testthat::test_that("NOAA HMS Smoke download URLs have HTTP status 200.", {
   withr::local_package("httr")
   withr::local_package("stringr")
   # function parameters
@@ -298,7 +298,7 @@ testthat::test_that("NOAA HMS Smoke download URLs exist.", {
   # extract urls
   urls <- extract_urls(commands = commands, position = 6)
   # check HTTP URL status
-  url_status <- check_urls(urls = urls, size = 30L)
+  url_status <- check_urls(urls = urls, size = 30L, method = "HEAD")
   # implement unit tests
   test_download_functions(directory_to_save = directory_to_save,
                           commands_path = commands_path,
@@ -307,7 +307,7 @@ testthat::test_that("NOAA HMS Smoke download URLs exist.", {
   file.remove(commands_path)
 })
 
-testthat::test_that("NLCD download URLs exist.", {
+testthat::test_that("NLCD download URLs have HTTP status 200.", {
   withr::local_package("httr")
   withr::local_package("stringr")
   # function parameters
@@ -341,7 +341,7 @@ testthat::test_that("NLCD download URLs exist.", {
     # extract urls
     urls <- extract_urls(commands = commands, position = 5)
     # check HTTP URL status
-    url_status <- check_urls(urls = urls, size = 1L)
+    url_status <- check_urls(urls = urls, size = 1L, method = "HEAD")
     # implement unit tests
     test_download_functions(directory_to_download = directory_to_download,
                             directory_to_save = directory_to_save,
@@ -351,3 +351,116 @@ testthat::test_that("NLCD download URLs exist.", {
     file.remove(commands_path)
   }
 })
+
+testthat::test_that("SEDAC groads download URLs have HTTP status 200.", {
+  withr::local_package("httr")
+  withr::local_package("stringr")
+  # function parameters
+  data_regions <- c("Americas", "Global", "Africa", "Asia",
+                    "Europe", "Oceania East", "Oceania West")
+  data_formats <- c("Geodatabase", "Shapefile")
+  directory_to_download <- "../testdata/"
+  directory_to_save <- "../testdata/"
+  # run download function
+  for (r in seq_along(data_regions)) {
+    data_region <- data_regions[r]
+    for (f in seq_along(data_formats)) {
+      download_sedac_groads_data(data_format = data_formats[f],
+                                 data_region = data_region,
+                                 directory_to_download = directory_to_download,
+                                 directory_to_save = directory_to_save,
+                                 data_download_acknowledgement = TRUE,
+                                 download = FALSE,
+                                 unzip = FALSE,
+                                 remove_zip = FALSE,
+                                 remove_command = FALSE)
+      # define file path with commands
+      commands_path <- paste0(directory_to_download,
+                              "sedac_groads_",
+                              gsub(" ", "_", tolower(data_region)),
+                              "_",
+                              Sys.Date(),
+                              "_curl_command.txt")
+      # import commands
+      commands <- read_commands(commands_path = commands_path)
+      # extract urls
+      urls <- extract_urls(commands = commands, position = 11)
+      # check HTTP URL status
+      url_status <- check_urls(urls = urls, size = 1L, method = "HEAD")
+      # implement unit tests
+      test_download_functions(directory_to_download = directory_to_download,
+                              directory_to_save = directory_to_save,
+                              commands_path = commands_path,
+                              url_status = url_status)
+      # remove file with commands after test
+      file.remove(commands_path)
+    }
+  }
+})
+
+testthat::test_that("SEDAC population download URLs have HTTP status 200.", {
+  withr::local_package("httr")
+  withr::local_package("stringr")
+  # function parameters
+  years <- c("2000", "2005", "2010", "2015", "2020", "all")
+  data_formats <- c("ASCII", "GeoTIFF")
+  data_resolutions <- cbind(c("60 minute", "30 second", "2.5 minute",
+                              "15 minute", "30 minute"),
+                            c("1_deg", "30_sec", "2pt5_min",
+                              "15_min", "30_min"))
+  directory_to_download <- "../testdata/"
+  directory_to_save <- "../testdata/"
+  for (f in seq_along(data_formats)) {
+    data_format <- data_formats[f]
+    for (y in seq_along(years)) {
+      year <- years[y]
+      for (r in seq_len(nrow(data_resolutions))) {
+        # run download function
+        download_sedac_population_data(
+          year = year,
+          data_format = data_format,
+          data_resolution = data_resolutions[r, 1],
+          directory_to_download = directory_to_download,
+          directory_to_save = directory_to_save,
+          data_download_acknowledgement = TRUE,
+          download = FALSE,
+          unzip = FALSE,
+          remove_zip = FALSE,
+          remove_command = FALSE)
+        # define file path with commands
+        if (year == "all") {
+          year <- "totpop"
+        } else {
+          year <- year
+        }
+        if (year == "totpop" && data_resolutions[r, 2] == "30_sec") {
+          resolution <- "2pt5_min"
+        } else {
+          resolution <- data_resolutions[r, 2]
+        }
+        commands_path <- paste0(directory_to_download,
+                                "sedac_population_",
+                                year,
+                                "_",
+                                resolution,
+                                "_",
+                                Sys.Date(),
+                                "_curl_commands.txt")
+        # import commands
+        commands <- read_commands(commands_path = commands_path)
+        # extract urls
+        urls <- extract_urls(commands = commands, position = 11)
+        # check HTTP URL status
+        url_status <- check_urls(urls = urls, size = 1L, method = "HEAD")
+        # implement unit tests
+        test_download_functions(directory_to_download = directory_to_download,
+                                directory_to_save = directory_to_save,
+                                commands_path = commands_path,
+                                url_status = url_status)
+        # remove file with commands after test
+        file.remove(commands_path)
+      }
+    }
+  }
+})
+

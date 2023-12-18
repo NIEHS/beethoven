@@ -1224,72 +1224,66 @@ download_nlcd_data <- function(
 #' @return NULL;
 #' @export
 download_sedac_groads_data <- function(
-  data_format = c("Shapefile", "Geodatabase"),
-  data_region = c("Americas", "Global", "Africa", "Asia",
-                  "Europe", "Oceania East", "Oceania West"),
-  directory_to_download = "./input/data/sedac_groads/",
-  directory_to_save = "./input/data/sedac_groads/",
-  data_download_acknowledgement = FALSE,
-  unzip = TRUE,
-  remove_zip = FALSE,
-  download = FALSE,
-  remove_command = FALSE
+    data_format = c("Shapefile", "Geodatabase"),
+    data_region = c("Americas", "Global", "Africa", "Asia",
+                    "Europe", "Oceania East", "Oceania West"),
+    directory_to_download = "./input/data/sedac_groads/",
+    directory_to_save = "./input/data/sedac_groads/",
+    data_download_acknowledgement = FALSE,
+    unzip = TRUE,
+    remove_zip = FALSE,
+    download = FALSE,
+    remove_command = FALSE
 ) {
   #### 1. check for data download acknowledgement
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
-  #### 2. directory setup
+  #### 2. check for null parameters
+  check_for_null_parameters(mget(ls()))
+  #### 3. directory setup
   download_setup_dir(directory_to_download)
   download_setup_dir(directory_to_save)
   directory_to_download <- download_sanitize_path(directory_to_download)
   directory_to_save <- download_sanitize_path(directory_to_save)
-
-  #### 3. check for region
-  if (is.null(data_region)) {
-    stop(paste0("Please select a data region.\n"))
-  }
   #### 4. check if region is valid
   regions <- c("Global", "Africa", "Asia", "Europe",
                "Americas", "Oceania East", "Oceania West")
   data_region <- match.arg(data_region)
-  #### 5. check for data format
-  # formats <- c("Shapefile", "Geodatabase")
-  # if (!(data_format %in% formats)) {
-  #   stop(paste0("Requested data format not recognized.\n"))
-  # }
-  # formats <- match.arg(formats)
-  #### 6. define URL base
+  #### 5. define URL base
   base <- paste0("https://sedac.ciesin.columbia.edu/downloads/data/groads/",
                  "groads-global-roads-open-access-v1/",
                  "groads-v1-")
-  #### 7. define data format
-  if (data_format == "Shapefile") {
+  #### 6. define data format
+  if (data_format == "Shapefile" && data_region == "Global") {
+    cat(paste0("Geodatabase format utilized for 'Global' dataset.\n"))
+    format <- "gdb"
+  } else if (data_format == "Shapefile" && !(data_region == "Global")) {
     format <- "shp"
   } else if (data_format == "Geodatabase") {
     format <- "gdb"
   }
-  #### 8. coerce region to lower case
+  #### 7. coerce region to lower case
   region <- tolower(data_region)
-  #### 9. build download URL
+  #### 8. build download URL
   download_url <- paste0(base,
                          gsub(" ", "-", region),
                          "-",
                          format,
                          ".zip")
-  #### 10. build download file name
+  #### 9. build download file name
   download_name <- paste0(directory_to_download,
                           "groads_v1_",
                           gsub(" ", "-", region),
                           "_",
                           format,
                           ".zip")
-  #### 11. build system command
+  #### 10. build system command
   download_command <- paste0("curl -n -c ~/.urs_cookies -b ~/.urs_cookies -LJ",
                              " -o ",
                              download_name,
                              " --url ",
                              download_url,
                              "\n")
-  #### 12. initiate "..._curl_commands.txt"
+  #### 11. initiate "..._curl_commands.txt"
   commands_txt <- paste0(directory_to_download,
                          "sedac_groads_",
                          gsub(" ", "_", region),
@@ -1297,30 +1291,29 @@ download_sedac_groads_data <- function(
                          Sys.Date(),
                          "_curl_command.txt")
   download_sink(commands_txt)
-  #### 13. concatenate and print download command to "..._curl_commands.txt"
+  #### 12. concatenate and print download command to "..._curl_commands.txt"
   cat(download_command)
-  #### 14. finish "..._curl_commands.txt" file
+  #### 13. finish "..._curl_commands.txt" file
   sink()
-  #### 15. build system command
+  #### 14. build system command
   system_command <- paste0(". ",
                            commands_txt,
                            "\n")
-  #### 16. download data
+  #### 15. download data
   download_run(download = download,
                system_command = system_command,
                commands_txt = commands_txt)
-  #### 17. end if unzip == FALSE
+  #### 16. end if unzip == FALSE
   download_unzip(file_name = download_name,
                  directory_to_unzip = directory_to_save,
                  unzip = unzip)
-
-  #### 18. Remove command file
+  #### 17. Remove command file
   download_remove_command(commands_txt = commands_txt,
                           remove = remove_command)
-  #### 19. remove zip files
+  #### 18. remove zip files
   download_remove_zips(remove = remove_zip,
                        download_name = download_name)
-
+  
 }
 
 
@@ -1357,52 +1350,46 @@ download_sedac_groads_data <- function(
 #' @return NULL;
 #' @export
 download_sedac_population_data <- function(
-  year = "2020",
-  data_format = "GeoTIFF",
-  data_resolution = "60 minute",
-  directory_to_download = "./input/data/sedac_population/",
-  directory_to_save = "./input/data/sedac_population/",
-  data_download_acknowledgement = FALSE,
-  download = FALSE,
-  unzip = TRUE,
-  remove_zip = FALSE,
-  remove_command = FALSE
+    year = "2020",
+    data_format = "GeoTIFF",
+    data_resolution = "60 minute",
+    directory_to_download = "../../data/covariates/sedac_population/",
+    directory_to_save = "../../data/covariates/sedac_population/",
+    data_download_acknowledgement = FALSE,
+    download = FALSE,
+    unzip = TRUE,
+    remove_zip = FALSE,
+    remove_command = FALSE
 ) {
   #### 1. check for data download acknowledgement
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
-  #### 2. directory setup
+  #### 2. check for null parameters
+  check_for_null_parameters(mget(ls()))
+  #### 3. directory setup
   download_setup_dir(directory_to_download)
   download_setup_dir(directory_to_save)
   directory_to_download <- download_sanitize_path(directory_to_download)
   directory_to_save <- download_sanitize_path(directory_to_save)
-
-  #### 3. check for data format
-  if (is.null(data_format)) {
-    stop(paste0("Please select a data format.\n"))
-  }
-  #### 4. check for data resolution
-  if (is.null(data_resolution)) {
-    stop(paste0("Please select a data resolution.\n"))
-  }
-  #### 5. define URL base
+  #### 4. define URL base
   base <- paste0("https://sedac.ciesin.columbia.edu/downloads/data/gpw-v4/")
-  #### 6. define year
+  #### 5. define year
   if (year == "all") {
     year <- "totpop"
   } else {
     year <- as.character(year)
   }
-  #### 7. define data resolution
-  if (data_resolution == "60 minute") {
-    resolution <- "1_deg"
-  } else if (data_resolution == "30 second") {
-    resolution <- "30_sec"
-  } else if (data_resolution == "2.5 minute") {
+  #### 6. define data resolution
+  resolution_namecodes <- cbind(c("60 minute", "30 second", "2.5 minute",
+                                  "15 minute", "30 minute"),
+                                c("1_deg", "30_sec", "2pt5_min",
+                                  "15_min", "30_min"))
+  resolution <- 
+    resolution_namecodes[resolution_namecodes[,1] == data_resolution][2]
+  #### 7. 30 second resolution not available for all years
+  if (year == "totpop" && resolution == "30_sec") {
     resolution <- "2pt5_min"
-  } else if (data_resolution == "15 minute") {
-    resolution <- "15_min"
-  } else if (data_resolution == "30 minute") {
-    resolution <- "30_min"
+    cat(paste0("30 second resolution not available for all years. Returning",
+               " highest (2.5 minute) resolution.\n"))
   }
   #### 8. define data format
   if (data_format == "GeoTIFF" && year != "totpop") {
@@ -1414,6 +1401,7 @@ download_sedac_population_data <- function(
   } else if (data_format == "ASCII" && year != "totpop") {
     format <- "asc"
   } else if (data_format == "ASCII" && year == "totpop") {
+    format <- "nc"
     cat(paste0("Data for all years is only available in netCDF format. ",
                "Data will be downloaded as netCDF.\n"))
   } else if (data_format == "netCDF") {
