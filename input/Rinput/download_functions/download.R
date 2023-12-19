@@ -23,12 +23,13 @@
 #' - [download_noaa_hms_smoke_data()]: "noaa", "smoke", "hms"
 #' - [download_sedac_groads_data()]: "sedac_groads", "groads"
 #' - [download_sedac_population_data()]: "sedac_population", "population"
+#' - [download_modis_data()]: "modis", "MODIS"
 #' @returns NULL
 #' @export
 download_data <-
   function(
     dataset_name = c("aqs", "ecoregion", "geos", "gmted", "koppen",
-    "koppengeiger", "merra2", "merra", "narr_monolevel",
+    "koppengeiger", "merra2", "merra", "narr_monolevel", "modis",
     "narr_p_levels", "nlcd", "noaa", "sedac_groads", "sedac_population",
     "groads", "population", "plevels", "p_levels", "monolevel", "hms", "smoke"),
     directory_to_save = NULL,
@@ -61,7 +62,8 @@ download_data <-
       sedac_groads = download_sedac_groads_data,
       groads = download_sedac_groads_data,
       sedac_population = download_sedac_population_data,
-      population = download_sedac_population_data
+      population = download_sedac_population_data,
+      modis = download_modis_data
     )
 
     tryCatch({
