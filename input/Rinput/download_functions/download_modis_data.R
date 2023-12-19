@@ -56,26 +56,18 @@ download_modis_data <- function(
     remove_command = FALSE) {
   #### 1. check for data download acknowledgement
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
+  #### 2. check for null parameters
+  check_for_null_parameters(mget(ls()))
   #### 2. directory setup
   download_setup_dir(directory_to_save)
   directory_to_save <- download_sanitize_path(directory_to_save)
-
-  #### 3. check for NASA earth data token
-  if (is.null(nasa_earth_data_token)) {
-    stop("Please provide NASA EarthData Login token.\n")
-  }
   #### 4. check for product
   product <- match.arg(product)
   ismod13 <- startsWith(product, "MOD13")
   ismod06 <- startsWith(product, "MOD06")
-
+  #### 5. value years
   if (substr(date_start, 1, 4) != substr(date_end, 1, 4)) {
     stop("date_start and date_end should be in the same year.\n")
-  }
-
-  #### 5. check for version
-  if (is.null(version)) {
-    stop("Please select a data version.\n")
   }
   #### 6. check for valid horizontal tiles
   if (!all(horizontal_tiles %in% seq(0, 35))) {
@@ -84,11 +76,9 @@ download_modis_data <- function(
   if (!all(vertical_tiles %in% seq(0, 17))) {
     stop("Vertical tiles are not in the proper range [0, 17].\n")
   }
-
   #### 8. Reuse ladsweb home url
   ladsurl <- "https://ladsweb.modaps.eosdis.nasa.gov/"
   version <- ifelse(startsWith(product, "VNP"), "5000", version)
-
   #### 9. define date sequence
   date_start_date_format <- as.Date(date_start, format = "%Y-%m-%d")
   date_end_date_format <- as.Date(date_end, format = "%Y-%m-%d")

@@ -559,3 +559,54 @@ testthat::test_that("Koppen Geiger download URLs have HTTP status 200.", {
     }
   }
 })
+
+testthat::test_that("MODIS download URLs have HTTP status 200.", {
+  withr::local_package("httr")
+  withr::local_package("stringr")
+  # function parameters
+  years <- c(2022:2022)
+  product <- "MOD09GA"
+  version <- "61"
+  horizontal_tiles <- c(7, 13)
+  vertical_tiles <- c(3, 6)
+  nasa_earth_data_token <- "tOkEnPlAcEhOlDeR"
+  directory_to_save <- "../testdata/"
+  for (y in seq_along(years)) {
+    date_start <- paste0(years[y], "-01-01")
+    date_end <- paste0(years[y], "-01-31")
+    # run download function
+    download_modis_data(date_start = date_start,
+                        date_end = date_end,
+                        product = product,
+                        version = version,
+                        horizontal_tiles = horizontal_tiles,
+                        vertical_tiles = horizontal_tiles,
+                        nasa_earth_data_token = nasa_earth_data_token,
+                        directory_to_save = directory_to_save,
+                        data_download_acknowledgement = TRUE,
+                        download = FALSE,
+                        remove_command = FALSE)
+    # define file path with commands
+    commands_path <- paste0(
+      directory_to_save,
+      product,
+      "_",
+      date_start,
+      "_",
+      date_end,
+      "_wget_commands.txt"
+    )
+    # import commands
+    commands <- read_commands(commands_path = commands_path)[,2]
+    # extract urls
+    urls <- extract_urls(commands = commands, position = 4)
+    # check HTTP URL status
+    url_status <- check_urls(urls = urls, size = 10L, method = "HEAD")
+    # implement unit tests
+    test_download_functions(directory_to_save = directory_to_save,
+                            commands_path = commands_path,
+                            url_status = url_status)
+    # remove file with commands after test
+    file.remove(commands_path)
+  }
+})
