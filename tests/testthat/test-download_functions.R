@@ -78,6 +78,43 @@ testthat::test_that("EPA AQS download URLs have HTTP status 200.", {
   file.remove(commands_path)
 })
 
+setwd("/Volumes/manwareme/NRT-AP-Model/tests/testthat/")
+testthat::test_that("Ecoregion download URLs have HTTP status 200.", {
+  withr::local_package("httr")
+  withr::local_package("stringr")
+  # function parameters
+  directory_to_download <- "../testdata/"
+  directory_to_save <- "../testdata/"
+  # run download function
+  download_data(dataset_name = "ecoregion",
+                directory_to_save = directory_to_save,
+                directory_to_download = directory_to_download,
+                data_download_acknowledgement = TRUE,
+                unzip = FALSE,
+                remove_zip = FALSE,
+                download = FALSE,
+                remove_command = FALSE)
+  # define file path with commands
+  commands_path <- paste0(
+    directory_to_download,
+    "us_eco_l3_state_boundaries_",
+    Sys.Date(),
+    "_curl_command.txt"
+  )
+  # import commands
+  commands <- read_commands(commands_path = commands_path)
+  # extract urls
+  urls <- extract_urls(commands = commands, position = 3)
+  # check HTTP URL status
+  url_status <- check_urls(urls = urls, size = length(urls), method = "HEAD")
+  # implement unit tets
+  test_download_functions(directory_to_save = directory_to_save,
+                          commands_path = commands_path,
+                          url_status = url_status)
+  # remove file with commands after test
+  file.remove(commands_path)
+})
+
 testthat::test_that("GEOS-CF download URLs have HTTP status 200.", {
   withr::local_package("httr")
   withr::local_package("stringr")

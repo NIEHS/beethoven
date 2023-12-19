@@ -249,8 +249,8 @@ download_aqs_data <-
 #' @param download logical(1). `= FALSE` will generate a `.txt` file containing
 #' all download commands. By setting `= TRUE` the function will download all of
 #' the requested data files. Default is FALSE.
-#' @param remove_download logical(1). Remove download files in
-#' directory_to_download.
+#' @param remove_command logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
+#' the text file containing download commands.
 #' @author Insang Song
 #' @returns NULL;
 #' @export
@@ -261,51 +261,71 @@ download_ecoregion_data <- function(
   unzip = FALSE,
   remove_zip = FALSE,
   download = FALSE,
-  remove_download = TRUE
+  remove_command = TRUE
 ) {
-  if (!level %in% c(2, 3)) {
-    stop("level should be one of 2 or 3.\n")
-  }
+  #### 1. data download acknowledgement
+  download_permit(data_download_acknowledgement = data_download_acknowledgement)
+  #### 2. check for null parameters
+  check_for_null_parameters(mget(ls()))
+  #### 3. directory setup
   download_setup_dir(directory_to_save)
   download_setup_dir(directory_to_download)
-
-  directory_to_download <-
-    download_sanitize_path(directory = directory_to_download)
-  directory_to_save <-
-    download_sanitize_path(directory = directory_to_save)
-
-  download_permit(data_download_acknowledgement = data_download_acknowledgement)
-  #### 3. Check the presence of file
+  directory_to_download <- download_sanitize_path(directory_to_download)
+  directory_to_save <- download_sanitize_path(directory_to_save)
+  #### 4. Check the presence of file
   ## This part is hard-coded as the original file appears to
   ## be a misnomer. May need to be modified accordingly in the future.
-  path_downloaded_file <- sprintf("%sus_eco_l3_state_boundaries.shp", directory_to_save)
+  path_downloaded_file <- sprintf("%sus_eco_l3_state_boundaries.shp",
+                                  directory_to_save)
   if (file.exists(path_downloaded_file)) {
     message("Requested files exist in the target directory.\n")
     return(NULL)
   }
-  #### 4. define download URL
-  download_url <-
-    "https://gaftp.epa.gov/EPADataCommons/ORD/Ecoregions/us/us_eco_l3_state_boundaries.zip"
-
-  #### 5. build download file name
+  #### 5. define download URL
+  download_url <- paste0(
+    "https://gaftp.epa.gov/EPADataCommons/ORD/Ecoregions/us/",
+    "us_eco_l3_state_boundaries.zip"
+  )
+  #### 6. build download file name
   download_name <- sprintf("%sus_eco_l3_state_boundaries.zip",
                            directory_to_download)
-  #### 6. build download command
+  #### 7. build download command
   download_command <- paste0("wget --no-check-certificate ",
                              download_url,
                              " -O ",
                              download_name,
                              "\n")
-  #### 7. download data
-
-  download_run(download_command = download_command)
-
-  download_unzip(file_name = download_name,
+  #### 8. initiate "..._curl_commands.txt" file
+  commands_txt <- paste0(
+    directory_to_download,
+    "us_eco_l3_state_boundaries_",
+    Sys.Date(),
+    "_curl_command.txt"
+  )
+  #### 9. concatenate 
+  download_sink(commands_txt)
+  #### 10. concatenate and print download commands to "..._wget_commands.txt"
+  cat(download_command)
+  #### 11. finish "...curl_commands.txt" file
+  sink()
+  #### 12. build system command
+  system_command <- paste0(". ",
+                           commands_txt,
+                           "\n")
+  #### 13. download data
+  download_run(download = download,
+               system_command = system_command)
+  #### 14. remove download command
+  download_remove_command(commands_txt = commands_txt,
+                          remove = remove_command)
+  #### 15. unzip files
+  download_unzip(
+    file_name = download_name,
     directory_to_unzip = directory_to_save,
     unzip = unzip)
-  #### 9. remove zip files
+  #### 16. remove zip files
   download_remove_zips(
-    remove_download = remove_download,
+    remove = remove_zip,
     download_name = download_name
   )
 }
