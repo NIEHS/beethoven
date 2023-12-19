@@ -368,16 +368,6 @@ download_geos_cf_data <- function(
     data_download_acknowledgement = FALSE,
     download = FALSE,
     remove_command = FALSE) {
-  date_start = "2023-09-01",
-  date_end = "2023-09-01",
-  collection = c("aqc_tavg_1hr_g1440x721_v1", "chm_tavg_1hr_g1440x721_v1",
-                   "met_tavg_1hr_g1440x721_x1", "xgc_tavg_1hr_g1440x721_x1",
-                   "chm_inst_1hr_g1440x721_p23", "met_inst_1hr_g1440x721_p23"),
-  directory_to_save = "./input/geos_cf/",
-  data_download_acknowledgement = FALSE,
-  download = FALSE,
-  remove_command = FALSE
-) {
   #### 1. check for data download acknowledgement
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
   #### 2. check for null parameters
@@ -1896,7 +1886,7 @@ download_modis_data <- function(
     mod06l2_url2 <-
       "search/order/4/MOD06_L2--61/"
     mod06l2_url3 <-
-      "%s..%s/D/-130,52,-60,20"
+      "%s..%s/DNB/-130,52,-60,20"
     mod06l2_url_template <-
       paste0(mod06l2_url1, mod06l2_url2, mod06l2_url3)
     mod06l2_full <-

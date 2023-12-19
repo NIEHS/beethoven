@@ -37,6 +37,7 @@ fit_base_learner <- function(
     cv_mode = c("lolo", "loto", "lolto", "random", "lblo", "lbto", "lblto"),
     cv_fold = 5L,
     return_full_object = FALSE) {
+  learner <- tolower(learner)
   learner <- match.arg(learner)
   cv_mode <- match.arg(cv_mode)
   # type check
