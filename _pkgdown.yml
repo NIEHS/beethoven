@@ -2,3 +2,7 @@ url: https://spatiotemporal-exposures-and-toxicology.github.io/NRTAPmodel/
 template:
   bootstrap: 5
 
+
+reference:
+  vignette: null  # Exclude all vignettes by default
+
