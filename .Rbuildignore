@@ -9,3 +9,5 @@
 ^\.Rproj\.user$
 ^\.github$
 ^LICENSE\.md$
+vignettes/calc_nlcd_ratio_monitors.Rmd
+
