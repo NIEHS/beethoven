@@ -23,12 +23,13 @@
 #' - [download_noaa_hms_smoke_data()]: "noaa", "smoke", "hms"
 #' - [download_sedac_groads_data()]: "sedac_groads", "groads"
 #' - [download_sedac_population_data()]: "sedac_population", "population"
+#' - [download_modis_data()]: "modis", "MODIS"
 #' @returns NULL
 #' @export
 download_data <-
   function(
     dataset_name = c("aqs", "ecoregion", "geos", "gmted", "koppen",
-    "koppengeiger", "merra2", "merra", "narr_monolevel",
+    "koppengeiger", "merra2", "merra", "narr_monolevel", "modis",
     "narr_p_levels", "nlcd", "noaa", "sedac_groads", "sedac_population",
     "groads", "population", "plevels", "p_levels", "monolevel", "hms", "smoke"),
     directory_to_save = NULL,
@@ -61,7 +62,8 @@ download_data <-
       sedac_groads = download_sedac_groads_data,
       groads = download_sedac_groads_data,
       sedac_population = download_sedac_population_data,
-      population = download_sedac_population_data
+      population = download_sedac_population_data,
+      modis = download_modis_data
     )
 
     tryCatch({
@@ -120,8 +122,8 @@ download_aqs_data <-
     year_start = 2018,
     year_end = 2022,
     resolution_temporal = "daily",
-    directory_to_download = "../input/data/aqs/",
-    directory_to_save = "../input/data/aqs/",
+    directory_to_download = "../input/aqs/",
+    directory_to_save = "../input/aqs/",
     url_aqs_download = "https://aqs.epa.gov/aqsweb/airdata/",
     data_download_acknowledgement = FALSE,
     unzip = TRUE,
@@ -234,7 +236,8 @@ download_aqs_data <-
 
 #' download_ecoregion_data: download Ecoregion Shapefiles from EPA.
 #' @description
-#' The \code{download_ecoregion_data()} function accesses and downloads Ecoregions
+#' The \code{download_ecoregion_data()}
+#' function accesses and downloads Ecoregions
 #' level 3 data, where all pieces of information in the higher levels are
 #' included.
 #' @param directory_to_download character(1). Directory to download zip file
@@ -255,10 +258,10 @@ download_aqs_data <-
 #' @returns NULL;
 #' @export
 download_ecoregion_data <- function(
-  directory_to_download = "./input/data/ecoregions/",
-  directory_to_save = "./input/data/ecoregions/",
+  directory_to_download = "./input/ecoregions/",
+  directory_to_save = "./input/ecoregions/",
   data_download_acknowledgement = FALSE,
-  unzip = FALSE,
+  unzip = TRUE,
   remove_zip = FALSE,
   download = FALSE,
   remove_command = TRUE
@@ -365,6 +368,16 @@ download_geos_cf_data <- function(
     data_download_acknowledgement = FALSE,
     download = FALSE,
     remove_command = FALSE) {
+  date_start = "2023-09-01",
+  date_end = "2023-09-01",
+  collection = c("aqc_tavg_1hr_g1440x721_v1", "chm_tavg_1hr_g1440x721_v1",
+                   "met_tavg_1hr_g1440x721_x1", "xgc_tavg_1hr_g1440x721_x1",
+                   "chm_inst_1hr_g1440x721_p23", "met_inst_1hr_g1440x721_p23"),
+  directory_to_save = "./input/geos_cf/",
+  data_download_acknowledgement = FALSE,
+  download = FALSE,
+  remove_command = FALSE
+) {
   #### 1. check for data download acknowledgement
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
   #### 2. check for null parameters
@@ -497,20 +510,19 @@ download_geos_cf_data <- function(
 #' @return NULL;
 #' @export
 download_gmted_data <- function(
-    statistic = c(
-      "Breakline Emphasis", "Systematic Subsample",
-      "Median Statistic", "Minimum Statistic",
-      "Mean Statistic", "Maximum Statistic",
-      "Standard Deviation Statistic"
-    ),
-    resolution = c("7.5 arc-seconds", "15 arc-seconds", "30 arc-seconds"),
-    directory_to_download = "./input/data/gmted/",
-    directory_to_save = "./input/data/gmted/",
-    data_download_acknowledgement = FALSE,
-    unzip = TRUE,
-    remove_zip = FALSE,
-    download = FALSE,
-    remove_command = FALSE) {
+  statistic = c("Breakline Emphasis", "Systematic Subsample",
+                "Median Statistic", "Minimum Statistic",
+                "Mean Statistic", "Maximum Statistic",
+                "Standard Deviation Statistic"),
+  resolution = c("7.5 arc-seconds", "15 arc-seconds", "30 arc-seconds"),
+  directory_to_download = "./input/gmted/",
+  directory_to_save = "./input/gmted/",
+  data_download_acknowledgement = FALSE,
+  unzip = TRUE,
+  remove_zip = FALSE,
+  download = FALSE,
+  remove_command = FALSE
+) {
   #### 1. check for data download acknowledgement
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
   #### 2. check for null parameters
@@ -639,13 +651,25 @@ download_gmted_data <- function(
 #' @return NULL;
 #' @export
 download_merra2_data <- function(
-    date_start = "2023-09-01",
-    date_end = "2023-09-01",
-    collection = NULL,
-    directory_to_save = "../../data/covariates/merra2/",
-    data_download_acknowledgement = FALSE,
-    download = FALSE,
-    remove_command = FALSE
+  date_start = "2023-09-01",
+  date_end = "2023-09-01",
+  collection = c("inst1_2d_asm_Nx", "inst1_2d_int_Nx", "inst1_2d_lfo_Nx",
+                 "inst3_3d_asm_Np", "inst3_3d_aer_Nv", "inst3_3d_asm_Nv",
+                 "inst3_3d_chm_Nv", "inst3_3d_gas_Nv", "inst3_2d_gas_Nx",
+                 "inst6_3d_ana_Np", "inst6_3d_ana_Nv", "statD_2d_slv_Nx",
+                 "tavg1_2d_adg_Nx", "tavg1_2d_aer_Nx", "tavg1_2d_chm_Nx",
+                 "tavg1_2d_csp_Nx", "tavg1_2d_flx_Nx", "tavg1_2d_int_Nx",
+                 "tavg1_2d_lfo_Nx", "tavg1_2d_lnd_Nx", "tavg1_2d_ocn_Nx",
+                 "tavg1_2d_rad_Nx", "tavg1_2d_slv_Nx", "tavg3_3d_mst_Ne",
+                 "tavg3_3d_trb_Ne", "tavg3_3d_nav_Ne", "tavg3_3d_cld_Np",
+                 "tavg3_3d_mst_Np", "tavg3_3d_rad_Np", "tavg3_3d_tdt_Np",
+                 "tavg3_3d_trb_Np", "tavg3_3d_udt_Np", "tavg3_3d_odt_Np",
+                 "tavg3_3d_qdt_Np", "tavg3_3d_asm_Nv", "tavg3_3d_cld_Nv",
+                 "tavg3_3d_mst_Nv", "tavg3_3d_rad_Nv", "tavg3_2d_glc_Nx"),
+  directory_to_save = "./input/merra2/",
+  data_download_acknowledgement = FALSE,
+  download = FALSE,
+  remove_command = FALSE
 ) {
   #### 1. check for data download acknowledgement
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
@@ -862,13 +886,14 @@ download_merra2_data <- function(
 #' @return NULL;
 #' @export
 download_narr_monolevel_data <- function(
-    year_start = 2022,
-    year_end = 2022,
-    variables = NULL,
-    directory_to_save = "./input/data/narr/",
-    data_download_acknowledgement = FALSE,
-    download = FALSE,
-    remove_command = FALSE) {
+  year_start = 2022,
+  year_end = 2022,
+  variables = NULL,
+  directory_to_save = "./input/narr/",
+  data_download_acknowledgement = FALSE,
+  download = FALSE,
+  remove_command = FALSE
+) {
   #### 1. check for data download acknowledgement
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
   #### 2. check for null parameters
@@ -975,13 +1000,14 @@ download_narr_monolevel_data <- function(
 #' @return NULL;
 #' @export
 download_narr_p_levels_data <- function(
-    year_start = 2022,
-    year_end = 2022,
-    variables = NULL,
-    directory_to_save = "./input/data/narr/",
-    data_download_acknowledgement = FALSE,
-    download = FALSE,
-    remove_command = FALSE) {
+  year_start = 2022,
+  year_end = 2022,
+  variables = NULL,
+  directory_to_save = "./input/narr/",
+  data_download_acknowledgement = FALSE,
+  download = FALSE,
+  remove_command = FALSE
+) {
   #### 1. check for data download acknowledgement
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
   #### 2. check for null parameters
@@ -1099,15 +1125,16 @@ download_narr_p_levels_data <- function(
 #' @returns NULL;
 #' @export
 download_nlcd_data <- function(
-    year = 2021,
-    collection = "Coterminous United States",
-    directory_to_download = "./input/data/nlcd/",
-    directory_to_save = "./input/data/nlcd/",
-    data_download_acknowledgement = FALSE,
-    unzip = FALSE,
-    remove_zip = FALSE,
-    download = FALSE,
-    remove_command = FALSE) {
+  year = 2021,
+  collection = "Coterminous United States",
+  directory_to_download = "./input/nlcd/",
+  directory_to_save = "./input/nlcd/",
+  data_download_acknowledgement = FALSE,
+  unzip = TRUE,
+  remove_zip = FALSE,
+  download = FALSE,
+  remove_command = FALSE
+) {
   #### 1. check for data download acknowledgement
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
   #### 2. check for null parameters
@@ -1247,8 +1274,8 @@ download_sedac_groads_data <- function(
     data_format = c("Shapefile", "Geodatabase"),
     data_region = c("Americas", "Global", "Africa", "Asia",
                     "Europe", "Oceania East", "Oceania West"),
-    directory_to_download = "./input/data/sedac_groads/",
-    directory_to_save = "./input/data/sedac_groads/",
+    directory_to_download = "./input/sedac_groads/",
+    directory_to_save = "./input/sedac_groads/",
     data_download_acknowledgement = FALSE,
     unzip = TRUE,
     remove_zip = FALSE,
@@ -1370,16 +1397,16 @@ download_sedac_groads_data <- function(
 #' @return NULL;
 #' @export
 download_sedac_population_data <- function(
-    year = "2020",
-    data_format = "GeoTIFF",
-    data_resolution = "60 minute",
-    directory_to_download = "../../data/covariates/sedac_population/",
-    directory_to_save = "../../data/covariates/sedac_population/",
-    data_download_acknowledgement = FALSE,
-    download = FALSE,
-    unzip = TRUE,
-    remove_zip = FALSE,
-    remove_command = FALSE
+  year = "2020",
+  data_format = "GeoTIFF",
+  data_resolution = "60 minute",
+  directory_to_download = "./input/sedac_population/",
+  directory_to_save = "./input/sedac_population/",
+  data_download_acknowledgement = FALSE,
+  download = FALSE,
+  unzip = TRUE,
+  remove_zip = FALSE,
+  remove_command = FALSE
 ) {
   #### 1. check for data download acknowledgement
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
@@ -1529,8 +1556,8 @@ download_noaa_hms_smoke_data <- function(
     date_start = "2023-09-01",
     date_end = "2023-09-01",
     data_format = "Shapefile",
-    directory_to_download = "./input/data/noaa_hms/",
-    directory_to_save = "./input/data/noaa_hms/",
+    directory_to_download = "./input/noaa_hms/",
+    directory_to_save = "./input/noaa_hms/",
     data_download_acknowledgement = FALSE,
     download = FALSE,
     remove_command = FALSE,
@@ -1683,15 +1710,15 @@ download_noaa_hms_smoke_data <- function(
 #' @return NULL;
 #' @export
 download_koppen_geiger_data <- function(
-    time_period = c("Present", "Future"),
-    data_resolution = c("0.0083", "0.083", "0.5"),
-    directory_to_download = "./input/data/koppen_geiger/",
-    directory_to_save = "./input/data/koppen_geiger/",
-    data_download_acknowledgement = FALSE,
-    download = FALSE,
-    unzip = TRUE,
-    remove_zip = FALSE,
-    remove_command = FALSE
+  time_period = c("Present", "Future"),
+  data_resolution = c("0.0083", "0.083", "0.5"),
+  directory_to_download = "./input/koppen_geiger/",
+  directory_to_save = "./input/koppen_geiger/",
+  data_download_acknowledgement = FALSE,
+  download = FALSE,
+  unzip = TRUE,
+  remove_zip = FALSE,
+  remove_command = FALSE
 ) {
   #### 1. check for data download acknowledgement
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
@@ -1777,5 +1804,306 @@ download_koppen_geiger_data <- function(
   #### 19. remove zip files
   download_remove_zips(remove = remove_zip,
                        download_name = download_name)
-  
+
+}
+
+
+
+#' download_modis_data:
+#' @description Need maintenance for the directory path change
+#' in NASA EOSDIS. This function first retrieves the all hdf download links
+#' on a certain day, then only selects the relevant tiles from the retrieved
+#' links. Download is only done at the queried horizontal-vertical tile number
+#' combinations. An exception is MOD06_L2 product, which is produced
+#' every five minutes every day.
+#' @note \code{date_start} and \code{date_end} should be in the same year.
+#'  Directory structure looks like
+#'  input/modis/raw/[version]/[product]/[year]/[day_of_year]
+#'  Please note that \code{date_start} and \code{date_end} are
+#'  ignored if \code{product == 'MOD06_L2'}.
+#' @description
+#' @param date_start character(1). length of 10. Start date for downloading
+#' data. Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
+#' @param date_end character(1). length of 10. End date for downloading data.
+#' Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
+#' @param product character(1). One of c("MOD09GA", "MOD11A1", "MOD06_L2",
+#'      "MCD19A2", "MOD13A2", "VNP46A2").
+#' @param version character(1). Default is "61", meaning v061.
+#' @param horizontal_tiles integer(2). Horizontal tile numbers
+#' c([start], [end]). Default is c(7, 13).
+#' @param vertical_tiles integer(2). Vertical tile numbers
+#' c([start], [end]). Default is c(3, 6).
+#' @param nasa_earth_data_token character(1).
+#'  Token for downloading data from NASA. Should be set before
+#'  trying running the function.
+#' @param directory_to_save character(1). Directory to save data.
+#' @param data_download_acknowledgement logical(1). By setting `= TRUE` the
+#' user acknowledge that the data downloaded using this function may be very
+#' large and use lots of machine storage and memory.
+#' @param mod06_links character(1). CSV file path to MOD06_L2 download links
+#' from NASA LPDAAC. Default is NULL.
+#' @param download logical(1). Download data or only save wget commands.
+#' @param remove_command logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
+#' the text file containing download commands.
+#' @author Mitchell Manware, Insang Song
+#' @import rvest
+#' @returns NULL;
+#' @export
+download_modis_data <- function(
+    date_start = "2023-09-01",
+    date_end = "2023-09-01",
+    product = c("MOD09GA", "MOD11A1", "MOD06_L2",
+                "MCD19A2", "MOD13A2", "VNP46A2"),
+    version = "61",
+    horizontal_tiles = c(7, 13),
+    vertical_tiles = c(3, 6),
+    nasa_earth_data_token = NULL,
+    directory_to_save = "./input/modis/raw/",
+    data_download_acknowledgement = FALSE,
+    mod06_links = NULL,
+    download = TRUE,
+    remove_command = FALSE) {
+  #### 1. check for data download acknowledgement
+  download_permit(data_download_acknowledgement = data_download_acknowledgement)
+  #### 2. directory setup
+  download_setup_dir(directory_to_save)
+  directory_to_save <- download_sanitize_path(directory_to_save)
+
+  #### 3. check for NASA earth data token
+  if (is.null(nasa_earth_data_token)) {
+    stop("Please provide NASA EarthData Login token.\n")
+  }
+  #### 4. check for product
+  product <- match.arg(product)
+
+  if (substr(date_start, 1, 4) != substr(date_end, 1, 4)) {
+    stop("date_start and date_end should be in the same year.\n")
+  }
+
+  #### 5. check for version
+  if (is.null(version)) {
+    stop("Please select a data version.\n")
+  }
+
+  #### 6. Reuse ladsweb home url
+  ladsurl <- "https://ladsweb.modaps.eosdis.nasa.gov/"
+  version <- ifelse(startsWith(product, "VNP"), "5000", version)
+
+  #### 7. MOD06_L2 manual input
+  if (product == "MOD06_L2") {
+    mod06l2_url1 <-
+      "https://ladsweb.modaps.eosdis.nasa.gov/"
+    mod06l2_url2 <-
+      "search/order/4/MOD06_L2--61/"
+    mod06l2_url3 <-
+      "%s..%s/D/-130,52,-60,20"
+    mod06l2_url_template <-
+      paste0(mod06l2_url1, mod06l2_url2, mod06l2_url3)
+    mod06l2_full <-
+      sprintf(mod06l2_url_template, date_start, date_end)
+    if (is.null(mod06_links)) {
+      stop(paste("Please provide a CSV file path to MOD06_L2 download links.
+                 You may download it from the link:\n", mod06l2_full,
+                 "\nTime length up to one month is recommended.\n"))
+    }
+
+    #### 7-1. Parse urls in csv
+    file_url <- read.csv(mod06_links)
+    file_url <- unlist(file_url[, 2])
+    download_url <-
+      paste0(substr(ladsurl, 1, nchar(ladsurl) - 1),
+             file_url)
+
+    #### 7-2. Parse dates from csv
+    file_dates <-
+      regmatches(file_url,
+                 regexpr("[2][0-2][0-9]{2,2}[0-3][0-9]{2,2}", file_url))
+    file_dates <- as.integer(file_dates)
+    date_start <- as.Date(as.character(min(file_dates)), format = "%Y%j")
+    date_end <- as.Date(as.character(max(file_dates)), format = "%Y%j")
+
+    #### 7-2. initiate "..._wget_commands.txt" file
+    commands_txt <- paste0(
+      directory_to_save,
+      product,
+      "_",
+      date_start,
+      "_",
+      date_end,
+      "_wget_commands.txt"
+    )
+
+    #### 7-3. write download_command
+    download_command <- paste0(
+      "wget -e robots=off -m -np -R .html,.tmp ",
+      "-nH --cut-dirs=3 \"",
+      download_url,
+      "\" --header \"Authorization: Bearer ",
+      nasa_earth_data_token,
+      "\" -P ",
+      directory_to_save,
+      "\n"
+    )
+
+    # avoid any possible errors by removing existing command files
+    download_sink(commands_txt)
+    cat(download_command)
+    sink()
+
+    system_command <- paste0(
+      ". ",
+      commands_txt,
+      "\n"
+    )
+    download_run(download = download,
+                 system_command = system_command,
+                 commands_txt = commands_txt)
+
+    message("Requests were processed.\n")
+
+    download_remove_command(commands_txt = commands_txt,
+                            remove = remove_command)
+    return(NULL)
+  }
+
+  #### 6. check for valid horizontal tiles
+  if (!all(horizontal_tiles %in% seq(0, 35))) {
+    stop("Horizontal tiles are not in the proper range [0, 35].\n")
+  }
+  if (!all(vertical_tiles %in% seq(0, 17))) {
+    stop("Vertical tiles are not in the proper range [0, 17].\n")
+  }
+
+  #### 9. define date sequence
+  date_start_date_format <- as.Date(date_start, format = "%Y-%m-%d")
+  date_end_date_format <- as.Date(date_end, format = "%Y-%m-%d")
+  date_sequence <- seq(date_start_date_format, date_end_date_format, "day")
+
+  # In a certain year, list all available dates
+  year <- as.character(substr(date_start, 1, 4))
+  filedir_year_url <-
+    paste0(
+          ladsurl,
+          "archive/allData/",
+          version,
+          "/",
+          product,
+          "/",
+          year)
+
+  list_available_d <-
+    rvest::read_html(filedir_year_url) |>
+    rvest::html_elements("tr") |>
+    rvest::html_attr("data-name")
+  # no conditional assignment at this moment.
+
+  # remove NAs
+  # Queried year's available days
+  date_sequence <- list_available_d[!is.na(list_available_d)]
+  date_sequence_i <- as.integer(date_sequence)
+  # Queried dates to integer range
+  date_start_i <- as.integer(strftime(date_start, "%j"))
+  date_end_i <- as.integer(strftime(date_end, "%j"))
+  date_range_julian <- seq(date_start_i, date_end_i)
+  date_sequence_in <- (date_sequence_i %in% date_range_julian)
+
+  message(sprintf("%d / %d days of data available in the queried dates.\n",
+                  sum(date_sequence_in), length(date_range_julian)))
+  date_sequence <- date_sequence[date_sequence_in]
+
+
+  #### 10. define horizontal tiles
+  tiles_horizontal <- seq(horizontal_tiles[1],
+    horizontal_tiles[2],
+    by = 1
+  )
+  tiles_horizontal <- paste0(
+    "h",
+    sprintf("%02d", tiles_horizontal)
+  )
+
+  #### 11. define vertical tiles
+  tiles_vertical <- seq(vertical_tiles[1],
+    vertical_tiles[2],
+    by = 1
+  )
+  tiles_vertical <- paste0(
+    "v",
+    sprintf("%02d", tiles_vertical)
+  )
+  #### 12. define requested tiles
+  tiles_df <- expand.grid(
+    h = tiles_horizontal,
+    v = tiles_vertical
+  )
+  tiles_requested <-
+    paste0(tiles_df$h, tiles_df$v)
+
+
+  #### 13. initiate "..._wget_commands.txt" file
+  commands_txt <- paste0(
+    directory_to_save,
+    product,
+    "_",
+    date_start,
+    "_",
+    date_end,
+    "_wget_commands.txt"
+  )
+
+  # avoid any possible errors by removing existing command files
+  download_sink(commands_txt)
+  #### 14. append download commands to text file
+  for (d in seq_along(date_sequence)) {
+    day <- date_sequence[d]
+    filedir_url <-
+      paste0(
+             filedir_year_url,
+             "/",
+             day)
+
+    filelist <-
+      rvest::read_html(filedir_url) |>
+      rvest::html_elements("tr") |>
+      rvest::html_attr("data-path")
+
+    filelist_sub <-
+      grep(
+           paste("(", paste(tiles_requested, collapse = "|"), ")"),
+           filelist, value = TRUE)
+    download_url <- sprintf("%s%s", ladsurl, filelist_sub)
+
+    # Main wget run
+    download_command <- paste0(
+      "wget -e robots=off -m -np -R .html,.tmp ",
+      "-nH --cut-dirs=3 \"",
+      download_url,
+      "\" --header \"Authorization: Bearer ",
+      nasa_earth_data_token,
+      "\" -P ",
+      directory_to_save,
+      "\n"
+    )
+    #### 15. concatenate and print download commands to "..._wget_commands.txt"
+    cat(download_command)
+  }
+
+  #### 16. finish "..._wget_commands.txt"
+  sink(file = NULL)
+
+  #### 17.
+  system_command <- paste0(
+    ". ",
+    commands_txt,
+    "\n"
+  )
+  download_run(download = download,
+               system_command = system_command,
+               commands_txt = commands_txt)
+
+  message("Requests were processed.\n")
+
+  download_remove_command(commands_txt = commands_txt,
+                          remove = remove_command)
+
 }

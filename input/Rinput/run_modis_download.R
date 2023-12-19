@@ -11,7 +11,8 @@ lib_dir <- file.path(rootdir, rlibdir)
 
 
 # sourcing modis data download function
-source("./input/Rinput/download_functions/download_modis_data.R")
+source("./input/Rinput/download_functions/download_support.R")
+source("./input/Rinput/download_functions/download.R")
 
 
 products <-
@@ -53,7 +54,7 @@ download_modis_data(
   date_end = dend,
   product = product_query,
   version = "61",
-  horizontal_tiles = c(7, 13),
+  horizontal_tiles = c(5, 6),
   vertical_tiles = c(3, 6),
   nasa_earth_data_token = edtoken,
   directory_to_save = download_dir_user,

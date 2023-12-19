@@ -70,7 +70,7 @@ download_permit <-
 #' @param download logical(1). Execute (`TRUE`) or skip (`FALSE`) download.
 #' @param system_command character(1). Linux command to execute downloads.
 #' Inherited from data download function.
-#' @param commands_txt character(1).
+#' @param commands_txt character(1). Text file with download commands.
 #' @returns NULL
 #' @export
 download_run <- function(

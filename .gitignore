@@ -80,4 +80,4 @@ tools/metalearner_test
 .dodsrc
 
 # raw data
-input/data
+input/
