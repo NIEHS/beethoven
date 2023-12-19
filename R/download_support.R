@@ -26,13 +26,16 @@ download_sanitize_path <-
   function(directory) {
     #### 1. directory setup
     chars_dir <- nchar(directory)
-    if (substr(directory,
-               chars_dir,
-               chars_dir) != "/") {
+    if (substr(
+      directory,
+      chars_dir,
+      chars_dir
+    ) != "/") {
       directory <-
         paste(directory,
-              "/",
-              sep = "")
+          "/",
+          sep = ""
+        )
     }
     return(directory)
   }
@@ -47,10 +50,12 @@ download_sanitize_path <-
 download_permit <-
   function(data_download_acknowledgement) {
     if (!data_download_acknowledgement) {
-      stop(paste0("Data download acknowledgement is set to FALSE.",
-                 "Please acknowledge that the data downloaded using this",
-                 "function may be very large and use lots of machine storage",
-                 "and memory.\n"))
+      stop(paste0(
+        "Data download acknowledgement is set to FALSE. ",
+        "Please acknowledge that the data downloaded using this ",
+        "function may be very large and use lots of machine storage ",
+        "and memory.\n"
+      ))
     }
   }
 
@@ -58,7 +63,7 @@ download_permit <-
 
 
 #' download_run: execute or skip `system_command` in data download function.
-#' 
+#'
 #' @description
 #' Execute or skip the commands listed in the ...wget/curl_commands.txt file
 #' produced by one of the data download functions.
@@ -69,10 +74,9 @@ download_permit <-
 #' @returns NULL
 #' @export
 download_run <- function(
-  download = FALSE,
-  system_command = NULL,
-  commands_txt = NULL
-) {
+    download = FALSE,
+    system_command = NULL,
+    commands_txt = NULL) {
   if (download == TRUE) {
     cat(paste0("Downloading requested files...\n"))
     system(command = system_command)
@@ -86,7 +90,7 @@ download_run <- function(
 
 
 #' Remove or keep wget command file
-#' 
+#'
 #' @param commands_txt character(1). Path of download commands
 #' @param remove logical(1). Remove (\code{TRUE}) or
 #'  keep (\code{FALSE}) commands
@@ -94,9 +98,8 @@ download_run <- function(
 #' @export
 download_remove_command <-
   function(
-    commands_txt = NULL,
-    remove = FALSE
-  ) {
+      commands_txt = NULL,
+      remove = FALSE) {
     if (remove) {
       file.remove(commands_txt)
     }
@@ -109,8 +112,7 @@ download_remove_command <-
 #' @export
 download_sink <-
   function(
-    command_txt
-  ) {
+      command_txt) {
     if (file.exists(command_txt)) {
       file.remove(command_txt)
     }
@@ -128,10 +130,9 @@ download_sink <-
 #' @export
 download_unzip <-
   function(
-    file_name,
-    directory_to_unzip,
-    unzip = TRUE
-  ) {
+      file_name,
+      directory_to_unzip,
+      unzip = TRUE) {
     if (!unzip) {
       cat(paste0("Downloaded files will not be unzipped.\n"))
       return(NULL)
@@ -139,10 +140,13 @@ download_unzip <-
 
     cat(paste0("Unzipping files...\n"))
     unzip(file_name,
-          exdir = directory_to_unzip)
-    cat(paste0("Files unzipped and saved in ",
-              directory_to_unzip,
-              ".\n"))
+      exdir = directory_to_unzip
+    )
+    cat(paste0(
+      "Files unzipped and saved in ",
+      directory_to_unzip,
+      ".\n"
+    ))
   }
 
 #' Remove downloaded zip files
@@ -152,9 +156,8 @@ download_unzip <-
 #' @export
 download_remove_zips <-
   function(
-    remove = FALSE,
-    download_name
-  ) {
+      remove = FALSE,
+      download_name) {
     #### remove zip files
     if (remove) {
       cat(paste0("Removing download files...\n"))
@@ -162,3 +165,25 @@ download_remove_zips <-
       cat(paste0("Download files removed.\n"))
     }
   }
+
+
+#' Check for null arguments
+#' @param parameters parameters passed to function (called by
+#' \code{mget(ls())}.)
+#' @returns NULL
+#' @export
+check_for_null_parameters <-
+  function(
+    parameters
+  ) {
+    parameters_status <- any(unlist(lapply(parameters, is.null)))
+    if (parameters_status) {
+      stop(paste0("One or more parameters are `NULL`\n"))
+    }
+  }
+
+
+
+
+
+

@@ -31,7 +31,6 @@ testthat::test_that("calc_koppen_geiger works well", {
   # ncol is equal to 6
   testthat::expect_equal(ncol(kg_res), 6)
   # should have only one climate zone
-  testthat::expect_equal(sum(unlist(kg_res[,-1])), 1)
+  testthat::expect_equal(sum(unlist(kg_res[, -1])), 1)
   testthat::expect_true(is.function(calc_koeppen_geiger))
-
 })
