@@ -23,7 +23,9 @@ A numeric value reporting the extent of input_raster is
 within the extent of spatial_domain
 }
 \description{
-\code{domain_tolerance} will have "meters" is converted to arc degrees approximately 100,000 meters = 1 arc degree
+\code{domain_tolerance} should be in "meters"
+which is converted to arc degrees with respect to the latitude
+(approximately 100,000 meters = 1 arc degree)
 }
 \author{
 Kyle Messier, Insang Song

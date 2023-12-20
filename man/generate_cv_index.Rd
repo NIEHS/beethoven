@@ -45,7 +45,13 @@ Generate spatio-temporal cross-validation index
 \details{
 \code{blocks} is NULL as default
 (i.e., no block structure is considered); then "lb*" cv_mode
-is not working. If any meaningful object is assigned here,
+is not working.
+\code{blocks} should be one of integer vector (length 2),
+sf, sftime, or SpatVector object.
+Please be advised that we cannot provide error messages
+related to the \code{blocks} type invalidity
+due to the cyclometric complexity.
+If any valid object is assigned here,
 cv_fold will not make sense and be ignored.
 Definition of unit grid (horizontal, vertical) size,
 arbitrary shape of blocks (sf/SpatVector case)
