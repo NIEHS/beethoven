@@ -2,6 +2,78 @@
 ## Design: generic function and switch to each function type
 ## Potential improvement: integration to tidymodels
 
+#' Check torch installation and load
+#' @param default_device character(1). "cpu" or "cuda"
+#' @returns NULL
+#' @author Insang Song
+#' @importFrom torch torch_is_installed
+#' @importFrom torch torch_device
+#' @export
+check_and_load_torch <- function(
+  default_device = c("cpu", "cuda")
+) {
+  library(torch)
+  torch::torch_is_installed()
+  torch::torch_device(default_device)
+}
+
+
+
+#' Data preparation for base learners
+#' @param learner
+#' @param data
+#' @param dependent_name "pm2.5"
+#' @param independent_name character.
+#' @returns A list of two matrices (except for cnn) or
+#'  multidimensional arrays (cnn) depending on learners
+#' @author Insang Song
+#' @importFrom data.table as.data.table
+#' @importFrom torch torch_tensor
+#' @importFrom torch torch_reshape
+#' @export
+prep_base_learner <- function(
+  learner = c("cnn", "randomforest", "xgboost"),
+  data,
+  dependent_name,
+  independent_name
+) {
+  learner <- match.arg(learner)
+  if (learner == "cnn") {
+    check_and_load_torch()
+  }
+
+  ## data sorting: stdt is supposed to be sorted already
+
+  ## ~cnn
+  ymat <- as.matrix(data[, independent_name])
+  xmat <- as.matrix(data[, dependent_name])
+
+  ## cnn
+  ymat <-
+  torch::torch_tensor(
+    torch::torch_reshape(
+      data[, dependent_name],
+      ...
+    )
+  )
+  xmat <-
+  torch::torch_tensor(
+    torch::torch_reshape(
+      data[, independent_name],
+      ...
+    )
+  )
+
+  res <- list(
+    dependent = ymat,
+    independent = xmat
+  )
+  return(res)
+}
+
+
+
+
 #' Fit base learner
 #' @param learner character(1). Currently one of 'randomforest', 'xgboost',
 #' and 'cnn'
