@@ -564,7 +564,7 @@ testthat::test_that("MODIS download URLs have HTTP status 200.", {
   withr::local_package("httr")
   withr::local_package("stringr")
   # function parameters
-  years <- c(2022:2022)
+  years <- c(2018:2022)
   product <- "MOD09GA"
   version <- "61"
   horizontal_tiles <- c(7, 13)
@@ -575,17 +575,18 @@ testthat::test_that("MODIS download URLs have HTTP status 200.", {
     date_start <- paste0(years[y], "-01-01")
     date_end <- paste0(years[y], "-01-31")
     # run download function
-    download_modis_data(date_start = date_start,
-                        date_end = date_end,
-                        product = product,
-                        version = version,
-                        horizontal_tiles = horizontal_tiles,
-                        vertical_tiles = horizontal_tiles,
-                        nasa_earth_data_token = nasa_earth_data_token,
-                        directory_to_save = directory_to_save,
-                        data_download_acknowledgement = TRUE,
-                        download = FALSE,
-                        remove_command = FALSE)
+    download_data(dataset_name = "modis",
+                  date_start = date_start,
+                  date_end = date_end,
+                  product = product,
+                  version = version,
+                  horizontal_tiles = horizontal_tiles,
+                  vertical_tiles = horizontal_tiles,
+                  nasa_earth_data_token = nasa_earth_data_token,
+                  directory_to_save = directory_to_save,
+                  data_download_acknowledgement = TRUE,
+                  download = FALSE,
+                  remove_command = FALSE)
     # define file path with commands
     commands_path <- paste0(
       directory_to_save,

@@ -367,16 +367,7 @@ download_geos_cf_data <- function(
     directory_to_save = "./input/data/geos_cf/",
     data_download_acknowledgement = FALSE,
     download = FALSE,
-    remove_command = FALSE) {
-  date_start = "2023-09-01",
-  date_end = "2023-09-01",
-  collection = c("aqc_tavg_1hr_g1440x721_v1", "chm_tavg_1hr_g1440x721_v1",
-                   "met_tavg_1hr_g1440x721_x1", "xgc_tavg_1hr_g1440x721_x1",
-                   "chm_inst_1hr_g1440x721_p23", "met_inst_1hr_g1440x721_p23"),
-  directory_to_save = "./input/geos_cf/",
-  data_download_acknowledgement = FALSE,
-  download = FALSE,
-  remove_command = FALSE
+    remove_command = FALSE
 ) {
   #### 1. check for data download acknowledgement
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
