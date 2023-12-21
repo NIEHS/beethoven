@@ -78,7 +78,6 @@ testthat::test_that("EPA AQS download URLs have HTTP status 200.", {
   file.remove(commands_path)
 })
 
-setwd("/Volumes/manwareme/NRT-AP-Model/tests/testthat/")
 testthat::test_that("Ecoregion download URLs have HTTP status 200.", {
   withr::local_package("httr")
   withr::local_package("stringr")
