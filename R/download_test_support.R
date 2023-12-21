@@ -1,8 +1,9 @@
-################################################################################
-# Functions used to implement and simplify unit tests on data download functions
+###############################################################################
+# Functions used to implement and simplify unit tests on data download
+# functions
 # Date created: 2023-11-30
 # Date modified: 2023-12-12
-################################################################################
+###############################################################################
 
 #' Check if sample of download URLs have HTTP Status 200
 #' @param url Download URL to be checked.
@@ -13,8 +14,8 @@
 #' @importFrom httr GET
 #' @export
 check_url_file_exist <- function(
-    url,
-    method = "HEAD"
+  url,
+  method = "HEAD"
 ) {
   http_status_ok <- 200
   if (method == "HEAD") {
@@ -22,7 +23,7 @@ check_url_file_exist <- function(
   } else if (method == "GET") {
     hd <- httr::GET(url)
   }
-  # status <- hd$all_headers[[1]]$status
+
   status <- hd$status_code
   return(status == http_status_ok)
 }

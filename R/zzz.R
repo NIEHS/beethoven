@@ -1,5 +1,4 @@
 ## After loading and attaching NRTAPModel package
-#' 
 "_PACKAGE"
 
 
@@ -38,7 +37,6 @@ startup_nrtap <-
     cat("   - ./output\n\n")
     # Directories listed below should align with additional settings
     # related to pipeline settings, HPC deployment, etc.
-    # cat("   - ./pipeline\n")
 
     if (username != Sys.info()["effective_user"]) {
       username_in <- username
