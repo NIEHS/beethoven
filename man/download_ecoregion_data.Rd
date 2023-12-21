@@ -45,6 +45,15 @@ function accesses and downloads Ecoregions
 level 3 data, where all pieces of information in the higher levels are
 included.
 }
+\note{
+In Linux systems as of December 2023, downloading Ecoregion data from
+EPA Data Commons will result in certificate errors. This is bypassed by
+manually identifying .crt file link in your browser by connecting to
+https://gaftp.epa.gov then clicking a lock icon in the address bar.
+(TO DEVELOPERS: see the comments in source code)
+Currently we bundle the pre-downloaded crt and its PEM (which is accepted
+in wget command) file in ./inst/extdata.
+}
 \author{
 Insang Song
 }
