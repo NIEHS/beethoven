@@ -252,6 +252,9 @@ download_aqs_data <-
 #' the requested data files. Default is FALSE.
 #' @param remove_command logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
 #' the text file containing download commands.
+#' @param epa_certificate_path character(1). Path to the certificate file
+#' for EPA DataCommons. Default is
+#' './inst/extdata/cacert_gaftp_epa.pem'
 #' @author Insang Song
 #' @returns NULL;
 #' @export
@@ -262,7 +265,8 @@ download_ecoregion_data <- function(
   unzip = TRUE,
   remove_zip = FALSE,
   download = FALSE,
-  remove_command = TRUE
+  remove_command = TRUE,
+  epa_certificate_path = "./inst/extdata/cacert_gaftp_epa.pem"
 ) {
   #### 1. data download acknowledgement
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
@@ -284,20 +288,23 @@ download_ecoregion_data <- function(
   }
   #### 5. define download URL
   if (startsWith(Sys.info()["sysname"], "Linux")) {
-    if (!file.exists("./inst/extdata/cacert_gaftp_epa.crt")) {
+    if (!file.exists(epa_certificate_path)) {
       # URL should be identified in web browser
       # Lock icon in the address bar at https://gaftp.epa.gov
       # Click Show Certificate
       # access "Details" then find URL with *.crt extension
       # copy and replace the url below
+      download_crt_target <- gsub("pem", "crt", epa_certificate_path)
       certificate_url <-
         "http://cacerts.digicert.com/DigiCertGlobalG2TLSRSASHA2562020CA1-1.crt"
-      download.file(certificate_url, "./inst/extdata/cacert_gaftp_epa.crt")
+      download.file(certificate_url, download_crt_target)
       system(paste("openssl x509",
                    "-inform DER",
                    "-outform PEM",
-                   "-in ./inst/extdata/cacert_gaftp_epa.crt",
-                   "-out ./inst/extdata/cacert_gaftp_epa.pem"))
+                   "-in",
+                   download_crt_target,
+                   "-out",
+                   epa_certificate_path))
     }
   }
 
@@ -310,7 +317,9 @@ download_ecoregion_data <- function(
                            directory_to_download)
   #### 7. build download command
   download_command <-
-    paste0("wget --ca-certificate=./inst/extdata/cacert_gaftp_epa.pem ",
+    paste0("wget --ca-certificate=",
+           epa_certificate_path,
+           " ",
            download_url,
            " -O ",
            download_name,

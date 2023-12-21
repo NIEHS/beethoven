@@ -11,7 +11,8 @@ download_ecoregion_data(
   unzip = TRUE,
   remove_zip = FALSE,
   download = FALSE,
-  remove_command = TRUE
+  remove_command = TRUE,
+  epa_certificate_path = "./inst/extdata/cacert_gaftp_epa.pem"
 )
 }
 \arguments{
@@ -35,6 +36,10 @@ the requested data files. Default is FALSE.}
 
 \item{remove_command}{logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
 the text file containing download commands.}
+
+\item{epa_certificate_path}{character(1). Path to the certificate file
+for EPA DataCommons. Default is
+'./inst/extdata/cacert_gaftp_epa.pem'}
 }
 \value{
 NULL;

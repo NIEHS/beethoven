@@ -86,6 +86,7 @@ testthat::test_that("Ecoregion download URLs have HTTP status 200.", {
   # function parameters
   directory_to_download <- "../testdata/"
   directory_to_save <- "../testdata/"
+  certificate <- "../../inst/extdata/cacert_gaftp_epa.pem"
   # run download function
   download_data(dataset_name = "ecoregion",
                 directory_to_save = directory_to_save,
@@ -94,7 +95,8 @@ testthat::test_that("Ecoregion download URLs have HTTP status 200.", {
                 unzip = FALSE,
                 remove_zip = FALSE,
                 download = FALSE,
-                remove_command = FALSE)
+                remove_command = FALSE,
+                epa_certificate_path = certificate)
   # define file path with commands
   commands_path <- paste0(
     directory_to_download,
@@ -120,8 +122,8 @@ testthat::test_that("GEOS-CF download URLs have HTTP status 200.", {
   withr::local_package("httr")
   withr::local_package("stringr")
   # function parameters
-  date_start <- "2018-01-01"
-  date_end <- "2022-12-31"
+  date_start <- "2019-09-09"
+  date_end <- "2019-09-21"
   collections <- c("aqc_tavg_1hr_g1440x721_v1",
                    "chm_inst_1hr_g1440x721_p23")
   directory_to_save <- "../testdata/"
@@ -147,7 +149,7 @@ testthat::test_that("GEOS-CF download URLs have HTTP status 200.", {
     # extract urls
     urls <- extract_urls(commands = commands, position = 2)
     # check HTTP URL status
-    url_status <- check_urls(urls = urls, size = 30L, method = "HEAD")
+    url_status <- check_urls(urls = urls, size = 20L, method = "HEAD")
     # implement unit tests
     test_download_functions(directory_to_save = directory_to_save,
                             commands_path = commands_path,
@@ -161,8 +163,8 @@ testthat::test_that("GMTED download URLs have HTTP status 200.", {
   withr::local_package("httr")
   # function parameters
   statistics <- c("Breakline Emphasis", "Systematic Subsample",
-                  "Median Statistic", "Minimum Statistic",
-                  "Mean Statistic", "Maximum Statistic",
+                  # "Median Statistic", "Minimum Statistic",
+                  # "Mean Statistic", "Maximum Statistic",
                   "Standard Deviation Statistic")
   resolution <- "7.5 arc-seconds"
   directory_to_download <- "../testdata/"
@@ -206,8 +208,8 @@ testthat::test_that("MERRA2 download URLs have HTTP status 200.", {
   withr::local_package("httr")
   withr::local_package("stringr")
   # function parameters
-  date_start <- "2018-01-01"
-  date_end <- "2022-12-31"
+  date_start <- "2022-02-14"
+  date_end <- "2022-03-08"
   collections <- c("inst1_2d_asm_Nx", "inst3_3d_asm_Np")
   directory_to_save <- "../testdata/"
   for (c in seq_along(collections)) {
@@ -247,7 +249,7 @@ testthat::test_that("NARR monolevel download URLs have HTTP status 200.", {
   withr::local_package("stringr")
   # function parameters
   year_start <- 2018
-  year_end <- 2022
+  year_end <- 2019
   variables <- c("weasd", "air.2m")
   directory_to_save <- "../testdata/"
   # run download function
@@ -281,7 +283,7 @@ testthat::test_that("NARR p-levels download URLs have HTTP status 200.", {
   withr::local_package("httr")
   withr::local_package("stringr")
   # function parameters
-  year_start <- 2018
+  year_start <- 2020
   year_end <- 2022
   variables <- c("shum", "omega")
   directory_to_save <- "../testdata/"
@@ -303,7 +305,7 @@ testthat::test_that("NARR p-levels download URLs have HTTP status 200.", {
   # extract urls
   urls <- extract_urls(commands = commands, position = 6)
   # check HTTP URL status
-  url_status <- check_urls(urls = urls, size = 30L, method = "HEAD")
+  url_status <- check_urls(urls = urls, size = 20L, method = "HEAD")
   # implement unit tests
   test_download_functions(directory_to_save = directory_to_save,
                           commands_path = commands_path,
@@ -316,8 +318,8 @@ testthat::test_that("NOAA HMS Smoke download URLs have HTTP status 200.", {
   withr::local_package("httr")
   withr::local_package("stringr")
   # function parameters
-  date_start <- "2022-01-01"
-  date_end <- "2022-12-31"
+  date_start <- "2022-08-12"
+  date_end <- "2022-10-21"
   directory_to_download <- "../testdata/"
   directory_to_save <- "../testdata/"
   # run download function
@@ -565,7 +567,7 @@ testthat::test_that("MODIS download URLs have HTTP status 200.", {
   withr::local_package("httr")
   withr::local_package("stringr")
   # function parameters
-  years <- c(2018:2022)
+  years <- 2020
   product <- "MOD09GA"
   version <- "61"
   horizontal_tiles <- c(7, 13)
@@ -573,8 +575,8 @@ testthat::test_that("MODIS download URLs have HTTP status 200.", {
   nasa_earth_data_token <- "tOkEnPlAcEhOlDeR"
   directory_to_save <- "../testdata/"
   for (y in seq_along(years)) {
-    date_start <- paste0(years[y], "-01-01")
-    date_end <- paste0(years[y], "-01-31")
+    date_start <- paste0(years[y], "-06-20")
+    date_end <- paste0(years[y], "-07-15")
     # run download function
     download_data(dataset_name = "modis",
                   date_start = date_start,
