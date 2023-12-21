@@ -4,12 +4,14 @@
 \alias{check_urls}
 \title{Sample download URLs and apply `check_url_file_exist` function}
 \usage{
-check_urls(urls = urls, size = NULL)
+check_urls(urls = urls, size = NULL, method = "HEAD")
 }
 \arguments{
 \item{urls}{character vector of URLs}
 
 \item{size}{number of observations to be sampled from `urls`}
+
+\item{method}{httr method to obtain URL ("HEAD" or "GET")}
 }
 \value{
 logical vector for URL status = 200

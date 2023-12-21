@@ -17,7 +17,13 @@ if (run) {
 #' @param id_col character(1). Name of unique identifier.
 #' @returns a data.frame object
 #' @author Insang Song
-#' @import terra
+#' @importFrom terra vect
+#' @importFrom terra rast
+#' @importFrom terra crs
+#' @importFrom terra project
+#' @importFrom terra extract
+#' @importFrom terra coltab
+#' @importFrom terra merge
 #' @importFrom methods is
 #' @export
 calc_koppen_geiger <-

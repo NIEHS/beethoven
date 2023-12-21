@@ -1804,7 +1804,6 @@ download_koppen_geiger_data <- function(
 #'  input/modis/raw/[version]/[product]/[year]/[day_of_year]
 #'  Please note that \code{date_start} and \code{date_end} are
 #'  ignored if \code{product == 'MOD06_L2'}.
-#' @description
 #' @param date_start character(1). length of 10. Start date for downloading
 #' data. Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
 #' @param date_end character(1). length of 10. End date for downloading data.

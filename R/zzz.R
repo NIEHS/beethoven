@@ -4,8 +4,11 @@
 
 .onLoad <- function(lib, pkg) {
   packageStartupMessage("
+    NRTAPmodel 1.0.0
+    ---------------------------------------------------------------------
     Please run startup_nrtap() to apply default settings of this package.
-    Consider running ?startup_nrtap for details.\n")
+    Consider running ?startup_nrtap for details.
+    ---------------------------------------------------------------------\n")
 }
 
 
