@@ -200,18 +200,7 @@ download_aqs_data <-
       download_run(download = download,
                    system_command = system_command)
     }
-    #### 12. Construct string with unzipped file names
-    csv_names <- sprintf(
-      paste(directory_to_download,
-        resolution_temporal,
-        "_",
-        parameter_code,
-        "_%.0f.csv",
-        sep = ""
-      ),
-      year_sequence
-    )
-    #### 13. unzip data
+    #### 12. unzip data
     for (n in seq_along(download_names)) {
       download_unzip(
         file_name = download_names[n],
@@ -219,12 +208,12 @@ download_aqs_data <-
         unzip = unzip
       )
     }
-    #### 14. remove command file
+    #### 13. remove command file
     download_remove_command(
       commands_txt = commands_txt,
       remove = remove_command
     )
-    #### 15. remove zip files
+    #### 14. remove zip files
     for (d in seq_along(download_names)) {
       download_remove_zips(
         remove = remove_zip,
@@ -1427,19 +1416,25 @@ download_sedac_population_data <- function(
                " highest (2.5 minute) resolution.\n"))
   }
   #### 8. define data format
-  if (data_format == "GeoTIFF" && year != "totpop") {
-    format <- "tif"
-  } else if (data_format == "GeoTIFF" && year == "totpop") {
-    format <- "nc"
-    cat(paste0("Data for all years is only available in netCDF format. ",
-               "Data will be downloaded as netCDF.\n"))
-  } else if (data_format == "ASCII" && year != "totpop") {
-    format <- "asc"
-  } else if (data_format == "ASCII" && year == "totpop") {
-    format <- "nc"
-    cat(paste0("Data for all years is only available in netCDF format. ",
-               "Data will be downloaded as netCDF.\n"))
-  } else if (data_format == "netCDF") {
+  if (data_format == "GeoTIFF") {
+    if (year != "totpop") {
+      format <- "tif"
+    } else {
+      format <- "nc"
+      cat(paste0("Data for all years is only available in netCDF format. ",
+                 "Data will be downloaded as netCDF.\n"))
+    }
+  }
+  if (data_format == "ASCII") {
+    if (year != "totpop") {
+      format <- "asc"
+    } else {
+      format <- "nc"
+      cat(paste0("Data for all years is only available in netCDF format. ",
+                 "Data will be downloaded as netCDF.\n"))
+    }
+  }
+  if (data_format == "netCDF") {
     format <- "nc"
   }
   #### 9. build download URL
