@@ -51,9 +51,9 @@ download_permit <-
   function(data_download_acknowledgement) {
     if (!data_download_acknowledgement) {
       stop(paste0(
-        "Data download acknowledgement is set to FALSE.",
-        "Please acknowledge that the data downloaded using this",
-        "function may be very large and use lots of machine storage",
+        "Data download acknowledgement is set to FALSE. ",
+        "Please acknowledge that the data downloaded using this ",
+        "function may be very large and use lots of machine storage ",
         "and memory.\n"
       ))
     }
@@ -70,7 +70,7 @@ download_permit <-
 #' @param download logical(1). Execute (`TRUE`) or skip (`FALSE`) download.
 #' @param system_command character(1). Linux command to execute downloads.
 #' Inherited from data download function.
-#' @param commands_txt character(1).
+#' @param commands_txt character(1). Text file with download commands.
 #' @returns NULL
 #' @export
 download_run <- function(
@@ -165,3 +165,25 @@ download_remove_zips <-
       cat(paste0("Download files removed.\n"))
     }
   }
+
+
+#' Check for null arguments
+#' @param parameters parameters passed to function (called by
+#' \code{mget(ls())}.)
+#' @returns NULL
+#' @export
+check_for_null_parameters <-
+  function(
+    parameters
+  ) {
+    parameters_status <- any(unlist(lapply(parameters, is.null)))
+    if (parameters_status) {
+      stop(paste0("One or more parameters are `NULL`\n"))
+    }
+  }
+
+
+
+
+
+

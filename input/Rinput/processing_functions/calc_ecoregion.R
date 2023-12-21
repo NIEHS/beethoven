@@ -3,7 +3,9 @@
 #' @param sites sf/SpatVector. Unique sites. Should include
 #'  a unique identifier field named \code{id_col}
 #' @param id_col character(1). Name of unique identifier.
-#' @returns a data.frame object
+#' @returns a data.frame object with dummy variables and attributes of:
+#'   - \code{attr(., "ecoregion2_code")}: Ecoregion lv.2 code and key
+#'   - \code{attr(., "ecoregion3_code")}: Ecoregion lv.3 code and key
 #' @author Insang Song
 #' @importFrom methods is
 #' @import terra
@@ -38,14 +40,14 @@ calc_ecoregion <-
     key2_num <-
       regmatches(key2_sorted, regexpr("\\d{1,2}\\.[1-9]", key2_sorted))
     key2_num <- as.integer(10 * as.numeric(key2_num))
-    key2_num <- sprintf("DUM_ECOREG_2_%03d", key2_num)
+    key2_num <- sprintf("DUM_E2%03d_0_00000", key2_num)
     key2_num_unique <- sort(unique(key2_num))
 
     key3_sorted <- unlist(extracted[, 2])
     key3_num <-
       regmatches(key3_sorted, regexpr("\\d{1,3}", key3_sorted))
     key3_num <- as.integer(as.numeric(key3_num))
-    key3_num <- sprintf("DUM_ECOREG_3_%03d", key3_num)
+    key3_num <- sprintf("DUM_E3%03d_0_00000", key3_num)
     key3_num_unique <- sort(unique(key3_num))
 
 
@@ -61,11 +63,17 @@ calc_ecoregion <-
       Reduce(f = cbind, x = _) |>
       as.data.frame()
     colnames(df_lv3) <- key3_num_unique
-    
-    sites_ecoreg <- cbind(sites[[id_col]], df_lv2, df_lv3)
 
+    sites_ecoreg <- cbind(sites[[id_col]], df_lv2, df_lv3)
+    attr(sites_ecoreg, "ecoregion2_code") <- sort(unique(ecoreg$L2_KEY))
+    attr(sites_ecoreg, "ecoregion3_code") <- sort(unique(ecoreg$L3_KEY))
     return(sites_ecoreg)
   }
 
-# er3 <- calc_ecoregion(sites = vect(sites))
+# sites_vec <- vect(sites, crs = crs("EPSG:4326"))
+# er3 <- calc_ecoregion(sites = sites_vec)
+# saveRDS(er3,
+#         file = "./output/NRTAP_Covars_Ecoregion.rds",
+#         compress = "xz")
 
+## TODO: all-zero category variables
