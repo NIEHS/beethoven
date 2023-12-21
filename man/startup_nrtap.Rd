@@ -16,7 +16,7 @@ startup_nrtap(
 \item{user_mode}{logical(1).
 Use an user directory for fitting models.
 When \code{TRUE}, a directory with the current session's user name will be
-created under %workdir%/output/%username%.}
+created under [working directory]/output/[username].}
 
 \item{username}{character(1). Used username. Default is
 the "effective_user" element of \code{[Sys.info()]} outputs.}

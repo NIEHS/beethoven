@@ -18,7 +18,7 @@
 #' @param user_mode logical(1).
 #' Use an user directory for fitting models.
 #' When \code{TRUE}, a directory with the current session's user name will be
-#' created under %workdir%/output/%username%.
+#' created under [working directory]/output/[username].
 #' @param username character(1). Used username. Default is
 #' the "effective_user" element of \code{[Sys.info()]} outputs.
 #' @export
@@ -34,10 +34,11 @@ startup_nrtap <-
     cat("This package supposes the working directory has subdirectories\n")
     cat("for running the entire pipeline:\n")
     cat("   - ./R\n")
-    cat("   - ./tests\n")
-    cat("   - ./tools\n")
+    cat("   - ./inst\n")
     cat("   - ./input\n")
     cat("   - ./output\n\n")
+    cat("   - ./tests\n")
+    cat("   - ./tools\n")
     # Directories listed below should align with additional settings
     # related to pipeline settings, HPC deployment, etc.
 
