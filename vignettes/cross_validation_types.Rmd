@@ -2,7 +2,7 @@
 title: "Spatiotemporal cross validation types"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{cross-validation}
+  %\VignetteIndexEntry{Spatiotemporal cross validation types}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 date: "2023-11-13"

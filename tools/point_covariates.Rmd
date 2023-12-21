@@ -2,7 +2,7 @@
 title: "Extract point covariates"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{point_covariates}
+  %\VignetteIndexEntry{Extract point covariates}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 date: "2023-10-02"
@@ -24,7 +24,7 @@ sf_use_s2(FALSE)
 load("./tests/testdata/epa_egrid_powerplants.RData")
 aqs <- terra::vect("./tests/testdata/aqs-test-data.gpkg") |>
   terra::project("EPSG:4326")
-coastline <- readRDS("./tests/testdata/us_coastline.rds")
+coastline <- sf::st_read("./tests/testdata/US-mainland-boundary.gpkg")
 coastline <- terra::vect(coastline) |>
   terra::project("EPSG:4326")
 ```

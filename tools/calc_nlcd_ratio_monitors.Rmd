@@ -13,9 +13,9 @@ vignette: >
 pkgs <- c(
   "terra",
   "exactextractr",
-  "tidyverse",
   "data.table",
   "sf",
+  "stringr",
   "spData",
   "ggplot2",
   "scatterpie"

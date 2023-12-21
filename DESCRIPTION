@@ -15,3 +15,4 @@ VignetteBuilder: knitr, rmarkdown
 RoxygenNote: 7.2.3
 Config/testhat/edition: 3
 License: MIT + file LICENSE
+URL: https://spatiotemporal-exposures-and-toxicology.github.io/NRTAPmodel/
