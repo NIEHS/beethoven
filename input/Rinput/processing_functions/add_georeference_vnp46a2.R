@@ -133,7 +133,7 @@ tile_def$xmax <- tile_def$xmin + 10
 tile_def$ymin <- rep(seq(50, 20, -10), 7)
 tile_def$ymax <- tile_def$ymin + 10
 
-
+write.csv(tile_def, "./inst/extdata/modis_vnp46_tiles.csv", row.names = FALSE)
 #' Assign corner coordinates to retrieve a merged raster
 #' @description This function will return a SpatRaster object with
 #' georeferenced h5 files of VNP46A2 product.

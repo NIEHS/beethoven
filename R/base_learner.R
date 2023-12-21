@@ -8,22 +8,31 @@
 #' @author Insang Song
 #' @importFrom torch torch_is_installed
 #' @importFrom torch torch_device
+#' @importFrom torch cuda_is_available
+#' @importFrom torch backends_mps_is_available
 #' @export
 check_and_load_torch <- function(
-  default_device = c("cpu", "cuda")
+  default_device = c("cpu", "cuda", "mps")
 ) {
+  default_device <- match.arg(default_device)
+
+  if (torch::cuda_is_available()) {
+    default_device <- "cuda"
+  }
+  if (torch::backends_mps_is_available() && default_device == "cpu") {
+    message("Your device is capable of MPS, but default_device is set cpu.\n")
+  }
   library(torch)
   torch::torch_is_installed()
   torch::torch_device(default_device)
 }
 
 
-
 #' Data preparation for base learners
 #' @param learner
-#' @param data
-#' @param dependent_name "pm2.5"
-#' @param independent_name character.
+#' @param data stdt.
+#' @param dependent_name Name of dependent variable. Default is "pm2.5"
+#' @param independent_name character. Names of independent variables.
 #' @returns A list of two matrices (except for cnn) or
 #'  multidimensional arrays (cnn) depending on learners
 #' @author Insang Song
@@ -70,7 +79,6 @@ prep_base_learner <- function(
   )
   return(res)
 }
-
 
 
 
