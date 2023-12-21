@@ -231,6 +231,13 @@ download_aqs_data <-
 #' function accesses and downloads Ecoregions
 #' level 3 data, where all pieces of information in the higher levels are
 #' included.
+#' @note In Linux systems as of December 2023, downloading Ecoregion data from
+#' EPA Data Commons will result in certificate errors. This is bypassed by
+#' manually identifying .crt file link in your browser by connecting to
+#' https://gaftp.epa.gov then clicking a lock icon in the address bar.
+#' (TO DEVELOPERS: see the comments in source code)
+#' Currently we bundle the pre-downloaded crt and its PEM (which is accepted
+#' in wget command) file in ./inst/extdata.
 #' @param directory_to_download character(1). Directory to download zip file
 #' of Ecoregion level 3 shapefiles
 #' @param directory_to_save character(1). Directory to decompress zip files.
@@ -276,6 +283,24 @@ download_ecoregion_data <- function(
     return(NULL)
   }
   #### 5. define download URL
+  if (startsWith(Sys.info()["sysname"], "Linux")) {
+    if (!file.exists("./inst/extdata/cacert_gaftp_epa.crt")) {
+      # URL should be identified in web browser
+      # Lock icon in the address bar at https://gaftp.epa.gov
+      # Click Show Certificate
+      # access "Details" then find URL with *.crt extension
+      # copy and replace the url below
+      certificate_url <-
+        "http://cacerts.digicert.com/DigiCertGlobalG2TLSRSASHA2562020CA1-1.crt"
+      download.file(certificate_url, "./inst/extdata/cacert_gaftp_epa.crt")
+      system(paste("openssl x509",
+                   "-inform DER",
+                   "-outform PEM",
+                   "-in ./inst/extdata/cacert_gaftp_epa.crt",
+                   "-out ./inst/extdata/cacert_gaftp_epa.pem"))
+    }
+  }
+
   download_url <- paste0(
     "https://gaftp.epa.gov/EPADataCommons/ORD/Ecoregions/us/",
     "us_eco_l3_state_boundaries.zip"
@@ -284,11 +309,12 @@ download_ecoregion_data <- function(
   download_name <- sprintf("%sus_eco_l3_state_boundaries.zip",
                            directory_to_download)
   #### 7. build download command
-  download_command <- paste0("wget --no-check-certificate ",
-                             download_url,
-                             " -O ",
-                             download_name,
-                             "\n")
+  download_command <-
+    paste0("wget --ca-certificate=./inst/extdata/cacert_gaftp_epa.pem ",
+           download_url,
+           " -O ",
+           download_name,
+           "\n")
   #### 8. initiate "..._curl_commands.txt" file
   commands_txt <- paste0(
     directory_to_download,
