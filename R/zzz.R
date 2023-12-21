@@ -1,12 +1,14 @@
 ## After loading and attaching NRTAPModel package
-#' 
 "_PACKAGE"
 
 
 .onLoad <- function(lib, pkg) {
   packageStartupMessage("
+    NRTAPmodel 1.0.0
+    ---------------------------------------------------------------------
     Please run startup_nrtap() to apply default settings of this package.
-    Consider running ?startup_nrtap for details.\n")
+    Consider running ?startup_nrtap for details.
+    ---------------------------------------------------------------------\n")
 }
 
 
@@ -38,7 +40,6 @@ startup_nrtap <-
     cat("   - ./output\n\n")
     # Directories listed below should align with additional settings
     # related to pipeline settings, HPC deployment, etc.
-    # cat("   - ./pipeline\n")
 
     if (username != Sys.info()["effective_user"]) {
       username_in <- username

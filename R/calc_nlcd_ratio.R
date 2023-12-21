@@ -8,8 +8,16 @@
 #' @param nlcd_path character giving nlcd data path
 #' @importFrom utils read.csv
 #' @importFrom utils data
-#' @import terra
-#' @import sf
+#' @importFrom terra rast
+#' @importFrom terra project
+#' @importFrom terra vect
+#' @importFrom terra crs
+#' @importFrom terra same.crs
+#' @importFrom terra buffer
+#' @importFrom sf st_union
+#' @importFrom sf st_geometry
+#' @importFrom terra intersect
+#' @importFrom exactextractr exact_extract
 #' @import spData
 #' @export
 calc_nlcd_ratio <- function(data_vect,

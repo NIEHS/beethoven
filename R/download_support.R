@@ -41,7 +41,6 @@ download_sanitize_path <-
   }
 
 
-
 #' Check for data download acknowledgement
 #' @param data_download_acknowledgement logical(1). Whether to
 #' start downloading
@@ -58,8 +57,6 @@ download_permit <-
       ))
     }
   }
-
-
 
 
 #' download_run: execute or skip `system_command` in data download function.
@@ -86,7 +83,6 @@ download_run <- function(
     return(NULL)
   }
 }
-
 
 
 #' Remove or keep wget command file
@@ -120,7 +116,6 @@ download_sink <-
   }
 
 
-
 #' Unzip downloaded data
 #' @param file_name character(1). Full zip file path
 #' @param directory_to_unzip character(1). Directory to unzip
@@ -148,6 +143,7 @@ download_unzip <-
       ".\n"
     ))
   }
+
 
 #' Remove downloaded zip files
 #' @param remove logical(1). Confirm removal. Default is FALSE.
@@ -181,9 +177,3 @@ check_for_null_parameters <-
       stop(paste0("One or more parameters are `NULL`\n"))
     }
   }
-
-
-
-
-
-

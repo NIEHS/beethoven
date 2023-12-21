@@ -55,15 +55,16 @@ testthat::test_that("EPA AQS download URLs have HTTP status 200.", {
                 download = FALSE,
                 remove_command = FALSE)
   # define file path with commands
-  commands_path <- paste0(
-    directory_to_download,
-    "aqs_",
-    parameter_code,
-    "_",
-    year_start, "_", year_end,
-    "_",
-    resolution_temporal,
-    "_curl_commands.txt")
+  commands_path <-
+    paste0(
+           directory_to_download,
+           "aqs_",
+           parameter_code,
+           "_",
+           year_start, "_", year_end,
+           "_",
+           resolution_temporal,
+           "_curl_commands.txt")
   # import commands
   commands <- read_commands(commands_path = commands_path)
   # extract urls
@@ -78,7 +79,7 @@ testthat::test_that("EPA AQS download URLs have HTTP status 200.", {
   file.remove(commands_path)
 })
 
-setwd("/Volumes/manwareme/NRT-AP-Model/tests/testthat/")
+
 testthat::test_that("Ecoregion download URLs have HTTP status 200.", {
   withr::local_package("httr")
   withr::local_package("stringr")
@@ -598,7 +599,7 @@ testthat::test_that("MODIS download URLs have HTTP status 200.", {
       "_wget_commands.txt"
     )
     # import commands
-    commands <- read_commands(commands_path = commands_path)[,2]
+    commands <- read_commands(commands_path = commands_path)[, 2]
     # extract urls
     urls <- extract_urls(commands = commands, position = 4)
     # check HTTP URL status
