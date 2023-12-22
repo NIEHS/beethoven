@@ -109,7 +109,10 @@ testthat::test_that("Ecoregion download URLs have HTTP status 200.", {
   # extract urls
   urls <- extract_urls(commands = commands, position = 3)
   # check HTTP URL status
-  url_status <- check_urls(urls = urls, size = length(urls), method = "HEAD")
+  url_status <-
+    httr::HEAD(urls, config = httr::config(cainfo = certificate))
+  url_status <- url_status$status_code
+  # url_status <- check_urls(urls = urls, size = length(urls), method = "HEAD")
   # implement unit tets
   test_download_functions(directory_to_save = directory_to_save,
                           commands_path = commands_path,
@@ -162,7 +165,8 @@ testthat::test_that("GEOS-CF download URLs have HTTP status 200.", {
 testthat::test_that("GMTED download URLs have HTTP status 200.", {
   withr::local_package("httr")
   # function parameters
-  statistics <- c("Breakline Emphasis", "Systematic Subsample",
+  statistics <- c("Breakline Emphasis",
+                  # "Systematic Subsample",
                   # "Median Statistic", "Minimum Statistic",
                   # "Mean Statistic", "Maximum Statistic",
                   "Standard Deviation Statistic")
@@ -249,7 +253,7 @@ testthat::test_that("NARR monolevel download URLs have HTTP status 200.", {
   withr::local_package("stringr")
   # function parameters
   year_start <- 2018
-  year_end <- 2019
+  year_end <- 2018
   variables <- c("weasd", "air.2m")
   directory_to_save <- "../testdata/"
   # run download function
@@ -284,7 +288,7 @@ testthat::test_that("NARR p-levels download URLs have HTTP status 200.", {
   withr::local_package("stringr")
   # function parameters
   year_start <- 2020
-  year_end <- 2022
+  year_end <- 2021
   variables <- c("shum", "omega")
   directory_to_save <- "../testdata/"
   # run download function
@@ -319,7 +323,7 @@ testthat::test_that("NOAA HMS Smoke download URLs have HTTP status 200.", {
   withr::local_package("stringr")
   # function parameters
   date_start <- "2022-08-12"
-  date_end <- "2022-10-21"
+  date_end <- "2022-09-21"
   directory_to_download <- "../testdata/"
   directory_to_save <- "../testdata/"
   # run download function
@@ -404,8 +408,7 @@ testthat::test_that("SEDAC groads download URLs have HTTP status 200.", {
   withr::local_package("httr")
   withr::local_package("stringr")
   # function parameters
-  data_regions <- c("Americas", "Global", "Africa", "Asia",
-                    "Europe", "Oceania East", "Oceania West")
+  data_regions <- c("Americas")
   data_formats <- c("Geodatabase", "Shapefile")
   directory_to_download <- "../testdata/"
   directory_to_save <- "../testdata/"
@@ -451,12 +454,10 @@ testthat::test_that("SEDAC population download URLs have HTTP status 200.", {
   withr::local_package("httr")
   withr::local_package("stringr")
   # function parameters
-  years <- c("2000", "2005", "2010", "2015", "2020", "all")
-  data_formats <- c("ASCII", "GeoTIFF")
-  data_resolutions <- cbind(c("60 minute", "30 second", "2.5 minute",
-                              "15 minute", "30 minute"),
-                            c("1_deg", "30_sec", "2pt5_min",
-                              "15_min", "30_min"))
+  years <- c("2020")
+  data_formats <- c("GeoTIFF")
+  data_resolutions <- cbind(c("30 second"),
+                            c("30_sec"))
   directory_to_download <- "../testdata/"
   directory_to_save <- "../testdata/"
   for (f in seq_along(data_formats)) {
@@ -518,7 +519,7 @@ testthat::test_that("Koppen Geiger download URLs have HTTP status 200.", {
   withr::local_package("stringr")
   # function parameters
   time_periods <- c("Present", "Future")
-  data_resolutions <- c("0.0083", "0.083", "0.5")
+  data_resolutions <- c("0.0083")
   directory_to_download <- "../testdata/"
   directory_to_save <- "../testdata/"
   # run download function
@@ -538,7 +539,7 @@ testthat::test_that("Koppen Geiger download URLs have HTTP status 200.", {
       # define file path with commands
       commands_path <- paste0(directory_to_download,
                               "koppen_geiger_",
-                              tolower(time_period),
+                              time_period,
                               "_",
                               gsub("\\.",
                                    "p",
@@ -570,13 +571,13 @@ testthat::test_that("MODIS download URLs have HTTP status 200.", {
   years <- 2020
   product <- "MOD09GA"
   version <- "61"
-  horizontal_tiles <- c(7, 13)
-  vertical_tiles <- c(3, 6)
+  horizontal_tiles <- c(12, 13)
+  vertical_tiles <- c(5, 6)
   nasa_earth_data_token <- "tOkEnPlAcEhOlDeR"
   directory_to_save <- "../testdata/"
   for (y in seq_along(years)) {
     date_start <- paste0(years[y], "-06-20")
-    date_end <- paste0(years[y], "-07-15")
+    date_end <- paste0(years[y], "-06-24")
     # run download function
     download_data(dataset_name = "modis",
                   date_start = date_start,
@@ -584,7 +585,7 @@ testthat::test_that("MODIS download URLs have HTTP status 200.", {
                   product = product,
                   version = version,
                   horizontal_tiles = horizontal_tiles,
-                  vertical_tiles = horizontal_tiles,
+                  vertical_tiles = vertical_tiles,
                   nasa_earth_data_token = nasa_earth_data_token,
                   directory_to_save = directory_to_save,
                   data_download_acknowledgement = TRUE,

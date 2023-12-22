@@ -266,7 +266,9 @@ download_ecoregion_data <- function(
   remove_zip = FALSE,
   download = FALSE,
   remove_command = TRUE,
-  epa_certificate_path = "./inst/extdata/cacert_gaftp_epa.pem"
+  epa_certificate_path =
+    system.file("inst/extdata/cacert_gaftp_epa.pem",
+                package = "NRTAPmodel")
 ) {
   #### 1. data download acknowledgement
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
@@ -1902,11 +1904,42 @@ download_modis_data <- function(
     stop("Please select a data version.\n")
   }
 
-  #### 6. Reuse ladsweb home url
+  #### 6. check for valid horizontal tiles
+  if (!all(horizontal_tiles %in% seq(0, 35))) {
+    stop("Horizontal tiles are not in the proper range [0, 35].\n")
+  }
+  if (!all(vertical_tiles %in% seq(0, 17))) {
+    stop("Vertical tiles are not in the proper range [0, 17].\n")
+  }
+
+  #### 7. define horizontal and vertical tiles
+  tiles_horizontal <-
+    seq(horizontal_tiles[1],
+      horizontal_tiles[2]
+    )
+  tiles_horizontal <-
+    sprintf("h%02d", tiles_horizontal)
+
+  tiles_vertical <-
+    seq(vertical_tiles[1],
+      vertical_tiles[2]
+    )
+  tiles_vertical <-
+    sprintf("v%02d", tiles_vertical)
+
+  #### 8. define requested tiles
+  tiles_df <- expand.grid(
+    h = tiles_horizontal,
+    v = tiles_vertical
+  )
+  tiles_requested <-
+    paste0(tiles_df$h, tiles_df$v)
+
+  #### 9. Reuse ladsweb home url
   ladsurl <- "https://ladsweb.modaps.eosdis.nasa.gov/"
   version <- ifelse(startsWith(product, "VNP"), "5000", version)
 
-  #### 7. MOD06_L2 manual input
+  #### 10. MOD06_L2 manual input
   if (product == "MOD06_L2") {
     mod06l2_url1 <-
       "https://ladsweb.modaps.eosdis.nasa.gov/"
@@ -1924,14 +1957,14 @@ download_modis_data <- function(
                  "\nTime length up to one month is recommended.\n"))
     }
 
-    #### 7-1. Parse urls in csv
+    #### 10-1. Parse urls in csv
     file_url <- read.csv(mod06_links)
     file_url <- unlist(file_url[, 2])
     download_url <-
       paste0(substr(ladsurl, 1, nchar(ladsurl) - 1),
              file_url)
 
-    #### 7-2. Parse dates from csv
+    #### 10-2. Parse dates from csv
     file_dates <-
       regmatches(file_url,
                  regexpr("[2][0-2][0-9]{2,2}[0-3][0-9]{2,2}", file_url))
@@ -1939,7 +1972,7 @@ download_modis_data <- function(
     date_start <- as.Date(as.character(min(file_dates)), format = "%Y%j")
     date_end <- as.Date(as.character(max(file_dates)), format = "%Y%j")
 
-    #### 7-2. initiate "..._wget_commands.txt" file
+    #### 10-3. initiate "..._wget_commands.txt" file
     commands_txt <- paste0(
       directory_to_save,
       product,
@@ -1950,7 +1983,7 @@ download_modis_data <- function(
       "_wget_commands.txt"
     )
 
-    #### 7-3. write download_command
+    #### 10-4. write download_command
     download_command <- paste0(
       "wget -e robots=off -m -np -R .html,.tmp ",
       "-nH --cut-dirs=3 \"",
@@ -1983,15 +2016,8 @@ download_modis_data <- function(
     return(NULL)
   }
 
-  #### 6. check for valid horizontal tiles
-  if (!all(horizontal_tiles %in% seq(0, 35))) {
-    stop("Horizontal tiles are not in the proper range [0, 35].\n")
-  }
-  if (!all(vertical_tiles %in% seq(0, 17))) {
-    stop("Vertical tiles are not in the proper range [0, 17].\n")
-  }
 
-  #### 9. define date sequence
+  #### 11. define date sequence
   date_start_date_format <- as.Date(date_start, format = "%Y-%m-%d")
   date_end_date_format <- as.Date(date_end, format = "%Y-%m-%d")
   date_sequence <- seq(date_start_date_format, date_end_date_format, "day")
@@ -2015,7 +2041,7 @@ download_modis_data <- function(
   # no conditional assignment at this moment.
 
   # remove NAs
-  # Queried year's available days
+  # 12. Queried year's available days
   date_sequence <- list_available_d[!is.na(list_available_d)]
   date_sequence_i <- as.integer(date_sequence)
   # Queried dates to integer range
@@ -2027,34 +2053,6 @@ download_modis_data <- function(
   message(sprintf("%d / %d days of data available in the queried dates.\n",
                   sum(date_sequence_in), length(date_range_julian)))
   date_sequence <- date_sequence[date_sequence_in]
-
-
-  #### 10. define horizontal tiles
-  tiles_horizontal <- seq(horizontal_tiles[1],
-    horizontal_tiles[2],
-    by = 1
-  )
-  tiles_horizontal <- paste0(
-    "h",
-    sprintf("%02d", tiles_horizontal)
-  )
-
-  #### 11. define vertical tiles
-  tiles_vertical <- seq(vertical_tiles[1],
-    vertical_tiles[2],
-    by = 1
-  )
-  tiles_vertical <- paste0(
-    "v",
-    sprintf("%02d", tiles_vertical)
-  )
-  #### 12. define requested tiles
-  tiles_df <- expand.grid(
-    h = tiles_horizontal,
-    v = tiles_vertical
-  )
-  tiles_requested <-
-    paste0(tiles_df$h, tiles_df$v)
 
 
   #### 13. initiate "..._wget_commands.txt" file
@@ -2086,10 +2084,9 @@ download_modis_data <- function(
 
     filelist_sub <-
       grep(
-           paste("(", paste(tiles_requested, collapse = "|"), ")"),
+           paste0("(", paste(tiles_requested, collapse = "|"), ")"),
            filelist, value = TRUE)
     download_url <- sprintf("%s%s", ladsurl, filelist_sub)
-
     # Main wget run
     download_command <- paste0(
       "wget -e robots=off -m -np -R .html,.tmp ",

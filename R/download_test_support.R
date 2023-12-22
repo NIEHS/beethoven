@@ -75,7 +75,7 @@ check_urls <- function(
     cat(paste0("URL sample size is not defined.\n"))
     return(NULL)
   }
-  if (length(urls) > size) {
+  if (length(urls) < size) {
     size <- length(urls)
   }
   url_sample <- sample(urls, size, replace = FALSE)
