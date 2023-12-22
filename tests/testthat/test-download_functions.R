@@ -112,7 +112,6 @@ testthat::test_that("Ecoregion download URLs have HTTP status 200.", {
   url_status <-
     httr::HEAD(urls, config = httr::config(cainfo = certificate))
   url_status <- url_status$status_code
-  # url_status <- check_urls(urls = urls, size = length(urls), method = "HEAD")
   # implement unit tets
   test_download_functions(directory_to_save = directory_to_save,
                           commands_path = commands_path,
