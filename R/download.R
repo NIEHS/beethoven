@@ -257,6 +257,7 @@ download_aqs_data <-
 #' './inst/extdata/cacert_gaftp_epa.pem'
 #' @author Insang Song
 #' @returns NULL;
+#' @importFrom utils download.file
 #' @export
 download_ecoregion_data <- function(
   directory_to_download = "./input/ecoregions/",
@@ -299,7 +300,7 @@ download_ecoregion_data <- function(
       download_crt_target <- gsub("pem", "crt", epa_certificate_path)
       certificate_url <-
         "http://cacerts.digicert.com/DigiCertGlobalG2TLSRSASHA2562020CA1-1.crt"
-      download.file(certificate_url, download_crt_target)
+      utils::download.file(certificate_url, download_crt_target)
       system(paste("openssl x509",
                    "-inform DER",
                    "-outform PEM",

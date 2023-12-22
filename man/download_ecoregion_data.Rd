@@ -12,7 +12,8 @@ download_ecoregion_data(
   remove_zip = FALSE,
   download = FALSE,
   remove_command = TRUE,
-  epa_certificate_path = "./inst/extdata/cacert_gaftp_epa.pem"
+  epa_certificate_path = system.file("inst/extdata/cacert_gaftp_epa.pem", package =
+    "NRTAPmodel")
 )
 }
 \arguments{

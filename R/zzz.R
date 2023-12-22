@@ -36,9 +36,9 @@ startup_nrtap <-
     cat("   - ./R\n")
     cat("   - ./inst\n")
     cat("   - ./input\n")
-    cat("   - ./output\n\n")
+    cat("   - ./output\n")
     cat("   - ./tests\n")
-    cat("   - ./tools\n")
+    cat("   - ./tools\n\n")
     # Directories listed below should align with additional settings
     # related to pipeline settings, HPC deployment, etc.
 
@@ -49,7 +49,7 @@ startup_nrtap <-
     userpath <- file.path(workdir, "output", username_in)
     if (user_mode) {
       if (!dir.exists(userpath)) {
-        dir.create(userpath)
+        dir.create(userpath, recursive = TRUE)
         cat(sprintf("%s is created for running the pipeline in user mode.\n",
                     userpath))
       }
