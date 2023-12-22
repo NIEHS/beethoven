@@ -564,7 +564,7 @@ testthat::test_that("Koppen Geiger download URLs have HTTP status 200.", {
   }
 })
 
-testthat::test_that("MODIS download URLs have HTTP status 200.", {
+testthat::test_that("MODIS-MOD09GA download URLs have HTTP status 200.", {
   withr::local_package("httr")
   withr::local_package("stringr")
   # function parameters
@@ -614,4 +614,89 @@ testthat::test_that("MODIS download URLs have HTTP status 200.", {
     # remove file with commands after test
     file.remove(commands_path)
   }
+})
+
+
+testthat::test_that("MODIS-MOD06L2 download URLs have HTTP status 200.", {
+  withr::local_package("httr")
+  withr::local_package("stringr")
+  # function parameters
+  product <- "MOD06_L2"
+  version <- "61"
+  date_start <- "2019-02-18"
+  date_end <- "2022-03-22"
+  nasa_earth_data_token <- "tOkEnPlAcEhOlDeR"
+  horizontal_tiles <- c(8, 10)
+  vertical_tiles <- c(4, 5)
+  directory_to_save <- "./tests/testdata/"
+
+  kax <- download_data(dataset_name = "modis",
+                  date_start = date_start,
+                  date_end = date_end,
+                  product = product,
+                  version = version,
+                  horizontal_tiles = horizontal_tiles,
+                  vertical_tiles = vertical_tiles,
+                  nasa_earth_data_token = nasa_earth_data_token,
+                  directory_to_save = directory_to_save,
+                  data_download_acknowledgement = TRUE,
+                  download = FALSE,
+                  mod06_links = NULL,
+                  remove_command = FALSE)
+  testthat::expect_true(is.null(kax))
+
+  # link check
+  tdir <- tempdir()
+  faux_urls <-
+    rbind(
+      c(4387858920,
+        "/archive/allData/61/MOD06_L2/2019/049/MOD06_L2.A2019049.0720.061.2019049194350.hdf",
+        28267915),
+      c(6845623203,
+        "/archive/allData/61/MOD06_L2/2022/033/MOD06_L2.A2022033.0435.061.2022035152913.hdf",
+        26393941),
+      c(6898699552,
+        "/archive/allData/61/MOD06_L2/2022/081/MOD06_L2.A2022081.0620.061.2022092003817.hdf",
+        28878947)
+    )
+  faux_urls <- data.frame(faux_urls)
+  mod06_scenes <- paste0(tdir, "/mod06_example.csv")
+  write.csv(faux_urls, mod06_scenes, row.names = FALSE)
+
+  download_data(dataset_name = "modis",
+                  date_start = date_start,
+                  date_end = date_end,
+                  product = product,
+                  version = version,
+                  horizontal_tiles = horizontal_tiles,
+                  vertical_tiles = vertical_tiles,
+                  nasa_earth_data_token = nasa_earth_data_token,
+                  directory_to_save = directory_to_save,
+                  data_download_acknowledgement = TRUE,
+                  download = FALSE,
+                  mod06_links = mod06_scenes,
+                  remove_command = FALSE)
+  
+  # define file path with commands
+  commands_path <- paste0(
+    directory_to_save,
+    product,
+    "_",
+    date_start,
+    "_",
+    date_end,
+    "_wget_commands.txt"
+  )
+  # import commands
+  commands <- read_commands(commands_path = commands_path)[, 2]
+  # extract urls
+  urls <- extract_urls(commands = commands, position = 4)
+  # check HTTP URL status
+  url_status <- check_urls(urls = urls, size = 10L, method = "HEAD")
+  # implement unit tests
+  test_download_functions(directory_to_save = directory_to_save,
+                          commands_path = commands_path,
+                          url_status = url_status)
+  # remove file with commands after test
+  file.remove(commands_path)
 })

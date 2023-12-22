@@ -1,7 +1,7 @@
 ## After loading and attaching NRTAPModel package
 "_PACKAGE"
 
-
+#nocov start
 .onLoad <- function(lib, pkg) {
   packageStartupMessage("
     NRTAPmodel 1.0.0
@@ -10,7 +10,7 @@
     Consider running ?startup_nrtap for details.
     ---------------------------------------------------------------------\n")
 }
-
+#nocov end
 
 
 #' Start-up settings

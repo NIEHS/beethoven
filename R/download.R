@@ -1897,7 +1897,9 @@ download_modis_data <- function(
   product <- match.arg(product)
 
   if (substr(date_start, 1, 4) != substr(date_end, 1, 4)) {
-    stop("date_start and date_end should be in the same year.\n")
+    if (product != "MOD06_L2") {
+      stop("date_start and date_end should be in the same year.\n")
+    }
   }
 
   #### 5. check for version
@@ -1947,11 +1949,12 @@ download_modis_data <- function(
     mod06l2_url2 <-
       "search/order/4/MOD06_L2--61/"
     mod06l2_url3 <-
-      "%s..%s/D/-130,52,-60,20"
+      "%s..%s/DNB/-130,52,-60,20"
     mod06l2_url_template <-
       paste0(mod06l2_url1, mod06l2_url2, mod06l2_url3)
     mod06l2_full <-
       sprintf(mod06l2_url_template, date_start, date_end)
+
     if (is.null(mod06_links)) {
       stop(paste("Please provide a CSV file path to MOD06_L2 download links.
                  You may download it from the link:\n", mod06l2_full,
