@@ -1,14 +1,16 @@
 ## After loading and attaching NRTAPModel package
-#' 
 "_PACKAGE"
 
-
+#nocov start
 .onLoad <- function(lib, pkg) {
   packageStartupMessage("
+    NRTAPmodel 1.0.0
+    ---------------------------------------------------------------------
     Please run startup_nrtap() to apply default settings of this package.
-    Consider running ?startup_nrtap for details.\n")
+    Consider running ?startup_nrtap for details.
+    ---------------------------------------------------------------------\n")
 }
-
+#nocov end
 
 
 #' Start-up settings
@@ -16,7 +18,7 @@
 #' @param user_mode logical(1).
 #' Use an user directory for fitting models.
 #' When \code{TRUE}, a directory with the current session's user name will be
-#' created under %workdir%/output/%username%.
+#' created under [working directory]/output/[username].
 #' @param username character(1). Used username. Default is
 #' the "effective_user" element of \code{[Sys.info()]} outputs.
 #' @export
@@ -32,13 +34,13 @@ startup_nrtap <-
     cat("This package supposes the working directory has subdirectories\n")
     cat("for running the entire pipeline:\n")
     cat("   - ./R\n")
-    cat("   - ./tests\n")
-    cat("   - ./tools\n")
+    cat("   - ./inst\n")
     cat("   - ./input\n")
-    cat("   - ./output\n\n")
+    cat("   - ./output\n")
+    cat("   - ./tests\n")
+    cat("   - ./tools\n\n")
     # Directories listed below should align with additional settings
     # related to pipeline settings, HPC deployment, etc.
-    # cat("   - ./pipeline\n")
 
     if (username != Sys.info()["effective_user"]) {
       username_in <- username
@@ -47,7 +49,7 @@ startup_nrtap <-
     userpath <- file.path(workdir, "output", username_in)
     if (user_mode) {
       if (!dir.exists(userpath)) {
-        dir.create(userpath)
+        dir.create(userpath, recursive = TRUE)
         cat(sprintf("%s is created for running the pipeline in user mode.\n",
                     userpath))
       }

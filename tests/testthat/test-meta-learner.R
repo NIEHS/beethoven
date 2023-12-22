@@ -3,6 +3,8 @@
 #' @title meta learner unit test
 
 test_that("the meta learner fitting abides", {
+  withr::local_package("BART")
+  withr::local_package("data.table")
   # Test data
   response <- 3 + rnorm(100)
   kfolds <- sample(rep(1:5, length.out = length(response)))
@@ -90,6 +92,8 @@ test_that("the meta learner fitting abides", {
 
 
 test_that("the meta learner prediction abides", {
+  withr::local_package("BART")
+  withr::local_package("data.table")
   response <- 3 + rnorm(100)
   kfolds <- sample(rep(1:5, length.out = length(response)))
   predictor_list <- list(
