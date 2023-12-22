@@ -1,6 +1,8 @@
-withr::local_package("spData")
-
 test_that("Check extract_nlcd_ratio works", {
+  withr::local_package("terra")
+  withr::local_package("exactextractr")
+  withr::local_package("spData")
+
   point_us1 <- cbind(lon = -114.7, lat = 38.9, dem = 40)
   point_us2 <- cbind(lon = -114, lat = 39, dem = 15)
   point_ak <- cbind(lon = -155.997, lat = 69.3884, dem = 100) # alaska

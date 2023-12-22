@@ -1,19 +1,30 @@
-################################################################################
-# Functions used to implement and simplify unit tests on data download functions
+###############################################################################
+# Functions used to implement and simplify unit tests on data download
+# functions
 # Date created: 2023-11-30
 # Date modified: 2023-12-12
-################################################################################
+###############################################################################
 
 #' Check if sample of download URLs have HTTP Status 200
 #' @param url Download URL to be checked.
+#' @param method httr method to obtain URL ("HEAD" or "GET")
 #' @author Insang Song; Mitchell Manware
 #' based on comment #164 Location of download functions
 #' @importFrom httr HEAD
+#' @importFrom httr GET
 #' @export
-check_url_file_exist <- function(url) {
+check_url_file_exist <- function(
+  url,
+  method = "HEAD"
+) {
   http_status_ok <- 200
-  hd <- httr::HEAD(url)
-  status <- hd$all_headers[[1]]$status
+  if (method == "HEAD") {
+    hd <- httr::HEAD(url)
+  } else if (method == "GET") {
+    hd <- httr::GET(url)
+  }
+
+  status <- hd$status_code
   return(status == http_status_ok)
 }
 
@@ -53,17 +64,24 @@ extract_urls <- function(
 #' Sample download URLs and apply `check_url_file_exist` function
 #' @param urls character vector of URLs
 #' @param size number of observations to be sampled from `urls`
+#' @param method httr method to obtain URL ("HEAD" or "GET")
 #' @return logical vector for URL status = 200
 #' @export
 check_urls <- function(
     urls = urls,
-    size = NULL) {
+    size = NULL,
+    method = "HEAD") {
   if (is.null(size)) {
     cat(paste0("URL sample size is not defined.\n"))
     return(NULL)
   }
+  if (length(urls) < size) {
+    size <- length(urls)
+  }
   url_sample <- sample(urls, size, replace = FALSE)
-  url_status <- sapply(url_sample, check_url_file_exist)
+  url_status <- sapply(url_sample,
+                       check_url_file_exist,
+                       method = method)
   return(url_status)
 }
 
