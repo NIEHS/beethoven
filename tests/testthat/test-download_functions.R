@@ -86,7 +86,8 @@ testthat::test_that("Ecoregion download URLs have HTTP status 200.", {
   # function parameters
   directory_to_download <- "../testdata/"
   directory_to_save <- "../testdata/"
-  certificate <- "../../inst/extdata/cacert_gaftp_epa.pem"
+  certificate <- system.file("extdata/cacert_gaftp_epa.pem",
+                             package = "NRTAPmodel")
   # run download function
   download_data(dataset_name = "ecoregion",
                 directory_to_save = directory_to_save,
