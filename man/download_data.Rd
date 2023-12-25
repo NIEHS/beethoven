@@ -20,7 +20,7 @@ download_data(
 \item{directory_to_save}{character(1). Directory to save / unzip
 (if zip files are downloaded) data.}
 
-\item{data_download_acknowledgement}{logical(1). By setting `= TRUE` the
+\item{data_download_acknowledgement}{logical(1). By setting \code{TRUE} the
 user acknowledge that the data downloaded using this function may be very
 large and use lots of machine storage and memory.}
 
@@ -33,19 +33,19 @@ download_data: a wrapper function for download covariate sources
 - All download function names are in \code{download_*_data} formats
 }
 \seealso{
-- [download_aqs_data()]: "aqs"
-- [download_ecoregion_data()]: "ecoregion"
-- [download_geos_cf_data()]: "geos"
-- [download_gmted_data()]: "gmted"
-- [download_koppen_geiger_data()]: "koppen", "koppengeiger"
-- [download_merra2_data()]: "merra2", "merra"
-- [download_narr_monolevel_data()]: "narr_monolevel", "monolevel"
-- [download_narr_p_levels_data()]: "narr_p_levels", "p_levels", "plevels"
-- [download_nlcd_data()]: "nlcd",
-- [download_noaa_hms_smoke_data()]: "noaa", "smoke", "hms"
-- [download_sedac_groads_data()]: "sedac_groads", "groads"
-- [download_sedac_population_data()]: "sedac_population", "population"
-- [download_modis_data()]: "modis", "MODIS"
+- \link{download_aqs_data}: "aqs"
+- \link{download_ecoregion_data}: "ecoregion"
+- \link{download_geos_cf_data}: "geos"
+- \link{gmted_data}: "gmted"
+- \link{koppen_geiger_data}: "koppen", "koppengeiger"
+- \link{merra2_data}: "merra2", "merra"
+- \link{narr_monolevel_data}: "narr_monolevel", "monolevel"
+- \link{narr_p_levels_data}: "narr_p_levels", "p_levels", "plevels"
+- \link{nlcd_data}: "nlcd",
+- \link{noaa_hms_smoke_data}: "noaa", "smoke", "hms"
+- \link{sedac_groads_data}: "sedac_groads", "groads"
+- \link{sedac_population_data}: "sedac_population", "population"
+- \link{modis_data}: "modis", "MODIS"
 }
 \author{
 Insang Song

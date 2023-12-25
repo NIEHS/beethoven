@@ -20,7 +20,9 @@
 #' When \code{TRUE}, a directory with the current session's user name will be
 #' created under [working directory]/output/[username].
 #' @param username character(1). Used username. Default is
-#' the "effective_user" element of \code{[Sys.info()]} outputs.
+#' the "effective_user" element of \link{\code{Sys.info}} outputs.
+#' @examples
+#' startup_nrtap()
 #' @export
 startup_nrtap <-
   function(
