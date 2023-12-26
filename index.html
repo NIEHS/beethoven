@@ -99,12 +99,7 @@
 <div class="section level2">
 <h2 id="overall-project-workflow">Overall Project Workflow<a class="anchor" aria-label="anchor" href="#overall-project-workflow"></a>
 </h2>
-<pre class="mermaid"><code>
-flowchart LR
-    subgraph "Targets: Make-like Reproducible Analysis Pipeline"
-    direction LR
-    A[AQS Data] --&gt; B[Generate Covariates]--&gt; C[Fit Base Learners]--&gt;D[Fit Meta Learners]--&gt;E[Predictions]--&gt;F[Summary Stats]
-    end</code></pre>
+<p>Targets: Make-like Reproducible Analysis Pipeline 1) AQS Data 2) Generate Covariates 3) Fit Base Learners 4) Fit Meta Learners 5) Predictions 6) Summary Stats</p>
 </div>
 <div class="section level2">
 <h2 id="unit-and-integration-testing">Unit and Integration Testing<a class="anchor" aria-label="anchor" href="#unit-and-integration-testing"></a>
@@ -126,75 +121,12 @@ flowchart LR
 </h3>
 <p>Starting from the end product, we work backwards while articulating the tests needed at each stage.</p>
 <div class="section level4">
-<h4 id="final-product">Final Product<a class="anchor" aria-label="anchor" href="#final-product"></a>
+<h4 id="key-points-of-unit-and-integration-testing">Key Points of Unit and Integration Testing<a class="anchor" aria-label="anchor" href="#key-points-of-unit-and-integration-testing"></a>
 </h4>
 <p>File Type 1. NetCDF 2. Numeric, double precision 3. NA 4. Variable Names Exist 5. Naming Convention</p>
 <p>Stats 1. Non-negative variance (<span class="math inline"><em>σ</em><sup>2</sup></span>) 2. Mean is reasonable (<span class="math inline"><em>μ</em></span>) 3. SI Units</p>
 <p>Domain 1. In the US (+ buffer) 2. In Time range (2018-2022)</p>
-<p>Geographic 1. Projections 2. Coordinate names (e.g. lat/lon) 3. Time in acceptable format #### Summary Statistics File Type 1. NetCDF 2. csv 3. NA 4. Variable Names Exist 5. Naming Convention</p>
-<p>Stats 1. Non-negative variance (<span class="math inline"><em>σ</em><sup>2</sup></span>) 2. Mean is reasonable (<span class="math inline"><em>μ</em></span>) 3. SI Units</p>
-<p>Domain 1. In the US (+ buffer) 2. In Time range (2018-2022)</p>
 <p>Geographic 1. Projections 2. Coordinate names (e.g. lat/lon) 3. Time in acceptable format</p>
-</div>
-<div class="section level4">
-<h4 id="meta-learners">Meta Learners<a class="anchor" aria-label="anchor" href="#meta-learners"></a>
-</h4>
-</div>
-<div class="section level4">
-<h4 id="base-learners">Base Learners<a class="anchor" aria-label="anchor" href="#base-learners"></a>
-</h4>
-</div>
-<div class="section level4">
-<h4 id="geographic-covariates">Geographic Covariates<a class="anchor" aria-label="anchor" href="#geographic-covariates"></a>
-</h4>
-</div>
-<div class="section level4">
-<h4 id="aqs-data">AQS Data<a class="anchor" aria-label="anchor" href="#aqs-data"></a>
-</h4>
-</div>
-<div class="section level4">
-<h4 id="each-of-the-following-are-the-classes-of-variables-for-the-io-that-will-need-to-be-tested">Each of the following are the classes of variables for the I/O that will need to be tested<a class="anchor" aria-label="anchor" href="#each-of-the-following-are-the-classes-of-variables-for-the-io-that-will-need-to-be-tested"></a>
-</h4>
-<pre class="mermaid"><code>
----
-title: Data Type/Class by Module
----
-classDiagram
-    class AirPollutionData
-    AirPollutionData : +Type1  sf
-    AirPollutionData : +Type2 sftime
-    AirPollutionData : +Geometry point
-
-    class GeographicCovariates
-    GeographicCovariates : +Type1  sf
-    GeographicCovariates : +Type2 sftime
-    GeographicCovariates : +Geometry point
-
-    class BaseLearners
-    BaseLearners : +Type1 S3.model
-    BaseLearners : +Type2 S4.model
-    BaseLearners : +Geometry1 point
-    BaseLearners : +Geometry2 NA
-
-    class MetaLearners
-    MetaLearners : +Type1 S3.model
-    MetaLearners : +Type2 S4.model
-    MetaLearners : +Geometry1 point
-    MetaLearners : +Geometry2 NA
-
-    class SummaryStats
-    SummaryStats : +Type1 sf
-    SummaryStats : +Type2 sftime
-    SummaryStats : +Geometry1 point
-    SummaryStats : +Geometry2 polygon
-
-    class Predictions
-    Predictions : +Type1 sf
-    Predictions : +Type2 sftime
-    Predictions : +Type3 csv
-    Predictions : +Geometry1 point
-    Predictions : +Geometry2 NA
-</code></pre>
 </div>
 </div>
 <div class="section level3">
@@ -213,26 +145,13 @@ classDiagram
 <li><p><strong>Complete the Feature</strong>: Keep repeating the process until your code meets all the requirements for the feature you’re working on.</p></li>
 </ol>
 <p>TDD helps ensure that your code is reliable and that it remains functional as you make changes and updates. It also encourages a clear understanding of the requirements and promotes better code design.</p>
-<p><strong>In addition to TDD, we will likely need to do ATDD:</strong></p>
-<ol style="list-style-type: decimal">
-<li><p><strong>Acceptance Test-Driven Development (ATDD)</strong>: ATDD is a practice where tests are written to capture the acceptance criteria defined by stakeholders before development begins. These tests serve as a contract between developers and stakeholders, ensuring that the software meets the desired requirements.</p></li>
-<li><p><strong>Continuous Integration (CI)</strong>: While not a development methodology per se, CI is a practice where code changes are integrated into a shared repository multiple times a day. Automated tests are run with each integration to catch issues early. CI works well in conjunction with TDD.</p></li>
-</ol>
-<p>```</p>
 </div>
 </div>
 </div>
 <div class="section level2">
-<h2 id="base-learners-1">Base Learners<a class="anchor" aria-label="anchor" href="#base-learners-1"></a>
+<h2 id="base-learners">Base Learners<a class="anchor" aria-label="anchor" href="#base-learners"></a>
 </h2>
 <p>Potential base learners we can use: 1) PrestoGP (lasso + GP) 2) XGBOOST 3) RF 4) CNN 5) UMAP covariates 6) Encoder NN covariates</p>
-</div>
-<div class="section level2">
-<h2 id="open-question">Open Question<a class="anchor" aria-label="anchor" href="#open-question"></a>
-</h2>
-<ol style="list-style-type: decimal">
-<li>Publish Results to CRAN package</li>
-</ol>
 </div>
 </div>
 
