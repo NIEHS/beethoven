@@ -381,6 +381,7 @@ modis_worker <- function(
 #' @importFrom parallelly availableCores
 #' @importFrom doParallel registerDoParallel
 #' @importFrom parallelly killNode
+#' @export
 calc_modis <-
   function(
     paths,
