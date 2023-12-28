@@ -312,7 +312,7 @@ modis_worker <- function(
       preprocess_modis_vnp46(
         paths = paths,
         date_in = date,
-        tile_def = tile_def_vnp46,
+        tile_df = tile_def_vnp46,
         crs_ref = "EPSG:4326"
       )
   } else {
