@@ -4,7 +4,7 @@ source("./input/Rinput/processing_functions/load_packages.R")
 
 
 files_vnp46 <-
-    list.files(path = "./input/data/modis/raw/5000",
+    list.files(path = "./input/modis/raw/5000",
                pattern = "*.h5$",
                full.names = TRUE,
                recursive = TRUE)
@@ -133,12 +133,13 @@ tile_def$xmax <- tile_def$xmin + 10
 tile_def$ymin <- rep(seq(50, 20, -10), 7)
 tile_def$ymax <- tile_def$ymin + 10
 
-write.csv(tile_def, "./inst/extdata/modis_vnp46_tiles.csv", row.names = FALSE)
-#' Assign corner coordinates to retrieve a merged raster
+# write.csv(tile_def, "./inst/extdata/modis_vnp46_tiles.csv", row.names = FALSE)
+
+#' Assign MODIS VNP46 corner coordinates to retrieve a merged raster
 #' @description This function will return a SpatRaster object with
 #' georeferenced h5 files of VNP46A2 product.
-#' @param filepaths character. Full paths of h5 files.
-#' @param date character(1). Date to query.
+#' @param paths character. Full paths of h5 files.
+#' @param date_in character(1). Date to query.
 #' @param tile_df prespecified data.frame with "tile" and "exts" columns,
 #' where the former stores tile number (h00v00 format) and the latter
 #' stores terra::ext output.
@@ -146,21 +147,21 @@ write.csv(tile_def, "./inst/extdata/modis_vnp46_tiles.csv", row.names = FALSE)
 #' Default is "EPSG:4326"
 #' @author Insang Song
 assign_ext_vnp46 <- function(
-  filepaths,
-  date,
+  paths,
+  date_in,
   tile_df = tile_def,
   crs_ref = "EPSG:4326"
 ) {
-  if (is.character(date)) {
-    if (nchar(date) != 10) {
+  if (is.character(date_in)) {
+    if (nchar(date_in) != 10) {
       stop("Check the date format.\n")
     }
-    date <- as.Date(date)
+    date_in <- as.Date(date_in)
   }
-  datejul <- strftime(date, format = "%Y/%j")
+  datejul <- strftime(date_in, format = "%Y/%j")
   stdtile <- tile_df$tile
 
-  filepaths_today <- grep(as.character(datejul), filepaths, value = TRUE)
+  filepaths_today <- grep(as.character(datejul), paths, value = TRUE)
   # today's filenames
   # filepaths_tiles <-
   #     regmatches(filepaths_today,

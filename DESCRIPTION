@@ -1,6 +1,6 @@
 Package: NRTAPmodel
 Title: The SET group near real time air pollution model
-Version: 1.0.0
+Version: 0.1.0
 Authors@R:
     c(person(given = "Kyle",
              family = "Messier",
@@ -8,8 +8,8 @@ Authors@R:
              email = "kyle.messier@nih.gov"))
 Description: Near Real Time air pollution model results and code produced by the SET group. It is fully tested, versioned, and open source and open access.
 Depends: R (>= 4.1.0)
-Imports: dplyr, sf, stats, terra, methods, BART, data.table, httr, rvest, spData, exactextractr, ggplot2, scatterpie, utils, stringr, testthat (>= 3.0.0)
-Suggests: covr, withr, knitr, rmarkdown, stars, sftime
+Imports: dplyr, sf, stats, terra, methods, BART, data.table, httr, rvest, spData, exactextractr, ggplot2, scatterpie, utils, stringr, testthat (>= 3.0.0), doRNG, doParallel, parallelly
+Suggests: covr, withr, knitr, rmarkdown, stars, sftime, foreach
 Encoding: UTF-8
 VignetteBuilder: knitr, rmarkdown
 RoxygenNote: 7.2.3
