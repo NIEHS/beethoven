@@ -185,6 +185,8 @@ modis_get_vrt <- function(
 #' @param tile_df prespecified data.frame with "tile" and "exts" columns,
 #' where the former stores tile number (h00v00 format) and the latter
 #' stores terra::ext output.
+#' @param subdataset integer(1). Subdataset number to process.
+#' Default is 3L.
 #' @param crs_ref character(1). terra::crs compatible CRS.
 #' Default is "EPSG:4326"
 #' @author Insang Song
@@ -197,6 +199,7 @@ preprocess_modis_vnp46 <- function(
   paths,
   date_in,
   tile_df,
+  subdataset = 3L,
   crs_ref = "EPSG:4326"
 ) {
   if (is.character(date_in)) {
@@ -232,7 +235,7 @@ preprocess_modis_vnp46 <- function(
   # Subdataset 3 is BRDF-corrected nighttime light
   vnp_assigned <-
     mapply(function(vnp, tile_in) {
-      vnp_ <- terra::rast(vnp, subds = 3)
+      vnp_ <- terra::rast(vnp, subds = subdataset)
       tile_ext <- tile_df[tile_df$tile == tile_in, -1]
       # print(tile_ext)
       terra::crs(vnp_) <- terra::crs(crs_ref)
@@ -240,7 +243,7 @@ preprocess_modis_vnp46 <- function(
       return(vnp_)
     }, vnp46_today, filepaths_today_tiles_list, SIMPLIFY = FALSE)
   vnp_all <- do.call(terra::merge, vnp_assigned)
-  vnp_all[vnp_all == 65535] <- NA
+  # vnp_all[vnp_all == 65535] <- NA
   return(vnp_all)
 }
 
@@ -260,11 +263,11 @@ preprocess_modis_vnp46 <- function(
 #' columns, where the former stores tile number
 #' (h00v00 format) and the latter stores terra::ext output.
 #' @param fun_summary_raster function. Summary function for
-#' multilayer rasters.
+#' multilayer rasters. Passed to \code{foo}.
 #' @param foo function. A calculation function working with
 #' SpatRaster and sf.
 #' @author Insang Song
-#' @returns A SpatRaster object.
+#' @returns A data.frame object.
 #' @importFrom terra extract
 #' @importFrom terra project
 #' @importFrom terra vect
@@ -275,15 +278,16 @@ preprocess_modis_vnp46 <- function(
 #' @importFrom sf st_drop_geometry
 #' @export
 modis_worker <- function(
-  paths,
-  date,
+  raster,
+  # paths,
+  # date,
   sites_in = NULL,
   name_extracted = NULL,
   product = c("MOD11A1", "MOD13A2", "MOD06_L2",
               "VNP46A2", "MOD09GA", "MCD19A2"),
-  subdataset = NULL,
-  layers = NULL,
-  tile_def_vnp46 = NULL,
+  # subdataset = NULL,
+  # layers = NULL,
+  # tile_def_vnp46 = NULL,
   fun_summary_raster = mean,
   foo = scomps::extract_with_buffer,
   ...
@@ -297,42 +301,44 @@ modis_worker <- function(
     stop("Argument foo should be a function.\n")
   }
   product <- match.arg(product)
-  if (is.null(subdataset)) {
-    print(terra::describe(paths[1], sds = TRUE))
-    stop("Please put relevant index for subdataset.
-    The full list of subdatasets is above.\n")
-  }
+  # if (is.null(subdataset)) {
+  #   print(terra::describe(paths[1], sds = TRUE))
+  #   stop("Please put relevant index for subdataset.
+  #   The full list of subdatasets is above.\n")
+  # }
   if (methods::is(sites_in, "SpatVector")) {
     sites_in <- sf::st_as_sf(sites_in)
   }
 
-  # VNP46 corner assignment
-  if (product == "VNP46A2") {
-    vrt_today <-
-      preprocess_modis_vnp46(
-        paths = paths,
-        date_in = date,
-        tile_df = tile_def_vnp46,
-        crs_ref = "EPSG:4326"
-      )
-  } else {
-    vrt_today <-
-      modis_get_vrt(
-                    paths = paths,
-                    index_sds = subdataset,
-                    product = product,
-                    date_in = date,
-                    layers = layers)
-  }
+  # # VNP46 corner assignment
+  # if (product == "VNP46A2") {
+  #   vrt_today <-
+  #     preprocess_modis_vnp46(
+  #       paths = paths,
+  #       date_in = date,
+  #       tile_df = tile_def_vnp46,
+  #       subdataset = subdataset,
+  #       crs_ref = "EPSG:4326"
+  #     )
+  # } else {
+  #   vrt_today <-
+  #     modis_get_vrt(
+  #                   paths = paths,
+  #                   index_sds = subdataset,
+  #                   product = product,
+  #                   date_in = date,
+  #                   layers = layers)
+  # }
 
+  # raster used to be vrt_today
   if (any(grepl("00000", name_extracted))) {
     sites_tr <- terra::vect(sites_in)
-    sites_tr <- terra::project(sites_tr, terra::crs(vrt_today))
-    extracted <- terra::extract(x = vrt_today, y = sites_tr)
+    sites_tr <- terra::project(sites_tr, terra::crs(raster))
+    extracted <- terra::extract(x = raster, y = sites_tr)
     sites_blank <- sf::st_drop_geometry(sites_in)
     extracted <- cbind(sites_blank, extracted)
   } else {
-    extracted <- foo(..., surf = vrt_today)
+    extracted <- foo(..., func = fun_summary_raster, surf = raster)
   }
 
   # cleaning names
@@ -363,15 +369,17 @@ modis_worker <- function(
 #' Default is c(0, 1000, 10000, 50000).
 #' @param subdataset Index of subdataset.
 #' @param layers Index of layers.
+#' @param fun_summary character or function. Function to summarize
+#'  extracted raster values.
 #' @param nthreads integer(1). Number of threads to be used
 #'  to calculate covariates.
+#' @param tilelist character(1). Path to VNP46A2 tile corner coordinate list.
 #' @param package_list_add character. A vector with package names to load
 #'  these in each thread. Note that \code{sf}, \code{terra},
 #'  \code{exactextractr}, \code{scomps}, and \code{dplyr}
 #'  are the default packages to be loaded.
 #' @param export_list_add character. A vector with object names to export
 #'  to each thread. It should be minimized to spare memory.
-#' @param foo function.
 #' ...
 #' @import foreach
 #' @importFrom dplyr bind_rows
@@ -391,9 +399,11 @@ calc_modis <-
     siteid = "site_id",
     name_covariates,
     radius = c(0L, 1e3L, 1e4L, 5e4L),
-    subdataset,
+    subdataset = NULL,
     layers = NULL,
+    fun_summary = "mean",
     nthreads = floor(parallelly::availableCores() / 2),
+    tilelist = NULL,
     package_list_add = NULL,
     export_list_add = NULL
   ) {
@@ -406,7 +416,8 @@ calc_modis <-
     export_list <-
       c("paths", "product", "sites_input", "name_covariates",
         "siteid",
-        "radius", "subdataset", "layers", "modis_worker", "get_vrt",
+        "radius", "subdataset", "layers", "modis_worker", "modis_get_vrt",
+        "preprocess_modis_vnp46",
         "dates_available")
     package_list <-
       c("sf", "terra", "exactextractr", "foreach", "scomps", "dplyr", "doRNG")
@@ -440,6 +451,26 @@ calc_modis <-
         radiusindex <- seq_along(radius)
         radiuslist <- split(radiusindex, radiusindex)
 
+        # VNP46 corner assignment
+        if (product == "VNP46A2") {
+          vrt_today <-
+            preprocess_modis_vnp46(
+              paths = paths,
+              date_in = day_to_pick,
+              tile_df = tilelist,
+              subdataset = subdataset,
+              crs_ref = "EPSG:4326"
+            )
+        } else {
+          vrt_today <-
+            modis_get_vrt(
+                          paths = paths,
+                          index_sds = subdataset,
+                          product = product,
+                          date_in = day_to_pick,
+                          layers = layers)
+        }
+
         res0 <-
           lapply(radiuslist,
                  function(k) {
@@ -456,7 +487,9 @@ calc_modis <-
                          sites_in = sites_input,
                          product = product,
                          subdataset = subdataset,
+                         fun_summary_raster = fun_summary,
                          name_extracted = name_radius,
+                         tile_def_vnp46 = tilelist,
                          points = terra::vect(sites_input),
                          id = siteid,
                          radius = radius[k]
@@ -468,6 +501,9 @@ calc_modis <-
                      error_df$remarks <- -99999
                      names(error_df)[which(names(error_df) == "remarks")] <-
                        name_radius
+                    #  error_df$message <- e
+                    #  names(error_df)[which(names(error_df) == "remarks")] <-
+                    #    paste0(name_radius, "_error")
                      return(error_df)
                    })
                  })
@@ -476,6 +512,7 @@ calc_modis <-
                           dplyr::left_join(x, y,
                                            by = c("site_id", "date"))},
           res0)
+        # res$message <- as.factor(res$message)
         return(res)
       }
     Sys.sleep(3L)
