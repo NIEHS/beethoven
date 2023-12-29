@@ -5,22 +5,18 @@
 \title{A single-date MODIS worker for parallelization}
 \usage{
 modis_worker(
-  paths,
+  raster,
   date,
   sites_in = NULL,
   name_extracted = NULL,
   product = c("MOD11A1", "MOD13A2", "MOD06_L2", "VNP46A2", "MOD09GA", "MCD19A2"),
-  subdataset = NULL,
-  layers = NULL,
-  tile_def_vnp46 = NULL,
-  fun_summary_raster = mean,
+  fun_summary_raster = "mean",
   foo = scomps::extract_with_buffer,
   ...
 )
 }
 \arguments{
-\item{paths}{character. Full list of hdf file paths.
-preferably a recursive search result from \code{list.files}.}
+\item{raster}{SpatRaster.}
 
 \item{date}{Date(1). date to query.}
 
@@ -31,23 +27,18 @@ preferably a recursive search result from \code{list.files}.}
 \item{product}{character(1). Product code of MODIS. Should be one of
 \code{c('MOD11A1', 'MOD13A2', 'MOD06_L2', 'VNP46A2', 'MOD09GA', 'MCD19A2')}}
 
-\item{subdataset}{integer(1). The index of subdataset to work with.}
-
-\item{layers}{integer. The index (indices) of layers if there are only
-layers inside the input file.}
-
-\item{tile_def_vnp46}{prespecified data.frame with "tile" and "exts"
-columns, where the former stores tile number
-(h00v00 format) and the latter stores terra::ext output.}
-
 \item{fun_summary_raster}{function. Summary function for
-multilayer rasters.}
+multilayer rasters. Passed to \code{foo}. See also
+\code{\link[exactextractr]{exact_extract}} and
+\code{\link[scomps]{extract_with}}.}
 
 \item{foo}{function. A calculation function working with
 SpatRaster and sf.}
+
+\item{...}{Additional arguments passed to \code{foo}.}
 }
 \value{
-A SpatRaster object.
+A data.frame object.
 }
 \description{
 A single-date MODIS worker for parallelization

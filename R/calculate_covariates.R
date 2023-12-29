@@ -249,23 +249,19 @@ preprocess_modis_vnp46 <- function(
 
 
 #' A single-date MODIS worker for parallelization
-#' @param paths character. Full list of hdf file paths.
-#'  preferably a recursive search result from \code{list.files}.
+#' @param raster SpatRaster.
 #' @param date Date(1). date to query.
 #' @param sites_in sf object. AQS sites.
 #' @param name_extracted character. Names of calculated covariates.
 #' @param product character(1). Product code of MODIS. Should be one of
 #' \code{c('MOD11A1', 'MOD13A2', 'MOD06_L2', 'VNP46A2', 'MOD09GA', 'MCD19A2')}
-#' @param subdataset integer(1). The index of subdataset to work with.
-#' @param layers integer. The index (indices) of layers if there are only
-#' layers inside the input file.
-#' @param tile_def_vnp46 prespecified data.frame with "tile" and "exts"
-#' columns, where the former stores tile number
-#' (h00v00 format) and the latter stores terra::ext output.
 #' @param fun_summary_raster function. Summary function for
-#' multilayer rasters. Passed to \code{foo}.
+#' multilayer rasters. Passed to \code{foo}. See also
+#' \code{\link[exactextractr]{exact_extract}} and
+#' \code{\link[scomps]{extract_with}}.
 #' @param foo function. A calculation function working with
 #' SpatRaster and sf.
+#' @param ... Additional arguments passed to \code{foo}.
 #' @author Insang Song
 #' @returns A data.frame object.
 #' @importFrom terra extract
@@ -279,16 +275,12 @@ preprocess_modis_vnp46 <- function(
 #' @export
 modis_worker <- function(
   raster,
-  # paths,
-  # date,
+  date,
   sites_in = NULL,
   name_extracted = NULL,
   product = c("MOD11A1", "MOD13A2", "MOD06_L2",
               "VNP46A2", "MOD09GA", "MCD19A2"),
-  # subdataset = NULL,
-  # layers = NULL,
-  # tile_def_vnp46 = NULL,
-  fun_summary_raster = mean,
+  fun_summary_raster = "mean",
   foo = scomps::extract_with_buffer,
   ...
 ) {
@@ -297,38 +289,20 @@ modis_worker <- function(
            methods::is(sites_in, "sftime"))) {
     stop("sites_in should be one of sf, sftime, or SpatVector.\n")
   }
+
   if (!is.function(foo)) {
     stop("Argument foo should be a function.\n")
   }
   product <- match.arg(product)
-  # if (is.null(subdataset)) {
-  #   print(terra::describe(paths[1], sds = TRUE))
-  #   stop("Please put relevant index for subdataset.
-  #   The full list of subdatasets is above.\n")
-  # }
+
   if (methods::is(sites_in, "SpatVector")) {
     sites_in <- sf::st_as_sf(sites_in)
   }
 
   # # VNP46 corner assignment
-  # if (product == "VNP46A2") {
-  #   vrt_today <-
-  #     preprocess_modis_vnp46(
-  #       paths = paths,
-  #       date_in = date,
-  #       tile_df = tile_def_vnp46,
-  #       subdataset = subdataset,
-  #       crs_ref = "EPSG:4326"
-  #     )
-  # } else {
-  #   vrt_today <-
-  #     modis_get_vrt(
-  #                   paths = paths,
-  #                   index_sds = subdataset,
-  #                   product = product,
-  #                   date_in = date,
-  #                   layers = layers)
-  # }
+  if (product == "VNP46A2") {
+    raster[raster == 65535L] <- NA
+  }
 
   # raster used to be vrt_today
   if (any(grepl("00000", name_extracted))) {
@@ -344,7 +318,7 @@ modis_worker <- function(
   # cleaning names
   # assuming that extracted is a data.frame
   extracted$date <- date
-  name_offset <- terra::nlyr(vrt_today)
+  name_offset <- terra::nlyr(raster)
   # multiple columns will get proper names
   name_range <- seq(ncol(extracted) - name_offset, ncol(extracted) - 1, 1)
   colnames(extracted)[name_range] <- name_extracted
@@ -380,7 +354,11 @@ modis_worker <- function(
 #'  are the default packages to be loaded.
 #' @param export_list_add character. A vector with object names to export
 #'  to each thread. It should be minimized to spare memory.
-#' ...
+#' @note See details for setting parallelization
+#' \code{\link[foreach]{foreach}},
+#' \code{\link[parallelly]{makeClusterPSOCK}},
+#' \code{\link[parallelly]{availableCores}},
+#' \code{\link[doParallel]{registerDoParallel}}
 #' @import foreach
 #' @importFrom dplyr bind_rows
 #' @importFrom dplyr left_join
@@ -409,13 +387,14 @@ calc_modis <-
   ) {
     product <- match.arg(product)
     dates_available <-
-      regmatches(paths, regexpr("20\\d{2,2}[0-3]\\d{2,2}", paths))
+      regmatches(paths, regexpr("20\\d{2,2}/[0-3]\\d{2,2}", paths))
     dates_available <- unique(dates_available)
+    dates_available <- sub("/", "", dates_available)
 
     # default export list to minimize memory consumption per thread
     export_list <-
       c("paths", "product", "sites_input", "name_covariates",
-        "siteid",
+        "siteid", "fun_summary",
         "radius", "subdataset", "layers", "modis_worker", "modis_get_vrt",
         "preprocess_modis_vnp46",
         "dates_available")
@@ -470,6 +449,10 @@ calc_modis <-
                           date_in = day_to_pick,
                           layers = layers)
         }
+        if (terra::nlyr(vrt_today) != length(name_covariates)) {
+          warning("The number of layers in the input raster do not match
+                  the length of name_covariates.\n")
+        }
 
         res0 <-
           lapply(radiuslist,
@@ -482,28 +465,26 @@ calc_modis <-
                    tryCatch({
                      extracted <-
                        modis_worker(
-                         paths = paths,
-                         date = day_to_pick,
+                         raster = vrt_today,
+                         date = as.character(day_to_pick),
                          sites_in = sites_input,
                          product = product,
-                         subdataset = subdataset,
                          fun_summary_raster = fun_summary,
                          name_extracted = name_radius,
-                         tile_def_vnp46 = tilelist,
+                         foo = scomps::extract_with_buffer,
                          points = terra::vect(sites_input),
                          id = siteid,
                          radius = radius[k]
                        )
                      return(extracted)
                    }, error = function(e) {
+                     print(e)
                      error_df <- sf::st_drop_geometry(sites_input)
                      error_df$date <- day_to_pick
                      error_df$remarks <- -99999
                      names(error_df)[which(names(error_df) == "remarks")] <-
                        name_radius
-                    #  error_df$message <- e
-                    #  names(error_df)[which(names(error_df) == "remarks")] <-
-                    #    paste0(name_radius, "_error")
+
                      return(error_df)
                    })
                  })
@@ -512,7 +493,6 @@ calc_modis <-
                           dplyr::left_join(x, y,
                                            by = c("site_id", "date"))},
           res0)
-        # res$message <- as.factor(res$message)
         return(res)
       }
     Sys.sleep(3L)

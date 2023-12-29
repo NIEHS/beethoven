@@ -4,14 +4,13 @@
 #nocov start
 .onLoad <- function(lib, pkg) {
   packageStartupMessage("
-    NRTAPmodel 1.0.0
+    NRTAPmodel 0.1.0
     ---------------------------------------------------------------------
     Please run startup_nrtap() to apply default settings of this package.
     Consider running ?startup_nrtap for details.
     ---------------------------------------------------------------------\n")
 }
 #nocov end
-
 
 #' Start-up settings
 #' @param workdir character(1). Working directory path.

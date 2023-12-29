@@ -11,9 +11,11 @@ calc_modis(
   siteid = "site_id",
   name_covariates,
   radius = c(0L, 1000L, 10000L, 50000L),
-  subdataset,
+  subdataset = NULL,
   layers = NULL,
+  fun_summary = "mean",
   nthreads = floor(parallelly::availableCores()/2),
+  tilelist = NULL,
   package_list_add = NULL,
   export_list_add = NULL
 )
@@ -42,8 +44,13 @@ Default is c(0, 1000, 10000, 50000).}
 
 \item{layers}{Index of layers.}
 
+\item{fun_summary}{character or function. Function to summarize
+extracted raster values.}
+
 \item{nthreads}{integer(1). Number of threads to be used
 to calculate covariates.}
+
+\item{tilelist}{character(1). Path to VNP46A2 tile corner coordinate list.}
 
 \item{package_list_add}{character. A vector with package names to load
 these in each thread. Note that \code{sf}, \code{terra},
@@ -52,10 +59,14 @@ are the default packages to be loaded.}
 
 \item{export_list_add}{character. A vector with object names to export
 to each thread. It should be minimized to spare memory.}
-
-\item{foo}{function.
-...}
 }
 \description{
 Calculate MODIS product covariates in multiple CPU threads
+}
+\note{
+See details for setting parallelization
+\code{\link[foreach]{foreach}},
+\code{\link[parallelly]{makeClusterPSOCK}},
+\code{\link[parallelly]{availableCores}},
+\code{\link[doParallel]{registerDoParallel}}
 }
