@@ -28,7 +28,6 @@ testthat::test_that("base learner preparation", {
   colnames(pstx) <- sprintf("X%d", seq(1, np))
   pst <- cbind(pst, pstx)
 
-  source("./R/manipulate_spacetime_data.R")
   pstdt <- convert_stobj_to_stdt(pst)
 
   colindx <-
@@ -111,7 +110,6 @@ testthat::test_that("base learner cv fit: xgboost", {
   colnames(pstx) <- sprintf("X%d", seq(1, np))
   pst <- cbind(pst, pstx)
 
-  source("./R/manipulate_spacetime_data.R")
   testthat::expect_no_error(
     pstdt <- convert_stobj_to_stdt(pst)
   )
@@ -120,7 +118,9 @@ testthat::test_that("base learner cv fit: xgboost", {
          paste0("(", paste(sprintf("X%d", seq(1, np)), collapse = "|"), ")"),
          colnames(pstdt$stdt))
 
-  res_datap <- base_learner_prep(learner = "xgboost", data = pstdt,
+  res_datap <- base_learner_prep(
+    learner = "xgboost",
+    data = pstdt,
     dependent_name = "pm2.5",
     independent_name = sprintf("X%d", seq(1, np)))
 
@@ -130,19 +130,16 @@ testthat::test_that("base learner cv fit: xgboost", {
   testthat::expect_no_error(
     res_check_fit_xg <- base_learner_fit_xgboost(res_datap$ymat, res_datap$xmat)
   )
-  #res_check_fit_cnn <- base_learner_fit_ranger(res_datap$ymat, res_datap$xmat)
-  testthat::expect_no_error(
-    res_check_fit_xgb_lblo <-
-      base_learner_fit(data = pstdt, learner = "xgboost",
-        dependent_name = "pm2.5", independent_name = colnames(pstdt$stdt)[-1:-5],
-        cv_mode = "lblo", blocks = c(4, 4))
-  )
 
   testthat::expect_no_error(
     res_check_fit_ranger_lblo <-
-      base_learner_fit(data = pstdt, learner = "randomforest",
-        dependent_name = "pm2.5", independent_name = colnames(pstdt$stdt)[-1:-5],
-        cv_mode = "lblo", blocks = c(20, 20))
+      base_learner_fit(
+        data = pstdt,
+        learner = "randomforest",
+        dependent_name = "pm2.5",
+        independent_name = colnames(pstdt$stdt)[-1:-5],
+        cv_mode = "lblo",
+        blocks = c(20, 20))
   )
 
   testthat::expect_no_error(
@@ -155,7 +152,6 @@ testthat::test_that("base learner cv fit: xgboost", {
       blocks = c(25, 25)
     )
   )
-  res_xgb_cv[[1]]$tested
 
 })
 

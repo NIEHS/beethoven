@@ -276,7 +276,7 @@ base_learner_fit_cnn <- function(
 base_learner_fit_xgboost <- function(
     ymat,
     xmat) {
-  xgboost::xgboost(data = xmat, label = ymat, nrounds = 100L)
+  xgboost::xgboost(data = xmat, label = ymat, nrounds = 300L)
 }
 
 
