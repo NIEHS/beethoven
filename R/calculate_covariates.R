@@ -7,10 +7,91 @@ if (run) {
 }
 
 
+#' Calculate covariates
+#' @param covariate character(1). Covariate type.
+#' @param path character. Single or multiple path strings.
+#' @param sites sf/SpatVector. Unique sites. Should include
+#'  a unique identifier field named \code{id_col}
+#' @param id_col character(1). Name of unique identifier.
+#'  Default is \code{'site_id'}.
+#' @param ... Arguments passed to each covariate calculation
+#'  function.
+#' @seealso
+#' - \link{calc_modis}: "modis", "MODIS"
+#' - \link{calc_koppen_geiger}: "koppen-geiger", "koeppen-geiger", "koppen",
+#' "koeppen"
+#' @returns Calculated covariates. Mainly data.frame object.
+#' @author Insang Song
+#' @export
+calc_covariates <-
+  function(
+      covariate = c("modis", "MODIS", "koppen-geiger",
+                    "koeppen-geiger", "koppen", "koeppen",
+                    "geos", "dummies", "gmted", "roads",
+                    "sedac_groads", "mlcd", "tri", "ncep", "aadt",
+                    "ecoregions", "ecoregion"),
+      path = "./input/koppen_geiger/raw/Beck_KG_V1_present_0p0083.tif",
+      sites,
+      id_col = "site_id",
+      ...) {
+
+    covariate <- tolower(covariate)
+    covariate <- match.arg(covariate)
+    if (startsWith(covariate, "ko")) {
+      covariate <- "koppen"
+    }
+
+    # select function to run
+    what_to_run <- switch(covariate,
+      modis = calc_modis,
+      ecoregion = calc_ecoregion,
+      ecoregions = calc_ecoregion,
+      koppen = calc_koppen_geiger,
+      narr_monolevel = calc_narr_monolevel,
+      monolevel = calc_narr_monolevel,
+      narr_p_levels = calc_narr_p_levels,
+      p_levels = calc_narr_p_levels,
+      plevels = calc_narr_p_levels,
+      nlcd = calc_nlcd,
+      noaa = calc_noaa_hms,
+      smoke = calc_noaa_hms,
+      hms = calc_noaa_hms,
+      sedac_groads = calc_sedac_groads,
+      roads = calc_sedac_groads,
+      sedac_population = calc_sedac_population,
+      population = calc_sedac_population,
+      aadt = calc_aadt,
+      tri = calc_tri,
+      ncep = calc_ncep,
+      geos = calc_geos,
+      gmted = calc_gmted,
+      dummies = calc_temporal_dummies
+    )
+
+    res_covariate <-
+      tryCatch({
+        what_to_run(
+          path = path,
+          sites = sites,
+          id_col = id_col,
+          ...
+        )
+      }, error = function(e) {
+        print(e)
+        print(args(what_to_run))
+        message(paste0("Please refer to the argument list and
+                        the error message above to rectify the error.\n"))
+        return(NULL)
+      })
+
+    return(res_covariate)
+  }
+
+
 #' Calculate Koeppen-Geiger climate zone binary variables
 #' @note the same function is run with an alias
 #' \code{calc_koeppen_geiger}.
-#' @param path_koppen character(1). Path to Koppen-Geiger
+#' @param path character(1). Path to Koppen-Geiger
 #'  climate zone raster file
 #' @param sites sf/SpatVector. Unique sites. Should include
 #'  a unique identifier field named \code{id_col}
@@ -28,11 +109,11 @@ if (run) {
 #' @export
 calc_koppen_geiger <-
   function(
-      path_koppen = "./input/koppen_geiger/raw/Beck_KG_V1_present_0p0083.tif",
+      path = "./input/koppen_geiger/raw/Beck_KG_V1_present_0p0083.tif",
       sites,
       id_col = "site_id") {
     ## You will get "sites" in memory after sourcing the file above
-    kg_rast <- terra::rast(path_koppen)
+    kg_rast <- terra::rast(path)
     sites_tr <- sites
 
     if (!methods::is(sites, "SpatVector")) {
@@ -105,6 +186,80 @@ calc_koeppen_geiger <- calc_koppen_geiger
 if (run) {
   saveRDS(kg_extracted, file = "~/NRTAP_Covars_Koppen_Geiger_AE_binary.rds")
 }
+
+
+#' Calculate EPA Ecoregions level 2/3 binary variables
+#' @param path character(1). Path to Ecoregion Shapefiles
+#' @param sites sf/SpatVector. Unique sites. Should include
+#'  a unique identifier field named \code{id_col}
+#' @param id_col character(1). Name of unique identifier.
+#' @returns a data.frame object with dummy variables and attributes of:
+#'   - \code{attr(., "ecoregion2_code")}: Ecoregion lv.2 code and key
+#'   - \code{attr(., "ecoregion3_code")}: Ecoregion lv.3 code and key
+#' @author Insang Song
+#' @importFrom methods is
+#' @import terra
+#' @export
+calc_ecoregion <-
+  function(
+    path = "./input/data/ecoregions/raw/us_eco_l3_state_boundaries.shp",
+    sites,
+    id_col = "site_id"
+  ) {
+
+    if (!methods::is(sites, "SpatVector")) {
+      sites <- terra::vect(sites)
+    }
+    ecoreg <- terra::vect(path)
+    ecoreg <- ecoreg[, grepl("^(L2_KEY|L3_KEY)", names(ecoreg))]
+
+    sites <- terra::project(sites, terra::crs(ecoreg))
+
+    sites_in <- terra::intersect(sites, ecoreg)
+    sites_out <-
+      sites[!unlist(sites[[id_col]]) %in% unlist(sites_in[[id_col]]), ]
+
+    sites_snapped <- terra::snap(sites_out, ecoreg, tolerance = 50)
+    sites_fixed <- rbind(sites_in, sites_snapped)
+    extracted <- terra::extract(ecoreg, sites_fixed)
+
+    # Generate field names from extracted ecoregion keys
+    # TODO: if we keep all-zero fields, the initial reference
+    # should be the ecoregion polygon, not the extracted data
+    key2_sorted <- unlist(extracted[, 3])
+    key2_num <-
+      regmatches(key2_sorted, regexpr("\\d{1,2}\\.[1-9]", key2_sorted))
+    key2_num <- as.integer(10 * as.numeric(key2_num))
+    key2_num <- sprintf("DUM_E2%03d_0_00000", key2_num)
+    key2_num_unique <- sort(unique(key2_num))
+
+    key3_sorted <- unlist(extracted[, 2])
+    key3_num <-
+      regmatches(key3_sorted, regexpr("\\d{1,3}", key3_sorted))
+    key3_num <- as.integer(as.numeric(key3_num))
+    key3_num <- sprintf("DUM_E3%03d_0_00000", key3_num)
+    key3_num_unique <- sort(unique(key3_num))
+
+
+    df_lv2 <-
+      split(key2_num_unique, key2_num_unique) |>
+      lapply(function(x) { as.integer(key2_num == x) }) |>
+      Reduce(f = cbind, x = _) |>
+      as.data.frame()
+    colnames(df_lv2) <- key2_num_unique
+    df_lv3 <-
+      split(key3_num_unique, key3_num_unique) |>
+      lapply(function(x) { as.integer(key3_num == x) }) |>
+      Reduce(f = cbind, x = _) |>
+      as.data.frame()
+    colnames(df_lv3) <- key3_num_unique
+
+    sites_ecoreg <- cbind(sites[[id_col]], df_lv2, df_lv3)
+    attr(sites_ecoreg, "ecoregion2_code") <- sort(unique(ecoreg$L2_KEY))
+    attr(sites_ecoreg, "ecoregion3_code") <- sort(unique(ecoreg$L3_KEY))
+    return(sites_ecoreg)
+  }
+
 
 
 #' Get mosaicked or merged raster from multiple MODIS hdf files
@@ -328,12 +483,12 @@ modis_worker <- function(
 
 
 #' Calculate MODIS product covariates in multiple CPU threads
-#' @param paths character. List of HDF files.
+#' @param path character. List of HDF files.
 #' @param product character(1). MODIS product. Should be one of
 #' \code{c('MOD11A1', 'MOD13A2', 'MOD06_L2', 'VNP46A2', 'MOD09GA', 'MCD19A2')}
-#' @param sites_input sf object. Unique sites where covariates
+#' @param sites sf object. Unique sites where covariates
 #' will be calculated.
-#' @param siteid character(1). Site identifier. Default is "site_id"
+#' @param id_col character(1). Site identifier. Default is "site_id"
 #' @param name_covariates character. Name header of covariates.
 #' The calculated covariate names will have a form of
 #' '{name_covariates}{zero-padded buffer radius in meters}',
@@ -370,11 +525,11 @@ modis_worker <- function(
 #' @export
 calc_modis <-
   function(
-    paths,
+    path,
     product = c("MOD11A1", "MOD13A2", "MOD06_L2",
                 "VNP46A2", "MOD09GA", "MCD19A2"),
-    sites_input,
-    siteid = "site_id",
+    sites,
+    id_col = "site_id",
     name_covariates,
     radius = c(0L, 1e3L, 1e4L, 5e4L),
     subdataset = NULL,
@@ -387,14 +542,15 @@ calc_modis <-
   ) {
     product <- match.arg(product)
     dates_available <-
-      regmatches(paths, regexpr("20\\d{2,2}/[0-3]\\d{2,2}", paths))
+      regmatches(path, regexpr("20\\d{2,2}/[0-3]\\d{2,2}", path))
     dates_available <- unique(dates_available)
     dates_available <- sub("/", "", dates_available)
 
+    sites_input <- sites
     # default export list to minimize memory consumption per thread
     export_list <-
       c("paths", "product", "sites_input", "name_covariates",
-        "siteid", "fun_summary",
+        "id_col", "fun_summary",
         "radius", "subdataset", "layers", "modis_worker", "modis_get_vrt",
         "preprocess_modis_vnp46",
         "dates_available")
@@ -434,7 +590,7 @@ calc_modis <-
         if (product == "VNP46A2") {
           vrt_today <-
             preprocess_modis_vnp46(
-              paths = paths,
+              paths = path,
               date_in = day_to_pick,
               tile_df = tilelist,
               subdataset = subdataset,
@@ -443,7 +599,7 @@ calc_modis <-
         } else {
           vrt_today <-
             modis_get_vrt(
-                          paths = paths,
+                          paths = path,
                           index_sds = subdataset,
                           product = product,
                           date_in = day_to_pick,
@@ -473,7 +629,7 @@ calc_modis <-
                          name_extracted = name_radius,
                          foo = scomps::extract_with_buffer,
                          points = terra::vect(sites_input),
-                         id = siteid,
+                         id = id_col,
                          radius = radius[k]
                        )
                      return(extracted)
@@ -499,4 +655,79 @@ calc_modis <-
     parallelly::killNode(cl)
 
     return(calc_results)
+  }
+
+
+#' Calculate temporal dummy variables
+#' @param sites data.frame with a temporal field named "date"
+#'  see \link{\code{convert_stobj_to_stdt}}
+#' @param id_col character(1). Unique site identifier column name.
+#'  Default is "site_id".
+#' @returns data.frame with year, month, and weekday indicators.
+#' @author Insang Song
+#' @importFrom methods is
+#' @importFrom data.table year
+#' @importFrom data.table month
+#' @importFrom data.table as.data.table
+#' @export
+calc_temporal_dummies <-
+  function(
+    sites,
+    id_col = "site_id"
+  ) {
+    if (!methods::is(sites, "data.frame")) {
+      stop("Argument sites is not a data.frame.\n")
+    }
+    if (!"date" %in% names(sites)) {
+      stop("A mandatory field 'date' does not exist in sites.\n")
+    }
+    id_col <- id_col
+    dummify <- function(vec) {
+      vec_unique <- sort(unique(vec))
+      vec_split <- split(vec_unique, vec_unique)
+      vec_assigned <-
+        lapply(vec_split,
+               function(x) {
+                 as.integer(vec == x)
+               })
+      dt_dum <- Reduce(cbind, vec_assigned)
+      dt_dum <- data.table::as.data.table(dt_dum)
+      return(dt_dum)
+    }
+
+    # year
+    vec_year <- data.table::year(sites$date)
+    dt_year_dum <- dummify(vec_year)
+    # should the last year be the present year or 2022?
+    colnames(dt_year_dum) <-
+      sprintf("DUM_Y%d_0_00000", seq(2018L, 2022L))
+
+
+    # month
+    vec_month <- data.table::month(sites$date)
+    dt_month_dum <- dummify(vec_month)
+    shortmn <-
+      c("JANUA", "FEBRU", "MARCH", "APRIL",
+        "MAYMA", "JUNEJ", "JULYJ", "AUGUS",
+        "SEPTE", "OCTOB", "NOVEM", "DECEM")
+    colnames(dt_month_dum) <-
+      sprintf("DUM_%s_0_00000", shortmn)
+
+    # weekday (starts from 1-Monday)
+    vec_wday <- as.POSIXlt(sites$date)$wday
+    dt_wday_dum <- dummify(vec_wday)
+    colnames(dt_wday_dum) <-
+      sprintf("DUM_WKDY%d_0_00000", seq(1L, 7L))
+
+
+    # column binding
+    sites_dums <-
+      cbind(
+        sites,
+        dt_year_dum,
+        dt_month_dum,
+        dt_wday_dum
+      )
+
+    return(sites_dums)
   }
