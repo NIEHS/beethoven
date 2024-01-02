@@ -5,10 +5,10 @@
 \title{Calculate MODIS product covariates in multiple CPU threads}
 \usage{
 calc_modis(
-  paths,
+  path,
   product = c("MOD11A1", "MOD13A2", "MOD06_L2", "VNP46A2", "MOD09GA", "MCD19A2"),
-  sites_input,
-  siteid = "site_id",
+  sites,
+  id_col = "site_id",
   name_covariates,
   radius = c(0L, 1000L, 10000L, 50000L),
   subdataset = NULL,
@@ -21,15 +21,15 @@ calc_modis(
 )
 }
 \arguments{
-\item{paths}{character. List of HDF files.}
+\item{path}{character. List of HDF files.}
 
 \item{product}{character(1). MODIS product. Should be one of
 \code{c('MOD11A1', 'MOD13A2', 'MOD06_L2', 'VNP46A2', 'MOD09GA', 'MCD19A2')}}
 
-\item{sites_input}{sf object. Unique sites where covariates
+\item{sites}{sf object. Unique sites where covariates
 will be calculated.}
 
-\item{siteid}{character(1). Site identifier. Default is "site_id"}
+\item{id_col}{character(1). Site identifier. Default is "site_id"}
 
 \item{name_covariates}{character. Name header of covariates.
 The calculated covariate names will have a form of

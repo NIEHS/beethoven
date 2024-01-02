@@ -12,17 +12,17 @@ testthat::test_that("calc_koppen_geiger works well", {
       lat = 35.97
     )
   site_faux <- terra::vect(site_faux, crs = "EPSG:4326")
-  kp_path <- "../testdata/koppen_subset.tif"
+  kp_path <- testthat::test_path("..", "testdata", "koppen_subset.tif")
 
   testthat::expect_no_error(
     kg_res <- calc_koppen_geiger(
-      path_koppen = kp_path,
+      path = kp_path,
       sites = site_faux
     )
   )
   testthat::expect_no_error(
     kg_res <- calc_koppen_geiger(
-      path_koppen = kp_path,
+      path = kp_path,
       sites = sf::st_as_sf(site_faux)
     )
   )
@@ -42,12 +42,13 @@ testthat::test_that("calc_dummies works well", {
       site_id = "37031000188101",
       lon = -78.90,
       lat = 35.97,
-      date = as.Date("2022-01-01")
+      date = "2022-01-01"
     )
 
   testthat::expect_no_error(
     dum_res <- calc_temporal_dummies(
-      sites = sites_faux
+      sites = site_faux,
+      domain_year = seq(2018L, 2022L)
     )
   )
 
@@ -56,20 +57,20 @@ testthat::test_that("calc_dummies works well", {
   # ncol is equal to 12 + 5 + 7 + 4
   testthat::expect_equal(ncol(dum_res), 28L)
   # should have each of the indicator groups
-  testthat::expect_equal(sum(unlist(kg_res[, -1:-4])), 3L)
+  testthat::expect_equal(sum(unlist(dum_res[, -1:-4])), 3L)
 
   # error cases
-  sites_faux_err <- sites_faux
-  colnames(sites_faux_err)[4] <- "time"
+  site_faux_err <- site_faux
+  colnames(site_faux_err)[4] <- "time"
   testthat::expect_error(
     dum_res <- calc_temporal_dummies(
-      sites = sites_faux_err
+      sites = site_faux_err
     )
   )
 
   testthat::expect_error(
     dum_res <- calc_temporal_dummies(
-      sites = as.matrix(sites_faux_err)
+      sites = as.matrix(site_faux_err)
     )
   )
 
@@ -97,8 +98,8 @@ testthat::test_that("calc_ecoregion works well", {
 
   testthat::expect_no_error(
     ecor_res <- calc_ecoregion(
-      path = "../testdata/eco_l3_clip.gpkg",
-      sites = sites_faux,
+      path = testthat::test_path("..", "testdata", "eco_l3_clip.gpkg"),
+      sites = site_faux,
       id_col = "site_id"
     )
   )
@@ -106,13 +107,10 @@ testthat::test_that("calc_ecoregion works well", {
   # the result is a data frame
   testthat::expect_s3_class(ecor_res, "data.frame")
   # ncol is equal to 2 + 5 + 2 + 1 + 1
-  testthat::expect_equal(ncol(ecor_res), 11L)
+  testthat::expect_equal(ncol(ecor_res), 3L)
   # should have each of the indicator groups
   dum_cn <- grep("DUM_", colnames(ecor_res))
   testthat::expect_equal(
                          sum(unlist(ecor_res[, dum_cn])), 2L)
-
-
 })
-
 

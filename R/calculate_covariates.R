@@ -89,8 +89,6 @@ calc_covariates <-
 
 
 #' Calculate Koeppen-Geiger climate zone binary variables
-#' @note the same function is run with an alias
-#' \code{calc_koeppen_geiger}.
 #' @param path character(1). Path to Koppen-Geiger
 #'  climate zone raster file
 #' @param sites sf/SpatVector. Unique sites. Should include
@@ -182,10 +180,6 @@ calc_koppen_geiger <-
   }
 
 
-calc_koeppen_geiger <- calc_koppen_geiger
-if (run) {
-  saveRDS(kg_extracted, file = "~/NRTAP_Covars_Koppen_Geiger_AE_binary.rds")
-}
 
 
 #' Calculate EPA Ecoregions level 2/3 binary variables
@@ -663,6 +657,8 @@ calc_modis <-
 #'  see \link{\code{convert_stobj_to_stdt}}
 #' @param id_col character(1). Unique site identifier column name.
 #'  Default is "site_id".
+#' @param domain_year integer. Year domain to dummify.
+#'  Default is \code{seq(2018L, 2022L)}
 #' @returns data.frame with year, month, and weekday indicators.
 #' @author Insang Song
 #' @importFrom methods is
@@ -673,7 +669,8 @@ calc_modis <-
 calc_temporal_dummies <-
   function(
     sites,
-    id_col = "site_id"
+    id_col = "site_id",
+    domain_year = seq(2018L, 2022L)
   ) {
     if (!methods::is(sites, "data.frame")) {
       stop("Argument sites is not a data.frame.\n")
@@ -682,8 +679,8 @@ calc_temporal_dummies <-
       stop("A mandatory field 'date' does not exist in sites.\n")
     }
     id_col <- id_col
-    dummify <- function(vec) {
-      vec_unique <- sort(unique(vec))
+    dummify <- function(vec, domain) {
+      vec_unique <- domain#sort(unique(vec))
       vec_split <- split(vec_unique, vec_unique)
       vec_assigned <-
         lapply(vec_split,
@@ -697,15 +694,15 @@ calc_temporal_dummies <-
 
     # year
     vec_year <- data.table::year(sites$date)
-    dt_year_dum <- dummify(vec_year)
+    dt_year_dum <- dummify(vec_year, domain_year)
     # should the last year be the present year or 2022?
     colnames(dt_year_dum) <-
-      sprintf("DUM_Y%d_0_00000", seq(2018L, 2022L))
+      sprintf("DUM_Y%d_0_00000", domain_year)
 
 
     # month
     vec_month <- data.table::month(sites$date)
-    dt_month_dum <- dummify(vec_month)
+    dt_month_dum <- dummify(vec_month, seq(1L, 12L))
     shortmn <-
       c("JANUA", "FEBRU", "MARCH", "APRIL",
         "MAYMA", "JUNEJ", "JULYJ", "AUGUS",
@@ -715,7 +712,7 @@ calc_temporal_dummies <-
 
     # weekday (starts from 1-Monday)
     vec_wday <- as.POSIXlt(sites$date)$wday
-    dt_wday_dum <- dummify(vec_wday)
+    dt_wday_dum <- dummify(vec_wday, seq(1L, 7L))
     colnames(dt_wday_dum) <-
       sprintf("DUM_WKDY%d_0_00000", seq(1L, 7L))
 
