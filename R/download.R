@@ -11,20 +11,21 @@
 #' - All download function names are in \code{download_*_data} formats
 #' @author Insang Song
 #' @seealso
-#' - \link{download_aqs_data}: "aqs"
+#' - \link{download_aqs_data}: "aqs", "AQS"
 #' - \link{download_ecoregion_data}: "ecoregion"
 #' - \link{download_geos_cf_data}: "geos"
-#' - \link{gmted_data}: "gmted"
-#' - \link{koppen_geiger_data}: "koppen", "koppengeiger"
-#' - \link{merra2_data}: "merra2", "merra"
-#' - \link{narr_monolevel_data}: "narr_monolevel", "monolevel"
-#' - \link{narr_p_levels_data}: "narr_p_levels", "p_levels", "plevels"
-#' - \link{nlcd_data}: "nlcd",
-#' - \link{noaa_hms_smoke_data}: "noaa", "smoke", "hms"
-#' - \link{sedac_groads_data}: "sedac_groads", "groads"
-#' - \link{sedac_population_data}: "sedac_population", "population"
-#' - \link{modis_data}: "modis", "MODIS"
-#' - \link{modis_data}: "tri", "TRI"
+#' - \link{download_gmted_data}: "gmted", "GMTED"
+#' - \link{download_koppen_geiger_data}: "koppen", "koppengeiger"
+#' - \link{download_merra2_data}: "merra2", "merra", "MERRA", "MERRA2"
+#' - \link{download_narr_monolevel_data}: "narr_monolevel", "monolevel"
+#' - \link{download_narr_p_levels_data}: "narr_p_levels", "p_levels", "plevels"
+#' - \link{download_nlcd_data}: "nlcd", "NLCD"
+#' - \link{download_noaa_hms_smoke_data}: "noaa", "smoke", "hms"
+#' - \link{download_sedac_groads_data}: "sedac_groads", "groads"
+#' - \link{download_sedac_population_data}: "sedac_population", "population"
+#' - \link{download_modis_data}: "modis", "MODIS"
+#' - \link{download_tri_data}: "tri", "TRI"
+#' - \link{download_aadt_data}: "aadt", "AADT"
 #' @returns NULL
 #' @export
 download_data <-
@@ -33,7 +34,7 @@ download_data <-
                      "koppengeiger", "merra2", "merra", "narr_monolevel",
                      "modis", "narr_p_levels", "nlcd", "noaa", "sedac_groads",
                      "sedac_population", "groads", "population", "plevels",
-                     "p_levels", "monolevel", "hms", "smoke", "tri"),
+                     "p_levels", "monolevel", "hms", "smoke", "tri", "aadt"),
     directory_to_save = NULL,
     data_download_acknowledgement = FALSE,
     ...
@@ -2182,6 +2183,89 @@ download_tri_data <- function(
     "TRI_",
     "_",
     year_start, "_", year_end,
+    "_",
+    Sys.Date(),
+    "_curl_commands.txt"
+  )
+  download_sink(commands_txt)
+  #### 6. concatenate and print download commands to "..._curl_commands.txt"
+  writeLines(download_commands)
+  #### 7. finish "..._curl_commands.txt" file
+  sink()
+  #### 8. build system command
+  system_command <- paste0(
+    ". ",
+    commands_txt,
+    "\n"
+  )
+  #### 9. download data
+  download_run(download = download,
+               system_command = system_command)
+  message("Requests were processed.\n")
+  #### 10. remove download commands
+  download_remove_command(commands_txt = commands_txt,
+                          remove = remove_command)
+
+}
+
+
+
+#' download_aadt_data: download data from EPA National Emission Inventory
+#' aggregated on-road emission data
+#'
+#' @param directory_to_save character(1). Directory to download files.
+#' @param data_download_acknowledgement logical(1). By setting `= TRUE` the
+#' user acknowledge that the data downloaded using this function may be very
+#' large and use lots of machine storage and memory.
+#' @param year_target Available years of NEI data.
+#' Default is c(2017L, 2020L).
+#' @param download logical(1). Download data or only save wget commands.
+#' @param remove_command logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
+#' the text file containing download commands.
+#' @author Ranadeep Daw, Insang Song
+#' @returns NULL; Two comma-separated value (CSV) raw files for 2017 and 2020
+#' @export
+download_aadt_data <- function(
+  directory_to_save = "./input/aadt/",
+  data_download_acknowledgement = FALSE,
+  year_target = c(2017L, 2020L),
+  download = FALSE,
+  remove_command = FALSE
+) {
+  #### 1. check for data download acknowledgement
+  download_permit(data_download_acknowledgement = data_download_acknowledgement)
+  #### 2. directory setup
+  download_setup_dir(directory_to_save)
+  directory_to_save <- download_sanitize_path(directory_to_save)
+
+  #### 3. define measurement data paths
+  year_target <- match.arg(year_target)
+  url_download_base <- "https://gaftp.epa.gov/air/nei/%d/data_summaries/"
+  url_download_remain <-
+    c("2017v1/2017neiApr_onroad_byregions.zip",
+      "2020nei_onroad_byregion.zip")
+  download_urls <-
+    paste0(
+      sprintf(url_download_base, year_target),
+      url_download_remain
+    )
+  download_names <-
+    sprintf(paste0(directory_to_save,
+                   "nei_onroad_byregions_%d.csv"),
+            year_target)
+
+  #### 4. build download command
+  download_commands <- paste0("curl ",
+                              download_urls,
+                              " --output ",
+                              download_names,
+                              "\n")
+  #### 5. initiate "..._curl_commands.txt"
+  commands_txt <- paste0(
+    directory_to_save,
+    "NEI_AADT_",
+    "_",
+    paste(year_target, collapse = "-"),
     "_",
     Sys.Date(),
     "_curl_commands.txt"
