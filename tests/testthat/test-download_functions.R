@@ -700,3 +700,40 @@ testthat::test_that("MODIS-MOD06L2 download URLs have HTTP status 200.", {
   # remove file with commands after test
   file.remove(commands_path)
 })
+
+
+testthat::test_that("EPA TRI download URLs have HTTP status 200.", {
+  withr::local_package("httr")
+  withr::local_package("stringr")
+  # function parameters
+  directory_to_save <- "../testdata/"
+  # run download function
+  download_data(dataset_name = "tri",
+                directory_to_save = directory_to_save,
+                data_download_acknowledgement = TRUE,
+                download = FALSE,
+                remove_command = FALSE)
+  # define file path with commands
+  commands_path <- paste0(
+    directory_to_save,
+    "TRI_",
+    "_",
+    year_start, "_", year_end,
+    "_",
+    Sys.Date(),
+    "_curl_commands.txt"
+  )
+
+  # import commands
+  commands <- read_commands(commands_path = commands_path)
+  # extract urls
+  urls <- extract_urls(commands = commands, position = 2)
+  # check HTTP URL status
+  url_status <- check_urls(urls = urls, size = 1L, method = "GET")
+  # implement unit tests
+  test_download_functions(directory_to_save = directory_to_save,
+                          commands_path = commands_path,
+                          url_status = url_status)
+  # remove file with commands after test
+  file.remove(commands_path)
+})

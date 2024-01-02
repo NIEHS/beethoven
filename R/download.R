@@ -24,6 +24,7 @@
 #' - \link{sedac_groads_data}: "sedac_groads", "groads"
 #' - \link{sedac_population_data}: "sedac_population", "population"
 #' - \link{modis_data}: "modis", "MODIS"
+#' - \link{modis_data}: "tri", "TRI"
 #' @returns NULL
 #' @export
 download_data <-
@@ -32,7 +33,7 @@ download_data <-
                      "koppengeiger", "merra2", "merra", "narr_monolevel",
                      "modis", "narr_p_levels", "nlcd", "noaa", "sedac_groads",
                      "sedac_population", "groads", "population", "plevels",
-                     "p_levels", "monolevel", "hms", "smoke"),
+                     "p_levels", "monolevel", "hms", "smoke", "tri"),
     directory_to_save = NULL,
     data_download_acknowledgement = FALSE,
     ...
@@ -64,7 +65,8 @@ download_data <-
       groads = download_sedac_groads_data,
       sedac_population = download_sedac_population_data,
       population = download_sedac_population_data,
-      modis = download_modis_data
+      modis = download_modis_data,
+      tri = download_tri_data
     )
 
     tryCatch({
@@ -2121,6 +2123,85 @@ download_modis_data <- function(
 
   message("Requests were processed.\n")
 
+  download_remove_command(commands_txt = commands_txt,
+                          remove = remove_command)
+
+}
+
+
+#' download_tri_data: download data from EPA toxic release inventory
+#'
+#' @param year_start integer(1). length of 4. Start year for downloading data.
+#' @param year_end integer(1). length of 4. End year for downloading data.
+#' @param directory_to_save character(1). Directory to download files.
+#' @param data_download_acknowledgement logical(1). By setting `= TRUE` the
+#' user acknowledge that the data downloaded using this function may be very
+#' large and use lots of machine storage and memory.
+#' @param download logical(1). Download data or only save wget commands.
+#' @param remove_command logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
+#' the text file containing download commands.
+#' @author Mariana Kassien, Insang Song
+#' @returns NULL; Yearly comma-separated value (CSV) raw files for each year
+#' @export
+download_tri_data <- function(
+  year_start = 2018L,
+  year_end = 2022L,
+  directory_to_save = "./input/tri/",
+  data_download_acknowledgement = FALSE,
+  download = FALSE,
+  remove_command = FALSE
+) {
+  #### 1. check for data download acknowledgement
+  download_permit(data_download_acknowledgement = data_download_acknowledgement)
+  #### 2. directory setup
+  download_setup_dir(directory_to_save)
+  directory_to_save <- download_sanitize_path(directory_to_save)
+
+  #### 3. define measurement data paths
+  url_download <-
+    "https://data.epa.gov/efservice/downloads/tri/mv_tri_basic_download/"
+  year_sequence <- seq(year_start, year_end, 1)
+  download_urls <- sprintf(
+    paste(url_download, "%.0f", "_US/csv", sep = ""),
+    year_sequence
+  )
+  download_names <-
+    sprintf(paste0(directory_to_save,
+                   "tri_raw_%.0f.csv"),
+            year_sequence)
+
+  #### 4. build download command
+  download_commands <- paste0("curl ",
+                              download_urls,
+                              " --output ",
+                              download_names,
+                              "\n")
+  #### 5. initiate "..._curl_commands.txt"
+  commands_txt <- paste0(
+    directory_to_save,
+    "TRI_",
+    "_",
+    year_start, "_", year_end,
+    "_",
+    Sys.Date(),
+    "_curl_commands.txt"
+  )
+  download_sink(commands_txt)
+  #### 6. concatenate and print download commands to "..._curl_commands.txt"
+  writeLines(download_commands)
+  #### 7. finish "..._curl_commands.txt" file
+  sink()
+  #### 8. build system command
+  system_command <- paste0(
+    ". ",
+    commands_txt,
+    "\n"
+  )
+  #### 9. download data
+  download_run(download = download,
+               system_command = system_command)
+  message("Requests were processed.\n")
+  #### 10. remove download commands
   download_remove_command(commands_txt = commands_txt,
                           remove = remove_command)
 
