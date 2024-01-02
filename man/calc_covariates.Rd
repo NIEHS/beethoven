@@ -5,8 +5,8 @@
 \title{Calculate covariates}
 \usage{
 calc_covariates(
-  covariate = c("modis", "MODIS", "koppen-geiger", "koeppen-geiger", "koppen", "koeppen",
-    "geos", "dummies", "gmted", "roads", "sedac_groads", "mlcd", "tri", "ncep", "aadt",
+  covariate = c("modis", "koppen-geiger", "koeppen-geiger", "koppen", "koeppen", "geos",
+    "dummies", "gmted", "roads", "sedac_groads", "nlcd", "tri", "ncep", "aadt",
     "ecoregions", "ecoregion"),
   path = "./input/koppen_geiger/raw/Beck_KG_V1_present_0p0083.tif",
   sites,
@@ -37,7 +37,8 @@ Calculate covariates
 \seealso{
 - \link{calc_modis}: "modis", "MODIS"
 - \link{calc_koppen_geiger}: "koppen-geiger", "koeppen-geiger", "koppen",
-"koeppen"
+- \link{calc_ecoregion}: "ecoregion", "ecoregions"
+- \link{calc_temporal_dummies}: "dummies"
 }
 \author{
 Insang Song

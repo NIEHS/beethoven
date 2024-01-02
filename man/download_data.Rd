@@ -8,7 +8,7 @@ download_data(
   dataset_name = c("aqs", "ecoregion", "geos", "gmted", "koppen", "koppengeiger",
     "merra2", "merra", "narr_monolevel", "modis", "narr_p_levels", "nlcd", "noaa",
     "sedac_groads", "sedac_population", "groads", "population", "plevels", "p_levels",
-    "monolevel", "hms", "smoke"),
+    "monolevel", "hms", "smoke", "tri", "aadt"),
   directory_to_save = NULL,
   data_download_acknowledgement = FALSE,
   ...
@@ -33,19 +33,21 @@ download_data: a wrapper function for download covariate sources
 - All download function names are in \code{download_*_data} formats
 }
 \seealso{
-- \link{download_aqs_data}: "aqs"
+- \link{download_aqs_data}: "aqs", "AQS"
 - \link{download_ecoregion_data}: "ecoregion"
 - \link{download_geos_cf_data}: "geos"
-- \link{gmted_data}: "gmted"
-- \link{koppen_geiger_data}: "koppen", "koppengeiger"
-- \link{merra2_data}: "merra2", "merra"
-- \link{narr_monolevel_data}: "narr_monolevel", "monolevel"
-- \link{narr_p_levels_data}: "narr_p_levels", "p_levels", "plevels"
-- \link{nlcd_data}: "nlcd",
-- \link{noaa_hms_smoke_data}: "noaa", "smoke", "hms"
-- \link{sedac_groads_data}: "sedac_groads", "groads"
-- \link{sedac_population_data}: "sedac_population", "population"
-- \link{modis_data}: "modis", "MODIS"
+- \link{download_gmted_data}: "gmted", "GMTED"
+- \link{download_koppen_geiger_data}: "koppen", "koppengeiger"
+- \link{download_merra2_data}: "merra2", "merra", "MERRA", "MERRA2"
+- \link{download_narr_monolevel_data}: "narr_monolevel", "monolevel"
+- \link{download_narr_p_levels_data}: "narr_p_levels", "p_levels", "plevels"
+- \link{download_nlcd_data}: "nlcd", "NLCD"
+- \link{download_noaa_hms_smoke_data}: "noaa", "smoke", "hms"
+- \link{download_sedac_groads_data}: "sedac_groads", "groads"
+- \link{download_sedac_population_data}: "sedac_population", "population"
+- \link{download_modis_data}: "modis", "MODIS"
+- \link{download_tri_data}: "tri", "TRI"
+- \link{download_aadt_data}: "aadt", "AADT"
 }
 \author{
 Insang Song

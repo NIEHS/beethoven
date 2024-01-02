@@ -67,7 +67,8 @@ download_data <-
       sedac_population = download_sedac_population_data,
       population = download_sedac_population_data,
       modis = download_modis_data,
-      tri = download_tri_data
+      tri = download_tri_data,
+      aadt = download_aadt_data
     )
 
     tryCatch({
@@ -2172,7 +2173,7 @@ download_tri_data <- function(
             year_sequence)
 
   #### 4. build download command
-  download_commands <- paste0("curl ",
+  download_commands <- paste0("curl -L ",
                               download_urls,
                               " --output ",
                               download_names,
@@ -2181,7 +2182,6 @@ download_tri_data <- function(
   commands_txt <- paste0(
     directory_to_save,
     "TRI_",
-    "_",
     year_start, "_", year_end,
     "_",
     Sys.Date(),
@@ -2239,7 +2239,6 @@ download_aadt_data <- function(
   directory_to_save <- download_sanitize_path(directory_to_save)
 
   #### 3. define measurement data paths
-  year_target <- match.arg(year_target)
   url_download_base <- "https://gaftp.epa.gov/air/nei/%d/data_summaries/"
   url_download_remain <-
     c("2017v1/2017neiApr_onroad_byregions.zip",
@@ -2264,7 +2263,6 @@ download_aadt_data <- function(
   commands_txt <- paste0(
     directory_to_save,
     "NEI_AADT_",
-    "_",
     paste(year_target, collapse = "-"),
     "_",
     Sys.Date(),

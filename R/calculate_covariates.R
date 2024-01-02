@@ -19,16 +19,17 @@ if (run) {
 #' @seealso
 #' - \link{calc_modis}: "modis", "MODIS"
 #' - \link{calc_koppen_geiger}: "koppen-geiger", "koeppen-geiger", "koppen",
-#' "koeppen"
+#' - \link{calc_ecoregion}: "ecoregion", "ecoregions"
+#' - \link{calc_temporal_dummies}: "dummies"
 #' @returns Calculated covariates. Mainly data.frame object.
 #' @author Insang Song
 #' @export
 calc_covariates <-
   function(
-      covariate = c("modis", "MODIS", "koppen-geiger",
+      covariate = c("modis", "koppen-geiger",
                     "koeppen-geiger", "koppen", "koeppen",
                     "geos", "dummies", "gmted", "roads",
-                    "sedac_groads", "mlcd", "tri", "ncep", "aadt",
+                    "sedac_groads", "nlcd", "tri", "ncep", "aadt",
                     "ecoregions", "ecoregion"),
       path = "./input/koppen_geiger/raw/Beck_KG_V1_present_0p0083.tif",
       sites,
@@ -728,3 +729,83 @@ calc_temporal_dummies <-
 
     return(sites_dums)
   }
+
+#' Calculate TRI covariates
+#' @param path character(1). Path to the directory with TRI CSV files
+#' @param sites stdt/sf/SpatVector/data.frame. Unique sites
+#' see \link{\code{convert_stobj_to_stdt}}
+#' @param id_col character(1). Unique site identifier column name.
+#'  Default is "site_id".
+#' @param domain_year integer. Year domain to dummify.
+#'  Default is \code{seq(2018L, 2022L)}
+#' @author Insang Song
+#' @returns A data.frame object.
+#' @importFrom terra vect
+#' @importFrom terra crs
+#' @importFrom methods is
+#' @importFrom data.table fread
+#' @importFrom data.table rbindlist
+#' @export
+calculate_tri <- function(
+  path = "./input/tri/",
+  sites,
+  id_col = "site_id",
+  domain_year = seq(2018L, 2022L),
+  radius = c(1e3L, 1e4L, 5e4L)
+) {
+  if (is_stdt(sites)) {
+    sites <- sites$stdt
+    sites_epsg <- sites$crs_dt
+  } else {
+    if (!all(c("lon", "lat", "date") %in% colnames(sites))) {
+      stop("sites should be stdt or have 'lon', 'lat', and 'date' fields.\n")
+    }
+    sites_epsg <- terra::crs(sites)
+    if (!methods::is(sites, "SpatVector")) {
+      if (methods::is(sites, "sf")) {
+        sites <- terra::vect(sites)
+      }
+      if (is.data.frame(sites)) {
+        sites <-
+          terra::vect(sites,
+                      geom = c("lon", "lat"),
+                      epsg = sites_epsg)
+      }
+    }
+  }
+
+  radius <- match.arg(radius)
+
+  csvs_tri <- list.files(path = path, pattern = "*.csv$", full.names = TRUE)
+  col_sel <- c(1, 13, 12, 34, 41, 42, 43, 45, 46, 48, 47, 104)
+  csvs_tri <- lapply(csvs_tri, read.csv)
+  csvs_tri <- lapply(csvs_tri, function(x) x[, col_sel])
+  csvs_tri <- data.table::rbindlist(csvs_tri)
+  # column name readjustment
+
+  # depending on the way the chemicals are summarized
+  # ... csvs are aggregated...
+  csvs_tri_x <-
+    data.table::dcast(csvs_tri, YEAR + LONGITUDE + LATITUDE ~ .)
+  spvect_tri <-
+    terra::vect(csvs_tri_x,
+                geom = c("LONGITUDE", "LATITUDE"),
+                crs = "EPSG:4326",
+                keepgeom = TRUE)
+  sites_re <- terra::project(sites, terra::crs(spvect_tri))
+
+  list_buffer <- split(radius, radius)
+  list_buffer <-
+    lapply(list_buffer,
+           function(x) {
+             xx <- terra::nearby(sites_re, spvect_tri, distance = x)
+             xx$buffer <- x
+             xx[, lapply(.SD, sum, na.rm = TRUE),
+                by = c("YEAR", "LONGITUDE", "LATITUDE", "buffer")]
+           })
+  df_tri <- data.table::rbindlist(list_buffer)
+  return(df_tri)
+
+}
+
+

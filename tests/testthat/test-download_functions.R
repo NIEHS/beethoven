@@ -706,18 +706,20 @@ testthat::test_that("EPA TRI download URLs have HTTP status 200.", {
   withr::local_package("httr")
   withr::local_package("stringr")
   # function parameters
-  directory_to_save <- "../testdata/"
+  directory_to_save <- testthat::test_path("..", "testdata/")
   # run download function
   download_data(dataset_name = "tri",
                 directory_to_save = directory_to_save,
                 data_download_acknowledgement = TRUE,
                 download = FALSE,
                 remove_command = FALSE)
+  year_start <- 2018L
+  year_end <- 2022L
+  
   # define file path with commands
   commands_path <- paste0(
     directory_to_save,
     "TRI_",
-    "_",
     year_start, "_", year_end,
     "_",
     Sys.Date(),
@@ -727,7 +729,7 @@ testthat::test_that("EPA TRI download URLs have HTTP status 200.", {
   # import commands
   commands <- read_commands(commands_path = commands_path)
   # extract urls
-  urls <- extract_urls(commands = commands, position = 2)
+  urls <- extract_urls(commands = commands, position = 3)
   # check HTTP URL status
   url_status <- check_urls(urls = urls, size = 1L, method = "GET")
   # implement unit tests
@@ -743,18 +745,18 @@ testthat::test_that("EPA NEI (AADT) download URLs have HTTP status 200.", {
   withr::local_package("httr")
   withr::local_package("stringr")
   # function parameters
-  directory_to_save <- "../testdata/"
+  directory_to_save <- testthat::test_path("..", "testdata/")
   # run download function
   download_data(dataset_name = "aadt",
                 directory_to_save = directory_to_save,
                 data_download_acknowledgement = TRUE,
                 download = FALSE,
                 remove_command = FALSE)
+  year_target <- c(2017L, 2020L)
   # define file path with commands
   commands_path <- paste0(
     directory_to_save,
     "NEI_AADT_",
-    "_",
     paste(year_target, collapse = "-"),
     "_",
     Sys.Date(),
