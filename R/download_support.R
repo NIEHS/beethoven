@@ -72,8 +72,7 @@ download_permit <-
 #' @export
 download_run <- function(
     download = FALSE,
-    system_command = NULL,
-    commands_txt = NULL) {
+    system_command = NULL) {
   if (download == TRUE) {
     cat(paste0("Downloading requested files...\n"))
     system(command = system_command)
