@@ -53,7 +53,7 @@ calc_covariates <-
       narr_p_levels = calc_narr_p_levels,
       p_levels = calc_narr_p_levels,
       plevels = calc_narr_p_levels,
-      nlcd = calc_nlcd,
+      nlcd = calc_nlcd_ratio,
       noaa = calc_noaa_hms,
       smoke = calc_noaa_hms,
       hms = calc_noaa_hms,
@@ -181,6 +181,100 @@ calc_koppen_geiger <-
   }
 
 
+#' Compute land cover classes ratio in circle buffers around points
+#'
+#' @param path character giving nlcd data path
+#' @param sites terra::SpatVector of points geometry
+#' @param radius numeric (non-negative) giving the
+#' radius of buffer around points
+#' @param year numeric giving the year of NLCD data used
+#' @importFrom utils read.csv
+#' @importFrom utils data
+#' @importFrom terra rast
+#' @importFrom terra project
+#' @importFrom terra vect
+#' @importFrom terra crs
+#' @importFrom terra same.crs
+#' @importFrom terra buffer
+#' @importFrom sf st_union
+#' @importFrom sf st_geometry
+#' @importFrom terra intersect
+#' @importFrom exactextractr exact_extract
+#' @import spData
+#' @export
+calc_nlcd_ratio <- function(path,
+                            sites,
+                            radius = 1000,
+                            year = 2021) {
+  # check inputs
+  if (!is.numeric(radius)) {
+    stop("radius is not a numeric.")
+  }
+  if (radius <= 0) {
+    stop("radius has not a likely value.")
+  }
+  if (!is.numeric(year)) {
+    stop("year is not a numeric.")
+  }
+  if (class(sites)[1] != "SpatVector") {
+    stop("sites is not a terra::SpatVector.")
+  }
+  if (!is.character(path)) {
+    stop("path is not a character.")
+  }
+  if (!file.exists(path)) {
+    stop("path does not exist.")
+  }
+  # open nlcd file corresponding to the year
+  nlcd_file <- list.files(path,
+                          pattern = paste0("nlcd_", year, "_.*.tif$"),
+                          full.names = TRUE)
+  if (length(nlcd_file) == 0) {
+    stop("NLCD data not available for this year.")
+  }
+  nlcd <- terra::rast(nlcd_file)
+  # select points within mainland US and reproject on nlcd crs if necessary
+  # need spData library
+  utils::data("us_states", package = "spData")
+  us_main <- sf::st_union(get("us_states")) |>
+    terra::vect() |>
+    terra::project(y = terra::crs(sites))
+  data_vect_b <- sites |>
+    terra::intersect(x = us_main)
+  if (!terra::same.crs(data_vect_b, nlcd)) {
+    data_vect_b <- terra::project(data_vect_b, terra::crs(nlcd))
+  }
+  # create circle buffers with buf_radius
+  bufs_pol <- terra::buffer(data_vect_b, width = radius) |>
+    sf::st_as_sf()
+  # ratio of each nlcd class per buffer
+  nlcd_at_bufs <- exactextractr::exact_extract(nlcd,
+                                               sf::st_geometry(bufs_pol),
+                                               fun = "frac",
+                                               stack_apply = TRUE,
+                                               progress = FALSE)
+  # select only the columns of interest
+  nlcd_at_bufs <- nlcd_at_bufs[names(nlcd_at_bufs)[grepl("frac_",
+                                                         names(nlcd_at_bufs))]]
+  # change column names
+  fpath <- system.file("extdata", "nlcd_classes.csv", package = "NRTAPmodel")
+  nlcd_classes <- utils::read.csv(fpath)
+  nlcd_names <- names(nlcd_at_bufs)
+  nlcd_names <- sub(pattern = "frac_", replacement = "", x = nlcd_names)
+  nlcd_names <- as.numeric(nlcd_names)
+  nlcd_names <- nlcd_classes[nlcd_classes$value %in% nlcd_names, c("class")]
+  new_names <- sapply(
+    nlcd_names,
+    function(x) {
+      sprintf("LDU_%s_0_%05d_%04d", x, radius, year)
+    }
+  )
+  names(nlcd_at_bufs) <- new_names
+  # merge data_vect with nlcd class fractions (and reproject)
+  new_data_vect <- cbind(data_vect_b, nlcd_at_bufs)
+  new_data_vect <- terra::project(new_data_vect, terra::crs(sites))
+  return(new_data_vect)
+}
 
 
 #' Calculate EPA Ecoregions level 2/3 binary variables
@@ -345,7 +439,7 @@ modis_get_vrt <- function(
 #' @importFrom terra crs
 #' @importFrom terra merge
 #' @export
-preprocess_modis_vnp46 <- function(
+modis_preprocess_vnp46 <- function(
   paths,
   date_in,
   tile_df,
@@ -584,7 +678,7 @@ calc_modis <-
         # VNP46 corner assignment
         if (product == "VNP46A2") {
           vrt_today <-
-            preprocess_modis_vnp46(
+            modis_preprocess_vnp46(
               paths = path,
               date_in = day_to_pick,
               tile_df = tilelist,

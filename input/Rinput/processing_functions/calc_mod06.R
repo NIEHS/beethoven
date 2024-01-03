@@ -12,8 +12,6 @@ if (!require(NRTAPmodel)) {
   library(NRTAPmodel)
 }
 
-
-
 pkgs <- c("terra", "sf", "foreach", "parallelly", "doParallel", "data.table", "doRNG", "exactextractr")
 invisible(sapply(pkgs, library, character.only = TRUE, quietly = TRUE))
 sf::sf_use_s2(FALSE)
@@ -26,15 +24,16 @@ setwd(prjhome)
 source(file.path(prjhome, "R", "calculate_covariates.R"))
 source(file.path(inputdir, "Rinput", "processing_functions", "filter_unique_sites.R"))
 sites <- filter_unique_sites()
-sites_sf <- sf::st_as_sf(as.data.frame(sites), coords = c("lon", "lat"),
-        crs = "EPSG:4326")
+sites_sf <-
+  sf::st_as_sf(as.data.frame(sites), coords = c("lon", "lat"),
+               crs = "EPSG:4326")
 
 mod06_dir <- file.path(inputdir, "modis", "raw", "61", "MOD06_L2")
 files_mod06 <-
-    list.files(path = mod06_dir,
-               pattern = "*.hdf$",
-               full.names = TRUE,
-               recursive = TRUE)
+  list.files(path = mod06_dir,
+             pattern = "*.hdf$",
+             full.names = TRUE,
+             recursive = TRUE)
 
 # Cloud fraction night, day (37, 39, respectively)
 # indices <- c(37, 39)
@@ -53,10 +52,30 @@ cf2 <- terra::rast(parsinga[2])
 cf9 <- terra::rast(parsinga[9])
 
 
+stars::st_warp
+
+rectify_ref_stars <- function(ras) {
+  ras <- stars::read_stars(ras)
+  ref_ext <- sf::st_bbox(ras)
+  ref_ext <- ref_ext + c(-5L, 5L, -5L, 5L)
+  #ref_aoi <- terra::rast(ref_ext, resolution = 0.05)
+  rtd <- stars::st_warp(ras, crs = 4326, cellsize = 0.025)
+  return(rtd)
+}
+
+kk <- rectify_ref_stars(parsinga[1])
+pps <- split(parsinga, parsinga) |>
+  lapply(rectify_ref_stars) |>
+  lapply(terra::rast) |>
+  Reduce(f = terra::mosaic, x = _)
+plot(pps)
+
+
 rectify_ref <- function(ras) {
   ras <- terra::rast(ras)
   ref_ext <- terra::ext(ras)
-  ref_aoi <- terra::rast(ref_ext, resolution = 0.02)
+  ref_ext <- ref_ext + 5L
+  ref_aoi <- terra::rast(ref_ext, resolution = 0.05)
   rtd <- terra::rectify(ras, method = "near", aoi = ref_aoi)
   return(rtd)
 }
