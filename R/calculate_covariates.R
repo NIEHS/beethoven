@@ -679,7 +679,7 @@ calc_modis <-
     sites_input <- sites
     # default export list to minimize memory consumption per thread
     export_list <-
-      c("paths", "product", "sites_input", "name_covariates",
+      c("path", "product", "sites_input", "name_covariates",
         "id_col", "fun_summary",
         "radius", "subdataset", "layers", "modis_worker", "modis_get_vrt",
         "modis_preprocess_vnp46",

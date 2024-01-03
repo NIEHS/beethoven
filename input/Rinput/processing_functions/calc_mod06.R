@@ -21,7 +21,7 @@ setwd(prjhome)
 
 
 ##
-source(file.path(prjhome, "R", "calculate_covariates.R"))
+# source(file.path(prjhome, "R", "calculate_covariates.R"))
 source(file.path(inputdir, "Rinput", "processing_functions", "filter_unique_sites.R"))
 sites <- filter_unique_sites()
 sites_sf <-
