@@ -38,71 +38,52 @@ files_mod06 <-
 # Cloud fraction night, day (37, 39, respectively)
 # indices <- c(37, 39)
 
-header <- "HDF4_EOS:EOS_SWATH:"
-suffix <- ":mod06:"
-parsing <- c("Cloud_Fraction_Day", "Cloud_Fraction_Night")
-filename <- files_mod06[1:24]
-parsinga <- sprintf("%s%s%s%s", header, filename, suffix, parsing[2])
+# header <- "HDF4_EOS:EOS_SWATH:"
+# suffix <- ":mod06:"
+# parsing <- c("Cloud_Fraction_Day", "Cloud_Fraction_Night")
+# filename <- files_mod06[1:24]
+# parsinga <- sprintf("%s%s%s%s", header, filename, suffix, parsing[2])
 # parsinga
 
-# terra::describe(files_mod06[1], sds = TRUE)
+# rectify_ref_stars <- function(ras) {
+#   ras <- stars::read_stars(ras)
+#   # ref_ext <- sf::st_bbox(ras)
+#   # ref_ext <- ref_ext + c(-5L, 5L, -5L, 5L)
+#   #ref_aoi <- terra::rast(ref_ext, resolution = 0.05)
+#   rtd <- stars::st_warp(ras, crs = 4326, cellsize = 0.025)
+#   return(rtd)
+# }
 
-cf1 <- terra::rast(parsinga[1])
-cf2 <- terra::rast(parsinga[2])
-cf9 <- terra::rast(parsinga[9])
-
-
-stars::st_warp
-
-rectify_ref_stars <- function(ras) {
-  ras <- stars::read_stars(ras)
-  ref_ext <- sf::st_bbox(ras)
-  ref_ext <- ref_ext + c(-5L, 5L, -5L, 5L)
-  #ref_aoi <- terra::rast(ref_ext, resolution = 0.05)
-  rtd <- stars::st_warp(ras, crs = 4326, cellsize = 0.025)
-  return(rtd)
-}
-
-kk <- rectify_ref_stars(parsinga[1])
-pps <- split(parsinga, parsinga) |>
-  lapply(rectify_ref_stars) |>
-  lapply(terra::rast) |>
-  Reduce(f = terra::mosaic, x = _)
-plot(pps)
+# kk <- rectify_ref_stars(parsinga[1])
+# pps <- split(parsinga, parsinga) |>
+#   lapply(rectify_ref_stars) |>
+#   lapply(terra::rast) |>
+#   Reduce(f = terra::mosaic, x = _)
+# plot(pps)
 
 
-rectify_ref <- function(ras) {
-  ras <- terra::rast(ras)
-  ref_ext <- terra::ext(ras)
-  ref_ext <- ref_ext + 5L
-  ref_aoi <- terra::rast(ref_ext, resolution = 0.05)
-  rtd <- terra::rectify(ras, method = "near", aoi = ref_aoi)
-  return(rtd)
-}
+# rectify_ref <- function(ras) {
+#   ras <- terra::rast(ras)
+#   ref_ext <- terra::ext(ras)
+#   ref_ext <- ref_ext + 5L
+#   ref_aoi <- terra::rast(ref_ext, resolution = 0.05)
+#   rtd <- terra::rectify(ras, method = "near", aoi = ref_aoi)
+#   return(rtd)
+# }
 
-pps <- split(parsinga, parsinga) |>
-  lapply(rectify_ref) |>
-  Reduce(f = terra::mosaic, x = _)
-
-# ref <- terra::rast(ext = terra::ext(cf1), resolution = 0.025)
+# pps <- split(parsinga, parsinga) |>
+#   lapply(rectify_ref) |>
+#   Reduce(f = terra::mosaic, x = _)
 
 # cf1r <- terra::rectify(cf1, method = "near", aoi = ref)
 # cf2r <- terra::rectify(cf2, method = "near")
 # cf9r <- terra::rectify(cf9, method = "near")
 
-# ref <- terra::rast(ext = terra::ext(cf1r), resolution = 0.025)
-
-
-
-nt1 <- stars::read_stars(parsinga[1])
-nt11 <- sf::st_transform(nt1, "EPSG:4326")
-nt2 <- stars::read_stars(parsinga[2])
-nt21 <- sf::st_transform(nt2, "EPSG:4326")
-
-plot(nt1)
-
-lightmosaicked <-
-    sf::st_m(nt11, nt21)
-
-stars::st_warp()
-
+mod06_vars <-
+  calc_modis(
+    files_mod06[1:48],
+    product = "MOD06_L2",
+    sites = sites,
+    name_covariates = c("MOD_CLCVD_0_", "MOD_CLCVN_0_"),
+    nthreads = 48L
+  )

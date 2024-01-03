@@ -6,7 +6,7 @@
 \usage{
 modis_get_vrt(
   paths,
-  product = c("MOD11A1", "MOD13A2", "MOD06_L2", "VNP46A2", "MOD09GA", "MCD19A2"),
+  product = c("MOD11A1", "MOD13A2", "MOD06_L2", "MOD09GA", "MCD19A2"),
   index_sds = NULL,
   layers = NULL,
   date_in,
@@ -18,7 +18,7 @@ modis_get_vrt(
 preferably a recursive search result from \code{list.files}.}
 
 \item{product}{character(1). Product code of MODIS. Should be one of
-\code{c('MOD11A1', 'MOD13A2', 'MOD06_L2', 'VNP46A2', 'MOD09GA', 'MCD19A2')}}
+\code{c('MOD11A1', 'MOD13A2', 'MOD06_L2', 'MOD09GA', 'MCD19A2')}}
 
 \item{index_sds}{integer(1). The index of subdataset to draw.}
 

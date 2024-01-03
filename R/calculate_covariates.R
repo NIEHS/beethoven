@@ -1,12 +1,3 @@
-# to look at the path and package settings,
-# consult "load_packages.r"
-# run variable is to pass lintr test
-run <- FALSE
-if (run) {
-  source("./input/Rinput/processing_functions/load_packages.R")
-}
-
-
 #' Calculate covariates
 #' @param covariate character(1). Covariate type.
 #' @param path character. Single or multiple path strings.
@@ -355,7 +346,7 @@ calc_ecoregion <-
 #' @param paths character. Full list of hdf file paths.
 #'  preferably a recursive search result from \code{list.files}.
 #' @param product character(1). Product code of MODIS. Should be one of
-#' \code{c('MOD11A1', 'MOD13A2', 'MOD06_L2', 'VNP46A2', 'MOD09GA', 'MCD19A2')}
+#' \code{c('MOD11A1', 'MOD13A2', 'MOD06_L2', 'MOD09GA', 'MCD19A2')}
 #' @param index_sds integer(1). The index of subdataset to draw.
 #' @param layers integer. The index (indices) of layers if there are only
 #' layers inside the input file.
@@ -367,7 +358,7 @@ calc_ecoregion <-
 modis_get_vrt <- function(
     paths,
     product = c("MOD11A1", "MOD13A2", "MOD06_L2",
-                "VNP46A2", "MOD09GA", "MCD19A2"),
+                "MOD09GA", "MCD19A2"),
     index_sds = NULL,
     layers = NULL,
     date_in,
@@ -487,9 +478,59 @@ modis_preprocess_vnp46 <- function(
       return(vnp_)
     }, vnp46_today, filepaths_today_tiles_list, SIMPLIFY = FALSE)
   vnp_all <- do.call(terra::merge, vnp_assigned)
-  # vnp_all[vnp_all == 65535] <- NA
   return(vnp_all)
 }
+
+
+#' Mosaic MODIS MOD06_L2 product files
+#' @description This function will return a SpatRaster object with
+#' mosaicked 5-minute cloud coverage values.
+#' @param paths character. Full paths of hdf files.
+#' @param date_in character(1). Date to query.
+#' @param get_var character(1). One of 'Cloud_Fraction_Day' or
+#' 'Cloud_Fraction_Night'
+#' @param resolution numeric(1). Resolution of output raster.
+#' Unit is degree.
+#' @returns SpatRaster object. CRS is "EPSG:4326".
+#' @author Insang Song
+#' @importFrom stars read_stars
+#' @importFrom stars st_warp
+#' @importFrom terra rast
+#' @importFrom terra mosaic
+#' @export
+modis_mosaic_mod06 <-
+  function(
+    paths,
+    date_in,
+    resolution = 0.025
+  ) {
+    rectify_ref_stars <- function(ras, cellsize = resolution) {
+      ras <- stars::read_stars(ras)
+      rtd <-
+        stars::st_warp(ras, crs = 4326, cellsize = cellsize, threshold = 0.66)
+      return(rtd)
+    }
+    header <- "HDF4_EOS:EOS_SWATH:"
+    suffix <- ":mod06:"
+    get_var = c("Cloud_Fraction_Day", "Cloud_Fraction_Night")
+    ras_mod06 <- vector("list", 2L)
+    datejul <- strftime(date_in, format = "%Y/%j")
+    paths_today <- grep(as.character(datejul), paths, value = TRUE)
+
+    for (element in seq_along(get_var)) {
+      target_text <-
+        sprintf("%s%s%s%s", header, paths_today, suffix, get_var[element])
+      mod06_element <- split(target_text, target_text) |>
+        lapply(rectify_ref_stars) |>
+        lapply(terra::rast)
+      mod06_element <- Reduce(f = terra::mosaic, x = mod06_element)
+      ras_mod06[[element]] <- mod06_element
+    }
+    mod06_mosaic <- c(ras_mod06[[1]], ras_mod06[[2]])
+    terra::varnames(mod06_mosaic) <- get_var
+    return(mod06_mosaic)
+  }
+
 
 
 #' A single-date MODIS worker for parallelization
@@ -641,7 +682,7 @@ calc_modis <-
       c("paths", "product", "sites_input", "name_covariates",
         "id_col", "fun_summary",
         "radius", "subdataset", "layers", "modis_worker", "modis_get_vrt",
-        "preprocess_modis_vnp46",
+        "modis_preprocess_vnp46",
         "dates_available")
     package_list <-
       c("sf", "terra", "exactextractr", "foreach", "scomps", "dplyr", "doRNG")
@@ -685,6 +726,11 @@ calc_modis <-
               subdataset = subdataset,
               crs_ref = "EPSG:4326"
             )
+        } else if (product == "MOD06_L2") {
+          vrt_today <-
+            modis_mosaic_mod06(
+                               paths = path,
+                               date_in = day_to_pick)
         } else {
           vrt_today <-
             modis_get_vrt(

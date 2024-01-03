@@ -114,3 +114,28 @@ testthat::test_that("calc_ecoregion works well", {
                          sum(unlist(ecor_res[, dum_cn])), 2L)
 })
 
+
+
+# testthat::test_that("mod06 is well run", {
+
+#   withr::local_package("terra")
+#   withr::local_package("sf")
+#   withr::local_package("stars")
+#   withr::local_options(list(sf_use_s2 = FALSE))
+
+#   ddnhome <- "/ddn/gs1/home/songi2"
+#   usrlib <- file.path(ddnhome, "r-libs")
+#   prjhome <- file.path(ddnhome, "projects", "NRTAPModel")
+#   inputdir <- file.path(prjhome, "input")
+
+#   mod06_dir <- file.path(inputdir, "modis", "raw", "61", "MOD06_L2")
+#   files_mod06 <-
+#     list.files(path = mod06_dir,
+#                pattern = "*.hdf$",
+#                full.names = TRUE,
+#                recursive = TRUE)
+
+#   xx <- modis_mosaic_mod06(paths = files_mod06, "2018-05-28")
+#   testthat::expect_s4_class(xx, "SpatRaster")
+#   testthat::expect_equal(length(terra::varnames(xx)), 2L)
+# })
