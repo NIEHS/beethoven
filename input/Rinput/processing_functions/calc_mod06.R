@@ -91,6 +91,60 @@ mod06_vars <-
     nthreads = 2L
   )
 
+modecatch <- c("2018001", "2018002")
+radius <- c(0, 1e3L, 1e4L, 5e4L)
+product <- "MOD06_L2"
+doParallel::registerDoParallel(2L)
+
+resdf_mod06_surfref <-
+foreach(
+  datei = seq_along(modecatch),
+  .packages = c("sf", "terra", "exactextractr", "foreach", "scomps", "dplyr", "parallelly", "doParallel", "NRTAPmodel", "doRNG"),
+  .export = c("sites_sf", "files_mod06", "radius", "modecatch", "product"),
+  .combine = dplyr::bind_rows,
+  .errorhandling = "pass"
+) %dorng% {
+    options(sf_use_s2 = FALSE)
+    #radius <- c(0L, 1e3L, 1e4L, 5e4L)
+    
+    mod09_thisyear <- modecatch[datei]
+    mod09_thisyear <- as.Date(mod09_thisyear, format = "%Y%j")
+
+    radiusindex <- seq_along(radius)
+    radiuslist <- split(radiusindex, radiusindex)
+    nameflag <- c("MOD_06DYT_", "MOD_06NGT_")
+    res0 <-
+    lapply(radiuslist,
+      function(k) {
+        name_radius <- sprintf("%s%05d", nameflag, radius[k])
+        tryCatch({
+        inras <- modis_mosaic_mod06(files_mod06, mod09_thisyear)
+        
+        extracted <- modis_worker(
+          raster = inras,
+          date = mod09_thisyear,
+          sites_in = sites_sf,
+          product = "MOD06_L2",
+          name_extracted = name_radius,
+          points = terra::vect(sites_sf),
+          id = "site_id",
+          radius = radius[k]
+          )
+        return(extracted)
+        }, error = function(e) {
+          error_df <- sf::st_drop_geometry(sites_sf)
+          error_df$date <- mod09_thisyear
+          error_df$remarks <- -99999
+          names(error_df)[which(names(error_df) == "remarks")] <- name_radius
+          return(error_df)
+        })
+      })
+    res <- Reduce(\(x, y) dplyr::left_join(x, y, by = c("site_id", "date")), res0)
+    return(res)
+  }
+
+testras <- modis_mosaic_mod06(files_mod06, "2018-01-02")
+
 kk <- modis_mosaic_mod06(files_mod06, "2018-01-01")
 kx <-
   modis_worker(kk,

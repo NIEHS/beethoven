@@ -528,6 +528,8 @@ modis_mosaic_mod06 <-
     }
     mod06_mosaic <- c(ras_mod06[[1]], ras_mod06[[2]])
     terra::varnames(mod06_mosaic) <- get_var
+    mod06_mosaic <- terra::crop(mod06_mosaic,
+                                terra::ext(c(-130, -60, 20, 54)))
     return(mod06_mosaic)
   }
 
@@ -681,9 +683,8 @@ calc_modis <-
     export_list <-
       c("path", "product", "sites_input", "name_covariates",
         "id_col", "fun_summary", "tilelist",
-        "radius", "subdataset", "layers", "modis_worker", "modis_get_vrt",
-        "modis_preprocess_vnp46",
-        "dates_available")
+        "radius", "subdataset", "layers")
+        # "modis_worker", "modis_get_vrt", "modis_preprocess_vnp46")
     package_list <-
       c("sf", "terra", "exactextractr", "foreach", "data.table",
         "NRTAPmodel", "scomps", "dplyr", "doRNG", "parallelly", "doParallel")
@@ -762,8 +763,8 @@ calc_modis <-
                          sites_in = sites_input,
                          product = product,
                          fun_summary_raster = fun_summary,
-                         name_extracted = name_radius,
                          foo = scomps::extract_with_buffer,
+                         name_extracted = name_radius,
                          points = terra::vect(sites_input),
                          id = id_col,
                          radius = radius[k]
