@@ -680,12 +680,13 @@ calc_modis <-
     # default export list to minimize memory consumption per thread
     export_list <-
       c("path", "product", "sites_input", "name_covariates",
-        "id_col", "fun_summary",
+        "id_col", "fun_summary", "tilelist",
         "radius", "subdataset", "layers", "modis_worker", "modis_get_vrt",
         "modis_preprocess_vnp46",
         "dates_available")
     package_list <-
-      c("sf", "terra", "exactextractr", "foreach", "scomps", "dplyr", "doRNG")
+      c("sf", "terra", "exactextractr", "foreach", "data.table",
+        "NRTAPmodel", "scomps", "dplyr", "doRNG", "parallelly", "doParallel")
     if (!is.null(export_list_add)) {
       export_list <- c(export_list, export_list_add)
     }

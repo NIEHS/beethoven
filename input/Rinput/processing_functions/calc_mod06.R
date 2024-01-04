@@ -18,8 +18,6 @@ sf::sf_use_s2(FALSE)
 
 setwd(prjhome)
 
-
-
 ##
 # source(file.path(prjhome, "R", "calculate_covariates.R"))
 source(file.path(inputdir, "Rinput", "processing_functions", "filter_unique_sites.R"))
@@ -79,11 +77,206 @@ files_mod06 <-
 # cf2r <- terra::rectify(cf2, method = "near")
 # cf9r <- terra::rectify(cf9, method = "near")
 
+
+# mod06dates <- regmatches(files_mod06, regexpr("20\\d{2,2}/[0-3]\\d{2,2}", files_mod06))
+
+
+sites_sf <- sf::st_as_sf(sites, coords= 2:3, crs = 4326)
 mod06_vars <-
   calc_modis(
     files_mod06[1:48],
     product = "MOD06_L2",
-    sites = sites,
+    sites = sites_sf,
     name_covariates = c("MOD_CLCVD_0_", "MOD_CLCVN_0_"),
-    nthreads = 48L
+    nthreads = 2L
   )
+
+kk <- modis_mosaic_mod06(files_mod06, "2018-01-01")
+kx <-
+  modis_worker(kk,
+               "2018-01-01",
+               sites_in = sites_sf,
+               name_extracted = c("MOD_CLCVD_0_10000", "MOD_CLCVN_0_10000"),
+               product = "MOD06_L2",
+               points = terra::vect(sites_sf),
+               radius = c(50000),
+               id = "site_id")
+kx2 <-
+  modis_worker(kk,
+               "2018-01-01",
+               sites_in = sites_sf,
+               name_extracted = c("MOD_CLCVD_0_10000", "MOD_CLCVN_0_10000"),
+               product = "MOD06_L2",
+               points = terra::vect(sites_sf),
+               radius = c(50000),
+               id = "site_id")
+kx3 <-
+  modis_worker(kk,
+               "2018-01-01",
+               sites_in = sites_sf,
+               name_extracted = c("MOD_CLCVD_0_10000", "MOD_CLCVN_0_10000"),
+               product = "MOD06_L2",
+               points = terra::vect(sites_sf),
+               radius = c(50000),
+               id = "site_id")
+kxl <- list(kx, kx2, kx3)
+kxldf <- Reduce(\(x, y) dplyr::left_join(x, y, by = c("site_id", "date")), kxl)
+
+kxx <- terra::extract(kk, vect(sites_sf))
+
+
+
+rlst <- c(1000L, 10000L, 50000L)
+rlst <- split(seq_along(rlst), seq_along(rlst))
+radius0 <- c(1000L, 10000L, 50000L)
+res0 <-
+  lapply(rlst,
+          function(k) {
+            name_radius <-
+              sprintf("%s%05d",
+                      c("MOD_CLCVD_0_", "MOD_CLCVN_0_"),
+                      radius0[k])
+
+            tryCatch({
+              extracted <-
+                modis_worker(
+                  raster = kk,
+                  date = as.character("2018-05-29"),
+                  sites_in = sites_sf,
+                  product = "MOD06_L2",
+                  fun_summary_raster = "mean",
+                  name_extracted = name_radius,
+                  foo = scomps::extract_with_buffer,
+                  points = terra::vect(sites_sf),
+                  id = "site_id",
+                  radius = radius0[k]
+                )
+              return(extracted)
+            }, error = function(e) {
+              print(e)
+              error_df <- sf::st_drop_geometry(sites_sf)
+              error_df$date <- "2018-05-29"
+              error_df$remarks <- -99999
+              names(error_df)[which(names(error_df) == "remarks")] <-
+                name_radius
+
+              return(error_df)
+            })
+          })
+res <-
+  Reduce(\(x, y) {
+                  dplyr::left_join(x, y,
+                                    by = c("site_id", "date"))},
+  res0)
+
+
+### run by line
+path <- files_mod06
+product <- "MOD06_L2"
+radius0 <- c(1000L, 10000L, 50000L)
+    export_list <-
+      c("path", "product", "sites_sf", #"name_covariates",
+        #"id_col", "fun_summary",
+        "radius0", "modis_worker", "modis_get_vrt",
+        "modis_preprocess_vnp46", "dates_available")
+    package_list <-
+      c("sf", "terra", "exactextractr", "foreach", "data.table",
+        "NRTAPmodel", "scomps", "dplyr", "doRNG", "parallelly", "doParallel")
+    cl0 <-
+      parallelly::makeClusterPSOCK(
+                                   2L,
+                                   rscript_libs = .libPaths())
+    doParallel::registerDoParallel(cl0)
+    dates_available <- c("2018001", "2018002")
+    calc_results <-
+      foreach::foreach(
+        datei = seq_along(c(1,2)),
+        .packages = package_list,
+        .export = export_list,
+        .combine = dplyr::bind_rows,
+        .errorhandling = "pass",
+        .verbose = TRUE
+      ) %dorng% {
+        options(sf_use_s2 = FALSE)
+
+        day_to_pick <- dates_available[datei]
+        day_to_pick <- as.Date(day_to_pick, format = "%Y%j")
+
+        radiusindex <- seq_along(radius0)
+        radiuslist <- split(radiusindex, radiusindex)
+
+        # VNP46 corner assignment
+        if (product == "VNP46A2") {
+          vrt_today <-
+            modis_preprocess_vnp46(
+              paths = path,
+              date_in = day_to_pick,
+              tile_df = tilelist,
+              subdataset = subdataset,
+              crs_ref = "EPSG:4326"
+            )
+        } else if (product == "MOD06_L2") {
+          vrt_today <-
+            modis_mosaic_mod06(
+                               paths = path,
+                               date_in = day_to_pick)
+        } else {
+          vrt_today <-
+            modis_get_vrt(
+                          paths = path,
+                          index_sds = subdataset,
+                          product = product,
+                          date_in = day_to_pick,
+                          layers = layers)
+        }
+        if (terra::nlyr(vrt_today) != length(name_covariates)) {
+          warning("The number of layers in the input raster do not match
+                  the length of name_covariates.\n")
+        }
+
+res0 <-
+  lapply(rlst,
+          function(k) {
+            name_radius <-
+              sprintf("%s%05d",
+                      c("MOD_CLCVD_0_", "MOD_CLCVN_0_"),
+                      radius0[k])
+
+            tryCatch({
+              extracted <-
+                modis_worker(
+                  raster = vrt_today,
+                  date = as.character("2018-05-29"),
+                  sites_in = sites_sf,
+                  product = "MOD06_L2",
+                  fun_summary_raster = "mean",
+                  name_extracted = name_radius,
+                  foo = scomps::extract_with_buffer,
+                  points = terra::vect(sites_sf),
+                  id = "site_id",
+                  radius = radius0[k]
+                )
+              return(extracted)
+            }, error = function(e) {
+              print(e)
+              error_df <- sf::st_drop_geometry(sites_sf)
+              error_df$date <- "2018-05-29"
+              error_df$remarks <- -99999
+              names(error_df)[which(names(error_df) == "remarks")] <-
+                name_radius
+
+              return(error_df)
+            })
+          })
+res <-
+  Reduce(\(x, y) {
+                  dplyr::left_join(x, y,
+                                    by = c("site_id", "date"))},
+  res0)
+  print(head(res))
+  return(res)
+      }
+    Sys.sleep(3L)
+    parallelly::killNode(cl)
+
+  

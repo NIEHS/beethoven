@@ -167,7 +167,7 @@ modis_worker <- function(
 
 ## MOD09GA elements ####
 modis_mod09 <-
-  list.files(path = "~/projects/NRTAPModel/input/data/modis/raw/61/MOD09GA",
+  list.files(path = "~/projects/NRTAPModel/input/modis/raw/61/MOD09GA",
              pattern = "*.hdf$",
              recursive = TRUE,
              full.names = TRUE)
@@ -253,6 +253,17 @@ foreach(
     res <- Reduce(\(x, y) dplyr::left_join(x, y, by = c("site_id", "date")), res0)
     return(res)
   }
+
+mod09_vars <-
+  calc_modis(
+    modis_mod09[1:46],
+    product = "MOD09GA",
+    sites = sites_sf,
+    name_covariates = sprintf("MOD_GAGAA_%d_", seq(1, 7)),
+    layers = seq(2, 8),
+    nthreads = 2L
+  )
+
 
 saveRDS(resdf_mod09_surfref,
     file = "/ddn/gs1/home/songi2/NRTAP_Covar_MOD09GA_B1_B7.rds")
