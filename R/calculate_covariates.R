@@ -684,7 +684,7 @@ calc_modis <-
       c("path", "product", "sites_input", "name_covariates",
         "id_col", "fun_summary", "tilelist",
         "radius", "subdataset", "layers")
-        # "modis_worker", "modis_get_vrt", "modis_preprocess_vnp46")
+    # "modis_worker", "modis_get_vrt", "modis_preprocess_vnp46")
     package_list <-
       c("sf", "terra", "exactextractr", "foreach", "data.table",
         "NRTAPmodel", "scomps", "dplyr", "doRNG", "parallelly", "doParallel")
@@ -763,8 +763,8 @@ calc_modis <-
                          sites_in = sites_input,
                          product = product,
                          fun_summary_raster = fun_summary,
-                         foo = scomps::extract_with_buffer,
                          name_extracted = name_radius,
+                         foo = scomps::extract_with_buffer,
                          points = terra::vect(sites_input),
                          id = id_col,
                          radius = radius[k]
