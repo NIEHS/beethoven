@@ -491,8 +491,7 @@ download_geos_cf_data <- function(
   #### 11. download data
   download_run(
     download = download,
-    system_command = system_command,
-    commands_txt = commands_txt
+    system_command = system_command
   )
   download_remove_command(
     commands_txt = commands_txt,
@@ -625,8 +624,7 @@ download_gmted_data <- function(
   #### 16. download data
   download_run(
     download = download,
-    system_command = system_command,
-    commands_txt = commands_txt
+    system_command = system_command
   )
   #### 17. end if unzip == FALSE
   download_unzip(
@@ -873,8 +871,7 @@ download_merra2_data <- function(
                            "\n")
   #### 16. download data
   download_run(download = download,
-               system_command = system_command,
-               commands_txt = commands_txt)
+               system_command = system_command)
   #### 17. Remove command file
   download_remove_command(commands_txt = commands_txt,
                           remove = remove_command)
@@ -985,8 +982,7 @@ download_narr_monolevel_data <- function(
   #### 11. download data
   download_run(
     download = download,
-    system_command = system_command,
-    commands_txt = commands_txt
+    system_command = system_command
   )
   #### 12. remove command text file
   download_remove_command(
@@ -1106,8 +1102,7 @@ download_narr_p_levels_data <- function(
   #### 12. download data
   download_run(
     download = download,
-    system_command = system_command,
-    commands_txt = commands_txt
+    system_command = system_command
   )
   #### 13. Remove command file
   download_remove_command(
@@ -1239,8 +1234,7 @@ download_nlcd_data <- function(
   #### 15. download data
   download_run(
     download = download,
-    system_command = system_command,
-    commands_txt = commands_txt
+    system_command = system_command
   )
   #### 16. end if unzip == FALSE
   download_unzip(
@@ -1275,7 +1269,7 @@ download_nlcd_data <- function(
 #' @param data_region character(1). Data can be downloaded for "Global",
 #' "Africa", "Asia", "Europe", "Americas", "Oceania East", and "Oceania West".
 #' @param directory_to_download character(1). Directory to download zip files
-#' from NASA UN WPP-Adjusted Population Density, v4.11.
+#' from NASA Global Roads Open Access Data Set.
 #' @param directory_to_save character(1). Directory to decompress zip files.
 #' @param data_download_acknowledgement logical(1). By setting `= TRUE` the user
 #' acknowledge that the data downloaded using this function may be very large
@@ -1367,8 +1361,7 @@ download_sedac_groads_data <- function(
                            "\n")
   #### 15. download data
   download_run(download = download,
-               system_command = system_command,
-               commands_txt = commands_txt)
+               system_command = system_command)
   #### 16. end if unzip == FALSE
   download_unzip(file_name = download_name,
                  directory_to_unzip = directory_to_save,
@@ -1524,8 +1517,7 @@ download_sedac_population_data <- function(
                            "\n")
   #### 16. download data
   download_run(download = download,
-               system_command = system_command,
-               commands_txt = commands_txt)
+               system_command = system_command)
   #### 17. end if unzip == FALSE
   download_unzip(file_name = download_name,
                  directory_to_unzip = directory_to_save,
@@ -1669,8 +1661,7 @@ download_noaa_hms_smoke_data <- function(
   #### 11. download data
   download_run(
     download = download,
-    system_command = system_command,
-    commands_txt = commands_txt
+    system_command = system_command
   )
   #### 12. remove command file
   download_remove_command(
@@ -1793,8 +1784,7 @@ download_koppen_geiger_data <- function(
                            "\n")
   #### 15. download data
   download_run(download = download,
-               system_command = system_command,
-               commands_txt = commands_txt)
+               system_command = system_command)
   #### 16. end if unzip == FALSE
   download_unzip(file_name = download_name,
                  directory_to_unzip = directory_to_save,
@@ -2010,8 +2000,7 @@ download_modis_data <- function(
       "\n"
     )
     download_run(download = download,
-                 system_command = system_command,
-                 commands_txt = commands_txt)
+                 system_command = system_command)
 
     message("Requests were processed.\n")
 
@@ -2116,8 +2105,7 @@ download_modis_data <- function(
     "\n"
   )
   download_run(download = download,
-               system_command = system_command,
-               commands_txt = commands_txt)
+               system_command = system_command)
 
   message("Requests were processed.\n")
 
