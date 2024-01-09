@@ -424,10 +424,6 @@ modis_get_vrt <- function(
          'YYYY-MM-DD'.\n")
   }
 
-  # if (startsWith(product, "MOD09")) {
-  #   ismod09 <- TRUE
-  # }
-
   # interpret date
   today <- as.character(date_in)
   dayjul <- strftime(today, "%Y%j")
@@ -439,20 +435,6 @@ modis_get_vrt <- function(
            function(x) {
              sds_aggregate(x, product = product, fun_agg = foo)
            })
-  # get relevant subdataset only
-  # layer_target <- sapply(layer_descr, function(x) x[[1]])
-  # layer_number <- sapply(layer_descr, function(x) as.integer(x[[2]]))
-
-  # if there are multiple layers in a subdataset
-  # if (any(layer_number > 1)) {
-  #   if (ismod09) {
-  #     layers <- describe(ftarget[[1]], sds = TRUE)
-  #     layers <- grep("sur_refl_b0", layers$var)
-  #     layer_target <- lapply(ftarget, \(x) terra::rast(x, lyrs = layers))
-  #   } else {
-  #     layer_target <- lapply(layer_target, \(x) terra::rast(x))
-  #   }
-  #   layer_target <- lapply(layer_target, foo, na.rm = TRUE)
 
   # Merge multiple rasters into one
   # do.call(f, l) is equivalent to f(l[[1]], ... , l[[length(l)]])
@@ -461,9 +443,6 @@ modis_get_vrt <- function(
   } else {
     result_merged <- layer_target[[1]]
   }
-  # } else {
-  #   result_merged <- terra::vrt(layer_target)
-  # }
   return(result_merged)
 }
 
@@ -567,6 +546,12 @@ modis_mosaic_mod06 <-
     get_var = c("Cloud_Fraction_Day", "Cloud_Fraction_Night"),
     resolution = 0.025
   ) {
+    if (!grepl("[0-9]{4,4}\\-([0][1-9]|[1][0-2])\\-([0-2][0-9]|[3][0-1])",
+               date_in)
+    ) {
+      stop("date_in does not conform to the required format
+           'YYYY-MM-DD'.\n")
+    }
     rectify_ref_stars <- function(ras, cellsize = resolution) {
       sf::sf_use_s2(FALSE)
       ras <- stars::read_stars(ras)

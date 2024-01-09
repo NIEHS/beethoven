@@ -146,15 +146,17 @@ testthat::test_that("calc_modis works well.", {
       "../testdata/modis/",
       "MOD11A1.A2021227.h11v05.061.2021228105320.hdf"
     )
-  testthat::expect_warning(
-    calc_mod11 <-
-      calc_modis(
-        path = path_mod11,
-        product = "MOD11A1",
-        sites = site_faux,
-        name_covariates = c("MOD_LSTNT_0_", "MOD_LSTDY_0_"),
-        nthreads = 1
-      )
+  testthat::expect_no_error(
+    suppressWarnings(
+      calc_mod11 <-
+        calc_modis(
+          path = path_mod11,
+          product = "MOD11A1",
+          sites = site_faux,
+          name_covariates = c("MOD_LSTNT_0_", "MOD_LSTDY_0_"),
+          nthreads = 1
+        )
+    )
   )
   testthat::expect_s3_class(calc_mod11, "data.frame")
 
@@ -165,15 +167,17 @@ testthat::test_that("calc_modis works well.", {
       "MOD06",
       full.names = TRUE
     )
-  testthat::expect_warning(
-    calc_mod06 <-
-      calc_modis(
-        path = path_mod06,
-        product = "MOD06_L2",
-        sites = site_faux,
-        name_covariates = c("MOD_CLFRN_0_", "MOD_CLFRD_0_"),
-        nthreads = 2
-      )
+  testthat::expect_no_error(
+    suppressWarnings(
+      calc_mod06 <-
+        calc_modis(
+          path = path_mod06,
+          product = "MOD06_L2",
+          sites = site_faux,
+          name_covariates = c("MOD_CLFRN_0_", "MOD_CLFRD_0_"),
+          nthreads = 2
+        )
+    )
   )
   testthat::expect_s3_class(calc_mod06, "data.frame")
 
@@ -184,39 +188,111 @@ testthat::test_that("calc_modis works well.", {
       "VNP46",
       full.names = TRUE
     )
-  testthat::expect_warning(
-    calc_vnp46 <-
-      calc_modis(
-        path = path_vnp46,
-        product = "VNP46A2",
-        sites = site_faux,
-        name_covariates = c("MOD_NITLT_0_"),
-        subdataset = 3L,
-        tilelist =
+  testthat::expect_no_error(
+    suppressWarnings(
+      calc_vnp46 <-
+        calc_modis(
+          path = path_vnp46,
+          product = "VNP46A2",
+          sites = site_faux,
+          name_covariates = c("MOD_NITLT_0_"),
+          subdataset = 3L,
+          tilelist =
           read.csv("tests/testthat/../../inst/extdata/modis_vnp46_tiles.csv"),
-        nthreads = 2
-      )
+          nthreads = 2
+        )
+    )
   )
   testthat::expect_s3_class(calc_vnp46, "data.frame")
+
+  # error cases
+  testthat::expect_error(
+    modis_get_vrt(path = site_faux)
+  )
+  testthat::expect_error(
+    modis_get_vrt(
+      paths = path_mod11,
+      product = "MOD11A1",
+      date_in = "2021-08-15",
+      foo = 3L
+    )
+  )
+  testthat::expect_error(
+    modis_get_vrt(
+      paths = path_mod11,
+      product = "MOD11A1",
+      date_in = "2021~08~15",
+      foo = "mean"
+    )
+  )
+  testthat::expect_error(
+    modis_preprocess_vnp46(
+      paths = path_vnp46,
+      date_in = "2021~08~15"
+    )
+  )
+  tilepath <- testthat::test_path("../../inst/extdata/modis_vnp46_tiles.csv")
+  tilecsv <- utils::read.csv(tilepath)
+  testthat::expect_error(
+    modis_preprocess_vnp46(
+      paths = path_vnp46,
+      date_in = "2021-08-15",
+      tile_df = tilecsv[, -3]
+    )
+  )
+  testthat::expect_error(
+    modis_worker(raster = rast(nrow = 3, ncol = 3), date = "2021-08-15",
+                 sites_in = matrix(c(1, 3, 4, 5), nrow = 2))
+  )
+  testthat::expect_error(
+    modis_worker(raster = rast(nrow = 3, ncol = 3), date = "2021-08-15",
+                 sites_in = sf::st_as_sf(site_faux))
+  )
+  site_faux2 <- site_faux
+  names(site_faux2)[2] <- "date"
+  testthat::expect_error(
+    modis_worker(raster = rast(nrow = 3, ncol = 3), date = "2021-08-15",
+                 sites_in = sf::st_as_sf(site_faux2))
+  )
+
+  testthat::expect_error(
+    calc_modis(path = site_faux)
+  )
+  testthat::expect_error(
+    calc_modis(path = path_mod11, product = "MOD11A1", sites = list(1, 2, 3))
+  )
+
+  testthat::expect_error(
+    suppressWarnings(
+      calc_mod06 <-
+        calc_modis(
+          path = path_mod06,
+          product = "MOD06_L2",
+          sites = site_faux,
+          name_covariates = c("MOD_CLFRN_0_"),
+          nthreads = 2
+        )
+    )
+  )
 
 })
 
 
-dodo <- modis_preprocess_vnp46(path_vnp46, "2018-08-13", 3L,           read.csv("tests/testthat/../../inst/extdata/modis_vnp46_tiles.csv"))
-modis_worker(dodo, "2018-08-13", sf::st_as_sf(site_faux), name_extracted = "MOD_NILTL_0_00000", product = "VNP46A2")
-doxa <- modis_mosaic_mod06(path_mod06, "2021-08-15")
-modis_worker(doxa, "2018-08-13", sf::st_as_sf(site_faux), name_extracted = c("MOD_NIDTL_0_01000", "MOD_NILTL_0_01000"), product = "MOD06_L2", radius = 1000L)
-dols <- modis_get_vrt(path_mod11, "MOD11A1", "2021-08-15")
-modis_worker(dols, "2021-08-15", sf::st_as_sf(site_faux), name_extracted = c("MOD_NIDTL_0_01000", "MOD_NILTL_0_01000"), product = "MOD11A1", radius = 1000L)
-modis_worker(dols, "2021-08-15", sf::st_as_sf(site_faux), name_extracted = c("MOD_NIDTL_0_00000", "MOD_NILTL_0_00000"), product = "MOD11A1", radius = 0L)
-modis_worker(dols, "2021-08-15", sf::st_as_sf(site_faux), name_extracted = c("MOD_NIDTL_0_10000", "MOD_NILTL_0_10000"), product = "MOD11A1", radius = 10000L)
-modis_worker(dols, "2021-08-15", sf::st_as_sf(site_faux), name_extracted = c("MOD_NIDTL_0_50000", "MOD_NILTL_0_50000"), product = "MOD11A1", radius = 50000L)
+# dodo <- modis_preprocess_vnp46(path_vnp46, "2018-08-13", 3L,           read.csv("tests/testthat/../../inst/extdata/modis_vnp46_tiles.csv"))
+# modis_worker(dodo, "2018-08-13", sf::st_as_sf(site_faux), name_extracted = "MOD_NILTL_0_00000", product = "VNP46A2")
+# doxa <- modis_mosaic_mod06(path_mod06, "2021-08-15")
+# modis_worker(doxa, "2018-08-13", sf::st_as_sf(site_faux), name_extracted = c("MOD_NIDTL_0_01000", "MOD_NILTL_0_01000"), product = "MOD06_L2", radius = 1000L)
+# dols <- modis_get_vrt(path_mod11, "MOD11A1", "2021-08-15")
+# modis_worker(dols, "2021-08-15", sf::st_as_sf(site_faux), name_extracted = c("MOD_NIDTL_0_01000", "MOD_NILTL_0_01000"), product = "MOD11A1", radius = 1000L)
+# modis_worker(dols, "2021-08-15", sf::st_as_sf(site_faux), name_extracted = c("MOD_NIDTL_0_00000", "MOD_NILTL_0_00000"), product = "MOD11A1", radius = 0L)
+# modis_worker(dols, "2021-08-15", sf::st_as_sf(site_faux), name_extracted = c("MOD_NIDTL_0_10000", "MOD_NILTL_0_10000"), product = "MOD11A1", radius = 10000L)
+# modis_worker(dols, "2021-08-15", sf::st_as_sf(site_faux), name_extracted = c("MOD_NIDTL_0_50000", "MOD_NILTL_0_50000"), product = "MOD11A1", radius = 50000L)
 
-dols <- modis_get_vrt(path_mod11, "MOD11A1", "2021-08-15")
-dolsnan <- dols
-dolsnan[is.nan(dolsnan)] <- 0L
-modis_worker(dols, "2021-08-15", sf::st_as_sf(site_faux), name_extracted = c("MOD_NIDTL_0_01000", "MOD_NILTL_0_01000"), product = "MOD11A1", radius = 1000L)
-plot(dols)
-site_fbuf <- terra::buffer(site_faux, 30000)
-site_fbuf <- terra::project(site_fbuf, crs(dols))
-plot(site_fbuf, add = T)
+# dols <- modis_get_vrt(path_mod11, "MOD11A1", "2021-08-15")
+# dolsnan <- dols
+# dolsnan[is.nan(dolsnan)] <- 0L
+# modis_worker(dols, "2021-08-15", sf::st_as_sf(site_faux), name_extracted = c("MOD_NIDTL_0_01000", "MOD_NILTL_0_01000"), product = "MOD11A1", radius = 1000L)
+# plot(dols)
+# site_fbuf <- terra::buffer(site_faux, 30000)
+# site_fbuf <- terra::project(site_fbuf, crs(dols))
+# plot(site_fbuf, add = T)
