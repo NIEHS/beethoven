@@ -12,7 +12,6 @@ calc_modis(
   name_covariates,
   radius = c(0L, 1000L, 10000L, 50000L),
   subdataset = NULL,
-  layers = NULL,
   fun_summary = "mean",
   nthreads = floor(parallelly::availableCores()/2),
   tilelist = NULL,
@@ -40,9 +39,9 @@ was used to calculate mean NDVI value.}
 \item{radius}{numeric. Radii to calculate covariates.
 Default is c(0, 1000, 10000, 50000).}
 
-\item{subdataset}{Index of subdataset.}
-
-\item{layers}{Index of layers.}
+\item{subdataset}{Index or search pattern of subdataset.
+Pattern is not accepted when product is \code{"VNP46A2"} or
+\code{"MOD06_L2"}}
 
 \item{fun_summary}{character or function. Function to summarize
 extracted raster values.}

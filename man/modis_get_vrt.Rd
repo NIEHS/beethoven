@@ -6,11 +6,10 @@
 \usage{
 modis_get_vrt(
   paths,
-  product = c("MOD11A1", "MOD13A2", "MOD06_L2", "MOD09GA", "MCD19A2"),
-  index_sds = NULL,
-  layers = NULL,
-  date_in,
-  foo = mean
+  product = c("MOD11A1", "MOD13A2", "MOD09GA", "MCD19A2"),
+  date_in = NULL,
+  regex_sds = NULL,
+  foo = "mean"
 )
 }
 \arguments{
@@ -18,16 +17,18 @@ modis_get_vrt(
 preferably a recursive search result from \code{list.files}.}
 
 \item{product}{character(1). Product code of MODIS. Should be one of
-\code{c('MOD11A1', 'MOD13A2', 'MOD06_L2', 'MOD09GA', 'MCD19A2')}}
+\code{c('MOD11A1', 'MOD13A2', 'MOD09GA', 'MCD19A2')}}
 
-\item{index_sds}{integer(1). The index of subdataset to draw.}
+\item{date_in}{character(1). date to query. Should be in
+\code{"YYYY-MM-DD"} format.}
 
-\item{layers}{integer. The index (indices) of layers if there are only
-layers inside the input file.}
+\item{regex_sds}{character(1). subdataset names to extract.
+Should conform to regular expression. See \link{regex} for details.
+Default is NULL, which means that the subdataset names are automatically
+selected based on \code{product} value.}
 
-\item{date_in}{Date(1). date to query.}
-
-\item{foo}{function. A function compatible with \code{SpatRaster}.}
+\item{foo}{Function name or custom function to aggregate overlapping
+cell values. See \code{fun} description in \link[terra]{tapp} for details.}
 }
 \value{
 A SpatRaster object.

@@ -322,3 +322,20 @@ mod06_vars <-
 
 outfilename <- file.path(ddnhome, sprintf("NRTAP_Covars_MOD06_L2_%s.rds", year_target))
 saveRDS(mod06_vars, outfilename, compress = "xz")
+
+
+### consolidate
+library(data.table)
+tdir <- "~"
+rdss <- list.files(tdir, "NRTAP_Covars_MOD06*.*.rds$", full.names = TRUE)
+rdsd <- lapply(rdss, readRDS)
+rdsdf <- data.table::rbindlist(rdsd)
+saveRDS(rdsdf, file.path(tdir, "NRTAP_Covars_MOD06_2018_2022.rds"), compress = "xz")
+
+
+mod09s <- list.files("input/modis/raw/61/MOD09GA/2018/241", "*.hdf", full.names = TRUE)
+.libPaths("~/r-libs")
+library(terra)
+describe(mod09s[1], sds = TRUE)$var
+
+terra::rast(mod09s[1], subds = 12:18)

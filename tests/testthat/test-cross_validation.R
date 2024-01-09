@@ -95,15 +95,23 @@ testthat::test_that("leave-block-outs work as expected", {
   ncv_sp <- 3L
   ncv_t <- 5L
 
-  index_lblo <- generate_cv_index(ncostdt, "lblo", cv_fold = ncv_fold)
-  ret_spblock <- generate_block_sp_index(ncostdt, cv_fold = ncv_fold)
-  index_lbto <- generate_cv_index(ncostdt, "lbto", cv_fold = ncv_fold)
-  index_lblto <-
-    generate_cv_index(
-                      ncostdt,
-                      "lblto",
-                      sp_fold = ncv_sp,
-                      t_fold = ncv_t)
+  testthat::expect_no_error(
+    index_lblo <- generate_cv_index(ncostdt, "lblo", cv_fold = ncv_fold)
+  )
+  testthat::expect_no_error(
+    ret_spblock <- generate_block_sp_index(ncostdt, cv_fold = ncv_fold)
+  )
+  testthat::expect_no_error(
+    index_lbto <- generate_cv_index(ncostdt, "lbto", cv_fold = ncv_fold)
+  )
+  testthat::expect_no_error(
+    index_lblto <-
+      generate_cv_index(
+                        ncostdt,
+                        "lblto",
+                        sp_fold = ncv_sp,
+                        t_fold = ncv_t)
+  )
 
   # max value test
   testthat::expect_equal(max(index_lblo), ncv_fold)
@@ -131,6 +139,14 @@ testthat::test_that("leave-block-outs work as expected", {
                       ncostdt, "lblo",
                       blocks = eco4d,
                       block_id = "US_L3NAME")
+  # error case: blocks are sf, but no block_id
+  testthat::expect_error(
+    generate_cv_index(
+                      ncostdt, "lblo",
+                      blocks = eco4d,
+                      block_id = NULL)
+  )
+
   # when SpatVector input is entered
   index_lblo_tr <-
     generate_cv_index(
@@ -173,11 +189,24 @@ testthat::test_that("leave-block-outs work as expected", {
   )
 
   # numeric block case
-  expect_no_error(
+  testthat::expect_no_error(
     generate_cv_index(
       ncostdt, "lblo",
       blocks = c(0.5, 0.5)
     )
+  )
+
+  # lblo error case
+  testthat::expect_error(
+    generate_cv_index(ncostdt, "lblo", cv_fold = NULL, blocks = NULL)
+  )
+
+  # lbto error cases
+  testthat::expect_error(
+    generate_cv_index(ncostdt, "lbto", NULL)
+  )
+  testthat::expect_error(
+    generate_cv_index(ncostdt, "lbto", 10L)
   )
 
 
@@ -211,9 +240,15 @@ testthat::test_that("random cross-validation abides", {
   # to stdt
   ncostdt <- convert_stobj_to_stdt(ncost)
   ncv_fold <- 10L
-  index_random <- generate_cv_index(ncostdt, "random", cv_fold = ncv_fold)
+  testthat::expect_no_error(
+    index_random <- generate_cv_index(ncostdt, "random", cv_fold = ncv_fold)
+  )
 
   testthat::expect_true(is.numeric(index_random))
   testthat::expect_equal(max(index_random), ncv_fold)
 
+  # error case
+  testthat::expect_error(
+    generate_cv_index(ncostdt, "random", NULL)
+  )
 })

@@ -346,69 +346,125 @@ calc_ecoregion <-
 #' @param paths character. Full list of hdf file paths.
 #'  preferably a recursive search result from \code{list.files}.
 #' @param product character(1). Product code of MODIS. Should be one of
-#' \code{c('MOD11A1', 'MOD13A2', 'MOD06_L2', 'MOD09GA', 'MCD19A2')}
-#' @param index_sds integer(1). The index of subdataset to draw.
-#' @param layers integer. The index (indices) of layers if there are only
-#' layers inside the input file.
-#' @param date_in Date(1). date to query.
-#' @param foo function. A function compatible with \code{SpatRaster}.
+#' \code{c('MOD11A1', 'MOD13A2', 'MOD09GA', 'MCD19A2')}
+#' @param date_in character(1). date to query. Should be in
+#' \code{"YYYY-MM-DD"} format.
+#' @param regex_sds character(1). subdataset names to extract.
+#' Should conform to regular expression. See \link{regex} for details.
+#' Default is NULL, which means that the subdataset names are automatically
+#' selected based on \code{product} value.
+#' @param foo Function name or custom function to aggregate overlapping
+#' cell values. See \code{fun} description in \link[terra]{tapp} for details.
 #' @author Insang Song
 #' @returns A SpatRaster object.
 #' @export
 modis_get_vrt <- function(
     paths,
-    product = c("MOD11A1", "MOD13A2", "MOD06_L2",
+    product = c("MOD11A1", "MOD13A2",
                 "MOD09GA", "MCD19A2"),
-    index_sds = NULL,
-    layers = NULL,
-    date_in,
-    foo = mean) {
+    date_in = NULL,
+    regex_sds = NULL,
+    foo = "mean") {
+
+  product <- match.arg(product)
+
+  sds_selector <- function(pname, custom_sel = regex_sds) {
+    modis_sds <-
+      switch(pname,
+        MOD11A1 = "(LST_)",
+        MOD13A2 = "(NDVI_)",
+        MOD09GA = "(sur_refl_b0)",
+        MCD19A2 = "(Optical_Depth)"
+      )
+    if (!is.null(custom_sel)) {
+      modis_sds <- custom_sel
+    }
+    return(modis_sds)
+  }
+
+  # aggregate sublayers in subdataset
+  sds_aggregate <- function(path, product, fun_agg = foo) {
+    # describe provides subdataset information
+    # we use var to get detailed information in subdatasets
+    sds_desc <- terra::describe(path, sds = TRUE)
+    flag_modis <- sds_selector(pname = product)
+    index_sds <- grep(flag_modis, sds_desc$var)
+    sds_desc <- sds_desc[index_sds, c("name", "var", "nlyr")]
+
+    # if there are multiple layers in a subdataset,
+    # aggregate (average)
+    sds_read <- terra::rast(path, subds = index_sds)
+    sds_nsds <- nrow(sds_desc)
+    if (all(sds_desc$nlyr == 1L)) {
+      sds_agg <- sds_read
+    } else {
+      sds_aggindex <- rep(seq_len(sds_nsds), times = sds_desc$nlyr)
+      sds_agg <-
+        terra::tapp(sds_read,
+                    index = sds_aggindex,
+                    fun = fun_agg,
+                    na.rm = TRUE)
+    }
+    names(sds_agg) <- sds_desc$var
+    return(sds_agg)
+  }
+
   if (!is.character(paths)) {
     stop("Argument flist should be a list of hdf files (character).\n")
   }
-  if (!is.numeric(index_sds)) {
-    stop("Argument index_sds should be an integer.\n")
+  if (!(is.character(foo) || is.function(foo))) {
+    stop("Argument foo should be a function or name of a function
+         that is accepted in terra::tapp.\n")
   }
-  if (!is.function(foo)) {
-    stop("Argument foo should be a function.\n")
+  # this case cannot detect malform like 2024-02-30.
+  if (!grepl("[0-9]{4,4}\\-([0][1-9]|[1][0-2])\\-([0-2][0-9]|[3][0-1])",
+             date_in)
+  ) {
+    stop("date_in does not conform to the required format
+         'YYYY-MM-DD'.\n")
   }
-  product <- match.arg(product)
 
-  if (startsWith(product, "MOD09")) {
-    ismod09 <- TRUE
-  }
+  # if (startsWith(product, "MOD09")) {
+  #   ismod09 <- TRUE
+  # }
 
   # interpret date
   today <- as.character(date_in)
-  year_today <- strftime(today, "%Y")
-  jul_today <- strftime(today, "%j")
-  dayjul <- paste0(year_today, "/", jul_today)
+  dayjul <- strftime(today, "%Y/%j")
   ftarget <- grep(paste0(dayjul), paths, value = TRUE)
 
   # get layer information
-  layer_descr <-
+  layer_target <-
     lapply(ftarget,
            function(x) {
-             terra::describe(x, sds = TRUE)[index_sds, c("name", "nlyr")]
+             sds_aggregate(x, product = product, fun_agg = foo)
            })
   # get relevant subdataset only
-  layer_target <- sapply(layer_descr, function(x) x[[1]])
-  layer_number <- sapply(layer_descr, function(x) as.integer(x[[2]]))
+  # layer_target <- sapply(layer_descr, function(x) x[[1]])
+  # layer_number <- sapply(layer_descr, function(x) as.integer(x[[2]]))
 
   # if there are multiple layers in a subdataset
-  if (any(layer_number > 1)) {
-    if (ismod09) {
-      layer_target <- lapply(ftarget, \(x) terra::rast(x, lyrs = layers))
-    } else {
-      layer_target <- lapply(layer_target, \(x) terra::rast(x))
-    }
-    layer_target <- lapply(layer_target, foo, na.rm = TRUE)
-    # Merge multiple rasters into one
-    # do.call(f, l) is equivalent to f(l[[1]], ... , l[[length(l)]])
-    do.call(terra::merge, layer_target)
+  # if (any(layer_number > 1)) {
+  #   if (ismod09) {
+  #     layers <- describe(ftarget[[1]], sds = TRUE)
+  #     layers <- grep("sur_refl_b0", layers$var)
+  #     layer_target <- lapply(ftarget, \(x) terra::rast(x, lyrs = layers))
+  #   } else {
+  #     layer_target <- lapply(layer_target, \(x) terra::rast(x))
+  #   }
+  #   layer_target <- lapply(layer_target, foo, na.rm = TRUE)
+
+  # Merge multiple rasters into one
+  # do.call(f, l) is equivalent to f(l[[1]], ... , l[[length(l)]])
+  if (length(paths) > 1) {
+    result_merged <- do.call(terra::merge, layer_target)
   } else {
-    terra::vrt(layer_target)
+    result_merged <- layer_target
   }
+  # } else {
+  #   result_merged <- terra::vrt(layer_target)
+  # }
+  return(result_merged)
 }
 
 
@@ -417,11 +473,11 @@ modis_get_vrt <- function(
 #' georeferenced h5 files of VNP46A2 product.
 #' @param paths character. Full paths of h5 files.
 #' @param date_in character(1). Date to query.
+#' @param subdataset integer(1). Subdataset number to process.
+#' Default is 3L.
 #' @param tile_df prespecified data.frame with "tile" and "exts" columns,
 #' where the former stores tile number (h00v00 format) and the latter
 #' stores terra::ext output.
-#' @param subdataset integer(1). Subdataset number to process.
-#' Default is 3L.
 #' @param crs_ref character(1). terra::crs compatible CRS.
 #' Default is "EPSG:4326"
 #' @author Insang Song
@@ -433,20 +489,22 @@ modis_get_vrt <- function(
 modis_preprocess_vnp46 <- function(
   paths,
   date_in,
-  tile_df,
   subdataset = 3L,
+  tile_df,
   crs_ref = "EPSG:4326"
 ) {
-  if (is.character(date_in)) {
-    if (nchar(date_in) != 10) {
-      stop("Check the date format.\n")
-    }
-    date_in <- as.Date(date_in)
+  # this case cannot detect malform like 2024-02-30.
+  if (!grepl("[0-9]{4,4}\\-([0][1-9]|[1][0-2])\\-([0-2][0-9]|[3][0-1])",
+             date_in)
+  ) {
+    stop("date_in does not conform to the required format
+         'YYYY-MM-DD'.\n")
   }
   if (!all(c("tile", "xmin", "xmax", "ymin", "ymax") %in%
              colnames(tile_df))) {
     stop("tile_df is in invalid format. Please review tile_df.\n")
   }
+  date_in <- as.Date(date_in)
   datejul <- strftime(date_in, format = "%Y/%j")
   stdtile <- tile_df$tile
 
@@ -459,7 +517,7 @@ modis_preprocess_vnp46 <- function(
 
   filepaths_today_tiles <-
     regmatches(filepaths_today,
-               regexpr("h[0-9]+{2,2}v[0-9]+{2,2}", filepaths_today))
+               regexpr("h([0-2][0-9]|[3][0-6])v([0-1][0-9])", filepaths_today))
 
   vnp46_today <- unname(split(filepaths_today, filepaths_today))
   filepaths_today_tiles_list <-
@@ -477,7 +535,11 @@ modis_preprocess_vnp46 <- function(
       terra::ext(vnp_) <- unlist(tile_ext)
       return(vnp_)
     }, vnp46_today, filepaths_today_tiles_list, SIMPLIFY = FALSE)
-  vnp_all <- do.call(terra::merge, vnp_assigned)
+  if (length(filepaths_today) > 1) {
+    vnp_all <- do.call(terra::merge, vnp_assigned)
+  } else {
+    vnp_all <- vnp_assigned
+  }
   return(vnp_all)
 }
 
@@ -487,7 +549,7 @@ modis_preprocess_vnp46 <- function(
 #' mosaicked 5-minute cloud coverage values.
 #' @param paths character. Full paths of hdf files.
 #' @param date_in character(1). Date to query.
-#' @param get_var character(1). One of 'Cloud_Fraction_Day' or
+#' @param get_var character. One of 'Cloud_Fraction_Day' or
 #' 'Cloud_Fraction_Night'
 #' @param resolution numeric(1). Resolution of output raster.
 #' Unit is degree.
@@ -502,6 +564,7 @@ modis_mosaic_mod06 <-
   function(
     paths,
     date_in,
+    get_var = c("Cloud_Fraction_Day", "Cloud_Fraction_Night"),
     resolution = 0.025
   ) {
     rectify_ref_stars <- function(ras, cellsize = resolution) {
@@ -512,24 +575,28 @@ modis_mosaic_mod06 <-
     }
     header <- "HDF4_EOS:EOS_SWATH:"
     suffix <- ":mod06:"
-    get_var = c("Cloud_Fraction_Day", "Cloud_Fraction_Night")
     ras_mod06 <- vector("list", 2L)
     datejul <- strftime(date_in, format = "%Y/%j")
     paths_today <- grep(as.character(datejul), paths, value = TRUE)
 
-    for (element in seq_along(get_var)) {
-      target_text <-
-        sprintf("%s%s%s%s", header, paths_today, suffix, get_var[element])
-      mod06_element <- split(target_text, target_text) |>
-        lapply(rectify_ref_stars) |>
-        lapply(terra::rast)
-      mod06_element <- Reduce(f = terra::mosaic, x = mod06_element)
-      ras_mod06[[element]] <- mod06_element
+    if (length(paths) > 1) {
+      for (element in seq_along(get_var)) {
+        target_text <-
+          sprintf("%s%s%s%s", header, paths_today, suffix, get_var[element])
+        # rectified stars objects to SpatRaster
+        mod06_element <- split(target_text, target_text) |>
+          lapply(rectify_ref_stars) |>
+          lapply(terra::rast)
+        mod06_element <- Reduce(f = terra::mosaic, x = mod06_element)
+        ras_mod06[[element]] <- mod06_element
+      }
+      mod06_mosaic <- c(ras_mod06[[1]], ras_mod06[[2]])
+      terra::varnames(mod06_mosaic) <- get_var
+      mod06_mosaic <- terra::crop(mod06_mosaic,
+                                  terra::ext(c(-130, -60, 20, 54)))
+    } else {
+      mod06_mosaic <- terra::rast(rectify_ref_stars(paths))
     }
-    mod06_mosaic <- c(ras_mod06[[1]], ras_mod06[[2]])
-    terra::varnames(mod06_mosaic) <- get_var
-    mod06_mosaic <- terra::crop(mod06_mosaic,
-                                terra::ext(c(-130, -60, 20, 54)))
     return(mod06_mosaic)
   }
 
@@ -544,11 +611,10 @@ modis_mosaic_mod06 <-
 #' \code{c('MOD11A1', 'MOD13A2', 'MOD06_L2', 'VNP46A2', 'MOD09GA', 'MCD19A2')}
 #' @param fun_summary_raster function. Summary function for
 #' multilayer rasters. Passed to \code{foo}. See also
-#' \code{\link[exactextractr]{exact_extract}} and
-#' \code{\link[scomps]{extract_with}}.
-#' @param foo function. A calculation function working with
-#' SpatRaster and sf.
-#' @param ... Additional arguments passed to \code{foo}.
+#' \code{\link[exactextractr]{exact_extract}}
+#' @param id_col character(1). Field name where unique site identifiers
+#' are stored. Default is "site_id"
+#' @param radius numeric. Radius to buffer.
 #' @author Insang Song
 #' @returns A data.frame object.
 #' @importFrom terra extract
@@ -568,8 +634,8 @@ modis_worker <- function(
   product = c("MOD11A1", "MOD13A2", "MOD06_L2",
               "VNP46A2", "MOD09GA", "MCD19A2"),
   fun_summary_raster = "mean",
-  foo = scomps::extract_with_buffer,
-  ...
+  id_col = "site_id",
+  radius = 0L
 ) {
   if (!any(methods::is(sites_in, "SpatVector"),
            methods::is(sites_in, "sf"),
@@ -577,9 +643,39 @@ modis_worker <- function(
     stop("sites_in should be one of sf, sftime, or SpatVector.\n")
   }
 
-  if (!is.function(foo)) {
-    stop("Argument foo should be a function.\n")
+  extract_with_buffer <- function(
+    points,
+    surf,
+    radius,
+    id,
+    func = "mean"
+  ) {
+    # generate buffers
+    bufs <- terra::buffer(points, width = radius, quadsegs = 180L)
+    bufs <- terra::project(bufs, terra::crs(surf))
+    # crop raster
+    bufs_extent <- terra::ext(bufs)
+    surf_cropped <- terra::crop(surf, bufs_extent, snap = "out")
+
+    # extract raster values
+    surf_at_bufs <-
+      exactextractr::exact_extract(
+        surf_cropped,
+        sf::st_as_sf(bufs),
+        fun = func,
+        force_df = TRUE,
+        append_cols = id,
+        progress = FALSE,
+        max_cells_in_memory = 5e07
+      )
+    surf_at_bufs_summary <-
+      surf_at_bufs
+
+    return(surf_at_bufs_summary)
   }
+  # if (!is.function(foo)) {
+  #   stop("Argument foo should be a function.\n")
+  # }
   product <- match.arg(product)
 
   if (methods::is(sites_in, "SpatVector")) {
@@ -599,7 +695,14 @@ modis_worker <- function(
     sites_blank <- sf::st_drop_geometry(sites_in)
     extracted <- cbind(sites_blank, extracted)
   } else {
-    extracted <- foo(..., func = fun_summary_raster, surf = raster)
+    extracted <-
+      extract_with_buffer(
+        points = sites_in,
+        surf = raster,
+        id = id_col,
+        radius = radius,
+        func = fun_summary_raster
+      )
   }
 
   # cleaning names
@@ -628,8 +731,9 @@ modis_worker <- function(
 #' was used to calculate mean NDVI value.
 #' @param radius numeric. Radii to calculate covariates.
 #' Default is c(0, 1000, 10000, 50000).
-#' @param subdataset Index of subdataset.
-#' @param layers Index of layers.
+#' @param subdataset Index or search pattern of subdataset.
+#'  Pattern is not accepted when product is \code{"VNP46A2"} or
+#'  \code{"MOD06_L2"}
 #' @param fun_summary character or function. Function to summarize
 #'  extracted raster values.
 #' @param nthreads integer(1). Number of threads to be used
@@ -665,7 +769,6 @@ calc_modis <-
     name_covariates,
     radius = c(0L, 1e3L, 1e4L, 5e4L),
     subdataset = NULL,
-    layers = NULL,
     fun_summary = "mean",
     nthreads = floor(parallelly::availableCores() / 2),
     tilelist = NULL,
@@ -682,12 +785,10 @@ calc_modis <-
     # default export list to minimize memory consumption per thread
     export_list <-
       c("path", "product", "sites_input", "name_covariates",
-        "id_col", "fun_summary", "tilelist",
-        "radius", "subdataset", "layers")
-    # "modis_worker", "modis_get_vrt", "modis_preprocess_vnp46")
+        "id_col", "fun_summary", "tilelist", "radius", "subdataset")
     package_list <-
-      c("sf", "terra", "exactextractr", "foreach", "data.table",
-        "NRTAPmodel", "scomps", "dplyr", "doRNG", "parallelly", "doParallel")
+      c("sf", "terra", "exactextractr", "foreach", "data.table", "stars",
+        "NRTAPmodel", "dplyr", "doRNG", "parallelly", "doParallel")
     if (!is.null(export_list_add)) {
       export_list <- c(export_list, export_list_add)
     }
@@ -724,8 +825,8 @@ calc_modis <-
             modis_preprocess_vnp46(
               paths = path,
               date_in = day_to_pick,
-              tile_df = tilelist,
               subdataset = subdataset,
+              tile_df = tilelist,
               crs_ref = "EPSG:4326"
             )
         } else if (product == "MOD06_L2") {
@@ -737,10 +838,9 @@ calc_modis <-
           vrt_today <-
             modis_get_vrt(
                           paths = path,
-                          index_sds = subdataset,
+                          regex_sds = subdataset,
                           product = product,
-                          date_in = day_to_pick,
-                          layers = layers)
+                          date_in = day_to_pick)
         }
         if (terra::nlyr(vrt_today) != length(name_covariates)) {
           warning("The number of layers in the input raster do not match
@@ -764,9 +864,7 @@ calc_modis <-
                          product = product,
                          fun_summary_raster = fun_summary,
                          name_extracted = name_radius,
-                         foo = scomps::extract_with_buffer,
-                         points = terra::vect(sites_input),
-                         id = id_col,
+                         id_col = id_col,
                          radius = radius[k]
                        )
                      return(extracted)

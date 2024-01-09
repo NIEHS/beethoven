@@ -50,6 +50,11 @@ test_that("the meta learner fitting abides", {
   ), "Error in meta_learner_fit:
          Base predictors need to be the same length")
 
+  expect_error(meta_learner_fit(
+    base_predictor_list = rep(NA, 3),
+    kfolds = kfolds, y = response
+  ))
+
   # test that it throws an error when base learners
   # and response are different length
   predictor_list <- list(
@@ -148,5 +153,9 @@ test_that("the meta learner prediction abides", {
   class(base_outputs_stdt) <- c("list", "stdt")
   expect_error(meta_learner_predict(meta_model, base_outputs_stdt),
                "Error: baselearners list incomplete or with wrong names")
+  
+  expect_error(meta_learner_predict(meta_model, as.matrix(base_outputs_stdt$stdt),
+               "Error: baselearners list incomplete or with wrong names")
+  )
 
 })

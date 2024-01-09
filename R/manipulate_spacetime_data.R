@@ -314,11 +314,11 @@ dt_to_sftime <- function(datatable, crs) {
 #' @return same datatable object with "lon", "lat",
 #' "lon_ori", "lat_ori" columns
 project_dt <- function(datatable, crs_ori, crs_dest) {
-  if (!is.character(crs_ori) || !is.character(crs_dest)) {
-    stop("crs are not characters")
-  }
   if (!("data.table" %in% class(datatable))) {
     stop("datatable is not a data.table")
+  }
+  if (!is.character(crs_ori) || !is.character(crs_dest)) {
+    stop("crs are not characters")
   }
   if (!("lat" %in% colnames(datatable))) {
     stop("datatable does not contain lat column")

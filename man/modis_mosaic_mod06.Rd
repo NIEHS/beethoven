@@ -4,18 +4,23 @@
 \alias{modis_mosaic_mod06}
 \title{Mosaic MODIS MOD06_L2 product files}
 \usage{
-modis_mosaic_mod06(paths, date_in, resolution = 0.025)
+modis_mosaic_mod06(
+  paths,
+  date_in,
+  get_var = c("Cloud_Fraction_Day", "Cloud_Fraction_Night"),
+  resolution = 0.025
+)
 }
 \arguments{
 \item{paths}{character. Full paths of hdf files.}
 
 \item{date_in}{character(1). Date to query.}
 
+\item{get_var}{character. One of 'Cloud_Fraction_Day' or
+'Cloud_Fraction_Night'}
+
 \item{resolution}{numeric(1). Resolution of output raster.
 Unit is degree.}
-
-\item{get_var}{character(1). One of 'Cloud_Fraction_Day' or
-'Cloud_Fraction_Night'}
 }
 \value{
 SpatRaster object. CRS is "EPSG:4326".

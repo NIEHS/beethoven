@@ -22,7 +22,10 @@ check_and_load_torch <- function(
   if (torch::backends_mps_is_available() && default_device == "cpu") {
     message("Your device is capable of MPS, but default_device is set cpu.\n")
   }
-  library(torch)
+  if (!require(torch)) {
+    install.packages("torch")
+    library(torch)
+  }
   torch::torch_is_installed()
   torch::torch_device(default_device)
 }
@@ -267,7 +270,6 @@ base_learner_fit_cnn <- function(
 #' Fit XGBoost model
 #' @param ymat data.frame or matrix. Dependent variable.
 #' @param xmat data.frame or matrix. Independent variables.
-#' @param cv_index integer. Index per cross-validation method.
 #' See \link{\code{generate_cv_index}} for details.
 #' @return data.frame
 #' @author Insang Song

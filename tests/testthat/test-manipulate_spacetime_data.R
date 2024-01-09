@@ -123,11 +123,11 @@ test_that("convert_stobj_to_stdt works well", {
   names(var2) <- c("2023-11-01", "2023-11-02", "2023-11-03")
   stobj <- terra::sds(var1, var2)
   names(stobj) <- c("var1", "var2")
-  expect_no_error(convert_stobj_to_stdt(stobj))
-  stdt_converted <- convert_stobj_to_stdt(stobj)
+  expect_no_error(stdt_converted <- convert_stobj_to_stdt(stobj))
   expect_equal(class(stdt_converted$stdt)[[1]], "data.table")
   expect_equal(class(stdt_converted$crs_stdt), "character")
   expect_true(terra::same.crs(stdt_converted$crs_stdt, "EPSG:4326"))
+  
   expect_false({
                 any(!(c("lon", "lat", "time") %in%
                         colnames(stdt_converted$stdt)))})
@@ -146,6 +146,11 @@ test_that("convert_stobj_to_stdt works well", {
 
   var1sds <- terra::sds(var1)
   expect_error(convert_stobj_to_stdt(var1sds))
+
+  # convert stdt to spatrastdataset test
+  expect_no_error(sds_from_stdt <- convert_stdt_spatrastdataset(stdt_converted))
+  expect_s4_class(sds_from_stdt, "SpatRasterDataset")
+
 })
 
 
@@ -247,6 +252,10 @@ test_that("dt_to_sftime works as expected", {
   expect_no_error(dt_to_sftime(dfdt, "EPSG:4326"))
   dfsf <- dt_to_sftime(dfdt, "EPSG:4326")
   expect_s3_class(dfsf, "sftime")
+
+  df_nonstandard <- df
+  colnames(df_nonstandard)[3] <- "yeardate"
+  expect_error(dt_to_sftime(df_nonstandard, "EPSG:4326"))
 })
 
 

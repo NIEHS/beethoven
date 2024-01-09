@@ -9,9 +9,7 @@ base_learner_fit_xgboost(ymat, xmat)
 \arguments{
 \item{ymat}{data.frame or matrix. Dependent variable.}
 
-\item{xmat}{data.frame or matrix. Independent variables.}
-
-\item{cv_index}{integer. Index per cross-validation method.
+\item{xmat}{data.frame or matrix. Independent variables.
 See \link{\code{generate_cv_index}} for details.}
 }
 \value{

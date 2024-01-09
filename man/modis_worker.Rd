@@ -11,8 +11,8 @@ modis_worker(
   name_extracted = NULL,
   product = c("MOD11A1", "MOD13A2", "MOD06_L2", "VNP46A2", "MOD09GA", "MCD19A2"),
   fun_summary_raster = "mean",
-  foo = scomps::extract_with_buffer,
-  ...
+  id_col = "site_id",
+  radius = 0L
 )
 }
 \arguments{
@@ -29,13 +29,12 @@ modis_worker(
 
 \item{fun_summary_raster}{function. Summary function for
 multilayer rasters. Passed to \code{foo}. See also
-\code{\link[exactextractr]{exact_extract}} and
-\code{\link[scomps]{extract_with}}.}
+\code{\link[exactextractr]{exact_extract}}}
 
-\item{foo}{function. A calculation function working with
-SpatRaster and sf.}
+\item{id_col}{character(1). Field name where unique site identifiers
+are stored. Default is "site_id"}
 
-\item{...}{Additional arguments passed to \code{foo}.}
+\item{radius}{numeric. Radius to buffer.}
 }
 \value{
 A data.frame object.
