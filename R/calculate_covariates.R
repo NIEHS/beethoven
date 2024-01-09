@@ -650,6 +650,9 @@ modis_worker <- function(
     id,
     func = "mean"
   ) {
+    if (!methods::is(points, "SpatVector")) {
+      points <- terra::vect(points)
+    }
     # generate buffers
     bufs <- terra::buffer(points, width = radius, quadsegs = 180L)
     bufs <- terra::project(bufs, terra::crs(surf))
@@ -755,12 +758,13 @@ modis_worker <- function(
 #' @importFrom dplyr bind_rows
 #' @importFrom dplyr left_join
 #' @importFrom doRNG `%dorng%`
+#' @importFrom doRNG registerDoRNG
 #' @importFrom parallelly makeClusterPSOCK
 #' @importFrom parallelly availableCores
 #' @importFrom doParallel registerDoParallel
 #' @importFrom parallelly killNode
 #' @export
-calc_modis <-
+calc_modis2 <-
   function(
     path,
     product = c("MOD11A1", "MOD13A2", "MOD06_L2",
@@ -811,7 +815,7 @@ calc_modis <-
         .combine = dplyr::bind_rows,
         .errorhandling = "pass",
         .verbose = FALSE
-      ) %dorng% {
+      ) %dopar% {
         options(sf_use_s2 = FALSE)
 
         day_to_pick <- dates_available[datei]

@@ -116,10 +116,13 @@ testthat::test_that("calc_ecoregion works well", {
 
 
 testthat::test_that("calc_modis works well.", {
+  .libPaths("~/r-libs")
+  withr::local_package("NRTAPmodel")
+  withr::local_package("sf")
   withr::local_package("terra")
   withr::local_package("foreach")
   withr::local_package("doRNG")
-  withr::local_package("sf")
+  withr::local_package("doParallel")
   withr::local_options(list(sf_use_s2 = FALSE))
 
   site_faux <-
@@ -134,7 +137,6 @@ testthat::test_that("calc_modis works well.", {
                 site_faux,
                 geom = c("lon", "lat"),
                 crs = "EPSG:4326")
-  site_faux <- terra::project(site_faux, "EPSG:5070")
 
   # case 1: standard mod11a1
   path_mod11 <-
@@ -144,7 +146,7 @@ testthat::test_that("calc_modis works well.", {
     )
   testthat::expect_no_error(
     calc_mod11 <-
-      calc_modis(
+      calc_modis2(
         path = path_mod11,
         product = "MOD11A1",
         sites = site_faux,
@@ -162,7 +164,7 @@ testthat::test_that("calc_modis works well.", {
     )
   testthat::expect_no_error(
     calc_mod06 <-
-      calc_modis(
+      calc_modis2(
         path = path_mod06,
         product = "MOD06_L2",
         sites = site_faux,
@@ -180,7 +182,7 @@ testthat::test_that("calc_modis works well.", {
     )
   testthat::expect_no_error(
     calc_vnp46 <-
-      calc_modis(
+      calc_modis2(
         path = path_vnp46,
         product = "VNP46A2",
         sites = site_faux,
@@ -192,3 +194,4 @@ testthat::test_that("calc_modis works well.", {
   )
 
 })
+
