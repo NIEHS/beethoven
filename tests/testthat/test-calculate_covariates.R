@@ -117,6 +117,8 @@ testthat::test_that("calc_ecoregion works well", {
 
 testthat::test_that("calc_modis works well.", {
   withr::local_package("terra")
+  withr::local_package("foreach")
+  withr::local_package("doRNG")
   withr::local_package("sf")
   withr::local_options(list(sf_use_s2 = FALSE))
 
@@ -144,10 +146,10 @@ testthat::test_that("calc_modis works well.", {
     calc_mod11 <-
       calc_modis(
         path = path_mod11,
-        "MOD11A1",
+        product = "MOD11A1",
         sites = site_faux,
-        "MOD_NDVIV_0_",
-        nthreads = 1L
+        name_covariates = "MOD_NDVIV_0_",
+        nthreads = 2
       )
   )
 
@@ -155,17 +157,17 @@ testthat::test_that("calc_modis works well.", {
   path_mod06 <-
     list.files(
       "tests/testthat/../testdata/modis",
-      "MOD06*",
+      "MOD06",
       full.names = TRUE
     )
   testthat::expect_no_error(
     calc_mod06 <-
       calc_modis(
         path = path_mod06,
-        "MOD06_L2",
+        product = "MOD06_L2",
         sites = site_faux,
-        c("MOD_CLFRN_0_", "MOD_CLFRD_0_"),
-        nthreads = 1L
+        name_covariates = c("MOD_CLFRN_0_", "MOD_CLFRD_0_"),
+        nthreads = 2
       )
   )
 
@@ -173,45 +175,20 @@ testthat::test_that("calc_modis works well.", {
   path_vnp46 <-
     list.files(
       "tests/testthat/../testdata/modis",
-      "VNP46*",
+      "VNP46",
       full.names = TRUE
     )
   testthat::expect_no_error(
     calc_vnp46 <-
       calc_modis(
         path = path_vnp46,
-        "VNP46A2",
+        product = "VNP46A2",
         sites = site_faux,
-        c("MOD_NITLT_0_"),
-        nthreads = 1L
+        name_covariates = c("MOD_NITLT_0_"),
+        tilelist =
+          read.csv("tests/testthat/../../inst/extdata/modis_vnp46_tiles.csv"),
+        nthreads = 2
       )
   )
 
 })
-
-
-
-
-# testthat::test_that("mod06 is well run", {
-
-#   withr::local_package("terra")
-#   withr::local_package("sf")
-#   withr::local_package("stars")
-#   withr::local_options(list(sf_use_s2 = FALSE))
-
-#   ddnhome <- "/ddn/gs1/home/songi2"
-#   usrlib <- file.path(ddnhome, "r-libs")
-#   prjhome <- file.path(ddnhome, "projects", "NRTAPModel")
-#   inputdir <- file.path(prjhome, "input")
-
-#   mod06_dir <- file.path(inputdir, "modis", "raw", "61", "MOD06_L2")
-#   files_mod06 <-
-#     list.files(path = mod06_dir,
-#                pattern = "*.hdf$",
-#                full.names = TRUE,
-#                recursive = TRUE)
-
-#   xx <- modis_mosaic_mod06(paths = files_mod06, "2018-05-28")
-#   testthat::expect_s4_class(xx, "SpatRaster")
-#   testthat::expect_equal(length(terra::varnames(xx)), 2L)
-# })

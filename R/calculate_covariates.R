@@ -430,8 +430,8 @@ modis_get_vrt <- function(
 
   # interpret date
   today <- as.character(date_in)
-  dayjul <- strftime(today, "%Y/%j")
-  ftarget <- grep(paste0(dayjul), paths, value = TRUE)
+  dayjul <- strftime(today, "%Y%j")
+  ftarget <- grep(sprintf("A%s", dayjul), paths, value = TRUE)
 
   # get layer information
   layer_target <-
@@ -505,10 +505,10 @@ modis_preprocess_vnp46 <- function(
     stop("tile_df is in invalid format. Please review tile_df.\n")
   }
   date_in <- as.Date(date_in)
-  datejul <- strftime(date_in, format = "%Y/%j")
+  datejul <- strftime(date_in, format = "%Y%j")
   stdtile <- tile_df$tile
 
-  filepaths_today <- grep(as.character(datejul), paths, value = TRUE)
+  filepaths_today <- grep(sprintf("A%s", datejul), paths, value = TRUE)
   # today's filenames
   filepaths_today <-
     grep(paste("(", 
@@ -576,8 +576,8 @@ modis_mosaic_mod06 <-
     header <- "HDF4_EOS:EOS_SWATH:"
     suffix <- ":mod06:"
     ras_mod06 <- vector("list", 2L)
-    datejul <- strftime(date_in, format = "%Y/%j")
-    paths_today <- grep(as.character(datejul), paths, value = TRUE)
+    datejul <- strftime(date_in, format = "%Y%j")
+    paths_today <- grep(sprintf("A%s", datejul), paths, value = TRUE)
 
     if (length(paths) > 1) {
       for (element in seq_along(get_var)) {
@@ -738,7 +738,8 @@ modis_worker <- function(
 #'  extracted raster values.
 #' @param nthreads integer(1). Number of threads to be used
 #'  to calculate covariates.
-#' @param tilelist character(1). Path to VNP46A2 tile corner coordinate list.
+#' @param tilelist character(1). data.frame with
+#'  VNP46A2 tile corner coordinate list.
 #' @param package_list_add character. A vector with package names to load
 #'  these in each thread. Note that \code{sf}, \code{terra},
 #'  \code{exactextractr}, \code{scomps}, and \code{dplyr}
@@ -753,7 +754,7 @@ modis_worker <- function(
 #' @import foreach
 #' @importFrom dplyr bind_rows
 #' @importFrom dplyr left_join
-#' @importFrom doRNG %dorng%
+#' @importFrom doRNG `%dorng%`
 #' @importFrom parallelly makeClusterPSOCK
 #' @importFrom parallelly availableCores
 #' @importFrom doParallel registerDoParallel
