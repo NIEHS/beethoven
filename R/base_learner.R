@@ -247,7 +247,7 @@ base_learner_fit_ranger <- function(
 }
 
 
-
+#nocov start
 #' Fit convolutional neural networks with neural network library
 #' @param ymat torch::torch_tensor. Dependent variable.
 #' @param xmat torch::torch_tensor. Independent variables.
@@ -265,7 +265,7 @@ base_learner_fit_cnn <- function(
   # fit model (spt-array and 3d-pooling)
   return(NULL)
 }
-
+#nocov end
 
 #' Fit XGBoost model
 #' @param ymat data.frame or matrix. Dependent variable.

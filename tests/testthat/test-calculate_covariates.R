@@ -117,20 +117,22 @@ testthat::test_that("calc_ecoregion works well", {
 
 testthat::test_that("calc_modis works well.", {
   .libPaths("~/r-libs")
-  withr::local_package("NRTAPmodel")
+  # withr::local_package("NRTAPmodel")
   withr::local_package("sf")
   withr::local_package("terra")
   withr::local_package("foreach")
   withr::local_package("doRNG")
   withr::local_package("doParallel")
   withr::local_options(list(sf_use_s2 = FALSE))
+  source(testthat::test_path("../..", "R", "manipulate_spacetime_data.R"))
+  source(testthat::test_path("../..", "R", "calculate_covariates.R"))
 
   site_faux <-
     data.frame(
       site_id = "37999904288101",
       lon = -78.87,
       lat = 35.8734,
-      date = as.Date("2021-08-15")
+      time = as.Date("2021-08-15")
     )
   site_faux <-
     terra::vect(
@@ -144,9 +146,9 @@ testthat::test_that("calc_modis works well.", {
       "../testdata/modis/",
       "MOD11A1.A2021227.h11v05.061.2021228105320.hdf"
     )
-  testthat::expect_no_error(
+  testthat::expect_warning(
     calc_mod11 <-
-      calc_modis2(
+      calc_modis(
         path = path_mod11,
         product = "MOD11A1",
         sites = site_faux,
@@ -154,6 +156,7 @@ testthat::test_that("calc_modis works well.", {
         nthreads = 2
       )
   )
+  testthat::expect_s3_class(calc_mod11, "data.frame")
 
   # case 2: swath mod06l2
   path_mod06 <-
@@ -162,9 +165,9 @@ testthat::test_that("calc_modis works well.", {
       "MOD06",
       full.names = TRUE
     )
-  testthat::expect_no_error(
+  testthat::expect_warning(
     calc_mod06 <-
-      calc_modis2(
+      calc_modis(
         path = path_mod06,
         product = "MOD06_L2",
         sites = site_faux,
@@ -172,6 +175,7 @@ testthat::test_that("calc_modis works well.", {
         nthreads = 2
       )
   )
+  testthat::expect_s3_class(calc_mod06, "data.frame")
 
   # case 3: VIIRS
   path_vnp46 <-
@@ -180,18 +184,36 @@ testthat::test_that("calc_modis works well.", {
       "VNP46",
       full.names = TRUE
     )
-  testthat::expect_no_error(
+  testthat::expect_warning(
     calc_vnp46 <-
-      calc_modis2(
+      calc_modis(
         path = path_vnp46,
         product = "VNP46A2",
         sites = site_faux,
         name_covariates = c("MOD_NITLT_0_"),
+        subdataset = 3L,
         tilelist =
           read.csv("tests/testthat/../../inst/extdata/modis_vnp46_tiles.csv"),
         nthreads = 2
       )
   )
+  testthat::expect_s3_class(calc_vnp46, "data.frame")
 
 })
 
+
+dodo <- modis_preprocess_vnp46(path_vnp46, "2018-08-13", 3L,           read.csv("tests/testthat/../../inst/extdata/modis_vnp46_tiles.csv"))
+modis_worker(dodo, "2018-08-13", sf::st_as_sf(site_faux), name_extracted = "MOD_NILTL_0_00000", product = "VNP46A2")
+doxa <- modis_mosaic_mod06(path_mod06, "2021-08-15")
+modis_worker(doxa, "2018-08-13", sf::st_as_sf(site_faux), name_extracted = c("MOD_NIDTL_0_01000", "MOD_NILTL_0_01000"), product = "MOD06_L2", radius = 1000L)
+dols <- modis_get_vrt(path_mod11, "MOD11A1", "2021-08-15")
+modis_worker(dols, "2021-08-15", sf::st_as_sf(site_faux), name_extracted = c("MOD_NIDTL_0_01000", "MOD_NILTL_0_01000"), product = "MOD11A1", radius = 1000L)
+
+dols <- modis_get_vrt(path_mod11, "MOD11A1", "2021-08-15")
+dolsnan <- dols
+dolsnan[is.nan(dolsnan)] <- 0L
+modis_worker(dols, "2021-08-15", sf::st_as_sf(site_faux), name_extracted = c("MOD_NIDTL_0_01000", "MOD_NILTL_0_01000"), product = "MOD11A1", radius = 1000L)
+plot(dols)
+site_fbuf <- terra::buffer(site_faux, 30000)
+site_fbuf <- terra::project(site_fbuf, crs(dols))
+plot(site_fbuf, add = T)

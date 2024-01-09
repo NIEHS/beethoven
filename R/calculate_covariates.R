@@ -459,7 +459,7 @@ modis_get_vrt <- function(
   if (length(paths) > 1) {
     result_merged <- do.call(terra::merge, layer_target)
   } else {
-    result_merged <- layer_target
+    result_merged <- layer_target[[1]]
   }
   # } else {
   #   result_merged <- terra::vrt(layer_target)
@@ -538,7 +538,7 @@ modis_preprocess_vnp46 <- function(
   if (length(filepaths_today) > 1) {
     vnp_all <- do.call(terra::merge, vnp_assigned)
   } else {
-    vnp_all <- vnp_assigned
+    vnp_all <- vnp_assigned[[1]]
   }
   return(vnp_all)
 }
@@ -568,6 +568,7 @@ modis_mosaic_mod06 <-
     resolution = 0.025
   ) {
     rectify_ref_stars <- function(ras, cellsize = resolution) {
+      sf::st_use_s2(FALSE)
       ras <- stars::read_stars(ras)
       rtd <-
         stars::st_warp(ras, crs = 4326, cellsize = cellsize, threshold = 0.66)
@@ -605,7 +606,7 @@ modis_mosaic_mod06 <-
 #' A single-date MODIS worker for parallelization
 #' @param raster SpatRaster.
 #' @param date Date(1). date to query.
-#' @param sites_in sf object. AQS sites.
+#' @param sites_in SpatVector/sf/sftime object. AQS sites.
 #' @param name_extracted character. Names of calculated covariates.
 #' @param product character(1). Product code of MODIS. Should be one of
 #' \code{c('MOD11A1', 'MOD13A2', 'MOD06_L2', 'VNP46A2', 'MOD09GA', 'MCD19A2')}
@@ -639,8 +640,20 @@ modis_worker <- function(
 ) {
   if (!any(methods::is(sites_in, "SpatVector"),
            methods::is(sites_in, "sf"),
-           methods::is(sites_in, "sftime"))) {
-    stop("sites_in should be one of sf, sftime, or SpatVector.\n")
+           methods::is(sites_in, "sftime"),
+           is_stdt(sites_in))) {
+    stop("sites_in should be one of sf, sftime, stdt, or SpatVector.\n")
+  }
+  if (is_stdt(sites_in)) {
+    sites_in <- convert_stdt_spatvect(sites_in)
+  }
+  if (!methods::is(points, "SpatVector")) {
+    sites_in <- terra::vect(sites_in)
+  }
+  if (!all(c(id_col, "time") %in% names(sites_in))) {
+    stop(sprintf("sites should include columns named %s and %s.\n",
+                 id_col, "time")
+    )
   }
 
   extract_with_buffer <- function(
@@ -650,9 +663,6 @@ modis_worker <- function(
     id,
     func = "mean"
   ) {
-    if (!methods::is(points, "SpatVector")) {
-      points <- terra::vect(points)
-    }
     # generate buffers
     bufs <- terra::buffer(points, width = radius, quadsegs = 180L)
     bufs <- terra::project(bufs, terra::crs(surf))
@@ -663,39 +673,33 @@ modis_worker <- function(
     # extract raster values
     surf_at_bufs <-
       exactextractr::exact_extract(
-        surf_cropped,
-        sf::st_as_sf(bufs),
+        x = surf_cropped,
+        y = sf::st_as_sf(bufs),
         fun = func,
         force_df = TRUE,
         append_cols = id,
         progress = FALSE,
         max_cells_in_memory = 5e07
       )
-    surf_at_bufs_summary <-
-      surf_at_bufs
-
-    return(surf_at_bufs_summary)
+    return(surf_at_bufs)
   }
   # if (!is.function(foo)) {
   #   stop("Argument foo should be a function.\n")
   # }
   product <- match.arg(product)
 
-  if (methods::is(sites_in, "SpatVector")) {
-    sites_in <- sf::st_as_sf(sites_in)
-  }
-
-  # # VNP46 corner assignment
+  ## internal NaN values 65535 to NaN
   if (product == "VNP46A2") {
-    raster[raster == 65535L] <- NA
+    raster[raster == 65535L] <- NaN
   }
+  ## NaN to zero
+  raster[is.nan(raster)] <- 0L
 
   # raster used to be vrt_today
   if (any(grepl("00000", name_extracted))) {
-    sites_tr <- terra::vect(sites_in)
-    sites_tr <- terra::project(sites_tr, terra::crs(raster))
-    extracted <- terra::extract(x = raster, y = sites_tr)
-    sites_blank <- sf::st_drop_geometry(sites_in)
+    sites_tr <- terra::project(sites_in, terra::crs(raster))
+    extracted <- terra::extract(x = raster, y = sites_tr, ID = FALSE)
+    sites_blank <- as.data.frame(sites_in)
     extracted <- cbind(sites_blank, extracted)
   } else {
     extracted <-
@@ -710,10 +714,11 @@ modis_worker <- function(
 
   # cleaning names
   # assuming that extracted is a data.frame
-  extracted$date <- date
+  extracted$time <- date
   name_offset <- terra::nlyr(raster)
   # multiple columns will get proper names
-  name_range <- seq(ncol(extracted) - name_offset, ncol(extracted) - 1, 1)
+  name_range <- seq(ncol(extracted) - name_offset + 1, ncol(extracted), 1)
+  extracted <- extracted[, c(1, ncol(extracted), seq(2, ncol(extracted) - 1))]
   colnames(extracted)[name_range] <- name_extracted
   return(extracted)
 }
@@ -749,15 +754,17 @@ modis_worker <- function(
 #'  are the default packages to be loaded.
 #' @param export_list_add character. A vector with object names to export
 #'  to each thread. It should be minimized to spare memory.
+#' @description sites should be sf object as it is exportable to
+#' parallel workers.
 #' @note See details for setting parallelization
 #' \code{\link[foreach]{foreach}},
 #' \code{\link[parallelly]{makeClusterPSOCK}},
 #' \code{\link[parallelly]{availableCores}},
 #' \code{\link[doParallel]{registerDoParallel}}
 #' @import foreach
+#' @importFrom methods is
 #' @importFrom dplyr bind_rows
 #' @importFrom dplyr left_join
-#' @importFrom doRNG `%dorng%`
 #' @importFrom doRNG registerDoRNG
 #' @importFrom parallelly makeClusterPSOCK
 #' @importFrom parallelly availableCores
@@ -782,12 +789,16 @@ calc_modis <-
   ) {
     product <- match.arg(product)
     dates_available <-
-      regmatches(path, regexpr("20\\d{2,2}/[0-3]\\d{2,2}", path))
+      regmatches(path, regexpr("A20\\d{2,2}[0-3]\\d{2,2}", path))
     dates_available <- unique(dates_available)
-    dates_available <- sub("/", "", dates_available)
+    dates_available <- sub("A", "", dates_available)
 
-    sites_input <- sites
-    # default export list to minimize memory consumption per thread
+    sites_input <- try(sf::st_as_sf(sites))
+    if (inherits(sites_input, "try-error")) {
+      stop("sites cannot be convertible to sf.
+      Please convert sites into a sf object to proceed.\n")
+    }
+
     export_list <-
       c("path", "product", "sites_input", "name_covariates",
         "id_col", "fun_summary", "tilelist", "radius", "subdataset")
@@ -876,7 +887,7 @@ calc_modis <-
                    }, error = function(e) {
                      print(e)
                      error_df <- sf::st_drop_geometry(sites_input)
-                     error_df$date <- day_to_pick
+                     error_df$time <- day_to_pick
                      error_df$remarks <- -99999
                      names(error_df)[which(names(error_df) == "remarks")] <-
                        name_radius
@@ -887,7 +898,7 @@ calc_modis <-
         res <-
           Reduce(\(x, y) {
                           dplyr::left_join(x, y,
-                                           by = c("site_id", "date"))},
+                                           by = c("site_id", "time"))},
           res0)
         return(res)
       }
@@ -899,7 +910,7 @@ calc_modis <-
 
 
 #' Calculate temporal dummy variables
-#' @param sites data.frame with a temporal field named "date"
+#' @param sites data.frame with a temporal field named "time"
 #'  see \link{\code{convert_stobj_to_stdt}}
 #' @param id_col character(1). Unique site identifier column name.
 #'  Default is "site_id".
@@ -921,8 +932,8 @@ calc_temporal_dummies <-
     if (!methods::is(sites, "data.frame")) {
       stop("Argument sites is not a data.frame.\n")
     }
-    if (!"date" %in% names(sites)) {
-      stop("A mandatory field 'date' does not exist in sites.\n")
+    if (!"time" %in% names(sites)) {
+      stop("A mandatory field 'time' does not exist in sites.\n")
     }
     id_col <- id_col
     dummify <- function(vec, domain) {
@@ -939,7 +950,7 @@ calc_temporal_dummies <-
     }
 
     # year
-    vec_year <- data.table::year(sites$date)
+    vec_year <- data.table::year(sites$time)
     dt_year_dum <- dummify(vec_year, domain_year)
     # should the last year be the present year or 2022?
     colnames(dt_year_dum) <-
@@ -947,7 +958,7 @@ calc_temporal_dummies <-
 
 
     # month
-    vec_month <- data.table::month(sites$date)
+    vec_month <- data.table::month(sites$time)
     dt_month_dum <- dummify(vec_month, seq(1L, 12L))
     shortmn <-
       c("JANUA", "FEBRU", "MARCH", "APRIL",
@@ -957,7 +968,7 @@ calc_temporal_dummies <-
       sprintf("DUM_%s_0_00000", shortmn)
 
     # weekday (starts from 1-Monday)
-    vec_wday <- as.POSIXlt(sites$date)$wday
+    vec_wday <- as.POSIXlt(sites$time)$wday
     dt_wday_dum <- dummify(vec_wday, seq(1L, 7L))
     colnames(dt_wday_dum) <-
       sprintf("DUM_WKDY%d_0_00000", seq(1L, 7L))
@@ -1002,8 +1013,9 @@ calculate_tri <- function(
     sites <- sites$stdt
     sites_epsg <- sites$crs_dt
   } else {
-    if (!all(c("lon", "lat", "date") %in% colnames(sites))) {
-      stop("sites should be stdt or have 'lon', 'lat', and 'date' fields.\n")
+    if (!all(c("lon", "lat", "time") %in% colnames(sites))) {
+      stop("sites should be stdt or 
+      have 'lon', 'lat', and 'time' fields.\n")
     }
     sites_epsg <- terra::crs(sites)
     if (!methods::is(sites, "SpatVector")) {
