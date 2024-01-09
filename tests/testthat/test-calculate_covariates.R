@@ -115,6 +115,82 @@ testthat::test_that("calc_ecoregion works well", {
 })
 
 
+testthat::test_that("calc_modis works well.", {
+  withr::local_package("terra")
+  withr::local_package("sf")
+  withr::local_options(list(sf_use_s2 = FALSE))
+
+  site_faux <-
+    data.frame(
+      site_id = "37999904288101",
+      lon = -78.87,
+      lat = 35.8734,
+      date = as.Date("2021-08-15")
+    )
+  site_faux <-
+    terra::vect(
+                site_faux,
+                geom = c("lon", "lat"),
+                crs = "EPSG:4326")
+  site_faux <- terra::project(site_faux, "EPSG:5070")
+
+  # case 1: standard mod11a1
+  path_mod11 <-
+    testthat::test_path(
+      "../testdata/modis/",
+      "MOD11A1.A2021227.h11v05.061.2021228105320.hdf"
+    )
+  testthat::expect_no_error(
+    calc_mod11 <-
+      calc_modis(
+        path = path_mod11,
+        "MOD11A1",
+        sites = site_faux,
+        "MOD_NDVIV_0_",
+        nthreads = 1L
+      )
+  )
+
+  # case 2: swath mod06l2
+  path_mod06 <-
+    list.files(
+      "tests/testthat/../testdata/modis",
+      "MOD06*",
+      full.names = TRUE
+    )
+  testthat::expect_no_error(
+    calc_mod06 <-
+      calc_modis(
+        path = path_mod06,
+        "MOD06_L2",
+        sites = site_faux,
+        c("MOD_CLFRN_0_", "MOD_CLFRD_0_"),
+        nthreads = 1L
+      )
+  )
+
+  # case 3: VIIRS
+  path_vnp46 <-
+    list.files(
+      "tests/testthat/../testdata/modis",
+      "VNP46*",
+      full.names = TRUE
+    )
+  testthat::expect_no_error(
+    calc_vnp46 <-
+      calc_modis(
+        path = path_vnp46,
+        "VNP46A2",
+        sites = site_faux,
+        c("MOD_NITLT_0_"),
+        nthreads = 1L
+      )
+  )
+
+})
+
+
+
 
 # testthat::test_that("mod06 is well run", {
 

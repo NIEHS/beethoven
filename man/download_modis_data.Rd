@@ -43,7 +43,7 @@ trying running the function.}
 
 \item{directory_to_save}{character(1). Directory to save data.}
 
-\item{data_download_acknowledgement}{logical(1). By setting `= TRUE` the
+\item{data_download_acknowledgement}{logical(1). By setting \code{TRUE} the
 user acknowledge that the data downloaded using this function may be very
 large and use lots of machine storage and memory.}
 

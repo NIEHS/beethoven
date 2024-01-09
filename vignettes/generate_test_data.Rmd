@@ -46,7 +46,7 @@ In this vignette, we will introduce the workflow of generating test datasets usi
 ncpath <- system.file("shape/nc.shp", package = "sf")
 nc <- terra::vect(ncpath)
 nc <- terra::project(nc, "EPSG:4326")
-dw <- nc[grep("^(Dur|Wake)", nc$NAME), ]
+dw <- nc[grep("^(Dur|Wake|Orange)", nc$NAME), ]
 
 plot(dw)
 text(dw, dw$NAME)
@@ -190,4 +190,29 @@ describe(filepaths06[1], sds = TRUE)
 subset_modis(filepaths06[1], c("Cloud_Fraction_Day", "Cloud_Fraction_Night"), "/ddn/gs1/home/songi2/projects/NRTAPModel/tests/testdata/modis/", "MOD06_L2_2018241_0250.nc")
 
 rast(filepaths06[1], subds = c("Cloud_Fraction_Day", "Cloud_Fraction_Night"))
+```
+
+
+## MODIStsp trial
+```{r}
+.libPaths("~/r-libs")
+remotes::install_github("rspatial/luna")
+library(luna)
+
+dwext <- terra::ext(dw) + 0.05
+luna::getProducts("MCD19")
+luna::getNASA(
+  product="VNP46A2",
+  start_date="2021-03-21",
+  end_date="2021-03-22",
+  aoi = dwext,
+  version="5000",
+  download=TRUE,
+  path="tests/testdata",
+  username="kaga",
+  password=readLines("~/.edtoken")[1],#"@Coin1135",
+  server="LAADS",
+  limit=100000, overwrite=TRUE
+)
+
 ```

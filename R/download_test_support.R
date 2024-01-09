@@ -61,9 +61,9 @@ extract_urls <- function(
   return(url_list)
 }
 
-#' Sample download URLs and apply `check_url_file_exist` function
+#' Sample download URLs and apply \code{check_url_file_exist} function
 #' @param urls character vector of URLs
-#' @param size number of observations to be sampled from `urls`
+#' @param size number of observations to be sampled from \code{urls}
 #' @param method httr method to obtain URL ("HEAD" or "GET")
 #' @return logical vector for URL status = 200
 #' @export

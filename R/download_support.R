@@ -59,12 +59,14 @@ download_permit <-
   }
 
 
-#' download_run: execute or skip `system_command` in data download function.
+#' download_run: execute or skip \code{system_command}
+#' in data download function.
 #'
 #' @description
 #' Execute or skip the commands listed in the ...wget/curl_commands.txt file
 #' produced by one of the data download functions.
-#' @param download logical(1). Execute (`TRUE`) or skip (`FALSE`) download.
+#' @param download logical(1). Execute (\code{TRUE}) or
+#'  skip (\code{FALSE}) download.
 #' @param system_command character(1). Linux command to execute downloads.
 #' Inherited from data download function.
 #' @param commands_txt character(1). Text file with download commands.
@@ -174,6 +176,6 @@ check_for_null_parameters <-
   ) {
     parameters_status <- any(unlist(lapply(parameters, is.null)))
     if (parameters_status) {
-      stop(paste0("One or more parameters are `NULL`\n"))
+      stop(paste0("One or more parameters are NULL\n"))
     }
   }

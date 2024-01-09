@@ -33,27 +33,28 @@ from Global Multi-resolution Terrain Elevation Data (GMTED2010).}
 
 \item{directory_to_save}{character(1). Directory to decompress zip files.}
 
-\item{data_download_acknowledgement}{logical(1). By setting `= TRUE` the
+\item{data_download_acknowledgement}{logical(1). By setting \code{TRUE} the
 user acknowledge that the data downloaded using this function may be very
 large and use lots of machine storage and memory.}
 
-\item{unzip}{logical(1). Unzip zip files. Default = `TRUE`.}
+\item{unzip}{logical(1). Unzip zip files. Default is \code{TRUE}.}
 
 \item{remove_zip}{logical(1). Remove zip file from directory_to_download.
-Default = `FALSE`.}
+Default is \code{FALSE}.}
 
-\item{download}{logical(1). `= FALSE` will generate a `.txt` file containing
-all download commands. By setting `= TRUE` the function will download all of
-the requested data files. Default is FALSE.}
+\item{download}{logical(1). \code{FALSE} will generate a *.txt file
+containing all download commands. By setting \code{TRUE} the function
+will download all of the requested data files.}
 
-\item{remove_command}{logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
+\item{remove_command}{logical(1).
+Remove (\code{TRUE}) or keep (\code{FALSE})
 the text file containing download commands. Default is FALSE.}
 }
 \value{
 NULL;
 }
 \description{
-The `download_gmted_data()` function acesses and downloads Global
+The \code{download_gmted_data()} function acesses and downloads Global
 Multi-resolution Terrain Elevation Data (GMTED2010) from
 [U.S. Geological Survey and National Geospatial-Intelligence Agency]
 (https://www.usgs.gov/coastal-changes-and-impacts/gmted2010).

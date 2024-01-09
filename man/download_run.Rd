@@ -2,12 +2,14 @@
 % Please edit documentation in R/download_support.R
 \name{download_run}
 \alias{download_run}
-\title{download_run: execute or skip `system_command` in data download function.}
+\title{download_run: execute or skip \code{system_command}
+in data download function.}
 \usage{
 download_run(download = FALSE, system_command = NULL, commands_txt = NULL)
 }
 \arguments{
-\item{download}{logical(1). Execute (`TRUE`) or skip (`FALSE`) download.}
+\item{download}{logical(1). Execute (\code{TRUE}) or
+skip (\code{FALSE}) download.}
 
 \item{system_command}{character(1). Linux command to execute downloads.
 Inherited from data download function.}

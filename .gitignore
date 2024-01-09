@@ -91,3 +91,7 @@ input/geos_cf
 input/merra2
 input/modis
 input/narr
+
+
+# testdata modis
+tests/testdata/modis

@@ -31,27 +31,28 @@ from NASA UN WPP-Adjusted Population Density, v4.11.}
 
 \item{directory_to_save}{character(1). Directory to decompress zip files.}
 
-\item{data_download_acknowledgement}{logical(1). By setting `= TRUE` the user
-acknowledge that the data downloaded using this function may be very large
-and use lots of machine storage and memory.}
+\item{data_download_acknowledgement}{logical(1). By setting \code{TRUE} the
+user acknowledge that the data downloaded using this function may be very
+large and use lots of machine storage and memory.}
 
-\item{unzip}{logical(1). Unzip zip files. Default = `TRUE`.}
+\item{unzip}{logical(1). Unzip zip files. Default is \code{TRUE}.}
 
 \item{remove_zip}{logical(1). Remove zip files from directory_to_download.
-Default = `FALSE`.}
+Default is \code{FALSE}.}
 
-\item{download}{logical(1). `= FALSE` will generate a `.txt` file containing
-all download commands. By setting `= TRUE` the function will download all of
-the requested data files.}
+\item{download}{logical(1). \code{FALSE} will generate a *.txt file
+containing all download commands. By setting \code{TRUE} the function
+will download all of the requested data files.}
 
-\item{remove_command}{logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
+\item{remove_command}{logical(1).
+Remove (\code{TRUE}) or keep (\code{FALSE})
 the text file containing download commands.}
 }
 \value{
 NULL;
 }
 \description{
-The `download_sedac_groads_data()` function accesses and downloads
+The \code{download_sedac_groads_data()} function accesses and downloads
 roads data from the National Aeronautics and Space
 Administration's (NASA) [Global Roads Open Access Data Set]
 (https://sedac.ciesin.columbia.edu/data/set/groads-global-roads-open-access-

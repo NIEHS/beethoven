@@ -95,7 +95,7 @@ base_learner_prep <- function(
 #' @param ymat data.frame or matrix. Dependent variable.
 #' @param xmat data.frame or matrix. Independent variables.
 #' @param cv_index integer. Index per cross-validation method.
-#' See ?generate_cv_index for details.
+#' See \code{?generate_cv_index} for details.
 #' @param fun base_learner_fit_*
 #' @returns List of 4 with xtrain, ytrain, xtest, and ytest.
 #' @author Insang Song

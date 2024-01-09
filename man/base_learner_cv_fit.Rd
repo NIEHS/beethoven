@@ -15,7 +15,7 @@ and 'cnn'}
 \item{xmat}{data.frame or matrix. Independent variables.}
 
 \item{cv_index}{integer. Index per cross-validation method.
-See ?generate_cv_index for details.}
+See \code{?generate_cv_index} for details.}
 
 \item{fun}{base_learner_fit_*}
 }

@@ -753,7 +753,7 @@ modis_worker <- function(
 #' @import foreach
 #' @importFrom dplyr bind_rows
 #' @importFrom dplyr left_join
-#' @importFrom doRNG `%dorng%`
+#' @importFrom doRNG %dorng%
 #' @importFrom parallelly makeClusterPSOCK
 #' @importFrom parallelly availableCores
 #' @importFrom doParallel registerDoParallel

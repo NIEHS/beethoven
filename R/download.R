@@ -105,21 +105,22 @@ download_data <-
 #'  Directory to decompress zip files.
 #' @param url_aqs_download character(1).
 #'  URL to the AQS pre-generated datasets.
-#' @param data_download_acknowledgement logical(1). By setting `= TRUE` the
+#' @param data_download_acknowledgement logical(1). By setting \code{TRUE} the
 #' user acknowledge that the data downloaded using this function may be very
 #' large and use lots of machine storage and memory.
-#' @param unzip logical(1). Unzip zip files. Default = `TRUE`.
+#' @param unzip logical(1). Unzip zip files. Default \code{TRUE}.
 #' @param remove_zip logical(1). Remove zip file from directory_to_download.
-#' Default = `FALSE`.
-#' @param download logical(1). `= FALSE` will generate a `.txt` file containing
-#' all download commands. By setting `= TRUE` the function will download all of
-#' the requested data files. Default is FALSE.
-#' @param remove_command logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
+#' Default \code{FALSE}.
+#' @param download logical(1). \code{FALSE} will generate a *.txt file
+#' containing all download commands. By setting \code{TRUE} the function
+#' will download all of the requested data files.
+#' @param remove_command logical(1).
+#' Remove (\code{TRUE}) or keep (\code{FALSE})
 #' the text file containing download commands. Default is FALSE.
 #' @author Mariana Kassien, Insang Song, Mitchell Manware
 #' @returns NULL; Separate comma-separated value (CSV) files of
 #'  monitors and the daily representative values
-#'  will be stored in directory_to_save.
+#'  will be stored in \code{directory_to_save}.
 #' @export
 download_aqs_data <-
   function(
@@ -248,13 +249,14 @@ download_aqs_data <-
 #' @param data_download_acknowledgement logical(1). By setting \code{TRUE} the
 #' user acknowledge that the data downloaded using this function may be very
 #' large and use lots of machine storage and memory.
-#' @param unzip logical(1). Unzip zip files. Default = `TRUE`.
+#' @param unzip logical(1). Unzip zip files. Default \code{TRUE}.
 #' @param remove_zip logical(1). Remove zip file from directory_to_download.
-#' Default = `FALSE`.
-#' @param download logical(1). `= FALSE` will generate a `.txt` file containing
-#' all download commands. By setting `= TRUE` the function will download all of
-#' the requested data files. Default is FALSE.
-#' @param remove_command logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
+#' Default \code{FALSE}.
+#' @param download logical(1). \code{FALSE} will generate a *.txt file
+#' containing all download commands. By setting \code{TRUE} the function
+#' will download all of the requested data files.
+#' @param remove_command logical(1).
+#' Remove (\code{TRUE}) or keep (\code{FALSE})
 #' the text file containing download commands.
 #' @param epa_certificate_path character(1). Path to the certificate file
 #' for EPA DataCommons. Default is
@@ -369,7 +371,7 @@ download_ecoregion_data <- function(
 #' download_geos_cf_data: download atmospheric composition data from the NASA
 #' Global Earth Observing System (GEOS) model.
 #' @description
-#' The `download_goes_cf_data()` function accesses and downloads various
+#' The \code{download_goes_cf_data()} function accesses and downloads various
 #' atmospheric composition collections from the [NASA Global Earth Observing]
 #' [System (GEOS) model](https://gmao.gsfc.nasa.gov/GEOS_systems/).
 #' @param date_start character(1). length of 10. Start date for downloading
@@ -378,13 +380,14 @@ download_ecoregion_data <- function(
 #' Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
 #' @param collection character(1). GEOS-CF data collection file name.
 #' @param directory_to_save character(1). Directory to save data.
-#' @param data_download_acknowledgement logical(1). By setting `= TRUE` the
+#' @param data_download_acknowledgement logical(1). By setting \code{TRUE} the
 #' user acknowledge that the data downloaded using this function may be very
 #' large and use lots of machine storage and memory.
-#' @param download logical(1). `= FALSE` will generate a `.txt` file containing
-#' all download commands. By setting `= TRUE` the function will download all of
-#' the requested data files.
-#' @param remove_command logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
+#' @param download logical(1). \code{FALSE} will generate a *.txt file
+#' containing all download commands. By setting \code{TRUE} the function
+#' will download all of the requested data files.
+#' @param remove_command logical(1).
+#' Remove (\code{TRUE}) or keep (\code{FALSE})
 #' the text file containing download commands.
 #' @author Mitchell Manware, Insang Song
 #' @return NULL;
@@ -507,7 +510,7 @@ download_geos_cf_data <- function(
 #' download_gmted_data: download global elevation data from the Global Multi-
 #' resolution Terrain Elevation Data (GMTED2010).
 #' @description
-#' The `download_gmted_data()` function acesses and downloads Global
+#' The \code{download_gmted_data()} function acesses and downloads Global
 #' Multi-resolution Terrain Elevation Data (GMTED2010) from
 #' [U.S. Geological Survey and National Geospatial-Intelligence Agency]
 #' (https://www.usgs.gov/coastal-changes-and-impacts/gmted2010).
@@ -520,16 +523,17 @@ download_geos_cf_data <- function(
 #' @param directory_to_download character(1). Directory to download zip files
 #' from Global Multi-resolution Terrain Elevation Data (GMTED2010).
 #' @param directory_to_save character(1). Directory to decompress zip files.
-#' @param data_download_acknowledgement logical(1). By setting `= TRUE` the
+#' @param data_download_acknowledgement logical(1). By setting \code{TRUE} the
 #' user acknowledge that the data downloaded using this function may be very
 #' large and use lots of machine storage and memory.
-#' @param unzip logical(1). Unzip zip files. Default = `TRUE`.
+#' @param unzip logical(1). Unzip zip files. Default is \code{TRUE}.
 #' @param remove_zip logical(1). Remove zip file from directory_to_download.
-#' Default = `FALSE`.
-#' @param download logical(1). `= FALSE` will generate a `.txt` file containing
-#' all download commands. By setting `= TRUE` the function will download all of
-#' the requested data files. Default is FALSE.
-#' @param remove_command logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
+#' Default is \code{FALSE}.
+#' @param download logical(1). \code{FALSE} will generate a *.txt file
+#' containing all download commands. By setting \code{TRUE} the function
+#' will download all of the requested data files.
+#' @param remove_command logical(1).
+#' Remove (\code{TRUE}) or keep (\code{FALSE})
 #' the text file containing download commands. Default is FALSE.
 #' @author Mitchell Manware, Insang Song
 #' @return NULL;
@@ -654,7 +658,7 @@ download_gmted_data <- function(
 #' Modern-Era Retrospective analysis for Research and Applications, Version 2
 #' (MERRA-2) model.
 #' @description
-#' The `download_merra2_data()` function accesses and downloads various
+#' The \code{download_merra2_data()} function accesses and downloads various
 #' meteorological and atmospheric collections from the [Modern-Era]
 #' [Retrospective analysis for Research and Applications, Version 2 (MERRA-2)]
 #' (https://gmao.gsfc.nasa.gov/reanalysis/MERRA-2/).
@@ -664,13 +668,14 @@ download_gmted_data <- function(
 #' Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
 #' @param collection character(1). MERRA-2 data collection file name.
 #' @param directory_to_save character(1). Directory to save data.
-#' @param data_download_acknowledgement logical(1). By setting `= TRUE` the
+#' @param data_download_acknowledgement logical(1). By setting \code{TRUE} the
 #' user acknowledge that the data downloaded using this function may be very
 #' large and use lots of machine storage and memory.
-#' @param download logical(1). `= FALSE` will generate a `.txt` file containing
-#' all download commands. By setting `= TRUE` the function will download all of
-#' the requested data files.
-#' @param remove_command logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
+#' @param download logical(1). \code{FALSE} will generate a *.txt file
+#' containing all download commands. By setting \code{TRUE} the function
+#' will download all of the requested data files.
+#' @param remove_command logical(1).
+#' Remove (\code{TRUE}) or keep (\code{FALSE})
 #' the text file containing download commands.
 #' @author Mitchell Manware, Insang Song
 #' @return NULL;
@@ -775,7 +780,7 @@ download_merra2_data <- function(
              "\n"))
   #### 8. define URL base
   #### NOTE: sorted and defined manually according to
-  ####       https://goldsmr4.gesdisc.eosdis.nasa.gov/data/MERRA2/ &
+  ####       https://goldsmr4.gesdisc.eosdis.nasa.gov/data/MERRA2/ \&
   ####       https://goldsmr5.gesdisc.eosdis.nasa.gov/data/MERRA2/
   esdt_name_4 <- c("M2I1NXASM", "M2I1NXINT", "M2I1NXLFO", "M2I3NXGAS",
                    "M2SDNXSLV", "M2T1NXADG", "M2T1NXAER", "M2T1NXCHM",
@@ -889,7 +894,7 @@ download_merra2_data <- function(
 #' download_narr_monolevel_data: download monolevel meteorological data from
 #' NOAA NCEP North American Regional Reanalysis (NARR) model.
 #' @description
-#' The `download_narr_monolevel_data` function accesses and downloads
+#' The \code{download_narr_monolevel_data} function accesses and downloads
 #' monolevel meteorological data from [NOAA NCEP North American Regional]
 #' [Reanalysis (NARR)](https://psl.noaa.gov/data/gridded/data.narr.html).
 #' @param year_start integer(1). length of 4. Start of year range for
@@ -899,13 +904,14 @@ download_merra2_data <- function(
 #' @param variables character. Variable(s) name acronym.
 #' @param directory_to_save character(1). Directory(s) to save downloaded data
 #' files.
-#' @param data_download_acknowledgement logical(1). By setting `= TRUE` the user
-#' acknowledge that the data downloaded using this function may be very large
-#' and use lots of machine storage and memory.
-#' @param download logical(1). `= FALSE` will generate a `.txt` file containing
-#' all download commands. By setting `= TRUE` the function will download all of
-#' the requested data files.
-#' @param remove_command logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
+#' @param data_download_acknowledgement logical(1). By setting \code{TRUE} the
+#' user acknowledge that the data downloaded using this function may be very
+#' large and use lots of machine storage and memory.
+#' @param download logical(1). \code{FALSE} will generate a *.txt file
+#' containing all download commands. By setting \code{TRUE} the function
+#' will download all of the requested data files.
+#' @param remove_command logical(1).
+#' Remove (\code{TRUE}) or keep (\code{FALSE})
 #' the text file containing download commands.
 #' @author Mitchell Manware, Insang Song
 #' @return NULL;
@@ -1000,10 +1006,10 @@ download_narr_monolevel_data <- function(
 }
 
 
-#' download_narr_p_levels_data: download pressure level meteorological data from
-#' NOAA NCEP North American Regional Reanalysis (NARR) model.
+#' download_narr_p_levels_data: download pressure level meteorological data
+#' from NOAA NCEP North American Regional Reanalysis (NARR) model.
 #' @description
-#' The `download_narr_p_levels_data` function accesses and downloads
+#' The \code{download_narr_p_levels_data} function accesses and downloads
 #' pressure level meteorological data from [NOAA NCEP North American Regional]
 #' [Reanalysis (NARR)](https://psl.noaa.gov/data/gridded/data.narr.html).
 #' @param year_start integer(1). length of 4. Start of year range for
@@ -1013,13 +1019,14 @@ download_narr_monolevel_data <- function(
 #' @param variables character(1). Variable(s) name acronym.
 #' @param directory_to_save character(1). Directory(s) to save downloaded data
 #' files.
-#' @param data_download_acknowledgement logical(1). By setting `= TRUE` the user
-#' acknowledge that the data downloaded using this function may be very large
-#' and use lots of machine storage and memory.
-#' @param download logical(1). `= FALSE` will generate a `.txt` file containing
-#' all download commands. By setting `= TRUE` the function will download all of
-#' the requested data files.
-#' @param remove_command logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
+#' @param data_download_acknowledgement logical(1). By setting \code{TRUE} the
+#' user acknowledge that the data downloaded using this function may be very
+#' large and use lots of machine storage and memory.
+#' @param download logical(1). \code{FALSE} will generate a *.txt file
+#' containing all download commands. By setting \code{TRUE} the function
+#' will download all of the requested data files.
+#' @param remove_command logical(1).
+#' Remove (\code{TRUE}) or keep (\code{FALSE})
 #' the text file containing download commands.
 #' @author Mitchell Manware, Insang Song
 #' @return NULL;
@@ -1125,26 +1132,27 @@ download_narr_p_levels_data <- function(
 #' download_nlcd_data: download land cover data from the National Land Cover
 #' Database Science Research Products.
 #' @description
-#' The `download_nlcd_data()` function accesses and downloads land cover data
-#' from the [NLCD Science Research Products](https://www.mrlc.gov/data)
-#' data base.
-#' @param year integer(1). Available years for Coterminous United States include
-#' 2001, 2004, 2006, 2008, 2011, 2013, 2016, 2019, and 2021. Available years for
-#' Alaska include 2001, 2011, and 2016.
+#' The \code{download_nlcd_data()} function accesses and downloads
+#' land cover data from the
+#' [NLCD Science Research Products](https://www.mrlc.gov/data) data base.
+#' @param year integer(1). Available years for Coterminous United States
+#' include 2001, 2004, 2006, 2008, 2011, 2013, 2016, 2019, and 2021.
+#' Available years for Alaska include 2001, 2011, and 2016.
 #' @param collection character(1). "Coterminous United States" or "Alaska".
 #' @param directory_to_download character(1). Directory to download zip files
 #' from National Land Cover Database Science Research Products.
 #' @param directory_to_save character(1). Directory to decompress zip files.
-#' @param data_download_acknowledgement logical(1). By setting `= TRUE` the
+#' @param data_download_acknowledgement logical(1). By setting \code{TRUE} the
 #' user acknowledge that the data downloaded using this function may be very
 #' large and use lots of machine storage and memory.
-#' @param unzip logical(1). Unzip zip files. Default = `TRUE`.
+#' @param unzip logical(1). Unzip zip files. Default is \code{TRUE}.
 #' @param remove_zip logical(1). Remove zip files from directory_to_download.
-#' Default = `FALSE`.
-#' @param download logical(1). `= FALSE` will generate a `.txt` file containing
-#' all download commands. By setting `= TRUE` the function will download all of
-#' the requested data files.
-#' @param remove_command logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
+#' Default is \code{FALSE}.
+#' @param download logical(1). \code{FALSE} will generate a *.txt file
+#' containing all download commands. By setting \code{TRUE} the function
+#' will download all of the requested data files.
+#' @param remove_command logical(1).
+#' Remove (\code{TRUE}) or keep (\code{FALSE})
 #' the text file containing download commands.
 #' @author Mitchell Manware, Insang Song
 #' @returns NULL;
@@ -1269,7 +1277,7 @@ download_nlcd_data <- function(
 #' Set (gROADS), v1 (1980-2010) data from NASA Socioeconomic Data and
 #' Applications Center (SEDAC).
 #' @description
-#' The `download_sedac_groads_data()` function accesses and downloads
+#' The \code{download_sedac_groads_data()} function accesses and downloads
 #' roads data from the National Aeronautics and Space
 #' Administration's (NASA) [Global Roads Open Access Data Set]
 #' (https://sedac.ciesin.columbia.edu/data/set/groads-global-roads-open-access-
@@ -1281,16 +1289,17 @@ download_nlcd_data <- function(
 #' @param directory_to_download character(1). Directory to download zip files
 #' from NASA UN WPP-Adjusted Population Density, v4.11.
 #' @param directory_to_save character(1). Directory to decompress zip files.
-#' @param data_download_acknowledgement logical(1). By setting `= TRUE` the user
-#' acknowledge that the data downloaded using this function may be very large
-#' and use lots of machine storage and memory.
-#' @param unzip logical(1). Unzip zip files. Default = `TRUE`.
+#' @param data_download_acknowledgement logical(1). By setting \code{TRUE} the
+#' user acknowledge that the data downloaded using this function may be very
+#' large and use lots of machine storage and memory.
+#' @param unzip logical(1). Unzip zip files. Default is \code{TRUE}.
 #' @param remove_zip logical(1). Remove zip files from directory_to_download.
-#' Default = `FALSE`.
-#' @param download logical(1). `= FALSE` will generate a `.txt` file containing
-#' all download commands. By setting `= TRUE` the function will download all of
-#' the requested data files.
-#' @param remove_command logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
+#' Default is \code{FALSE}.
+#' @param download logical(1). \code{FALSE} will generate a *.txt file
+#' containing all download commands. By setting \code{TRUE} the function
+#' will download all of the requested data files.
+#' @param remove_command logical(1).
+#' Remove (\code{TRUE}) or keep (\code{FALSE})
 #' the text file containing download commands.
 #' @author Mitchell Manware, Insang Song
 #' @return NULL;
@@ -1390,7 +1399,7 @@ download_sedac_groads_data <- function(
 #' download_sedac_population_data: download UN WPP-Adjusted population density
 #' data from NASA Socioeconomic Data and Applications Center (SEDAC).
 #' @description
-#' The `download_sedac_population_data()` function accesses and downloads
+#' The \code{download_sedac_population_data()} function accesses and downloads
 #' population density data from the National Aeronatuics and Space
 #' Administration's (NASA) [UN WPP-Adjusted Population Density, v4.11]
 #' (https://sedac.ciesin.columbia.edu/data/set/gpw-v4-population-density-adjuste
@@ -1400,21 +1409,22 @@ download_sedac_groads_data <- function(
 #' @param data_format character(1). Individual year data can be downloaded as
 #' "ASCII" or "GeoTIFF". "all" years is downloaded as "netCDF".
 #' @param data_resolution character(1). Available resolutions are 30 second
-#' (~1km), 2.5 minute (~5km), 15 minute (~30km), 30 minute (~55km), and 60
-#' minute (~110km).
+#' (\~ 1 km), 2.5 minute (\~ 5 km), 15 minute (\~ 30 km),
+#' 30 minute (\~ 55 km), and 60 minute (\~ 110 km).
 #' @param directory_to_download character(1). Directory to download zip files
 #' from NASA UN WPP-Adjusted Population Density, v4.11.
 #' @param directory_to_save character(1). Directory to decompress zip files.
-#' @param data_download_acknowledgement logical(1). By setting `= TRUE` the user
-#' acknowledge that the data downloaded using this function may be very large
-#' and use lots of machine storage and memory.
-#' @param download logical(1). `= FALSE` will generate a `.txt` file containing
-#' all download commands. By setting `= TRUE` the function will download all of
-#' the requested data files.
-#' @param unzip logical(1). Unzip zip files. Default = `TRUE`.
+#' @param data_download_acknowledgement logical(1). By setting \code{TRUE} the
+#' user acknowledge that the data downloaded using this function may be very
+#' large and use lots of machine storage and memory.
+#' @param download logical(1). \code{FALSE} will generate a *.txt file
+#' containing all download commands. By setting \code{TRUE} the function
+#' will download all of the requested data files.
+#' @param unzip logical(1). Unzip zip files. Default is \code{TRUE}.
 #' @param remove_zip logical(1). Remove zip files from directory_to_download.
-#' Default = `FALSE`.
-#' @param remove_command logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
+#' Default is \code{FALSE}.
+#' @param remove_command logical(1).
+#' Remove (\code{TRUE}) or keep (\code{FALSE})
 #' the text file containing download commands.
 #' @author Mitchell Manware, Insang Song
 #' @return NULL;
@@ -1546,9 +1556,10 @@ download_sedac_population_data <- function(
 #' download_noaa_hms_smoke_data: download daily wildfire smoke plume data from
 #' NOAA Hazard Mapping System Fire and Smoke Product
 #' @description
-#' The `download_noaa_hms_smoke_data()` function accesses and downloads wildfire
-#' smoke plume coverage data from the National Oceanic and Atmospheric
-#' Administration's (NOAA) [Hazard Mapping System Fire and Smoke Product]
+#' The \code{download_noaa_hms_smoke_data()} function accesses and downloads
+#' wildfire smoke plume coverage data from
+#' the National Oceanic and Atmospheric Administration's (NOAA)
+#' [Hazard Mapping System Fire and Smoke Product]
 #' (https://www.ospo.noaa.gov/Products/land/hms.html#0).
 #' @param date_start character(1). length of 10. Start date for downloading
 #' data. Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
@@ -1557,20 +1568,23 @@ download_sedac_population_data <- function(
 #' @param data_format character(1). "Shapefile" or "KML".
 #' @param directory_to_download character(1). Directory to download zip files
 #' from NOAA Hazard Mapping System Fire and Smoke Product. (Ignored if
-#' `data_format = "KML"`.)
+#' \code{data_format = "KML"}.)
 #' @param directory_to_save character(1). Directory to save unzipped shapefiles
 #' and KML files.
-#' @param data_download_acknowledgement logical(1). By setting `= TRUE` the user
-#' acknowledge that the data downloaded using this function may be very large
-#' and use lots of machine storage and memory.
-#' @param download logical(1). `= FALSE` will generate a `.txt` file containing
-#' all download commands. By setting `= TRUE` the function will download all of
-#' the requested data files.
-#' @param unzip logical(1). Unzip zip files. Default = `TRUE`. (Ignored if
-#' `data_format = "KML"`.)
+#' @param data_download_acknowledgement logical(1).
+#' By setting \code{TRUE} the
+#' user acknowledge that the data downloaded using this function may be very
+#' large and use lots of machine storage and memory.
+#' @param download logical(1). \code{FALSE} will generate a *.txt file
+#' containing all download commands. By setting \code{TRUE} the function
+#' will download all of the requested data files.
+#' @param unzip logical(1). Unzip zip files. Default is \code{TRUE}. (Ignored
+#' if \code{data_format = "KML"}.)
 #' @param remove_zip logical(1). Remove zip files from
-#' directory_to_download. Default = `FALSE`. (Ignored if `data_format = "KML"`.)
-#' @param remove_command logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
+#' directory_to_download. Default is \code{FALSE}.
+#' (Ignored if \code{data_format = "KML"}.)
+#' @param remove_command logical(1).
+#' Remove (\code{TRUE}) or keep (\code{FALSE})
 #' the text file containing download commands.
 #' @importFrom utils head
 #' @importFrom utils tail
@@ -1600,7 +1614,7 @@ download_noaa_hms_smoke_data <- function(
   #### 4. check for unzip == FALSE && remove_zip == TRUE
   if (unzip == FALSE && remove_zip == TRUE) {
     stop(paste0(
-      "Arguments `unzip = FALSE` and `remove_zip = TRUE` are not ",
+      "Arguments unzip = FALSE and remove_zip = TRUE are not ",
       "acceptable together. Please change one.\n"
     ))
   }
@@ -1705,31 +1719,33 @@ download_noaa_hms_smoke_data <- function(
 #' download_koppen_geiger_data: download climate classification data from the
 #' Present and future Köppen-Geiger climate classification maps.
 #' @description
-#' The `download_koppen_geiger_data()` function accesses and downloads climate
-#' classification data from the Present and future Köppen-Geiger climate
-#' classification maps at 1-km resolution ([link for article]
+#' The \code{download_koppen_geiger_data()} function accesses and downloads
+#' climate classification data from the Present and future
+#' Köppen-Geiger climate classification maps at
+#'  1-km resolution ([link for article]
 #' (https://www.nature.com/articles/sdata2018214); [link for data]
 #' (https://figshare.com/articles/dataset/Present_and_future_K_ppen-Geiger_
 #' climate_classification_maps_at_1-km_resolution/6396959/2)).
-#' @param time_period character(1). Available times are "Present" (1980-206) and
-#' "Future" (2071-2100). ("Future" classifications are based on scenario
+#' @param time_period character(1). Available times are "Present" (1980-206)
+#' and "Future" (2071-2100). ("Future" classifications are based on scenario
 #' RCP8.5).
 #' @param data_resolution character(1). Available resolutions are "0.0083"
-#' degrees (~1km), "0.083" degrees (~10km), and "0.5" degrees (~50km).
+#' degrees (\~ 1 km), "0.083" degrees (\~ 10 km), and "0.5" degrees (\~ 50 km).
 #' @param directory_to_download character(1). Directory to download zip files
 #' from Present and future Köppen-Geiger climate classification maps at 1-km
 #' resolution.
 #' @param directory_to_save character(1). Directory to decompress zip files.
-#' @param data_download_acknowledgement logical(1). By setting `= TRUE` the
+#' @param data_download_acknowledgement logical(1). By setting \code{TRUE} the
 #' user acknowledge that the data downloaded using this function may be very
 #' large and use lots of machine storage and memory.
-#' @param unzip logical(1). Unzip zip files. Default = `TRUE`.
+#' @param unzip logical(1). Unzip zip files. Default is \code{TRUE}.
 #' @param remove_zip logical(1). Remove zip files from directory_to_download.
-#' Default = `FALSE`.
-#' @param download logical(1). `= FALSE` will generate a `.txt` file containing
-#' all download commands. By setting `= TRUE` the function will download all of
-#' the requested data files.
-#' @param remove_command logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
+#' Default is \code{FALSE}.
+#' @param download logical(1). \code{FALSE} will generate a *.txt file
+#' containing all download commands. By setting \code{TRUE} the function
+#' will download all of the requested data files.
+#' @param remove_command logical(1).
+#' Remove (\code{TRUE}) or keep (\code{FALSE})
 #' the text file containing download commands.
 #' @author Mitchell Manware, Insang Song
 #' @return NULL;
@@ -1861,7 +1877,7 @@ download_koppen_geiger_data <- function(
 #'  Token for downloading data from NASA. Should be set before
 #'  trying running the function.
 #' @param directory_to_save character(1). Directory to save data.
-#' @param data_download_acknowledgement logical(1). By setting `= TRUE` the
+#' @param data_download_acknowledgement logical(1). By setting \code{TRUE} the
 #' user acknowledge that the data downloaded using this function may be very
 #' large and use lots of machine storage and memory.
 #' @param mod06_links character(1). CSV file path to MOD06_L2 download links
@@ -2136,10 +2152,12 @@ download_modis_data <- function(
 #' @param year_start integer(1). length of 4. Start year for downloading data.
 #' @param year_end integer(1). length of 4. End year for downloading data.
 #' @param directory_to_save character(1). Directory to download files.
-#' @param data_download_acknowledgement logical(1). By setting `= TRUE` the
+#' @param data_download_acknowledgement logical(1). By setting \code{TRUE} the
 #' user acknowledge that the data downloaded using this function may be very
 #' large and use lots of machine storage and memory.
-#' @param download logical(1). Download data or only save wget commands.
+#' @param download logical(1). \code{FALSE} will generate a *.txt file
+#' containing all download commands. By setting \code{TRUE} the function
+#' will download all of the requested data files.
 #' @param remove_command logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
 #' the text file containing download commands.
 #' @author Mariana Kassien, Insang Song
@@ -2214,12 +2232,14 @@ download_tri_data <- function(
 #' aggregated on-road emission data
 #'
 #' @param directory_to_save character(1). Directory to download files.
-#' @param data_download_acknowledgement logical(1). By setting `= TRUE` the
+#' @param data_download_acknowledgement logical(1). By setting \code{TRUE} the
 #' user acknowledge that the data downloaded using this function may be very
 #' large and use lots of machine storage and memory.
 #' @param year_target Available years of NEI data.
 #' Default is c(2017L, 2020L).
-#' @param download logical(1). Download data or only save wget commands.
+#' @param download logical(1). \code{FALSE} will generate a *.txt file
+#' containing all download commands. By setting \code{TRUE} the function
+#' will download all of the requested data files.
 #' @param remove_command logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
 #' the text file containing download commands.
 #' @author Ranadeep Daw, Insang Song

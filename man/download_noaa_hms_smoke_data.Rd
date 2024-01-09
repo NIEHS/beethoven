@@ -29,35 +29,39 @@ Format YYYY-MM-DD (ex. September 10, 2023 = "2023-09-10").}
 
 \item{directory_to_download}{character(1). Directory to download zip files
 from NOAA Hazard Mapping System Fire and Smoke Product. (Ignored if
-`data_format = "KML"`.)}
+\code{data_format = "KML"}.)}
 
 \item{directory_to_save}{character(1). Directory to save unzipped shapefiles
 and KML files.}
 
-\item{data_download_acknowledgement}{logical(1). By setting `= TRUE` the user
-acknowledge that the data downloaded using this function may be very large
-and use lots of machine storage and memory.}
+\item{data_download_acknowledgement}{logical(1).
+By setting \code{TRUE} the
+user acknowledge that the data downloaded using this function may be very
+large and use lots of machine storage and memory.}
 
-\item{download}{logical(1). `= FALSE` will generate a `.txt` file containing
-all download commands. By setting `= TRUE` the function will download all of
-the requested data files.}
+\item{download}{logical(1). \code{FALSE} will generate a *.txt file
+containing all download commands. By setting \code{TRUE} the function
+will download all of the requested data files.}
 
-\item{remove_command}{logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
+\item{remove_command}{logical(1).
+Remove (\code{TRUE}) or keep (\code{FALSE})
 the text file containing download commands.}
 
-\item{unzip}{logical(1). Unzip zip files. Default = `TRUE`. (Ignored if
-`data_format = "KML"`.)}
+\item{unzip}{logical(1). Unzip zip files. Default is \code{TRUE}. (Ignored
+if \code{data_format = "KML"}.)}
 
 \item{remove_zip}{logical(1). Remove zip files from
-directory_to_download. Default = `FALSE`. (Ignored if `data_format = "KML"`.)}
+directory_to_download. Default is \code{FALSE}.
+(Ignored if \code{data_format = "KML"}.)}
 }
 \value{
 NULL;
 }
 \description{
-The `download_noaa_hms_smoke_data()` function accesses and downloads wildfire
-smoke plume coverage data from the National Oceanic and Atmospheric
-Administration's (NOAA) [Hazard Mapping System Fire and Smoke Product]
+The \code{download_noaa_hms_smoke_data()} function accesses and downloads
+wildfire smoke plume coverage data from
+the National Oceanic and Atmospheric Administration's (NOAA)
+[Hazard Mapping System Fire and Smoke Product]
 (https://www.ospo.noaa.gov/Products/land/hms.html#0).
 }
 \author{

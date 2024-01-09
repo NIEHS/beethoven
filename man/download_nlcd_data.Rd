@@ -18,9 +18,9 @@ download_nlcd_data(
 )
 }
 \arguments{
-\item{year}{integer(1). Available years for Coterminous United States include
-2001, 2004, 2006, 2008, 2011, 2013, 2016, 2019, and 2021. Available years for
-Alaska include 2001, 2011, and 2016.}
+\item{year}{integer(1). Available years for Coterminous United States
+include 2001, 2004, 2006, 2008, 2011, 2013, 2016, 2019, and 2021.
+Available years for Alaska include 2001, 2011, and 2016.}
 
 \item{collection}{character(1). "Coterminous United States" or "Alaska".}
 
@@ -29,29 +29,30 @@ from National Land Cover Database Science Research Products.}
 
 \item{directory_to_save}{character(1). Directory to decompress zip files.}
 
-\item{data_download_acknowledgement}{logical(1). By setting `= TRUE` the
+\item{data_download_acknowledgement}{logical(1). By setting \code{TRUE} the
 user acknowledge that the data downloaded using this function may be very
 large and use lots of machine storage and memory.}
 
-\item{unzip}{logical(1). Unzip zip files. Default = `TRUE`.}
+\item{unzip}{logical(1). Unzip zip files. Default is \code{TRUE}.}
 
 \item{remove_zip}{logical(1). Remove zip files from directory_to_download.
-Default = `FALSE`.}
+Default is \code{FALSE}.}
 
-\item{download}{logical(1). `= FALSE` will generate a `.txt` file containing
-all download commands. By setting `= TRUE` the function will download all of
-the requested data files.}
+\item{download}{logical(1). \code{FALSE} will generate a *.txt file
+containing all download commands. By setting \code{TRUE} the function
+will download all of the requested data files.}
 
-\item{remove_command}{logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
+\item{remove_command}{logical(1).
+Remove (\code{TRUE}) or keep (\code{FALSE})
 the text file containing download commands.}
 }
 \value{
 NULL;
 }
 \description{
-The `download_nlcd_data()` function accesses and downloads land cover data
-from the [NLCD Science Research Products](https://www.mrlc.gov/data)
-data base.
+The \code{download_nlcd_data()} function accesses and downloads
+land cover data from the
+[NLCD Science Research Products](https://www.mrlc.gov/data) data base.
 }
 \author{
 Mitchell Manware, Insang Song

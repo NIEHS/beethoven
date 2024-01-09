@@ -20,11 +20,13 @@ download_tri_data(
 
 \item{directory_to_save}{character(1). Directory to download files.}
 
-\item{data_download_acknowledgement}{logical(1). By setting `= TRUE` the
+\item{data_download_acknowledgement}{logical(1). By setting \code{TRUE} the
 user acknowledge that the data downloaded using this function may be very
 large and use lots of machine storage and memory.}
 
-\item{download}{logical(1). Download data or only save wget commands.}
+\item{download}{logical(1). \code{FALSE} will generate a *.txt file
+containing all download commands. By setting \code{TRUE} the function
+will download all of the requested data files.}
 
 \item{remove_command}{logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
 the text file containing download commands.}
