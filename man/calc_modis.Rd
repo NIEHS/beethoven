@@ -49,7 +49,8 @@ extracted raster values.}
 \item{nthreads}{integer(1). Number of threads to be used
 to calculate covariates.}
 
-\item{tilelist}{character(1). Path to VNP46A2 tile corner coordinate list.}
+\item{tilelist}{character(1). data.frame with
+VNP46A2 tile corner coordinate list.}
 
 \item{package_list_add}{character. A vector with package names to load
 these in each thread. Note that \code{sf}, \code{terra},
