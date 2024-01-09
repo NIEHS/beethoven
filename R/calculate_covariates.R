@@ -764,7 +764,7 @@ modis_worker <- function(
 #' @importFrom doParallel registerDoParallel
 #' @importFrom parallelly killNode
 #' @export
-calc_modis2 <-
+calc_modis <-
   function(
     path,
     product = c("MOD11A1", "MOD13A2", "MOD06_L2",
