@@ -20,7 +20,7 @@ modis_worker(
 
 \item{date}{Date(1). date to query.}
 
-\item{sites_in}{sf object. AQS sites.}
+\item{sites_in}{SpatVector/sf/sftime object. AQS sites.}
 
 \item{name_extracted}{character. Names of calculated covariates.}
 

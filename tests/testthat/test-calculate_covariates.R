@@ -117,7 +117,7 @@ testthat::test_that("calc_ecoregion works well", {
 
 testthat::test_that("calc_modis works well.", {
   .libPaths("~/r-libs")
-  # withr::local_package("NRTAPmodel")
+  withr::local_package("NRTAPmodel")
   withr::local_package("sf")
   withr::local_package("terra")
   withr::local_package("foreach")
@@ -152,8 +152,8 @@ testthat::test_that("calc_modis works well.", {
         path = path_mod11,
         product = "MOD11A1",
         sites = site_faux,
-        name_covariates = "MOD_NDVIV_0_",
-        nthreads = 2
+        name_covariates = c("MOD_LSTNT_0_", "MOD_LSTDY_0_"),
+        nthreads = 1
       )
   )
   testthat::expect_s3_class(calc_mod11, "data.frame")
@@ -208,6 +208,9 @@ doxa <- modis_mosaic_mod06(path_mod06, "2021-08-15")
 modis_worker(doxa, "2018-08-13", sf::st_as_sf(site_faux), name_extracted = c("MOD_NIDTL_0_01000", "MOD_NILTL_0_01000"), product = "MOD06_L2", radius = 1000L)
 dols <- modis_get_vrt(path_mod11, "MOD11A1", "2021-08-15")
 modis_worker(dols, "2021-08-15", sf::st_as_sf(site_faux), name_extracted = c("MOD_NIDTL_0_01000", "MOD_NILTL_0_01000"), product = "MOD11A1", radius = 1000L)
+modis_worker(dols, "2021-08-15", sf::st_as_sf(site_faux), name_extracted = c("MOD_NIDTL_0_00000", "MOD_NILTL_0_00000"), product = "MOD11A1", radius = 0L)
+modis_worker(dols, "2021-08-15", sf::st_as_sf(site_faux), name_extracted = c("MOD_NIDTL_0_10000", "MOD_NILTL_0_10000"), product = "MOD11A1", radius = 10000L)
+modis_worker(dols, "2021-08-15", sf::st_as_sf(site_faux), name_extracted = c("MOD_NIDTL_0_50000", "MOD_NILTL_0_50000"), product = "MOD11A1", radius = 50000L)
 
 dols <- modis_get_vrt(path_mod11, "MOD11A1", "2021-08-15")
 dolsnan <- dols

@@ -61,7 +61,8 @@ are the default packages to be loaded.}
 to each thread. It should be minimized to spare memory.}
 }
 \description{
-Calculate MODIS product covariates in multiple CPU threads
+sites should be sf object as it is exportable to
+parallel workers.
 }
 \note{
 See details for setting parallelization

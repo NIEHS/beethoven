@@ -11,7 +11,7 @@ calc_temporal_dummies(
 )
 }
 \arguments{
-\item{sites}{data.frame with a temporal field named "date"
+\item{sites}{data.frame with a temporal field named "time"
 see \link{\code{convert_stobj_to_stdt}}}
 
 \item{id_col}{character(1). Unique site identifier column name.

@@ -568,7 +568,7 @@ modis_mosaic_mod06 <-
     resolution = 0.025
   ) {
     rectify_ref_stars <- function(ras, cellsize = resolution) {
-      sf::st_use_s2(FALSE)
+      sf::sf_use_s2(FALSE)
       ras <- stars::read_stars(ras)
       rtd <-
         stars::st_warp(ras, crs = 4326, cellsize = cellsize, threshold = 0.66)
@@ -661,6 +661,7 @@ modis_worker <- function(
     surf,
     radius,
     id,
+    time = "time",
     func = "mean"
   ) {
     # generate buffers
@@ -677,7 +678,7 @@ modis_worker <- function(
         y = sf::st_as_sf(bufs),
         fun = func,
         force_df = TRUE,
-        append_cols = id,
+        append_cols = c(id, time),
         progress = FALSE,
         max_cells_in_memory = 5e07
       )
@@ -714,11 +715,11 @@ modis_worker <- function(
 
   # cleaning names
   # assuming that extracted is a data.frame
-  extracted$time <- date
+  #extracted$time <- date
   name_offset <- terra::nlyr(raster)
   # multiple columns will get proper names
   name_range <- seq(ncol(extracted) - name_offset + 1, ncol(extracted), 1)
-  extracted <- extracted[, c(1, ncol(extracted), seq(2, ncol(extracted) - 1))]
+  # extracted <- extracted[, c(1, ncol(extracted), seq(2, ncol(extracted) - 1))]
   colnames(extracted)[name_range] <- name_extracted
   return(extracted)
 }
@@ -793,7 +794,7 @@ calc_modis <-
     dates_available <- unique(dates_available)
     dates_available <- sub("A", "", dates_available)
 
-    sites_input <- try(sf::st_as_sf(sites))
+    sites_input <- try(sf::st_as_sf(sites), silent = TRUE)
     if (inherits(sites_input, "try-error")) {
       stop("sites cannot be convertible to sf.
       Please convert sites into a sf object to proceed.\n")
@@ -812,6 +813,7 @@ calc_modis <-
       package_list <- c(package_list, package_list_add)
     }
 
+    # make clusters
     cl <-
       parallelly::makeClusterPSOCK(
                                    nthreads,
@@ -885,20 +887,22 @@ calc_modis <-
                        )
                      return(extracted)
                    }, error = function(e) {
-                     print(e)
+                     name_radius <-
+                       sprintf("%s%05d",
+                               name_covariates,
+                               radius[k])
                      error_df <- sf::st_drop_geometry(sites_input)
-                     error_df$time <- day_to_pick
-                     error_df$remarks <- -99999
-                     names(error_df)[which(names(error_df) == "remarks")] <-
-                       name_radius
-
+                     error_df <- error_df[, c(id_col, "time")]
+                     error_df[, name_radius] <- -99999
                      return(error_df)
                    })
                  })
         res <-
           Reduce(\(x, y) {
-                          dplyr::left_join(x, y,
-                                           by = c("site_id", "time"))},
+            dplyr::left_join(x, y,
+              by = c("site_id", "time")
+            )
+          },
           res0)
         return(res)
       }
