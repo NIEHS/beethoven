@@ -7,9 +7,11 @@
 download_aadt_data(
   directory_to_save = "./input/aadt/",
   data_download_acknowledgement = FALSE,
-  year_target = c(2017L, 2020L),
   download = FALSE,
-  remove_command = FALSE
+  remove_command = FALSE,
+  year_target = c(2017L, 2020L),
+  epa_certificate_path = system.file("inst/extdata/cacert_gaftp_epa.pem", package =
+    "NRTAPmodel")
 )
 }
 \arguments{
@@ -19,9 +21,6 @@ download_aadt_data(
 user acknowledge that the data downloaded using this function may be very
 large and use lots of machine storage and memory.}
 
-\item{year_target}{Available years of NEI data.
-Default is \code{c(2017L, 2020L)}.}
-
 \item{download}{logical(1). \code{FALSE} will generate a *.txt file
 containing all download commands. By setting \code{TRUE} the function
 will download all of the requested data files.}
@@ -29,6 +28,13 @@ will download all of the requested data files.}
 \item{remove_command}{logical(1).
 Remove (\code{TRUE}) or keep (\code{FALSE})
 the text file containing download commands.}
+
+\item{year_target}{Available years of NEI data.
+Default is \code{c(2017L, 2020L)}.}
+
+\item{epa_certificate_path}{character(1). Path to the certificate file
+for EPA DataCommons. Default is
+'./inst/extdata/cacert_gaftp_epa.pem'}
 }
 \value{
 NULL; Two comma-separated value (CSV) raw files for 2017 and 2020
