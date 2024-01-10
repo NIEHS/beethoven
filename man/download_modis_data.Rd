@@ -2,7 +2,7 @@
 % Please edit documentation in R/download.R
 \name{download_modis_data}
 \alias{download_modis_data}
-\title{download_modis_data:}
+\title{Download MODIS product files}
 \usage{
 download_modis_data(
   date_start = "2023-09-01",

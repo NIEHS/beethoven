@@ -1,4 +1,6 @@
 #' Calculate covariates
+
+# nocov start
 #' @param covariate character(1). Covariate type.
 #' @param path character. Single or multiple path strings.
 #' @param sites sf/SpatVector. Unique sites. Should include
@@ -78,7 +80,7 @@ calc_covariates <-
 
     return(res_covariate)
   }
-
+# nocov end
 
 #' Calculate Koeppen-Geiger climate zone binary variables
 #' @param path character(1). Path to Koppen-Geiger
@@ -278,7 +280,12 @@ calc_nlcd_ratio <- function(path,
 #'   - \code{attr(., "ecoregion3_code")}: Ecoregion lv.3 code and key
 #' @author Insang Song
 #' @importFrom methods is
-#' @import terra
+#' @importFrom terra vect
+#' @importFrom terra project
+#' @importFrom terra intersect
+#' @importFrom terra snap
+#' @importFrom terra extract
+#' @importFrom terra crs
 #' @export
 calc_ecoregion <-
   function(
@@ -719,6 +726,7 @@ modis_worker <- function(
 #' will be calculated.
 #' @param id_col character(1). Site identifier. Default is "site_id"
 #' @param name_covariates character. Name header of covariates.
+#' e.g., "MOD_NDVIF_0_".
 #' The calculated covariate names will have a form of
 #' '{name_covariates}{zero-padded buffer radius in meters}',
 #' e.g., 'MOD_NDVIF_0_50000' where 50 km radius circular buffer
@@ -747,11 +755,14 @@ modis_worker <- function(
 #' \code{\link[parallelly]{makeClusterPSOCK}},
 #' \code{\link[parallelly]{availableCores}},
 #' \code{\link[doParallel]{registerDoParallel}}
-#' @import foreach
+#' @importFrom foreach foreach
+#' @importFrom foreach `%dopar%`
 #' @importFrom methods is
+#' @importFrom sf st_as_sf
+#' @importFrom sf st_drop_geometry
+#' @importFrom terra nlyr
 #' @importFrom dplyr bind_rows
 #' @importFrom dplyr left_join
-#' @importFrom doRNG registerDoRNG
 #' @importFrom parallelly makeClusterPSOCK
 #' @importFrom parallelly availableCores
 #' @importFrom doParallel registerDoParallel
@@ -852,36 +863,38 @@ calc_modis <-
 
         res0 <-
           lapply(radiuslist,
-                 function(k) {
-                   name_radius <-
-                     sprintf("%s%05d",
-                             name_covariates,
-                             radius[k])
+            function(k) {
+              name_radius <-
+                sprintf("%s%05d",
+                        name_covariates,
+                        radius[k])
 
-                   tryCatch({
-                     extracted <-
-                       modis_worker(
-                         raster = vrt_today,
-                         date = as.character(day_to_pick),
-                         sites_in = sites_input,
-                         product = product,
-                         fun_summary_raster = fun_summary,
-                         name_extracted = name_radius,
-                         id_col = id_col,
-                         radius = radius[k]
-                       )
-                     return(extracted)
-                   }, error = function(e) {
-                     name_radius <-
-                       sprintf("%s%05d",
-                               name_covariates,
-                               radius[k])
-                     error_df <- sf::st_drop_geometry(sites_input)
-                     error_df <- error_df[, c(id_col, "time")]
-                     error_df[, name_radius] <- -99999
-                     return(error_df)
-                   })
-                 })
+              tryCatch({
+                extracted <-
+                  modis_worker(
+                    raster = vrt_today,
+                    date = as.character(day_to_pick),
+                    sites_in = sites_input,
+                    product = product,
+                    fun_summary_raster = fun_summary,
+                    name_extracted = name_radius,
+                    id_col = id_col,
+                    radius = radius[k]
+                  )
+                return(extracted)
+              }, error = function(e) {
+                name_radius <-
+                  sprintf("%s%05d",
+                          name_covariates,
+                          radius[k])
+                error_df <- sf::st_drop_geometry(sites_input)
+                error_df <- error_df[, c(id_col, "time")]
+                error_df[, name_radius] <- -99999
+                return(error_df)
+              }
+              )
+            }
+          )
         res <-
           Reduce(\(x, y) {
             dplyr::left_join(x, y,
@@ -926,7 +939,7 @@ calc_temporal_dummies <-
     }
     id_col <- id_col
     dummify <- function(vec, domain) {
-      vec_unique <- domain#sort(unique(vec))
+      vec_unique <- domain
       vec_split <- split(vec_unique, vec_unique)
       vec_assigned <-
         lapply(vec_split,
@@ -975,6 +988,7 @@ calc_temporal_dummies <-
     return(sites_dums)
   }
 
+# nocov start
 #' Calculate TRI covariates
 #' @param path character(1). Path to the directory with TRI CSV files
 #' @param sites stdt/sf/SpatVector/data.frame. Unique sites
@@ -1053,5 +1067,4 @@ calculate_tri <- function(
   return(df_tri)
 
 }
-
-
+# nocov end

@@ -2,8 +2,7 @@
 % Please edit documentation in R/download.R
 \name{download_narr_p_levels_data}
 \alias{download_narr_p_levels_data}
-\title{download_narr_p_levels_data: download pressure level meteorological data
-from NOAA NCEP North American Regional Reanalysis (NARR) model.}
+\title{Download pressure level meteorological data from NOAA NCEP North American Regional Reanalysis (NARR) model.}
 \usage{
 download_narr_p_levels_data(
   year_start = 2022,
@@ -44,8 +43,8 @@ NULL;
 }
 \description{
 The \code{download_narr_p_levels_data} function accesses and downloads
-pressure level meteorological data from [NOAA NCEP North American Regional]
-[Reanalysis (NARR)](https://psl.noaa.gov/data/gridded/data.narr.html).
+pressure level meteorological data from [NOAA NCEP North American Regional
+Reanalysis (NARR)](https://psl.noaa.gov/data/gridded/data.narr.html).
 }
 \author{
 Mitchell Manware, Insang Song

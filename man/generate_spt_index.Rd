@@ -16,8 +16,7 @@ stdt with a new index named "sp_index"
 }
 \description{
 It generates unique spatiotemporal identifier in the
-input stdt object.
-Regardless of mode values
+input stdt object. Regardless of mode values
 (should be one of 'spatial' or 'spatiotemporal'),
 the index column will be named 'sp_index'.
 }

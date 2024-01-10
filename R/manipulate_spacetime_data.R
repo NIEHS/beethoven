@@ -1,6 +1,6 @@
-#' Convert spatio-temporal object to a datatable with lon, lat, time, predictors
-#' columns. It also returns the crs.
-#'
+# nolint start
+#' Convert spatio-temporal object to a datatable with lon, lat, time, predictors columns. It also returns the crs.
+# nolint end
 #' @param stobj object containing space-time data. It can be a data.frame,
 #' a data.table, an sf or sftime, a SpatVector or a SpatRastDataset.
 #' @return a list with a "stdt" a data.table of locations identified by

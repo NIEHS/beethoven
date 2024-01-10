@@ -2,8 +2,7 @@
 % Please edit documentation in R/download.R
 \name{download_noaa_hms_smoke_data}
 \alias{download_noaa_hms_smoke_data}
-\title{download_noaa_hms_smoke_data: download daily wildfire smoke plume data from
-NOAA Hazard Mapping System Fire and Smoke Product}
+\title{Download daily wildfire smoke plume data from NOAA Hazard Mapping System Fire and Smoke Product}
 \usage{
 download_noaa_hms_smoke_data(
   date_start = "2023-09-01",
@@ -61,8 +60,7 @@ NULL;
 The \code{download_noaa_hms_smoke_data()} function accesses and downloads
 wildfire smoke plume coverage data from
 the National Oceanic and Atmospheric Administration's (NOAA)
-[Hazard Mapping System Fire and Smoke Product]
-(https://www.ospo.noaa.gov/Products/land/hms.html#0).
+[Hazard Mapping System Fire and Smoke Product](https://www.ospo.noaa.gov/Products/land/hms.html#0).
 }
 \author{
 Mitchell Manware, Insang Song

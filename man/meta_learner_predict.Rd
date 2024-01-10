@@ -2,10 +2,7 @@
 % Please edit documentation in R/meta_learner.R
 \name{meta_learner_predict}
 \alias{meta_learner_predict}
-\title{meta_learner_predict - take the list of BART fit objects and
-predictions of baselearners to create meta_learner predictions. The BART
-meta learner is not explicitly a S-T model, but the input covariates
-(outputs of each base learner) are S-T based.}
+\title{Create meta_learner predictions from the list of BART fit objects and predictions of base learners}
 \usage{
 meta_learner_predict(meta_fit, base_outputs_stdt, nthreads = 2)
 }
@@ -22,10 +19,7 @@ list with datatable containing lat, lon, time and the covariates
 meta_pred: the final meta learner predictions
 }
 \description{
-meta_learner_predict - take the list of BART fit objects and
-predictions of baselearners to create meta_learner predictions. The BART
-meta learner is not explicitly a S-T model, but the input covariates
-(outputs of each base learner) are S-T based.
+The meta learner used in this package, Bayesian Additive Regression Tree (BART), is not explicitly a S-T model, but the input covariates (outputs of each base learner) are S-T based.
 }
 \note{
 The predictions can be a rast or sf, which depends on the same

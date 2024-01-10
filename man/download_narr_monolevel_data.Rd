@@ -2,8 +2,7 @@
 % Please edit documentation in R/download.R
 \name{download_narr_monolevel_data}
 \alias{download_narr_monolevel_data}
-\title{download_narr_monolevel_data: download monolevel meteorological data from
-NOAA NCEP North American Regional Reanalysis (NARR) model.}
+\title{Download monolevel meteorological data from NOAA NCEP North American Regional Reanalysis (NARR) model.}
 \usage{
 download_narr_monolevel_data(
   year_start = 2022,
@@ -44,8 +43,7 @@ NULL;
 }
 \description{
 The \code{download_narr_monolevel_data} function accesses and downloads
-monolevel meteorological data from [NOAA NCEP North American Regional]
-[Reanalysis (NARR)](https://psl.noaa.gov/data/gridded/data.narr.html).
+monolevel meteorological data from [NOAA NCEP North American Regional Reanalysis (NARR)](https://psl.noaa.gov/data/gridded/data.narr.html).
 }
 \author{
 Mitchell Manware, Insang Song

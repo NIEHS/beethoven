@@ -9,7 +9,6 @@
 #' @param url Download URL to be checked.
 #' @param method httr method to obtain URL ("HEAD" or "GET")
 #' @author Insang Song; Mitchell Manware
-#' based on comment #164 Location of download functions
 #' @importFrom httr HEAD
 #' @importFrom httr GET
 #' @export

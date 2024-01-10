@@ -1,5 +1,5 @@
 # download.R
-#' download_data: a wrapper function for download covariate sources
+#' Download raw data from sources
 #' @param dataset_name character(1). Dataset to download.
 #' @param directory_to_save character(1). Directory to save / unzip
 #'  (if zip files are downloaded) data.
@@ -80,17 +80,16 @@ download_data <-
     }, error = function(e) {
       print(e)
       print(args(what_to_run))
-      message(paste0("Please refer to the argument list and the error message ",
-                     "above to rectify the error.\n"))
+      message(paste0("Please refer to the argument list and ",
+                     "the error message above to rectify the error.\n"))
       return(NULL)
     })
   }
 
 
-#' download_aqs_data: download daily data from AQS datamart
+#' Download daily data from AQS datamart
 #' @param parameter_code integer(1). length of 5.
-#'  EPA pollutant parameter code.
-#'  For details, please refer to
+#'  EPA pollutant parameter code. For details, please refer to
 #'  https://aqs.epa.gov/aqsweb/documents/codetables/parameters.html
 #' @param year_start integer(1). length of 4.
 #'  Start year for downloading data.
@@ -138,8 +137,9 @@ download_aqs_data <-
       remove_command = FALSE) {
     #### 1. check for data download acknowledgement
     download_permit(
-                    data_download_acknowledgement =
-                      data_download_acknowledgement)
+      data_download_acknowledgement =
+      data_download_acknowledgement
+    )
     #### 2. check for null parameteres
     check_for_null_parameters(mget(ls()))
     #### 3. directory setup
@@ -230,12 +230,11 @@ download_aqs_data <-
 
 
 
-#' download_ecoregion_data: download Ecoregion Shapefiles from EPA.
+#' Download Ecoregion Shapefiles from EPA
 #' @description
-#' The \code{download_ecoregion_data()}
-#' function accesses and downloads Ecoregions
-#' level 3 data, where all pieces of information in the higher levels are
-#' included.
+#' The \code{download_ecoregion_data()} function accesses and downloads
+#' Ecoregions level 3 data, where all pieces of information in the higher
+#' levels are included.
 #' @note In Linux systems as of December 2023, downloading Ecoregion data from
 #' EPA Data Commons will result in certificate errors. This is bypassed by
 #' manually identifying .crt file link in your browser by connecting to
@@ -298,11 +297,12 @@ download_ecoregion_data <- function(
   #### 5. define download URL
   if (startsWith(Sys.info()["sysname"], "Linux")) {
     if (!file.exists(epa_certificate_path)) {
-      # URL should be identified in web browser
-      # Lock icon in the address bar at https://gaftp.epa.gov
-      # Click Show Certificate
-      # access "Details" then find URL with *.crt extension
-      # copy and replace the url below
+      message("URL should be identified in web browser
+      Lock icon in the address bar at https://gaftp.epa.gov
+      Click Show Certificate
+      access Details then find URL with *.crt extension
+      copy and replace the url below.\n"
+      )
       download_crt_target <- gsub("pem", "crt", epa_certificate_path)
       certificate_url <-
         "http://cacerts.digicert.com/DigiCertGlobalG2TLSRSASHA2562020CA1-1.crt"
@@ -368,12 +368,12 @@ download_ecoregion_data <- function(
   )
 }
 
-#' download_geos_cf_data: download atmospheric composition data from the NASA
-#' Global Earth Observing System (GEOS) model.
+# nolint start 
+#' Download atmospheric composition data from the NASA Global Earth Observing System (GEOS) model.
 #' @description
 #' The \code{download_goes_cf_data()} function accesses and downloads various
-#' atmospheric composition collections from the [NASA Global Earth Observing]
-#' [System (GEOS) model](https://gmao.gsfc.nasa.gov/GEOS_systems/).
+#' atmospheric composition collections from the [NASA Global Earth Observing System (GEOS) model](https://gmao.gsfc.nasa.gov/GEOS_systems/).
+# nolint end
 #' @param date_start character(1). length of 10. Start date for downloading
 #' data. Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
 #' @param date_end character(1). length of 10. End date for downloading data.
@@ -507,13 +507,13 @@ download_geos_cf_data <- function(
   )
 }
 
-#' download_gmted_data: download global elevation data from the Global Multi-
-#' resolution Terrain Elevation Data (GMTED2010).
+# nolint start
+#' Download global elevation data from the Global Multi-resolution Terrain Elevation Data (GMTED2010).
 #' @description
 #' The \code{download_gmted_data()} function acesses and downloads Global
 #' Multi-resolution Terrain Elevation Data (GMTED2010) from
-#' [U.S. Geological Survey and National Geospatial-Intelligence Agency]
-#' (https://www.usgs.gov/coastal-changes-and-impacts/gmted2010).
+#' [U.S. Geological Survey and National Geospatial-Intelligence Agency](https://www.usgs.gov/coastal-changes-and-impacts/gmted2010).
+# nolint end
 #' @param statistic character(1). Available statistics include "Breakline
 #' Emphasis", "Systematic Subsample", "md (Median Statistic)",
 #' "Minimum Statistic", "Mean Statistic", "Maximum Statistic", and
@@ -654,14 +654,11 @@ download_gmted_data <- function(
   )
 }
 
-#' download_merra2_data: download meteorological and atmospheric data from the
-#' Modern-Era Retrospective analysis for Research and Applications, Version 2
-#' (MERRA-2) model.
+# nolint start
+#' Download meteorological and atmospheric data from the Modern-Era Retrospective analysis for Research and Applications, Version 2 (MERRA-2) model.
 #' @description
 #' The \code{download_merra2_data()} function accesses and downloads various
-#' meteorological and atmospheric collections from the [Modern-Era]
-#' [Retrospective analysis for Research and Applications, Version 2 (MERRA-2)]
-#' (https://gmao.gsfc.nasa.gov/reanalysis/MERRA-2/).
+#' meteorological and atmospheric collections from the [Modern-Era Retrospective analysis for Research and Applications, Version 2 (MERRA-2)](https://gmao.gsfc.nasa.gov/reanalysis/MERRA-2/).
 #' @param date_start character(1). length of 10. Start date for downloading
 #' data. Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
 #' @param date_end character(1). length of 10. End date for downloading data.
@@ -680,6 +677,7 @@ download_gmted_data <- function(
 #' @author Mitchell Manware, Insang Song
 #' @return NULL;
 #' @export
+# nolint end
 download_merra2_data <- function(
   date_start = "2023-09-01",
   date_end = "2023-09-01",
@@ -890,13 +888,12 @@ download_merra2_data <- function(
 
 }
 
-
-#' download_narr_monolevel_data: download monolevel meteorological data from
-#' NOAA NCEP North American Regional Reanalysis (NARR) model.
+# nolint start
+#' Download monolevel meteorological data from NOAA NCEP North American Regional Reanalysis (NARR) model.
 #' @description
 #' The \code{download_narr_monolevel_data} function accesses and downloads
-#' monolevel meteorological data from [NOAA NCEP North American Regional]
-#' [Reanalysis (NARR)](https://psl.noaa.gov/data/gridded/data.narr.html).
+#' monolevel meteorological data from [NOAA NCEP North American Regional Reanalysis (NARR)](https://psl.noaa.gov/data/gridded/data.narr.html).
+# nolint end
 #' @param year_start integer(1). length of 4. Start of year range for
 #' downloading data.
 #' @param year_end integer(1). length of 4. End of year range for downloading
@@ -1005,13 +1002,13 @@ download_narr_monolevel_data <- function(
   )
 }
 
-
-#' download_narr_p_levels_data: download pressure level meteorological data
-#' from NOAA NCEP North American Regional Reanalysis (NARR) model.
+# nolint start
+#' Download pressure level meteorological data from NOAA NCEP North American Regional Reanalysis (NARR) model.
+# nolint end
 #' @description
 #' The \code{download_narr_p_levels_data} function accesses and downloads
-#' pressure level meteorological data from [NOAA NCEP North American Regional]
-#' [Reanalysis (NARR)](https://psl.noaa.gov/data/gridded/data.narr.html).
+#' pressure level meteorological data from [NOAA NCEP North American Regional
+#' Reanalysis (NARR)](https://psl.noaa.gov/data/gridded/data.narr.html).
 #' @param year_start integer(1). length of 4. Start of year range for
 #' downloading data.
 #' @param year_end integer(1). length of 4. End of year range for downloading
@@ -1128,9 +1125,9 @@ download_narr_p_levels_data <- function(
 }
 
 
-
-#' download_nlcd_data: download land cover data from the National Land Cover
-#' Database Science Research Products.
+# nolint start
+#' Download land cover data from the National Land Cover Database Science Research Products.
+# nolint end
 #' @description
 #' The \code{download_nlcd_data()} function accesses and downloads
 #' land cover data from the
@@ -1272,16 +1269,13 @@ download_nlcd_data <- function(
   )
 }
 
-
-#' download_sedac_groads_data: download Global Roads Open Access Data
-#' Set (gROADS), v1 (1980-2010) data from NASA Socioeconomic Data and
-#' Applications Center (SEDAC).
+# nolint start
+#' Download Global Roads Open Access Data Set (gROADS), v1 (1980-2010) data from NASA Socioeconomic Data and Applications Center (SEDAC).
 #' @description
 #' The \code{download_sedac_groads_data()} function accesses and downloads
 #' roads data from the National Aeronautics and Space
-#' Administration's (NASA) [Global Roads Open Access Data Set]
-#' (https://sedac.ciesin.columbia.edu/data/set/groads-global-roads-open-access-
-#' v1/data-download).
+#' Administration's (NASA) [Global Roads Open Access Data Set](https://sedac.ciesin.columbia.edu/data/set/groads-global-roads-open-access-v1/data-download).
+# nolint end
 #' @param data_format character(1). Data can be downloaded as "Shapefile" or
 #' "Geodatabase". (Only "Geodatabase" available for "Global" region).
 #' @param data_region character(1). Data can be downloaded for "Global",
@@ -1395,14 +1389,14 @@ download_sedac_groads_data <- function(
 
 }
 
-
-#' download_sedac_population_data: download UN WPP-Adjusted population density
-#' data from NASA Socioeconomic Data and Applications Center (SEDAC).
+# nolint start
+#' Download UN WPP-Adjusted population density data from NASA Socioeconomic Data and Applications Center (SEDAC)
+# nolint end
 #' @description
 #' The \code{download_sedac_population_data()} function accesses and downloads
 #' population density data from the National Aeronatuics and Space
-#' Administration's (NASA) [UN WPP-Adjusted Population Density, v4.11]
-#' (https://sedac.ciesin.columbia.edu/data/set/gpw-v4-population-density-adjuste
+#' Administration's (NASA) [UN WPP-Adjusted Population Density, v4.11](
+#' https://sedac.ciesin.columbia.edu/data/set/gpw-v4-population-density-adjuste
 #' d-to-2015-unwpp-country-totals-rev11).
 #' @param year character(1). Available years are 2000, 2005, 2010, 2015, and
 #' 2020, or "all" for all years.
@@ -1552,15 +1546,16 @@ download_sedac_population_data <- function(
                        download_name = download_name)
 }
 
-
-#' download_noaa_hms_smoke_data: download daily wildfire smoke plume data from
-#' NOAA Hazard Mapping System Fire and Smoke Product
+# nolint start
+#' Download daily wildfire smoke plume data from NOAA Hazard Mapping System Fire and Smoke Product
 #' @description
+# nolint end
 #' The \code{download_noaa_hms_smoke_data()} function accesses and downloads
 #' wildfire smoke plume coverage data from
 #' the National Oceanic and Atmospheric Administration's (NOAA)
-#' [Hazard Mapping System Fire and Smoke Product]
-#' (https://www.ospo.noaa.gov/Products/land/hms.html#0).
+# nolint start
+#' [Hazard Mapping System Fire and Smoke Product](https://www.ospo.noaa.gov/Products/land/hms.html#0).
+# nolint end
 #' @param date_start character(1). length of 10. Start date for downloading
 #' data. Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
 #' @param date_end character(1). length of 10. End date for downloading data.
@@ -1715,9 +1710,9 @@ download_noaa_hms_smoke_data <- function(
 }
 
 
-
-#' download_koppen_geiger_data: download climate classification data from the
-#' Present and future Köppen-Geiger climate classification maps.
+# nolint start
+#' Download climate classification data from the present and future Köppen-Geiger climate classification maps.
+# nolint end
 #' @description
 #' The \code{download_koppen_geiger_data()} function accesses and downloads
 #' climate classification data from the Present and future
@@ -1849,8 +1844,9 @@ download_koppen_geiger_data <- function(
 }
 
 
-
-#' download_modis_data:
+# nolint start
+#' Download MODIS product files
+# nolint end
 #' @description Need maintenance for the directory path change
 #' in NASA EOSDIS. This function first retrieves the all hdf download links
 #' on a certain day, then only selects the relevant tiles from the retrieved
@@ -2147,8 +2143,7 @@ download_modis_data <- function(
 }
 
 
-#' download_tri_data: download data from EPA toxic release inventory
-#'
+#' Download data from EPA toxic release inventory
 #' @param year_start integer(1). length of 4. Start year for downloading data.
 #' @param year_end integer(1). length of 4. End year for downloading data.
 #' @param directory_to_save character(1). Directory to download files.
@@ -2227,20 +2222,20 @@ download_tri_data <- function(
 }
 
 
-
-#' download_aadt_data: download data from EPA National Emission Inventory
-#' aggregated on-road emission data
-#'
+# nolint start
+#' Download data from EPA National Emission Inventory aggregated on-road emission data
+# nolint end
 #' @param directory_to_save character(1). Directory to download files.
 #' @param data_download_acknowledgement logical(1). By setting \code{TRUE} the
 #' user acknowledge that the data downloaded using this function may be very
 #' large and use lots of machine storage and memory.
 #' @param year_target Available years of NEI data.
-#' Default is c(2017L, 2020L).
+#' Default is \code{c(2017L, 2020L)}.
 #' @param download logical(1). \code{FALSE} will generate a *.txt file
 #' containing all download commands. By setting \code{TRUE} the function
 #' will download all of the requested data files.
-#' @param remove_command logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
+#' @param remove_command logical(1).
+#' Remove (\code{TRUE}) or keep (\code{FALSE})
 #' the text file containing download commands.
 #' @author Ranadeep Daw, Insang Song
 #' @returns NULL; Two comma-separated value (CSV) raw files for 2017 and 2020

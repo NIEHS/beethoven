@@ -31,6 +31,7 @@ will be calculated.}
 \item{id_col}{character(1). Site identifier. Default is "site_id"}
 
 \item{name_covariates}{character. Name header of covariates.
+e.g., "MOD_NDVIF_0_".
 The calculated covariate names will have a form of
 '{name_covariates}{zero-padded buffer radius in meters}',
 e.g., 'MOD_NDVIF_0_50000' where 50 km radius circular buffer

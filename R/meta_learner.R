@@ -1,7 +1,5 @@
-#' meta_learner_fit
-#' Fit a BART (Bayesian Additive Regression Tree) meta learner. It takes
-#' predictions of other models such as kriging, GLM, machine learning models as
-#' input and fits a BART Model
+# nolint start
+#' Fit a BART (Bayesian Additive Regression Tree) meta learner. It takes predictions of other models such as kriging, GLM, machine learning models as input and fits a BART Model
 #' @param base_predictor_list - P x 1 list where P = p is a base predictor
 #' vector (numeric). Each predictor vector should be the same length and
 #' named.
@@ -11,6 +9,7 @@
 #' @return meta_fit_obj object of meta learner
 #' @export
 #' @examples NULL
+# nolint end
 meta_learner_fit <- function(base_predictor_list,
                              kfolds, y) {
   # Unnamed base_predictor_list is not accepted
@@ -67,11 +66,11 @@ meta_learner_fit <- function(base_predictor_list,
 }
 
 
-#' meta_learner_predict - take the list of BART fit objects and
-#' predictions of baselearners to create meta_learner predictions. The BART
-#' meta learner is not explicitly a S-T model, but the input covariates
-#' (outputs of each base learner) are S-T based.
-#'
+# nolint start
+#' Create meta_learner predictions from the list of BART fit objects and predictions of base learners
+#' @description
+#' The meta learner used in this package, Bayesian Additive Regression Tree (BART), is not explicitly a S-T model, but the input covariates (outputs of each base learner) are S-T based.
+# nolint end
 #' @param meta_fit list of BART objects from meta_learner_fit
 #' @param base_outputs_stdt stdt object (see convert_spacetime_data.R):
 #' list with datatable containing lat, lon, time and the covariates

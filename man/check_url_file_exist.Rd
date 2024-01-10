@@ -16,5 +16,4 @@ Check if sample of download URLs have HTTP Status 200
 }
 \author{
 Insang Song; Mitchell Manware
-based on comment #164 Location of download functions
 }

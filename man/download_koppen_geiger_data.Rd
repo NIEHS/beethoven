@@ -2,8 +2,7 @@
 % Please edit documentation in R/download.R
 \name{download_koppen_geiger_data}
 \alias{download_koppen_geiger_data}
-\title{download_koppen_geiger_data: download climate classification data from the
-Present and future Köppen-Geiger climate classification maps.}
+\title{Download climate classification data from the present and future Köppen-Geiger climate classification maps.}
 \usage{
 download_koppen_geiger_data(
   time_period = c("Present", "Future"),

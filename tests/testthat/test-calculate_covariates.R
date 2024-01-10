@@ -121,11 +121,8 @@ testthat::test_that("calc_modis works well.", {
   withr::local_package("sf")
   withr::local_package("terra")
   withr::local_package("foreach")
-  withr::local_package("doRNG")
   withr::local_package("doParallel")
   withr::local_options(list(sf_use_s2 = FALSE))
-  source(testthat::test_path("../..", "R", "manipulate_spacetime_data.R"))
-  source(testthat::test_path("../..", "R", "calculate_covariates.R"))
 
   site_faux <-
     data.frame(

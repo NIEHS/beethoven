@@ -2,7 +2,7 @@
 % Please edit documentation in R/download.R
 \name{download_data}
 \alias{download_data}
-\title{download_data: a wrapper function for download covariate sources}
+\title{Download raw data from sources}
 \usage{
 download_data(
   dataset_name = c("aqs", "ecoregion", "geos", "gmted", "koppen", "koppengeiger",
@@ -27,7 +27,7 @@ large and use lots of machine storage and memory.}
 \item{...}{Arguments passed to each download function.}
 }
 \description{
-download_data: a wrapper function for download covariate sources
+Download raw data from sources
 }
 \note{
 - All download function names are in \code{download_*_data} formats

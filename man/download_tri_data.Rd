@@ -2,7 +2,7 @@
 % Please edit documentation in R/download.R
 \name{download_tri_data}
 \alias{download_tri_data}
-\title{download_tri_data: download data from EPA toxic release inventory}
+\title{Download data from EPA toxic release inventory}
 \usage{
 download_tri_data(
   year_start = 2018L,
@@ -35,7 +35,7 @@ the text file containing download commands.}
 NULL; Yearly comma-separated value (CSV) raw files for each year
 }
 \description{
-download_tri_data: download data from EPA toxic release inventory
+Download data from EPA toxic release inventory
 }
 \author{
 Mariana Kassien, Insang Song

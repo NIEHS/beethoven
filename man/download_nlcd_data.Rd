@@ -2,8 +2,7 @@
 % Please edit documentation in R/download.R
 \name{download_nlcd_data}
 \alias{download_nlcd_data}
-\title{download_nlcd_data: download land cover data from the National Land Cover
-Database Science Research Products.}
+\title{Download land cover data from the National Land Cover Database Science Research Products.}
 \usage{
 download_nlcd_data(
   year = 2021,

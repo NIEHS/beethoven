@@ -2,14 +2,12 @@
 % Please edit documentation in R/cross_validation.R
 \name{generate_cv_index_random}
 \alias{generate_cv_index_random}
-\title{Generate spatio-temporal cross-validation index
-(random)}
+\title{Generate spatio-temporal cross-validation index (random)}
 \usage{
 generate_cv_index_random(covars, cv_fold = NULL)
 }
 \arguments{
-\item{covars}{stdt. See \code{\link{convert_stobj_to_stdt}}
-for details.}
+\item{covars}{stdt. See \code{\link{convert_stobj_to_stdt}} for details.}
 
 \item{cv_fold}{integer(1). Number of folds for cross-validation.}
 }
@@ -17,8 +15,7 @@ for details.}
 An integer vector with unique values of \code{seq(1, cv_fold)}
 }
 \description{
-Generate spatio-temporal cross-validation index
-(random)
+Generate spatio-temporal cross-validation index (random)
 }
 \author{
 Insang Song

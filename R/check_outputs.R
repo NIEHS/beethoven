@@ -2,9 +2,9 @@
 ## Output data refers to outputs of base/meta learners
 ## Last edited 11/13/2023
 
-#' Check output locations are in
-#' the reference spatial domain of the mainland US
-#'
+# nolint start
+#' Check output locations are in the reference spatial domain of the mainland US
+# nolint end
 #' @param model_output sf/sftime object of the model output
 #' @param spatial_domain sf/sftime object of spatial domain
 #' @return A logical vector of length nrow(model_output)

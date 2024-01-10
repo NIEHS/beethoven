@@ -2,9 +2,7 @@
 % Please edit documentation in R/download.R
 \name{download_sedac_groads_data}
 \alias{download_sedac_groads_data}
-\title{download_sedac_groads_data: download Global Roads Open Access Data
-Set (gROADS), v1 (1980-2010) data from NASA Socioeconomic Data and
-Applications Center (SEDAC).}
+\title{Download Global Roads Open Access Data Set (gROADS), v1 (1980-2010) data from NASA Socioeconomic Data and Applications Center (SEDAC).}
 \usage{
 download_sedac_groads_data(
   data_format = c("Shapefile", "Geodatabase"),
@@ -54,9 +52,7 @@ NULL;
 \description{
 The \code{download_sedac_groads_data()} function accesses and downloads
 roads data from the National Aeronautics and Space
-Administration's (NASA) [Global Roads Open Access Data Set]
-(https://sedac.ciesin.columbia.edu/data/set/groads-global-roads-open-access-
-v1/data-download).
+Administration's (NASA) [Global Roads Open Access Data Set](https://sedac.ciesin.columbia.edu/data/set/groads-global-roads-open-access-v1/data-download).
 }
 \author{
 Mitchell Manware, Insang Song

@@ -2,7 +2,7 @@
 % Please edit documentation in R/download.R
 \name{download_aqs_data}
 \alias{download_aqs_data}
-\title{download_aqs_data: download daily data from AQS datamart}
+\title{Download daily data from AQS datamart}
 \usage{
 download_aqs_data(
   parameter_code = 88101,
@@ -21,8 +21,7 @@ download_aqs_data(
 }
 \arguments{
 \item{parameter_code}{integer(1). length of 5.
-EPA pollutant parameter code.
-For details, please refer to
+EPA pollutant parameter code. For details, please refer to
 https://aqs.epa.gov/aqsweb/documents/codetables/parameters.html}
 
 \item{year_start}{integer(1). length of 4.
@@ -67,7 +66,7 @@ NULL; Separate comma-separated value (CSV) files of
  will be stored in \code{directory_to_save}.
 }
 \description{
-download_aqs_data: download daily data from AQS datamart
+Download daily data from AQS datamart
 }
 \author{
 Mariana Kassien, Insang Song, Mitchell Manware

@@ -22,18 +22,11 @@ stdt
 Generate blocked spatial index
 }
 \details{
-"Block" in this function refers to
-a group of contiguous spatial/temporal entities.
-Regardless of mode values
-(should be one of 'spatial' or 'spatiotemporal'),
-the index column will be named 'sp_index'.
-\code{block_id} should be set with a proper field name
-when blocks is a sf or SpatVector object. When \code{cv_fold} is
-an integer, then the coordinates stored in \code{stdt} object
-are clustered with k-means. In this case, the result object
-will include attributes (accessible with \code{attr} function) about
-"kmeans_centers" (coordinates of centers) and
-"kmeans_sizes" (size of each cluster)
+"Block" in this function refers to a group of contiguous spatial/temporal entities.
+Regardless of mode values (should be one of 'spatial' or 'spatiotemporal'),
+the index column will be named 'sp_index'. \code{block_id} should be set with a proper field name
+when blocks is a sf or SpatVector object. When \code{cv_fold} is an integer, then the coordinates stored in \code{stdt} object are clustered with k-means. In this case, the result object will include attributes (accessible with \code{attr} function) about
+"kmeans_centers" (coordinates of centers) and "kmeans_sizes" (size of each cluster)
 }
 \author{
 Insang Song

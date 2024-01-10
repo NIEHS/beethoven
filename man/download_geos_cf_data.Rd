@@ -2,8 +2,7 @@
 % Please edit documentation in R/download.R
 \name{download_geos_cf_data}
 \alias{download_geos_cf_data}
-\title{download_geos_cf_data: download atmospheric composition data from the NASA
-Global Earth Observing System (GEOS) model.}
+\title{Download atmospheric composition data from the NASA Global Earth Observing System (GEOS) model.}
 \usage{
 download_geos_cf_data(
   date_start = "2023-09-01",
@@ -45,8 +44,7 @@ NULL;
 }
 \description{
 The \code{download_goes_cf_data()} function accesses and downloads various
-atmospheric composition collections from the [NASA Global Earth Observing]
-[System (GEOS) model](https://gmao.gsfc.nasa.gov/GEOS_systems/).
+atmospheric composition collections from the [NASA Global Earth Observing System (GEOS) model](https://gmao.gsfc.nasa.gov/GEOS_systems/).
 }
 \author{
 Mitchell Manware, Insang Song

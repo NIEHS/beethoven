@@ -2,8 +2,7 @@
 % Please edit documentation in R/download.R
 \name{download_aadt_data}
 \alias{download_aadt_data}
-\title{download_aadt_data: download data from EPA National Emission Inventory
-aggregated on-road emission data}
+\title{Download data from EPA National Emission Inventory aggregated on-road emission data}
 \usage{
 download_aadt_data(
   directory_to_save = "./input/aadt/",
@@ -21,21 +20,21 @@ user acknowledge that the data downloaded using this function may be very
 large and use lots of machine storage and memory.}
 
 \item{year_target}{Available years of NEI data.
-Default is c(2017L, 2020L).}
+Default is \code{c(2017L, 2020L)}.}
 
 \item{download}{logical(1). \code{FALSE} will generate a *.txt file
 containing all download commands. By setting \code{TRUE} the function
 will download all of the requested data files.}
 
-\item{remove_command}{logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
+\item{remove_command}{logical(1).
+Remove (\code{TRUE}) or keep (\code{FALSE})
 the text file containing download commands.}
 }
 \value{
 NULL; Two comma-separated value (CSV) raw files for 2017 and 2020
 }
 \description{
-download_aadt_data: download data from EPA National Emission Inventory
-aggregated on-road emission data
+Download data from EPA National Emission Inventory aggregated on-road emission data
 }
 \author{
 Ranadeep Daw, Insang Song

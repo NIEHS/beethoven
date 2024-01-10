@@ -2,7 +2,7 @@
 % Please edit documentation in R/download.R
 \name{download_ecoregion_data}
 \alias{download_ecoregion_data}
-\title{download_ecoregion_data: download Ecoregion Shapefiles from EPA.}
+\title{Download Ecoregion Shapefiles from EPA}
 \usage{
 download_ecoregion_data(
   directory_to_download = "./input/ecoregions/",
@@ -47,10 +47,9 @@ for EPA DataCommons. Default is
 NULL;
 }
 \description{
-The \code{download_ecoregion_data()}
-function accesses and downloads Ecoregions
-level 3 data, where all pieces of information in the higher levels are
-included.
+The \code{download_ecoregion_data()} function accesses and downloads
+Ecoregions level 3 data, where all pieces of information in the higher
+levels are included.
 }
 \note{
 In Linux systems as of December 2023, downloading Ecoregion data from
