@@ -33,10 +33,9 @@ calc_narr <- function(
     level = NULL,
     directory_with_data = "../../data/covariates/narr/") {
   #### 1. directory setup
-  chars_dir_data <- nchar(directory_with_data)
-  if (substr(directory_with_data, chars_dir_data, chars_dir_data) != "/") {
-    directory_with_data <- paste0(directory_with_data, "/", sep = "")
-  }
+  directory_with_data <- download_sanitize_path(directory_with_data)
+  #### 2. check for variable
+  check_for_null_parameters(mget(ls()))
   #### 2. assign variable code
   code <- gsub("\\.", "", variable)
   code <- gsub("_", "", code)
