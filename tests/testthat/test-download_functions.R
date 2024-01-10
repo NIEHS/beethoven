@@ -746,6 +746,8 @@ testthat::test_that("EPA NEI (AADT) download URLs have HTTP status 200.", {
   withr::local_package("stringr")
   # function parameters
   directory_to_save <- testthat::test_path("..", "testdata/")
+  certificate <- system.file("extdata/cacert_gaftp_epa.pem",
+                             package = "NRTAPmodel")
   # run download function
   year_target <- c(2017L, 2020L)
   download_data(dataset_name = "aadt",
@@ -753,7 +755,9 @@ testthat::test_that("EPA NEI (AADT) download URLs have HTTP status 200.", {
                 data_download_acknowledgement = TRUE,
                 download = FALSE,
                 year_target = year_target,
-                remove_command = FALSE)
+                remove_command = FALSE,
+                epa_certificate_path = certificate
+                )
   # define file path with commands
   commands_path <- paste0(
     directory_to_save,

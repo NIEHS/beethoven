@@ -2314,7 +2314,7 @@ download_aadt_data <- function(
     paste(year_target, collapse = "-"),
     "_",
     Sys.Date(),
-    "_curl_commands.txt"
+    "_wget_commands.txt"
   )
   download_sink(commands_txt)
   #### 6. concatenate and print download commands to "..._curl_commands.txt"

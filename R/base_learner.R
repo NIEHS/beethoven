@@ -27,8 +27,6 @@ base_learner_prep <- function(
 
   if (learner == "cnn") {
     ## data sorting: stdt is supposed to be sorted already
-    check_and_load_torch()
-
     # dimensions
     dim_s <- dim(unique(data[, 1:2]))[1]
     dim_t <- dim(unique(data[, 3]))[1]

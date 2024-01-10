@@ -157,7 +157,7 @@ testthat::test_that("calc_modis works well.", {
   # case 2: swath mod06l2
   path_mod06 <-
     list.files(
-      "tests/testthat/../testdata/modis",
+      testthat::test_path("..", "testdata/modis"),
       "MOD06",
       full.names = TRUE
     )
@@ -178,10 +178,17 @@ testthat::test_that("calc_modis works well.", {
   # case 3: VIIRS
   path_vnp46 <-
     list.files(
-      "tests/testthat/../testdata/modis",
+      testthat::test_path("..", "testdata/modis"),
       "VNP46",
       full.names = TRUE
     )
+  vnptiledf <-
+    read.csv(
+      testthat::test_path("..", "..",
+        "inst/extdata/modis_vnp46_tiles.csv"
+      )
+    )
+
   testthat::expect_no_error(
     suppressWarnings(
       calc_vnp46 <-
@@ -191,8 +198,7 @@ testthat::test_that("calc_modis works well.", {
           sites = site_faux,
           name_covariates = c("MOD_NITLT_0_"),
           subdataset = 3L,
-          tilelist =
-          read.csv("tests/testthat/../../inst/extdata/modis_vnp46_tiles.csv"),
+          tilelist = vnptiledf,
           nthreads = 2
         )
     )
@@ -225,13 +231,11 @@ testthat::test_that("calc_modis works well.", {
       date_in = "2021~08~15"
     )
   )
-  tilepath <- testthat::test_path("../../inst/extdata/modis_vnp46_tiles.csv")
-  tilecsv <- utils::read.csv(tilepath)
   testthat::expect_error(
     modis_preprocess_vnp46(
       paths = path_vnp46,
       date_in = "2021-08-15",
-      tile_df = tilecsv[, -3]
+      tile_df = vnpfiledf[, -3]
     )
   )
   testthat::expect_error(
@@ -271,7 +275,7 @@ testthat::test_that("Check extract_nlcd_ratio works", {
   eg_data <- rbind(point_us1, point_us2, point_ak, point_fr) |>
     as.data.frame() |>
     terra::vect(crs = "EPSG:4326")
-  getwd()
+
   path_testdata <-
     testthat::test_path(
       "..",
