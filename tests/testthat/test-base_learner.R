@@ -2,7 +2,6 @@
 
 testthat::test_that("base_learner_fit works", {
   withr::local_package("terra")
-  withr::local_package("ranger")
   withr::local_package("dplyr")
   withr::local_package("data.table")
   withr::local_package("ranger")
@@ -111,9 +110,10 @@ testthat::test_that("base learner data cv fit: ranger", {
 
 })
 
-testthat::test_that("base learner cv fit: xgboost", {
+testthat::test_that("base learner cv fit: rf and xgboost", {
   withr::local_package("terra")
   withr::local_package("xgboost")
+  withr::local_package("ranger")
   withr::local_package("dplyr")
   withr::local_package("data.table")
 

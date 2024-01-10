@@ -4,11 +4,12 @@
 ## TODO: validation set in training set
 
 #' Check torch installation and load
-#' @param default_device character(1). "cpu" or "cuda"
+#' @param default_device character(1). "cpu", "cuda", or "mps"
 #' @returns NULL
 #' @author Insang Song
 #' @importFrom torch torch_is_installed
 #' @importFrom torch torch_device
+#' @importFrom torch install_torch
 #' @importFrom torch cuda_is_available
 #' @importFrom torch backends_mps_is_available
 #' @export
@@ -17,9 +18,8 @@ check_and_load_torch <- function(
 ) {
   default_device <- match.arg(default_device)
 
-  if (!require(torch)) {
-    install.packages("torch")
-    library(torch)
+  if (!torch::torch_is_installed()) {
+    torch::install_torch()
   }
   if (!torch::cuda_is_available()) {
     if (default_device == "cuda") {
@@ -32,14 +32,13 @@ check_and_load_torch <- function(
       default_device <- "cpu"
     }
   }
-  torch::torch_is_installed()
   torch::torch_device(default_device)
 }
 
 
 #' Data preparation for base learners
 #' @param learner character(1). One of 'cnn', 'randomforest', 'xgboost'
-#' @param data stdt. see \link{\code{convert_stobj_to_stdt}}
+#' @param data stdt. see \code{\link{convert_stobj_to_stdt}}
 #' @param dependent_name Name of dependent variable. Default is "pm2.5"
 #' @param independent_name character. Names of independent variables.
 #' @returns A list of two matrices (except for cnn) or
@@ -126,12 +125,6 @@ base_learner_cv_fit <- function(
     ytrain <- ymat[cviter != iter, ]
     ytest <- ymat[cviter == iter, ]
 
-    # # to matrix
-    # xtrain <- as.matrix(xtrain)
-    # xtest <- as.matrix(xtest)
-    # ytrain <- as.matrix(ytrain)
-    # ytest <- as.matrix(ytest)
-
     train_fitted <-
       fun(ymat = ytrain,
           xmat = xtrain,
@@ -142,7 +135,6 @@ base_learner_cv_fit <- function(
         xgboost = predict(train_fitted, xtest),
         cnn = stop("cnn prediction is not yet implemented.\n")
       )
-    # predict(train_fitted, ytest, xtest)
     cvlist[[iter]] <-
       list(trained = train_fitted,
            tested = test_fitted)
@@ -154,7 +146,7 @@ base_learner_cv_fit <- function(
 
 
 #' Fit base learner
-#' @param data stdt. See \link{\code{convert_stobj_to_stdt}}
+#' @param data stdt. See \code{\link{convert_stobj_to_stdt}}
 #' @param learner character(1). Currently one of 'randomforest', 'xgboost',
 #' and 'cnn'
 #' @param dependent_name character(1). Name of the dependent variable.
@@ -307,11 +299,10 @@ base_learner_fit_xgboost <- function(
 }
 
 
-
 #' Return cvfold outcome values
-#' @param data stdt. See \link{\code{convert_stobj_to_stdt}}
+#' @param data stdt. See \code{\link{convert_stobj_to_stdt}}
 #' @param cv_index integer. Index per cross-validation method.
-#' See \link{\code{generate_cv_index}}
+#' See \code{\link{generate_cv_index}}
 #' @param dependent_name character(1). Name of the dependent variable.
 #' @author Insang Song
 #' @returns List length of \code{max(cv_index)}

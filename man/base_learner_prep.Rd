@@ -14,7 +14,7 @@ base_learner_prep(
 \arguments{
 \item{learner}{character(1). One of 'cnn', 'randomforest', 'xgboost'}
 
-\item{data}{stdt. see \link{\code{convert_stobj_to_stdt}}}
+\item{data}{stdt. see \code{\link{convert_stobj_to_stdt}}}
 
 \item{dependent_name}{Name of dependent variable. Default is "pm2.5"}
 

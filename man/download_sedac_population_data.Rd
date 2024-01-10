@@ -25,8 +25,8 @@ download_sedac_population_data(
 "ASCII" or "GeoTIFF". "all" years is downloaded as "netCDF".}
 
 \item{data_resolution}{character(1). Available resolutions are 30 second
-(\~ 1 km), 2.5 minute (\~ 5 km), 15 minute (\~ 30 km),
-30 minute (\~ 55 km), and 60 minute (\~ 110 km).}
+(approx. 1 km), 2.5 minute (approx. 5 km), 15 minute (approx. 30 km),
+30 minute (approx. 55 km), and 60 minute (approx. 110 km).}
 
 \item{directory_to_download}{character(1). Directory to download zip files
 from NASA UN WPP-Adjusted Population Density, v4.11.}

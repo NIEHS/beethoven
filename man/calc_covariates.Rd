@@ -8,7 +8,7 @@ calc_covariates(
   covariate = c("modis", "koppen-geiger", "koeppen-geiger", "koppen", "koeppen", "geos",
     "dummies", "gmted", "roads", "sedac_groads", "nlcd", "tri", "ncep", "aadt",
     "ecoregions", "ecoregion"),
-  path = "./input/koppen_geiger/raw/Beck_KG_V1_present_0p0083.tif",
+  path,
   sites,
   id_col = "site_id",
   ...

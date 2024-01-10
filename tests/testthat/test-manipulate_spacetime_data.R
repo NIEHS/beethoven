@@ -127,7 +127,7 @@ test_that("convert_stobj_to_stdt works well", {
   expect_equal(class(stdt_converted$stdt)[[1]], "data.table")
   expect_equal(class(stdt_converted$crs_stdt), "character")
   expect_true(terra::same.crs(stdt_converted$crs_stdt, "EPSG:4326"))
-  
+
   expect_false({
                 any(!(c("lon", "lat", "time") %in%
                         colnames(stdt_converted$stdt)))})

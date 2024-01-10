@@ -7,10 +7,10 @@
 base_learner_cv_outcome(data, cv_index, dependent_name)
 }
 \arguments{
-\item{data}{stdt. See \link{\code{convert_stobj_to_stdt}}}
+\item{data}{stdt. See \code{\link{convert_stobj_to_stdt}}}
 
 \item{cv_index}{integer. Index per cross-validation method.
-See \link{\code{generate_cv_index}}}
+See \code{\link{generate_cv_index}}}
 
 \item{dependent_name}{character(1). Name of the dependent variable.}
 }

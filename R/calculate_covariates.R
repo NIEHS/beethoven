@@ -24,7 +24,7 @@ calc_covariates <-
                     "geos", "dummies", "gmted", "roads",
                     "sedac_groads", "nlcd", "tri", "ncep", "aadt",
                     "ecoregions", "ecoregion"),
-      path = "./input/koppen_geiger/raw/Beck_KG_V1_present_0p0083.tif",
+      path,
       sites,
       id_col = "site_id",
       ...) {
@@ -41,24 +41,24 @@ calc_covariates <-
       ecoregion = calc_ecoregion,
       ecoregions = calc_ecoregion,
       koppen = calc_koppen_geiger,
-      narr_monolevel = calc_narr_monolevel,
-      monolevel = calc_narr_monolevel,
-      narr_p_levels = calc_narr_p_levels,
-      p_levels = calc_narr_p_levels,
-      plevels = calc_narr_p_levels,
+      # narr_monolevel = calc_narr_monolevel,
+      # monolevel = calc_narr_monolevel,
+      # narr_p_levels = calc_narr_p_levels,
+      # p_levels = calc_narr_p_levels,
+      # plevels = calc_narr_p_levels,
       nlcd = calc_nlcd_ratio,
-      noaa = calc_noaa_hms,
-      smoke = calc_noaa_hms,
-      hms = calc_noaa_hms,
-      sedac_groads = calc_sedac_groads,
-      roads = calc_sedac_groads,
-      sedac_population = calc_sedac_population,
-      population = calc_sedac_population,
-      aadt = calc_aadt,
-      tri = calc_tri,
-      ncep = calc_ncep,
-      geos = calc_geos,
-      gmted = calc_gmted,
+      # noaa = calc_noaa_hms,
+      # smoke = calc_noaa_hms,
+      # hms = calc_noaa_hms,
+      # sedac_groads = calc_sedac_groads,
+      # roads = calc_sedac_groads,
+      # sedac_population = calc_sedac_population,
+      # population = calc_sedac_population,
+      # aadt = calc_aadt,
+      # tri = calc_tri,
+      # ncep = calc_ncep,
+      # geos = calc_geos,
+      # gmted = calc_gmted,
       dummies = calc_temporal_dummies
     )
 
@@ -330,13 +330,17 @@ calc_ecoregion <-
 
     df_lv2 <-
       split(key2_num_unique, key2_num_unique) |>
-      lapply(function(x) { as.integer(key2_num == x) }) |>
+      lapply(function(x) {
+        as.integer(key2_num == x)
+      }) |>
       Reduce(f = cbind, x = _) |>
       as.data.frame()
     colnames(df_lv2) <- key2_num_unique
     df_lv3 <-
       split(key3_num_unique, key3_num_unique) |>
-      lapply(function(x) { as.integer(key3_num == x) }) |>
+      lapply(function(x) {
+        as.integer(key3_num == x)
+      }) |>
       Reduce(f = cbind, x = _) |>
       as.data.frame()
     colnames(df_lv3) <- key3_num_unique
@@ -497,7 +501,7 @@ modis_preprocess_vnp46 <- function(
   filepaths_today <- grep(sprintf("A%s", datejul), paths, value = TRUE)
   # today's filenames
   filepaths_today <-
-    grep(paste("(", 
+    grep(paste("(",
                paste(stdtile, collapse = "|"), ")"),
          filepaths_today, value = TRUE)
 
@@ -826,8 +830,9 @@ calc_modis <-
         .verbose = FALSE
       ) %dopar% {
         options(sf_use_s2 = FALSE)
-
+        # nolint start
         day_to_pick <- dates_available[datei]
+        # nolint end
         day_to_pick <- as.Date(day_to_pick, format = "%Y%j")
 
         radiusindex <- seq_along(radius)
@@ -913,7 +918,7 @@ calc_modis <-
 
 #' Calculate temporal dummy variables
 #' @param sites data.frame with a temporal field named "time"
-#'  see \link{\code{convert_stobj_to_stdt}}
+#'  see \code{\link{convert_stobj_to_stdt}}
 #' @param id_col character(1). Unique site identifier column name.
 #'  Default is "site_id".
 #' @param domain_year integer. Year domain to dummify.
@@ -992,11 +997,13 @@ calc_temporal_dummies <-
 #' Calculate TRI covariates
 #' @param path character(1). Path to the directory with TRI CSV files
 #' @param sites stdt/sf/SpatVector/data.frame. Unique sites
-#' see \link{\code{convert_stobj_to_stdt}}
+#' see \code{\link{convert_stobj_to_stdt}}
 #' @param id_col character(1). Unique site identifier column name.
 #'  Default is "site_id".
 #' @param domain_year integer. Year domain to dummify.
 #'  Default is \code{seq(2018L, 2022L)}
+#' @param radius Circular buffer radius.
+#' Default is \code{c(1000, 10000, 50000)} (meters)
 #' @author Insang Song
 #' @returns A data.frame object.
 #' @importFrom terra vect

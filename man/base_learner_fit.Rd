@@ -20,7 +20,7 @@ base_learner_fit(
 )
 }
 \arguments{
-\item{data}{stdt. See \link{\code{convert_stobj_to_stdt}}}
+\item{data}{stdt. See \code{\link{convert_stobj_to_stdt}}}
 
 \item{learner}{character(1). Currently one of 'randomforest', 'xgboost',
 and 'cnn'}

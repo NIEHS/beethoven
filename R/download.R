@@ -137,7 +137,7 @@ download_aqs_data <-
     #### 1. check for data download acknowledgement
     download_permit(
       data_download_acknowledgement =
-      data_download_acknowledgement
+        data_download_acknowledgement
     )
     #### 2. check for null parameteres
     check_for_null_parameters(mget(ls()))
@@ -1402,8 +1402,8 @@ download_sedac_groads_data <- function(
 #' @param data_format character(1). Individual year data can be downloaded as
 #' "ASCII" or "GeoTIFF". "all" years is downloaded as "netCDF".
 #' @param data_resolution character(1). Available resolutions are 30 second
-#' (\~ 1 km), 2.5 minute (\~ 5 km), 15 minute (\~ 30 km),
-#' 30 minute (\~ 55 km), and 60 minute (\~ 110 km).
+#' (approx. 1 km), 2.5 minute (approx. 5 km), 15 minute (approx. 30 km),
+#' 30 minute (approx. 55 km), and 60 minute (approx. 110 km).
 #' @param directory_to_download character(1). Directory to download zip files
 #' from NASA UN WPP-Adjusted Population Density, v4.11.
 #' @param directory_to_save character(1). Directory to decompress zip files.
@@ -1724,7 +1724,8 @@ download_noaa_hms_smoke_data <- function(
 #' and "Future" (2071-2100). ("Future" classifications are based on scenario
 #' RCP8.5).
 #' @param data_resolution character(1). Available resolutions are "0.0083"
-#' degrees (\~ 1 km), "0.083" degrees (\~ 10 km), and "0.5" degrees (\~ 50 km).
+#' degrees (approx. 1 km), "0.083" degrees (approx. 10 km), and
+#' "0.5" degrees (approx. 50 km).
 #' @param directory_to_download character(1). Directory to download zip files
 #' from Present and future Köppen-Geiger climate classification maps at 1-km
 #' resolution.

@@ -16,13 +16,16 @@ calculate_tri(
 \item{path}{character(1). Path to the directory with TRI CSV files}
 
 \item{sites}{stdt/sf/SpatVector/data.frame. Unique sites
-see \link{\code{convert_stobj_to_stdt}}}
+see \code{\link{convert_stobj_to_stdt}}}
 
 \item{id_col}{character(1). Unique site identifier column name.
 Default is "site_id".}
 
 \item{domain_year}{integer. Year domain to dummify.
 Default is \code{seq(2018L, 2022L)}}
+
+\item{radius}{Circular buffer radius.
+Default is \code{c(1000, 10000, 50000)} (meters)}
 }
 \value{
 A data.frame object.

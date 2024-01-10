@@ -7,7 +7,7 @@
 check_and_load_torch(default_device = c("cpu", "cuda", "mps"))
 }
 \arguments{
-\item{default_device}{character(1). "cpu" or "cuda"}
+\item{default_device}{character(1). "cpu", "cuda", or "mps"}
 }
 \description{
 Check torch installation and load
