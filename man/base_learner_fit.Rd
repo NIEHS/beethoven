@@ -15,7 +15,8 @@ base_learner_fit(
   t_fold = NULL,
   blocks = NULL,
   block_id = NULL,
-  return_full_object = FALSE
+  return_full_object = FALSE,
+  ...
 )
 }
 \arguments{
@@ -52,14 +53,25 @@ and 'cnn'}
 the package in use, whereas \code{FALSE} will only return the prediction
 with spatial/temporal information. Full object is potentially helpful for
 debugging.}
+
+\item{...}{Arguments passed to \code{base_learner_fit_*}.}
 }
 \value{
-data.frame
+List of length \code{cv_fold}, \code{sp_fold * t_fold}, or
+\code{prod(blocks)} (when \code{blocks} is a numeric object of length 2) /
+\code{nrow(blocks)} (\code{blocks} is sf or SpatVector).
 }
 \description{
 This function fits a selected base learner, which is supposed
 to be one of random forest, XGBoost, and convolutional neural network,
 using one of spatiotemporal cross-validation approaches.
+}
+\seealso{
+\link{base_learner_cv_fit}
+\link{base_learner_fit_xgboost}
+\link{base_learner_fit_ranger}
+\link{base_learner_fit_cnn}
+\link[xgboost]{xgboost}, \link[ranger]{ranger}
 }
 \author{
 Insang Song

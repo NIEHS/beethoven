@@ -5,6 +5,8 @@ testthat::test_that("base_learner_fit works", {
   withr::local_package("ranger")
   withr::local_package("dplyr")
   withr::local_package("data.table")
+  withr::local_package("ranger")
+  withr::local_package("xgboost")
 
   nsp <- 50L
   nt <- 60L
@@ -41,16 +43,18 @@ testthat::test_that("base_learner_fit works", {
     test_fit_rf <- base_learner_fit(pstdt,
                                     "randomforest",
                                     independent_name = cns_covar,
-                                    cv_mode = "lblo", blocks = c(25L, 20L))
+                                    cv_mode = "lblo", blocks = c(25L, 20L),
+                                    num.trees = 100L)
   )
   testthat::expect_no_error(
     test_fit_xg <- base_learner_fit(pstdt,
-                                    "randomforest",
+                                    "xgboost",
                                     independent_name = cns_covar,
-                                    cv_mode = "lblo", blocks = c(25L, 20L))
+                                    cv_mode = "lblo", blocks = c(25L, 20L),
+                                    nrounds = 50L)
   )
-  testthat::expect_s3_class(test_fit_rf, "ranger")
-  testthat::expect_s3_class(test_fit_xg, "xgb.Booster")
+  testthat::expect_true(is.list(test_fit_rf))
+  testthat::expect_true(is.list(test_fit_xg))
 })
 
 
@@ -90,10 +94,20 @@ testthat::test_that("base learner data cv fit: ranger", {
          paste0("(", paste(sprintf("X%d", seq(1, np)), collapse = "|"), ")"),
          colnames(pstdt$stdt))
 
-  testthat::expect_no_error(
-    res_check_fit_rf <- base_learner_fit_ranger(res_datap$ymat, res_datap$xmat)
+  res_datap <- base_learner_prep(
+    learner = "xgboost",
+    data = pstdt,
+    dependent_name = "pm2.5",
+    independent_name = sprintf("X%d", seq(1, np))
   )
-
+  testthat::expect_no_error(
+    res_check_fit_rf <-
+      base_learner_fit_ranger(res_datap$ymat, res_datap$xmat, num.trees = 50L)
+  )
+  testthat::expect_no_error(
+    res_check_fit_xg <-
+      base_learner_fit_xgboost(res_datap$ymat, res_datap$xmat, nrounds = 10L)
+  )
 
 })
 
@@ -142,7 +156,8 @@ testthat::test_that("base learner cv fit: xgboost", {
   )
 
   testthat::expect_no_error(
-    res_check_fit_xg <- base_learner_fit_xgboost(res_datap$ymat, res_datap$xmat)
+    res_check_fit_xg <-
+      base_learner_fit_xgboost(res_datap$ymat, res_datap$xmat, nrounds = 30L)
   )
 
   testthat::expect_no_error(
@@ -153,7 +168,8 @@ testthat::test_that("base learner cv fit: xgboost", {
         dependent_name = "pm2.5",
         independent_name = colnames(pstdt$stdt)[-1:-5],
         cv_mode = "lblo",
-        blocks = c(20, 20)
+        blocks = c(20, 20),
+        num.trees = 100L
       )
   )
 
@@ -164,7 +180,8 @@ testthat::test_that("base learner cv fit: xgboost", {
       dependent_name = "pm2.5",
       independent_name = colnames(pstdt$stdt)[-1:-5],
       cv_mode = "lblo",
-      blocks = c(25, 25)
+      blocks = c(25, 25),
+      nrounds = 30L
     )
   )
 
@@ -175,8 +192,12 @@ testthat::test_that("torch installation status is well tested.", {
   withr::local_package("torch")
   testthat::expect_no_error(check_and_load_torch("cpu"))
   # system-specific: CUDA
-  testthat::expect_error(check_and_load_torch("cuda"))
+  testthat::expect_message(check_and_load_torch("cuda"),
+    "There is no device found to use CUDA. Trying other devices...\n"
+  )
   # system-specific: mps (Apple silicon)
-  testthat::expect_error(check_and_load_torch("cpu"))
+  testthat::expect_message(check_and_load_torch("mps"),
+    "MPS is not available in your system. Setting cpu as default."
+  )
 })
 ### ------ test end ------

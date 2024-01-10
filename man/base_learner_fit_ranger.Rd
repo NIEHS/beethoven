@@ -4,15 +4,17 @@
 \alias{base_learner_fit_ranger}
 \title{Fit random forests with ranger}
 \usage{
-base_learner_fit_ranger(ymat, xmat)
+base_learner_fit_ranger(ymat, xmat, ...)
 }
 \arguments{
 \item{ymat}{data.frame or matrix. Dependent variable.}
 
 \item{xmat}{data.frame or matrix. Independent variables.}
+
+\item{...}{Arguments passed to \code{ranger::ranger}}
 }
 \value{
-data.frame
+ranger object.
 }
 \description{
 Fit random forests with ranger

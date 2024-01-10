@@ -3,15 +3,16 @@
 #' @param base_predictor_list - P x 1 list where P = p is a base predictor
 #' vector (numeric). Each predictor vector should be the same length and
 #' named.
-#' @param y dependent variable
 #' @param kfolds integer, index of k-folds for cross-validation. This should be
 #' produced with regards to spatial and/or temporal considerations
+#' @param y dependent variable
+#' @param ... Passed arguments to \link[BART]{wbart}
 #' @return meta_fit_obj object of meta learner
 #' @export
 #' @examples NULL
 # nolint end
 meta_learner_fit <- function(base_predictor_list,
-                             kfolds, y) {
+                             kfolds, y, ...) {
   # Unnamed base_predictor_list is not accepted
   if (is.null(names(base_predictor_list)) ||
         any(is.na(names(base_predictor_list)))) {
@@ -59,7 +60,8 @@ meta_learner_fit <- function(base_predictor_list,
     meta_fit_obj[[i]] <- BART::wbart(
       x.train = x_tr,
       y.train = y_tr,
-      x.test = x_te
+      x.test = x_te,
+      ...
     )
   }
   return(meta_fit_obj)

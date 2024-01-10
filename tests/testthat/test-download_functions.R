@@ -41,8 +41,8 @@ testthat::test_that("EPA AQS download URLs have HTTP status 200.", {
   year_end <- 2022
   resolution_temporal <- "daily"
   parameter_code <- 88101
-  directory_to_download <- "../testdata/"
-  directory_to_save <- "../testdata/"
+  directory_to_download <- testthat::test_path("..", "testdata/")
+  directory_to_save <- testthat::test_path("..", "testdata/")
   # run download function
   download_data(dataset_name = "aqs",
                 year_start = year_start,
@@ -84,8 +84,8 @@ testthat::test_that("Ecoregion download URLs have HTTP status 200.", {
   withr::local_package("httr")
   withr::local_package("stringr")
   # function parameters
-  directory_to_download <- "../testdata/"
-  directory_to_save <- "../testdata/"
+  directory_to_download <- testthat::test_path("..", "testdata/")
+  directory_to_save <- testthat::test_path("..", "testdata/")
   certificate <- system.file("extdata/cacert_gaftp_epa.pem",
                              package = "NRTAPmodel")
   # run download function
@@ -129,7 +129,7 @@ testthat::test_that("GEOS-CF download URLs have HTTP status 200.", {
   date_end <- "2019-09-21"
   collections <- c("aqc_tavg_1hr_g1440x721_v1",
                    "chm_inst_1hr_g1440x721_p23")
-  directory_to_save <- "../testdata/"
+  directory_to_save <- testthat::test_path("..", "testdata/")
   for (c in seq_along(collections)) {
     # run download function
     download_data(dataset_name = "geos",
@@ -171,8 +171,8 @@ testthat::test_that("GMTED download URLs have HTTP status 200.", {
                   # "Mean Statistic", "Maximum Statistic",
                   "Standard Deviation Statistic")
   resolution <- "7.5 arc-seconds"
-  directory_to_download <- "../testdata/"
-  directory_to_save <- "../testdata/"
+  directory_to_download <- testthat::test_path("..", "testdata/")
+  directory_to_save <- testthat::test_path("..", "testdata/")
   for (s in seq_along(statistics)) {
     # run download function
     download_data(dataset_name = "gmted",
@@ -215,7 +215,7 @@ testthat::test_that("MERRA2 download URLs have HTTP status 200.", {
   date_start <- "2022-02-14"
   date_end <- "2022-03-08"
   collections <- c("inst1_2d_asm_Nx", "inst3_3d_asm_Np")
-  directory_to_save <- "../testdata/"
+  directory_to_save <- testthat::test_path("..", "testdata/")
   for (c in seq_along(collections)) {
     # run download function
     download_data(dataset_name = "merra2",
@@ -255,7 +255,7 @@ testthat::test_that("NARR monolevel download URLs have HTTP status 200.", {
   year_start <- 2018
   year_end <- 2018
   variables <- c("weasd", "air.2m")
-  directory_to_save <- "../testdata/"
+  directory_to_save <- testthat::test_path("..", "testdata/")
   # run download function
   download_data(dataset_name = "narr_monolevel",
                 year_start = year_start,
@@ -290,7 +290,7 @@ testthat::test_that("NARR p-levels download URLs have HTTP status 200.", {
   year_start <- 2020
   year_end <- 2021
   variables <- c("shum", "omega")
-  directory_to_save <- "../testdata/"
+  directory_to_save <- testthat::test_path("..", "testdata/")
   # run download function
   download_data(dataset_name = "narr_p_levels",
                 year_start = year_start,
@@ -324,8 +324,8 @@ testthat::test_that("NOAA HMS Smoke download URLs have HTTP status 200.", {
   # function parameters
   date_start <- "2022-08-12"
   date_end <- "2022-09-21"
-  directory_to_download <- "../testdata/"
-  directory_to_save <- "../testdata/"
+  directory_to_download <- testthat::test_path("..", "testdata/")
+  directory_to_save <- testthat::test_path("..", "testdata/")
   # run download function
   download_data(dataset_name = "smoke",
                 date_start = date_start,
@@ -365,8 +365,8 @@ testthat::test_that("NLCD download URLs have HTTP status 200.", {
   years <- c(2021, 2019, 2016)
   collections <- c(rep("Coterminous United States", 2), "Alaska")
   collection_codes <- c(rep("l48", 2), "ak")
-  directory_to_download <- "../testdata/"
-  directory_to_save <- "../testdata/"
+  directory_to_download <- testthat::test_path("..", "testdata/")
+  directory_to_save <- testthat::test_path("..", "testdata/")
   # run download function
   for (y in seq_along(years)) {
     download_data(dataset_name = "nlcd",
@@ -410,8 +410,8 @@ testthat::test_that("SEDAC groads download URLs have HTTP status 200.", {
   # function parameters
   data_regions <- c("Americas")
   data_formats <- c("Geodatabase", "Shapefile")
-  directory_to_download <- "../testdata/"
-  directory_to_save <- "../testdata/"
+  directory_to_download <- testthat::test_path("..", "testdata/")
+  directory_to_save <- testthat::test_path("..", "testdata/")
   # run download function
   for (r in seq_along(data_regions)) {
     data_region <- data_regions[r]
@@ -458,8 +458,8 @@ testthat::test_that("SEDAC population download URLs have HTTP status 200.", {
   data_formats <- c("GeoTIFF")
   data_resolutions <- cbind(c("30 second"),
                             c("30_sec"))
-  directory_to_download <- "../testdata/"
-  directory_to_save <- "../testdata/"
+  directory_to_download <- testthat::test_path("..", "testdata/")
+  directory_to_save <- testthat::test_path("..", "testdata/")
   for (f in seq_along(data_formats)) {
     data_format <- data_formats[f]
     for (y in seq_along(years)) {
@@ -520,8 +520,8 @@ testthat::test_that("Koppen Geiger download URLs have HTTP status 200.", {
   # function parameters
   time_periods <- c("Present", "Future")
   data_resolutions <- c("0.0083")
-  directory_to_download <- "../testdata/"
-  directory_to_save <- "../testdata/"
+  directory_to_download <- testthat::test_path("..", "testdata/")
+  directory_to_save <- testthat::test_path("..", "testdata/")
   # run download function
   for (p in seq_along(time_periods)) {
     time_period <- time_periods[p]
@@ -574,7 +574,7 @@ testthat::test_that("MODIS-MOD09GA download URLs have HTTP status 200.", {
   horizontal_tiles <- c(12, 13)
   vertical_tiles <- c(5, 6)
   nasa_earth_data_token <- "tOkEnPlAcEhOlDeR"
-  directory_to_save <- "../testdata/"
+  directory_to_save <- testthat::test_path("..", "testdata/")
   for (y in seq_along(years)) {
     date_start <- paste0(years[y], "-06-20")
     date_end <- paste0(years[y], "-06-24")
@@ -624,41 +624,41 @@ testthat::test_that("MODIS-MOD06L2 download URLs have HTTP status 200.", {
   product <- "MOD06_L2"
   version <- "61"
   date_start <- "2019-02-18"
-  date_end <- "2022-03-22"
+  date_end <- "2019-02-18"
   nasa_earth_data_token <- "tOkEnPlAcEhOlDeR"
   horizontal_tiles <- c(8, 10)
   vertical_tiles <- c(4, 5)
-  directory_to_save <- "./tests/testdata/"
+  directory_to_save <- testthat::test_path("..", "testdata/")
 
-  kax <- download_data(dataset_name = "modis",
-                  date_start = date_start,
-                  date_end = date_end,
-                  product = product,
-                  version = version,
-                  horizontal_tiles = horizontal_tiles,
-                  vertical_tiles = vertical_tiles,
-                  nasa_earth_data_token = nasa_earth_data_token,
-                  directory_to_save = directory_to_save,
-                  data_download_acknowledgement = TRUE,
-                  download = FALSE,
-                  mod06_links = NULL,
-                  remove_command = FALSE)
-  testthat::expect_true(is.null(kax))
-
+  testthat::expect_error(
+    kax <- download_data(dataset_name = "modis",
+                    date_start = date_start,
+                    date_end = date_end,
+                    product = product,
+                    version = version,
+                    horizontal_tiles = horizontal_tiles,
+                    vertical_tiles = vertical_tiles,
+                    nasa_earth_data_token = nasa_earth_data_token,
+                    directory_to_save = directory_to_save,
+                    data_download_acknowledgement = TRUE,
+                    download = FALSE,
+                    mod06_links = NULL,
+                    remove_command = FALSE)
+  )
   # link check
   tdir <- tempdir()
   faux_urls <-
     rbind(
       c(4387858920,
         "/archive/allData/61/MOD06_L2/2019/049/MOD06_L2.A2019049.0720.061.2019049194350.hdf",
-        28267915),
-      c(6845623203,
-        "/archive/allData/61/MOD06_L2/2022/033/MOD06_L2.A2022033.0435.061.2022035152913.hdf",
-        26393941),
-      c(6898699552,
-        "/archive/allData/61/MOD06_L2/2022/081/MOD06_L2.A2022081.0620.061.2022092003817.hdf",
-        28878947)
+        28267915)
     )
+      # c(6845623203,
+      #   "/archive/allData/61/MOD06_L2/2022/033/MOD06_L2.A2022033.0435.061.2022035152913.hdf",
+      #   26393941),
+      # c(6898699552,
+      #   "/archive/allData/61/MOD06_L2/2022/081/MOD06_L2.A2022081.0620.061.2022092003817.hdf",
+      #   28878947)
   faux_urls <- data.frame(faux_urls)
   mod06_scenes <- paste0(tdir, "/mod06_example.csv")
   write.csv(faux_urls, mod06_scenes, row.names = FALSE)

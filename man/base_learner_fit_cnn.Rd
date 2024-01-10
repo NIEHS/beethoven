@@ -4,15 +4,17 @@
 \alias{base_learner_fit_cnn}
 \title{Fit convolutional neural networks with neural network library}
 \usage{
-base_learner_fit_cnn(ymat, xmat)
+base_learner_fit_cnn(ymat, xmat, ...)
 }
 \arguments{
 \item{ymat}{torch::torch_tensor. Dependent variable.}
 
 \item{xmat}{torch::torch_tensor. Independent variables.}
+
+\item{...}{Arguments passed to fitting function}
 }
 \value{
-data.frame
+torch-compatible object
 }
 \description{
 This function uses torch as a backend.

@@ -1,6 +1,7 @@
 ### Base learner fit
 ## Design: generic function and switch to each function type
 ## Potential improvement: integration to tidymodels
+## TODO: validation set in training set
 
 #' Check torch installation and load
 #' @param default_device character(1). "cpu" or "cuda"
@@ -16,15 +17,20 @@ check_and_load_torch <- function(
 ) {
   default_device <- match.arg(default_device)
 
-  if (torch::cuda_is_available()) {
-    default_device <- "cuda"
-  }
-  if (torch::backends_mps_is_available() && default_device == "cpu") {
-    message("Your device is capable of MPS, but default_device is set cpu.\n")
-  }
   if (!require(torch)) {
     install.packages("torch")
     library(torch)
+  }
+  if (!torch::cuda_is_available()) {
+    if (default_device == "cuda") {
+      message("There is no device found to use CUDA. Trying other devices...")
+    }
+  }
+  if (!torch::backends_mps_is_available()) {
+    if (default_device == "mps") {
+      message("MPS is not available in your system. Setting cpu as default.")
+      default_device <- "cpu"
+    }
   }
   torch::torch_is_installed()
   torch::torch_device(default_device)
@@ -97,6 +103,7 @@ base_learner_prep <- function(
 #' @param cv_index integer. Index per cross-validation method.
 #' See \code{?generate_cv_index} for details.
 #' @param fun base_learner_fit_*
+#' @param ... Arguments passed to the argument \code{fun}
 #' @returns List of 4 with xtrain, ytrain, xtest, and ytest.
 #' @author Insang Song
 #' @export
@@ -105,7 +112,8 @@ base_learner_cv_fit <- function(
   ymat,
   xmat,
   cv_index,
-  fun
+  fun,
+  ...
 ) {
 
   cviter <- sort(unique(cv_index))
@@ -126,7 +134,8 @@ base_learner_cv_fit <- function(
 
     train_fitted <-
       fun(ymat = ytrain,
-          xmat = xtrain)
+          xmat = xtrain,
+          ...)
     test_fitted <-
       switch(learner,
         randomforest = predict(train_fitted, data.frame(cbind(ytest, xtest))),
@@ -168,7 +177,16 @@ base_learner_cv_fit <- function(
 #' the package in use, whereas \code{FALSE} will only return the prediction
 #' with spatial/temporal information. Full object is potentially helpful for
 #' debugging.
-#' @return data.frame
+#' @param ... Arguments passed to \code{base_learner_fit_*}.
+#' @seealso
+#' \link{base_learner_cv_fit}
+#' \link{base_learner_fit_xgboost}
+#' \link{base_learner_fit_ranger}
+#' \link{base_learner_fit_cnn}
+#' \link[xgboost]{xgboost}, \link[ranger]{ranger}
+#' @returns List of length \code{cv_fold}, \code{sp_fold * t_fold}, or
+#' \code{prod(blocks)} (when \code{blocks} is a numeric object of length 2) /
+#' \code{nrow(blocks)} (\code{blocks} is sf or SpatVector).
 #' @author Insang Song
 #' @description This function fits a selected base learner, which is supposed
 #' to be one of random forest, XGBoost, and convolutional neural network,
@@ -185,7 +203,8 @@ base_learner_fit <- function(
     t_fold = NULL,
     blocks = NULL,
     block_id = NULL,
-    return_full_object = FALSE) {
+    return_full_object = FALSE,
+    ...) {
   if (is.null(independent_name)) {
     stop("independent_name cannot be null.\n")
   }
@@ -227,7 +246,8 @@ base_learner_fit <- function(
       ymat = data_prep$ymat,
       xmat = data_prep$xmat,
       cv_index = cv_index,
-      fun = run_foo
+      fun = run_foo,
+      ...
     )
   return(cv_res)
 }
@@ -235,15 +255,17 @@ base_learner_fit <- function(
 #' Fit random forests with ranger
 #' @param ymat data.frame or matrix. Dependent variable.
 #' @param xmat data.frame or matrix. Independent variables.
-#' @return data.frame
+#' @param ... Arguments passed to \code{ranger::ranger}
+#' @return ranger object.
 #' @author Insang Song
 #' @importFrom ranger ranger
 #' @export
 base_learner_fit_ranger <- function(
   ymat,
-  xmat
+  xmat,
+  ...
 ) {
-  ranger::ranger(y = ymat, x = xmat, num.trees = 1000L)
+  ranger::ranger(y = ymat, x = xmat, ...)
 }
 
 
@@ -251,7 +273,8 @@ base_learner_fit_ranger <- function(
 #' Fit convolutional neural networks with neural network library
 #' @param ymat torch::torch_tensor. Dependent variable.
 #' @param xmat torch::torch_tensor. Independent variables.
-#' @return data.frame
+#' @param ... Arguments passed to fitting function
+#' @return torch-compatible object
 #' @author Insang Song
 #' @description This function uses torch as a backend.
 #' Torch currently supports CPU, CUDA, and Metal (Apple Silicon graphics),
@@ -260,7 +283,8 @@ base_learner_fit_ranger <- function(
 #' @export
 base_learner_fit_cnn <- function(
     ymat,
-    xmat) {
+    xmat,
+    ...) {
   # check if MPS (for Apple Silicon) / CUDA is available ...
   # fit model (spt-array and 3d-pooling)
   return(NULL)
@@ -270,15 +294,16 @@ base_learner_fit_cnn <- function(
 #' Fit XGBoost model
 #' @param ymat data.frame or matrix. Dependent variable.
 #' @param xmat data.frame or matrix. Independent variables.
-#' See \link{\code{generate_cv_index}} for details.
-#' @return data.frame
+#' @param ... Arguments passed to \code{xgboost::xgboost}
+#' @return xgboost object
 #' @author Insang Song
 #' @importFrom xgboost xgb.train
 #' @export
 base_learner_fit_xgboost <- function(
     ymat,
-    xmat) {
-  xgboost::xgboost(data = xmat, label = ymat, nrounds = 300L)
+    xmat,
+    ...) {
+  xgboost::xgboost(data = xmat, label = ymat, ...)
 }
 
 

@@ -4,7 +4,7 @@
 \alias{base_learner_cv_fit}
 \title{Split training-test data for base learner fitting}
 \usage{
-base_learner_cv_fit(learner, ymat, xmat, cv_index, fun)
+base_learner_cv_fit(learner, ymat, xmat, cv_index, fun, ...)
 }
 \arguments{
 \item{learner}{character(1). Currently one of 'randomforest', 'xgboost',
@@ -18,6 +18,8 @@ and 'cnn'}
 See \code{?generate_cv_index} for details.}
 
 \item{fun}{base_learner_fit_*}
+
+\item{...}{Arguments passed to the argument \code{fun}}
 }
 \value{
 List of 4 with xtrain, ytrain, xtest, and ytest.

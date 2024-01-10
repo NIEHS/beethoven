@@ -80,9 +80,8 @@ download_data <-
     }, error = function(e) {
       print(e)
       print(args(what_to_run))
-      message(paste0("Please refer to the argument list and ",
-                     "the error message above to rectify the error.\n"))
-      return(NULL)
+      stop(paste0("Please refer to the argument list and ",
+                  "the error message above to rectify the error.\n"))
     })
   }
 

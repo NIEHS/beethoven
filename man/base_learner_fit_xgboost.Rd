@@ -4,16 +4,17 @@
 \alias{base_learner_fit_xgboost}
 \title{Fit XGBoost model}
 \usage{
-base_learner_fit_xgboost(ymat, xmat)
+base_learner_fit_xgboost(ymat, xmat, ...)
 }
 \arguments{
 \item{ymat}{data.frame or matrix. Dependent variable.}
 
-\item{xmat}{data.frame or matrix. Independent variables.
-See \link{\code{generate_cv_index}} for details.}
+\item{xmat}{data.frame or matrix. Independent variables.}
+
+\item{...}{Arguments passed to \code{xgboost::xgboost}}
 }
 \value{
-data.frame
+xgboost object
 }
 \description{
 Fit XGBoost model
