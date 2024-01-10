@@ -4,8 +4,8 @@
 ################################################################################
 
 ################################################################################
-#' process_hms: download daily wildfire smoke plume data from 
-#' NOAA Hazard Mapping System Fire and Smoke Product
+#' process_hms: import and aggregate wildfire smoke plume data based on smoke
+#' density level.
 #'
 #' @param date_start character(1). length of 10. Start date of downloaded data. 
 #' Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
@@ -13,14 +13,14 @@
 #' Format YYYY-MM-DD (ex. September 10, 2023 = "2023-09-10").
 #' @param data_format character(1). "Shapefile" or "KML". Format of downloaded 
 #' data.
-#' @param density_level character(1). "Light", "Medium", "Heavy" or "all" 
-#' wildfire smoke plumes. (Default = "all").
-#' @param directory_with_downloaded_data character(1). Directory storing
+#' @param density_level character(1). "Light", "Medium", or "Heavy".
+#' @param directory_with_data character(1). Directory storing
 #' downloaded ".shp" or ".kml" files.
 #' @author Mitchell Manware.
-#' @return a data.frame object;
+#' @return a SpatVector object;
 #' @importFrom terra vect
 #' @importFrom terra aggregate
+#' @importFrom terra subset
 #' @export
 process_hms <- function(
     date_start = "2023-09-01",
@@ -37,7 +37,7 @@ process_hms <- function(
   directory_with_data <- download_sanitize_path(directory_with_data)
   #### 2. check for variable
   check_for_null_parameters(mget(ls()))
-  #### 3. define date sequence in character format
+  #### 3. define date sequence
   date_start_date_format <- as.Date(date_start, format = "%Y-%m-%d")
   date_end_date_format <- as.Date(date_end, format = "%Y-%m-%d")
   date_sequence <- seq(date_start_date_format, date_end_date_format, "day")
@@ -80,9 +80,19 @@ process_hms <- function(
   data <- terra::vect()
   if (data_format == "Shapefile") {
     for (d in seq_along(data_files)) {
+      cat(paste0(
+        "Processing data in file ",
+        data_files[d],
+        "\n"
+      ))
       data_date <- terra::vect(data_files[d])
-      data_date_aggregate <- terra::aggregate(
+      #### 7. zero buffer to avoid self-intersecting geometry error
+      data_date_b <- terra::buffer(
         data_date,
+        width = 0
+      )
+      data_date_aggregate <- terra::aggregate(
+        data_date_b,
         by = "Density",
         dissolve = TRUE
       )
@@ -94,14 +104,10 @@ process_hms <- function(
       data <- rbind(data, data_date_aggregate)
     }
   }
-  #### 7. subset data
-  if (density_level %in% c("Light", "Medium", "Heavy")) {
-    data_return <- data[
-      data$Density == density_level,
-    ]
-  } else if (density_level == "all"){
-    data_return <- data
-  }
-  #### 8. return SpatVector
+  #### 8. select "Density" and "Date"
+  data <- data[1:nrow(data), c("Density", "Date")]
+  #### 9. subset to density level
+  data_return <- data[data$Density == density_level,]
+  #### 10. return SpatVector
   return(data_return)
 }
