@@ -1,6 +1,6 @@
 Package: NRTAPmodel
 Title: The SET group near real time air pollution model
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: c(
     person("Kyle", "Messier", , "kyle.messier@nih.gov", role = c("aut", "cre")),
     person("Insang", "Song", role = c("aut", "ctb"), comment = c(ORCID = "0000-0001-8732-3256")),

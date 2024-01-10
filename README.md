@@ -4,6 +4,7 @@
 [![lint](https://github.com/Spatiotemporal-Exposures-and-Toxicology/NRTAPmodel/actions/workflows/lint.yaml/badge.svg)](https://github.com/Spatiotemporal-Exposures-and-Toxicology/NRTAPmodel/actions/workflows/lint.yaml)
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+
 # Air Pollution Data for the Masses: An Open-Access, Test-Driven, and Reproducible Pipeline  PM<sub>2.5</sub> Hybrid Model 
  Group Project for the Spatiotemporal Exposures and Toxicology group with help from friends :smiley: :cowboy_hat_face: :earth_americas:
 
@@ -21,14 +22,14 @@ experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](h
    
 ## Overall Project Workflow
 
-```mermaid
-
-flowchart LR
-    subgraph "Targets: Make-like Reproducible Analysis Pipeline"
-    direction LR
-    A[AQS Data] --> B[Generate Covariates]--> C[Fit Base Learners]-->D[Fit Meta Learners]-->E[Predictions]-->F[Summary Stats]
-    end
-```
+Targets: Make-like Reproducible Analysis Pipeline
+ 1) AQS Data
+ 2) Generate Covariates
+ 3) Fit Base Learners
+ 4) Fit Meta Learners
+ 5) Predictions
+ 6) Summary Stats
+    
 ##  Unit and Integration Testing 
 
 We will utilize various testing approaches to ensure functionality and quality of code
@@ -43,7 +44,7 @@ We will utilize various testing approaches to ensure functionality and quality o
 ### Test Drive Development
 Starting from the end product, we work backwards while articulating the tests needed at each stage.
 
-#### Final Product
+#### Key Points of Unit and Integration Testing
 File Type
 1. NetCDF
 2. Numeric, double precision
@@ -64,81 +65,7 @@ Geographic
 1. Projections
 2. Coordinate names (e.g. lat/lon)
 3. Time in acceptable format 
-#### Summary Statistics
-File Type
-1. NetCDF
-2. csv
-3. NA
-4. Variable Names Exist
-5. Naming Convention
 
-Stats 
-1. Non-negative variance ($\sigma^2$)
-2. Mean is reasonable ($\mu$)
-3. SI Units
-
-Domain 
-1. In the US (+ buffer)
-2. In Time range (2018-2022)
-
-Geographic 
-1. Projections
-2. Coordinate names (e.g. lat/lon)
-3. Time in acceptable format
-   
-#### Meta Learners
-
-#### Base Learners
-
-#### Geographic Covariates
-
-#### AQS Data
-    
-
-#### Each of the following are the classes of variables for the I/O that will need to be tested
-
-```mermaid
-
----
-title: Data Type/Class by Module
----
-classDiagram
-    class AirPollutionData
-    AirPollutionData : +Type1  sf
-    AirPollutionData : +Type2 sftime
-    AirPollutionData : +Geometry point
-
-    class GeographicCovariates
-    GeographicCovariates : +Type1  sf
-    GeographicCovariates : +Type2 sftime
-    GeographicCovariates : +Geometry point
-
-    class BaseLearners
-    BaseLearners : +Type1 S3.model
-    BaseLearners : +Type2 S4.model
-    BaseLearners : +Geometry1 point
-    BaseLearners : +Geometry2 NA
-
-    class MetaLearners
-    MetaLearners : +Type1 S3.model
-    MetaLearners : +Type2 S4.model
-    MetaLearners : +Geometry1 point
-    MetaLearners : +Geometry2 NA
-
-    class SummaryStats
-    SummaryStats : +Type1 sf
-    SummaryStats : +Type2 sftime
-    SummaryStats : +Geometry1 point
-    SummaryStats : +Geometry2 polygon
-
-    class Predictions
-    Predictions : +Type1 sf
-    Predictions : +Type2 sftime
-    Predictions : +Type3 csv
-    Predictions : +Geometry1 point
-    Predictions : +Geometry2 NA
-
-```
 
 ### Frameworks for Testing of this project (with help from ChatGPT)
 
@@ -159,14 +86,8 @@ classDiagram
 
 TDD helps ensure that your code is reliable and that it remains functional as you make changes and updates. It also encourages a clear understanding of the requirements and promotes better code design.
 
-**In addition to TDD, we will likely need to do ATDD:**
-
-1. **Acceptance Test-Driven Development (ATDD)**: ATDD is a practice where tests are written to capture the acceptance criteria defined by stakeholders before development begins. These tests serve as a contract between developers and stakeholders, ensuring that the software meets the desired requirements.
-
-2. **Continuous Integration (CI)**: While not a development methodology per se, CI is a practice where code changes are integrated into a shared repository multiple times a day. Automated tests are run with each integration to catch issues early. CI works well in conjunction with TDD.
 
 
-```
 
 ## Base Learners 
 Potential base learners we can use: 
@@ -177,8 +98,6 @@ Potential base learners we can use:
 5) UMAP covariates
 6) Encoder NN covariates
 
-## Open Question
-1) Publish Results to CRAN package
 
 
 
