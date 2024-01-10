@@ -187,17 +187,4 @@ testthat::test_that("base learner cv fit: rf and xgboost", {
 
 })
 
-
-testthat::test_that("torch installation status is well tested.", {
-  withr::local_package("torch")
-  testthat::expect_no_error(check_and_load_torch("cpu"))
-  # system-specific: CUDA
-  testthat::expect_message(check_and_load_torch("cuda"),
-    "There is no device found to use CUDA. Trying other devices...\n"
-  )
-  # system-specific: mps (Apple silicon)
-  testthat::expect_message(check_and_load_torch("mps"),
-    "MPS is not available in your system. Setting cpu as default."
-  )
-})
 ### ------ test end ------

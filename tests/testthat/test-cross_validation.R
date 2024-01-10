@@ -73,8 +73,12 @@ testthat::test_that("leave-block-outs work as expected", {
   withr::local_options(list(sf_use_s2 = FALSE))
 
   set.seed(202311)
-  nco <- sf::st_read("../testdata/test_nc_output.nc") |>
+  nco <-
+    sf::st_read(
+      testthat::test_path("..", "testdata/test_nc_output.nc")
+    ) |>
     unique()
+  sf::st_crs(nco) <- "OGC:WGS84"
 
   # data preparation for larger stdt than the previous example
   ncost <-
@@ -124,9 +128,13 @@ testthat::test_that("leave-block-outs work as expected", {
   testthat::expect_true(!is.null(attr(ret_spblock, "kmeans_sizes")))
 
   # external block data is present
-  eco4 <- readRDS("../testdata/ecoregion_lv4.rds")
+  eco4 <-
+    readRDS(
+      testthat::test_path("..", "testdata/ecoregion_lv4.rds")
+    )
+  suppressWarnings(sf::st_crs(eco4) <- "OGC:WGS84")
   eco4d <- eco4 |>
-    group_by(US_L3CODE, US_L3NAME) |>
+    dplyr::group_by(US_L3CODE, US_L3NAME) |>
     dplyr::summarize(nsubregions = n()) |>
     ungroup()
   neco4 <- nrow(eco4d)
@@ -206,10 +214,8 @@ testthat::test_that("leave-block-outs work as expected", {
     generate_cv_index(ncostdt, "lbto", NULL)
   )
   testthat::expect_error(
-    generate_cv_index(ncostdt, "lbto", 10L)
+    generate_cv_index(ncostdt, "lbto", 20L)
   )
-
-
 }
 )
 

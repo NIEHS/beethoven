@@ -7,11 +7,11 @@ testthat::test_that("Error when data_download_acknowledgement = FALSE", {
                          "sedac_population", "groads", "population", "plevels",
                          "p_levels", "monolevel", "hms", "smoke")
   for (d in seq_along(download_datasets)) {
-    expect_message(
+    expect_error(
       download_data(dataset_name = download_datasets[d],
                     data_download_acknowledgement = FALSE),
-      paste0("Please refer to the argument list and the error message above ",
-             "to rectify the error.")
+      paste0("Please refer to the argument list and ",
+             "the error message above to rectify the error.\n")
     )
   }
 })
@@ -23,12 +23,12 @@ testthat::test_that("Error when one parameter is NULL.", {
                          "sedac_population", "groads", "population", "plevels",
                          "p_levels", "monolevel", "hms", "smoke")
   for (d in seq_along(download_datasets)) {
-    expect_message(
+    expect_error(
       download_data(dataset_name = download_datasets[d],
                     data_download_acknowledgement = TRUE,
                     directory_to_save = NULL),
-      paste0("Please refer to the argument list and the error message above ",
-             "to rectify the error.")
+      paste0("Please refer to the argument list and ",
+             "the error message above to rectify the error.\n")
     )
   }
 })
@@ -747,12 +747,13 @@ testthat::test_that("EPA NEI (AADT) download URLs have HTTP status 200.", {
   # function parameters
   directory_to_save <- testthat::test_path("..", "testdata/")
   # run download function
+  year_target <- c(2017L, 2020L)
   download_data(dataset_name = "aadt",
                 directory_to_save = directory_to_save,
                 data_download_acknowledgement = TRUE,
                 download = FALSE,
+                year_target = year_target,
                 remove_command = FALSE)
-  year_target <- c(2017L, 2020L)
   # define file path with commands
   commands_path <- paste0(
     directory_to_save,
@@ -766,7 +767,7 @@ testthat::test_that("EPA NEI (AADT) download URLs have HTTP status 200.", {
   # import commands
   commands <- read_commands(commands_path = commands_path)
   # extract urls
-  urls <- extract_urls(commands = commands, position = 2)
+  urls <- extract_urls(commands = commands, position = 5)
   # check HTTP URL status
   url_status <- check_urls(urls = urls, size = 1L, method = "GET")
   # implement unit tests

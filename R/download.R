@@ -2229,29 +2229,58 @@ download_tri_data <- function(
 #' @param data_download_acknowledgement logical(1). By setting \code{TRUE} the
 #' user acknowledge that the data downloaded using this function may be very
 #' large and use lots of machine storage and memory.
-#' @param year_target Available years of NEI data.
-#' Default is \code{c(2017L, 2020L)}.
 #' @param download logical(1). \code{FALSE} will generate a *.txt file
 #' containing all download commands. By setting \code{TRUE} the function
 #' will download all of the requested data files.
 #' @param remove_command logical(1).
 #' Remove (\code{TRUE}) or keep (\code{FALSE})
 #' the text file containing download commands.
+#' @param year_target Available years of NEI data.
+#' Default is \code{c(2017L, 2020L)}.
+#' @param epa_certificate_path character(1). Path to the certificate file
+#' for EPA DataCommons. Default is
+#' './inst/extdata/cacert_gaftp_epa.pem'
 #' @author Ranadeep Daw, Insang Song
 #' @returns NULL; Two comma-separated value (CSV) raw files for 2017 and 2020
 #' @export
 download_aadt_data <- function(
   directory_to_save = "./input/aadt/",
   data_download_acknowledgement = FALSE,
-  year_target = c(2017L, 2020L),
   download = FALSE,
-  remove_command = FALSE
+  remove_command = FALSE,
+  year_target = c(2017L, 2020L),
+  epa_certificate_path =
+    system.file("inst/extdata/cacert_gaftp_epa.pem",
+                package = "NRTAPmodel")
 ) {
   #### 1. check for data download acknowledgement
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
   #### 2. directory setup
   download_setup_dir(directory_to_save)
   directory_to_save <- download_sanitize_path(directory_to_save)
+
+  #### 5. define download URL
+  if (startsWith(Sys.info()["sysname"], "Linux")) {
+    if (!file.exists(epa_certificate_path)) {
+      message("URL should be identified in web browser
+      Lock icon in the address bar at https://gaftp.epa.gov
+      Click Show Certificate
+      access Details then find URL with *.crt extension
+      copy and replace the url below.\n"
+      )
+      download_crt_target <- gsub("pem", "crt", epa_certificate_path)
+      certificate_url <-
+        "http://cacerts.digicert.com/DigiCertGlobalG2TLSRSASHA2562020CA1-1.crt"
+      utils::download.file(certificate_url, download_crt_target)
+      system(paste("openssl x509",
+                   "-inform DER",
+                   "-outform PEM",
+                   "-in",
+                   download_crt_target,
+                   "-out",
+                   epa_certificate_path))
+    }
+  }
 
   #### 3. define measurement data paths
   url_download_base <- "https://gaftp.epa.gov/air/nei/%d/data_summaries/"
@@ -2269,11 +2298,15 @@ download_aadt_data <- function(
             year_target)
 
   #### 4. build download command
-  download_commands <- paste0("curl ",
-                              download_urls,
-                              " --output ",
-                              download_names,
-                              "\n")
+  download_commands <-
+    paste0("wget --ca-certificate=",
+           epa_certificate_path,
+           " ",
+           download_urls,
+           " -O ",
+           download_names,
+           "\n")
+
   #### 5. initiate "..._curl_commands.txt"
   commands_txt <- paste0(
     directory_to_save,
