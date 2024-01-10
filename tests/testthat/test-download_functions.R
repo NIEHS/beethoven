@@ -765,7 +765,7 @@ testthat::test_that("EPA NEI (AADT) download URLs have HTTP status 200.", {
     paste(year_target, collapse = "-"),
     "_",
     Sys.Date(),
-    "_curl_commands.txt"
+    "_wget_commands.txt"
   )
 
   # import commands

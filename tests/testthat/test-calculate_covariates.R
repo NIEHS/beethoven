@@ -184,8 +184,8 @@ testthat::test_that("calc_modis works well.", {
     )
   vnptiledf <-
     read.csv(
-      testthat::test_path("..", "..",
-        "inst/extdata/modis_vnp46_tiles.csv"
+      system.file("inst/extdata/modis_vnp46_tiles.csv",
+        package = "NRTAPmodel"
       )
     )
 
