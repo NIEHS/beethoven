@@ -259,37 +259,4 @@ testthat::test_that("calc_modis works well.", {
     calc_modis(path = path_mod11, product = "MOD11A1", sites = list(1, 2, 3))
   )
 
-  testthat::expect_error(
-    suppressWarnings(
-      calc_mod06 <-
-        calc_modis(
-          path = path_mod06,
-          product = "MOD06_L2",
-          sites = site_faux,
-          name_covariates = c("MOD_CLFRN_0_"),
-          nthreads = 2
-        )
-    )
-  )
-
 })
-
-
-# dodo <- modis_preprocess_vnp46(path_vnp46, "2018-08-13", 3L,           read.csv("tests/testthat/../../inst/extdata/modis_vnp46_tiles.csv"))
-# modis_worker(dodo, "2018-08-13", sf::st_as_sf(site_faux), name_extracted = "MOD_NILTL_0_00000", product = "VNP46A2")
-# doxa <- modis_mosaic_mod06(path_mod06, "2021-08-15")
-# modis_worker(doxa, "2018-08-13", sf::st_as_sf(site_faux), name_extracted = c("MOD_NIDTL_0_01000", "MOD_NILTL_0_01000"), product = "MOD06_L2", radius = 1000L)
-# dols <- modis_get_vrt(path_mod11, "MOD11A1", "2021-08-15")
-# modis_worker(dols, "2021-08-15", sf::st_as_sf(site_faux), name_extracted = c("MOD_NIDTL_0_01000", "MOD_NILTL_0_01000"), product = "MOD11A1", radius = 1000L)
-# modis_worker(dols, "2021-08-15", sf::st_as_sf(site_faux), name_extracted = c("MOD_NIDTL_0_00000", "MOD_NILTL_0_00000"), product = "MOD11A1", radius = 0L)
-# modis_worker(dols, "2021-08-15", sf::st_as_sf(site_faux), name_extracted = c("MOD_NIDTL_0_10000", "MOD_NILTL_0_10000"), product = "MOD11A1", radius = 10000L)
-# modis_worker(dols, "2021-08-15", sf::st_as_sf(site_faux), name_extracted = c("MOD_NIDTL_0_50000", "MOD_NILTL_0_50000"), product = "MOD11A1", radius = 50000L)
-
-# dols <- modis_get_vrt(path_mod11, "MOD11A1", "2021-08-15")
-# dolsnan <- dols
-# dolsnan[is.nan(dolsnan)] <- 0L
-# modis_worker(dols, "2021-08-15", sf::st_as_sf(site_faux), name_extracted = c("MOD_NIDTL_0_01000", "MOD_NILTL_0_01000"), product = "MOD11A1", radius = 1000L)
-# plot(dols)
-# site_fbuf <- terra::buffer(site_faux, 30000)
-# site_fbuf <- terra::project(site_fbuf, crs(dols))
-# plot(site_fbuf, add = T)

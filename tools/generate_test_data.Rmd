@@ -1,0 +1,247 @@
+---
+title: "Generating test data in Durham-Wake County, NC"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Generating test data in Durham-Wake County, NC}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+date: "2024-01-05"
+author: "Insang Song"
+---
+
+```{r init, echo = FALSE, include = FALSE}
+.libPaths("~/r-libs")
+
+knitr::opts_chunk$set(
+  warning = FALSE,
+  message = FALSE,
+  fig.width = 8,
+  fig.height = 6,
+  res = "retina"
+)
+if (!require(NRTAPmodel)) {
+  pak::pak("Spatiotemporal-Exposures-and-Toxicology/NRTAPmodel@isong-calc-covars")
+  require(NRTAPmodel)
+}
+
+pkgs <- c("data.table", "sf", "terra", "sftime", "dplyr", "stars", "NRTAPmodel")
+invisible(sapply(pkgs, library, character.only = TRUE, quietly = TRUE))
+options(sf_use_s2 = FALSE)
+
+# source("../R/manipulate_spacetime_data.R")
+# source("../R/calculate_covariates.R")
+```
+
+
+In this vignette, we will introduce the workflow of generating test datasets using areas of two adjacent counties, Durham and Wake, in North Carolina. The objective of subsetting the raw data is to reduce the file size for quickly running tests on automated continuous integration (CI) platforms such as GitHub CI. When generating subsets out of various raw data, one should find difficulties related to the file structure by formats. This vignette will give subsetting rationales and corresponding code examples that can be transferred to users' specific objects for local tests.
+
+## Assumptions and prerequisites
+- Raw data formats are preserved unless it is not feasible with the tools that are used in `NRTAPmodel` package (i.e., sf and terra)
+- Metadata need to be preserved if these are used in any part of the entire pipeline.
+- Irrelevant or redundant elements in raw data can be removed to reduce the test data size.
+
+## Durham - Wake County
+- North Carolina Counties data is available in bundled ESRI shapefiles of `sf` package.
+```{r get-dw-polygon}
+ncpath <- system.file("shape/nc.shp", package = "sf")
+nc <- terra::vect(ncpath)
+nc <- terra::project(nc, "EPSG:4326")
+dw <- nc[grep("^(Dur|Wake|Orange)", nc$NAME), ]
+
+plot(dw)
+text(dw, dw$NAME)
+plot(nc, border = "grey", lty = 2, add = TRUE)
+```
+
+## NetCDF file subsetting
+- NetCDF 4/5 formats (extensions: nc4, nc, h5) are the most frequently used file formats to calculate covariates.
+- Standard input (`terra::rast`) /output (`terra::writeCDF`) interface supported in `terra` can handle these files. 
+- Users need to specify details that will be explicitly stored in the output file. Users should consult `?terra::writeCDF` about arguments in detail.
+
+```{r, echo = FALSE}
+PROJECT_HOME <-
+  file.path("/ddn/gs1/group/set",
+            "Projects",
+            "NRT-AP-Model")
+              
+```
+
+```{r netcdf}
+date_target <- "2018/241"
+mod_products <- c("MOD11A1", "MOD13A2",
+                  "MOD09GA", "MCD19A2")
+hvindex <- c("(h10v05|h11v05)")
+
+moddirs <-
+  split(mod_products, mod_products) |>
+  lapply(function(x) {
+    moddir <- file.path(PROJECT_HOME,
+                "input",
+                "modis",
+                "raw",
+                "61",
+                x,
+                date_target)
+    modfiles <- list.files(moddir, "*.hdf$", full.names = TRUE)
+    grep(hvindex, modfiles, value = TRUE)
+  })
+
+
+moddirs
+
+
+#' @param path filepaths
+#' @param subdataset subdatasets that will be used.
+#' It can be translated into layers in relevant products.
+#' @param outpath output path directory
+#' @param outfilename output file name.
+#' @param extent extent that will be cropped.
+#' See \link[terra]{ext} for the right form of ext value.
+subset_modis <-
+  function(path,
+           subdataset,
+           outpath,
+           outfilename = sub("hdf", "nc", path),
+           extent = NULL) {
+    if (grepl("MOD09", path)) {
+      prast <- terra::rast(path, lyrs = subdataset)
+    } else {
+      prast <- terra::rast(path, subds = subdataset)
+      split_mode <- TRUE
+    }
+    if (!is.null(extent)) {
+      prast_c <- terra::crop(prast, extent)
+    } else {
+      prast_c <- prast
+    }
+    outpath <- file.path(outpath, outfilename)
+    writeCDF(prast_c,
+             outpath,
+             overwrite = TRUE,
+             varname = names(prast),
+             unit = units(prast),
+             split = TRUE,
+             compression = 9L)
+    cat(sprintf("Export output to: %s\n", outpath))
+  }
+
+
+allfiles_hvgrid <- do.call(c, moddirs)
+allfiles_hvgrid_to <- paste0("/ddn/gs1/home/songi2/projects/NRTAPModel/tests/testdata/modis/", substr(allfiles_hvgrid, 78, 122))
+
+file.copy(allfiles_hvgrid, allfiles_hvgrid_to)
+
+describe(moddirs[[1]], sds = TRUE)
+
+describe(moddirs[[2]][1], sds = TRUE)
+
+subset_modis(moddirs[[1]][1], sprintf("Optical_Depth_%03d", c(47, 55)), tempdir(), "MCD19A2_2018241_h10v05.nc")
+de <- rast(moddirs[[1]][1], subds = "Optical_Depth_047")
+de <- rast(moddirs[[1]][1])
+de
+plot(de)
+
+dd <- rast("/tmp/RtmpshJH9e/MCD19A2_2018241_h10v05.cdf", subds = "Optical_Depth_047")
+dd
+
+testdatadir <- "/ddn/gs1/home/songi2/projects/NRTAPModel/tests/testdata/modis/"
+describe(mod09files[1], sds = TRUE)
+subset_modis(moddirs[[2]][1], 2:8, testdatadir, "MOD09GA_A2018241_h10v05.cdf")
+subset_modis(moddirs[[2]][2], 2:8, testdatadir, "MOD09GA_A2018241_h11v05.nc")
+
+rast("/ddn/gs1/home/songi2/projects/NRTAPModel/tests/testdata/modis/MOD09GA_A2018241_h10v05.nc")
+
+subset_modis(mod09files[17], 2:8, tempdir(), "mod09test.nc", extent = ext(rast(mod09files[17])))
+m09r <- rast(mod09files[1], lyrs = 2:7)
+m09r
+testres <- rast("/tmp/RtmpshJH9e/mod09test.nc")
+testres <- rast("/tmp/RtmpshJH9e/mod09test.nc", lyrs = 1:7)
+testres
+# when split=TRUE
+writeCDF(
+  mod11_1,
+  "~/writetest.nc",
+  varname = names(mod11_1),
+  overwrite = TRUE,
+  unit = units(mod11_1),
+  split = TRUE)
+modtest <- rast("tests/testdata/modis/MCD19A2.A2018241.h11v05.061.2023120154954.hdf.nc4")
+mod06test <- rast("tests/testdata/modis/MOD06_L2_2018241_0250.nc")
+modtest <- rast("~/writetest.nc")
+
+modtestsub <- rast("~/writetest.nc", subds = 2)
+
+# print by subdatasets
+describe("/ddn/gs1/home/songi2/writetest.nc", sds = TRUE)
+
+
+
+```
+
+```{r}
+run_template <- ""
+```
+
+
+
+```{r mod06}
+dirheader <- "/ddn/gs1/home/songi2/projects/NRTAPModel/input/modis/raw/61/MOD06_L2/2018/241/"
+kax <-
+  c("MOD06_L2.A2018241.0250.061.2018241235711.hdf",
+    "MOD06_L2.A2018241.1630.061.2018242015515.hdf")
+filepaths06 <- paste0(dirheader, kax)
+describe(filepaths06[1], sds = TRUE)
+
+subset_modis(filepaths06[1], c("Cloud_Fraction_Day", "Cloud_Fraction_Night"), "/ddn/gs1/home/songi2/projects/NRTAPModel/tests/testdata/modis/", "MOD06_L2_2018241_0250.nc")
+
+rast(filepaths06[1], subds = c("Cloud_Fraction_Day", "Cloud_Fraction_Night"))
+```
+
+
+## MODIStsp trial
+```{r}
+.libPaths("~/r-libs")
+remotes::install_github("rspatial/luna")
+library(luna)
+
+dwext <- terra::ext(dw) + 0.05
+luna::getProducts("MCD19")
+luna::getNASA(
+  product="VNP46A2",
+  start_date="2021-03-21",
+  end_date="2021-03-22",
+  aoi = dwext,
+  version="5000",
+  download=TRUE,
+  path="tests/testdata",
+  username="kaga",
+  password=readLines("~/.edtoken")[1],#"@Coin1135",
+  server="LAADS",
+  limit=100000, overwrite=TRUE
+)
+
+```
+
+
+```{r}
+# dodo <- modis_preprocess_vnp46(path_vnp46, "2018-08-13", 3L,           read.csv("tests/testthat/../../inst/extdata/modis_vnp46_tiles.csv"))
+# modis_worker(dodo, "2018-08-13", sf::st_as_sf(site_faux), name_extracted = "MOD_NILTL_0_00000", product = "VNP46A2")
+# doxa <- modis_mosaic_mod06(path_mod06, "2021-08-15")
+# modis_worker(doxa, "2018-08-13", sf::st_as_sf(site_faux), name_extracted = c("MOD_NIDTL_0_01000", "MOD_NILTL_0_01000"), product = "MOD06_L2", radius = 1000L)
+# dols <- modis_get_vrt(path_mod11, "MOD11A1", "2021-08-15")
+# modis_worker(dols, "2021-08-15", sf::st_as_sf(site_faux), name_extracted = c("MOD_NIDTL_0_01000", "MOD_NILTL_0_01000"), product = "MOD11A1", radius = 1000L)
+# modis_worker(dols, "2021-08-15", sf::st_as_sf(site_faux), name_extracted = c("MOD_NIDTL_0_00000", "MOD_NILTL_0_00000"), product = "MOD11A1", radius = 0L)
+# modis_worker(dols, "2021-08-15", sf::st_as_sf(site_faux), name_extracted = c("MOD_NIDTL_0_10000", "MOD_NILTL_0_10000"), product = "MOD11A1", radius = 10000L)
+# modis_worker(dols, "2021-08-15", sf::st_as_sf(site_faux), name_extracted = c("MOD_NIDTL_0_50000", "MOD_NILTL_0_50000"), product = "MOD11A1", radius = 50000L)
+
+# dols <- modis_get_vrt(path_mod11, "MOD11A1", "2021-08-15")
+# dolsnan <- dols
+# dolsnan[is.nan(dolsnan)] <- 0L
+# modis_worker(dols, "2021-08-15", sf::st_as_sf(site_faux), name_extracted = c("MOD_NIDTL_0_01000", "MOD_NILTL_0_01000"), product = "MOD11A1", radius = 1000L)
+# plot(dols)
+# site_fbuf <- terra::buffer(site_faux, 30000)
+# site_fbuf <- terra::project(site_fbuf, crs(dols))
+# plot(site_fbuf, add = T)
+
+
+```
