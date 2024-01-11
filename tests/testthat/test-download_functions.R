@@ -769,7 +769,7 @@ testthat::test_that("EPA NEI (AADT) download URLs have HTTP status 200.", {
   urls <- extract_urls(commands = commands, position = 3)
   # check HTTP URL status
   url_status <-
-    httr::HEAD(urls, config = httr::config(cainfo = certificate))
+    httr::HEAD(urls[1], config = httr::config(cainfo = certificate))
   url_status <- url_status$status_code
   # implement unit tests
   test_download_functions(directory_to_save = directory_to_save,
