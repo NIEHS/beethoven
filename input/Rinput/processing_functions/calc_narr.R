@@ -4,8 +4,8 @@
 ################################################################################
 
 ################################################################################
-#' calc_narr:
-#' @description
+#' calc_narr: Calculate meteorological covariates from NOAA NCEP North American
+#' Regional Reanalysis.
 #' @param year_start integer(1). length of 4. Start of year range for
 #' downloading data.
 #' @param year_end integer(1). length of 4. End of year range for downloading

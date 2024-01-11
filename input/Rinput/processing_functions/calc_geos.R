@@ -4,8 +4,7 @@
 ################################################################################
 
 ################################################################################
-#' calc_geos:
-#' @description
+#' calc_geos: Calculate atmospheric chemistry covariates from GEOS-CF.
 #' @param date_start character(1). length of 10. Format YYYY-MM-DD
 #' (ex. September 1, 2023 = "2023-09-01").
 #' @param date_end character(1). length of 10. Format YYYY-MM-DD

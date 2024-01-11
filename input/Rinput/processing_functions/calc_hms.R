@@ -4,9 +4,8 @@
 ################################################################################
 
 ################################################################################
-#' calc_hms: download daily wildfire smoke plume data from 
-#' NOAA Hazard Mapping System Fire and Smoke Product
-#'
+#' calc_hms: Calculate wildfire smoke plume binary covariates from NOAA HMS
+#' Smoke Product.
 #' @param date_start character(1). length of 10. Start date of downloaded data. 
 #' Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
 #' @param date_end character(1). length of 10. End date of downloaded data. 
@@ -101,17 +100,3 @@ calc_hms <- function(
   }
   return(sites_extracted)
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
