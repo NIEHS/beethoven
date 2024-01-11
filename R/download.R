@@ -473,6 +473,8 @@ download_geos_cf_data <- function(
       )
       if (t == 1) {
         if (!(check_url_status(download_url))) {
+          sink()
+          file.remove(commands_txt)
           stop(paste0("Invalid date returns HTTP code 404. ",
                         "Check `date_start` parameter.\n"))
         }
@@ -980,6 +982,8 @@ download_narr_monolevel_data <- function(
       )
       if (y == 1) {
         if (!(check_url_status(url))) {
+          sink()
+          file.remove(commands_txt)
           stop(paste0("Invalid year returns HTTP code 404. ",
                       "Check `year_start` parameter.\n"))
         }
@@ -1104,6 +1108,8 @@ download_narr_p_levels_data <- function(
         )
         if (m == 1) {
           if (!(check_url_status(url))) {
+            sink()
+            file.remove(commands_txt)
             stop(paste0("Invalid year returns HTTP code 404. ",
                         "Check `year_start` parameter.\n"))
           }
@@ -1676,6 +1682,8 @@ download_noaa_hms_smoke_data <- function(
     )
     if (f == 1) {
       if (!(check_url_status(url))) {
+        sink()
+        file.remove(commands_txt)
         stop(paste0("Invalid date returns HTTP code 404. ",
                     "Check `date_start` parameter.\n"))
       }
