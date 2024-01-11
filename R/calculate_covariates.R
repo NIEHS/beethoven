@@ -465,9 +465,6 @@ modis_get_vrt <- function(
 #' @param date_in character(1). Date to query.
 #' @param subdataset integer(1). Subdataset number to process.
 #' Default is 3L.
-#' @param tile_df prespecified data.frame with "tile" and "exts" columns,
-#' where the former stores tile number (h00v00 format) and the latter
-#' stores terra::ext output.
 #' @param crs_ref character(1). terra::crs compatible CRS.
 #' Default is "EPSG:4326"
 #' @author Insang Song
@@ -480,7 +477,6 @@ modis_preprocess_vnp46 <- function(
   paths,
   date_in,
   subdataset = 3L,
-  tile_df,
   crs_ref = "EPSG:4326"
 ) {
   # this case cannot detect malform like 2024-02-30.
@@ -490,10 +486,23 @@ modis_preprocess_vnp46 <- function(
     stop("date_in does not conform to the required format
          'YYYY-MM-DD'.\n")
   }
-  if (!all(c("tile", "xmin", "xmax", "ymin", "ymax") %in%
-             colnames(tile_df))) {
-    stop("tile_df is in invalid format. Please review tile_df.\n")
-  }
+  # if (!all(c("tile", "xmin", "xmax", "ymin", "ymax") %in%
+  #            colnames(tile_df))) {
+  #   stop("tile_df is in invalid format. Please review tile_df.\n")
+  # }
+
+  tile_df <-
+    expand.grid(
+      vaddr = sprintf("v%02d", 3:6),
+      haddr = sprintf("h%02d", 5:11)
+    )
+  tile_df$tile <- paste0(tile_df$haddr, tile_df$vaddr)
+  tile_df <- data.frame(tile = tile_df$tile)
+  tile_df$xmin <- rep(seq(-130, -70, 10), each = 4)
+  tile_df$xmax <- tile_df$xmin + 10
+  tile_df$ymin <- rep(seq(50, 20, -10), 7)
+  tile_df$ymax <- tile_df$ymin + 10
+
   date_in <- as.Date(date_in)
   datejul <- strftime(date_in, format = "%Y%j")
   stdtile <- tile_df$tile
@@ -680,9 +689,7 @@ modis_worker <- function(
       )
     return(surf_at_bufs)
   }
-  # if (!is.function(foo)) {
-  #   stop("Argument foo should be a function.\n")
-  # }
+
   product <- match.arg(product)
 
   ## internal NaN values 65535 to NaN
@@ -715,7 +722,6 @@ modis_worker <- function(
   name_offset <- terra::nlyr(raster)
   # multiple columns will get proper names
   name_range <- seq(ncol(extracted) - name_offset + 1, ncol(extracted), 1)
-  # extracted <- extracted[, c(1, ncol(extracted), seq(2, ncol(extracted) - 1))]
   colnames(extracted)[name_range] <- name_extracted
   return(extracted)
 }
@@ -744,8 +750,6 @@ modis_worker <- function(
 #'  extracted raster values.
 #' @param nthreads integer(1). Number of threads to be used
 #'  to calculate covariates.
-#' @param tilelist character(1). data.frame with
-#'  VNP46A2 tile corner coordinate list.
 #' @param package_list_add character. A vector with package names to load
 #'  these in each thread. Note that \code{sf}, \code{terra},
 #'  \code{exactextractr}, \code{scomps}, and \code{dplyr}
@@ -784,7 +788,6 @@ calc_modis <-
     subdataset = NULL,
     fun_summary = "mean",
     nthreads = floor(parallelly::availableCores() / 2),
-    tilelist = NULL,
     package_list_add = NULL,
     export_list_add = NULL
   ) {
@@ -802,7 +805,7 @@ calc_modis <-
 
     export_list <-
       c("path", "product", "sites_input", "name_covariates",
-        "id_col", "fun_summary", "tilelist", "radius", "subdataset")
+        "id_col", "fun_summary", "radius", "subdataset")
     package_list <-
       c("sf", "terra", "exactextractr", "foreach", "data.table", "stars",
         "NRTAPmodel", "dplyr", "doRNG", "parallelly", "doParallel")
@@ -845,7 +848,6 @@ calc_modis <-
               paths = path,
               date_in = day_to_pick,
               subdataset = subdataset,
-              tile_df = tilelist,
               crs_ref = "EPSG:4326"
             )
         } else if (product == "MOD06_L2") {
@@ -963,7 +965,6 @@ calc_temporal_dummies <-
     colnames(dt_year_dum) <-
       sprintf("DUM_Y%d_0_00000", domain_year)
 
-
     # month
     vec_month <- data.table::month(sites$time)
     dt_month_dum <- dummify(vec_month, seq(1L, 12L))
@@ -979,7 +980,6 @@ calc_temporal_dummies <-
     dt_wday_dum <- dummify(vec_wday, seq(1L, 7L))
     colnames(dt_wday_dum) <-
       sprintf("DUM_WKDY%d_0_00000", seq(1L, 7L))
-
 
     # column binding
     sites_dums <-
@@ -1071,7 +1071,7 @@ calculate_tri <- function(
                 by = c("YEAR", "LONGITUDE", "LATITUDE", "buffer")]
            })
   df_tri <- data.table::rbindlist(list_buffer)
+  
   return(df_tri)
-
 }
 # nocov end

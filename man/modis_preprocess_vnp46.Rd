@@ -4,13 +4,7 @@
 \alias{modis_preprocess_vnp46}
 \title{Assign MODIS VNP46 corner coordinates to retrieve a merged raster}
 \usage{
-modis_preprocess_vnp46(
-  paths,
-  date_in,
-  subdataset = 3L,
-  tile_df,
-  crs_ref = "EPSG:4326"
-)
+modis_preprocess_vnp46(paths, date_in, subdataset = 3L, crs_ref = "EPSG:4326")
 }
 \arguments{
 \item{paths}{character. Full paths of h5 files.}
@@ -19,10 +13,6 @@ modis_preprocess_vnp46(
 
 \item{subdataset}{integer(1). Subdataset number to process.
 Default is 3L.}
-
-\item{tile_df}{prespecified data.frame with "tile" and "exts" columns,
-where the former stores tile number (h00v00 format) and the latter
-stores terra::ext output.}
 
 \item{crs_ref}{character(1). terra::crs compatible CRS.
 Default is "EPSG:4326"}

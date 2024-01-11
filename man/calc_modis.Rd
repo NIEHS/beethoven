@@ -14,7 +14,6 @@ calc_modis(
   subdataset = NULL,
   fun_summary = "mean",
   nthreads = floor(parallelly::availableCores()/2),
-  tilelist = NULL,
   package_list_add = NULL,
   export_list_add = NULL
 )
@@ -49,9 +48,6 @@ extracted raster values.}
 
 \item{nthreads}{integer(1). Number of threads to be used
 to calculate covariates.}
-
-\item{tilelist}{character(1). data.frame with
-VNP46A2 tile corner coordinate list.}
 
 \item{package_list_add}{character. A vector with package names to load
 these in each thread. Note that \code{sf}, \code{terra},

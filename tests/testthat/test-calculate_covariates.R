@@ -182,12 +182,6 @@ testthat::test_that("calc_modis works well.", {
       "VNP46",
       full.names = TRUE
     )
-  vnptiledf <-
-    read.csv(
-      system.file("inst/extdata/modis_vnp46_tiles.csv",
-        package = "NRTAPmodel"
-      )
-    )
 
   testthat::expect_no_error(
     suppressWarnings(
@@ -198,7 +192,6 @@ testthat::test_that("calc_modis works well.", {
           sites = site_faux,
           name_covariates = c("MOD_NITLT_0_"),
           subdataset = 3L,
-          tilelist = vnptiledf,
           nthreads = 2
         )
     )
@@ -231,13 +224,7 @@ testthat::test_that("calc_modis works well.", {
       date_in = "2021~08~15"
     )
   )
-  testthat::expect_error(
-    modis_preprocess_vnp46(
-      paths = path_vnp46,
-      date_in = "2021-08-15",
-      tile_df = vnpfiledf[, -3]
-    )
-  )
+
   testthat::expect_error(
     modis_worker(raster = rast(nrow = 3, ncol = 3), date = "2021-08-15",
                  sites_in = matrix(c(1, 3, 4, 5), nrow = 2))

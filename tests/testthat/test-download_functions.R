@@ -771,7 +771,7 @@ testthat::test_that("EPA NEI (AADT) download URLs have HTTP status 200.", {
   # import commands
   commands <- read_commands(commands_path = commands_path)
   # extract urls
-  urls <- extract_urls(commands = commands, position = 5)
+  urls <- extract_urls(commands = commands, position = 3)
   # check HTTP URL status
   url_status <- check_urls(urls = urls, size = 1L, method = "GET")
   # implement unit tests
