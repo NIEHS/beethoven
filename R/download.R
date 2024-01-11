@@ -155,6 +155,11 @@ download_aqs_data <-
       ),
       year_sequence
     )
+    #### 6. check for valid URL
+    if (!(check_url_status(download_urls[1]))) {
+      stop(paste0("Invalid year returns HTTP code 404. ",
+                  "Check `year_start` parameter.\n"))
+    }
     #### 5. build download file name
     download_names <- sprintf(
       paste(directory_to_download,
@@ -466,6 +471,12 @@ download_geos_cf_data <- function(
         time_sequence[t],
         "z.nc4"
       )
+      if (t == 1) {
+        if (!(check_url_status(download_url))) {
+          stop(paste0("Invalid date returns HTTP code 404. ",
+                        "Check `date_start` parameter.\n"))
+        }
+      }
       download_folder <- paste0(
         directory_to_save,
         collection
@@ -792,6 +803,21 @@ download_merra2_data <- function(
   for (y in seq_along(yearmonth_sequence)) {
     year <- substr(yearmonth_sequence[y], 1, 4)
     month <- substr(yearmonth_sequence[y], 5, 6)
+    if (y == 1) {
+      base_url <- paste0(
+        base,
+        esdt_name,
+        ".5.12.4",
+        year,
+        "/",
+        month,
+        "/"
+      )
+      if (!(check_url_status(base_url))) {
+        stop(paste0("Invalid date returns HTTP code 404. ",
+                    "Check `date_start` parameter.\n"))
+      }
+    }
     list_urls_month <- system(paste0("wget -q -nH -nd ",
                                      "\"",
                                      base,
@@ -952,6 +978,12 @@ download_narr_monolevel_data <- function(
         year,
         ".nc"
       )
+      if (y == 1) {
+        if (!(check_url_status(url))) {
+          stop(paste0("Invalid year returns HTTP code 404. ",
+                      "Check `year_start` parameter.\n"))
+        }
+      }
       destfile <- paste0(
         directory_to_save,
         variable,
@@ -1070,6 +1102,12 @@ download_narr_p_levels_data <- function(
           month,
           ".nc"
         )
+        if (m == 1) {
+          if (!(check_url_status(url))) {
+            stop(paste0("Invalid year returns HTTP code 404. ",
+                        "Check `year_start` parameter.\n"))
+          }
+        }
         destfile <- paste0(
           directory_to_save,
           variable,
@@ -1480,6 +1518,10 @@ download_sedac_population_data <- function(
                          "_",
                          format,
                          ".zip")
+  if (!(check_url_status(download_url))) {
+    stop(paste0("Invalid year returns HTTP code 404. ",
+                "Check `year`.\n"))
+  }
   #### 10. build download file name
   download_name <- paste0(directory_to_download,
                           "gpw_v4_population_density_adjusted_to_2015_unwpp_",
@@ -1632,6 +1674,12 @@ download_noaa_hms_smoke_data <- function(
       date_sequence[f],
       suffix
     )
+    if (f == 1) {
+      if (!(check_url_status(url))) {
+        stop(paste0("Invalid date returns HTTP code 404. ",
+                    "Check `date_start` parameter.\n"))
+      }
+    }
     destfile <- paste0(
       directory_to_cat,
       "hms_smoke_",
