@@ -1071,7 +1071,7 @@ calculate_tri <- function(
                 by = c("YEAR", "LONGITUDE", "LATITUDE", "buffer")]
            })
   df_tri <- data.table::rbindlist(list_buffer)
-  
+
   return(df_tri)
 }
 # nocov end
