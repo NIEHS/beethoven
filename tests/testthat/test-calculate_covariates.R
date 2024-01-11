@@ -117,6 +117,7 @@ testthat::test_that("calc_ecoregion works well", {
 testthat::test_that("calc_modis works well.", {
   withr::local_package("sf")
   withr::local_package("terra")
+  withr::local_package("stars")
   withr::local_package("foreach")
   withr::local_package("doParallel")
   withr::local_options(list(sf_use_s2 = FALSE))
