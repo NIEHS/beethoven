@@ -653,12 +653,7 @@ testthat::test_that("MODIS-MOD06L2 download URLs have HTTP status 200.", {
         "/archive/allData/61/MOD06_L2/2019/049/MOD06_L2.A2019049.0720.061.2019049194350.hdf",
         28267915)
     )
-      # c(6845623203,
-      #   "/archive/allData/61/MOD06_L2/2022/033/MOD06_L2.A2022033.0435.061.2022035152913.hdf",
-      #   26393941),
-      # c(6898699552,
-      #   "/archive/allData/61/MOD06_L2/2022/081/MOD06_L2.A2022081.0620.061.2022092003817.hdf",
-      #   28878947)
+
   faux_urls <- data.frame(faux_urls)
   mod06_scenes <- paste0(tdir, "/mod06_example.csv")
   write.csv(faux_urls, mod06_scenes, row.names = FALSE)
@@ -731,7 +726,9 @@ testthat::test_that("EPA TRI download URLs have HTTP status 200.", {
   # extract urls
   urls <- extract_urls(commands = commands, position = 3)
   # check HTTP URL status
-  url_status <- check_urls(urls = urls, size = 1L, method = "GET")
+  url_status <-
+    httr::HEAD(urls, config = httr::config(cainfo = certificate))
+  url_status <- url_status$status_code
   # implement unit tests
   test_download_functions(directory_to_save = directory_to_save,
                           commands_path = commands_path,

@@ -163,6 +163,15 @@ testthat::test_that("calc_modis works well.", {
     )
   testthat::expect_no_error(
     suppressWarnings(
+      modis_mosaic_mod06(
+        paths = path_mod06,
+        date_in = "2021-08-15"
+      )
+    )
+  )
+
+  testthat::expect_no_error(
+    suppressWarnings(
       calc_mod06 <-
         calc_modis(
           path = path_mod06,

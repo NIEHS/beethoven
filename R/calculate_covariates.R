@@ -808,7 +808,7 @@ calc_modis <-
         "id_col", "fun_summary", "radius", "subdataset")
     package_list <-
       c("sf", "terra", "exactextractr", "foreach", "data.table", "stars",
-        "NRTAPmodel", "dplyr", "doRNG", "parallelly", "doParallel")
+        "NRTAPmodel", "dplyr", "parallelly", "doParallel")
     if (!is.null(export_list_add)) {
       export_list <- c(export_list, export_list_add)
     }
