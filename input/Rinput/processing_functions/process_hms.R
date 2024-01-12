@@ -26,11 +26,11 @@ process_hms <- function(
     date_start = "2023-09-01",
     date_end = "2023-09-02",
     data_format = "Shapefile",
-    density_level = "all",
+    density_level = c("Light", "Medium", "Heavy"),
     directory_with_data = "./input/noaa_hms/raw/") {
   #### 0.
   if (data_format == "KML") {
-    paste0("KML processes under construction")
+    message(paste0("KML processes under construction"))
     return(NULL)
   }
   #### 1. directory setup
@@ -62,7 +62,7 @@ process_hms <- function(
       full.names = TRUE
     )
   }
-  #### 6. check for matching dates
+  #### 5. check for matching dates
   data_file_dates <- stringr::str_split_i(
     stringr::str_split_i(
       data_files,
@@ -73,7 +73,9 @@ process_hms <- function(
     1
   )
   if (!(identical(data_file_dates, date_sequence))) {
-    cat(paste0("Data for requested dates does not match available files.\n"))
+    message(paste0(
+      "Data for requested dates does not match available files.\n"
+      ))
     return(NULL)
   }
   #### 6. process data
@@ -81,33 +83,48 @@ process_hms <- function(
   if (data_format == "Shapefile") {
     for (d in seq_along(data_files)) {
       cat(paste0(
-        "Processing data in file ",
+        "Processing file ",
         data_files[d],
-        "\n"
+        "...\n"
       ))
       data_date <- terra::vect(data_files[d])
-      #### 7. zero buffer to avoid self-intersecting geometry error
-      data_date_b <- terra::buffer(
-        data_date,
-        width = 0
-      )
-      data_date_aggregate <- terra::aggregate(
-        data_date_b,
-        by = "Density",
-        dissolve = TRUE
-      )
-      data_date_aggregate$Density <- factor(
-        data_date_aggregate$Density,
-        levels = c("Light", "Medium", "Heavy")
-      )
-      data_date_aggregate$Date <- paste0(date_sequence[d])
-      data <- rbind(data, data_date_aggregate)
+      data_date_p <- terra::project(data_date, "EPSG:4326")
+      #### 7. absent polygons (ie. December 31, 2018)
+      if (nrow(data_date) == 0) {
+        cat(paste0(
+          "Smoke plume polygons absent for date: ",
+          date_sequence[d],
+          ". Returning empty SpatVector.\n"))
+        data_missing <- data_date_p
+        data_missing$Density <- ""
+        data_missing$Date <- ""
+        data_return <- rbind(data, data_missing)
+      } else {
+        #### 8. zero buffer to avoid self-intersecting geometry error
+        data_date_b <- terra::buffer(
+          data_date_p,
+          width = 0
+        )
+        #### 9. aggregate density-specific polygons
+        data_date_aggregate <- terra::aggregate(
+          data_date_b,
+          by = "Density",
+          dissolve = TRUE
+        )
+        #### 10. factorize
+        data_date_aggregate$Density <- factor(
+          data_date_aggregate$Density,
+          levels = c("Light", "Medium", "Heavy")
+        )
+        data_date_aggregate$Date <- paste0(date_sequence[d])
+        data <- rbind(data, data_date_aggregate)
+      }
     }
   }
-  #### 8. select "Density" and "Date"
+  #### 11. select "Density" and "Date"
   data <- data[1:nrow(data), c("Density", "Date")]
-  #### 9. subset to density level
+  #### 12. subset to density level
   data_return <- data[data$Density == density_level,]
-  #### 10. return SpatVector
+  #### 13. return SpatVector
   return(data_return)
 }

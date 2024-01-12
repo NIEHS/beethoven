@@ -52,20 +52,19 @@ calc_hms <- function(
   for (d in seq_along(date_sequence)) {
     cat(paste0(
       "Extracting ",
-      density_level,
-      " smoke data for date: ",
+      tolower(density_level),
+      " smoke plume data for date: ",
       date_sequence[d],
-      "\n"))
+      "...\n"))
     #### 7. subset to date
     data_date <- data[data$Date == date_sequence[d],]
-    #### 8. check for polygons
-    if (length(data_date$Density) == 0) {
+    #### 8. check for DENSITY SPECFIIC polygons
+    if (nrow(data_date) == 0) {
       cat(paste0(
-        "No ",
         density_level,
-        " smoke plume polygons available for ",
+        " smoke plume polygons absent for date: ",
         date_sequence[d],
-        ". Will return 0 (NO SMOKE PRESENT).\n"))
+        ". Returning 0 (NO SMOKE PRESENT).\n"))
     }
     #### 9. extract data at sites
     sites_extracted_date <- terra::extract(
