@@ -854,40 +854,141 @@ After creating an account, navigate to "My Profile"(https://urs.earthdata.nasa.g
 
 ### Prerequisite files (Mac/Linux)
 
-With a NASA EarthData Account and the required applications authorized to use the credentials, it is time to create the prerequisite files. If working on a **Mac/Linux machine**, open a terminal window.
+With a NASA EarthData Account and the required applications authorized to use the credentials, it is time to create the prerequisite files.
 
-**Note** As the steps to produce the prerequisite files is very specific, much of the code used is taken verbatim from [How to Generate Earthdata Prerequisite Files](https://disc.gsfc.nasa.gov/information/howto?title=How%20to%20Generate%20Earthdata%20Prerequisite%20Files) on NASA GES DISC's "How-To's" webpage ([link](https://disc.gsfc.nasa.gov/information/howto)).
+**Note** As the steps to produce the prerequisite files is very specific, much of the code used is adopted from [How to Generate Earthdata Prerequisite Files](https://disc.gsfc.nasa.gov/information/howto?title=How%20to%20Generate%20Earthdata%20Prerequisite%20Files) on NASA GES DISC's "How-To's" webpage ([link](https://disc.gsfc.nasa.gov/information/howto)).
 
 #### `.netrc`
 
-Type the following commands in order replacing `YOUR_USERNAME` and `YOUR_PASSWORD` with your NASA EarthData username and password, respectively.
+The following commands create the `.netrc` file, which contains your NASA EarthData Account credentials.
 
-```{bash, eval = FALSE}
-cd ~
-touch .netrc
-echo "machine urs.earthdata.nasa.gov login YOUR_USERNAME password YOUR_PASSWORD" >> .netrc
-chmod 0600 .netrc
+First, set your working directory to the home directory.
+
+```{r, eval = FALSE}
+setwd("~/")
 ```
+
+Create a file named `.netrc` with `file.create()`.
+
+```{r, eval = FALSE}
+file.create(".netrc")
+```
+
+Open a connection to `.netrc` with `sink()`. Write the line `machine urs...` replacing `YOUR_USERNAME` and `YOUR_PASSWORD` with your NASA EarthData username and password, respectively. After writing the line, close the connection with `sink()` again. 
+
+```{r, eval = FALSE}
+sink(".netrc")
+writeLines(
+  "machine urs.earthdata.nasa.gov login YOUR_USERNAME password YOUR_PASSWORD"
+)
+sink()
+```
+
+Edit the settings so only you, the owner of the file, can read and write `.netrc`.
+
+```{r, eval = FALSE}
+system("chmod 0600")
+```
+
+After, check to ensure the file was created properly.
+
+```{r, eval = FALSE}
+file.exists(".netrc")
+```
+
+```{r, echo = FALSE}
+TRUE
+```
+
+```{r, eval = FALSE}
+readLines(".netrc")
+```
+
+```{r, echo = FALSE}
+paste0(
+  "machine urs.earthdata.nasa.gov login YOUR_USERNAME password YOUR_PASSWORD"
+)
+```
+
 
 #### `.urs_cookies`
 
-Type the following commands in order.
+The following commands create the `.urs_cookies` file.
 
-```{bash, eval = FALSE}
-cd ~
-touch .urs_cookies
+First, set your working directory to the home directory.
+
+```{r, eval = FALSE}
+setwd("~/")
+```
+
+Create a file named `.netrc` with `file.create()`.
+
+```{r, eval = FALSE}
+file.create(".urs_cookies")
+```
+
+After, check to ensure the file was created properly.
+
+```{r, eval = FALSE}
+file.exists(".urs_cookies")
+```
+
+```{r, echo = FALSE}
+TRUE
 ```
 
 #### `.dodsrc`
 
-Type the following commands in order replacing `YOUR_HOME_DIRECTORY` with the absolute path of your home directory.
+The following commands create the `.urs_cookies` file.
 
-```{bash, eval = FALSE}
-cd ~
-touch .dodsrc
-echo "HTTP.NETRC=YOUR_HOME_DIRECTORY/.netrc" >> .dodsrc
-echo "HTTP.COOKIE.JAR=YOUR_HOME_DIRECTORY/.urs_cookies" >> .dodsrc
+First, set your working directory to the home directory.
+
+```{r, eval = FALSE}
+setwd("~/")
 ```
+
+Create a file named ".dodsrc" with `file.create()`
+
+```{r, eval = FALSE}
+file.create(".dodsrc")
+```
+
+Open a connection to `.dodsrc` with `sink()`. Write the lines beginning with `HTTP.`, replacing `YOUR_USERNAME` and `YOUR_PASSWORD` with your NASA EarthData username and password, respectively. After writing the line, close the connection with `sink()` again. 
+
+```{r, eval = FALSE}
+sink(".dodsrc")
+writeLines(
+  paste0(
+    "HTTP.NETRC=YOUR_HOME_DIRECTORY/.netrc\n",
+    "HTTP.COOKIE.JAR=YOUR_HOME_DIRECTORY/.urs_cookies"
+  )
+)
+sink()
+```
+
+After, check to ensure the file was created properly.
+
+```{r, eval = FALSE}
+file.exists(".dodsrc")
+```
+
+```{r, echo = FALSE}
+TRUE
+```
+
+```{r, eval = FALSE}
+readLines(".dodsrc")
+```
+
+```{r, echo = FALSE}
+paste0(
+  c(
+    "HTTP.NETRC=YOUR_HOME_DIRECTORY/.netrc",
+    "HTTP.COOKIE.JAR=YOUR_HOME_DIRECTORY/.urs_cookies"
+  )
+)
+```
+
 
 It is important to ensure that these commands, as well as your username, password, and home directory, are typed without error, as a single problem with any of these files will result in a failed download.
 
