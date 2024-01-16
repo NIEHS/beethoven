@@ -852,7 +852,7 @@ After creating an account, navigate to "My Profile"(https://urs.earthdata.nasa.g
 
 ![NASA EarthData Approved Applications](../inst/extdata/vignette_images/NASA_EarthData_applications.png)
 
-### Prerequisite files (Mac/Linux)
+### Prerequisite files
 
 With a NASA EarthData Account and the required applications authorized to use the credentials, it is time to create the prerequisite files.
 
@@ -862,10 +862,14 @@ With a NASA EarthData Account and the required applications authorized to use th
 
 The following commands create the `.netrc` file, which contains your NASA EarthData Account credentials.
 
-First, set your working directory to the home directory.
+First, set your working directory to the home directory. Setting a working directory differs between Mac/Linux and Windows machines.
 
 ```{r, eval = FALSE}
-setwd("~/")
+if (.Platform$OS.type == "unix") {
+  setwd("~/")
+} else if (.Platform$OS.type == "windows") {
+  setwd("C:/")
+}
 ```
 
 Create a file named `.netrc` with `file.create()`.
@@ -918,7 +922,11 @@ The following commands create the `.urs_cookies` file.
 First, set your working directory to the home directory.
 
 ```{r, eval = FALSE}
-setwd("~/")
+if (.Platform$OS.type == "unix") {
+  setwd("~/")
+} else if (.Platform$OS.type == "windows") {
+  setwd("C:/")
+}
 ```
 
 Create a file named `.netrc` with `file.create()`.
@@ -944,7 +952,11 @@ The following commands create the `.urs_cookies` file.
 First, set your working directory to the home directory.
 
 ```{r, eval = FALSE}
-setwd("~/")
+if (.Platform$OS.type == "unix") {
+  setwd("~/")
+} else if (.Platform$OS.type == "windows") {
+  setwd("C:/")
+}
 ```
 
 Create a file named ".dodsrc" with `file.create()`
@@ -989,6 +1001,15 @@ paste0(
 )
 ```
 
+If working on a **Windows** machine, copy the `.dodsrc` file to the project working directory. Replace `YOUR_WORKING_DIRECTORY` with the absolute path to the project working directory.
+
+```{r}
+if (.Platform$OS.type == "windows") {
+  file.copy(
+    "C:/.dodsrc",
+    "YOUR_WORKING_DIRECTORY/.dodsrc")
+}
+```
 
 It is important to ensure that these commands, as well as your username, password, and home directory, are typed without error, as a single problem with any of these files will result in a failed download.
 
@@ -1055,38 +1076,3 @@ The following is the entire R code used to create `download_noaa_hms_smoke_data(
 ```{r}
 download_noaa_hms_smoke_data
 ```
-
-## Prerequisite files (Windows)
-
-With a NASA EarthData Account and the required applications authorized to use the credentials, it is time to create the prerequisite files. The following are steps for users with **Windows machines**.
-
-#### `.netrc`
-
-Open notepad and type:
-
-```{bash, eval = FALSE}
-machine urs.earthdata.nasa.gov login YOUR_USERNAME password YOUR_PASSWORD
-```
-
-Replace `YOUR_USERNAME` and `YOUR_PASSWORD` with your NASA EarthData username and password, respectively. Save file as `C:\.netrc`.
-
-#### `.urs_cookies`
-
-Open a run command window. Type "cmd" in text field and click "OK".
-
-```{bash, eval = FALSE}
-C:
-NUL > .urs_cookies
-```
-
-#### `.dodsrc`
-
-Open a run command window. Type "cmd" in text field and click "OK". Navigate to the root user directory.
-
-```{bash, eval = FALSE}
-NUL > .dodsrc
-HTTP.NETRC=YOUR_HOME_DIRECTORY/.netrc
-HTTP.COOKIE.JAR=YOUR_HOME_DIRECTORY/.urs_cookies
-```
-
-Replace `YOUR_HOME_DIRECTORY` with the absolute path of your home directory. Copy `.dodsrc` to the working directory.
