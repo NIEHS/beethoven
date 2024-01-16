@@ -82,21 +82,13 @@ calc_geos <- function(
     sub_hyphen = TRUE
   )
   #### 8. define time sequence
-  if (stringr::str_sub(collection, -1, -1) == "1") {
-    time_sequence <- as.character(seq(from = 30, to = 2330, by = 100))
-    time_sequence <- stringr::str_pad(time_sequence,
-      pad = "0",
-      width = 4,
-      side = "left"
-    )
-  } else if (stringr::str_sub(collection, -1, -1) == "3") {
-    time_sequence <- as.character(seq(from = 100, to = 2400, by = 100))
-    time_sequence <- stringr::str_pad(time_sequence,
-      pad = "0",
-      width = 4,
-      side = "left"
-    )
+  collection_end <- substr(collection, nchar(collection), nchar(collection))
+  if (collection_end == "1") {
+    time_sequence <- seq(from = 30, to = 2330, by = 100)
+  } else if (collection_end == "3") {
+    time_sequence <- seq(from = 0, to = 2300, by = 100)
   }
+  time_sequence <- sprintf("%04d", time_sequence)
   #### 10. location SpatVector
   sites_v <- terra::vect(sites,
     geom = c("lon", "lat"),
@@ -133,9 +125,6 @@ calc_geos <- function(
           names(data)
         )
       )
-      # data_time <- terra::rast(path,
-      #   subds = variable
-      # )
       #### 15. combine SpatRaster with same date
       data_date <- c(data_date, data_time, warn = FALSE)
     }
