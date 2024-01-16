@@ -76,10 +76,11 @@ calc_geos <- function(
   collection_codes <- subset(codes, subset = codes[, 3] == collection)
   code <- collection_codes[collection_codes[, 1] == variable, ][2]
   #### 7. define date sequence
-  date_start_date_format <- as.Date(date_start, format = "%Y-%m-%d")
-  date_end_date_format <- as.Date(date_end, format = "%Y-%m-%d")
-  date_sequence <- seq(date_start_date_format, date_end_date_format, "day")
-  date_sequence <- gsub("-", "", as.character(date_sequence))
+  date_sequence <- generate_date_sequence(
+    date_start,
+    date_end,
+    sub_hyphen = TRUE
+  )
   #### 8. define time sequence
   if (stringr::str_sub(collection, -1, -1) == "1") {
     time_sequence <- as.character(seq(from = 30, to = 2330, by = 100))

@@ -891,7 +891,7 @@ sink()
 Edit the settings so only you, the owner of the file, can read and write `.netrc`.
 
 ```{r, eval = FALSE}
-system("chmod 0600")
+system("chmod 0600 .netrc")
 ```
 
 After, check to ensure the file was created properly.

@@ -38,10 +38,11 @@ process_hms <- function(
   #### 2. check for variable
   check_for_null_parameters(mget(ls()))
   #### 3. define date sequence
-  date_start_date_format <- as.Date(date_start, format = "%Y-%m-%d")
-  date_end_date_format <- as.Date(date_end, format = "%Y-%m-%d")
-  date_sequence <- seq(date_start_date_format, date_end_date_format, "day")
-  date_sequence <- gsub("-", "", as.character(date_sequence))
+  date_sequence <- generate_date_sequence(
+    date_start,
+    date_end,
+    sub_hyphen = TRUE
+  )
   #### 4. define list of data file names
   if (data_format == "Shapefile") {
     data_files <- list.files(

@@ -422,10 +422,11 @@ download_geos_cf_data <- function(
     stop(paste0("Requested collection is not recognized.\n"))
   }
   #### 5. define date sequence
-  date_start_date_format <- as.Date(date_start, format = "%Y-%m-%d")
-  date_end_date_format <- as.Date(date_end, format = "%Y-%m-%d")
-  date_sequence <- seq(date_start_date_format, date_end_date_format, "day")
-  date_sequence <- gsub("-", "", as.character(date_sequence))
+  date_sequence <- generate_date_sequence(
+    date_start,
+    date_end,
+    sub_hyphen = TRUE
+  )
   #### 6. define time sequence
   collection_end <- substr(collection, nchar(collection), nchar(collection))
   if (collection_end == "1") {
@@ -761,10 +762,11 @@ download_merra2_data <- function(
     Please refer to the table above to find a proper collection.\n"))
   }
   #### 5. define date sequence
-  date_start_date_format <- as.Date(date_start, format = "%Y-%m-%d")
-  date_end_date_format <- as.Date(date_end, format = "%Y-%m-%d")
-  date_sequence <- seq(date_start_date_format, date_end_date_format, "day")
-  date_sequence <- gsub("-", "", as.character(date_sequence))
+  date_sequence <- generate_date_sequence(
+    date_start,
+    date_end,
+    sub_hyphen = TRUE
+  )
   #### 6. define year + month sequence
   yearmonth_sequence <- unique(substr(date_sequence, 1, 6))
   #### 7. define ESDT name and DOI
@@ -809,13 +811,14 @@ download_merra2_data <- function(
       base_url <- paste0(
         base,
         esdt_name,
-        ".5.12.4",
+        ".5.12.4/",
         year,
         "/",
         month,
         "/"
       )
       if (!(check_url_status(base_url))) {
+        cat(base_url)
         stop(paste0("Invalid date returns HTTP code 404. ",
                     "Check `date_start` parameter.\n"))
       }
@@ -1641,10 +1644,11 @@ download_noaa_hms_smoke_data <- function(
     ))
   }
   #### 5. define date sequence
-  date_start_date_format <- as.Date(date_start, format = "%Y-%m-%d")
-  date_end_date_format <- as.Date(date_end, format = "%Y-%m-%d")
-  date_sequence <- seq(date_start_date_format, date_end_date_format, "day")
-  date_sequence <- gsub("-", "", as.character(date_sequence))
+  date_sequence <- generate_date_sequence(
+    date_start,
+    date_end,
+    sub_hyphen = TRUE
+  )
   #### 6. define URL base
   base <- "https://satepsanone.nesdis.noaa.gov/pub/FIRE/web/HMS/Smoke_Polygons/"
   #### 7. initiate "..._curl_commands.txt"
@@ -2067,10 +2071,11 @@ download_modis_data <- function(
 
 
   #### 11. define date sequence
-  date_start_date_format <- as.Date(date_start, format = "%Y-%m-%d")
-  date_end_date_format <- as.Date(date_end, format = "%Y-%m-%d")
-  date_sequence <- seq(date_start_date_format, date_end_date_format, "day")
-
+  date_sequence <- generate_date_sequence(
+    date_start,
+    date_end,
+    sub_hyphen = FALSE
+  )
   # In a certain year, list all available dates
   year <- as.character(substr(date_start, 1, 4))
   filedir_year_url <-

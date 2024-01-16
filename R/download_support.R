@@ -176,3 +176,26 @@ check_for_null_parameters <-
       stop(paste0("One or more parameters are `NULL`\n"))
     }
   }
+
+#' Generate sequence of dates based on `date_start` and `date_end`.
+#' @param date_start
+#' @param date_end
+#' @returns vector
+#' @export
+generate_date_sequence <-
+  function(
+    date_start,
+    date_end,
+    sub_hyphen = TRUE
+  ) {
+    dates_original <- seq(
+      as.Date(date_start, format = "%Y-%m-%d"), 
+      as.Date(date_end, format = "%Y-%m-%d"), 
+      "day")
+    if (sub_hyphen == TRUE) {
+      dates_sub_hyphen <- gsub("-", "", as.character(dates_original))
+      return(dates_sub_hyphen)
+    } else {
+      return(dates_original)
+    }
+  }
