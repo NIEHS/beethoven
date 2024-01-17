@@ -4,7 +4,7 @@
 \alias{download_run}
 \title{download_run: execute or skip `system_command` in data download function.}
 \usage{
-download_run(download = FALSE, system_command = NULL, commands_txt = NULL)
+download_run(download = FALSE, system_command = NULL)
 }
 \arguments{
 \item{download}{logical(1). Execute (`TRUE`) or skip (`FALSE`) download.}

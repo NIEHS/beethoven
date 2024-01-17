@@ -67,7 +67,6 @@ download_permit <-
 #' @param download logical(1). Execute (`TRUE`) or skip (`FALSE`) download.
 #' @param system_command character(1). Linux command to execute downloads.
 #' Inherited from data download function.
-#' @param commands_txt character(1). Text file with download commands.
 #' @returns NULL
 #' @export
 download_run <- function(
@@ -173,8 +172,11 @@ check_for_null_parameters <-
   }
 
 #' Generate sequence of dates based on `date_start` and `date_end`.
-#' @param date_start
-#' @param date_end
+#' @param date_start character(1). Beginning of date sequence.
+#' @param date_end character(1). End of date sequence.
+#' @param sub_hyphen logical(1). Substitute hyphen in dates. If `TRUE`, returns
+#' date sequence as "YYYYMMDD". If `FALSE`, returns date sequence as
+#' "YYYY-MM-DD".
 #' @returns vector
 #' @export
 generate_date_sequence <-
