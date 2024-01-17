@@ -14,9 +14,8 @@
 #' @importFrom httr GET
 #' @export
 check_url_status <- function(
-  url,
-  method = "HEAD"
-) {
+    url,
+    method = "HEAD") {
   http_status_ok <- 200
   if (method == "HEAD") {
     hd <- httr::HEAD(url)
@@ -80,8 +79,9 @@ check_urls <- function(
   }
   url_sample <- sample(urls, size, replace = FALSE)
   url_status <- sapply(url_sample,
-                       check_url_status,
-                       method = method)
+    check_url_status,
+    method = method
+  )
   return(url_status)
 }
 

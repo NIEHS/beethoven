@@ -6,9 +6,9 @@
 ################################################################################
 #' calc_hms: Calculate wildfire smoke plume binary covariates from NOAA HMS
 #' Smoke Product.
-#' @param date_start character(1). length of 10. Start date of downloaded data. 
+#' @param date_start character(1). length of 10. Start date of downloaded data.
 #' Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
-#' @param date_end character(1). length of 10. End date of downloaded data. 
+#' @param date_end character(1). length of 10. End date of downloaded data.
 #' Format YYYY-MM-DD (ex. September 10, 2023 = "2023-09-10").
 #' @param data SpatVector(1). SpatVector object produced by `process_hms`
 #' containing density level-specific polygons.
@@ -29,8 +29,7 @@ calc_hms <- function(
     data,
     density_level = c("Light", "Medium", "Heavy"),
     sites,
-    identifier = "site_id"
-) {
+    identifier = "site_id") {
   #### 2. check for null parameters
   check_for_null_parameters(mget(ls()))
   #### 3. sites as SpatVector
@@ -56,16 +55,18 @@ calc_hms <- function(
       tolower(density_level),
       " smoke plume data for date: ",
       date_sequence[d],
-      "...\n"))
+      "...\n"
+    ))
     #### 7. subset to date
-    data_date <- data[data$Date == date_sequence[d],]
+    data_date <- data[data$Date == date_sequence[d], ]
     #### 8. check for DENSITY SPECFIIC polygons
     if (nrow(data_date) == 0) {
       cat(paste0(
         density_level,
         " smoke plume polygons absent for date: ",
         date_sequence[d],
-        ". Returning 0 (NO SMOKE PRESENT).\n"))
+        ". Returning 0 (NO SMOKE PRESENT).\n"
+      ))
     }
     #### 9. extract data at sites
     sites_extracted_date <- terra::extract(
@@ -84,7 +85,8 @@ calc_hms <- function(
       sites_id,
       paste0(as.Date(
         date_sequence[d],
-        format = "%Y%m%d")),
+        format = "%Y%m%d"
+      )),
       as.numeric(sites_extracted_date$binary01)
     ))
     #### 12. set column names
@@ -94,7 +96,8 @@ calc_hms <- function(
       paste0(
         "OTH_HMSW",
         substr(density_level, 1, 1),
-        "_0_00000")
+        "_0_00000"
+      )
     )
     sites_extracted <- rbind(sites_extracted, sites_extracted_date_id)
   }

@@ -7,11 +7,11 @@
 #' process_hms: import and aggregate wildfire smoke plume data based on smoke
 #' density level.
 #'
-#' @param date_start character(1). length of 10. Start date of downloaded data. 
+#' @param date_start character(1). length of 10. Start date of downloaded data.
 #' Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
-#' @param date_end character(1). length of 10. End date of downloaded data. 
+#' @param date_end character(1). length of 10. End date of downloaded data.
 #' Format YYYY-MM-DD (ex. September 10, 2023 = "2023-09-10").
-#' @param data_format character(1). "Shapefile" or "KML". Format of downloaded 
+#' @param data_format character(1). "Shapefile" or "KML". Format of downloaded
 #' data.
 #' @param density_level character(1). "Light", "Medium", or "Heavy".
 #' @param directory_with_data character(1). Directory storing
@@ -51,11 +51,13 @@ process_hms <- function(
       full.names = TRUE
     )
     data_files <- data_files[grep(".shp", data_files)]
-    data_files <- data_files[grepl(paste0(
-      date_sequence,
-      collapse = "|"
-    ),
-    data_files)]
+    data_files <- data_files[grepl(
+      paste0(
+        date_sequence,
+        collapse = "|"
+      ),
+      data_files
+    )]
   } else if (data_format == "KML") {
     data_files <- list.files(
       path = directory_with_data,
@@ -76,7 +78,7 @@ process_hms <- function(
   if (!(identical(data_file_dates, date_sequence))) {
     message(paste0(
       "Data for requested dates does not match available files.\n"
-      ))
+    ))
     return(NULL)
   }
   #### 6. process data
@@ -95,7 +97,8 @@ process_hms <- function(
         cat(paste0(
           "Smoke plume polygons absent for date: ",
           date_sequence[d],
-          ". Returning empty SpatVector.\n"))
+          ". Returning empty SpatVector.\n"
+        ))
         data_missing <- data_date_p
         data_missing$Density <- ""
         data_missing$Date <- ""
@@ -123,9 +126,9 @@ process_hms <- function(
     }
   }
   #### 11. select "Density" and "Date"
-  data <- data[1:nrow(data), c("Density", "Date")]
+  data <- data[seq_len(nrow(data)), c("Density", "Date")]
   #### 12. subset to density level
-  data_return <- data[data$Density == density_level,]
+  data_return <- data[data$Density == density_level, ]
   #### 13. return SpatVector
   return(data_return)
 }

@@ -30,7 +30,7 @@ The `data_download()` function was developed to improve researchers' access to p
 `data_download()` is capable of accessing and downloading geospatial data sets, collections, and variables from a variety of sources. This wrapper function calls on source-specific data download functions, each utilizing a unique combination of input parameters, host URL, naming convention, and data formats.
 
 ```{r, echo = FALSE}
-Function <- c(
+functions <- c(
   "download_aqs_data", "download_ecoregion_data",
   "download_geos_cf_data", "download_gmted_data",
   "download_koppen_geiger_data", "download_merra2_data",
@@ -39,7 +39,7 @@ Function <- c(
   "download_sedac_groads_data", "download_sedac_population_data",
   "download_modis_data"
 )
-Source <- c(
+source <- c(
   "US EPA Air Data Pre-Generated Data Files",
   "US EPA Ecoregions",
   "NASA Goddard Earth Observing System Composition Forecasting (GEOS-CF)",
@@ -83,7 +83,7 @@ link <- c(
   ),
   "https://modis.gsfc.nasa.gov/data/"
 )
-Source <- paste0(
+source <- paste0(
   "[",
   Source,
   "](",
@@ -91,7 +91,8 @@ Source <- paste0(
   ")"
 )
 
-functions_sources <- data.frame(Function, Source)
+functions_sources <- data.frame(functions, source)
+colnames(functions_sources) <- c("Function", "Source")
 kable(functions_sources,
   caption =
     "Source-Specific Download Functions and Sources"
@@ -116,13 +117,13 @@ The two functions have different required parameters because `download_noaa_hms_
 Four parameters are included in all of the data download functions.
 
 ```{r, echo = FALSE}
-Parameter <- c(
+parameter <- c(
   "directory_to_save",
   "data_download_acknowledgement",
   "download", "remove_command"
 )
-Type <- c("Character", "Logical", "Logical", "Logical")
-Description <- c(
+type <- c("Character", "Logical", "Logical", "Logical")
+description <- c(
   paste0(
     "There must be a directory to save downloaded ",
     "data. Default = './input/DATASET_NAME/'."
@@ -143,7 +144,8 @@ Description <- c(
     "\"...commands.txt\"])."
   )
 )
-parameter_descriptions <- data.frame(Parameter, Type, Description)
+parameter_descriptions <- data.frame(parameter, type, description)
+colnames(parameter_descriptions) <- c("Parameter", "Type", "Description")
 kable(parameter_descriptions)
 ```
 
@@ -1008,7 +1010,8 @@ If working on a **Windows** machine, copy the `.dodsrc` file to the project work
 if (.Platform$OS.type == "windows") {
   file.copy(
     "C:/.dodsrc",
-    "YOUR_WORKING_DIRECTORY/.dodsrc")
+    "YOUR_WORKING_DIRECTORY/.dodsrc"
+  )
 }
 ```
 

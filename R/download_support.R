@@ -92,9 +92,8 @@ download_run <- function(
 #' @returns NULL
 #' @export
 download_remove_command <-
-  function(
-      commands_txt = NULL,
-      remove = FALSE) {
+  function(commands_txt = NULL,
+           remove = FALSE) {
     if (remove) {
       file.remove(commands_txt)
     }
@@ -106,8 +105,7 @@ download_remove_command <-
 #' @returns NULL
 #' @export
 download_sink <-
-  function(
-      command_txt) {
+  function(command_txt) {
     if (file.exists(command_txt)) {
       file.remove(command_txt)
     }
@@ -123,10 +121,9 @@ download_sink <-
 #' @returns NULL
 #' @export
 download_unzip <-
-  function(
-      file_name,
-      directory_to_unzip,
-      unzip = TRUE) {
+  function(file_name,
+           directory_to_unzip,
+           unzip = TRUE) {
     if (!unzip) {
       cat(paste0("Downloaded files will not be unzipped.\n"))
       return(NULL)
@@ -150,9 +147,8 @@ download_unzip <-
 #' @returns NULL
 #' @export
 download_remove_zips <-
-  function(
-      remove = FALSE,
-      download_name) {
+  function(remove = FALSE,
+           download_name) {
     #### remove zip files
     if (remove) {
       cat(paste0("Removing download files...\n"))
@@ -169,8 +165,7 @@ download_remove_zips <-
 #' @export
 check_for_null_parameters <-
   function(
-    parameters
-  ) {
+      parameters) {
     parameters_status <- any(unlist(lapply(parameters, is.null)))
     if (parameters_status) {
       stop(paste0("One or more parameters are `NULL`\n"))
@@ -184,14 +179,14 @@ check_for_null_parameters <-
 #' @export
 generate_date_sequence <-
   function(
-    date_start,
-    date_end,
-    sub_hyphen = TRUE
-  ) {
+      date_start,
+      date_end,
+      sub_hyphen = TRUE) {
     dates_original <- seq(
-      as.Date(date_start, format = "%Y-%m-%d"), 
-      as.Date(date_end, format = "%Y-%m-%d"), 
-      "day")
+      as.Date(date_start, format = "%Y-%m-%d"),
+      as.Date(date_end, format = "%Y-%m-%d"),
+      "day"
+    )
     if (sub_hyphen == TRUE) {
       dates_sub_hyphen <- gsub("-", "", as.character(dates_original))
       return(dates_sub_hyphen)

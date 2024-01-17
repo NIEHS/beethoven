@@ -56,21 +56,25 @@ calc_geos <- function(
   }
   #### 8. assign variable code
   codes <- cbind(
-    unlist(strsplit(paste0("ACET ALD2 ALK4 BCPI BCPO BENZ C2H6 C3H8 CH4 CO ",
-                           "DST1 DST2 DST3 DST4 EOH H2O2 HCHO HNO3 HNO4 ISOP ",
-                           "MACR MEK MVK N2O5 NH3 NH4 NIT NO NO2 NOy OCPI ",
-                           "OCPO PAN PM25_RH35_GCC PM25_RH35_GOCART ",
-                           "PM25bc_RH35_GCC PM25du_RH35_GCC PM25ni_RH35_GCC ",
-                           "PM25oc_RH35_GCC PM25soa_RH35_GCC PM25ss_RH35_GCC ",
-                           "PM25su_RH35_GCC PRPE RCHO SALA SALC SO2 SOAP SOAS ",
-                           "TOLU XYLE CO NO2 O3 SO2"), " ")),
-    unlist(strsplit(paste0("ACETO ACETA CALKA HIBCA HOBCA BENZE ETHTE PROPA ",
-                           "METHA CMONO DUST1 DUST2 DUST3 DUST4 ETHOL HYPER ",
-                           "FORMA NITAC PERAC ISOPR METHC MEKET MVKET DIPEN ",
-                           "AMNIA AMNUM INNIT NIOXI NIDIO NITRO HIORG HOORG ",
-                           "PERNI PM25X PM25R BLCPM DUSPM NITPM ORCPM SORPM ",
-                           "SEAPM SULPM CALKE CALDH FSEAS CSEAS SULDI SOAPR ",
-                           "SOASI TOLUE XYLEN COVMR NOVMR OZVMR SOVMR"), " ")),
+    unlist(strsplit(paste0(
+      "ACET ALD2 ALK4 BCPI BCPO BENZ C2H6 C3H8 CH4 CO ",
+      "DST1 DST2 DST3 DST4 EOH H2O2 HCHO HNO3 HNO4 ISOP ",
+      "MACR MEK MVK N2O5 NH3 NH4 NIT NO NO2 NOy OCPI ",
+      "OCPO PAN PM25_RH35_GCC PM25_RH35_GOCART ",
+      "PM25bc_RH35_GCC PM25du_RH35_GCC PM25ni_RH35_GCC ",
+      "PM25oc_RH35_GCC PM25soa_RH35_GCC PM25ss_RH35_GCC ",
+      "PM25su_RH35_GCC PRPE RCHO SALA SALC SO2 SOAP SOAS ",
+      "TOLU XYLE CO NO2 O3 SO2"
+    ), " ")),
+    unlist(strsplit(paste0(
+      "ACETO ACETA CALKA HIBCA HOBCA BENZE ETHTE PROPA ",
+      "METHA CMONO DUST1 DUST2 DUST3 DUST4 ETHOL HYPER ",
+      "FORMA NITAC PERAC ISOPR METHC MEKET MVKET DIPEN ",
+      "AMNIA AMNUM INNIT NIOXI NIDIO NITRO HIORG HOORG ",
+      "PERNI PM25X PM25R BLCPM DUSPM NITPM ORCPM SORPM ",
+      "SEAPM SULPM CALKE CALDH FSEAS CSEAS SULDI SOAPR ",
+      "SOASI TOLUE XYLEN COVMR NOVMR OZVMR SOVMR"
+    ), " ")),
     c(rep("chm_tavg_1hr_g1440x721_v1", 51), rep("aqc_tavg_1hr_g1440x721_v1", 4))
   )
   collection_codes <- subset(codes, subset = codes[, 3] == collection)
@@ -166,7 +170,7 @@ calc_geos <- function(
     )
     #### 23. combine with locations data.frame
     sites_extracted_df <- rbind(sites_extracted_df, sites_extracted_date)
-    cat(paste0("Calculated ", variable, " for date ", date, "\n" ))
+    cat(paste0("Calculated ", variable, " for date ", date, "\n"))
   }
   #### 24. export data
   return(sites_extracted_df)
