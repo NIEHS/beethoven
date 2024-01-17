@@ -109,3 +109,5 @@ calc_koeppen_geiger <- calc_koppen_geiger
 if (run) {
   saveRDS(kg_extracted, file = "~/NRTAP_Covars_Koppen_Geiger_AE_binary.rds")
 }
+
+# nocov end
