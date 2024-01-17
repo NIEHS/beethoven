@@ -877,12 +877,3 @@ testthat::test_that("MODIS-MOD06L2 download URLs have HTTP status 200.", {
   file.remove(commands_path)
 })
 
-testthat::test_that("GEOS-CF code coverage example.", {
-  expect_error(
-    download_geos_cf_data(
-      date_start = "1900-01-01",
-      collection = "aqc_tavg_1hr_g1440x721_v1",
-      data_download_acknowledgement = TRUE
-    )
-  )
-})

@@ -1,5 +1,3 @@
-#' Calculate covariates
-
 # to look at the path and package settings,
 # consult "load_packages.r"
 # run variable is to pass lintr test

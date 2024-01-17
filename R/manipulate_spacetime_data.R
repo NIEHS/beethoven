@@ -175,7 +175,6 @@ convert_stdt_spatvect <- function(stdt) {
 #' @param stdt A stdt object
 #' @return a sftime object
 #' @author Eva Marques
-#' @importFrom sftime st_as_sftime
 #' @export
 convert_stdt_sftime <- function(stdt) {
   if (!is_stdt(stdt)) {
@@ -269,7 +268,6 @@ dt_to_sf <- function(datatable, crs) {
 #' @note "time" column in datatable argument should be in date format,
 #' e.g., "2023-01-01", "01/01/2023", etc.
 #' @author Eva Marques
-#' @importFrom sftime st_as_sftime
 #' @return an sftime object
 dt_to_sftime <- function(datatable, crs) {
   if (!("data.table" %in% class(datatable))) {
