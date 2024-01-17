@@ -12,6 +12,7 @@
 #' based on comment #164 Location of download functions
 #' @importFrom httr HEAD
 #' @importFrom httr GET
+#' @return logical object
 #' @export
 check_url_status <- function(
     url,

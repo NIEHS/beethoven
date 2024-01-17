@@ -11,8 +11,6 @@ download_run(download = FALSE, system_command = NULL)
 
 \item{system_command}{character(1). Linux command to execute downloads.
 Inherited from data download function.}
-
-\item{commands_txt}{character(1). Text file with download commands.}
 }
 \description{
 Execute or skip the commands listed in the ...wget/curl_commands.txt file
