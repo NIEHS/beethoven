@@ -13,6 +13,7 @@ editor: source
 # packages
 library(knitr)
 library(testthat)
+setwd("/Volumes/manwareme/NRTAPmodel/vignettes")
 # source functions
 home <- "../"
 source(paste0(home, "/R/download.R"))
@@ -543,7 +544,7 @@ testthat::test_that(
     # parameters
     test_start <- "2023-12-28"
     test_end <- "2024-01-02"
-    test_directory <- "./data/"
+    test_directory <- "./data"
     # download
     download_data(
       dataset_name = "noaa",
@@ -666,7 +667,7 @@ testthat::test_that(
 
 ```{r, echo = FALSE}
 testthat::test_that(
-  "Invalid dates return HTTP response status != 200.",
+  "Invalid dates return me.",
   {
     # parameters
     test_start <- "1800-01-01"
