@@ -876,4 +876,3 @@ testthat::test_that("MODIS-MOD06L2 download URLs have HTTP status 200.", {
   # remove file with commands after test
   file.remove(commands_path)
 })
-

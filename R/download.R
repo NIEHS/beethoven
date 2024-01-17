@@ -856,6 +856,7 @@ download_merra2_data <- function(
         "/"
       )
       if (!(check_url_status(base_url))) {
+        cat(base_url)
         stop(paste0(
           "Invalid date returns HTTP code 404. ",
           "Check `date_start` parameter.\n"
