@@ -12,11 +12,11 @@
 #' based on comment #164 Location of download functions
 #' @importFrom httr HEAD
 #' @importFrom httr GET
+#' @return logical object
 #' @export
-check_url_file_exist <- function(
-  url,
-  method = "HEAD"
-) {
+check_url_status <- function(
+    url,
+    method = "HEAD") {
   http_status_ok <- 200
   if (method == "HEAD") {
     hd <- httr::HEAD(url)
@@ -61,7 +61,7 @@ extract_urls <- function(
   return(url_list)
 }
 
-#' Sample download URLs and apply `check_url_file_exist` function
+#' Sample download URLs and apply `check_url_status` function
 #' @param urls character vector of URLs
 #' @param size number of observations to be sampled from `urls`
 #' @param method httr method to obtain URL ("HEAD" or "GET")
@@ -80,8 +80,9 @@ check_urls <- function(
   }
   url_sample <- sample(urls, size, replace = FALSE)
   url_status <- sapply(url_sample,
-                       check_url_file_exist,
-                       method = method)
+    check_url_status,
+    method = method
+  )
   return(url_status)
 }
 
