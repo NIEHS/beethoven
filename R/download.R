@@ -1447,6 +1447,12 @@ download_sedac_groads_data <- function(
     format,
     ".zip"
   )
+  if (!(check_url_status(download_url, method = "GET"))) {
+    stop(paste0(
+      "Invalid input returns HTTP code 404. ",
+      "Check parameters.\n"
+    ))
+  }
   #### 9. build download file name
   download_name <- paste0(
     directory_to_download,
@@ -1626,10 +1632,10 @@ download_sedac_population_data <- function(
     format,
     ".zip"
   )
-  if (!(check_url_status(download_url))) {
+  if (!(check_url_status(download_url, method = "GET"))) {
     stop(paste0(
-      "Invalid year returns HTTP code 404. ",
-      "Check `year`.\n"
+      "Invalid input returns HTTP code 404. ",
+      "Check parameters.\n"
     ))
   }
   #### 10. build download file name
