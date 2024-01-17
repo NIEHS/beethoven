@@ -2,7 +2,7 @@ Package: NRTAPmodel
 Title: The SET group near real time air pollution model
 Version: 0.1.0
 Authors@R: c(
-    person("Kyle", "Messier", , "kyle.messier@nih.gov", role = c("aut", "cre")),
+    person("Kyle", "Messier", , "kyle.messier@nih.gov", role = c("aut", "cre"), comment = c(ORCID = "0000-0001-9508-9623")),
     person("Insang", "Song", role = c("aut", "ctb"), comment = c(ORCID = "0000-0001-8732-3256")),
     person("Eva", "Marques", role = c("aut", "ctb")),
     person("Mitchell", "Manware", role = c("aut", "ctb")),
@@ -14,10 +14,12 @@ Authors@R: c(
 Description: Near Real Time air pollution model results and code produced by the SET group. It is fully tested, versioned, and open source and open access.
 Depends: R (>= 4.1.0)
 Imports: dplyr, sf, stats, terra, methods, BART, data.table, httr, rvest, spData, exactextractr, ggplot2, scatterpie, utils, stringr, testthat (>= 3.0.0), doRNG, doParallel, parallelly, stars, ranger, xgboost, torch, foreach
-Suggests: covr, withr, knitr, rmarkdown, sftime, lwgeom
+Suggests: covr, withr, knitr, rmarkdown, sftime, lwgeom, FNN
 Encoding: UTF-8
 VignetteBuilder: knitr, rmarkdown
 RoxygenNote: 7.2.3
+Config/Needs/website: tidyverse/tidytemplate
 Config/testhat/edition: 3
 License: MIT + file LICENSE
-URL: https://spatiotemporal-exposures-and-toxicology.github.io/NRTAPmodel/
+URL: https://github.com/Spatiotemporal-Exposures-and-Toxicology/NRTAPmodel, 
+https://spatiotemporal-exposures-and-toxicology.github.io/NRTAPmodel/
