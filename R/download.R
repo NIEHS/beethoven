@@ -443,9 +443,6 @@ download_geos_cf_data <- function(
     "chm_inst_1hr_g1440x721_p23", "met_inst_1hr_g1440x721_p23"
   )
   collection <- match.arg(collection)
-  if (!(collection %in% collections)) {
-    stop(paste0("Requested collection is not recognized.\n"))
-  }
   #### 5. define date sequence
   date_sequence <- generate_date_sequence(
     date_start,

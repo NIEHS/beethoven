@@ -36,67 +36,63 @@ testthat::test_that("Error when one parameter is NULL.", {
 testthat::test_that("Error when temporal range is invalid.", {
   invalid_date <- "1900-01-01"
   invalid_year <- 1900
+  directory_to_save <- "../testdata"
   functions_args <- list(
     c(
-      download_aqs_data,
-      c(
-        year_start = invalid_year,
-        data_download_acknowledgement = TRUE
-      )
+      dataset_name = "aqs",
+      directory_to_download = directory_to_save,
+      directory_to_save = directory_to_save,
+      year_start = invalid_year,
+      data_download_acknowledgement = TRUE
     ),
     c(
-      download_narr_monolevel_data,
-      c(
-        year = invalid_year,
-        collection = "air.sfc",
-        data_download_acknowledgement = TRUE
-      )
+      dataset_name = "narr_monolevel",
+      directory_to_save = directory_to_save,
+      year = invalid_year,
+      collection = "air.sfc",
+      data_download_acknowledgement = TRUE
     ),
     c(
-      download_narr_p_levels_data,
-      c(
-        year = invalid_year,
-        collection = "omega",
-        data_download_acknowledgement = TRUE
-      )
+      dataset_name = "narr_p_levels",
+      directory_to_save = directory_to_save,
+      year = invalid_year,
+      collection = "omega",
+      data_download_acknowledgement = TRUE
     ),
     c(
-      download_sedac_population_data,
-      c(
-        year = as.character(invalid_year),
-        data_download_acknowledgement = TRUE
-      )
+      dataset_name = "sedac_population",
+      directory_to_save = directory_to_save,
+      directory_to_download = directory_to_save,
+      year = as.character(invalid_year),
+      data_download_acknowledgement = TRUE
     ),
     c(
-      download_geos_cf_data,
-      c(
-        date_start = invalid_date,
-        collection = "aqc_tavg_1hr_g1440x721_v1",
-        data_download_acknowledgement = TRUE
-      )
+      dataset_name = "geos",
+      directory_to_save = directory_to_save,
+      date_start = invalid_date,
+      collection = "aqc_tavg_1hr_g1440x721_v1",
+      data_download_acknowledgement = TRUE
     ),
     c(
-      download_merra2_data,
-      c(
-        date_start = invalid_date,
-        collection = "inst1_2d_asm_Nx",
-        data_download_acknowledgement = TRUE
-      )
+      dataset_name = "merra2",
+      directory_to_save = directory_to_save,
+      date_start = invalid_date,
+      collection = "inst1_2d_asm_Nx",
+      data_download_acknowledgement = TRUE
     ),
     c(
-      download_noaa_hms_smoke_data,
-      c(
-        date_start = invalid_date,
-        data_download_acknowledgement = TRUE
-      )
+      dataset_name = "hms",
+      directory_to_save = directory_to_save,
+      directory_to_download = directory_to_save,
+      date_start = invalid_date,
+      data_download_acknowledgement = TRUE
     )
   )
-  
   for (e in seq_along(functions_args)) {
     testthat::expect_error(
       do.call(
-        functions_args[[e]][[1]],
-        functions_args[[e]][2:length(functions_args[[e]])]
+        download_data,
+        functions_args[[e]]
       )
     )
   }
@@ -507,7 +503,7 @@ testthat::test_that("SEDAC groads download URLs have HTTP status 200.", {
   withr::local_package("httr")
   withr::local_package("stringr")
   # function parameters
-  data_regions <- c("Americas")
+  data_regions <- c("Americas", "Global")
   data_formats <- c("Geodatabase", "Shapefile")
   directory_to_download <- "../testdata/"
   directory_to_save <- "../testdata/"
