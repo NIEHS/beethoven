@@ -33,72 +33,7 @@ testthat::test_that("Error when one parameter is NULL.", {
   }
 })
 
-testthat::test_that("Error when temporal range is invalid.", {
-  invalid_date <- "1900-01-01"
-  invalid_year <- 1900
-  directory_to_save <- "../testdata"
-  functions_args <- list(
-    c(
-      dataset_name = "aqs",
-      directory_to_download = directory_to_save,
-      directory_to_save = directory_to_save,
-      year_start = invalid_year,
-      data_download_acknowledgement = TRUE
-    ),
-    c(
-      dataset_name = "narr_monolevel",
-      directory_to_save = directory_to_save,
-      year = invalid_year,
-      collection = "air.sfc",
-      data_download_acknowledgement = TRUE
-    ),
-    c(
-      dataset_name = "narr_p_levels",
-      directory_to_save = directory_to_save,
-      year = invalid_year,
-      collection = "omega",
-      data_download_acknowledgement = TRUE
-    ),
-    c(
-      dataset_name = "sedac_population",
-      directory_to_save = directory_to_save,
-      directory_to_download = directory_to_save,
-      year = as.character(invalid_year),
-      data_download_acknowledgement = TRUE
-    ),
-    c(
-      dataset_name = "geos",
-      directory_to_save = directory_to_save,
-      date_start = invalid_date,
-      collection = "aqc_tavg_1hr_g1440x721_v1",
-      data_download_acknowledgement = TRUE
-    ),
-    c(
-      dataset_name = "merra2",
-      directory_to_save = directory_to_save,
-      date_start = invalid_date,
-      collection = "inst1_2d_asm_Nx",
-      data_download_acknowledgement = TRUE
-    ),
-    c(
-      dataset_name = "hms",
-      directory_to_save = directory_to_save,
-      directory_to_download = directory_to_save,
-      date_start = invalid_date,
-      data_download_acknowledgement = TRUE
-    )
-  )
-  for (e in seq_along(functions_args)) {
-    testthat::expect_error(
-      do.call(
-        download_data,
-        functions_args[[e]]
-      )
-    )
-  }
-})
-
-testthat::test_that("manual expected fail message 404.", {
+testthat::test_that("Errors when temporal ranges invalid.", {
   expect_error(
     download_geos_cf_data(
       date_start = "1900-01-01",
@@ -112,6 +47,46 @@ testthat::test_that("manual expected fail message 404.", {
       year_start = 1900,
       data_download_acknowledgement = TRUE,
       directory_to_save = "../testdata"
+    )
+  )
+  expect_error(
+    download_narr_monolevel_data(
+      year_start = 1900,
+      collection = "air.sfc",
+      data_download_acknowledgement = TRUE,
+      directory_to_save = "../testdata"
+    )
+  )
+  expect_error(
+    download_narr_p_levels_data(
+      year_start = 1900,
+      collection = "omega",
+      data_download_acknowledgement = TRUE,
+      directory_to_save = "../testdata"
+    )
+  )
+  expect_error(
+    download_sedac_population_data(
+      year = "1900",
+      data_download_acknowledgement = TRUE,
+      directory_to_save = "../testdata",
+      directory_to_download = "../testdata"
+    )
+  )
+  expect_error(
+    download_merra2_data(
+      date_start = "1900-01-01",
+      collection = "inst1_2d_asm_Nx",
+      directory_to_save = "../testdata",
+      data_download_acknowledgement = TRUE
+    )
+  )
+  expect_error(
+    download_noaa_hms_smoke_data(
+      date_start = "1900-01-01",
+      directory_to_save = "../testdata",
+      directory_to_download = "../testdata",
+      data_download_acknowledgement = TRUE
     )
   )
 })
