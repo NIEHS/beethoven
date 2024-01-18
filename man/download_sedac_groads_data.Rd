@@ -27,7 +27,7 @@ download_sedac_groads_data(
 "Africa", "Asia", "Europe", "Americas", "Oceania East", and "Oceania West".}
 
 \item{directory_to_download}{character(1). Directory to download zip files
-from NASA UN WPP-Adjusted Population Density, v4.11.}
+from NASA Global Roads Open Access Data Set.}
 
 \item{directory_to_save}{character(1). Directory to decompress zip files.}
 

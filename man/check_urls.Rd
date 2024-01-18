@@ -2,7 +2,7 @@
 % Please edit documentation in R/download_test_support.R
 \name{check_urls}
 \alias{check_urls}
-\title{Sample download URLs and apply `check_url_file_exist` function}
+\title{Sample download URLs and apply `check_url_status` function}
 \usage{
 check_urls(urls = urls, size = NULL, method = "HEAD")
 }
@@ -17,5 +17,5 @@ check_urls(urls = urls, size = NULL, method = "HEAD")
 logical vector for URL status = 200
 }
 \description{
-Sample download URLs and apply `check_url_file_exist` function
+Sample download URLs and apply `check_url_status` function
 }
