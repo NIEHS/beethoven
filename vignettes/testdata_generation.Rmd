@@ -1,0 +1,179 @@
+---
+title: "Create testdata on a small area"
+output: html_document
+date: "2024-01-02"
+---
+
+# Testdata area and period
+
+### Small area
+
+```{r}
+nc_file <- system.file("shape/nc.shp", package = "sf")
+nc <- terra::vect(nc_file)
+sp_samp <- nc[nc$NAME %in% c("Durham", "Wake", "Orange")]
+terra::plot(sp_samp)
+```
+
+### 2022-01-01 to 2022-01-02
+
+```{r}
+start_date <- as.Date("2022-01-01")
+end_date <- as.Date("2022-01-02")
+```
+
+### Load covariate file names
+
+```{r}
+dict_path <- "../inst/extdata/downloaded_files_metadata.csv"
+dict <- data.table::fread(dict_path, sep = ",")
+```
+
+### File path name
+
+```{r}
+string <- "/folder/yyyy/yday/varname_yyyymmdd.nc"
+date <- as.Date("2022-08-01")
+replace_dateinfo(string, date)
+```
+
+# Extract sampled area from each downloaded data
+
+## NLCD
+
+Extraction
+
+```{r, eval = FALSE}
+testdata_nlcd()
+```
+
+Example of output
+
+```{r}
+nlcd_sub_2019 <- terra::rast(
+  "../tests/testdata/raw/nlcd/nlcd_2019_land_cover_l48_20210604.tif")
+nlcd_sub_2021 <- terra::rast(
+  "../tests/testdata/raw/nlcd/nlcd_2021_land_cover_l48_20230630.tif")
+terra::plot(nlcd_sub_2019)
+terra::plot(nlcd_sub_2021)
+```
+
+## NARR reanalysis
+
+#### Variables stored as monthly rasters
+
+Extraction
+
+```{r, eval = FALSE}
+narr_names <- c(
+  "air_sfc", "albedo", "apcp", "dswrf", "evap", "hcdc", "hpbl",
+  "lcdc", "lhtfl", "mcdc", "pr_wtr", "prate", "pres_sfc", "shtfl",
+  "snowc", "soilm", "tcdc", "ulwrf_sfc", "uwnd_10m", "vis",
+  "vwnd_10m", "weasd"
+)
+for (n in narr_names) {
+  testdata_narr(var = n)
+}
+```
+
+Example of output
+
+```{r}
+albedo_sub <- terra::rast("../tests/testdata/raw/narr/albedo.2022.nc")
+terra::plot(albedo_sub)
+```
+
+#### Variables stored as monthly \* atm levels rasters
+
+Extraction
+
+```{r, eval = FALSE}
+narr_lev_names <- c("omega", "shum")
+for (n in narr_lev_names) {
+  testdata_narr_lev(var = n)
+}
+```
+
+Example of output
+
+```{r}
+omega_sub <- terra::rast("../tests/testdata/raw/narr/omega.202201.nc")
+terra::plot(omega_sub)
+```
+
+## GEOS CF
+
+### AQC
+
+Extraction
+
+```{r, eval = FALSE}
+aqc_path <- "../tests/testdata/raw/geos/aqc_tavg_1hr_g1440x721_v1/"
+testdata_geos(testdata_path = aqc_path, collection = "aqc_tavg")
+```
+
+New file is not exactly the same than raw file but contains all covariates and units:
+
+```{r}
+r_path <- paste0(
+  aqc_path,
+  "GEOS-CF.v01.rpl.aqc_tavg_1hr_g1440x721_v1.20220101_0030z.nc4"
+)
+aqc_sub <- terra::rast(r_path)
+aqc_sub
+terra::plot(aqc_sub)
+```
+
+### CHM
+
+Extraction
+
+```{r}
+chm_path <- "../tests/testdata/raw/geos/chm_tavg_1hr_g1440x721_v1/"
+testdata_geos(testdata_path = chm_path, collection = "chm_tavg")
+```
+
+Example extracted
+
+```{r}
+r_path <- paste0(
+  chm_path,
+  "GEOS-CF.v01.rpl.chm_tavg_1hr_g1440x721_v1.20220101_0030z.nc4"
+)
+chm_sub <- terra::rast(r_path)
+chm_sub
+terra::plot(chm_sub[[1:16]])
+terra::plot(chm_sub[[17:32]])
+terra::plot(chm_sub[[33:48]])
+terra::plot(chm_sub[[48:52]])
+```
+
+## TRI
+
+TODO 
+
+
+## AQS observations
+
+```{r}
+aqs_path <- paste0(
+  dict[name == "aqs", folder],
+  dict[name == "aqs", filename]
+) |>
+  replace_dateinfo(date = start_date)
+
+aqs <- data.table::fread(aqs_path) |>
+  subset(`Date Local` >= start_date & `Date Local` <= end_date)
+
+aqs_vect <- terra::vect(aqs,
+  geom = c("Longitude", "Latitude"),
+  crs = "EPSG:4326"
+)
+aqs_samp <- sp_subset(aqs_vect) |>
+  data.table::as.data.table()
+
+data.table::fwrite(
+  aqs_samp,
+  "../tests/testdata/raw/durham_wake_orange_aqs.csv"
+)
+```
