@@ -67,10 +67,11 @@ testthat::test_that("Errors when temporal ranges invalid.", {
   )
   expect_error(
     download_sedac_population_data(
-      year = "1900",
+      year = "1000",
       data_download_acknowledgement = TRUE,
       directory_to_save = "../testdata",
-      directory_to_download = "../testdata"
+      directory_to_download = "../testdata",
+      unzip = FALSE
     )
   )
   expect_error(
