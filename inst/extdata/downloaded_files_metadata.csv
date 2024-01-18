@@ -36,3 +36,4 @@ uwnd_10m,,/Volumes/set/Projects/NRT-AP-Model/input/narr/uwnd.10m/,uwnd.10m.yyyy.
 vis,,/Volumes/set/Projects/NRT-AP-Model/input/narr/vis/,vis.yyyy.nc
 vwnd_10m,,/Volumes/set/Projects/NRT-AP-Model/input/narr/vwnd.10m/,vwnd.10m.yyyy.nc
 weasd,,/Volumes/set/Projects/NRT-AP-Model/input/narr/weasd/,weasd.yyyy.nc
+tri,,/Volumes/set/Projects/NRT-AP-Model/input/tri/,tri_raw_yyyy.csv

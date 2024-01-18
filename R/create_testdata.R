@@ -96,6 +96,30 @@ testdata_ecoregions <- function(
   terra::writeVector(r_samp, testdata_file, overwrite = TRUE)
 }
 
+
+#' Create raw testdata files for Koppen-Geiger climate zone binary variables
+#' @author Eva Marques
+#' @param dict_path character path to the .csv file storing all data paths
+#' @param testdata_path character path to the folder where testdata should
+#' be stored
+testdata_kg <- function(
+    dict_path = "../inst/extdata/downloaded_files_metadata.csv",
+    testdata_path = "../tests/testdata/raw/koppen_geiger/") {
+  name <- folder <- filename <- NULL
+  dict <- data.table::fread(dict_path, sep = ",")
+  fpath <- paste0(
+    dict[name == "koppen_geiger", folder],
+    dict[name == "koppen_geiger", filename]
+  )
+  r <- terra::rast(fpath)
+  r_samp <- sp_subset(r)
+  testdata_file <- paste0(
+    testdata_path,
+    dict[name == "koppen_geiger", filename]
+  )
+  terra::writeRaster(r_samp, testdata_file, overwrite = TRUE)
+}
+
 #' Create raw testdata file for NARR variables stored as monthly rasters 
 #' @author Eva Marques
 #' @param dict_path character path to the .csv file storing all data paths
