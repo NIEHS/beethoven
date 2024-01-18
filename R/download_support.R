@@ -67,13 +67,11 @@ download_permit <-
 #' @param download logical(1). Execute (`TRUE`) or skip (`FALSE`) download.
 #' @param system_command character(1). Linux command to execute downloads.
 #' Inherited from data download function.
-#' @param commands_txt character(1). Text file with download commands.
 #' @returns NULL
 #' @export
 download_run <- function(
     download = FALSE,
-    system_command = NULL,
-    commands_txt = NULL) {
+    system_command = NULL) {
   if (download == TRUE) {
     cat(paste0("Downloading requested files...\n"))
     system(command = system_command)
@@ -93,9 +91,8 @@ download_run <- function(
 #' @returns NULL
 #' @export
 download_remove_command <-
-  function(
-      commands_txt = NULL,
-      remove = FALSE) {
+  function(commands_txt = NULL,
+           remove = FALSE) {
     if (remove) {
       file.remove(commands_txt)
     }
@@ -107,8 +104,7 @@ download_remove_command <-
 #' @returns NULL
 #' @export
 download_sink <-
-  function(
-      command_txt) {
+  function(command_txt) {
     if (file.exists(command_txt)) {
       file.remove(command_txt)
     }
@@ -124,10 +120,9 @@ download_sink <-
 #' @returns NULL
 #' @export
 download_unzip <-
-  function(
-      file_name,
-      directory_to_unzip,
-      unzip = TRUE) {
+  function(file_name,
+           directory_to_unzip,
+           unzip = TRUE) {
     if (!unzip) {
       cat(paste0("Downloaded files will not be unzipped.\n"))
       return(NULL)
@@ -151,9 +146,8 @@ download_unzip <-
 #' @returns NULL
 #' @export
 download_remove_zips <-
-  function(
-      remove = FALSE,
-      download_name) {
+  function(remove = FALSE,
+           download_name) {
     #### remove zip files
     if (remove) {
       cat(paste0("Removing download files...\n"))
@@ -170,10 +164,35 @@ download_remove_zips <-
 #' @export
 check_for_null_parameters <-
   function(
-    parameters
-  ) {
+      parameters) {
     parameters_status <- any(unlist(lapply(parameters, is.null)))
     if (parameters_status) {
       stop(paste0("One or more parameters are `NULL`\n"))
+    }
+  }
+
+#' Generate sequence of dates based on `date_start` and `date_end`.
+#' @param date_start character(1). Beginning of date sequence.
+#' @param date_end character(1). End of date sequence.
+#' @param sub_hyphen logical(1). Substitute hyphen in dates. If `TRUE`, returns
+#' date sequence as "YYYYMMDD". If `FALSE`, returns date sequence as
+#' "YYYY-MM-DD".
+#' @returns vector
+#' @export
+generate_date_sequence <-
+  function(
+      date_start,
+      date_end,
+      sub_hyphen = TRUE) {
+    dates_original <- seq(
+      as.Date(date_start, format = "%Y-%m-%d"),
+      as.Date(date_end, format = "%Y-%m-%d"),
+      "day"
+    )
+    if (sub_hyphen == TRUE) {
+      dates_sub_hyphen <- gsub("-", "", as.character(dates_original))
+      return(dates_sub_hyphen)
+    } else {
+      return(dates_original)
     }
   }
