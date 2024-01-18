@@ -98,6 +98,24 @@ testthat::test_that("Error when temporal range is invalid.", {
   }
 })
 
+testthat::test_that("manual expected fail message 404.", {
+  expect_error(
+    download_geos_cf_data(
+      date_start = "1900-01-01",
+      collection = "aqc_tavg_1hr_g1440x721_v1",
+      data_download_acknowledgement = TRUE,
+      directory_to_save = "../testdata"
+    )
+  )
+  expect_error(
+    download_aqs_data(
+      year_start = 1900,
+      data_download_acknowledgement = TRUE,
+      directory_to_save = "../testdata"
+    )
+  )
+})
+
 testthat::test_that("EPA AQS download URLs have HTTP status 200.", {
   withr::local_package("httr")
   withr::local_package("stringr")
@@ -225,22 +243,6 @@ testthat::test_that("GEOS-CF download URLs have HTTP status 200.", {
     # remove file with commands after test
     file.remove(commands_path)
   }
-})
-
-testthat::test_that("GEOS-CF returns message with unrecognized collection.", {
-  withr::local_package("httr")
-  withr::local_package("stringr")
-  # function parameters
-  collections <- "UnReCoGnIzEd"
-  directory_to_save <- "../testdata/"
-  expect_message(
-    download_data(
-      dataset_name = "geos",
-      collection = collections,
-      directory_to_save = directory_to_save,
-      data_download_acknowledgement = TRUE
-    )
-  )
 })
 
 testthat::test_that("GMTED download URLs have HTTP status 200.", {

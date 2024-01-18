@@ -436,12 +436,7 @@ download_geos_cf_data <- function(
   #### 3. directory setup
   download_setup_dir(directory_to_save)
   directory_to_save <- download_sanitize_path(directory_to_save)
-  #### 4. check if collection is valid
-  collections <- c(
-    "aqc_tavg_1hr_g1440x721_v1", "chm_tavg_1hr_g1440x721_v1",
-    "met_tavg_1hr_g1440x721_x1", "xgc_tavg_1hr_g1440x721_x1",
-    "chm_inst_1hr_g1440x721_p23", "met_inst_1hr_g1440x721_p23"
-  )
+  #### 4. match collection
   collection <- match.arg(collection)
   #### 5. define date sequence
   date_sequence <- generate_date_sequence(
