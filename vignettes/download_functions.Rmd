@@ -1,24 +1,21 @@
 ---
 title: "download_data() and NASA EarthData Account"
-author: Mitchell Manware
-date-modified: January 8, 2024
-format:
-  html:
-    toc: true
-    toc-depth: 6
-editor: source
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{download_data() and NASA EarthData Account}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+date: "2024-01-18"
+author: "Mitchell Manware"
 ---
 
 ```{r, echo = FALSE, warning = FALSE, message = FALSE}
 # packages
 library(knitr)
+library(devtools)
 library(testthat)
-setwd("/Volumes/manwareme/NRTAPmodel/vignettes")
 # source functions
-home <- "../"
-source(paste0(home, "/R/download.R"))
-source(paste0(home, "/R/download_support.R"))
-source(paste0(home, "/R/download_test_support.R"))
+devtools::load_all("../")
 ```
 
 ## Motivation
@@ -85,7 +82,7 @@ link <- c(
 )
 source <- paste0(
   "[",
-  Source,
+  source,
   "](",
   link,
   ")"
@@ -587,7 +584,7 @@ testthat::test_that(
     # parameters
     test_start <- "2023-12-28"
     test_end <- "2024-01-02"
-    test_directory <- "../tests/testdata/"
+    test_directory <- "../inst/extdata/"
     # download
     download_data(
       dataset_name = "noaa",
@@ -625,89 +622,66 @@ testthat::test_that(
 
 Although the `testthat::test_that(...)` chunk contains 32 lines of code, the unit test is performed by `expect_true(all(url_status))`. In words, this line is expecting (`expect_true()`) that all (`all()`) of the sampled URLs return HTTP response status 200 (`url_status`). Since this expectation was met, the test passed!
 
-For an alternate example, we can use a start and end date that are known to not have data. As the URLs associated with these dates do not exist, we expect `all(url_status)` to return `FALSE`.
+For an alternate example, we can use a start and end date that are known to not have data. As the URLs associated with these dates do not exist, we expect the function will fail. This test utilizes `expect_message()` because the `data_download()` wrapper function returns a message if the underlying source-specific download function returns an error.
 
-```{r, eval = FALSE}
+```{r}
 testthat::test_that(
-  "Invalid dates return HTTP response status != 200.",
+  "Invalid dates cause function to fail.",
   {
     # parameters
     test_start <- "1800-01-01"
     test_end <- "1800-01-02"
-    test_directory <- "./data/"
-    # download
-    download_data(
-      dataset_name = "noaa",
-      date_start = test_start,
-      date_end = test_end,
-      data_format = "Shapefile",
-      directory_to_download = test_directory,
-      directory_to_save = test_directory,
-      data_download_acknowledgement = TRUE,
-      download = FALSE,
-      remove_command = FALSE,
-      unzip = FALSE,
-      remove_zip = FALSE
+    test_directory <- "../inst/extdata/"
+    # test for error
+    expect_message(
+      download_data(
+        dataset_name = "noaa",
+        date_start = test_start,
+        date_end = test_end,
+        data_format = "Shapefile",
+        directory_to_download = test_directory,
+        directory_to_save = test_directory,
+        data_download_acknowledgement = TRUE,
+        download = FALSE,
+        remove_command = FALSE,
+        unzip = FALSE,
+        remove_zip = FALSE
+      )
     )
-    commands_path <- paste0(
-      test_directory,
-      "hms_smoke_",
-      gsub("-", "", test_start),
-      "_",
-      gsub("-", "", test_end),
-      "_curl_commands.txt"
-    )
-    # helpers
-    commands <- read_commands(commands_path = commands_path)
-    urls <- extract_urls(commands = commands, position = 6)
-    url_status <- check_urls(urls = urls, size = 2, method = "HEAD")
-    # test for false
-    expect_false(all(url_status))
   }
 )
 ```
 
-```{r, echo = FALSE}
+
+This test utilizes `expect_message()` because the `data_download()` wrapper function returns a message if the underlying source-specific download function returns an error. If we directly used the `download_noaa_hms_smoke` funciton, we would expect and recieve an error.
+
+```{r}
 testthat::test_that(
-  "Invalid dates return me.",
+  "Invalid dates cause function to fail.",
   {
     # parameters
     test_start <- "1800-01-01"
     test_end <- "1800-01-02"
-    test_directory <- "../tests/testdata/"
-    # download
-    download_data(
-      dataset_name = "noaa",
-      date_start = test_start,
-      date_end = test_end,
-      data_format = "Shapefile",
-      directory_to_download = test_directory,
-      directory_to_save = test_directory,
-      data_download_acknowledgement = TRUE,
-      download = FALSE,
-      remove_command = FALSE,
-      unzip = FALSE,
-      remove_zip = FALSE
+    test_directory <- "../inst/extdata/"
+    # test for error
+    expect_error(
+      download_noaa_hms_smoke_data(
+        date_start = test_start,
+        date_end = test_end,
+        data_format = "Shapefile",
+        directory_to_download = test_directory,
+        directory_to_save = test_directory,
+        data_download_acknowledgement = TRUE,
+        download = FALSE,
+        remove_command = FALSE,
+        unzip = FALSE,
+        remove_zip = FALSE
+      )
     )
-    commands_path <- paste0(
-      test_directory,
-      "hms_smoke_",
-      gsub("-", "", test_start),
-      "_",
-      gsub("-", "", test_end),
-      "_curl_commands.txt"
-    )
-    # helpers
-    commands <- read_commands(commands_path = commands_path)
-    urls <- extract_urls(commands = commands, position = 6)
-    url_status <- check_urls(urls = urls, size = 2, method = "HEAD")
-    # test for false
-    expect_false(all(url_status))
-    # remove after test
-    file.remove(commands_path)
   }
 )
 ```
+
 
 As expected, the test passes because the NOAA HMS Smoke data set does not contain data for January 1-2, 1800.
 
