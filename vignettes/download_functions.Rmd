@@ -12,10 +12,16 @@ author: "Mitchell Manware"
 ```{r, echo = FALSE, warning = FALSE, message = FALSE}
 # packages
 library(knitr)
-library(devtools)
 library(testthat)
 # source functions
-devtools::load_all("../")
+sapply(
+  list.files(
+    "../R/",
+    pattern = "download",
+    full.names = TRUE
+  ),
+  source
+)
 ```
 
 ## Motivation
