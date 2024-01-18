@@ -3,7 +3,7 @@ nlcd,2019,/Volumes/set/Projects/NRT-AP-Model/input/nlcd/raw/,nlcd_2019_land_cove
 nlcd,2021,/Volumes/set/Projects/NRT-AP-Model/input/nlcd/raw/,nlcd_2021_land_cover_l48_20230630.tif
 hms_smoke,,/Volumes/set/Projects/NRT-AP-Model/input/HMS_Smoke/,hms_smoke_2018_2022.zip
 koppen_geiger,,/Volumes/set/Projects/NRT-AP-Model/input/koppen_geiger/raw/,Beck_KG_V1_present_0p0083.tif
-ecoregion,,/Volumes/set/Projects/NRT-AP-Model/input/ecoregions/raw/,us_eco_14.shp
+ecoregions,,/Volumes/set/Projects/NRT-AP-Model/input/ecoregions/raw/,us_eco_l3_state_boundaries.shp
 nighttime_lights,,/Volumes/set/Projects/NRT-AP-Model/input/modis/raw/5000/VNP46A2/yyyy/yday/,
 land_aod,,/Volumes/set/Projects/NRT-AP-Model/input/modis/raw/61/MCD19A2/yyyy/yday/,
 surf_refl,,/Volumes/set/Projects/NRT-AP-Model/input/modis/raw/61/MOD09GA/yyyy/yday/,

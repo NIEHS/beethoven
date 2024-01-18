@@ -58,6 +58,22 @@ terra::plot(nlcd_sub_2019)
 terra::plot(nlcd_sub_2021)
 ```
 
+## Ecoregions
+
+Extraction
+
+```{r, eval = FALSE}
+testdata_ecoregions()
+```
+
+Example of output
+
+```{r}
+ecor_sub <- terra::vect(
+  "../tests/testdata/raw/ecoregions/us_eco_l3_state_boundaries.shp")
+terra::plot(ecor_sub)
+```
+
 ## NARR reanalysis
 
 #### Variables stored as monthly rasters
@@ -83,7 +99,7 @@ albedo_sub <- terra::rast("../tests/testdata/raw/narr/albedo.2022.nc")
 terra::plot(albedo_sub)
 ```
 
-#### Variables stored as monthly \* atm levels rasters
+#### Variables stored as monthly * atm levels rasters
 
 Extraction
 
@@ -151,7 +167,6 @@ terra::plot(chm_sub[[48:52]])
 ## TRI
 
 TODO 
-
 
 ## AQS observations
 
