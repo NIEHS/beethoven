@@ -43,7 +43,7 @@ NULL;
 }
 \description{
 The \code{download_narr_monolevel_data} function accesses and downloads
-monolevel meteorological data from [NOAA NCEP North American Regional Reanalysis (NARR)](https://psl.noaa.gov/data/gridded/data.narr.html).
+monolevel meteorological data from \href{https://psl.noaa.gov/data/gridded/data.narr.html}{NOAA NCEP North American Regional Reanalysis (NARR)}.
 }
 \author{
 Mitchell Manware, Insang Song

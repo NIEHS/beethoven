@@ -17,6 +17,7 @@ Imports: dplyr, sf, stats, terra, methods, BART, data.table, httr, rvest, spData
 Suggests: covr, withr, knitr, rmarkdown, sftime, lwgeom, FNN, ggplot2, scatterpie, doRNG
 Encoding: UTF-8
 VignetteBuilder: knitr, rmarkdown
+Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
 Config/testhat/edition: 3
 License: MIT + file LICENSE

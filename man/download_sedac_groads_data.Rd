@@ -52,7 +52,7 @@ NULL;
 \description{
 The \code{download_sedac_groads_data()} function accesses and downloads
 roads data from the National Aeronautics and Space
-Administration's (NASA) [Global Roads Open Access Data Set](https://sedac.ciesin.columbia.edu/data/set/groads-global-roads-open-access-v1/data-download).
+Administration's (NASA) \href{https://sedac.ciesin.columbia.edu/data/set/groads-global-roads-open-access-v1/data-download}{Global Roads Open Access Data Set}.
 }
 \author{
 Mitchell Manware, Insang Song

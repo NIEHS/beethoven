@@ -56,9 +56,7 @@ NULL;
 \description{
 The \code{download_sedac_population_data()} function accesses and downloads
 population density data from the National Aeronatuics and Space
-Administration's (NASA) [UN WPP-Adjusted Population Density, v4.11](
-https://sedac.ciesin.columbia.edu/data/set/gpw-v4-population-density-adjuste
-d-to-2015-unwpp-country-totals-rev11).
+Administration's (NASA) \href{https://sedac.ciesin.columbia.edu/data/set/gpw-v4-population-density-adjusted-to-2015-unwpp-country-totals-rev11}{UN WPP-Adjusted Population Density, v4.11}.
 }
 \author{
 Mitchell Manware, Insang Song

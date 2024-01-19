@@ -11,21 +11,23 @@
 #' - All download function names are in \code{download_*_data} formats
 #' @author Insang Song
 #' @seealso
-#' - \link{download_aqs_data}: "aqs", "AQS"
-#' - \link{download_ecoregion_data}: "ecoregion"
-#' - \link{download_geos_cf_data}: "geos"
-#' - \link{download_gmted_data}: "gmted", "GMTED"
-#' - \link{download_koppen_geiger_data}: "koppen", "koppengeiger"
-#' - \link{download_merra2_data}: "merra2", "merra", "MERRA", "MERRA2"
-#' - \link{download_narr_monolevel_data}: "narr_monolevel", "monolevel"
-#' - \link{download_narr_p_levels_data}: "narr_p_levels", "p_levels", "plevels"
-#' - \link{download_nlcd_data}: "nlcd", "NLCD"
-#' - \link{download_noaa_hms_smoke_data}: "noaa", "smoke", "hms"
-#' - \link{download_sedac_groads_data}: "sedac_groads", "groads"
-#' - \link{download_sedac_population_data}: "sedac_population", "population"
-#' - \link{download_modis_data}: "modis", "MODIS"
-#' - \link{download_tri_data}: "tri", "TRI"
-#' - \link{download_aadt_data}: "aadt", "AADT"
+#' For details of each download function per dataset,
+#' Please refer to:
+#' * \link{download_aqs_data}: "aqs", "AQS"
+#' * \link{download_ecoregion_data}: "ecoregion"
+#' * \link{download_geos_cf_data}: "geos"
+#' * \link{download_gmted_data}: "gmted", "GMTED"
+#' * \link{download_koppen_geiger_data}: "koppen", "koppengeiger"
+#' * \link{download_merra2_data}: "merra2", "merra", "MERRA", "MERRA2"
+#' * \link{download_narr_monolevel_data}: "narr_monolevel", "monolevel"
+#' * \link{download_narr_p_levels_data}: "narr_p_levels", "p_levels", "plevels"
+#' * \link{download_nlcd_data}: "nlcd", "NLCD"
+#' * \link{download_noaa_hms_smoke_data}: "noaa", "smoke", "hms"
+#' * \link{download_sedac_groads_data}: "sedac_groads", "groads"
+#' * \link{download_sedac_population_data}: "sedac_population", "population"
+#' * \link{download_modis_data}: "modis", "MODIS"
+#' * \link{download_tri_data}: "tri", "TRI"
+#' * \link{download_nei_data}: "nei", "NEI"
 #' @returns NULL
 #' @export
 download_data <-
@@ -34,7 +36,7 @@ download_data <-
                      "koppengeiger", "merra2", "merra", "narr_monolevel",
                      "modis", "narr_p_levels", "nlcd", "noaa", "sedac_groads",
                      "sedac_population", "groads", "population", "plevels",
-                     "p_levels", "monolevel", "hms", "smoke", "tri", "aadt"),
+                     "p_levels", "monolevel", "hms", "smoke", "tri", "nei"),
     directory_to_save = NULL,
     data_download_acknowledgement = FALSE,
     ...
@@ -68,7 +70,7 @@ download_data <-
       population = download_sedac_population_data,
       modis = download_modis_data,
       tri = download_tri_data,
-      aadt = download_aadt_data
+      nei = download_nei_data
     )
 
     tryCatch({
@@ -85,11 +87,12 @@ download_data <-
     })
   }
 
-
+# nolint start
 #' Download daily data from AQS datamart
 #' @param parameter_code integer(1). length of 5.
 #'  EPA pollutant parameter code. For details, please refer to
-#'  https://aqs.epa.gov/aqsweb/documents/codetables/parameters.html
+#'  [AQS parameter codes](https://aqs.epa.gov/aqsweb/documents/codetables/parameters.html)
+# nolint end
 #' @param year_start integer(1). length of 4.
 #'  Start year for downloading data.
 #' @param year_end integer(1). length of 4.
@@ -258,7 +261,7 @@ download_aqs_data <-
 #' the text file containing download commands.
 #' @param epa_certificate_path character(1). Path to the certificate file
 #' for EPA DataCommons. Default is
-#' './inst/extdata/cacert_gaftp_epa.pem'
+#' 'extdata/cacert_gaftp_epa.pem' under the package installation path.
 #' @author Insang Song
 #' @returns NULL;
 #' @importFrom utils download.file
@@ -272,7 +275,7 @@ download_ecoregion_data <- function(
   download = FALSE,
   remove_command = TRUE,
   epa_certificate_path =
-    system.file("inst/extdata/cacert_gaftp_epa.pem",
+    system.file("extdata/cacert_gaftp_epa.pem",
                 package = "NRTAPmodel")
 ) {
   #### 1. data download acknowledgement
@@ -337,7 +340,7 @@ download_ecoregion_data <- function(
     directory_to_download,
     "us_eco_l3_state_boundaries_",
     Sys.Date(),
-    "_curl_command.txt"
+    "_wget_command.txt"
   )
   #### 9. concatenate
   download_sink(commands_txt)
@@ -355,16 +358,18 @@ download_ecoregion_data <- function(
   #### 14. remove download command
   download_remove_command(commands_txt = commands_txt,
                           remove = remove_command)
-  #### 15. unzip files
-  download_unzip(
-                 file_name = download_name,
-                 directory_to_unzip = directory_to_save,
-                 unzip = unzip)
-  #### 16. remove zip files
-  download_remove_zips(
-    remove = remove_zip,
-    download_name = download_name
-  )
+  if (download) {
+    #### 15. unzip files
+    download_unzip(
+                  file_name = download_name,
+                  directory_to_unzip = directory_to_save,
+                  unzip = unzip)
+    #### 16. remove zip files
+    download_remove_zips(
+      remove = remove_zip,
+      download_name = download_name
+    )
+  }
 }
 
 # nolint start 
@@ -635,22 +640,24 @@ download_gmted_data <- function(
     system_command = system_command,
     commands_txt = commands_txt
   )
-  #### 17. end if unzip == FALSE
-  download_unzip(
-    file_name = download_name,
-    directory_to_unzip = directory_to_save,
-    unzip = unzip
-  )
   #### 18. Remove command file
   download_remove_command(
     commands_txt = commands_txt,
     remove = remove_command
   )
-  #### 19. remove zip files
-  download_remove_zips(
-    remove = remove_zip,
-    download_name = download_name
-  )
+  if (download) {
+    #### 17. end if unzip == FALSE
+    download_unzip(
+      file_name = download_name,
+      directory_to_unzip = directory_to_save,
+      unzip = unzip
+    )
+    #### 19. remove zip files
+    download_remove_zips(
+      remove = remove_zip,
+      download_name = download_name
+    )
+  }
 }
 
 # nolint start
@@ -1326,7 +1333,7 @@ download_sedac_groads_data <- function(
                  "groads-v1-")
   #### 6. define data format
   if (data_format == "Shapefile" && data_region == "Global") {
-    cat(paste0("Geodatabase format utilized for 'Global' dataset.\n"))
+    message("Geodatabase format utilized for 'Global' dataset.\n")
     format <- "gdb"
   } else if (data_format == "Shapefile" && !(data_region == "Global")) {
     format <- "shp"
@@ -1375,13 +1382,13 @@ download_sedac_groads_data <- function(
   download_run(download = download,
                system_command = system_command,
                commands_txt = commands_txt)
+  #### 17. Remove command file
+  download_remove_command(commands_txt = commands_txt,
+                          remove = remove_command)
   #### 16. end if unzip == FALSE
   download_unzip(file_name = download_name,
                  directory_to_unzip = directory_to_save,
                  unzip = unzip)
-  #### 17. Remove command file
-  download_remove_command(commands_txt = commands_txt,
-                          remove = remove_command)
   #### 18. remove zip files
   download_remove_zips(remove = remove_zip,
                        download_name = download_name)
@@ -1390,13 +1397,11 @@ download_sedac_groads_data <- function(
 
 # nolint start
 #' Download UN WPP-Adjusted population density data from NASA Socioeconomic Data and Applications Center (SEDAC)
-# nolint end
 #' @description
 #' The \code{download_sedac_population_data()} function accesses and downloads
 #' population density data from the National Aeronatuics and Space
-#' Administration's (NASA) [UN WPP-Adjusted Population Density, v4.11](
-#' https://sedac.ciesin.columbia.edu/data/set/gpw-v4-population-density-adjuste
-#' d-to-2015-unwpp-country-totals-rev11).
+#' Administration's (NASA) [UN WPP-Adjusted Population Density, v4.11]( https://sedac.ciesin.columbia.edu/data/set/gpw-v4-population-density-adjusted-to-2015-unwpp-country-totals-rev11).
+# nolint end
 #' @param year character(1). Available years are 2000, 2005, 2010, 2015, and
 #' 2020, or "all" for all years.
 #' @param data_format character(1). Individual year data can be downloaded as
@@ -1548,11 +1553,9 @@ download_sedac_population_data <- function(
 # nolint start
 #' Download daily wildfire smoke plume data from NOAA Hazard Mapping System Fire and Smoke Product
 #' @description
-# nolint end
 #' The \code{download_noaa_hms_smoke_data()} function accesses and downloads
 #' wildfire smoke plume coverage data from
 #' the National Oceanic and Atmospheric Administration's (NOAA)
-# nolint start
 #' [Hazard Mapping System Fire and Smoke Product](https://www.ospo.noaa.gov/Products/land/hms.html#0).
 # nolint end
 #' @param date_start character(1). length of 10. Start date for downloading
@@ -1711,15 +1714,12 @@ download_noaa_hms_smoke_data <- function(
 
 # nolint start
 #' Download climate classification data from the present and future Köppen-Geiger climate classification maps.
-# nolint end
 #' @description
 #' The \code{download_koppen_geiger_data()} function accesses and downloads
 #' climate classification data from the Present and future
 #' Köppen-Geiger climate classification maps at
-#'  1-km resolution ([link for article]
-#' (https://www.nature.com/articles/sdata2018214); [link for data]
-#' (https://figshare.com/articles/dataset/Present_and_future_K_ppen-Geiger_
-#' climate_classification_maps_at_1-km_resolution/6396959/2)).
+#'  1-km resolution ([link for article](https://www.nature.com/articles/sdata2018214); [link for data](https://figshare.com/articles/dataset/Present_and_future_K_ppen-Geiger_climate_classification_maps_at_1-km_resolution/6396959/2)).
+# nolint end
 #' @param time_period character(1). Available times are "Present" (1980-206)
 #' and "Future" (2071-2100). ("Future" classifications are based on scenario
 #' RCP8.5).
@@ -2237,20 +2237,23 @@ download_tri_data <- function(
 #' the text file containing download commands.
 #' @param year_target Available years of NEI data.
 #' Default is \code{c(2017L, 2020L)}.
+#' @param unzip logical(1). Unzip the downloaded zip files.
+#' Default is \code{FALSE}.
 #' @param epa_certificate_path character(1). Path to the certificate file
 #' for EPA DataCommons. Default is
-#' './inst/extdata/cacert_gaftp_epa.pem'
+#' 'extdata/cacert_gaftp_epa.pem' under the package installation path.
 #' @author Ranadeep Daw, Insang Song
 #' @returns NULL; Two comma-separated value (CSV) raw files for 2017 and 2020
 #' @export
-download_aadt_data <- function(
+download_nei_data <- function(
   directory_to_save = "./input/aadt/",
   data_download_acknowledgement = FALSE,
   download = FALSE,
   remove_command = FALSE,
   year_target = c(2017L, 2020L),
+  unzip = FALSE,
   epa_certificate_path =
-    system.file("inst/extdata/cacert_gaftp_epa.pem",
+    system.file("extdata/cacert_gaftp_epa.pem",
                 package = "NRTAPmodel")
 ) {
   #### 1. check for data download acknowledgement
@@ -2292,10 +2295,12 @@ download_aadt_data <- function(
       sprintf(url_download_base, year_target),
       url_download_remain
     )
-  download_names <-
-    sprintf(paste0(directory_to_save,
-                   "nei_onroad_byregions_%d.csv"),
-            year_target)
+  download_names_file <-
+    c("2017neiApr_onroad_byregions.zip",
+      "2020nei_onroad_byregion.zip")
+    # sprintf("nei_onroad_byregions_%d.zip",
+    #         year_target)
+  download_names <- paste0(directory_to_save, download_names_file)
 
   #### 4. build download command
   download_commands <-
@@ -2330,6 +2335,18 @@ download_aadt_data <- function(
   #### 9. download data
   download_run(download = download,
                system_command = system_command)
+  
+  #### 10. unzip data
+  # note that this part does not utilize download_unzip
+  # as duplicate file names are across multiple zip files
+  if (download) {
+    if (unzip) {
+      dir_unzip <- sub(".zip", "", download_names)
+      for (fn in seq_along(dir_unzip)) {
+        utils::unzip(zipfile = download_names[fn], exdir = dir_unzip[fn])
+      }
+    }
+  }
   message("Requests were processed.\n")
   #### 10. remove download commands
   download_remove_command(commands_txt = commands_txt,

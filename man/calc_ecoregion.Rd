@@ -20,8 +20,10 @@ a unique identifier field named \code{id_col}}
 }
 \value{
 a data.frame object with dummy variables and attributes of:
-  - \code{attr(., "ecoregion2_code")}: Ecoregion lv.2 code and key
-  - \code{attr(., "ecoregion3_code")}: Ecoregion lv.3 code and key
+\itemize{
+\item \code{attr(., "ecoregion2_code")}: Ecoregion lv.2 code and key
+\item \code{attr(., "ecoregion3_code")}: Ecoregion lv.3 code and key
+}
 }
 \description{
 Calculate EPA Ecoregions level 2/3 binary variables

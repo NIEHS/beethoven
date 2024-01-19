@@ -12,7 +12,7 @@ download_ecoregion_data(
   remove_zip = FALSE,
   download = FALSE,
   remove_command = TRUE,
-  epa_certificate_path = system.file("inst/extdata/cacert_gaftp_epa.pem", package =
+  epa_certificate_path = system.file("extdata/cacert_gaftp_epa.pem", package =
     "NRTAPmodel")
 )
 }
@@ -41,7 +41,7 @@ the text file containing download commands.}
 
 \item{epa_certificate_path}{character(1). Path to the certificate file
 for EPA DataCommons. Default is
-'./inst/extdata/cacert_gaftp_epa.pem'}
+'extdata/cacert_gaftp_epa.pem' under the package installation path.}
 }
 \value{
 NULL;

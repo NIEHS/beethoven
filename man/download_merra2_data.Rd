@@ -52,7 +52,7 @@ NULL;
 }
 \description{
 The \code{download_merra2_data()} function accesses and downloads various
-meteorological and atmospheric collections from the [Modern-Era Retrospective analysis for Research and Applications, Version 2 (MERRA-2)](https://gmao.gsfc.nasa.gov/reanalysis/MERRA-2/).
+meteorological and atmospheric collections from the \href{https://gmao.gsfc.nasa.gov/reanalysis/MERRA-2/}{Modern-Era Retrospective analysis for Research and Applications, Version 2 (MERRA-2)}.
 }
 \author{
 Mitchell Manware, Insang Song

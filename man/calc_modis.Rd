@@ -51,13 +51,26 @@ to calculate covariates.}
 
 \item{package_list_add}{character. A vector with package names to load
 these in each thread. Note that \code{sf}, \code{terra},
-\code{exactextractr}, \code{scomps}, and \code{dplyr}
+\code{exactextractr}, \code{doParallel}, \code{parallelly},
+and \code{dplyr}
 are the default packages to be loaded.}
 
 \item{export_list_add}{character. A vector with object names to export
 to each thread. It should be minimized to spare memory.}
 }
 \description{
+calc_modis essentially runs \code{modis_worker} function
+in each thread (subprocess). Based on daily resolution, each day's workload
+will be distributed to each thread. With \code{product} argument,
+the files are processed by a customized function where the unique structure
+and/or characteristics of the products are considered. \code{nthreads}
+argument should be carefully selected in consideration of the machine's
+CPU and memory capacities as products have their own memory pressure.
+Overall, this function and dependent routines assume that the file system
+can handle concurrent access to the (network) disk by multiple processes.
+File system characteristics, package versions, and hardware settings/
+specification can affect the processing efficiency.
+
 sites should be sf object as it is exportable to
 parallel workers.
 }

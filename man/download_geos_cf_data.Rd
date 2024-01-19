@@ -44,7 +44,7 @@ NULL;
 }
 \description{
 The \code{download_goes_cf_data()} function accesses and downloads various
-atmospheric composition collections from the [NASA Global Earth Observing System (GEOS) model](https://gmao.gsfc.nasa.gov/GEOS_systems/).
+atmospheric composition collections from the \href{https://gmao.gsfc.nasa.gov/GEOS_systems/}{NASA Global Earth Observing System (GEOS) model}.
 }
 \author{
 Mitchell Manware, Insang Song

@@ -14,7 +14,7 @@ Default is c("EPSG:4326", "EPSG:5070")}
 }
 \value{
 A logical value indicating the model is compliant to one of
- elements in crs_list.
+elements in crs_list.
 }
 \description{
 Check if the output is with the valid coordinate reference system

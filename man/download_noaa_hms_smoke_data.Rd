@@ -60,7 +60,7 @@ NULL;
 The \code{download_noaa_hms_smoke_data()} function accesses and downloads
 wildfire smoke plume coverage data from
 the National Oceanic and Atmospheric Administration's (NOAA)
-[Hazard Mapping System Fire and Smoke Product](https://www.ospo.noaa.gov/Products/land/hms.html#0).
+\href{https://www.ospo.noaa.gov/Products/land/hms.html#0}{Hazard Mapping System Fire and Smoke Product}.
 }
 \author{
 Mitchell Manware, Insang Song

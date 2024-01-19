@@ -40,7 +40,14 @@ are stored. Default is "site_id"}
 A data.frame object.
 }
 \description{
-A single-date MODIS worker for parallelization
+modis_worker operates at six MODIS/VIIRS products
+(MOD11A1, MOD13A2, MOD06_L2, VNP46A2, MOD09GA, and MCD19A2)
+on a daily basis. Given that the raw hdf files are downloaded from
+NASA, standard file names include a data retrieval date flag starting
+with A. Leveraging that piece of information, the function will select
+files of scope on the date of interest. Please note that this function
+does not provide a function to filter swaths or tiles, so it is strongly
+recommended to check and pre-filter the file names at users' discretion.
 }
 \author{
 Insang Song

@@ -1,5 +1,4 @@
 ### Base learner fit
-## Design: generic function and switch to each function type
 ## Potential improvement: integration to tidymodels
 ## TODO: validation set in training set
 
@@ -26,6 +25,7 @@ base_learner_prep <- function(
   data <- data.frame(data[[1]])
 
   if (learner == "cnn") {
+    # nocov start
     ## data sorting: stdt is supposed to be sorted already
     # dimensions
     dim_s <- dim(unique(data[, 1:2]))[1]
@@ -46,6 +46,7 @@ base_learner_prep <- function(
           list(dim_s, dim_t, dim_p)
         )
       )
+    # nocov end
   } else {
     ymat <- matrix(data[, dependent_name], ncol = 1L)
     xmat <- as.matrix(data[, independent_name])
@@ -226,7 +227,7 @@ base_learner_fit_ranger <- function(
 }
 
 
-#nocov start
+# nocov start
 #' Fit convolutional neural networks with neural network library
 #' @param ymat torch::torch_tensor. Dependent variable.
 #' @param xmat torch::torch_tensor. Independent variables.
@@ -246,7 +247,7 @@ base_learner_fit_cnn <- function(
   # fit model (spt-array and 3d-pooling)
   return(NULL)
 }
-#nocov end
+# nocov end
 
 #' Fit XGBoost model
 #' @param ymat data.frame or matrix. Dependent variable.

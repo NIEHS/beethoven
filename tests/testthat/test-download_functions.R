@@ -103,7 +103,7 @@ testthat::test_that("Ecoregion download URLs have HTTP status 200.", {
     directory_to_download,
     "us_eco_l3_state_boundaries_",
     Sys.Date(),
-    "_curl_command.txt"
+    "_wget_command.txt"
   )
   # import commands
   commands <- read_commands(commands_path = commands_path)
@@ -402,6 +402,19 @@ testthat::test_that("NLCD download URLs have HTTP status 200.", {
     # remove file with commands after test
     file.remove(commands_path)
   }
+  testthat::expect_error(
+    download_data(dataset_name = "nlcd",
+                  year = 2000,
+                  collection = "Coterminous United States",
+                  directory_to_download = directory_to_download,
+                  directory_to_save = directory_to_save,
+                  data_download_acknowledgement = TRUE,
+                  download = FALSE,
+                  remove_command = TRUE,
+                  unzip = FALSE,
+                  remove_zip = FALSE)
+  )
+
 })
 
 testthat::test_that("SEDAC groads download URLs have HTTP status 200.", {
@@ -448,6 +461,19 @@ testthat::test_that("SEDAC groads download URLs have HTTP status 200.", {
       file.remove(commands_path)
     }
   }
+
+  testthat::expect_message(
+    download_data(dataset_name = "sedac_groads",
+                  data_format = "Shapefile",
+                  data_region = "Global",
+                  directory_to_download = directory_to_download,
+                  directory_to_save = directory_to_save,
+                  data_download_acknowledgement = TRUE,
+                  download = FALSE,
+                  unzip = FALSE,
+                  remove_zip = FALSE,
+                  remove_command = TRUE)
+  )
 })
 
 testthat::test_that("SEDAC population download URLs have HTTP status 200.", {
@@ -697,6 +723,127 @@ testthat::test_that("MODIS-MOD06L2 download URLs have HTTP status 200.", {
 })
 
 
+testthat::test_that("MODIS download error cases.", {
+  withr::local_package("httr")
+  withr::local_package("stringr")
+  # function parameters
+  years <- 2020
+  product <- "MOD09GA"
+  version <- "61"
+  horizontal_tiles <- c(12, 13)
+  vertical_tiles <- c(5, 6)
+  nasa_earth_data_token <- "tOkEnPlAcEhOlDeR"
+  directory_to_save <- testthat::test_path("..", "testdata/")
+  date_start <- paste0(years, "-06-20")
+  date_end <- paste0(years, "-06-24")
+
+  # no token
+  testthat::expect_error(
+    download_data(dataset_name = "modis",
+                  date_start = date_start,
+                  date_end = date_end,
+                  product = product,
+                  version = version,
+                  horizontal_tiles = horizontal_tiles,
+                  vertical_tiles = vertical_tiles,
+                  nasa_earth_data_token = NULL,
+                  directory_to_save = directory_to_save,
+                  data_download_acknowledgement = TRUE,
+                  download = FALSE,
+                  remove_command = FALSE)
+  )
+
+  # year difference between date_start and date_end
+  testthat::expect_error(
+    download_data(dataset_name = "modis",
+                  date_start = date_start,
+                  date_end = "2024-03-28",
+                  product = "MOD11A1",
+                  version = version,
+                  horizontal_tiles = horizontal_tiles,
+                  vertical_tiles = vertical_tiles,
+                  nasa_earth_data_token = NULL,
+                  directory_to_save = directory_to_save,
+                  data_download_acknowledgement = TRUE,
+                  download = FALSE,
+                  remove_command = FALSE)
+  )
+
+  # null version
+  testthat::expect_error(
+    download_data(dataset_name = "modis",
+                  date_start = date_start,
+                  date_end = date_end,
+                  product = product,
+                  version = NULL,
+                  horizontal_tiles = horizontal_tiles,
+                  vertical_tiles = vertical_tiles,
+                  nasa_earth_data_token = nasa_earth_data_token,
+                  directory_to_save = directory_to_save,
+                  data_download_acknowledgement = TRUE,
+                  download = FALSE,
+                  remove_command = FALSE)
+  )
+
+  # invalid tile range (horizontal)
+  testthat::expect_error(
+    download_data(dataset_name = "modis",
+                  date_start = date_start,
+                  date_end = date_end,
+                  product = product,
+                  version = NULL,
+                  horizontal_tiles = c(-13, -3),
+                  vertical_tiles = vertical_tiles,
+                  nasa_earth_data_token = NULL,
+                  directory_to_save = directory_to_save,
+                  data_download_acknowledgement = TRUE,
+                  download = FALSE,
+                  remove_command = FALSE)
+  )
+
+  # invalid tile range (horizontal)
+  testthat::expect_error(
+    download_data(dataset_name = "modis",
+                  date_start = date_start,
+                  date_end = date_end,
+                  product = product,
+                  version = NULL,
+                  horizontal_tiles = horizontal_tiles,
+                  vertical_tiles = c(100, 102),
+                  nasa_earth_data_token = NULL,
+                  directory_to_save = directory_to_save,
+                  data_download_acknowledgement = TRUE,
+                  download = FALSE,
+                  remove_command = FALSE)
+  )
+
+
+  # define file path with commands
+  commands_path <- paste0(
+    directory_to_save,
+    product,
+    "_",
+    date_start,
+    "_",
+    date_end,
+    "_wget_commands.txt"
+  )
+  # import commands
+  commands <- read_commands(commands_path = commands_path)[, 2]
+  # extract urls
+  urls <- extract_urls(commands = commands, position = 4)
+  # check HTTP URL status
+  url_status <- check_urls(urls = urls, size = 10L, method = "HEAD")
+  # implement unit tests
+  test_download_functions(directory_to_save = directory_to_save,
+                          commands_path = commands_path,
+                          url_status = url_status)
+  # remove file with commands after test
+  file.remove(commands_path)
+})
+
+
+
 testthat::test_that("EPA TRI download URLs have HTTP status 200.", {
   withr::local_package("httr")
   withr::local_package("stringr")
@@ -777,4 +924,74 @@ testthat::test_that("EPA NEI (AADT) download URLs have HTTP status 200.", {
                           url_status = url_status)
   # remove file with commands after test
   file.remove(commands_path)
+})
+
+testthat::test_that("Test error cases in EPA gaftp sources 1", {
+  withr::local_package("httr")
+  withr::local_package("stringr")
+  # function parameters
+  tdir <- tempdir()
+  directory_to_save <- testthat::test_path("..", "testdata/")
+  certificate <- file.path(tdir, "cacert_gaftp_epa.pem")
+  # run download function
+  year_target <- c(2017L)
+  testthat::expect_message(
+    download_data(dataset_name = "aadt",
+                  directory_to_save = directory_to_save,
+                  data_download_acknowledgement = TRUE,
+                  download = FALSE,
+                  year_target = year_target,
+                  remove_command = FALSE,
+                  epa_certificate_path = certificate
+                  )
+  )
+  # define file path with commands
+  commands_path <- paste0(
+    directory_to_save,
+    "NEI_AADT_",
+    paste(year_target, collapse = "-"),
+    "_",
+    Sys.Date(),
+    "_wget_commands.txt"
+  )
+  # remove file with commands after test
+  testthat::expect_true(file.exists(commands_path))
+  file.remove(commands_path)
+  file.remove(certificate)
+  file.remove(sub("pem", "crt", certificate))
+})
+
+testthat::test_that("Test error cases in EPA gaftp sources 2", {
+  withr::local_package("httr")
+  withr::local_package("stringr")
+  # function parameters
+  tdir <- tempdir(check = TRUE)
+  directory_to_save <- testthat::test_path("..", "testdata/")
+  certificate <- file.path(tdir, "cacert_gaftp_epa.pem")
+  # run download function
+
+  testthat::expect_message(
+    download_data(dataset_name = "ecoregion",
+                  directory_to_save = directory_to_save,
+                  data_download_acknowledgement = TRUE,
+                  download = FALSE,
+                  remove_command = FALSE,
+                  directory_to_download = directory_to_save,
+                  epa_certificate_path = certificate
+                  )
+  )
+
+  # define file path with commands
+  commands_path <- paste0(
+    directory_to_save,
+    "us_eco_l3_state_boundaries_",
+    Sys.Date(),
+    "_wget_command.txt"
+  )
+
+  # remove file with commands after test
+  testthat::expect_true(file.exists(commands_path))
+  file.remove(commands_path)
+  file.remove(certificate)
+  file.remove(sub("pem", "crt", certificate))
 })

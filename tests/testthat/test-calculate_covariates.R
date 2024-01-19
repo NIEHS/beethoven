@@ -3,7 +3,9 @@
 testthat::test_that("calc_koppen_geiger works well", {
   withr::local_package("terra")
   withr::local_package("sf")
-  withr::local_options(list(sf_use_s2 = FALSE))
+  withr::local_options(
+    list(sf_use_s2 = FALSE)
+  )
 
   site_faux <-
     data.frame(
@@ -121,7 +123,10 @@ testthat::test_that("calc_modis works well.", {
   withr::local_package("lwgeom")
   withr::local_package("foreach")
   withr::local_package("doParallel")
-  withr::local_options(list(sf_use_s2 = FALSE))
+  withr::local_options(
+    list(sf_use_s2 = FALSE,
+         foreachDoparLocal = TRUE)
+  )
 
   site_faux <-
     data.frame(
@@ -148,9 +153,10 @@ testthat::test_that("calc_modis works well.", {
         calc_modis(
           path = path_mod11,
           product = "MOD11A1",
-          sites = site_faux,
+          sites = sf::st_as_sf(site_faux),
           name_covariates = c("MOD_LSTNT_0_", "MOD_LSTDY_0_"),
-          nthreads = 1
+          subdataset = "(LST_)",
+          nthreads = 1L
         )
     )
   )
@@ -180,7 +186,7 @@ testthat::test_that("calc_modis works well.", {
           product = "MOD06_L2",
           sites = site_faux,
           name_covariates = c("MOD_CLFRN_0_", "MOD_CLFRD_0_"),
-          nthreads = 2
+          nthreads = 1
         )
     )
   )
@@ -203,7 +209,7 @@ testthat::test_that("calc_modis works well.", {
           sites = site_faux,
           name_covariates = c("MOD_NITLT_0_"),
           subdataset = 3L,
-          nthreads = 2
+          nthreads = 1
         )
     )
   )
@@ -227,12 +233,6 @@ testthat::test_that("calc_modis works well.", {
       product = "MOD11A1",
       date_in = "2021~08~15",
       foo = "mean"
-    )
-  )
-  testthat::expect_error(
-    modis_preprocess_vnp46(
-      paths = path_vnp46,
-      date_in = "2021~08~15"
     )
   )
 

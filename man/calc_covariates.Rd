@@ -35,10 +35,12 @@ Calculated covariates. Mainly data.frame object.
 Calculate covariates
 }
 \seealso{
-- \link{calc_modis}: "modis", "MODIS"
-- \link{calc_koppen_geiger}: "koppen-geiger", "koeppen-geiger", "koppen",
-- \link{calc_ecoregion}: "ecoregion", "ecoregions"
-- \link{calc_temporal_dummies}: "dummies"
+\itemize{
+\item \link{calc_modis}: "modis", "MODIS"
+\item \link{calc_koppen_geiger}: "koppen-geiger", "koeppen-geiger", "koppen",
+\item \link{calc_ecoregion}: "ecoregion", "ecoregions"
+\item \link{calc_temporal_dummies}: "dummies"
+}
 }
 \author{
 Insang Song

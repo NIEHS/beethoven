@@ -22,7 +22,7 @@ download_aqs_data(
 \arguments{
 \item{parameter_code}{integer(1). length of 5.
 EPA pollutant parameter code. For details, please refer to
-https://aqs.epa.gov/aqsweb/documents/codetables/parameters.html}
+\href{https://aqs.epa.gov/aqsweb/documents/codetables/parameters.html}{AQS parameter codes}}
 
 \item{year_start}{integer(1). length of 4.
 Start year for downloading data.}
@@ -62,8 +62,8 @@ the text file containing download commands. Default is FALSE.}
 }
 \value{
 NULL; Separate comma-separated value (CSV) files of
- monitors and the daily representative values
- will be stored in \code{directory_to_save}.
+monitors and the daily representative values
+will be stored in \code{directory_to_save}.
 }
 \description{
 Download daily data from AQS datamart

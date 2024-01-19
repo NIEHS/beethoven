@@ -55,10 +55,7 @@ NULL;
 The \code{download_koppen_geiger_data()} function accesses and downloads
 climate classification data from the Present and future
 Köppen-Geiger climate classification maps at
- 1-km resolution ([link for article]
-(https://www.nature.com/articles/sdata2018214); [link for data]
-(https://figshare.com/articles/dataset/Present_and_future_K_ppen-Geiger_
-climate_classification_maps_at_1-km_resolution/6396959/2)).
+1-km resolution (\href{https://www.nature.com/articles/sdata2018214}{link for article}; \href{https://figshare.com/articles/dataset/Present_and_future_K_ppen-Geiger_climate_classification_maps_at_1-km_resolution/6396959/2}{link for data}).
 }
 \author{
 Mitchell Manware, Insang Song

@@ -32,10 +32,10 @@ Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").}
 \item{version}{character(1). Default is "61", meaning v061.}
 
 \item{horizontal_tiles}{integer(2). Horizontal tile numbers
-c([start], [end]). Default is c(7, 13).}
+c(\link{start}, \link{end}). Default is c(7, 13).}
 
 \item{vertical_tiles}{integer(2). Vertical tile numbers
-c([start], [end]). Default is c(3, 6).}
+c(\link{start}, \link{end}). Default is c(3, 6).}
 
 \item{nasa_earth_data_token}{character(1).
 Token for downloading data from NASA. Should be set before
@@ -68,10 +68,10 @@ every five minutes every day.
 }
 \note{
 \code{date_start} and \code{date_end} should be in the same year.
- Directory structure looks like
- input/modis/raw/[version]/[product]/[year]/[day_of_year]
- Please note that \code{date_start} and \code{date_end} are
- ignored if \code{product == 'MOD06_L2'}.
+Directory structure looks like
+input/modis/raw/\link{version}/\link{product}/\link{year}/\link{day_of_year}
+Please note that \code{date_start} and \code{date_end} are
+ignored if \code{product == 'MOD06_L2'}.
 }
 \author{
 Mitchell Manware, Insang Song

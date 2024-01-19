@@ -51,7 +51,7 @@ NULL;
 \description{
 The \code{download_nlcd_data()} function accesses and downloads
 land cover data from the
-[NLCD Science Research Products](https://www.mrlc.gov/data) data base.
+\href{https://www.mrlc.gov/data}{NLCD Science Research Products} data base.
 }
 \author{
 Mitchell Manware, Insang Song
