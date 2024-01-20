@@ -1865,7 +1865,7 @@ download_koppen_geiger_data <- function(
 #' @param date_end character(1). length of 10. End date for downloading data.
 #' Format YYYY-MM-DD (ex. September 1, 2023 is `"2023-09-01"`).
 #' @param product character(1).
-#' One of `c("MOD09GA", "MOD11A1", "MOD06_L2", "MCD19A2", "MOD13A2", "VNP46A2")`.
+#' One of `c("MOD09GA", "MOD11A1", "MOD06_L2", "MCD19A2", "MOD13A2", "VNP46A2")`
 #' @param version character(1). Default is `"61"`, meaning v061.
 #' @param horizontal_tiles integer(2). Horizontal tile numbers
 #' `c({start}, {end})`. Default is `c(7, 13)`.
