@@ -361,9 +361,10 @@ download_ecoregion_data <- function(
   if (download) {
     #### 15. unzip files
     download_unzip(
-                  file_name = download_name,
-                  directory_to_unzip = directory_to_save,
-                  unzip = unzip)
+      file_name = download_name,
+      directory_to_unzip = directory_to_save,
+      unzip = unzip
+    )
     #### 16. remove zip files
     download_remove_zips(
       remove = remove_zip,
@@ -2298,8 +2299,6 @@ download_nei_data <- function(
   download_names_file <-
     c("2017neiApr_onroad_byregions.zip",
       "2020nei_onroad_byregion.zip")
-    # sprintf("nei_onroad_byregions_%d.zip",
-    #         year_target)
   download_names <- paste0(directory_to_save, download_names_file)
 
   #### 4. build download command
@@ -2335,7 +2334,7 @@ download_nei_data <- function(
   #### 9. download data
   download_run(download = download,
                system_command = system_command)
-  
+
   #### 10. unzip data
   # note that this part does not utilize download_unzip
   # as duplicate file names are across multiple zip files

@@ -358,4 +358,3 @@ modis_mosaic_mod06 <-
     }
     return(mod06_mosaic)
   }
-

@@ -55,6 +55,5 @@ reference:
     desc: other helper functions
     contents:
       - read_commands
-      - startup_nrtap
       - test_download_functions
 
