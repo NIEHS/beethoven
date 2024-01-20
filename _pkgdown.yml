@@ -39,6 +39,7 @@ reference:
     desc: functions to calculate geographic covariates
     contents:
       - starts_with("calc")
+      - starts_with("modis_")
 
 
   - title: base learning
