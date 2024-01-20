@@ -13,7 +13,7 @@ Authors@R: c(
   )
 Description: Near Real Time air pollution model results and code produced by the SET group. It is fully tested, versioned, and open source and open access.
 Depends: R (>= 4.1.0)
-Imports: dplyr, sf, stats, terra, methods, BART, data.table, httr, rvest, spData, exactextractr, utils, stringr, testthat (>= 3.0.0), doParallel, parallelly, stars, foreach
+Imports: dplyr, sf, stats, terra, methods, BART, data.table, httr, rvest, spData, exactextractr, utils, stringr, testthat (>= 3.0.0), doParallel, parallelly, stars, foreach, future
 Suggests: covr, withr, knitr, rmarkdown, sftime, lwgeom, FNN, ggplot2, scatterpie, doRNG
 Encoding: UTF-8
 VignetteBuilder: knitr, rmarkdown

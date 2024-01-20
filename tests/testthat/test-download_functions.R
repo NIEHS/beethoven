@@ -735,8 +735,24 @@ testthat::test_that("MODIS download error cases.", {
   vertical_tiles <- c(5, 6)
   nasa_earth_data_token <- "tOkEnPlAcEhOlDeR"
   directory_to_save <- testthat::test_path("..", "testdata/")
-  date_start <- paste0(years, "-06-20")
-  date_end <- paste0(years, "-06-24")
+  date_start <- paste0(years, "-06-25")
+  date_end <- paste0(years, "-06-30")
+
+  # no token
+  testthat::expect_no_error(
+    download_data(dataset_name = "modis",
+                  date_start = date_start,
+                  date_end = date_end,
+                  product = product,
+                  version = version,
+                  horizontal_tiles = horizontal_tiles,
+                  vertical_tiles = vertical_tiles,
+                  nasa_earth_data_token = nasa_earth_data_token,
+                  directory_to_save = directory_to_save,
+                  data_download_acknowledgement = TRUE,
+                  download = FALSE,
+                  remove_command = FALSE)
+  )
 
   # no token
   testthat::expect_error(
@@ -893,7 +909,7 @@ testthat::test_that("EPA NEI (AADT) download URLs have HTTP status 200.", {
                              package = "NRTAPmodel")
   # run download function
   year_target <- c(2017L, 2020L)
-  download_data(dataset_name = "aadt",
+  download_data(dataset_name = "nei",
                 directory_to_save = directory_to_save,
                 data_download_acknowledgement = TRUE,
                 download = FALSE,
@@ -937,7 +953,7 @@ testthat::test_that("Test error cases in EPA gaftp sources 1", {
   # run download function
   year_target <- c(2017L)
   testthat::expect_message(
-    download_data(dataset_name = "aadt",
+    download_data(dataset_name = "nei",
                   directory_to_save = directory_to_save,
                   data_download_acknowledgement = TRUE,
                   download = FALSE,
