@@ -7,9 +7,9 @@
 base_learner_fit_cnn(ymat, xmat, ...)
 }
 \arguments{
-\item{ymat}{torch::torch_tensor. Dependent variable.}
+\item{ymat}{\code{\link[torch:torch_tensor]{torch::torch_tensor}}. Dependent variable.}
 
-\item{xmat}{torch::torch_tensor. Independent variables.}
+\item{xmat}{\code{\link[torch:torch_tensor]{torch::torch_tensor}}. Independent variables.}
 
 \item{...}{Arguments passed to fitting function}
 }

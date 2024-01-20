@@ -18,9 +18,9 @@ Suggests: covr, withr, knitr, rmarkdown, sftime, lwgeom, FNN, ggplot2, scatterpi
 Encoding: UTF-8
 VignetteBuilder: knitr, rmarkdown
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.0
 Config/Needs/website: tidyverse/tidytemplate
 Config/testhat/edition: 3
 License: MIT + file LICENSE
 URL: https://github.com/Spatiotemporal-Exposures-and-Toxicology/NRTAPmodel, 
-https://spatiotemporal-exposures-and-toxicology.github.io/NRTAPmodel/
+https: //spatiotemporal-exposures-and-toxicology.github.io/NRTAPmodel/

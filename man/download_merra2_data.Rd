@@ -26,10 +26,10 @@ download_merra2_data(
 }
 \arguments{
 \item{date_start}{character(1). length of 10. Start date for downloading
-data. Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").}
+data. Format YYYY-MM-DD (ex. September 1, 2023 is \code{"2023-09-01"}).}
 
 \item{date_end}{character(1). length of 10. End date for downloading data.
-Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").}
+Format YYYY-MM-DD (ex. September 1, 2023 is \code{"2023-09-01"}).}
 
 \item{collection}{character(1). MERRA-2 data collection file name.}
 

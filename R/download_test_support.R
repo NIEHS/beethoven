@@ -7,15 +7,17 @@
 
 #' Check if sample of download URLs have HTTP Status 200
 #' @param url Download URL to be checked.
-#' @param method httr method to obtain URL ("HEAD" or "GET")
+#' @param method httr method to obtain URL (`"HEAD"`` or `"GET"`)
 #' @author Insang Song; Mitchell Manware
 #' @importFrom httr HEAD
 #' @importFrom httr GET
 #' @export
 check_url_file_exist <- function(
   url,
-  method = "HEAD"
+  method = c("HEAD", "GET")
 ) {
+  method <- match.arg(method)
+
   http_status_ok <- 200
   if (method == "HEAD") {
     hd <- httr::HEAD(url)
@@ -63,13 +65,13 @@ extract_urls <- function(
 #' Sample download URLs and apply \code{check_url_file_exist} function
 #' @param urls character vector of URLs
 #' @param size number of observations to be sampled from \code{urls}
-#' @param method httr method to obtain URL ("HEAD" or "GET")
+#' @param method httr method to obtain URL (`"HEAD"` or `"GET"`)
 #' @return logical vector for URL status = 200
 #' @export
 check_urls <- function(
     urls = urls,
     size = NULL,
-    method = "HEAD") {
+    method = c("HEAD", "GET")) {
   if (is.null(size)) {
     cat(paste0("URL sample size is not defined.\n"))
     return(NULL)
@@ -77,6 +79,8 @@ check_urls <- function(
   if (length(urls) < size) {
     size <- length(urls)
   }
+  method <- match.arg(method)
+
   url_sample <- sample(urls, size, replace = FALSE)
   url_status <- sapply(url_sample,
                        check_url_file_exist,

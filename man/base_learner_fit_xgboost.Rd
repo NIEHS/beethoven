@@ -11,7 +11,7 @@ base_learner_fit_xgboost(ymat, xmat, ...)
 
 \item{xmat}{data.frame or matrix. Independent variables.}
 
-\item{...}{Arguments passed to \code{xgboost::xgboost}}
+\item{...}{Arguments passed to \code{\link[xgboost:xgb.train]{xgboost::xgboost}}}
 }
 \value{
 xgboost object

@@ -3,9 +3,9 @@
 ## TODO: validation set in training set
 
 #' Data preparation for base learners
-#' @param learner character(1). One of 'cnn', 'randomforest', 'xgboost'
+#' @param learner character(1). One of `"cnn"`, `"randomforest"`, `"xgboost"`
 #' @param data stdt. see \code{\link{convert_stobj_to_stdt}}
-#' @param dependent_name Name of dependent variable. Default is "pm2.5"
+#' @param dependent_name Name of dependent variable. Default is `"pm2.5"`
 #' @param independent_name character. Names of independent variables.
 #' @returns A list of two matrices (except for cnn) or
 #'  multidimensional arrays (cnn) depending on learners
@@ -61,8 +61,8 @@ base_learner_prep <- function(
 
 
 #' Split training-test data for base learner fitting
-#' @param learner character(1). Currently one of 'randomforest', 'xgboost',
-#' and 'cnn'
+#' @param learner character(1). Currently one of `"randomforest"`, `"xgboost"`,
+#' and `"cnn"`
 #' @param ymat data.frame or matrix. Dependent variable.
 #' @param xmat data.frame or matrix. Independent variables.
 #' @param cv_index integer. Index per cross-validation method.
@@ -113,18 +113,18 @@ base_learner_cv_fit <- function(
 
 #' Fit base learner
 #' @param data stdt. See \code{\link{convert_stobj_to_stdt}}
-#' @param learner character(1). Currently one of 'randomforest', 'xgboost',
-#' and 'cnn'
+#' @param learner character(1). Currently one of `"randomforest"`, `"xgboost"`,
+#' and `"cnn"`
 #' @param dependent_name character(1). Name of the dependent variable.
 #' @param independent_name character(1). Names of independent variables.
 #' @param cv_mode character(1). One of
-#' \code{'lolo'} (leave-one-location-out),
-#' \code{'loto'} (leave-one-time-out),
-#' \code{'lolto'} (leave-one-location-time-out),
-#' \code{'lblo'} (leave-block-location-out),
-#' \code{'lbto'} (leave-block-time-out),
-#' \code{'lblto'} (leave-block-location-time-out), and
-#' \code{'random'} (full random selection)
+#' \code{"lolo"} (leave-one-location-out),
+#' \code{"loto"} (leave-one-time-out),
+#' \code{"lolto"} (leave-one-location-time-out),
+#' \code{"lblo"} (leave-block-location-out),
+#' \code{"lbto"} (leave-block-time-out),
+#' \code{"lblto"} (leave-block-location-time-out), and
+#' \code{"random"} (full random selection)
 #' @param cv_fold integer(1). Number of folds for cross-validation.
 #' @param sp_fold integer(1). Number of subfolds for spatial blocks.
 #' @param t_fold integer(1). Number of subfolds for temporal blocks.
@@ -213,7 +213,7 @@ base_learner_fit <- function(
 #' Fit random forests with ranger
 #' @param ymat data.frame or matrix. Dependent variable.
 #' @param xmat data.frame or matrix. Independent variables.
-#' @param ... Arguments passed to \code{ranger::ranger}
+#' @param ... Arguments passed to [`ranger::ranger`]
 #' @return ranger object.
 #' @author Insang Song
 #' @importFrom ranger ranger
@@ -229,8 +229,8 @@ base_learner_fit_ranger <- function(
 
 # nocov start
 #' Fit convolutional neural networks with neural network library
-#' @param ymat torch::torch_tensor. Dependent variable.
-#' @param xmat torch::torch_tensor. Independent variables.
+#' @param ymat [`torch::torch_tensor`]. Dependent variable.
+#' @param xmat [`torch::torch_tensor`]. Independent variables.
 #' @param ... Arguments passed to fitting function
 #' @return torch-compatible object
 #' @author Insang Song
@@ -252,7 +252,7 @@ base_learner_fit_cnn <- function(
 #' Fit XGBoost model
 #' @param ymat data.frame or matrix. Dependent variable.
 #' @param xmat data.frame or matrix. Independent variables.
-#' @param ... Arguments passed to \code{xgboost::xgboost}
+#' @param ... Arguments passed to [`xgboost::xgboost`]
 #' @return xgboost object
 #' @author Insang Song
 #' @importFrom xgboost xgb.train

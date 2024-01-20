@@ -22,21 +22,21 @@ base_learner_fit(
 \arguments{
 \item{data}{stdt. See \code{\link{convert_stobj_to_stdt}}}
 
-\item{learner}{character(1). Currently one of 'randomforest', 'xgboost',
-and 'cnn'}
+\item{learner}{character(1). Currently one of \code{"randomforest"}, \code{"xgboost"},
+and \code{"cnn"}}
 
 \item{dependent_name}{character(1). Name of the dependent variable.}
 
 \item{independent_name}{character(1). Names of independent variables.}
 
 \item{cv_mode}{character(1). One of
-\code{'lolo'} (leave-one-location-out),
-\code{'loto'} (leave-one-time-out),
-\code{'lolto'} (leave-one-location-time-out),
-\code{'lblo'} (leave-block-location-out),
-\code{'lbto'} (leave-block-time-out),
-\code{'lblto'} (leave-block-location-time-out), and
-\code{'random'} (full random selection)}
+\code{"lolo"} (leave-one-location-out),
+\code{"loto"} (leave-one-time-out),
+\code{"lolto"} (leave-one-location-time-out),
+\code{"lblo"} (leave-block-location-out),
+\code{"lbto"} (leave-block-time-out),
+\code{"lblto"} (leave-block-location-time-out), and
+\code{"random"} (full random selection)}
 
 \item{cv_fold}{integer(1). Number of folds for cross-validation.}
 

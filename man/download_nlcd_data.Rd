@@ -18,10 +18,11 @@ download_nlcd_data(
 }
 \arguments{
 \item{year}{integer(1). Available years for Coterminous United States
-include 2001, 2004, 2006, 2008, 2011, 2013, 2016, 2019, and 2021.
-Available years for Alaska include 2001, 2011, and 2016.}
+include \code{2001}, \code{2004}, \code{2006}, \code{2008}, \code{2011}, \code{2013}, \code{2016},
+\code{2019}, and \code{2021}.
+Available years for Alaska include \code{2001}, \code{2011}, and \code{2016}.}
 
-\item{collection}{character(1). "Coterminous United States" or "Alaska".}
+\item{collection}{character(1). \code{"Coterminous United States"} or \code{"Alaska"}.}
 
 \item{directory_to_download}{character(1). Directory to download zip files
 from National Land Cover Database Science Research Products.}

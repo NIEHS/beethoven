@@ -1,22 +1,24 @@
 #' Calculate covariates
 
 # nocov start
+# nolint start
 #' @param covariate character(1). Covariate type.
 #' @param path character. Single or multiple path strings.
 #' @param sites sf/SpatVector. Unique sites. Should include
 #'  a unique identifier field named \code{id_col}
 #' @param id_col character(1). Name of unique identifier.
-#'  Default is \code{'site_id'}.
+#'  Default is \code{"site_id"}.
 #' @param ... Arguments passed to each covariate calculation
 #'  function.
 #' @seealso
-#' - \link{calc_modis}: "modis", "MODIS"
-#' - \link{calc_koppen_geiger}: "koppen-geiger", "koeppen-geiger", "koppen",
-#' - \link{calc_ecoregion}: "ecoregion", "ecoregions"
-#' - \link{calc_temporal_dummies}: "dummies"
+#' - \link{calc_modis}: `"modis"`, `"MODIS"`
+#' - \link{calc_koppen_geiger}: `"koppen-geiger"`, `"koeppen-geiger"`, `"koppen"`,
+#' - \link{calc_ecoregion}: `"ecoregion"`, `"ecoregions"`
+#' - \link{calc_temporal_dummies}: `"dummies"`
 #' @returns Calculated covariates. Mainly data.frame object.
 #' @author Insang Song
 #' @export
+# nolint end
 calc_covariates <-
   function(
       covariate = c("modis", "koppen-geiger",
@@ -371,7 +373,7 @@ calc_ecoregion <-
 #' multilayer rasters. Passed to \code{foo}. See also
 #' \code{\link[exactextractr]{exact_extract}}
 #' @param id_col character(1). Field name where unique site identifiers
-#' are stored. Default is "site_id"
+#' are stored. Default is `"site_id"`
 #' @param radius numeric. Radius to buffer.
 #' @author Insang Song
 #' @returns A data.frame object.
@@ -404,7 +406,7 @@ modis_worker <- function(
   if (is_stdt(sites_in)) {
     sites_in <- convert_stdt_spatvect(sites_in)
   }
-  if (!methods::is(points, "SpatVector")) {
+  if (!methods::is(sites_in, "SpatVector")) {
     sites_in <- terra::vect(sites_in)
   }
   if (!id_col %in% names(sites_in)) {
@@ -427,9 +429,7 @@ modis_worker <- function(
     # generate buffers
     bufs <- terra::buffer(points, width = radius, quadsegs = 180L)
     bufs <- terra::project(bufs, terra::crs(surf))
-    # crop raster
-    # bufs_extent <- terra::ext(bufs)
-    # surf <- terra::crop(surf, bufs_extent, snap = "out")
+    # crop raster (deprecated)
 
     # extract raster values
     surf_at_bufs <-
@@ -497,18 +497,18 @@ modis_worker <- function(
 #' specification can affect the processing efficiency.
 #' @param path character. List of HDF files.
 #' @param product character(1). MODIS product. Should be one of
-#' \code{c('MOD11A1', 'MOD13A2', 'MOD06_L2', 'VNP46A2', 'MOD09GA', 'MCD19A2')}
+#' \code{c("MOD11A1", "MOD13A2", "MOD06_L2", "VNP46A2", "MOD09GA", "MCD19A2")}
 #' @param sites sf object. Unique sites where covariates
 #' will be calculated.
-#' @param id_col character(1). Site identifier. Default is "site_id"
+#' @param id_col character(1). Site identifier. Default is `"site_id"`
 #' @param name_covariates character. Name header of covariates.
-#' e.g., "MOD_NDVIF_0_".
+#' e.g., `"MOD_NDVIF_0_"`.
 #' The calculated covariate names will have a form of
 #' '{name_covariates}{zero-padded buffer radius in meters}',
 #' e.g., 'MOD_NDVIF_0_50000' where 50 km radius circular buffer
 #' was used to calculate mean NDVI value.
 #' @param radius numeric. Radii to calculate covariates.
-#' Default is c(0, 1000, 10000, 50000).
+#' Default is `c(0, 1000, 10000, 50000)`.
 #' @param subdataset Index or search pattern of subdataset.
 #'  Pattern is not accepted when product is \code{"VNP46A2"} or
 #'  \code{"MOD06_L2"}
@@ -531,7 +531,7 @@ modis_worker <- function(
 #' \code{\link[parallelly]{availableCores}},
 #' \code{\link[doParallel]{registerDoParallel}}
 #' @importFrom foreach foreach
-#' @importFrom foreach `%dopar%`
+#' @importFrom foreach %dopar%
 #' @importFrom methods is
 #' @importFrom sf st_as_sf
 #' @importFrom sf st_drop_geometry
@@ -588,7 +588,7 @@ calc_modis <-
     #                              nthreads,
     #                              rscript_libs = .libPaths())
     doParallel::registerDoParallel(cores = nthreads)
-
+    datei <- NULL
     calc_results <-
       foreach::foreach(
         datei = seq_along(dates_available),
@@ -691,10 +691,10 @@ calc_modis <-
 
 
 #' Calculate temporal dummy variables
-#' @param sites data.frame with a temporal field named "time"
+#' @param sites data.frame with a temporal field named `"time"`
 #'  see \code{\link{convert_stobj_to_stdt}}
 #' @param id_col character(1). Unique site identifier column name.
-#'  Default is "site_id".
+#'  Default is `"site_id"`.
 #' @param domain_year integer. Year domain to dummify.
 #'  Default is \code{seq(2018L, 2022L)}
 #' @returns data.frame with year, month, and weekday indicators.
@@ -771,7 +771,7 @@ calc_temporal_dummies <-
 #' @param sites stdt/sf/SpatVector/data.frame. Unique sites
 #' see \code{\link{convert_stobj_to_stdt}}
 #' @param id_col character(1). Unique site identifier column name.
-#'  Default is "site_id".
+#'  Default is `"site_id"`.
 #' @param domain_year integer. Year domain to dummify.
 #'  Default is \code{seq(2018L, 2022L)}
 #' @param radius Circular buffer radius.

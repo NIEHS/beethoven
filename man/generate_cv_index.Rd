@@ -18,13 +18,13 @@ generate_cv_index(
 \item{covars}{stdt. See \code{\link{convert_stobj_to_stdt}}
 for details.}
 
-\item{cv_mode}{character(1). One of 'lolo (leave-one-location-out)',
-'loto (leave-one-time-out)',
-'lolto (leave-one-location-time-out)',
-'lblo (leave-block-location-out)',
-'lbto (leave-block-time-out)',
-'lblto (leave-block-location-time-out)'
-'random (full random selection)'}
+\item{cv_mode}{character(1). One of \code{"lolo"} (leave-one-location-out),
+\code{"loto"} (leave-one-time-out),
+\code{"lolto"} (leave-one-location-time-out),
+\code{"lblo"} (leave-block-location-out),
+\code{"lbto"} (leave-block-time-out),
+\code{"lblto"} (leave-block-location-time-out)
+\code{"random"} (full random selection)}
 
 \item{cv_fold}{integer(1). Number of folds for cross-validation.}
 

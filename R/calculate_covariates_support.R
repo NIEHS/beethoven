@@ -108,7 +108,7 @@ modis_aggregate_sds <-
 #' @param paths character. Full list of hdf file paths.
 #'  preferably a recursive search result from \code{list.files}.
 #' @param product character(1). Product code of MODIS. Should be one of
-#' \code{c('MOD11A1', 'MOD13A2', 'MOD09GA', 'MCD19A2')}
+#' \code{c("MOD11A1", "MOD13A2", "MOD09GA", "MCD19A2")}
 #' @param date_in character(1). date to query. Should be in
 #' \code{"YYYY-MM-DD"} format.
 #' @param regex_sds character(1). subdataset names to extract.
@@ -309,11 +309,11 @@ modis_warp_stars <-
 #' then mosaic the warped images into one large SpatRaster object.
 #' @param paths character. Full paths of hdf files.
 #' @param date_in character(1). Date to query.
-#' @param get_var character. One of 'Cloud_Fraction_Day' or
-#' 'Cloud_Fraction_Night'
+#' @param get_var character. One of `"Cloud_Fraction_Day"` or
+#' `"Cloud_Fraction_Night"`
 #' @param resolution numeric(1). Resolution of output raster.
 #' Unit is degree.
-#' @returns SpatRaster object. CRS is "EPSG:4326".
+#' @returns SpatRaster object. CRS is `"EPSG:4326"`.
 #' @author Insang Song
 #' @importFrom terra rast
 #' @importFrom terra crop

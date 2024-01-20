@@ -5,6 +5,7 @@
 #' named.
 #' @param kfolds integer, index of k-folds for cross-validation. This should be
 #' produced with regards to spatial and/or temporal considerations
+#' To make cross-validation indices, see [generate_cv_index]
 #' @param y dependent variable
 #' @param ... Passed arguments to \link[BART]{wbart}
 #' @return meta_fit_obj object of meta learner
@@ -71,13 +72,13 @@ meta_learner_fit <- function(base_predictor_list,
 # nolint start
 #' Create meta_learner predictions from the list of BART fit objects and predictions of base learners
 #' @description
-#' The meta learner used in this package, Bayesian Additive Regression Tree (BART), is not explicitly a S-T model, but the input covariates (outputs of each base learner) are S-T based.
+#' The meta learner used in this package, Bayesian Additive Regression Tree (BART), is not explicitly a spatiotemporal model, but the input covariates (outputs of each base learner) are S-T based.
 # nolint end
 #' @param meta_fit list of BART objects from meta_learner_fit
-#' @param base_outputs_stdt stdt object (see convert_spacetime_data.R):
+#' @param base_outputs_stdt stdt object. See [convert_stobj_to_stdt]
 #' list with datatable containing lat, lon, time and the covariates
 #' (outputs of each base learner) at prediction locations and crs.
-#' @param nthreads integer(1). Number of threads used in BART::predict.wbart
+#' @param nthreads integer(1). Number of threads used in [BART::predict.wbart]
 #' @note  The predictions can be a rast or sf, which depends on the same
 #' respective format of the covariance matrix input - cov_pred
 #' @return meta_pred: the final meta learner predictions

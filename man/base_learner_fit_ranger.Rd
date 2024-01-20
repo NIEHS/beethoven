@@ -11,7 +11,7 @@ base_learner_fit_ranger(ymat, xmat, ...)
 
 \item{xmat}{data.frame or matrix. Independent variables.}
 
-\item{...}{Arguments passed to \code{ranger::ranger}}
+\item{...}{Arguments passed to \code{\link[ranger:ranger]{ranger::ranger}}}
 }
 \value{
 ranger object.

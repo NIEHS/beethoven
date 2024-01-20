@@ -19,7 +19,7 @@ calculate_tri(
 see \code{\link{convert_stobj_to_stdt}}}
 
 \item{id_col}{character(1). Unique site identifier column name.
-Default is "site_id".}
+Default is \code{"site_id"}.}
 
 \item{domain_year}{integer. Year domain to dummify.
 Default is \code{seq(2018L, 2022L)}}

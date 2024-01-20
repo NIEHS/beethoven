@@ -12,11 +12,11 @@ base_learner_prep(
 )
 }
 \arguments{
-\item{learner}{character(1). One of 'cnn', 'randomforest', 'xgboost'}
+\item{learner}{character(1). One of \code{"cnn"}, \code{"randomforest"}, \code{"xgboost"}}
 
 \item{data}{stdt. see \code{\link{convert_stobj_to_stdt}}}
 
-\item{dependent_name}{Name of dependent variable. Default is "pm2.5"}
+\item{dependent_name}{Name of dependent variable. Default is \code{"pm2.5"}}
 
 \item{independent_name}{character. Names of independent variables.}
 }

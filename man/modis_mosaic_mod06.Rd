@@ -16,14 +16,14 @@ modis_mosaic_mod06(
 
 \item{date_in}{character(1). Date to query.}
 
-\item{get_var}{character. One of 'Cloud_Fraction_Day' or
-'Cloud_Fraction_Night'}
+\item{get_var}{character. One of \code{"Cloud_Fraction_Day"} or
+\code{"Cloud_Fraction_Night"}}
 
 \item{resolution}{numeric(1). Resolution of output raster.
 Unit is degree.}
 }
 \value{
-SpatRaster object. CRS is "EPSG:4326".
+SpatRaster object. CRS is \code{"EPSG:4326"}.
 }
 \description{
 This function will return a SpatRaster object with

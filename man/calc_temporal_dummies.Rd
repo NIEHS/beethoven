@@ -11,11 +11,11 @@ calc_temporal_dummies(
 )
 }
 \arguments{
-\item{sites}{data.frame with a temporal field named "time"
+\item{sites}{data.frame with a temporal field named \code{"time"}
 see \code{\link{convert_stobj_to_stdt}}}
 
 \item{id_col}{character(1). Unique site identifier column name.
-Default is "site_id".}
+Default is \code{"site_id"}.}
 
 \item{domain_year}{integer. Year domain to dummify.
 Default is \code{seq(2018L, 2022L)}}

@@ -19,13 +19,11 @@ download_gmted_data(
 )
 }
 \arguments{
-\item{statistic}{character(1). Available statistics include "Breakline
-Emphasis", "Systematic Subsample", "md (Median Statistic)",
-"Minimum Statistic", "Mean Statistic", "Maximum Statistic", and
-"Standard Deviation Statistic".}
+\item{statistic}{character(1). Available statistics include \code{"Breakline Emphasis"}, \code{"Systematic Subsample"}, \code{"Median Statistic"},
+\code{"Minimum Statistic"}, \code{"Mean Statistic"}, \code{"Maximum Statistic"}, and
+\code{"Standard Deviation Statistic"}.}
 
-\item{resolution}{character(1). Available resolutions include "7.5 arc-
-seconds", "15 arc-seconds", and "30 arc-seconds".}
+\item{resolution}{character(1). Available resolutions include \code{"7.5 arc-seconds"}, \code{"15 arc-seconds"}, and \code{"30 arc-seconds"}.}
 
 \item{directory_to_download}{character(1). Directory to download zip files
 from Global Multi-resolution Terrain Elevation Data (GMTED2010).}

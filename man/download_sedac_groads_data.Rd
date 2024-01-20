@@ -18,11 +18,11 @@ download_sedac_groads_data(
 )
 }
 \arguments{
-\item{data_format}{character(1). Data can be downloaded as "Shapefile" or
-"Geodatabase". (Only "Geodatabase" available for "Global" region).}
+\item{data_format}{character(1). Data can be downloaded as \code{"Shapefile"} or
+\code{"Geodatabase"}. (Only \code{"Geodatabase"} available for \code{"Global"} region).}
 
-\item{data_region}{character(1). Data can be downloaded for "Global",
-"Africa", "Asia", "Europe", "Americas", "Oceania East", and "Oceania West".}
+\item{data_region}{character(1). Data can be downloaded for \code{"Global"},
+\code{"Africa"}, \code{"Asia"}, \code{"Europe"}, \code{"Americas"}, \code{"Oceania East"}, and \code{"Oceania West"}.}
 
 \item{directory_to_download}{character(1). Directory to download zip files
 from NASA UN WPP-Adjusted Population Density, v4.11.}

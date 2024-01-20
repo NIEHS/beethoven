@@ -7,8 +7,8 @@
 base_learner_cv_fit(learner, ymat, xmat, cv_index, fun, ...)
 }
 \arguments{
-\item{learner}{character(1). Currently one of 'randomforest', 'xgboost',
-and 'cnn'}
+\item{learner}{character(1). Currently one of \code{"randomforest"}, \code{"xgboost"},
+and \code{"cnn"}}
 
 \item{ymat}{data.frame or matrix. Dependent variable.}
 

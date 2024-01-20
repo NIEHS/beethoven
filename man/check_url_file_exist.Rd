@@ -4,12 +4,12 @@
 \alias{check_url_file_exist}
 \title{Check if sample of download URLs have HTTP Status 200}
 \usage{
-check_url_file_exist(url, method = "HEAD")
+check_url_file_exist(url, method = c("HEAD", "GET"))
 }
 \arguments{
 \item{url}{Download URL to be checked.}
 
-\item{method}{httr method to obtain URL ("HEAD" or "GET")}
+\item{method}{httr method to obtain URL (\verb{"HEAD"`` or }"GET"`)}
 }
 \description{
 Check if sample of download URLs have HTTP Status 200

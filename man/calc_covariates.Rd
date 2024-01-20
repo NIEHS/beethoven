@@ -23,7 +23,7 @@ calc_covariates(
 a unique identifier field named \code{id_col}}
 
 \item{id_col}{character(1). Name of unique identifier.
-Default is \code{'site_id'}.}
+Default is \code{"site_id"}.}
 
 \item{...}{Arguments passed to each covariate calculation
 function.}
@@ -36,10 +36,10 @@ Calculate covariates
 }
 \seealso{
 \itemize{
-\item \link{calc_modis}: "modis", "MODIS"
-\item \link{calc_koppen_geiger}: "koppen-geiger", "koeppen-geiger", "koppen",
-\item \link{calc_ecoregion}: "ecoregion", "ecoregions"
-\item \link{calc_temporal_dummies}: "dummies"
+\item \link{calc_modis}: \code{"modis"}, \code{"MODIS"}
+\item \link{calc_koppen_geiger}: \code{"koppen-geiger"}, \code{"koeppen-geiger"}, \code{"koppen"},
+\item \link{calc_ecoregion}: \code{"ecoregion"}, \code{"ecoregions"}
+\item \link{calc_temporal_dummies}: \code{"dummies"}
 }
 }
 \author{

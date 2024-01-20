@@ -99,7 +99,7 @@ download_data <-
 #'  End year for downloading data.
 #' @param resolution_temporal character(1).
 #'  Name of column containing POC values.
-#'  Currently, no value other than "daily" works.
+#'  Currently, no value other than `"daily"` works.
 #' @param directory_to_download character(1).
 #'  Directory to download zip files from AQS data mart.
 #' @param directory_to_save character(1).
@@ -380,9 +380,9 @@ download_ecoregion_data <- function(
 #' atmospheric composition collections from the [NASA Global Earth Observing System (GEOS) model](https://gmao.gsfc.nasa.gov/GEOS_systems/).
 # nolint end
 #' @param date_start character(1). length of 10. Start date for downloading
-#' data. Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
+#' data. Format YYYY-MM-DD (ex. September 1, 2023 = `"2023-09-01"`).
 #' @param date_end character(1). length of 10. End date for downloading data.
-#' Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
+#' Format YYYY-MM-DD (ex. September 1, 2023 = `"2023-09-01"`).
 #' @param collection character(1). GEOS-CF data collection file name.
 #' @param directory_to_save character(1). Directory to save data.
 #' @param data_download_acknowledgement logical(1). By setting \code{TRUE} the
@@ -518,13 +518,10 @@ download_geos_cf_data <- function(
 #' The \code{download_gmted_data()} function acesses and downloads Global
 #' Multi-resolution Terrain Elevation Data (GMTED2010) from
 #' [U.S. Geological Survey and National Geospatial-Intelligence Agency](https://www.usgs.gov/coastal-changes-and-impacts/gmted2010).
-# nolint end
-#' @param statistic character(1). Available statistics include "Breakline
-#' Emphasis", "Systematic Subsample", "md (Median Statistic)",
-#' "Minimum Statistic", "Mean Statistic", "Maximum Statistic", and
-#' "Standard Deviation Statistic".
-#' @param resolution character(1). Available resolutions include "7.5 arc-
-#' seconds", "15 arc-seconds", and "30 arc-seconds".
+#' @param statistic character(1). Available statistics include `"Breakline Emphasis"`, `"Systematic Subsample"`, `"Median Statistic"`,
+#' `"Minimum Statistic"`, `"Mean Statistic"`, `"Maximum Statistic"`, and
+#' `"Standard Deviation Statistic"`.
+#' @param resolution character(1). Available resolutions include `"7.5 arc-seconds"`, `"15 arc-seconds"`, and `"30 arc-seconds"`.
 #' @param directory_to_download character(1). Directory to download zip files
 #' from Global Multi-resolution Terrain Elevation Data (GMTED2010).
 #' @param directory_to_save character(1). Directory to decompress zip files.
@@ -541,6 +538,7 @@ download_geos_cf_data <- function(
 #' Remove (\code{TRUE}) or keep (\code{FALSE})
 #' the text file containing download commands. Default is FALSE.
 #' @author Mitchell Manware, Insang Song
+# nolint end
 #' @return NULL;
 #' @export
 download_gmted_data <- function(
@@ -667,9 +665,9 @@ download_gmted_data <- function(
 #' The \code{download_merra2_data()} function accesses and downloads various
 #' meteorological and atmospheric collections from the [Modern-Era Retrospective analysis for Research and Applications, Version 2 (MERRA-2)](https://gmao.gsfc.nasa.gov/reanalysis/MERRA-2/).
 #' @param date_start character(1). length of 10. Start date for downloading
-#' data. Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
+#' data. Format YYYY-MM-DD (ex. September 1, 2023 is `"2023-09-01"`).
 #' @param date_end character(1). length of 10. End date for downloading data.
-#' Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
+#' Format YYYY-MM-DD (ex. September 1, 2023 is `"2023-09-01"`).
 #' @param collection character(1). MERRA-2 data collection file name.
 #' @param directory_to_save character(1). Directory to save data.
 #' @param data_download_acknowledgement logical(1). By setting \code{TRUE} the
@@ -1140,9 +1138,10 @@ download_narr_p_levels_data <- function(
 #' land cover data from the
 #' [NLCD Science Research Products](https://www.mrlc.gov/data) data base.
 #' @param year integer(1). Available years for Coterminous United States
-#' include 2001, 2004, 2006, 2008, 2011, 2013, 2016, 2019, and 2021.
-#' Available years for Alaska include 2001, 2011, and 2016.
-#' @param collection character(1). "Coterminous United States" or "Alaska".
+#' include `2001`, `2004`, `2006`, `2008`, `2011`, `2013`, `2016`,
+#' `2019`, and `2021`.
+#' Available years for Alaska include `2001`, `2011`, and `2016`.
+#' @param collection character(1). `"Coterminous United States"` or `"Alaska"`.
 #' @param directory_to_download character(1). Directory to download zip files
 #' from National Land Cover Database Science Research Products.
 #' @param directory_to_save character(1). Directory to decompress zip files.
@@ -1282,11 +1281,10 @@ download_nlcd_data <- function(
 #' The \code{download_sedac_groads_data()} function accesses and downloads
 #' roads data from the National Aeronautics and Space
 #' Administration's (NASA) [Global Roads Open Access Data Set](https://sedac.ciesin.columbia.edu/data/set/groads-global-roads-open-access-v1/data-download).
-# nolint end
-#' @param data_format character(1). Data can be downloaded as "Shapefile" or
-#' "Geodatabase". (Only "Geodatabase" available for "Global" region).
-#' @param data_region character(1). Data can be downloaded for "Global",
-#' "Africa", "Asia", "Europe", "Americas", "Oceania East", and "Oceania West".
+#' @param data_format character(1). Data can be downloaded as `"Shapefile"` or
+#' `"Geodatabase"`. (Only `"Geodatabase"` available for `"Global"` region).
+#' @param data_region character(1). Data can be downloaded for `"Global"`,
+#' `"Africa"`, `"Asia"`, `"Europe"`, `"Americas"`, `"Oceania East"`, and `"Oceania West"`.
 #' @param directory_to_download character(1). Directory to download zip files
 #' from NASA UN WPP-Adjusted Population Density, v4.11.
 #' @param directory_to_save character(1). Directory to decompress zip files.
@@ -1304,6 +1302,7 @@ download_nlcd_data <- function(
 #' the text file containing download commands.
 #' @author Mitchell Manware, Insang Song
 #' @return NULL;
+# nolint end
 #' @export
 download_sedac_groads_data <- function(
   data_format = c("Shapefile", "Geodatabase"),
@@ -1402,11 +1401,10 @@ download_sedac_groads_data <- function(
 #' The \code{download_sedac_population_data()} function accesses and downloads
 #' population density data from the National Aeronatuics and Space
 #' Administration's (NASA) [UN WPP-Adjusted Population Density, v4.11]( https://sedac.ciesin.columbia.edu/data/set/gpw-v4-population-density-adjusted-to-2015-unwpp-country-totals-rev11).
-# nolint end
-#' @param year character(1). Available years are 2000, 2005, 2010, 2015, and
-#' 2020, or "all" for all years.
+#' @param year character(1). Available years are `2000`, `2005`, `2010`, `2015`, and
+#' `2020`, or `"all"` for all years.
 #' @param data_format character(1). Individual year data can be downloaded as
-#' "ASCII" or "GeoTIFF". "all" years is downloaded as "netCDF".
+#' `"ASCII"` or `"GeoTIFF"`. "all" years is downloaded as `"netCDF"`.
 #' @param data_resolution character(1). Available resolutions are 30 second
 #' (approx. 1 km), 2.5 minute (approx. 5 km), 15 minute (approx. 30 km),
 #' 30 minute (approx. 55 km), and 60 minute (approx. 110 km).
@@ -1426,11 +1424,12 @@ download_sedac_groads_data <- function(
 #' Remove (\code{TRUE}) or keep (\code{FALSE})
 #' the text file containing download commands.
 #' @author Mitchell Manware, Insang Song
+# nolint end
 #' @return NULL;
 #' @export
 download_sedac_population_data <- function(
   year = "2020",
-  data_format = "GeoTIFF",
+  data_format = c("GeoTIFF", "ASCII", "netCDF"),
   data_resolution = "60 minute",
   directory_to_download = "./input/sedac_population/",
   directory_to_save = "./input/sedac_population/",
@@ -1466,6 +1465,8 @@ download_sedac_population_data <- function(
     cat(paste0("30 second resolution not available for all years. Returning",
                " highest (2.5 minute) resolution.\n"))
   }
+
+  data_format <- match.arg(data_format)
   #### 8. define data format
   if (data_format == "GeoTIFF") {
     if (year != "totpop") {
@@ -1560,9 +1561,9 @@ download_sedac_population_data <- function(
 #' [Hazard Mapping System Fire and Smoke Product](https://www.ospo.noaa.gov/Products/land/hms.html#0).
 # nolint end
 #' @param date_start character(1). length of 10. Start date for downloading
-#' data. Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
+#' data. Format YYYY-MM-DD (ex. September 1, 2023 is `"2023-09-01"`).
 #' @param date_end character(1). length of 10. End date for downloading data.
-#' Format YYYY-MM-DD (ex. September 10, 2023 = "2023-09-10").
+#' Format YYYY-MM-DD (ex. September 10, 2023 is `"2023-09-10"`).
 #' @param data_format character(1). "Shapefile" or "KML".
 #' @param directory_to_download character(1). Directory to download zip files
 #' from NOAA Hazard Mapping System Fire and Smoke Product. (Ignored if
@@ -1721,12 +1722,12 @@ download_noaa_hms_smoke_data <- function(
 #' Köppen-Geiger climate classification maps at
 #'  1-km resolution ([link for article](https://www.nature.com/articles/sdata2018214); [link for data](https://figshare.com/articles/dataset/Present_and_future_K_ppen-Geiger_climate_classification_maps_at_1-km_resolution/6396959/2)).
 # nolint end
-#' @param time_period character(1). Available times are "Present" (1980-206)
-#' and "Future" (2071-2100). ("Future" classifications are based on scenario
+#' @param time_period character(1). Available times are `"Present"` (1980-2016)
+#' and `"Future"` (2071-2100). ("Future" classifications are based on scenario
 #' RCP8.5).
-#' @param data_resolution character(1). Available resolutions are "0.0083"
-#' degrees (approx. 1 km), "0.083" degrees (approx. 10 km), and
-#' "0.5" degrees (approx. 50 km).
+#' @param data_resolution character(1). Available resolutions are `"0.0083"`
+#' degrees (approx. 1 km), `"0.083"` degrees (approx. 10 km), and
+#' `"0.5"` degrees (approx. 50 km).
 #' @param directory_to_download character(1). Directory to download zip files
 #' from Present and future Köppen-Geiger climate classification maps at 1-km
 #' resolution.
@@ -1856,20 +1857,20 @@ download_koppen_geiger_data <- function(
 #' every five minutes every day.
 #' @note \code{date_start} and \code{date_end} should be in the same year.
 #'  Directory structure looks like
-#'  input/modis/raw/[version]/[product]/[year]/[day_of_year]
+#'  input/modis/raw/\{version\}/\{product\}/\{year\}/\{day_of_year\}
 #'  Please note that \code{date_start} and \code{date_end} are
 #'  ignored if \code{product == 'MOD06_L2'}.
 #' @param date_start character(1). length of 10. Start date for downloading
-#' data. Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
+#' data. Format YYYY-MM-DD (ex. September 1, 2023 is `"2023-09-01"`).
 #' @param date_end character(1). length of 10. End date for downloading data.
-#' Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").
-#' @param product character(1). One of c("MOD09GA", "MOD11A1", "MOD06_L2",
-#'      "MCD19A2", "MOD13A2", "VNP46A2").
-#' @param version character(1). Default is "61", meaning v061.
+#' Format YYYY-MM-DD (ex. September 1, 2023 is `"2023-09-01"`).
+#' @param product character(1).
+#' One of `c("MOD09GA", "MOD11A1", "MOD06_L2", "MCD19A2", "MOD13A2", "VNP46A2")`.
+#' @param version character(1). Default is `"61"`, meaning v061.
 #' @param horizontal_tiles integer(2). Horizontal tile numbers
-#' c([start], [end]). Default is c(7, 13).
+#' `c({start}, {end})`. Default is `c(7, 13)`.
 #' @param vertical_tiles integer(2). Vertical tile numbers
-#' c([start], [end]). Default is c(3, 6).
+#' `c({start}, {end})`. Default is `c(3, 6)`.
 #' @param nasa_earth_data_token character(1).
 #'  Token for downloading data from NASA. Should be set before
 #'  trying running the function.
@@ -1878,7 +1879,7 @@ download_koppen_geiger_data <- function(
 #' user acknowledge that the data downloaded using this function may be very
 #' large and use lots of machine storage and memory.
 #' @param mod06_links character(1). CSV file path to MOD06_L2 download links
-#' from NASA LPDAAC. Default is NULL.
+#' from NASA LPDAAC. Default is `NULL`.
 #' @param download logical(1). Download data or only save wget commands.
 #' @param remove_command logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
 #' the text file containing download commands.

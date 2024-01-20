@@ -32,7 +32,7 @@ multilayer rasters. Passed to \code{foo}. See also
 \code{\link[exactextractr]{exact_extract}}}
 
 \item{id_col}{character(1). Field name where unique site identifiers
-are stored. Default is "site_id"}
+are stored. Default is \code{"site_id"}}
 
 \item{radius}{numeric. Radius to buffer.}
 }

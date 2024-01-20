@@ -22,22 +22,22 @@ calc_modis(
 \item{path}{character. List of HDF files.}
 
 \item{product}{character(1). MODIS product. Should be one of
-\code{c('MOD11A1', 'MOD13A2', 'MOD06_L2', 'VNP46A2', 'MOD09GA', 'MCD19A2')}}
+\code{c("MOD11A1", "MOD13A2", "MOD06_L2", "VNP46A2", "MOD09GA", "MCD19A2")}}
 
 \item{sites}{sf object. Unique sites where covariates
 will be calculated.}
 
-\item{id_col}{character(1). Site identifier. Default is "site_id"}
+\item{id_col}{character(1). Site identifier. Default is \code{"site_id"}}
 
 \item{name_covariates}{character. Name header of covariates.
-e.g., "MOD_NDVIF_0_".
+e.g., \code{"MOD_NDVIF_0_"}.
 The calculated covariate names will have a form of
 '{name_covariates}{zero-padded buffer radius in meters}',
 e.g., 'MOD_NDVIF_0_50000' where 50 km radius circular buffer
 was used to calculate mean NDVI value.}
 
 \item{radius}{numeric. Radii to calculate covariates.
-Default is c(0, 1000, 10000, 50000).}
+Default is \code{c(0, 1000, 10000, 50000)}.}
 
 \item{subdataset}{Index or search pattern of subdataset.
 Pattern is not accepted when product is \code{"VNP46A2"} or

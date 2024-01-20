@@ -17,7 +17,7 @@ modis_get_vrt(
 preferably a recursive search result from \code{list.files}.}
 
 \item{product}{character(1). Product code of MODIS. Should be one of
-\code{c('MOD11A1', 'MOD13A2', 'MOD09GA', 'MCD19A2')}}
+\code{c("MOD11A1", "MOD13A2", "MOD09GA", "MCD19A2")}}
 
 \item{date_in}{character(1). date to query. Should be in
 \code{"YYYY-MM-DD"} format.}

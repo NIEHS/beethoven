@@ -32,7 +32,7 @@ End year for downloading data.}
 
 \item{resolution_temporal}{character(1).
 Name of column containing POC values.
-Currently, no value other than "daily" works.}
+Currently, no value other than \code{"daily"} works.}
 
 \item{directory_to_download}{character(1).
 Directory to download zip files from AQS data mart.}

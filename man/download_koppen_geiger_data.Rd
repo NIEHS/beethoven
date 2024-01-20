@@ -17,13 +17,13 @@ download_koppen_geiger_data(
 )
 }
 \arguments{
-\item{time_period}{character(1). Available times are "Present" (1980-206)
-and "Future" (2071-2100). ("Future" classifications are based on scenario
+\item{time_period}{character(1). Available times are \code{"Present"} (1980-2016)
+and \code{"Future"} (2071-2100). ("Future" classifications are based on scenario
 RCP8.5).}
 
-\item{data_resolution}{character(1). Available resolutions are "0.0083"
-degrees (approx. 1 km), "0.083" degrees (approx. 10 km), and
-"0.5" degrees (approx. 50 km).}
+\item{data_resolution}{character(1). Available resolutions are \code{"0.0083"}
+degrees (approx. 1 km), \code{"0.083"} degrees (approx. 10 km), and
+\code{"0.5"} degrees (approx. 50 km).}
 
 \item{directory_to_download}{character(1). Directory to download zip files
 from Present and future Köppen-Geiger climate classification maps at 1-km

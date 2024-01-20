@@ -10,7 +10,7 @@ check_crs_is_valid(model_output, crs_list = c("EPSG:4326", "EPSG:5070"))
 \item{model_output}{Spat*/sf* object of model output.}
 
 \item{crs_list}{a character/integer vector of acceptable CRS.
-Default is c("EPSG:4326", "EPSG:5070")}
+Default is \code{c("EPSG:4326", "EPSG:5070")}}
 }
 \value{
 A logical value indicating the model is compliant to one of

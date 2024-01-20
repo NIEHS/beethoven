@@ -1,13 +1,13 @@
 #' Generate spatio-temporal cross-validation index
 #' @param covars stdt. See \code{\link{convert_stobj_to_stdt}}
 #' for details.
-#' @param cv_mode character(1). One of 'lolo (leave-one-location-out)',
-#' 'loto (leave-one-time-out)',
-#' 'lolto (leave-one-location-time-out)',
-#' 'lblo (leave-block-location-out)',
-#' 'lbto (leave-block-time-out)',
-#' 'lblto (leave-block-location-time-out)'
-#' 'random (full random selection)'
+#' @param cv_mode character(1). One of `"lolo"` (leave-one-location-out),
+#' `"loto"` (leave-one-time-out),
+#' `"lolto"` (leave-one-location-time-out),
+#' `"lblo"` (leave-block-location-out),
+#' `"lbto"` (leave-block-time-out),
+#' `"lblto"` (leave-block-location-time-out)
+#' `"random"` (full random selection)
 #' @param cv_fold integer(1). Number of folds for cross-validation.
 #' @param sp_fold integer(1). Number of subfolds for spatial blocks.
 #' @param t_fold integer(1). Number of subfolds for temporal blocks.
@@ -80,12 +80,12 @@ generate_cv_index <- function(
 
 
 #' Generate unique spatiotemporal identifier from stdt object
-#' @param covars stdt.
-#' @param mode One of "spatial" or "spatiotemporal"
+#' @param covars stdt. See [convert_stobj_to_stdt]
+#' @param mode One of `"spatial"` or `"spatiotemporal"`
 #' @description It generates unique spatiotemporal identifier in the
 #' input stdt object. Regardless of mode values
-#' (should be one of 'spatial' or 'spatiotemporal'),
-#' the index column will be named 'sp_index'.
+#' (should be one of `"spatial"` or `"spatiotemporal"`),
+#' the index column will be named "sp_index".
 #' @returns stdt with a new index named "sp_index"
 #' @author Insang Song
 #' @export
@@ -118,8 +118,8 @@ generate_spt_index <- function(
 #' @param blocks numeric(2)/sf/SpatVector configuration of blocks.
 #' @param block_id character(1). The unique identifier of each block.
 #' @details "Block" in this function refers to a group of contiguous spatial/temporal entities.
-#' Regardless of mode values (should be one of 'spatial' or 'spatiotemporal'),
-#' the index column will be named 'sp_index'. \code{block_id} should be set with a proper field name
+#' Regardless of `mode` value (should be one of `"spatial"` or `"spatiotemporal"`),
+#' the index column will be named "sp_index". \code{block_id} should be set with a proper field name
 #' when blocks is a sf or SpatVector object. When \code{cv_fold} is an integer, then the coordinates stored in \code{stdt} object are clustered with k-means. In this case, the result object will include attributes (accessible with \code{attr} function) about
 #' "kmeans_centers" (coordinates of centers) and "kmeans_sizes" (size of each cluster)
 #' @return stdt

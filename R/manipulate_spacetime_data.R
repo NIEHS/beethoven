@@ -126,7 +126,7 @@ is_stdt <- function(obj) {
 #' Convert a stdt to sf/sftime/SpatVector
 #' @param stdt A stdt object
 #' @param class_to character(1). Should be one of
-#' "sf", "sftime", "SpatRasterDataset", or "SpatVector"
+#' `"sf"`, `"sftime"`, `"SpatRasterDataset"`, or `"SpatVector"`
 #' @return a sf/sftime/SpatRasterDataset/SpatVector
 #' @importFrom sf st_as_sf
 #' @importFrom terra vect
