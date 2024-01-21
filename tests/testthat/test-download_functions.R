@@ -33,6 +33,56 @@ testthat::test_that("Error when one parameter is NULL.", {
   }
 })
 
+testthat::test_that("Errors when temporal ranges invalid.", {
+  expect_error(
+    download_geos_cf_data(
+      date_start = "1900-01-01",
+      collection = "aqc_tavg_1hr_g1440x721_v1",
+      data_download_acknowledgement = TRUE,
+      directory_to_save = "../testdata"
+    )
+  )
+  expect_error(
+    download_aqs_data(
+      year_start = 1900,
+      data_download_acknowledgement = TRUE,
+      directory_to_save = "../testdata"
+    )
+  )
+  expect_error(
+    download_narr_monolevel_data(
+      year_start = 1900,
+      collection = "air.sfc",
+      data_download_acknowledgement = TRUE,
+      directory_to_save = "../testdata"
+    )
+  )
+  expect_error(
+    download_narr_p_levels_data(
+      year_start = 1900,
+      collection = "omega",
+      data_download_acknowledgement = TRUE,
+      directory_to_save = "../testdata"
+    )
+  )
+  expect_error(
+    download_merra2_data(
+      date_start = "1900-01-01",
+      collection = "inst1_2d_asm_Nx",
+      directory_to_save = "../testdata",
+      data_download_acknowledgement = TRUE
+    )
+  )
+  expect_error(
+    download_noaa_hms_smoke_data(
+      date_start = "1900-01-01",
+      directory_to_save = "../testdata",
+      directory_to_download = "../testdata",
+      data_download_acknowledgement = TRUE
+    )
+  )
+})
+
 testthat::test_that("EPA AQS download URLs have HTTP status 200.", {
   withr::local_package("httr")
   withr::local_package("stringr")
@@ -248,6 +298,20 @@ testthat::test_that("MERRA2 download URLs have HTTP status 200.", {
   }
 })
 
+testthat::test_that("MERRA2 returns message with unrecognized collection.", {
+  # function parameters
+  collections <- "uNrEcOgNiZeD"
+  directory_to_save <- "../testdata/"
+  expect_message(
+    download_data(
+      dataset_name = "merra",
+      collection = collections,
+      directory_to_save = directory_to_save,
+      data_download_acknowledgement = TRUE
+    )
+  )
+})
+
 testthat::test_that("NARR monolevel download URLs have HTTP status 200.", {
   withr::local_package("httr")
   withr::local_package("stringr")
@@ -421,7 +485,7 @@ testthat::test_that("SEDAC groads download URLs have HTTP status 200.", {
   withr::local_package("httr")
   withr::local_package("stringr")
   # function parameters
-  data_regions <- c("Americas")
+  data_regions <- c("Americas", "Global")
   data_formats <- c("Geodatabase", "Shapefile")
   directory_to_download <- testthat::test_path("..", "testdata/")
   directory_to_save <- testthat::test_path("..", "testdata/")
@@ -537,6 +601,51 @@ testthat::test_that("SEDAC population download URLs have HTTP status 200.", {
         file.remove(commands_path)
       }
     }
+  }
+})
+
+testthat::test_that("SEDAC population data types are coerced.", {
+  withr::local_package("httr")
+  withr::local_package("stringr")
+  # function parameters
+  year <- c("totpop")
+  data_formats <- c("GeoTIFF", "ASCII", "netCDF")
+  data_resolutions <- c("30 second", "2pt5_min")
+  directory_to_download <- "../testdata/"
+  directory_to_save <- "../testdata/"
+  for (f in seq_along(data_formats)) {
+    download_data(dataset_name = "sedac_population",
+                  year = year,
+                  data_format = data_formats[f],
+                  data_resolution = data_resolutions[1],
+                  directory_to_download = directory_to_download,
+                  directory_to_save = directory_to_save,
+                  data_download_acknowledgement = TRUE,
+                  download = FALSE,
+                  unzip = FALSE,
+                  remove_zip = FALSE,
+                  remove_command = FALSE)
+    commands_path <- paste0(directory_to_download,
+                            "sedac_population_",
+                            year,
+                            "_",
+                            data_resolutions[2],
+                            "_",
+                            Sys.Date(),
+                            "_curl_commands.txt")
+    # import commands
+    commands <- read_commands(commands_path = commands_path)
+    # extract urls
+    urls <- extract_urls(commands = commands, position = 11)
+    # check HTTP URL status
+    url_status <- check_urls(urls = urls, size = 1L, method = "GET")
+    # implement unit tests
+    test_download_functions(directory_to_download = directory_to_download,
+                            directory_to_save = directory_to_save,
+                            commands_path = commands_path,
+                            url_status = url_status)
+    # remove file with commands after test
+    file.remove(commands_path)
   }
 })
 

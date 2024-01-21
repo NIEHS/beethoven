@@ -2,7 +2,7 @@
 # Functions used to implement and simplify unit tests on data download
 # functions
 # Date created: 2023-11-30
-# Date modified: 2023-12-12
+# Date modified: 2024-01-21
 ###############################################################################
 
 #' Check if sample of download URLs have HTTP Status 200
@@ -11,13 +11,13 @@
 #' @author Insang Song; Mitchell Manware
 #' @importFrom httr HEAD
 #' @importFrom httr GET
+#' @return logical object
 #' @export
 check_url_file_exist <- function(
   url,
   method = c("HEAD", "GET")
 ) {
   method <- match.arg(method)
-
   http_status_ok <- 200
   if (method == "HEAD") {
     hd <- httr::HEAD(url)
@@ -62,7 +62,7 @@ extract_urls <- function(
   return(url_list)
 }
 
-#' Sample download URLs and apply \code{check_url_file_exist} function
+#' Sample download URLs and apply `check_url_status` function
 #' @param urls character vector of URLs
 #' @param size number of observations to be sampled from \code{urls}
 #' @param method httr method to obtain URL (`"HEAD"` or `"GET"`)
@@ -83,8 +83,9 @@ check_urls <- function(
 
   url_sample <- sample(urls, size, replace = FALSE)
   url_status <- sapply(url_sample,
-                       check_url_file_exist,
-                       method = method)
+    check_url_file_exist,
+    method = method
+  )
   return(url_status)
 }
 

@@ -5,7 +5,7 @@
 \title{download_run: execute or skip \code{system_command}
 in data download function.}
 \usage{
-download_run(download = FALSE, system_command = NULL, commands_txt = NULL)
+download_run(download = FALSE, system_command = NULL)
 }
 \arguments{
 \item{download}{logical(1). Execute (\code{TRUE}) or
@@ -13,8 +13,6 @@ skip (\code{FALSE}) download.}
 
 \item{system_command}{character(1). Linux command to execute downloads.
 Inherited from data download function.}
-
-\item{commands_txt}{character(1). Text file with download commands.}
 }
 \description{
 Execute or skip the commands listed in the ...wget/curl_commands.txt file
