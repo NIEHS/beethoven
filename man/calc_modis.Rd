@@ -13,7 +13,7 @@ calc_modis(
   radius = c(0L, 1000L, 10000L, 50000L),
   subdataset = NULL,
   fun_summary = "mean",
-  nthreads = floor(parallelly::availableCores()/2),
+  nthreads = floor(length(parallelly::availableWorkers())/2),
   package_list_add = NULL,
   export_list_add = NULL
 )

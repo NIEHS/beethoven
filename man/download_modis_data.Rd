@@ -27,7 +27,7 @@ data. Format YYYY-MM-DD (ex. September 1, 2023 is \code{"2023-09-01"}).}
 Format YYYY-MM-DD (ex. September 1, 2023 is \code{"2023-09-01"}).}
 
 \item{product}{character(1).
-One of \code{c("MOD09GA", "MOD11A1", "MOD06_L2", "MCD19A2", "MOD13A2", "VNP46A2")}.}
+One of \code{c("MOD09GA", "MOD11A1", "MOD06_L2", "MCD19A2", "MOD13A2", "VNP46A2")}}
 
 \item{version}{character(1). Default is \code{"61"}, meaning v061.}
 

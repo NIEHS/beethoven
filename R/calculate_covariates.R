@@ -539,10 +539,9 @@ modis_worker <- function(
 #' @importFrom dplyr bind_rows
 #' @importFrom dplyr left_join
 #' @importFrom future plan
-#' @importFrom future multisession
-#' @importFrom parallelly availableCores
+#' @importFrom future cluster
+#' @importFrom parallelly availableWorkers
 #' @importFrom doParallel registerDoParallel
-#' @importFrom parallelly killNode
 #' @export
 calc_modis <-
   function(
@@ -555,7 +554,7 @@ calc_modis <-
     radius = c(0L, 1e3L, 1e4L, 5e4L),
     subdataset = NULL,
     fun_summary = "mean",
-    nthreads = floor(parallelly::availableCores() / 2),
+    nthreads = floor(length(parallelly::availableWorkers()) / 2),
     package_list_add = NULL,
     export_list_add = NULL
   ) {
@@ -583,11 +582,9 @@ calc_modis <-
     }
 
     # make clusters
-    future::future(future::multisession, workers = nthreads)
-    # parallelly::makeClusterPSOCK(
-    #                              nthreads,
-    #                              rscript_libs = .libPaths())
     doParallel::registerDoParallel(cores = nthreads)
+    future::future(future::cluster, workers = nthreads)
+
     datei <- NULL
     calc_results <-
       foreach::foreach(
@@ -684,8 +681,6 @@ calc_modis <-
         return(res)
       }
     Sys.sleep(1L)
-    # parallelly::killNode(cl)
-
     return(calc_results)
   }
 
