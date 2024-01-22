@@ -1482,19 +1482,11 @@ download_sedac_groads_data <- function(
     "\n"
   )
   #### 15. download data
-  download_run(download = download,
-               system_command = system_command)
-  #### 17. Remove command file
-  download_remove_command(commands_txt = commands_txt,
-                          remove = remove_command)
   download_run(
     download = download,
     system_command = system_command
   )
   #### 16. end if unzip == FALSE
-  download_unzip(file_name = download_name,
-                 directory_to_unzip = directory_to_save,
-                 unzip = unzip)
   download_unzip(
     file_name = download_name,
     directory_to_unzip = directory_to_save,

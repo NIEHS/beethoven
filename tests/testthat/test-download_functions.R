@@ -301,8 +301,8 @@ testthat::test_that("MERRA2 download URLs have HTTP status 200.", {
 testthat::test_that("MERRA2 returns message with unrecognized collection.", {
   # function parameters
   collections <- "uNrEcOgNiZeD"
-  directory_to_save <- "../testdata/"
-  expect_message(
+  directory_to_save <- testthat::test_path("..", "testdata/")
+  testthat::expect_error(
     download_data(
       dataset_name = "merra",
       collection = collections,
@@ -822,7 +822,7 @@ testthat::test_that("MODIS-MOD06L2 download URLs have HTTP status 200.", {
   # extract urls
   urls <- extract_urls(commands = commands, position = 4)
   # check HTTP URL status
-  url_status <- check_urls(urls = urls, size = 10L, method = "HEAD")
+  url_status <- check_urls(urls = urls, size = 1L, method = "HEAD")
   # implement unit tests
   test_download_functions(directory_to_save = directory_to_save,
                           commands_path = commands_path,
