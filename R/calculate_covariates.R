@@ -771,6 +771,7 @@ calc_temporal_dummies <-
 #'  Default is \code{seq(2018L, 2022L)}
 #' @param radius Circular buffer radius.
 #' Default is \code{c(1000, 10000, 50000)} (meters)
+#' @param sites_epsg character(1). Coordinate system of sites.
 #' @author Insang Song
 #' @returns A data.frame object.
 #' @importFrom terra vect
@@ -779,12 +780,13 @@ calc_temporal_dummies <-
 #' @importFrom data.table fread
 #' @importFrom data.table rbindlist
 #' @export
-calculate_tri <- function(
+calc_tri <- function(
   path = "./input/tri/",
   sites,
   id_col = "site_id",
   domain_year = seq(2018L, 2022L),
-  radius = c(1e3L, 1e4L, 5e4L)
+  radius = c(1e3L, 1e4L, 5e4L),
+  sites_epsg = "EPSG:4326"
 ) {
   if (is_stdt(sites)) {
     sites <- sites$stdt
@@ -803,12 +805,13 @@ calculate_tri <- function(
         sites <-
           terra::vect(sites,
                       geom = c("lon", "lat"),
-                      epsg = sites_epsg)
+                      crs = sites_epsg)
       }
     }
   }
-
-  radius <- match.arg(radius)
+  if (!is.numeric(radius)) {
+    stop("radius should be numeric.\n")
+  }
 
   csvs_tri <- list.files(path = path, pattern = "*.csv$", full.names = TRUE)
   col_sel <- c(1, 13, 12, 34, 41, 42, 43, 45, 46, 48, 47, 104)
@@ -842,3 +845,117 @@ calculate_tri <- function(
   return(df_tri)
 }
 # nocov end
+
+
+#' Calculate National Emission Inventory (NEI) covariates
+#' @description NEI data comprises multiple csv files where emissions of
+#' 50+ pollutants are recorded at county level. With raw data files,
+#' this function will join a combined table of NEI data and county
+#' boundary, then perform a spatial join to the sites.
+#' @param path character(1). Path to the directory with NEI CSV files
+#' @param sites stdt/sf/SpatVector/data.frame. Unique sites.
+#' See [`convert_stobj_to_stdt`] for details of `stdt`
+#' @param id_col character(1). Unique site identifier column name.
+#'  Default is `"site_id"`. It is no more than a placeholder
+#' in this function
+#' @param year integer(1). Data year.
+#'  Currently only accepts `c(2017, 2020)`
+#' @param county_shp character(1). Path to county boundary file.
+#' @param sites_epsg character(1). Coordinate system of sites.
+#' @author Insang Song, Ranadeep Daw
+#' @returns A data.frame object.
+#' @importFrom terra vect
+#' @importFrom terra crs
+#' @importFrom methods is
+#' @importFrom data.table .SD
+#' @importFrom data.table fread
+#' @importFrom data.table rbindlist
+#' @export
+calc_nei <- function(
+  path = "./input/nei/",
+  sites,
+  id_col = "site_id",
+  year = 2017,
+  county_shp = NULL,
+  sites_epsg = "EPSG:4326"
+) {
+  if (is_stdt(sites)) {
+    # sites <- sites$stdt
+    # sites_epsg <- sites$crs_stdt
+    sites <- convert_stdt_spatvect(sites)
+  } else {
+    if (!all(c("lon", "lat", "time") %in% colnames(sites))) {
+      stop("sites should be stdt or 
+      have 'lon', 'lat', and 'time' fields.\n")
+    }
+    if (!methods::is(sites, "SpatVector")) {
+      if (methods::is(sites, "sf")) {
+        sites <- terra::vect(sites)
+      }
+      if (is.data.frame(sites)) {
+        sites <-
+          terra::vect(sites,
+            geom = c("lon", "lat"),
+            keepgeom = TRUE,
+            crs = sites_epsg
+          )
+      }
+    }
+  }
+  if (is.null(county_shp)) {
+    stop("county_shp should be provided. Put the right path to the
+    county boundary file.")
+  }
+  if (!year %in% c(2017, 2020)) {
+    stop("year should be one of 2017 or 2020.\n")
+  }
+
+  # Concatenate NEI csv files
+  csvs_nei <- list.files(path = path, pattern = "*.csv$", full.names = TRUE)
+  csvs_nei <- lapply(csvs_nei, data.table::fread)
+  csvs_nei <- data.table::rbindlist(csvs_nei)
+
+  # column name readjustment
+  target_nm <- c("fips code", "total emissions", "emissions uom")
+  # not grep-ping at once for flexibility
+  target_cns <- sapply(target_nm, function(x) grep(x, colnames(csvs_nei)))
+  colnames(csvs_nei)[target_cns] <-
+    c("geoid", "emissions_total", "unit_measurement")
+
+  # unify unit of measurement
+  # TON here is short tonne, which is 2000 lbs.
+  csvs_nei$emissions_total_ton <-
+    ifelse(
+      csvs_nei$unit_measurement == "TON",
+      csvs_nei$emissions_total,
+      csvs_nei$emissions_total / 2000
+    )
+  emissions_total_ton <- NULL
+  geoid <- NULL
+  yearabbr <- substr(year, 3, 4)
+  csvs_nei$geoid <- sprintf("%05d", as.integer(csvs_nei$geoid))
+  csvs_nei <-
+    csvs_nei[, list(
+      TRF_NEINP_0_00000 = sum(emissions_total_ton, na.rm = TRUE)
+    ),
+    by = geoid]
+  csvs_nei$Year <- year
+
+  # read county vector
+  cnty_vect <- county_shp
+  if (is.character(cnty_vect)) {
+    cnty_vect <- terra::vect(cnty_vect)
+  }
+  cnty_geoid_guess <- grep("GEOID", names(cnty_vect))
+  names(cnty_vect)[cnty_geoid_guess] <- "geoid"
+  cnty_vect$geoid <- sprintf("%05d", as.integer(cnty_vect$geoid))
+  cnty_vect <- merge(cnty_vect, csvs_nei, by = "geoid")
+  cnty_vect <- cnty_vect[, c("geoid", "Year", "TRF_NEINP_0_00000")]
+  names(cnty_vect)[3] <- sub("NP", yearabbr, names(cnty_vect)[3])
+
+  # spatial join
+  sites_re <- terra::project(sites, terra::crs(cnty_vect))
+  sites_re <- terra::intersect(sites_re, cnty_vect)
+
+  return(sites_re)
+}

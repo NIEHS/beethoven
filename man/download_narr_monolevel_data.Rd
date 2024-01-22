@@ -2,7 +2,7 @@
 % Please edit documentation in R/download.R
 \name{download_narr_monolevel_data}
 \alias{download_narr_monolevel_data}
-\title{Download monolevel meteorological data from NOAA NCEP North American Regional Reanalysis (NARR) model.}
+\title{download_narr_monolevel_data: download monolevel meteorological data from NOAA NCEP North American Regional Reanalysis (NARR) model.}
 \usage{
 download_narr_monolevel_data(
   year_start = 2022,

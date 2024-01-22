@@ -13,7 +13,7 @@
 #' @importFrom httr GET
 #' @return logical object
 #' @export
-check_url_file_exist <- function(
+check_url_status <- function(
   url,
   method = c("HEAD", "GET")
 ) {
@@ -26,6 +26,7 @@ check_url_file_exist <- function(
   }
 
   status <- hd$status_code
+  Sys.sleep(1L)
   return(status == http_status_ok)
 }
 
@@ -83,7 +84,7 @@ check_urls <- function(
 
   url_sample <- sample(urls, size, replace = FALSE)
   url_status <- sapply(url_sample,
-    check_url_file_exist,
+    check_url_status,
     method = method
   )
   return(url_status)

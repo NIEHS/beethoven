@@ -494,11 +494,11 @@ testthat::test_that("SEDAC groads download URLs have HTTP status 200.", {
     data_region <- data_regions[r]
     for (f in seq_along(data_formats)) {
       download_data(dataset_name = "sedac_groads",
+                    directory_to_save = directory_to_save,
+                    data_download_acknowledgement = TRUE,
                     data_format = data_formats[f],
                     data_region = data_region,
                     directory_to_download = directory_to_download,
-                    directory_to_save = directory_to_save,
-                    data_download_acknowledgement = TRUE,
                     download = FALSE,
                     unzip = FALSE,
                     remove_zip = FALSE,
@@ -742,7 +742,6 @@ testthat::test_that("MODIS-MOD09GA download URLs have HTTP status 200.", {
     urls <- extract_urls(commands = commands, position = 4)
     # check HTTP URL status
     url_status <- check_urls(urls = urls, size = 10L, method = "HEAD")
-    Sys.sleep(10)
     # implement unit tests
     test_download_functions(directory_to_save = directory_to_save,
                             commands_path = commands_path,

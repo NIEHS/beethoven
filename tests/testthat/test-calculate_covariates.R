@@ -373,3 +373,99 @@ testthat::test_that("Check extract_nlcd_ratio works", {
     tolerance = 1e-7
   )
 })
+
+
+testthat::test_that("NEI calculation", {
+  withr::local_package("terra")
+  withr::local_package("sf")
+  withr::local_package("data.table")
+  withr::local_options(list(sf_use_s2 = FALSE))
+  withr::local_seed(202401)
+
+  ncpath <- system.file("gpkg/nc.gpkg", package = "sf")
+  nc <- terra::vect(ncpath)
+  nc <- nc[grep("(Orange|Wake|Durham)", nc$NAME), ]
+
+  testthat::expect_error(
+    calc_nei(neipath,
+      ncp,
+      year = 2017,
+      county_shp = nc,
+      sites_epsg = "EPSG:4267"
+    )
+  )
+  testthat::expect_error(
+    calc_nei(neipath,
+      ncpt,
+      year = 2010,
+      county_shp = nc,
+      sites_epsg = "EPSG:4267"
+    )
+  )
+  testthat::expect_error(
+    calc_nei(neipath,
+      ncpt,
+      year = 2017,
+      county_shp = "your/file/is/nowhere",
+      sites_epsg = "EPSG:4267"
+    )
+  )
+
+  nc$GEOID <- nc$FIPS
+  ncp <- data.frame(lon = -78.8277, lat = 35.95013)
+  ncp$site_id <- "3799900018810101"
+  ncp$time <- 2018
+  ncpt <- ncp# as.data.frame(ncp, geom = "XY")
+
+  # test data should be prepared
+  neipath <- testthat::test_path("..", "testdata", "nei")
+  testthat::expect_no_error(
+    ncnei <-
+      calc_nei(neipath,
+        ncpt,
+        year = 2017,
+        county_shp = nc,
+        sites_epsg = "EPSG:4267"
+      )
+  )
+  testthat::expect_no_error(
+    calc_nei(neipath,
+      ncpt,
+      year = 2017,
+      county_shp = ncpath,
+      sites_epsg = "EPSG:4267"
+    )
+  )
+
+  testthat::expect_true(any(grepl("NEI17", names(ncnei))))
+  testthat::expect_equal(ncnei$TRF_NEI17_0_00000, 1579079, tolerance = 1)
+
+  # error cases
+  testthat::expect_error(
+    calc_nei(neipath,
+      sf::st_as_sf(ncpt, coords = c("lon", "lat")),
+      year = 2017,
+      county_shp = nc,
+      sites_epsg = "EPSG:4267"
+    )
+  )
+  ncpsf <- sf::st_as_sf(ncpt, coords = c("lon", "lat"), remove = FALSE)
+  sf::st_crs(ncpsf) <- "EPSG:4267"
+  testthat::expect_no_error(
+    calc_nei(neipath,
+      ncpsf,
+      year = 2017,
+      county_shp = nc,
+      sites_epsg = "EPSG:4267"
+    )
+  )
+  testthat::expect_no_error(
+    calc_nei(neipath,
+      convert_stobj_to_stdt(ncpsf),
+      year = 2017,
+      county_shp = ncpath,
+      sites_epsg = "EPSG:4267"
+    )
+  )
+
+})

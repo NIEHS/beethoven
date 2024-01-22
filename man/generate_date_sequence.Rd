@@ -2,7 +2,7 @@
 % Please edit documentation in R/download_support.R
 \name{generate_date_sequence}
 \alias{generate_date_sequence}
-\title{Generate sequence of dates based on `date_start` and `date_end`.}
+\title{Generate sequence of dates based on \code{date_start} and \code{date_end}.}
 \usage{
 generate_date_sequence(date_start, date_end, sub_hyphen = TRUE)
 }
@@ -11,13 +11,13 @@ generate_date_sequence(date_start, date_end, sub_hyphen = TRUE)
 
 \item{date_end}{character(1). End of date sequence.}
 
-\item{sub_hyphen}{logical(1). Substitute hyphen in dates. If `TRUE`, returns
-date sequence as "YYYYMMDD". If `FALSE`, returns date sequence as
+\item{sub_hyphen}{logical(1). Substitute hyphen in dates. If \code{TRUE}, returns
+date sequence as "YYYYMMDD". If \code{FALSE}, returns date sequence as
 "YYYY-MM-DD".}
 }
 \value{
 vector
 }
 \description{
-Generate sequence of dates based on `date_start` and `date_end`.
+Generate sequence of dates based on \code{date_start} and \code{date_end}.
 }

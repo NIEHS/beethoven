@@ -165,7 +165,7 @@ download_aqs_data <-
       year_sequence
     )
     #### 6. check for valid URL
-    if (!(check_url_file_exist(download_urls[1]))) {
+    if (!(check_url_status(download_urls[1]))) {
       stop(paste0(
         "Invalid year returns HTTP code 404. ",
         "Check `year_start` parameter.\n"
@@ -972,8 +972,7 @@ download_merra2_data <- function(
 }
 
 # nolint start
-#' download_narr_monolevel_data: download monolevel meteorological data from
-#' NOAA NCEP North American Regional Reanalysis (NARR) model.
+#' download_narr_monolevel_data: download monolevel meteorological data from NOAA NCEP North American Regional Reanalysis (NARR) model.
 #' @description
 #' The \code{download_narr_monolevel_data} function accesses and downloads
 #' monolevel meteorological data from [NOAA NCEP North American Regional Reanalysis (NARR)](https://psl.noaa.gov/data/gridded/data.narr.html).
@@ -1395,14 +1394,10 @@ download_nlcd_data <- function(
 #' the text file containing download commands.
 #' @author Mitchell Manware, Insang Song
 #' @return NULL;
-# nolint end
 #' @export
 download_sedac_groads_data <- function(
     data_format = c("Shapefile", "Geodatabase"),
-    data_region = c(
-      "Americas", "Global", "Africa", "Asia",
-      "Europe", "Oceania East", "Oceania West"
-    ),
+    data_region = c("Americas", "Global", "Africa", "Asia", "Europe", "Oceania East", "Oceania West"),
     directory_to_download = "./input/sedac_groads/",
     directory_to_save = "./input/sedac_groads/",
     data_download_acknowledgement = FALSE,
@@ -1410,6 +1405,7 @@ download_sedac_groads_data <- function(
     remove_zip = FALSE,
     download = FALSE,
     remove_command = FALSE) {
+  # nolint end
   #### 1. check for data download acknowledgement
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
   #### 2. check for null parameters
@@ -1420,6 +1416,7 @@ download_sedac_groads_data <- function(
   directory_to_download <- download_sanitize_path(directory_to_download)
   directory_to_save <- download_sanitize_path(directory_to_save)
   #### 4. check if region is valid
+  data_format <- match.arg(data_format)
   data_region <- match.arg(data_region)
   #### 5. define URL base
   base <- paste0(
@@ -1486,8 +1483,7 @@ download_sedac_groads_data <- function(
   )
   #### 15. download data
   download_run(download = download,
-               system_command = system_command,
-               commands_txt = commands_txt)
+               system_command = system_command)
   #### 17. Remove command file
   download_remove_command(commands_txt = commands_txt,
                           remove = remove_command)
@@ -1809,7 +1805,7 @@ download_noaa_hms_smoke_data <- function(
       suffix
     )
     if (f == 1) {
-      if (!(check_url_file_exist(url))) {
+      if (!(check_url_status(url))) {
         sink()
         file.remove(commands_txt)
         stop(paste0(
@@ -1980,12 +1976,7 @@ download_koppen_geiger_data <- function(
     download = download,
     system_command = system_command
   )
-  #### 16. end if unzip == FALSE
-  download_unzip(
-    file_name = download_name,
-    directory_to_unzip = directory_to_save,
-    unzip = unzip
-  )
+
   if (unzip) {
     #### 17. remove unwanted files
     unwanted_names <- list.files(
@@ -2021,11 +2012,19 @@ download_koppen_geiger_data <- function(
     commands_txt = commands_txt,
     remove = remove_command
   )
-  #### 19. remove zip files
-  download_remove_zips(
-    remove = remove_zip,
-    download_name = download_name
-  )
+  if (download) {
+    #### 16. end if unzip == FALSE
+    download_unzip(
+      file_name = download_name,
+      directory_to_unzip = directory_to_save,
+      unzip = unzip
+    )
+    #### 19. remove zip files
+    download_remove_zips(
+      remove = remove_zip,
+      download_name = download_name
+    )
+  }
 }
 
 
@@ -2452,7 +2451,7 @@ download_tri_data <- function(
 #' @returns NULL; Two comma-separated value (CSV) raw files for 2017 and 2020
 #' @export
 download_nei_data <- function(
-  directory_to_save = "./input/aadt/",
+  directory_to_save = "./input/nei/",
   data_download_acknowledgement = FALSE,
   download = FALSE,
   remove_command = FALSE,

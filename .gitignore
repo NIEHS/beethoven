@@ -83,6 +83,7 @@ tools/metalearner_test
 .dodsrc
 
 # raw data
+input/aqs
 input/ecoregions
 input/geos
 input/gmted
