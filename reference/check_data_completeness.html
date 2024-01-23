@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">NRTAPmodel</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.1</span>
       </span>
     </div>
 
@@ -35,7 +35,13 @@
       <a href="../articles/cross_validation_types.html">Spatiotemporal cross validation types</a>
     </li>
     <li>
+      <a href="../articles/download_functions.html">download_data() and NASA EarthData Account</a>
+    </li>
+    <li>
       <a href="../articles/epa_download.html">Downloading EPA Daily Data</a>
+    </li>
+    <li>
+      <a href="../articles/prediction_points.html">Generate prediction points</a>
     </li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
@@ -83,16 +89,16 @@ Field names where completeness will be checked.</p></dd>
 
 <dt>report_fields_na</dt>
 <dd><p>logical(1). If any fields have NA values,
-report the field names which gave the errors. Default is FALSE.</p></dd>
+report the field names which gave the errors. Default is <code>FALSE</code>.</p></dd>
 
 </dl></div>
     <div id="value">
     <h2>Value</h2>
     
 
-<p>A logical (when report_fields_na is FALSE;
+<p>A logical (when report_fields_na is <code>FALSE</code>;
 TRUE means there are NA values at least one data value) or a list
-(when report_fields_na is TRUE) object.
+(when report_fields_na is <code>TRUE</code>) object.
 A list includes the list of fields that include NAs.</p>
     </div>
     <div id="author">

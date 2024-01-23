@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">NRTAPmodel</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.1</span>
       </span>
     </div>
 
@@ -35,7 +35,13 @@
       <a href="../articles/cross_validation_types.html">Spatiotemporal cross validation types</a>
     </li>
     <li>
+      <a href="../articles/download_functions.html">download_data() and NASA EarthData Account</a>
+    </li>
+    <li>
       <a href="../articles/epa_download.html">Downloading EPA Daily Data</a>
+    </li>
+    <li>
+      <a href="../articles/prediction_points.html">Generate prediction points</a>
     </li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
@@ -64,7 +70,7 @@
 
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">calc_koppen_geiger</span><span class="op">(</span></span>
-<span>  path_koppen <span class="op">=</span> <span class="st">"./input/koppen_geiger/raw/Beck_KG_V1_present_0p0083.tif"</span>,</span>
+<span>  path <span class="op">=</span> <span class="st">"./input/koppen_geiger/raw/Beck_KG_V1_present_0p0083.tif"</span>,</span>
 <span>  <span class="va">sites</span>,</span>
 <span>  id_col <span class="op">=</span> <span class="st">"site_id"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -72,7 +78,7 @@
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>path_koppen</dt>
+    <dl><dt>path</dt>
 <dd><p>character(1). Path to Koppen-Geiger
 climate zone raster file</p></dd>
 
@@ -91,11 +97,6 @@ a unique identifier field named <code>id_col</code></p></dd>
     
 
 <p>a data.frame object</p>
-    </div>
-    <div id="note">
-    <h2>Note</h2>
-    <p>the same function is run with an alias
-<code>calc_koeppen_geiger</code>.</p>
     </div>
     <div id="author">
     <h2>Author</h2>

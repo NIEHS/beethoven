@@ -13,10 +13,16 @@
     <loc>/articles/cross_validation_types.html</loc>
   </url>
   <url>
+    <loc>/articles/download_functions.html</loc>
+  </url>
+  <url>
     <loc>/articles/epa_download.html</loc>
   </url>
   <url>
     <loc>/articles/index.html</loc>
+  </url>
+  <url>
+    <loc>/articles/prediction_points.html</loc>
   </url>
   <url>
     <loc>/authors.html</loc>
@@ -25,13 +31,52 @@
     <loc>/index.html</loc>
   </url>
   <url>
+    <loc>/reference/base_learner_cv_fit.html</loc>
+  </url>
+  <url>
+    <loc>/reference/base_learner_cv_outcome.html</loc>
+  </url>
+  <url>
+    <loc>/reference/base_learner_fit.html</loc>
+  </url>
+  <url>
+    <loc>/reference/base_learner_fit_cnn.html</loc>
+  </url>
+  <url>
+    <loc>/reference/base_learner_fit_ranger.html</loc>
+  </url>
+  <url>
+    <loc>/reference/base_learner_fit_xgboost.html</loc>
+  </url>
+  <url>
+    <loc>/reference/base_learner_prep.html</loc>
+  </url>
+  <url>
     <loc>/reference/build_pipeline.html</loc>
+  </url>
+  <url>
+    <loc>/reference/calc_covariates.html</loc>
+  </url>
+  <url>
+    <loc>/reference/calc_ecoregion.html</loc>
   </url>
   <url>
     <loc>/reference/calc_koppen_geiger.html</loc>
   </url>
   <url>
+    <loc>/reference/calc_modis.html</loc>
+  </url>
+  <url>
+    <loc>/reference/calc_nei.html</loc>
+  </url>
+  <url>
     <loc>/reference/calc_nlcd_ratio.html</loc>
+  </url>
+  <url>
+    <loc>/reference/calc_temporal_dummies.html</loc>
+  </url>
+  <url>
+    <loc>/reference/calc_tri.html</loc>
   </url>
   <url>
     <loc>/reference/check_crs_is_valid.html</loc>
@@ -55,7 +100,7 @@
     <loc>/reference/check_temporal_range.html</loc>
   </url>
   <url>
-    <loc>/reference/check_url_file_exist.html</loc>
+    <loc>/reference/check_url_status.html</loc>
   </url>
   <url>
     <loc>/reference/check_urls.html</loc>
@@ -109,6 +154,9 @@
     <loc>/reference/download_narr_p_levels_data.html</loc>
   </url>
   <url>
+    <loc>/reference/download_nei_data.html</loc>
+  </url>
+  <url>
     <loc>/reference/download_nlcd_data.html</loc>
   </url>
   <url>
@@ -142,6 +190,9 @@
     <loc>/reference/download_sink.html</loc>
   </url>
   <url>
+    <loc>/reference/download_tri_data.html</loc>
+  </url>
+  <url>
     <loc>/reference/download_unzip.html</loc>
   </url>
   <url>
@@ -152,18 +203,6 @@
   </url>
   <url>
     <loc>/reference/extract_urls.html</loc>
-  </url>
-  <url>
-    <loc>/reference/fit_base_learner.html</loc>
-  </url>
-  <url>
-    <loc>/reference/fit_base_learner_cnn.html</loc>
-  </url>
-  <url>
-    <loc>/reference/fit_base_learner_ranger.html</loc>
-  </url>
-  <url>
-    <loc>/reference/fit_base_learner_xgboost.html</loc>
   </url>
   <url>
     <loc>/reference/generate_block_sp_index.html</loc>
@@ -193,6 +232,9 @@
     <loc>/reference/generate_cv_index_random.html</loc>
   </url>
   <url>
+    <loc>/reference/generate_date_sequence.html</loc>
+  </url>
+  <url>
     <loc>/reference/generate_spt_index.html</loc>
   </url>
   <url>
@@ -214,13 +256,31 @@
     <loc>/reference/meta_learner_predict.html</loc>
   </url>
   <url>
+    <loc>/reference/modis_aggregate_sds.html</loc>
+  </url>
+  <url>
+    <loc>/reference/modis_get_vrt.html</loc>
+  </url>
+  <url>
+    <loc>/reference/modis_mosaic_mod06.html</loc>
+  </url>
+  <url>
+    <loc>/reference/modis_prefilter_sds.html</loc>
+  </url>
+  <url>
+    <loc>/reference/modis_preprocess_vnp46.html</loc>
+  </url>
+  <url>
+    <loc>/reference/modis_warp_stars.html</loc>
+  </url>
+  <url>
+    <loc>/reference/modis_worker.html</loc>
+  </url>
+  <url>
     <loc>/reference/project_dt.html</loc>
   </url>
   <url>
     <loc>/reference/read_commands.html</loc>
-  </url>
-  <url>
-    <loc>/reference/startup_nrtap.html</loc>
   </url>
   <url>
     <loc>/reference/test_download_functions.html</loc>

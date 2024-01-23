@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">NRTAPmodel</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.1</span>
       </span>
     </div>
 
@@ -35,7 +35,13 @@
       <a href="../articles/cross_validation_types.html">Spatiotemporal cross validation types</a>
     </li>
     <li>
+      <a href="../articles/download_functions.html">download_data() and NASA EarthData Account</a>
+    </li>
+    <li>
       <a href="../articles/epa_download.html">Downloading EPA Daily Data</a>
+    </li>
+    <li>
+      <a href="../articles/prediction_points.html">Generate prediction points</a>
     </li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
@@ -92,18 +98,11 @@
     </div>
     <div id="details">
     <h2>Details</h2>
-    <p>"Block" in this function refers to
-a group of contiguous spatial/temporal entities.
-Regardless of mode values
-(should be one of 'spatial' or 'spatiotemporal'),
-the index column will be named 'sp_index'.
-<code>block_id</code> should be set with a proper field name
-when blocks is a sf or SpatVector object. When <code>cv_fold</code> is
-an integer, then the coordinates stored in <code>stdt</code> object
-are clustered with k-means. In this case, the result object
-will include attributes (accessible with <code>attr</code> function) about
-"kmeans_centers" (coordinates of centers) and
-"kmeans_sizes" (size of each cluster)</p>
+    <p>"Block" in this function refers to a group of contiguous spatial/temporal entities.
+Regardless of <code>mode</code> value (should be one of <code>"spatial"</code> or <code>"spatiotemporal"</code>),
+the index column will be named "sp_index". <code>block_id</code> should be set with a proper field name
+when blocks is a sf or SpatVector object. When <code>cv_fold</code> is an integer, then the coordinates stored in <code>stdt</code> object are clustered with k-means. In this case, the result object will include attributes (accessible with <code>attr</code> function) about
+"kmeans_centers" (coordinates of centers) and "kmeans_sizes" (size of each cluster)</p>
     </div>
     <div id="author">
     <h2>Author</h2>

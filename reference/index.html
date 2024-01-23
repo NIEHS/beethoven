@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">NRTAPmodel</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.1</span>
       </span>
     </div>
 
@@ -35,7 +35,13 @@
       <a href="../articles/cross_validation_types.html">Spatiotemporal cross validation types</a>
     </li>
     <li>
+      <a href="../articles/download_functions.html">download_data() and NASA EarthData Account</a>
+    </li>
+    <li>
       <a href="../articles/epa_download.html">Downloading EPA Daily Data</a>
+    </li>
+    <li>
+      <a href="../articles/prediction_points.html">Generate prediction points</a>
     </li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
@@ -61,17 +67,69 @@
           <p class="section-desc"></p>
         </th>
       </tr></tbody><tbody><tr><td>
+          <p><code><a href="base_learner_cv_fit.html">base_learner_cv_fit()</a></code> </p>
+        </td>
+        <td><p>Split training-test data for base learner fitting</p></td>
+      </tr><tr><td>
+          <p><code><a href="base_learner_cv_outcome.html">base_learner_cv_outcome()</a></code> </p>
+        </td>
+        <td><p>Return cvfold outcome values</p></td>
+      </tr><tr><td>
+          <p><code><a href="base_learner_fit.html">base_learner_fit()</a></code> </p>
+        </td>
+        <td><p>Fit base learner</p></td>
+      </tr><tr><td>
+          <p><code><a href="base_learner_fit_cnn.html">base_learner_fit_cnn()</a></code> </p>
+        </td>
+        <td><p>Fit convolutional neural networks with neural network library</p></td>
+      </tr><tr><td>
+          <p><code><a href="base_learner_fit_ranger.html">base_learner_fit_ranger()</a></code> </p>
+        </td>
+        <td><p>Fit random forests with ranger</p></td>
+      </tr><tr><td>
+          <p><code><a href="base_learner_fit_xgboost.html">base_learner_fit_xgboost()</a></code> </p>
+        </td>
+        <td><p>Fit XGBoost model</p></td>
+      </tr><tr><td>
+          <p><code><a href="base_learner_prep.html">base_learner_prep()</a></code> </p>
+        </td>
+        <td><p>Data preparation for base learners</p></td>
+      </tr><tr><td>
           <p><code><a href="build_pipeline.html">build_pipeline()</a></code> </p>
         </td>
-        <td><p>Title Build_Pipeline</p></td>
+        <td><p>Build generic pipeline</p></td>
+      </tr><tr><td>
+          <p><code><a href="calc_covariates.html">calc_covariates()</a></code> </p>
+        </td>
+        <td><p>Calculate covariates</p></td>
+      </tr><tr><td>
+          <p><code><a href="calc_ecoregion.html">calc_ecoregion()</a></code> </p>
+        </td>
+        <td><p>Calculate EPA Ecoregions level 2/3 binary variables</p></td>
       </tr><tr><td>
           <p><code><a href="calc_koppen_geiger.html">calc_koppen_geiger()</a></code> </p>
         </td>
         <td><p>Calculate Koeppen-Geiger climate zone binary variables</p></td>
       </tr><tr><td>
+          <p><code><a href="calc_modis.html">calc_modis()</a></code> </p>
+        </td>
+        <td><p>Calculate MODIS product covariates in multiple CPU threads</p></td>
+      </tr><tr><td>
+          <p><code><a href="calc_nei.html">calc_nei()</a></code> </p>
+        </td>
+        <td><p>Calculate National Emission Inventory (NEI) covariates</p></td>
+      </tr><tr><td>
           <p><code><a href="calc_nlcd_ratio.html">calc_nlcd_ratio()</a></code> </p>
         </td>
         <td><p>Compute land cover classes ratio in circle buffers around points</p></td>
+      </tr><tr><td>
+          <p><code><a href="calc_temporal_dummies.html">calc_temporal_dummies()</a></code> </p>
+        </td>
+        <td><p>Calculate temporal dummy variables</p></td>
+      </tr><tr><td>
+          <p><code><a href="calc_tri.html">calc_tri()</a></code> </p>
+        </td>
+        <td><p>Calculate TRI covariates</p></td>
       </tr><tr><td>
           <p><code><a href="check_crs_is_valid.html">check_crs_is_valid()</a></code> </p>
         </td>
@@ -95,20 +153,19 @@
       </tr><tr><td>
           <p><code><a href="check_output_locs_are_valid.html">check_output_locs_are_valid()</a></code> </p>
         </td>
-        <td><p>Check output locations are in
-the reference spatial domain of the mainland US</p></td>
+        <td><p>Check output locations are in the reference spatial domain of the mainland US</p></td>
       </tr><tr><td>
           <p><code><a href="check_temporal_range.html">check_temporal_range()</a></code> </p>
         </td>
         <td><p>Check if input data is within user defined temporal range</p></td>
       </tr><tr><td>
-          <p><code><a href="check_url_file_exist.html">check_url_file_exist()</a></code> </p>
+          <p><code><a href="check_url_status.html">check_url_status()</a></code> </p>
         </td>
         <td><p>Check if sample of download URLs have HTTP Status 200</p></td>
       </tr><tr><td>
           <p><code><a href="check_urls.html">check_urls()</a></code> </p>
         </td>
-        <td><p>Sample download URLs and apply `check_url_file_exist` function</p></td>
+        <td><p>Sample download URLs and apply <code>check_url_status</code> function</p></td>
       </tr><tr><td>
           <p><code><a href="check_variances_are_valid.html">check_variances_are_valid()</a></code> </p>
         </td>
@@ -132,65 +189,59 @@ the reference spatial domain of the mainland US</p></td>
       </tr><tr><td>
           <p><code><a href="convert_stobj_to_stdt.html">convert_stobj_to_stdt()</a></code> </p>
         </td>
-        <td><p>Convert spatio-temporal object to a datatable with lon, lat, time, predictors
-columns. It also returns the crs.</p></td>
+        <td><p>Convert spatio-temporal object to a datatable with lon, lat, time, predictors columns. It also returns the crs.</p></td>
       </tr><tr><td>
           <p><code><a href="download_aqs_data.html">download_aqs_data()</a></code> </p>
         </td>
-        <td><p>download_aqs_data: download daily data from AQS datamart</p></td>
+        <td><p>Download daily data from AQS datamart</p></td>
       </tr><tr><td>
           <p><code><a href="download_data.html">download_data()</a></code> </p>
         </td>
-        <td><p>download_data: a wrapper function for download covariate sources</p></td>
+        <td><p>Download raw data from sources</p></td>
       </tr><tr><td>
           <p><code><a href="download_ecoregion_data.html">download_ecoregion_data()</a></code> </p>
         </td>
-        <td><p>download_ecoregion_data: download Ecoregion Shapefiles from EPA.</p></td>
+        <td><p>Download Ecoregion Shapefiles from EPA</p></td>
       </tr><tr><td>
           <p><code><a href="download_geos_cf_data.html">download_geos_cf_data()</a></code> </p>
         </td>
-        <td><p>download_geos_cf_data: download atmospheric composition data from the NASA
-Global Earth Observing System (GEOS) model.</p></td>
+        <td><p>Download atmospheric composition data from the NASA Global Earth Observing System (GEOS) model.</p></td>
       </tr><tr><td>
           <p><code><a href="download_gmted_data.html">download_gmted_data()</a></code> </p>
         </td>
-        <td><p>download_gmted_data: download global elevation data from the Global Multi-
-resolution Terrain Elevation Data (GMTED2010).</p></td>
+        <td><p>Download global elevation data from the Global Multi-resolution Terrain Elevation Data (GMTED2010).</p></td>
       </tr><tr><td>
           <p><code><a href="download_koppen_geiger_data.html">download_koppen_geiger_data()</a></code> </p>
         </td>
-        <td><p>download_koppen_geiger_data: download climate classification data from the
-Present and future Köppen-Geiger climate classification maps.</p></td>
+        <td><p>Download climate classification data from the present and future Köppen-Geiger climate classification maps.</p></td>
       </tr><tr><td>
           <p><code><a href="download_merra2_data.html">download_merra2_data()</a></code> </p>
         </td>
-        <td><p>download_merra2_data: download meteorological and atmospheric data from the
-Modern-Era Retrospective analysis for Research and Applications, Version 2
-(MERRA-2) model.</p></td>
+        <td><p>Download meteorological and atmospheric data from the Modern-Era Retrospective analysis for Research and Applications, Version 2 (MERRA-2) model.</p></td>
       </tr><tr><td>
           <p><code><a href="download_modis_data.html">download_modis_data()</a></code> </p>
         </td>
-        <td><p>download_modis_data:</p></td>
+        <td><p>Download MODIS product files</p></td>
       </tr><tr><td>
           <p><code><a href="download_narr_monolevel_data.html">download_narr_monolevel_data()</a></code> </p>
         </td>
-        <td><p>download_narr_monolevel_data: download monolevel meteorological data from
-NOAA NCEP North American Regional Reanalysis (NARR) model.</p></td>
+        <td><p>download_narr_monolevel_data: download monolevel meteorological data from NOAA NCEP North American Regional Reanalysis (NARR) model.</p></td>
       </tr><tr><td>
           <p><code><a href="download_narr_p_levels_data.html">download_narr_p_levels_data()</a></code> </p>
         </td>
-        <td><p>download_narr_p_levels_data: download pressure level meteorological data from
-NOAA NCEP North American Regional Reanalysis (NARR) model.</p></td>
+        <td><p>Download pressure level meteorological data from NOAA NCEP North American Regional Reanalysis (NARR) model.</p></td>
+      </tr><tr><td>
+          <p><code><a href="download_nei_data.html">download_nei_data()</a></code> </p>
+        </td>
+        <td><p>Download data from EPA National Emission Inventory aggregated on-road emission data</p></td>
       </tr><tr><td>
           <p><code><a href="download_nlcd_data.html">download_nlcd_data()</a></code> </p>
         </td>
-        <td><p>download_nlcd_data: download land cover data from the National Land Cover
-Database Science Research Products.</p></td>
+        <td><p>Download land cover data from the National Land Cover Database Science Research Products.</p></td>
       </tr><tr><td>
           <p><code><a href="download_noaa_hms_smoke_data.html">download_noaa_hms_smoke_data()</a></code> </p>
         </td>
-        <td><p>download_noaa_hms_smoke_data: download daily wildfire smoke plume data from
-NOAA Hazard Mapping System Fire and Smoke Product</p></td>
+        <td><p>Download daily wildfire smoke plume data from NOAA Hazard Mapping System Fire and Smoke Product</p></td>
       </tr><tr><td>
           <p><code><a href="download_permit.html">download_permit()</a></code> </p>
         </td>
@@ -206,7 +257,8 @@ NOAA Hazard Mapping System Fire and Smoke Product</p></td>
       </tr><tr><td>
           <p><code><a href="download_run.html">download_run()</a></code> </p>
         </td>
-        <td><p>download_run: execute or skip `system_command` in data download function.</p></td>
+        <td><p>download_run: execute or skip <code>system_command</code>
+in data download function.</p></td>
       </tr><tr><td>
           <p><code><a href="download_sanitize_path.html">download_sanitize_path()</a></code> </p>
         </td>
@@ -214,14 +266,11 @@ NOAA Hazard Mapping System Fire and Smoke Product</p></td>
       </tr><tr><td>
           <p><code><a href="download_sedac_groads_data.html">download_sedac_groads_data()</a></code> </p>
         </td>
-        <td><p>download_sedac_groads_data: download Global Roads Open Access Data
-Set (gROADS), v1 (1980-2010) data from NASA Socioeconomic Data and
-Applications Center (SEDAC).</p></td>
+        <td><p>Download Global Roads Open Access Data Set (gROADS), v1 (1980-2010) data from NASA Socioeconomic Data and Applications Center (SEDAC).</p></td>
       </tr><tr><td>
           <p><code><a href="download_sedac_population_data.html">download_sedac_population_data()</a></code> </p>
         </td>
-        <td><p>download_sedac_population_data: download UN WPP-Adjusted population density
-data from NASA Socioeconomic Data and Applications Center (SEDAC).</p></td>
+        <td><p>Download UN WPP-Adjusted population density data from NASA Socioeconomic Data and Applications Center (SEDAC)</p></td>
       </tr><tr><td>
           <p><code><a href="download_setup_dir.html">download_setup_dir()</a></code> </p>
         </td>
@@ -230,6 +279,10 @@ data from NASA Socioeconomic Data and Applications Center (SEDAC).</p></td>
           <p><code><a href="download_sink.html">download_sink()</a></code> </p>
         </td>
         <td><p>Start sink download commands into a text file</p></td>
+      </tr><tr><td>
+          <p><code><a href="download_tri_data.html">download_tri_data()</a></code> </p>
+        </td>
+        <td><p>Download data from EPA toxic release inventory</p></td>
       </tr><tr><td>
           <p><code><a href="download_unzip.html">download_unzip()</a></code> </p>
         </td>
@@ -247,22 +300,6 @@ data from NASA Socioeconomic Data and Applications Center (SEDAC).</p></td>
         </td>
         <td><p>Extract URLs from download commands</p></td>
       </tr><tr><td>
-          <p><code><a href="fit_base_learner.html">fit_base_learner()</a></code> </p>
-        </td>
-        <td><p>Fit base learner</p></td>
-      </tr><tr><td>
-          <p><code><a href="fit_base_learner_cnn.html">fit_base_learner_cnn()</a></code> </p>
-        </td>
-        <td><p>Fit convolutional neural networks with neural network library</p></td>
-      </tr><tr><td>
-          <p><code><a href="fit_base_learner_ranger.html">fit_base_learner_ranger()</a></code> </p>
-        </td>
-        <td><p>Fit random forests with ranger</p></td>
-      </tr><tr><td>
-          <p><code><a href="fit_base_learner_xgboost.html">fit_base_learner_xgboost()</a></code> </p>
-        </td>
-        <td><p>Fit XGBoost model</p></td>
-      </tr><tr><td>
           <p><code><a href="generate_block_sp_index.html">generate_block_sp_index()</a></code> </p>
         </td>
         <td><p>Generate blocked spatial index</p></td>
@@ -273,18 +310,15 @@ data from NASA Socioeconomic Data and Applications Center (SEDAC).</p></td>
       </tr><tr><td>
           <p><code><a href="generate_cv_index_lblo.html">generate_cv_index_lblo()</a></code> </p>
         </td>
-        <td><p>Generate spatio-temporal cross-validation index
-(leave-block-location-out)</p></td>
+        <td><p>Generate spatio-temporal cross-validation index (leave-block-location-out)</p></td>
       </tr><tr><td>
           <p><code><a href="generate_cv_index_lblto.html">generate_cv_index_lblto()</a></code> </p>
         </td>
-        <td><p>Generate spatio-temporal cross-validation index
-(leave-block-location-time-out)</p></td>
+        <td><p>Generate spatio-temporal cross-validation index (leave-block-location-time-out)</p></td>
       </tr><tr><td>
           <p><code><a href="generate_cv_index_lbto.html">generate_cv_index_lbto()</a></code> </p>
         </td>
-        <td><p>Generate spatio-temporal cross-validation index
-(leave-block-time-out)</p></td>
+        <td><p>Generate spatio-temporal cross-validation index (leave-block-time-out)</p></td>
       </tr><tr><td>
           <p><code><a href="generate_cv_index_lolo.html">generate_cv_index_lolo()</a></code> </p>
         </td>
@@ -292,8 +326,7 @@ data from NASA Socioeconomic Data and Applications Center (SEDAC).</p></td>
       </tr><tr><td>
           <p><code><a href="generate_cv_index_lolto.html">generate_cv_index_lolto()</a></code> </p>
         </td>
-        <td><p>Generate spatio-temporal cross-validation index
-(leave-one-location-time-out)</p></td>
+        <td><p>Generate spatio-temporal cross-validation index leave-one-location-time-out)</p></td>
       </tr><tr><td>
           <p><code><a href="generate_cv_index_loto.html">generate_cv_index_loto()</a></code> </p>
         </td>
@@ -301,8 +334,11 @@ data from NASA Socioeconomic Data and Applications Center (SEDAC).</p></td>
       </tr><tr><td>
           <p><code><a href="generate_cv_index_random.html">generate_cv_index_random()</a></code> </p>
         </td>
-        <td><p>Generate spatio-temporal cross-validation index
-(random)</p></td>
+        <td><p>Generate spatio-temporal cross-validation index (random)</p></td>
+      </tr><tr><td>
+          <p><code><a href="generate_date_sequence.html">generate_date_sequence()</a></code> </p>
+        </td>
+        <td><p>Generate sequence of dates based on <code>date_start</code> and <code>date_end</code>.</p></td>
       </tr><tr><td>
           <p><code><a href="generate_spt_index.html">generate_spt_index()</a></code> </p>
         </td>
@@ -310,12 +346,11 @@ data from NASA Socioeconomic Data and Applications Center (SEDAC).</p></td>
       </tr><tr><td>
           <p><code><a href="generic_base_learner.html">generic_base_learner()</a></code> </p>
         </td>
-        <td><p>define a base learner dummy: this illustrates one way to wrap a learning
-algorithm and return an object that makes predictions</p></td>
+        <td><p>Generic script to apply a base learner to data and then a meta learner</p></td>
       </tr><tr><td>
           <p><code><a href="generic_meta_learner.html">generic_meta_learner()</a></code> </p>
         </td>
-        <td><p>Title Generic_Meta_Learner</p></td>
+        <td><p>Generic meta learner</p></td>
       </tr><tr><td>
           <p><code><a href="is_stdt.html">is_stdt()</a></code> </p>
         </td>
@@ -323,17 +358,39 @@ algorithm and return an object that makes predictions</p></td>
       </tr><tr><td>
           <p><code><a href="meta_learner_fit.html">meta_learner_fit()</a></code> </p>
         </td>
-        <td><p>meta_learner_fit
-Fit a BART (Bayesian Additive Regression Tree) meta learner. It takes
-predictions of other models such as kriging, GLM, machine learning models as
-input and fits a BART Model</p></td>
+        <td><p>Fit a BART (Bayesian Additive Regression Tree) meta learner. It takes predictions of other models such as kriging, GLM, machine learning models as input and fits a BART Model</p></td>
       </tr><tr><td>
           <p><code><a href="meta_learner_predict.html">meta_learner_predict()</a></code> </p>
         </td>
-        <td><p>meta_learner_predict - take the list of BART fit objects and
-predictions of baselearners to create meta_learner predictions. The BART
-meta learner is not explicitly a S-T model, but the input covariates
-(outputs of each base learner) are S-T based.</p></td>
+        <td><p>Create meta_learner predictions from the list of BART fit objects and predictions of base learners</p></td>
+      </tr><tr><td>
+          <p><code><a href="modis_aggregate_sds.html">modis_aggregate_sds()</a></code> </p>
+        </td>
+        <td><p>Aggregate layers in a MODIS sub-dataset</p></td>
+      </tr><tr><td>
+          <p><code><a href="modis_get_vrt.html">modis_get_vrt()</a></code> </p>
+        </td>
+        <td><p>Get mosaicked or merged raster from multiple MODIS hdf files</p></td>
+      </tr><tr><td>
+          <p><code><a href="modis_mosaic_mod06.html">modis_mosaic_mod06()</a></code> </p>
+        </td>
+        <td><p>Mosaic MODIS MOD06_L2 product files</p></td>
+      </tr><tr><td>
+          <p><code><a href="modis_prefilter_sds.html">modis_prefilter_sds()</a></code> </p>
+        </td>
+        <td><p>Selected MODIS product subdataset name selector</p></td>
+      </tr><tr><td>
+          <p><code><a href="modis_preprocess_vnp46.html">modis_preprocess_vnp46()</a></code> </p>
+        </td>
+        <td><p>Assign MODIS VNP46 corner coordinates to retrieve a merged raster</p></td>
+      </tr><tr><td>
+          <p><code><a href="modis_warp_stars.html">modis_warp_stars()</a></code> </p>
+        </td>
+        <td><p>Warp MODIS Swath data into rectilinear grid raster</p></td>
+      </tr><tr><td>
+          <p><code><a href="modis_worker.html">modis_worker()</a></code> </p>
+        </td>
+        <td><p>A single-date MODIS worker for parallelization</p></td>
       </tr><tr><td>
           <p><code><a href="project_dt.html">project_dt()</a></code> </p>
         </td>
@@ -342,10 +399,6 @@ meta learner is not explicitly a S-T model, but the input covariates
           <p><code><a href="read_commands.html">read_commands()</a></code> </p>
         </td>
         <td><p>Read commands and convert to character vector</p></td>
-      </tr><tr><td>
-          <p><code><a href="startup_nrtap.html">startup_nrtap()</a></code> </p>
-        </td>
-        <td><p>Start-up settings</p></td>
       </tr><tr><td>
           <p><code><a href="test_download_functions.html">test_download_functions()</a></code> </p>
         </td>

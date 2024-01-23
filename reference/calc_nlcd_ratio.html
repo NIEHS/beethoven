@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">NRTAPmodel</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.1</span>
       </span>
     </div>
 
@@ -35,7 +35,13 @@
       <a href="../articles/cross_validation_types.html">Spatiotemporal cross validation types</a>
     </li>
     <li>
+      <a href="../articles/download_functions.html">download_data() and NASA EarthData Account</a>
+    </li>
+    <li>
       <a href="../articles/epa_download.html">Downloading EPA Daily Data</a>
+    </li>
+    <li>
+      <a href="../articles/prediction_points.html">Generate prediction points</a>
     </li>
   </ul></li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
@@ -54,7 +60,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Compute land cover classes ratio in circle buffers around points</h1>
-    <small class="dont-index">Source: <a href="https://github.com/Spatiotemporal-Exposures-and-Toxicology/NRTAPmodel/blob/HEAD/R/calc_nlcd_ratio.R" class="external-link"><code>R/calc_nlcd_ratio.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/Spatiotemporal-Exposures-and-Toxicology/NRTAPmodel/blob/HEAD/R/calculate_covariates.R" class="external-link"><code>R/calculate_covariates.R</code></a></small>
     <div class="hidden name"><code>calc_nlcd_ratio.Rd</code></div>
     </div>
 
@@ -63,26 +69,26 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">calc_nlcd_ratio</span><span class="op">(</span><span class="va">data_vect</span>, buf_radius <span class="op">=</span> <span class="fl">1000</span>, year <span class="op">=</span> <span class="fl">2021</span>, <span class="va">nlcd_path</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">calc_nlcd_ratio</span><span class="op">(</span><span class="va">path</span>, <span class="va">sites</span>, radius <span class="op">=</span> <span class="fl">1000</span>, year <span class="op">=</span> <span class="fl">2021</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>data_vect</dt>
+    <dl><dt>path</dt>
+<dd><p>character giving nlcd data path</p></dd>
+
+
+<dt>sites</dt>
 <dd><p>terra::SpatVector of points geometry</p></dd>
 
 
-<dt>buf_radius</dt>
+<dt>radius</dt>
 <dd><p>numeric (non-negative) giving the
 radius of buffer around points</p></dd>
 
 
 <dt>year</dt>
 <dd><p>numeric giving the year of NLCD data used</p></dd>
-
-
-<dt>nlcd_path</dt>
-<dd><p>character giving nlcd data path</p></dd>
 
 </dl></div>
 
