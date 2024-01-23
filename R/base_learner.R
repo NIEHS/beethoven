@@ -272,7 +272,8 @@ base_learner_fit_xgboost <- function(
 #' @param dependent_name character(1). Name of the dependent variable.
 #' @author Insang Song
 #' @returns List length of \code{max(cv_index)}
-#' with numeric vectors
+#' with numeric vectors when `length(dependent_name) == 1` or
+#' data.frames `length(dependent_name) > 1`
 #' @export
 base_learner_cv_outcome <-
   function(
@@ -281,8 +282,17 @@ base_learner_cv_outcome <-
     dependent_name
   ) {
     ys <- data.frame(data$stdt)
-    ys <- ys[, dependent_name]
-    cv_index_l <- split(cv_index, seq_len(max(cv_index)))
-    ycvfolds <- lapply(cv_index_l, function(x) ys[cv_index == x])
-    return(ycvfolds)
+    #ys <- ys[, ]
+    unique_cvi <- unique(cv_index)
+    len_cvi <- length(unique_cvi)
+
+    # initialize list
+    cvindex_l <- vector("list", length = len_cvi)
+
+    # using for loop to save memory
+    for (idx in seq_len(len_cvi)) {
+      # dependent variable
+      cvindex_l[[idx]] <- ys[cv_index == unique_cvi[idx], dependent_name]
+    }
+    return(cvindex_l)
   }
