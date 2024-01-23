@@ -199,3 +199,44 @@ testthat::test_that("Swath warping abides", {
   )
 
 })
+
+
+testthat::test_that("Other MODIS function errors", {
+  withr::local_package("terra")
+  withr::local_package("stars")
+  withr::local_options(list(sf_use_s2 = FALSE))
+  path_mod06 <-
+    testthat::test_path(
+      "..", "testdata", "modis",
+      "MOD06_L2.A2021227.0320.061.2021227134022.hdf"
+    )
+  path_mod06 <-
+    sprintf("HDF4_EOS:EOS_SWATH:%s:mod06:Cloud_Fraction_Night", path_mod06)
+
+  testthat::expect_no_error(
+    suppressWarnings(
+      modis_mosaic_mod06(
+        paths = path_mod06,
+        date_in = "2021-08-15"
+      )
+    )
+  )
+  testthat::expect_error(
+    modis_mosaic_mod06(
+      paths = path_mod06,
+      date_in = "2021~08~15"
+    )
+  )
+  testthat::expect_error(
+    modis_mosaic_mod06(
+      paths = path_mod06,
+      date_in = "2021-13-15"
+    )
+  )
+  testthat::expect_error(
+    modis_mosaic_mod06(
+      paths = path_mod06,
+      date_in = "2021-12-45"
+    )
+  )
+})

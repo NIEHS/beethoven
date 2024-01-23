@@ -236,6 +236,12 @@ testthat::test_that("calc_modis works well.", {
     )
   )
 
+  site_faux_r <- site_faux
+  names(site_faux_r)[1] <- "ID"
+  testthat::expect_error(
+    modis_worker(raster = rast(nrow = 3, ncol = 3), date = "2021-08-15",
+                 sites_in = site_faux_r)
+  )
   testthat::expect_error(
     modis_worker(raster = rast(nrow = 3, ncol = 3), date = "2021-08-15",
                  sites_in = matrix(c(1, 3, 4, 5), nrow = 2))
@@ -256,6 +262,16 @@ testthat::test_that("calc_modis works well.", {
   )
   testthat::expect_error(
     calc_modis(path = path_mod11, product = "MOD11A1", sites = list(1, 2, 3))
+  )
+  testthat::expect_warning(
+    calc_modis(
+      path = path_vnp46,
+      product = "VNP46A2",
+      sites = site_faux,
+      name_covariates = c("MOD_NITLT_0_", "MOD_K1_"),
+      subdataset = 3L,
+      nthreads = 1
+    )
   )
 
 })
