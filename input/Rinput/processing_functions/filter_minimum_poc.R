@@ -16,7 +16,9 @@
 #' @param poc_name character(1). Name of column containing POC values.
 #' @author Insang Song
 #' @returns a data.table object
-#' @import dplyr
+#' @importFrom dplyr group_by
+#' @importFrom dplyr filter
+#' @importFrom dplyr ungroup
 #' @importFrom data.table data.table
 #' @importFrom rlang sym
 #' @export
@@ -33,11 +35,11 @@ filter_minimum_poc <- function(input_df, site_id, poc_name) {
   }
 
   poc_filtered <- input_df |>
-    dplyr::group_by(!!sym(site_id)) |>
-    dplyr::filter(!!sym(poc_name) == min(!!sym(poc_name))) |>
+    dplyr::group_by(!!rlang::sym(site_id)) |>
+    dplyr::filter(!!rlang::sym(poc_name) == min(!!rlang::sym(poc_name))) |>
     dplyr::ungroup() |>
     data.table::data.table()
-return(poc_filtered)
-#nocov end
+  return(poc_filtered)
+  #nocov end
 }
 

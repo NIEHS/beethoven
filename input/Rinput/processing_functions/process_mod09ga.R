@@ -33,7 +33,7 @@ unique_sites <- filter_unique_sites(
   file.path(rootdir, userdir, "tests/testdata/daily_88101_2018-2022.rds"),
   file.path(rootdir, userdir, "R/manipulate_spacetime_data.R"))
 # unique_sites_t <- filter_unique_sites(include_time = TRUE)
-sites <- sf::st_as_sf(unique_sites, coords = 2:3, crs = "EPSG:4326")
+sites_sf <- sf::st_as_sf(unique_sites, coords = 2:3, crs = "EPSG:4326")
 
 
 # check if remotes package is available
@@ -57,7 +57,7 @@ radius <- c(0L, 1e3L, 1e4L, 5e4L)
 
 
 ## hierarchy (arbitrary subsets of census regions)
-# 
+#
 ## path setting
 # modis_mod13 <-
 #   list.files(path = "~/projects/NRTAPModel/input/data/modis/raw/61/MOD13A2",
@@ -167,12 +167,12 @@ modis_worker <- function(
 
 ## MOD09GA elements ####
 modis_mod09 <-
-  list.files(path = "~/projects/NRTAPModel/input/data/modis/raw/61/MOD09GA",
+  list.files(path = "~/projects/NRTAPModel/input/modis/raw/61/MOD09GA",
              pattern = "*.hdf$",
              recursive = TRUE,
              full.names = TRUE)
 # stringi::stri_extract_first(modis_mod11, regex = "\\d{4,4}/\\d{3,3}")
-terra::describe(modis_mod09[1], sds = T)
+# terra::describe(modis_mod09[1], sds = T)
 # SDS 2:8 /12:18/ (Band 1 - 7)
 #  1 MOD_SFCRF_1_00000
 #  2 MOD_SFCRF_2_00000
@@ -189,70 +189,129 @@ mod09dates <- unique(mod09dates)
 mod09dates <- stringi::stri_replace_all(mod09dates, fixed = "/", "")
 
 
-cl <-
-  parallelly::makeClusterPSOCK(
-    30L, rscript_libs = .libPaths())
-registerDoParallel(cl)
+# cl <-
+#   parallelly::makeClusterPSOCK(
+#     30L, rscript_libs = .libPaths())
+# registerDoParallel(cl)
 
 
-mod09get <- function(
-  flist, date_in, layers = 2:8
-) {
-  today <- as.character(date_in)
-  year_today <- strftime(today, "%Y")
-  jul_today <- strftime(today, "%j")
-  dayjul <- paste0(year_today, "/", jul_today)
-  ftarget <- grep(paste0(dayjul), flist, value = TRUE)
-  layer_target <- lapply(ftarget, \(x) terra::rast(x, lyrs = layers))
-  #terra::vrt(ftarget, options = opt_list)
-  do.call(terra::merge, layer_target)
-}
+# mod09get <- function(
+#   flist, date_in, layers = 2:8
+# ) {
+#   today <- as.character(date_in)
+#   year_today <- strftime(today, "%Y")
+#   jul_today <- strftime(today, "%j")
+#   dayjul <- paste0(year_today, "/", jul_today)
+#   ftarget <- grep(paste0(dayjul), flist, value = TRUE)
+#   layer_target <- lapply(ftarget, \(x) terra::rast(x, lyrs = layers))
+#   #terra::vrt(ftarget, options = opt_list)
+#   do.call(terra::merge, layer_target)
+# }
 
-resdf_mod09_surfref <-
-foreach(
-  datei = seq_along(mod09dates),
-  .packages = c("sf", "terra", "exactextractr", "foreach", "scomps", "dplyr", "parallelly"),
-  .export = c("sites", "modis_mod09", "mod09dates", "modis_worker", "mod09get", "get_vrt", "radius"),
-  .combine = dplyr::bind_rows,
-  .errorhandling = "pass"
-) %dorng% {
-    options(sf_use_s2 = FALSE)
-    #radius <- c(0L, 1e3L, 1e4L, 5e4L)
+# resdf_mod09_surfref <-
+# foreach(
+#   datei = seq_along(mod09dates),
+#   .packages = c("sf", "terra", "exactextractr", "foreach", "scomps", "dplyr", "parallelly"),
+#   .export = c("sites", "modis_mod09", "mod09dates", "modis_worker", "mod09get", "get_vrt", "radius"),
+#   .combine = dplyr::bind_rows,
+#   .errorhandling = "pass"
+# ) %dorng% {
+#     options(sf_use_s2 = FALSE)
+#     #radius <- c(0L, 1e3L, 1e4L, 5e4L)
     
-    mod09_thisyear <- mod09dates[datei]
-    mod09_thisyear <- as.Date(mod09_thisyear, format = "%Y%j")
+#     mod09_thisyear <- mod09dates[datei]
+#     mod09_thisyear <- as.Date(mod09_thisyear, format = "%Y%j")
 
-    radiusindex <- seq_along(radius)
-    radiuslist <- split(radiusindex, radiusindex)
-    nameflag <- sprintf("MOD_SFCRF_%d_", seq(1, 7))
-    res0 <-
-    lapply(radiuslist,
-      function(k) {
-        name_radius <- sprintf("%s%05d", nameflag, radius[k])
-        tryCatch({
-        extracted <- modis_worker(
-          paths = modis_mod09,
-          date = mod09_thisyear,
-          subdataset = NULL,
-          name_extracted = name_radius,
-          points = terra::vect(sites),
-          id = "site_id",
-          layers = seq(2, 8),
-          radius = radius[k],
-          ismod09 = TRUE
-          )
-        return(extracted)
-        }, error = function(e) {
-          error_df <- sf::st_drop_geometry(sites)
-          error_df$date <- mod09_thisyear
-          error_df$remarks <- -99999
-          names(error_df)[which(names(error_df) == "remarks")] <- name_radius
-          return(error_df)
-        })
-      })
-    res <- Reduce(\(x, y) dplyr::left_join(x, y, by = c("site_id", "date")), res0)
-    return(res)
-  }
+#     radiusindex <- seq_along(radius)
+#     radiuslist <- split(radiusindex, radiusindex)
+#     nameflag <- sprintf("MOD_SFCRF_%d_", seq(1, 7))
+#     res0 <-
+#     lapply(radiuslist,
+#       function(k) {
+#         name_radius <- sprintf("%s%05d", nameflag, radius[k])
+#         tryCatch({
+#         extracted <- modis_worker(
+#           paths = modis_mod09,
+#           date = mod09_thisyear,
+#           subdataset = NULL,
+#           name_extracted = name_radius,
+#           points = terra::vect(sites),
+#           id = "site_id",
+#           layers = seq(2, 8),
+#           radius = radius[k],
+#           ismod09 = TRUE
+#           )
+#         return(extracted)
+#         }, error = function(e) {
+#           error_df <- sf::st_drop_geometry(sites)
+#           error_df$date <- mod09_thisyear
+#           error_df$remarks <- -99999
+#           names(error_df)[which(names(error_df) == "remarks")] <- name_radius
+#           return(error_df)
+#         })
+#       })
+#     res <- Reduce(\(x, y) dplyr::left_join(x, y, by = c("site_id", "date")), res0)
+#     return(res)
+#   }
+# based on older version of calc_modis
+source("R/calculate_covariates.R")
+mod09_vars <-
+  calc_modis(
+    modis_mod09,
+    product = "MOD09GA",
+    sites = sites_sf,
+    name_covariates = sprintf("MOD_SFCRF_%d_", seq(1, 7)),
+    nthreads = 2L
+  )
+
+
+mod09_2018001 <-
+modis_get_vrt(
+  paths = modis_mod09[1:23],
+  "MOD09GA",
+  date_in = "2018-01-01",
+  foo = "mean"
+)
+
+mod09_pnts <- terra::spatSample(mod09_2018001, 10000L, as.points = TRUE)
+mod09_pnts <- terra::buffer(mod09_pnts, 10000L)
+mod09_buf10_ext <- exactextractr::exact_extract(mod09_2018001, sf::st_as_sf(mod09_pnts), fun = "mean")
+
+# CPU hang error check
+terra::describe(modis_mod09[1], sds = TRUE)
+sds_selector("MOD09GA", NULL)
+regex_sds <- NULL
+d1 <- sds_aggregate(modis_mod09[1], "MOD09GA", fun_agg = "mean")
+d2 <- sds_aggregate(modis_mod09[2], "MOD09GA", fun_agg = "mean")
+d3 <- sds_aggregate(modis_mod09[3], "MOD09GA", fun_agg = "mean")
+object.size(values(d1))
+d123 <- terra::vrt(d1, d2, d3)
+object.size(d123)
+
+d123l <- do.call(terra::merge, list(d1, d2, d3))
 
 saveRDS(resdf_mod09_surfref,
     file = "/ddn/gs1/home/songi2/NRTAP_Covar_MOD09GA_B1_B7.rds")
+
+
+
+for (i in 24:46) {
+  assign(sprintf("d%02d", i),
+         sds_aggregate(modis_mod09[i], "MOD09GA", fun_agg = "mean"),
+         envir = .GlobalEnv)
+}
+
+d24461 <-
+  terra::vrt(modis_mod09[24:46], options = c("-sd", "12"))
+d24462 <-
+  terra::vrt(modis_mod09[24:46], options = c("-sd", "13"))
+d2446
+d1 <- sds_aggregate(modis_mod09[24], "MOD09GA", fun_agg = "mean")
+d2 <- sds_aggregate(modis_mod09[25], "MOD09GA", fun_agg = "mean")
+d3 <- sds_aggregate(modis_mod09[26], "MOD09GA", fun_agg = "mean")
+d4 <- sds_aggregate(modis_mod09[27], "MOD09GA", fun_agg = "mean")
+d5 <- sds_aggregate(modis_mod09[28], "MOD09GA", fun_agg = "mean")
+d15 <- terra::merge(d1, d2, d3, d4, d5)
+
+
+system("find /tmp/Rtmp*  -maxdepth 2 -mmin -60")

@@ -18,7 +18,8 @@ test_that("the meta learner fitting abides", {
   # Fit learner
   meta_model <- meta_learner_fit(
     base_predictor_list = predictor_list,
-    kfolds = kfolds, y = response
+    kfolds = kfolds, y = response,
+    ntree = 100L, ndpost = 500L
   )
 
   # test the output of the meta-learner fit is a list
@@ -46,9 +47,16 @@ test_that("the meta learner fitting abides", {
 
   expect_error(meta_learner_fit(
     base_predictor_list = predictor_list,
-    kfolds = kfolds, y = response
+    kfolds = kfolds, y = response,
+    ntree = 50L, ndpost = 250L
   ), "Error in meta_learner_fit:
          Base predictors need to be the same length")
+
+  expect_error(meta_learner_fit(
+    base_predictor_list = rep(NA, 3),
+    kfolds = kfolds, y = response,
+    ntree = 50L, ndpost = 250L
+  ))
 
   # test that it throws an error when base learners
   # and response are different length
@@ -62,7 +70,8 @@ test_that("the meta learner fitting abides", {
 
   expect_error(meta_learner_fit(
     base_predictor_list = predictor_list,
-    kfolds = kfolds, y = response
+    kfolds = kfolds, y = response,
+    ntree = 50L, ndpost = 250L
   ), "Error in meta_learner_fit:
          Predictors and response are not the same length")
 
@@ -73,7 +82,8 @@ test_that("the meta learner fitting abides", {
 
   expect_error(meta_learner_fit(
     base_predictor_list = predictor_list,
-    kfolds = kfolds, y = response
+    kfolds = kfolds, y = response,
+    ntree = 50L, ndpost = 250L
   ), "Error in meta_learner_fit:
          kfolds vector and response are not the same length")
 
@@ -84,7 +94,8 @@ test_that("the meta learner fitting abides", {
 
   expect_error(meta_learner_fit(
     base_predictor_list = predictor_list,
-    kfolds = kfolds, y = response
+    kfolds = kfolds, y = response,
+    ntree = 50L, ndpost = 250L
   ), "Error in meta_learner_fit:
          Some of base predictors are not numeric")
 })
@@ -103,7 +114,8 @@ test_that("the meta learner prediction abides", {
   )
   meta_model <- meta_learner_fit(
     base_predictor_list = predictor_list,
-    kfolds = kfolds, y = response
+    kfolds = kfolds, y = response,
+    ntree = 50L, ndpost = 250L
   )
 
   # new data to predict
@@ -120,8 +132,15 @@ test_that("the meta learner prediction abides", {
                             "crs_dt" = "EPSG:4326")
   class(base_outputs_stdt) <- c("list", "stdt")
 
-  expect_no_error(meta_learner_predict(meta_model, base_outputs_stdt))
-  model_output <- meta_learner_predict(meta_model, base_outputs_stdt)
+  expect_no_error(
+    meta_learner_predict(
+      meta_model, base_outputs_stdt
+    )
+  )
+  model_output <-
+    meta_learner_predict(
+      meta_model, base_outputs_stdt
+    )
   expect_identical(class(model_output), c("list", "stdt"))
   expect_true(all(c("lon", "lat", "time") %in% colnames(model_output$stdt)))
 
@@ -140,7 +159,8 @@ test_that("the meta learner prediction abides", {
   names(predictor_list) <- c("var1", "var2", "var3")
   meta_model <- meta_learner_fit(
     base_predictor_list = predictor_list,
-    kfolds = kfolds, y = response
+    kfolds = kfolds, y = response,
+    ntree = 50L, ndpost = 250L
   )
   base_outputs <- data.table::as.data.table(df)
   base_outputs_stdt <- list("stdt" = base_outputs,
@@ -148,5 +168,11 @@ test_that("the meta learner prediction abides", {
   class(base_outputs_stdt) <- c("list", "stdt")
   expect_error(meta_learner_predict(meta_model, base_outputs_stdt),
                "Error: baselearners list incomplete or with wrong names")
+  expect_error(
+    meta_learner_predict(
+      meta_model, as.matrix(base_outputs_stdt$stdt)
+    ),
+    "Error: param base_outputs_stdt is not in stdt format."
+  )
 
 })

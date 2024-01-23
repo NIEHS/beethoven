@@ -2,7 +2,7 @@
 % Please edit documentation in R/generic_pipeline_example.R
 \name{build_pipeline}
 \alias{build_pipeline}
-\title{Title Build_Pipeline}
+\title{Build generic pipeline}
 \usage{
 build_pipeline(
   base_learner_list,
@@ -33,7 +33,9 @@ build_pipeline(
 put it all together
 }
 \description{
-Title Build_Pipeline
+This function takes a set of base learners and
+a meta learner, fits the base learners, and then makes predictions with
+the meta learner at the prediction locations
 }
 \examples{
 NULL

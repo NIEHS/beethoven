@@ -2,7 +2,7 @@
 % Please edit documentation in R/download.R
 \name{download_ecoregion_data}
 \alias{download_ecoregion_data}
-\title{download_ecoregion_data: download Ecoregion Shapefiles from EPA.}
+\title{Download Ecoregion Shapefiles from EPA}
 \usage{
 download_ecoregion_data(
   directory_to_download = "./input/ecoregions/",
@@ -12,7 +12,7 @@ download_ecoregion_data(
   remove_zip = FALSE,
   download = FALSE,
   remove_command = TRUE,
-  epa_certificate_path = system.file("inst/extdata/cacert_gaftp_epa.pem", package =
+  epa_certificate_path = system.file("extdata/cacert_gaftp_epa.pem", package =
     "NRTAPmodel")
 )
 }
@@ -26,30 +26,30 @@ of Ecoregion level 3 shapefiles}
 user acknowledge that the data downloaded using this function may be very
 large and use lots of machine storage and memory.}
 
-\item{unzip}{logical(1). Unzip zip files. Default = `TRUE`.}
+\item{unzip}{logical(1). Unzip zip files. Default \code{TRUE}.}
 
 \item{remove_zip}{logical(1). Remove zip file from directory_to_download.
-Default = `FALSE`.}
+Default \code{FALSE}.}
 
-\item{download}{logical(1). `= FALSE` will generate a `.txt` file containing
-all download commands. By setting `= TRUE` the function will download all of
-the requested data files. Default is FALSE.}
+\item{download}{logical(1). \code{FALSE} will generate a *.txt file
+containing all download commands. By setting \code{TRUE} the function
+will download all of the requested data files.}
 
-\item{remove_command}{logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
+\item{remove_command}{logical(1).
+Remove (\code{TRUE}) or keep (\code{FALSE})
 the text file containing download commands.}
 
 \item{epa_certificate_path}{character(1). Path to the certificate file
 for EPA DataCommons. Default is
-'./inst/extdata/cacert_gaftp_epa.pem'}
+'extdata/cacert_gaftp_epa.pem' under the package installation path.}
 }
 \value{
 NULL;
 }
 \description{
-The \code{download_ecoregion_data()}
-function accesses and downloads Ecoregions
-level 3 data, where all pieces of information in the higher levels are
-included.
+The \code{download_ecoregion_data()} function accesses and downloads
+Ecoregions level 3 data, where all pieces of information in the higher
+levels are included.
 }
 \note{
 In Linux systems as of December 2023, downloading Ecoregion data from

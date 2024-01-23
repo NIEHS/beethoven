@@ -30,7 +30,7 @@ check_temporal_range <- function(
   start_date <- as.POSIXlt(start_range, tz = timezone)
   end_date <- as.POSIXlt(end_range, tz = timezone)
   range <- seq(start_date, end_date, 86400)
-  #### 2. import data and define `dates` vector
+  #### 2. import data and define dates vector
   if (data_type %in% c("Point", "Polygon")) {
     data <- terra::vect(data)
     dates <- as.POSIXlt(unlist(data[[time_column]]), tz = timezone)
@@ -38,7 +38,7 @@ check_temporal_range <- function(
     data <- terra::rast(data)
     dates <- as.POSIXlt(time(data), tz = timezone)
   }
-  #### 3. check `dates` are within `range`
+  #### 3. check dates are within range
   checked <- data.frame(dates %in% range)
   #### 4. return logical vector
   return(checked)

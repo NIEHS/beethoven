@@ -9,9 +9,9 @@
 #' of spatial_domain.
 #' @return A numeric value reporting the extent of input_raster is
 #' within the extent of spatial_domain
-#' @description \code{domain_tolerance} should be in "meters"
+#' @description \code{domain_tolerance} should be in **meters**
 #' which is converted to arc degrees with respect to the latitude
-#' (approximately 100,000 meters = 1 arc degree)
+#' (approximately 110,000 meters = 1 arc degree)
 #' @author Kyle Messier, Insang Song
 #' @importFrom sf st_bbox
 #' @importFrom sf st_as_sfc

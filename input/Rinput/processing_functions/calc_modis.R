@@ -13,7 +13,8 @@
 #' @export
 get_vrt <- function(
   paths,
-  product = c('MOD11A1', 'MOD13A2', 'MOD06_L2', 'VNP46A2', 'MOD09GA', 'MCD19A2'),
+  product = c('MOD11A1', 'MOD13A2', 'MOD06_L2',
+              'VNP46A2', 'MOD09GA', 'MCD19A2'),
   index_sds = NULL,
   layers = NULL,
   date_in,
@@ -41,10 +42,14 @@ get_vrt <- function(
   ftarget <- grep(paste0(dayjul), paths, value = TRUE)
 
   # get layer information
-  layer_descr <- lapply(ftarget, \(x) terra::describe(x, sds = TRUE)[index_sds, c("name", "nlyr")])
+  layer_descr <-
+    lapply(ftarget,
+           function(x) {
+             terra::describe(x, sds = TRUE)[index_sds, c("name", "nlyr")]
+           })
   # get relevant subdataset only
-  layer_target <- sapply(layer_descr, \(x) x[[1]])
-  layer_number <- sapply(layer_descr, \(x) as.integer(x[[2]]))
+  layer_target <- sapply(layer_descr, function(x) x[[1]])
+  layer_number <- sapply(layer_descr, function(x) as.integer(x[[2]]))
 
   # if there are multiple layers in a subdataset
   if (any(layer_number > 1)) {
@@ -76,6 +81,75 @@ get_vrt <- function(
 # }
 
 
+
+#' Assign MODIS VNP46 corner coordinates to retrieve a merged raster
+#' @description This function will return a SpatRaster object with
+#' georeferenced h5 files of VNP46A2 product.
+#' @param paths character. Full paths of h5 files.
+#' @param date_in character(1). Date to query.
+#' @param tile_df prespecified data.frame with "tile" and "exts" columns,
+#' where the former stores tile number (h00v00 format) and the latter
+#' stores terra::ext output.
+#' @param crs_ref character(1). terra::crs compatible CRS.
+#' Default is "EPSG:4326"
+#' @author Insang Song
+#' @importFrom terra rast
+#' @importFrom terra ext
+#' @importFrom terra crs
+#' @importFrom terra merge
+#' @export
+assign_ext_vnp46 <- function(
+  paths,
+  date_in,
+  tile_df,
+  crs_ref = "EPSG:4326"
+) {
+  if (is.character(date_in)) {
+    if (nchar(date_in) != 10) {
+      stop("Check the date format.\n")
+    }
+    date_in <- as.Date(date_in)
+  }
+  if (!all(c("tile", "xmin", "xmax", "ymin", "ymax") %in%
+             colnames(tile_df))) {
+    stop("tile_df is in invalid format. Please review tile_df.\n")
+  }
+  datejul <- strftime(date_in, format = "%Y/%j")
+  stdtile <- tile_df$tile
+
+  filepaths_today <- grep(as.character(datejul), paths, value = TRUE)
+  # today's filenames
+  filepaths_today <-
+    grep(paste("(", 
+               paste(stdtile, collapse = "|"), ")"),
+         filepaths_today, value = TRUE)
+
+  filepaths_today_tiles <-
+    regmatches(filepaths_today,
+               regexpr("h[0-9]+{2,2}v[0-9]+{2,2}", filepaths_today))
+
+  vnp46_today <- unname(split(filepaths_today, filepaths_today))
+  filepaths_today_tiles_list <-
+    unname(split(filepaths_today_tiles, filepaths_today_tiles))
+
+  # for filenames,
+  # assign corner coordinates then merge
+  # Subdataset 3 is BRDF-corrected nighttime light
+  vnp_assigned <-
+    mapply(function(vnp, tile_in) {
+      vnp_ <- terra::rast(vnp, subds = 3)
+      tile_ext <- tile_df[tile_df$tile == tile_in, -1]
+      # print(tile_ext)
+      terra::crs(vnp_) <- terra::crs(crs_ref)
+      terra::ext(vnp_) <- unlist(tile_ext)
+      return(vnp_)
+    }, vnp46_today, filepaths_today_tiles_list, SIMPLIFY = FALSE)
+  vnp_all <- do.call(terra::merge, vnp_assigned)
+  vnp_all[vnp_all == 65535] <- NA
+  return(vnp_all)
+}
+
+
 #' A single-date MODIS worker for parallelization
 #' @param paths character. Full list of hdf file paths.
 #'  preferably a recursive search result from \code{list.files}.
@@ -87,25 +161,43 @@ get_vrt <- function(
 #' @param subdataset integer(1). The index of subdataset to work with.
 #' @param layers integer. The index (indices) of layers if there are only
 #' layers inside the input file.
+#' @param tile_def_vnp46 prespecified data.frame with "tile" and "exts"
+#' columns, where the former stores tile number
+#' (h00v00 format) and the latter stores terra::ext output.
 #' @param fun_summary_raster function. Summary function for
 #' multilayer rasters.
 #' @param foo function. A calculation function working with
 #' SpatRaster and sf.
 #' @author Insang Song
 #' @returns A SpatRaster object.
+#' @importFrom terra extract
+#' @importFrom terra project
+#' @importFrom terra vect
+#' @importFrom terra nlyr
+#' @importFrom terra describe
+#' @importFrom methods is
+#' @importFrom sf st_as_sf
+#' @importFrom sf st_drop_geometry
 #' @export
 modis_worker <- function(
   paths,
   date,
-  sites_in = sites,
+  sites_in = NULL,
   name_extracted = NULL,
-  product = c('MOD11A1', 'MOD13A2', 'MOD06_L2', 'VNP46A2', 'MOD09GA', 'MCD19A2'),
+  product = c("MOD11A1", "MOD13A2", "MOD06_L2",
+              "VNP46A2", "MOD09GA", "MCD19A2"),
   subdataset = NULL,
   layers = NULL,
+  tile_def_vnp46 = NULL,
   fun_summary_raster = mean,
   foo = scomps::extract_with_buffer,
   ...
 ) {
+  if (!any(methods::is(sites_in, "SpatVector"),
+           methods::is(sites_in, "sf"),
+           methods::is(sites_in, "sftime"))) {
+    stop("sites_in should be one of sf, sftime, or SpatVector.\n")
+  }
   if (!is.function(foo)) {
     stop("Argument foo should be a function.\n")
   }
@@ -115,13 +207,28 @@ modis_worker <- function(
     stop("Please put relevant index for subdataset.
     The full list of subdatasets is above.\n")
   }
-  vrt_today <-
-    get_vrt(
-      paths = paths,
-      index_sds = subdataset,
-      product = product,
-      date_in = date,
-      layers = layers)
+  if (methods::is(sites_in, "SpatVector")) {
+    sites_in <- sf::st_as_sf(sites_in)
+  }
+
+  # VNP46 corner assignment
+  if (product == "VNP46A2") {
+    vrt_today <-
+      assign_ext_vnp46(
+        paths = paths,
+        date_in = date,
+        tile_def = tile_def_vnp46,
+        crs_ref = "EPSG:4326"
+      )
+  } else {
+    vrt_today <-
+      get_vrt(
+              paths = paths,
+              index_sds = subdataset,
+              product = product,
+              date_in = date,
+              layers = layers)
+  }
 
   if (any(grepl("00000", name_extracted))) {
     sites_tr <- terra::vect(sites_in)

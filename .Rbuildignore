@@ -12,5 +12,4 @@
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
-
-tests/testdata/modis
+^.lintr
