@@ -4,8 +4,5 @@ pkgdown_sha: ~
 articles:
   cross_validation_types: cross_validation_types.html
   epa_download: epa_download.html
-last_built: 2024-01-16T18:28Z
-urls:
-  reference: https://spatiotemporal-exposures-and-toxicology.github.io/NRTAPmodel/reference
-  article: https://spatiotemporal-exposures-and-toxicology.github.io/NRTAPmodel/articles
+last_built: 2024-01-23T03:36Z
 
