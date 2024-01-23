@@ -9,27 +9,26 @@ date: "2023-11-13"
 author: "Insang Song"
 ---
 
+```{r init, echo = FALSE, include = FALSE}
+knitr::opts_chunk$set(
+  warning = FALSE,
+  message = FALSE,
+  fig.width = 8,
+  fig.height = 6,
+  res = "retina"
+)
+pkgs <- c("data.table", "sf", "terra", "sftime", "dplyr", "ggplot2")
+invisible(sapply(pkgs, library, character.only = TRUE, quietly = TRUE))
+options(sf_use_s2 = FALSE)
 
+source("../R/manipulate_spacetime_data.R")
+source("../R/cross_validation.R")
+```
 
-
-```r
+```{r data conversion}
 set.seed(202311)
 nco <- sf::st_read("../tests/testdata/test_nc_output.nc") |>
   unique()
-```
-
-```
-## Reading layer `test_nc_output_mod' from data source 
-##   `/home/felix/GitHub/NRTAPModel/tests/testdata/test_nc_output.nc' 
-##   using driver `netCDF'
-## Simple feature collection with 166 features and 8 fields
-## Geometry type: POINT
-## Dimension:     XY
-## Bounding box:  xmin: -82.44781 ymin: 33.94194 xmax: -76.18192 ymax: 36.51828
-## Geodetic CRS:  WGS 84
-```
-
-```r
 nco_s <- nco |>
   dplyr::sample_n(10)
 ncost <-
@@ -38,13 +37,7 @@ ncost <-
   lapply(function(x) mutate(nco_s, time = x)) |>
   Reduce(rbind, x = _)
 dim(ncost)
-```
 
-```
-## [1] 100  10
-```
-
-```r
 ncost <-
   sftime::st_as_sftime(ncost,
     time_column_name = "time"
@@ -60,13 +53,8 @@ ncostdtd <- convert_stobj_to_stdt(ncost_dis)
 all.equal(ncostdt$stdt, ncostdtd$stdt)
 ```
 
-```
-## [1] TRUE
-```
 
-
-
-```r
+```{r lo-family}
 index_lolo <- generate_cv_index(ncostdt, "lolo")
 index_loto <- generate_cv_index(ncostdt, "loto")
 index_lolto <- generate_cv_index(ncostdt, "lolto")
@@ -90,11 +78,7 @@ ggplot(
   geom_point() +
   labs(title = "Leave-one-location-out and Leave-one-time-out") +
   facet_grid(variable ~ time)
-```
 
-![plot of chunk lo-family](../man/figures/lo-family-1.png)
-
-```r
 ggplot(
   data = ncodtol[variable == "lolto", ],
   mapping = aes(x = lon, y = lat, color = value)
@@ -104,11 +88,8 @@ ggplot(
   facet_wrap(~time)
 ```
 
-![plot of chunk lo-family](../man/figures/lo-family-2.png)
 
-
-
-```r
+```{r lb-family}
 # data preparation for larger stdt than the previous example
 ncost <-
   split(x = seq(1, 10), f = seq(1, 10)) |>
@@ -116,13 +97,7 @@ ncost <-
   lapply(function(x) mutate(nco, time = x)) |>
   Reduce(rbind, x = _)
 dim(ncost)
-```
 
-```
-## [1] 1660   10
-```
-
-```r
 ncost <-
   sftime::st_as_sftime(
     ncost,
@@ -137,8 +112,7 @@ index_lbto <- generate_cv_index(ncostdt, "lbto", cv_fold = 5L)
 index_lblto <- generate_cv_index(ncostdt, "lblto", sp_fold = 3, t_fold = 5)
 ```
 
-
-```r
+```{r lb-family plot}
 ncodt <- data.table::copy(ncostdt$stdt)
 ncodt$lblo <- index_lblo
 ncodt$lbto <- index_lbto
@@ -158,11 +132,7 @@ ggplot(
   geom_point() +
   labs(title = "Leave-block-location-out and\nLeave-block-time-out") +
   facet_grid(variable ~ time)
-```
 
-![plot of chunk lb-family plot](../man/figures/lb-family plot-1.png)
-
-```r
 ggplot(
   data = ncodtl[variable == "lblto", ],
   mapping = aes(x = lon, y = lat, color = value)
@@ -172,10 +142,7 @@ ggplot(
   facet_wrap(~time)
 ```
 
-![plot of chunk lb-family plot](../man/figures/lb-family plot-2.png)
-
-
-```r
+```{r lb-external}
 eco4 <- readRDS("../tests/testdata/ecoregion_lv4.rds")
 eco4d <- eco4 |>
   group_by(US_L3CODE, US_L3NAME) |>
@@ -203,13 +170,7 @@ index_lblo_tr <-
 ncodt$lblo_blt <- factor(index_lblo_tr)
 
 all.equal(index_lblo_sf, index_lblo_tr)
-```
 
-```
-## [1] TRUE
-```
-
-```r
 ggplot(
   data = ncodt,
   mapping = aes(x = lon, y = lat, color = lblo_bl)
@@ -217,18 +178,13 @@ ggplot(
   geom_point() +
   labs(title = "Leave-block-location-out (Ecoregion level 3)") +
   facet_wrap(~time)
-```
 
-![plot of chunk lb-external](../man/figures/lb-external-1.png)
-
-```r
 # TODO: irregular temporal blocks
 ```
 
 
 
-
-```r
+```{r random-family}
 index_random <- generate_cv_index(ncostdt, "random", cv_fold = 10L)
 ncodt$random <- factor(index_random)
 
@@ -240,5 +196,3 @@ ggplot(
   labs(title = "Random") +
   facet_wrap(~time)
 ```
-
-![plot of chunk random-family](../man/figures/random-family-1.png)
