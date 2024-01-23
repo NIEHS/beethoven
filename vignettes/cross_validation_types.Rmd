@@ -5,7 +5,7 @@ vignette: >
   %\VignetteIndexEntry{Spatiotemporal cross validation types}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
-date: "2023-11-13"
+date: "2024-01-22"
 author: "Insang Song"
 ---
 
@@ -92,7 +92,7 @@ ggplot(
   facet_grid(variable ~ time)
 ```
 
-![plot of chunk lo-family](../man/figures/lo-family-1.png)
+![plot of chunk lo-family](man/figures/lo-family-1.png)
 
 ```r
 ggplot(
@@ -104,7 +104,7 @@ ggplot(
   facet_wrap(~time)
 ```
 
-![plot of chunk lo-family](../man/figures/lo-family-2.png)
+![plot of chunk lo-family](man/figures/lo-family-2.png)
 
 
 
@@ -160,7 +160,7 @@ ggplot(
   facet_grid(variable ~ time)
 ```
 
-![plot of chunk lb-family plot](../man/figures/lb-family plot-1.png)
+![plot of chunk lb-family plot](man/figures/lb-family plot-1.png)
 
 ```r
 ggplot(
@@ -172,7 +172,7 @@ ggplot(
   facet_wrap(~time)
 ```
 
-![plot of chunk lb-family plot](../man/figures/lb-family plot-2.png)
+![plot of chunk lb-family plot](man/figures/lb-family plot-2.png)
 
 
 ```r
@@ -219,7 +219,7 @@ ggplot(
   facet_wrap(~time)
 ```
 
-![plot of chunk lb-external](../man/figures/lb-external-1.png)
+![plot of chunk lb-external](man/figures/lb-external-1.png)
 
 ```r
 # TODO: irregular temporal blocks
@@ -241,4 +241,4 @@ ggplot(
   facet_wrap(~time)
 ```
 
-![plot of chunk random-family](../man/figures/random-family-1.png)
+![plot of chunk random-family](man/figures/random-family-1.png)
