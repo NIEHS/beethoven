@@ -22,9 +22,9 @@
 calc_covariates <-
   function(
       covariate = c("modis", "koppen-geiger",
-                    "koeppen-geiger", "koppen", "koeppen",
+                    "koeppen-geiger", "koppen",
                     "geos", "dummies", "gmted", "roads",
-                    "sedac_groads", "nlcd", "tri", "ncep", "aadt",
+                    "sedac_groads", "nlcd", "tri", "nei",
                     "ecoregions", "ecoregion"),
       path,
       sites,
@@ -56,8 +56,8 @@ calc_covariates <-
       # roads = calc_sedac_groads,
       # sedac_population = calc_sedac_population,
       # population = calc_sedac_population,
-      # aadt = calc_aadt,
-      # tri = calc_tri,
+      nei = calc_aadt,
+      tri = calc_tri,
       # ncep = calc_ncep,
       # geos = calc_geos,
       # gmted = calc_gmted,
@@ -75,9 +75,8 @@ calc_covariates <-
       }, error = function(e) {
         print(e)
         print(args(what_to_run))
-        message(paste0("Please refer to the argument list and
+        stop(paste0("Please refer to the argument list and
                         the error message above to rectify the error.\n"))
-        return(NULL)
       })
 
     return(res_covariate)

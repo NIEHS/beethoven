@@ -108,6 +108,9 @@ testthat::test_that("leave-block-outs work as expected", {
   testthat::expect_no_error(
     index_lbto <- generate_cv_index(ncostdt, "lbto", cv_fold = ncv_fold)
   )
+  testthat::expect_error(
+    index_lbto <- generate_cv_index(ncostdt, "lbto", cv_fold = NULL)
+  )
   testthat::expect_no_error(
     index_lblto <-
       generate_cv_index(

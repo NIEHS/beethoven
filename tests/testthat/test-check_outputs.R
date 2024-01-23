@@ -91,15 +91,16 @@ testthat::test_that("Predicted variances are positive", {
 #' @author Insang Song
 #' @description
 #' unit testing for the model output is inside the mainland US
-#'
 testthat::test_that("Output locations are in the mainland US", {
   withr::local_package("sf")
   withr::local_package("dplyr")
   withr::local_options(list(sf_use_s2 = FALSE))
 
   # 1. read netcdf output file and mainland US polygons
-  path_mainland <- "../testdata/US-mainland-boundary.gpkg"
-  path_results <- "../testdata/test_nc_output.nc"
+  path_mainland <-
+    testthat::test_path("..", "testdata", "US-mainland-boundary.gpkg")
+  path_results <-
+    testthat::test_path("..", "testdata", "test_nc_output.nc")
   model_results <- sf::read_sf(path_results)
   mainland <- sf::read_sf(path_mainland)
 
@@ -107,6 +108,12 @@ testthat::test_that("Output locations are in the mainland US", {
   iswithin <- check_output_locs_are_valid(model_results, mainland)
   # we expect all elements in the vector are TRUE
   testthat::expect_equal(any(!iswithin), FALSE)
+
+  model_res_na <- model_results
+  sf::st_crs(model_res_na) <- NA
+  testthat::expect_error(
+    check_output_locs_are_valid(model_res_na, mainland)
+  )
 })
 
 

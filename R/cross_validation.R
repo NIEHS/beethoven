@@ -29,6 +29,8 @@
 #' states, counties, hydrological unit code areas, etc.
 #' \code{lblto} mode will accept \code{sp_fold} and \code{t_fold}.
 #' The maximum of results in this case is \code{sp_fold * t_fold}.
+#' @note `sp_fold` and `t_fold` are only applicable in `cv_mode == lblto`.
+#' These arguments will be ignored otherwise.
 #' @returns A numeric vector with length of the number of input rows
 #' @author Insang Song
 #' @export
@@ -53,13 +55,6 @@ generate_cv_index <- function(
     stop("Inputs for blocks argument are invalid.
     Please revisit the help page of this function
     for the details of proper setting of blocks.\n")
-  }
-
-  if (cv_mode != "lblto") {
-    if ((!is.null(sp_fold) || !is.null(t_fold))) {
-      stop("sp_fold and t_fold values are only applicable to
-        cv_mode == 'lblto'\n")
-    }
   }
 
   index_cv <- switch(cv_mode,

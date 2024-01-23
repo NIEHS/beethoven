@@ -83,6 +83,7 @@ test_that("convert_stobj_to_stdt works well", {
                terra::same.crs(convert_stobj_to_stdt(stobj)$crs_stdt,
                                "EPSG:4326")})
   expect_false(any(!(c("lon", "lat", "time") %in% colnames(stdt))))
+  expect_error(convert_stobj_to_stdt(stobj[, 3]))
   expect_equal(
     stdt[lon == -112 & lat == 35.35 & time == "2023-11-02", var1],
     6
@@ -172,9 +173,9 @@ test_that("is_stdt works as expected", {
 
   errstdt1 <- list(1L, 2L)
   expect_equal(is_stdt(errstdt1), FALSE)
-  names(errstdt1) <- c("stdt", "crs_stdt")
-  expect_equal(is_stdt(errstdt1), FALSE)
   class(errstdt1) <- c("list", "stdt")
+  expect_equal(is_stdt(errstdt1), FALSE)
+  names(errstdt1) <- c("stdt", "crs_stdt")
   expect_equal(is_stdt(errstdt1), FALSE)
   errstdt2 <- errstdt1
   errstdt2$stdt <- data.table(A = 1, B = 2, C = 3)
@@ -185,7 +186,6 @@ test_that("is_stdt works as expected", {
   expect_error(convert_stdt_spatvect(errstdt2))
   expect_error(convert_stdt_sftime(errstdt2))
   expect_error(convert_stdt_spatrastdataset(errstdt2))
-
 
 })
 
@@ -246,6 +246,9 @@ test_that("dt_to_sftime works as expected", {
   expect_error(dt_to_sftime(dfe, "EPSG:4326"))
   dfe <- as.data.table(df)
   names(dfe)[2] <- "ycoord"
+  expect_error(dt_to_sftime(dfe, "EPSG:4326"))
+  dfe <- as.data.table(df)
+  names(dfe)[3] <- "date"
   expect_error(dt_to_sftime(dfe, "EPSG:4326"))
 
   dfdt <- as.data.table(df)
