@@ -16,13 +16,23 @@ sp_subset <- function(sp) {
   return(crop_sp)
 }
 
+#' Creates the testdata directory if it does not already exists. 
+#' @author Eva Marques
+#' @param dir_path a character path to the directory. 
+create_dir <- function(dir_path) {
+  if (!file.exists(dir_path)) {
+    dir.create(dir_path)
+  }
+}
+
+
 #' The data paths are stored in a .csv file but they sometimes contain encoded
 #' dates with characters 'yday', yyyy', 'mm', 'dd'. This function replace these
-#' character strings by the good value contained in date. 
+#' character strings by the good value contained in date.
 #' @author Eva Marques
 #' @param string a character (eg: filepath)
-#' @param date a Date 
-#' @return the same string with encoded characters replaced by date info. 
+#' @param date a Date
+#' @return the same string with encoded characters replaced by date info.
 replace_dateinfo <- function(string, date) {
   output <- gsub("yyyy", lubridate::year(date), string) |>
     gsub(
@@ -59,6 +69,7 @@ testdata_nlcd <- function(
     dict_path = "../inst/extdata/downloaded_files_metadata.csv",
     testdata_path = "../tests/testdata/raw/nlcd/") {
   name <- folder <- filename <- NULL
+  create_dir(testdata_path)
   dict <- data.table::fread(dict_path, sep = ",")
   fpath <- paste0(
     dict[name == "nlcd", folder],
@@ -82,6 +93,7 @@ testdata_ecoregions <- function(
     dict_path = "../inst/extdata/downloaded_files_metadata.csv",
     testdata_path = "../tests/testdata/raw/ecoregions/") {
   name <- folder <- filename <- NULL
+  create_dir(testdata_path)
   dict <- data.table::fread(dict_path, sep = ",")
   fpath <- paste0(
     dict[name == "ecoregions", folder],
@@ -106,6 +118,7 @@ testdata_kg <- function(
     dict_path = "../inst/extdata/downloaded_files_metadata.csv",
     testdata_path = "../tests/testdata/raw/koppen_geiger/") {
   name <- folder <- filename <- NULL
+  create_dir(testdata_path)
   dict <- data.table::fread(dict_path, sep = ",")
   fpath <- paste0(
     dict[name == "koppen_geiger", folder],
@@ -120,7 +133,7 @@ testdata_kg <- function(
   terra::writeRaster(r_samp, testdata_file, overwrite = TRUE)
 }
 
-#' Create raw testdata file for NARR variables stored as monthly rasters 
+#' Create raw testdata file for NARR variables stored as monthly rasters
 #' @author Eva Marques
 #' @param dict_path character path to the .csv file storing all data paths
 #' @param start_date Date of when testdata starts
@@ -135,6 +148,7 @@ testdata_narr <- function(
     testdata_path = "../tests/testdata/raw/narr/",
     var) {
   name <- folder <- filename <- NULL
+  create_dir(testdata_path)
   dict <- data.table::fread(dict_path, sep = ",")
   # files are stored per year
   # we consider that start_date and end_date have the same year
@@ -162,7 +176,7 @@ testdata_narr <- function(
   cat("✓ ", new_fpath, "\n")
 }
 
-#' Create raw testdata file for NARR variables stored as monthly rasters 
+#' Create raw testdata file for NARR variables stored as monthly rasters
 #' with pressure levels (omega and shum variables)
 #' @author Eva Marques
 #' @param dict_path character path to the .csv file storing all data paths
@@ -178,6 +192,7 @@ testdata_narr_lev <- function(
     testdata_path = "../tests/testdata/raw/narr/",
     var) {
   name <- folder <- filename <- NULL
+  create_dir(testdata_path)
   dict <- data.table::fread(dict_path, sep = ",")
   # files are stored per month
   # we consider that start_date and end_date have the same month
@@ -205,11 +220,11 @@ testdata_narr_lev <- function(
   cat("✓ ", new_fpath, "\n")
 }
 
-#' Create raw testdata file for GEOS-CF variables 
-#' Note1: raw downloaded files have .nc4 extension, which leads to a warning 
+#' Create raw testdata file for GEOS-CF variables
+#' Note1: raw downloaded files have .nc4 extension, which leads to a warning
 #' when testdata .nc4 files are created.
 #' Note2: an error can occur when creating ncfile. Relaunching the code solves
-#' the problem for now...  
+#' the problem for now...
 #' @author Eva Marques, Mitchell Manware, Insang Song
 #' @param dict_path character path to the .csv file storing all data paths
 #' @param start_date Date of when testdata starts
@@ -224,6 +239,7 @@ testdata_geos <- function(
     testdata_path,
     collection) {
   name <- folder <- filename <- NULL
+  create_dir(testdata_path)
   period <- seq(from = start_date, to = end_date, by = "1 day")
   dict <- data.table::fread(dict_path, sep = ",")
   for (p in period) {
@@ -257,3 +273,145 @@ testdata_geos <- function(
     }
   }
 }
+
+#' Create raw testdata files for TRI
+#' @author Eva Marques
+#' @param dict_path character path to the .csv file storing all data paths
+#' @param year numeric giving the year
+#' @param testdata_path character path to the folder where testdata should
+#' be stored
+testdata_tri <- function(
+    dict_path = "../inst/extdata/downloaded_files_metadata.csv",
+    year = 2022,
+    testdata_path = "../tests/testdata/raw/tri/") {
+  name <- folder <- filename <- NULL
+  create_dir(testdata_path)
+  dict <- data.table::fread(dict_path, sep = ",")
+  tri_path <- paste0(
+      dict[name == "tri", folder],
+      dict[name == "tri", filename]
+    ) |>
+      replace_dateinfo(date = as.Date(paste0(year, "-01-01")))
+  tri_samp <- data.table::fread(tri_path) |>
+    subset(`1. YEAR` == year & `7. COUNTY` %in% c("DURHAM", "WAKE", "ORANGE"))
+  new_fpath <- paste0(
+    testdata_path,
+    dict[name == "tri", filename]
+  ) |>
+    replace_dateinfo(date = as.Date(paste0(year, "-01-01")))
+  data.table::fwrite(
+    tri_samp,
+    new_fpath
+  )
+}
+
+
+#' Create raw testdata files for AQS 
+#' (start_date and end_date are supposed to be from the same year)
+#' @author Eva Marques
+#' @param dict_path character path to the .csv file storing all data paths
+#' @param testdata_path character path to the folder where testdata should
+#' be stored
+testdata_aqs <- function(
+    dict_path = "../inst/extdata/downloaded_files_metadata.csv",
+    start_date = as.Date("2022-01-01"),
+    end_date = as.Date("2022-01-02"),
+    testdata_path = "../tests/testdata/raw/aqs/") {
+  name <- folder <- filename <- NULL
+  create_dir(testdata_path)
+  dict <- data.table::fread(dict_path, sep = ",")
+  fpath <- paste0(
+      dict[name == "aqs", folder],
+      dict[name == "aqs", filename]
+    ) |>
+      replace_dateinfo(date = start_date)
+  aqs <- data.table::fread(fpath) |>
+    subset(`Date Local` >= start_date & `Date Local` <= end_date)
+  aqs_vect <- terra::vect(aqs,
+                          geom = c("Longitude", "Latitude"),
+                          crs = "EPSG:4326"
+  )
+  aqs_samp <- sp_subset(aqs_vect) |>
+    data.table::as.data.table()
+  new_fpath <- paste0(
+    testdata_path,
+    dict[name == "aqs", filename]
+    ) |>
+      replace_dateinfo(start_date)
+    data.table::fwrite(
+      aqs_samp,
+      new_fpath
+    )
+  }
+}
+
+
+#' Create raw testdata files for NEI
+#' @author Eva Marques
+#' @param dict_path character path to the .csv file storing all data paths
+#' @param testdata_path character path to the folder where testdata should
+#' be stored
+testdata_nei <- function(
+    dict_path = "../inst/extdata/downloaded_files_metadata.csv",
+    testdata_path = "../tests/testdata/raw/NEI/") {
+  name <- folder <- filename <- NULL
+  create_dir(testdata_path)
+  dict <- data.table::fread(dict_path, sep = ",")
+  onroads <- c("4", "5", "67", "123", "8910")
+  for (onr in onroads) {
+    nei_path <- paste0(
+      dict[name == paste0("nei_onroad_", onr), folder],
+      dict[name == paste0("nei_onroad_", onr), filename]
+    ) |>
+      replace_dateinfo(date = "2020-01-01")
+    nei_samp <- data.table::fread(nei_path) |>
+      subset(county %in% c("Durham", "Wake", "Orange"))
+    
+    new_fpath <- paste0(
+      testdata_path,
+      dict[name == paste0("nei_onroad_", onr), filename]
+    ) |>
+      replace_dateinfo("2020-01-01")
+    data.table::fwrite(
+      nei_samp,
+      new_fpath
+    )
+  }
+}
+
+
+
+#' Create raw testdata files for HMS smoke shapefiles 
+#' Important note: the extracted dates are not the same than the rest of 
+#' testdata in favor of more interesting smoke polygons above
+#' Wake-Durham-Orange area. 
+#' @author Eva Marques
+#' @param dict_path character path to the .csv file storing all data paths
+#' @param testdata_path character path to the folder where testdata should
+#' be stored
+testdata_hms_smoke <- function(
+    dict_path = "../inst/extdata/downloaded_files_metadata.csv",
+    testdata_path = "../tests/testdata/raw/hms_smoke/") {
+  name <- folder <- filename <- NULL
+  create_dir(testdata_path)
+  dict <- data.table::fread(dict_path, sep = ",")
+  period <- c("2022-06-18", "2022-06-21")
+  for (p in period) {
+    fpath <- paste0(
+      dict[name == "hms_smoke", folder],
+      dict[name == "hms_smoke", filename]
+    ) |>
+      replace_dateinfo(date = as.Date(p))
+    r <- terra::vect(fpath)
+    r_samp <- sp_subset(r)
+    new_fpath <- paste0(
+      testdata_path,
+      dict[name == "hms_smoke", filename]
+    ) |>
+      replace_dateinfo(as.Date(p))
+    terra::writeVector(r_samp, new_fpath, overwrite = TRUE)
+  }
+}
+
+
+  

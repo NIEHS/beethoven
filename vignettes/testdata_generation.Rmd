@@ -50,10 +50,10 @@ testdata_nlcd()
 Example of output
 
 ```{r}
-nlcd_sub_2019 <- terra::rast(
-  "../tests/testdata/raw/nlcd/nlcd_2019_land_cover_l48_20210604.tif")
-nlcd_sub_2021 <- terra::rast(
-  "../tests/testdata/raw/nlcd/nlcd_2021_land_cover_l48_20230630.tif")
+nlcd_sub_2019 <- terra::rast(paste0("../tests/testdata/raw/nlcd/",
+                                    "nlcd_2019_land_cover_l48_20210604.tif"))
+nlcd_sub_2021 <- terra::rast(paste0("../tests/testdata/raw/nlcd/",
+                                    "nlcd_2021_land_cover_l48_20230630.tif"))
 terra::plot(nlcd_sub_2019)
 terra::plot(nlcd_sub_2021)
 ```
@@ -69,8 +69,8 @@ testdata_ecoregions()
 Example of output
 
 ```{r}
-ecor_sub <- terra::vect(
-  "../tests/testdata/raw/ecoregions/us_eco_l3_state_boundaries.shp")
+ecor_sub <- terra::vect(paste0("../tests/testdata/raw/",
+                               "ecoregions/us_eco_l3_state_boundaries.shp"))
 terra::plot(ecor_sub)
 ```
 
@@ -85,8 +85,8 @@ testdata_kg()
 Example of output
 
 ```{r}
-kg_sub <- terra::rast(
-  "../tests/testdata/raw/koppen_geiger/Beck_KG_V1_present_0p0083.tif")
+kg_sub <- terra::rast(paste0("../tests/testdata/raw/koppen_geiger/",
+                             "Beck_KG_V1_present_0p0083.tif"))
 terra::plot(kp_sub)
 ```
 
@@ -160,7 +160,7 @@ terra::plot(aqc_sub)
 
 Extraction
 
-```{r}
+```{r, eval = FALSE}
 chm_path <- "../tests/testdata/raw/geos/chm_tavg_1hr_g1440x721_v1/"
 testdata_geos(testdata_path = chm_path, collection = "chm_tavg")
 ```
@@ -182,43 +182,76 @@ terra::plot(chm_sub[[48:52]])
 
 ## Toxic Release Inventory (TRI)
 
-```{r}
-tri_path <- paste0(
-  dict[name == "tri", folder],
-  dict[name == "tri", filename]
-) |>
-  replace_dateinfo(date = start_date)
+Extraction
 
-tri_samp <- data.table::fread(tri_path) |>
-  subset(`1. YEAR` == 2022 & `7. COUNTY` %in% c("DURHAM", "WAKE", "ORANGE"))
-
-data.table::fwrite(
-  tri_samp,
-  "../tests/testdata/raw/tri/durham_wake_orange_tri.csv"
-)
+```{r, eval = FALSE}
+testdata_tri()
 ```
+
+Example of output
+
+```{r}
+tri_samp <- data.table::fread("../tests/testdata/raw/tri/tri_raw_2022.csv")
+head(tri_samp)
+```
+
 
 ## Air Quality System (AQS)
 
-```{r}
-aqs_path <- paste0(
-  dict[name == "aqs", folder],
-  dict[name == "aqs", filename]
-) |>
-  replace_dateinfo(date = start_date)
+Extraction
 
-aqs <- data.table::fread(aqs_path) |>
-  subset(`Date Local` >= start_date & `Date Local` <= end_date)
-
-aqs_vect <- terra::vect(aqs,
-  geom = c("Longitude", "Latitude"),
-  crs = "EPSG:4326"
-)
-aqs_samp <- sp_subset(aqs_vect) |>
-  data.table::as.data.table()
-
-data.table::fwrite(
-  aqs_samp,
-  "../tests/testdata/raw/durham_wake_orange_aqs.csv"
-)
+```{r, eval = FALSE}
+testdata_aqs()
 ```
+
+Example of output
+
+```{r}
+aqs_samp <- data.table::fread("../tests/testdata/raw/aqs/daily_88101_2022.csv")
+head(aqs_samp)
+```
+
+## National Emissions Inventory (NEI)
+
+Extraction
+
+```{r, eval = FALSE}
+testdata_nei()
+```
+
+```{r}
+nei_samp <- data.table::fread("../tests/testdata/raw/NEI/onroad_8910.csv")
+head(nei_samp)
+```
+
+
+## HMS Smoke
+
+Extraction
+
+```{r, eval = FALSE}
+testdata_hms_smoke()
+```
+
+Example of output
+
+```{r}
+smoke_samp <- terra::vect(paste0("../tests/testdata/raw/hms_smoke/",
+                                 "hms_smoke20220618.shp"))
+terra::plot(x = smoke_samp, y = "Density")
+terra::plot(sp_samp, lty = 2, lwd = 4, add = TRUE)
+```
+
+Comparison to the map on the entire US 
+
+```{r}
+if (requireNamespace("spData", quietly = TRUE)) {
+  library(spData)
+  data(us_states)
+}
+hms_jun18 <- terra::vect(paste0("/Volumes/set/Projects/NRT-AP-Model/input/",
+                                "HMS_Smoke/data/hms_smoke20220618.shp"))
+terra::plot(terra::project(terra::vect(us_states), terra::crs(hmsday)))
+terra::plot(x = hmsday, y = "Density", alpha = .5, add = TRUE)
+```
+

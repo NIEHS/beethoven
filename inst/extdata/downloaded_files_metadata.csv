@@ -37,11 +37,11 @@ vis,,/Volumes/set/Projects/NRT-AP-Model/input/narr/vis/,vis.yyyy.nc
 vwnd_10m,,/Volumes/set/Projects/NRT-AP-Model/input/narr/vwnd.10m/,vwnd.10m.yyyy.nc
 weasd,,/Volumes/set/Projects/NRT-AP-Model/input/narr/weasd/,weasd.yyyy.nc
 tri,,/Volumes/set/Projects/NRT-AP-Model/input/tri/,tri_raw_yyyy.csv
-nei_onroad_123,,/Volumes/set/Projects/NRT-AP-Model/input/NEI/aadtyyyy/,onroad_123.csv
-nei_onroad_4,,/Volumes/set/Projects/NRT-AP-Model/input/NEI/aadtyyyy/,onroad_4.csv
-nei_onroad_5,,/Volumes/set/Projects/NRT-AP-Model/input/NEI/aadtyyyy/,onroad_5.csv
-nei_onroad_67,,/Volumes/set/Projects/NRT-AP-Model/input/NEI/aadtyyyy/,onroad_67.csv
-nei_onroad_8910,,/Volumes/set/Projects/NRT-AP-Model/input/NEI/aadtyyyy/,onroad_8910.csv
+nei_onroad_123,,/Volumes/set/Projects/NRT-AP-Model/input/nei/yyyynei_onroad_byregion/,onroad123.csv
+nei_onroad_4,,/Volumes/set/Projects/NRT-AP-Model/input/nei/yyyynei_onroad_byregion/,onroad_4.csv
+nei_onroad_5,,/Volumes/set/Projects/NRT-AP-Model/input/nei/yyyynei_onroad_byregion/,onroad_5.csv
+nei_onroad_67,,/Volumes/set/Projects/NRT-AP-Model/input/nei/yyyynei_onroad_byregion/,onroad_67.csv
+nei_onroad_8910,,/Volumes/set/Projects/NRT-AP-Model/input/nei/yyyynei_onroad_byregion/,onroad_8910.csv
 modis,,/Volumes/set/Projects/NRT-AP-Model/input/modis/raw/,
 air_2m,,/Volumes/set/Projects/NRT-AP-Model/input/NCEP-NCAR-Reanalysis-1/,air.2m.gauss.2022.nc
 ncep_ncar,,/Volumes/set/Projects/NRT-AP-Model/input/NCEP-NCAR-Reanalysis-1/,tdc.eatm.gauss.2022.nc
