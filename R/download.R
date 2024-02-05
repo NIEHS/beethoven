@@ -289,7 +289,7 @@ download_ecoregion_data <- function(
   remove_command = TRUE,
   epa_certificate_path =
     system.file("extdata/cacert_gaftp_epa.pem",
-                package = "NRTAPmodel")
+                package = "beethoven")
 ) {
   #### 1. data download acknowledgement
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
@@ -2451,7 +2451,7 @@ download_nei_data <- function(
   unzip = FALSE,
   epa_certificate_path =
     system.file("extdata/cacert_gaftp_epa.pem",
-                package = "NRTAPmodel")
+                package = "beethoven")
 ) {
   #### 1. check for data download acknowledgement
   download_permit(data_download_acknowledgement = data_download_acknowledgement)
