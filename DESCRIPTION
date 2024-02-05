@@ -1,4 +1,4 @@
-Package: NRTAPmodel
+Package: beethoven
 Title: The SET group near real time air pollution model
 Version: 0.1.1
 Authors@R: c(
@@ -22,5 +22,5 @@ RoxygenNote: 7.3.0
 Config/Needs/website: tidyverse/tidytemplate
 Config/testhat/edition: 3
 License: MIT + file LICENSE
-URL: https://github.com/Spatiotemporal-Exposures-and-Toxicology/NRTAPmodel, 
-https: //spatiotemporal-exposures-and-toxicology.github.io/NRTAPmodel/
+URL: https://github.com/Spatiotemporal-Exposures-and-Toxicology/beethoven, 
+https: //spatiotemporal-exposures-and-toxicology.github.io/beethoven/
