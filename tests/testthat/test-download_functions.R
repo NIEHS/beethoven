@@ -137,7 +137,7 @@ testthat::test_that("Ecoregion download URLs have HTTP status 200.", {
   directory_to_download <- testthat::test_path("..", "testdata/")
   directory_to_save <- testthat::test_path("..", "testdata/")
   certificate <- system.file("extdata/cacert_gaftp_epa.pem",
-                             package = "NRTAPmodel")
+                             package = "beethoven")
   # run download function
   download_data(dataset_name = "ecoregion",
                 directory_to_save = directory_to_save,
@@ -1014,7 +1014,7 @@ testthat::test_that("EPA NEI (AADT) download URLs have HTTP status 200.", {
   # function parameters
   directory_to_save <- testthat::test_path("..", "testdata/")
   certificate <- system.file("extdata/cacert_gaftp_epa.pem",
-                             package = "NRTAPmodel")
+                             package = "beethoven")
   # run download function
   year_target <- c(2017L, 2020L)
   download_data(dataset_name = "nei",

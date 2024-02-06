@@ -252,7 +252,7 @@ calc_nlcd_ratio <- function(path,
   nlcd_at_bufs <- nlcd_at_bufs[names(nlcd_at_bufs)[grepl("frac_",
                                                          names(nlcd_at_bufs))]]
   # change column names
-  fpath <- system.file("extdata", "nlcd_classes.csv", package = "NRTAPmodel")
+  fpath <- system.file("extdata", "nlcd_classes.csv", package = "beethoven")
   nlcd_classes <- utils::read.csv(fpath)
   nlcd_names <- names(nlcd_at_bufs)
   nlcd_names <- sub(pattern = "frac_", replacement = "", x = nlcd_names)

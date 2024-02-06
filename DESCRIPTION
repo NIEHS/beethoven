@@ -1,4 +1,4 @@
-Package: NRTAPmodel
+Package: beethoven
 Title: The SET group near real time air pollution model
 Version: 0.1.1
 Authors@R: c(
@@ -18,9 +18,9 @@ Suggests: covr, withr, knitr, rmarkdown, sftime, lwgeom, FNN, ggplot2, scatterpi
 Encoding: UTF-8
 VignetteBuilder: knitr, rmarkdown
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.0
+RoxygenNote: 7.3.1
 Config/Needs/website: tidyverse/tidytemplate
 Config/testhat/edition: 3
 License: MIT + file LICENSE
-URL: https://github.com/Spatiotemporal-Exposures-and-Toxicology/NRTAPmodel, 
-https: //spatiotemporal-exposures-and-toxicology.github.io/NRTAPmodel/
+URL: https://github.com/Spatiotemporal-Exposures-and-Toxicology/beethoven, 
+https: //spatiotemporal-exposures-and-toxicology.github.io/beethoven/

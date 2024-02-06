@@ -13,7 +13,7 @@ download_ecoregion_data(
   download = FALSE,
   remove_command = TRUE,
   epa_certificate_path = system.file("extdata/cacert_gaftp_epa.pem", package =
-    "NRTAPmodel")
+    "beethoven")
 )
 }
 \arguments{

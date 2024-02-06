@@ -12,7 +12,7 @@ download_nei_data(
   year_target = c(2017L, 2020L),
   unzip = FALSE,
   epa_certificate_path = system.file("extdata/cacert_gaftp_epa.pem", package =
-    "NRTAPmodel")
+    "beethoven")
 )
 }
 \arguments{
