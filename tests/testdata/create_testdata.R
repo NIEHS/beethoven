@@ -16,9 +16,9 @@ sp_subset <- function(sp) {
   return(crop_sp)
 }
 
-#' Creates the testdata directory if it does not already exists. 
+#' Creates the testdata directory if it does not already exists.
 #' @author Eva Marques
-#' @param dir_path a character path to the directory. 
+#' @param dir_path a character path to the directory.
 create_dir <- function(dir_path) {
   if (!file.exists(dir_path)) {
     dir.create(dir_path)
@@ -288,10 +288,10 @@ testdata_tri <- function(
   create_dir(testdata_path)
   dict <- data.table::fread(dict_path, sep = ",")
   tri_path <- paste0(
-      dict[name == "tri", folder],
-      dict[name == "tri", filename]
-    ) |>
-      replace_dateinfo(date = as.Date(paste0(year, "-01-01")))
+    dict[name == "tri", folder],
+    dict[name == "tri", filename]
+  ) |>
+    replace_dateinfo(date = as.Date(paste0(year, "-01-01")))
   tri_samp <- data.table::fread(tri_path) |>
     subset(`1. YEAR` == year & `7. COUNTY` %in% c("DURHAM", "WAKE", "ORANGE"))
   new_fpath <- paste0(
@@ -305,8 +305,7 @@ testdata_tri <- function(
   )
 }
 
-
-#' Create raw testdata files for AQS 
+#' Create raw testdata files for AQS
 #' (start_date and end_date are supposed to be from the same year)
 #' @author Eva Marques
 #' @param dict_path character path to the .csv file storing all data paths
@@ -321,28 +320,27 @@ testdata_aqs <- function(
   create_dir(testdata_path)
   dict <- data.table::fread(dict_path, sep = ",")
   fpath <- paste0(
-      dict[name == "aqs", folder],
-      dict[name == "aqs", filename]
-    ) |>
-      replace_dateinfo(date = start_date)
+    dict[name == "aqs", folder],
+    dict[name == "aqs", filename]
+  ) |>
+    replace_dateinfo(date = start_date)
   aqs <- data.table::fread(fpath) |>
     subset(`Date Local` >= start_date & `Date Local` <= end_date)
   aqs_vect <- terra::vect(aqs,
-                          geom = c("Longitude", "Latitude"),
-                          crs = "EPSG:4326"
+    geom = c("Longitude", "Latitude"),
+    crs = "EPSG:4326"
   )
   aqs_samp <- sp_subset(aqs_vect) |>
     data.table::as.data.table()
   new_fpath <- paste0(
     testdata_path,
     dict[name == "aqs", filename]
-    ) |>
-      replace_dateinfo(start_date)
-    data.table::fwrite(
-      aqs_samp,
-      new_fpath
-    )
-  }
+  ) |>
+    replace_dateinfo(start_date)
+  data.table::fwrite(
+    aqs_samp,
+    new_fpath
+  )
 }
 
 
@@ -366,7 +364,7 @@ testdata_nei <- function(
       replace_dateinfo(date = "2020-01-01")
     nei_samp <- data.table::fread(nei_path) |>
       subset(county %in% c("Durham", "Wake", "Orange"))
-    
+
     new_fpath <- paste0(
       testdata_path,
       dict[name == paste0("nei_onroad_", onr), filename]
@@ -381,10 +379,10 @@ testdata_nei <- function(
 
 
 
-#' Create raw testdata files for HMS smoke shapefiles 
-#' Important note: the extracted dates are not the same than the rest of 
+#' Create raw testdata files for HMS smoke shapefiles
+#' Important note: the extracted dates are not the same than the rest of
 #' testdata in favor of more interesting smoke polygons above
-#' Wake-Durham-Orange area. 
+#' Wake-Durham-Orange area.
 #' @author Eva Marques
 #' @param dict_path character path to the .csv file storing all data paths
 #' @param testdata_path character path to the folder where testdata should
@@ -412,6 +410,3 @@ testdata_hms_smoke <- function(
     terra::writeVector(r_samp, new_fpath, overwrite = TRUE)
   }
 }
-
-
-  

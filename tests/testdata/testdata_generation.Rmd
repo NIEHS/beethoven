@@ -50,10 +50,14 @@ testdata_nlcd()
 Example of output
 
 ```{r}
-nlcd_sub_2019 <- terra::rast(paste0("../tests/testdata/raw/nlcd/",
-                                    "nlcd_2019_land_cover_l48_20210604.tif"))
-nlcd_sub_2021 <- terra::rast(paste0("../tests/testdata/raw/nlcd/",
-                                    "nlcd_2021_land_cover_l48_20230630.tif"))
+nlcd_sub_2019 <- terra::rast(paste0(
+  "../tests/testdata/raw/nlcd/",
+  "nlcd_2019_land_cover_l48_20210604.tif"
+))
+nlcd_sub_2021 <- terra::rast(paste0(
+  "../tests/testdata/raw/nlcd/",
+  "nlcd_2021_land_cover_l48_20230630.tif"
+))
 terra::plot(nlcd_sub_2019)
 terra::plot(nlcd_sub_2021)
 ```
@@ -69,8 +73,10 @@ testdata_ecoregions()
 Example of output
 
 ```{r}
-ecor_sub <- terra::vect(paste0("../tests/testdata/raw/",
-                               "ecoregions/us_eco_l3_state_boundaries.shp"))
+ecor_sub <- terra::vect(paste0(
+  "../tests/testdata/raw/",
+  "ecoregions/us_eco_l3_state_boundaries.shp"
+))
 terra::plot(ecor_sub)
 ```
 
@@ -85,8 +91,10 @@ testdata_kg()
 Example of output
 
 ```{r}
-kg_sub <- terra::rast(paste0("../tests/testdata/raw/koppen_geiger/",
-                             "Beck_KG_V1_present_0p0083.tif"))
+kg_sub <- terra::rast(paste0(
+  "../tests/testdata/raw/koppen_geiger/",
+  "Beck_KG_V1_present_0p0083.tif"
+))
 terra::plot(kp_sub)
 ```
 
@@ -161,7 +169,11 @@ terra::plot(aqc_sub)
 Extraction
 
 ```{r, eval = FALSE}
-chm_path <- "../tests/testdata/raw/geos/chm_tavg_1hr_g1440x721_v1/"
+# chm_path <- "../tests/testdata/raw/geos/chm_tavg_1hr_g1440x721_v1/"
+chm_path <- paste0(
+  "/Volumes/set/Projects/NRT-AP-Model/tests/testdata/raw/",
+  "geos/chm_tavg_1hr_g1440x721_v1/"
+)
 testdata_geos(testdata_path = chm_path, collection = "chm_tavg")
 ```
 
@@ -236,8 +248,10 @@ testdata_hms_smoke()
 Example of output
 
 ```{r}
-smoke_samp <- terra::vect(paste0("../tests/testdata/raw/hms_smoke/",
-                                 "hms_smoke20220618.shp"))
+smoke_samp <- terra::vect(paste0(
+  "../tests/testdata/raw/hms_smoke/",
+  "hms_smoke20220618.shp"
+))
 terra::plot(x = smoke_samp, y = "Density")
 terra::plot(sp_samp, lty = 2, lwd = 4, add = TRUE)
 ```
@@ -249,9 +263,10 @@ if (requireNamespace("spData", quietly = TRUE)) {
   library(spData)
   data(us_states)
 }
-hms_jun18 <- terra::vect(paste0("/Volumes/set/Projects/NRT-AP-Model/input/",
-                                "HMS_Smoke/data/hms_smoke20220618.shp"))
+hms_jun18 <- terra::vect(paste0(
+  "/Volumes/set/Projects/NRT-AP-Model/input/",
+  "HMS_Smoke/data/hms_smoke20220618.shp"
+))
 terra::plot(terra::project(terra::vect(us_states), terra::crs(hmsday)))
 terra::plot(x = hmsday, y = "Density", alpha = .5, add = TRUE)
 ```
-
