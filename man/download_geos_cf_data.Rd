@@ -2,8 +2,7 @@
 % Please edit documentation in R/download.R
 \name{download_geos_cf_data}
 \alias{download_geos_cf_data}
-\title{download_geos_cf_data: download atmospheric composition data from the NASA
-Global Earth Observing System (GEOS) model.}
+\title{Download atmospheric composition data from the NASA Global Earth Observing System (GEOS) model.}
 \usage{
 download_geos_cf_data(
   date_start = "2023-09-01",
@@ -19,33 +18,33 @@ download_geos_cf_data(
 }
 \arguments{
 \item{date_start}{character(1). length of 10. Start date for downloading
-data. Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").}
+data. Format YYYY-MM-DD (ex. September 1, 2023 = \code{"2023-09-01"}).}
 
 \item{date_end}{character(1). length of 10. End date for downloading data.
-Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").}
+Format YYYY-MM-DD (ex. September 1, 2023 = \code{"2023-09-01"}).}
 
 \item{collection}{character(1). GEOS-CF data collection file name.}
 
 \item{directory_to_save}{character(1). Directory to save data.}
 
-\item{data_download_acknowledgement}{logical(1). By setting `= TRUE` the
+\item{data_download_acknowledgement}{logical(1). By setting \code{TRUE} the
 user acknowledge that the data downloaded using this function may be very
 large and use lots of machine storage and memory.}
 
-\item{download}{logical(1). `= FALSE` will generate a `.txt` file containing
-all download commands. By setting `= TRUE` the function will download all of
-the requested data files.}
+\item{download}{logical(1). \code{FALSE} will generate a *.txt file
+containing all download commands. By setting \code{TRUE} the function
+will download all of the requested data files.}
 
-\item{remove_command}{logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
+\item{remove_command}{logical(1).
+Remove (\code{TRUE}) or keep (\code{FALSE})
 the text file containing download commands.}
 }
 \value{
 NULL;
 }
 \description{
-The `download_goes_cf_data()` function accesses and downloads various
-atmospheric composition collections from the [NASA Global Earth Observing]
-[System (GEOS) model](https://gmao.gsfc.nasa.gov/GEOS_systems/).
+The \code{download_goes_cf_data()} function accesses and downloads various
+atmospheric composition collections from the \href{https://gmao.gsfc.nasa.gov/GEOS_systems/}{NASA Global Earth Observing System (GEOS) model}.
 }
 \author{
 Mitchell Manware, Insang Song

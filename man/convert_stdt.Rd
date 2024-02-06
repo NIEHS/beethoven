@@ -13,7 +13,7 @@ convert_stdt(
 \item{stdt}{A stdt object}
 
 \item{class_to}{character(1). Should be one of
-"sf", "sftime", "SpatRasterDataset", or "SpatVector"}
+\code{"sf"}, \code{"sftime"}, \code{"SpatRasterDataset"}, or \code{"SpatVector"}}
 }
 \value{
 a sf/sftime/SpatRasterDataset/SpatVector

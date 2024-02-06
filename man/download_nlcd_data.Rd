@@ -2,8 +2,7 @@
 % Please edit documentation in R/download.R
 \name{download_nlcd_data}
 \alias{download_nlcd_data}
-\title{download_nlcd_data: download land cover data from the National Land Cover
-Database Science Research Products.}
+\title{Download land cover data from the National Land Cover Database Science Research Products.}
 \usage{
 download_nlcd_data(
   year = 2021,
@@ -18,40 +17,42 @@ download_nlcd_data(
 )
 }
 \arguments{
-\item{year}{integer(1). Available years for Coterminous United States include
-2001, 2004, 2006, 2008, 2011, 2013, 2016, 2019, and 2021. Available years for
-Alaska include 2001, 2011, and 2016.}
+\item{year}{integer(1). Available years for Coterminous United States
+include \code{2001}, \code{2004}, \code{2006}, \code{2008}, \code{2011}, \code{2013}, \code{2016},
+\code{2019}, and \code{2021}.
+Available years for Alaska include \code{2001}, \code{2011}, and \code{2016}.}
 
-\item{collection}{character(1). "Coterminous United States" or "Alaska".}
+\item{collection}{character(1). \code{"Coterminous United States"} or \code{"Alaska"}.}
 
 \item{directory_to_download}{character(1). Directory to download zip files
 from National Land Cover Database Science Research Products.}
 
 \item{directory_to_save}{character(1). Directory to decompress zip files.}
 
-\item{data_download_acknowledgement}{logical(1). By setting `= TRUE` the
+\item{data_download_acknowledgement}{logical(1). By setting \code{TRUE} the
 user acknowledge that the data downloaded using this function may be very
 large and use lots of machine storage and memory.}
 
-\item{unzip}{logical(1). Unzip zip files. Default = `TRUE`.}
+\item{unzip}{logical(1). Unzip zip files. Default is \code{TRUE}.}
 
 \item{remove_zip}{logical(1). Remove zip files from directory_to_download.
-Default = `FALSE`.}
+Default is \code{FALSE}.}
 
-\item{download}{logical(1). `= FALSE` will generate a `.txt` file containing
-all download commands. By setting `= TRUE` the function will download all of
-the requested data files.}
+\item{download}{logical(1). \code{FALSE} will generate a *.txt file
+containing all download commands. By setting \code{TRUE} the function
+will download all of the requested data files.}
 
-\item{remove_command}{logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
+\item{remove_command}{logical(1).
+Remove (\code{TRUE}) or keep (\code{FALSE})
 the text file containing download commands.}
 }
 \value{
 NULL;
 }
 \description{
-The `download_nlcd_data()` function accesses and downloads land cover data
-from the [NLCD Science Research Products](https://www.mrlc.gov/data)
-data base.
+The \code{download_nlcd_data()} function accesses and downloads
+land cover data from the
+\href{https://www.mrlc.gov/data}{NLCD Science Research Products} data base.
 }
 \author{
 Mitchell Manware, Insang Song

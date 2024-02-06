@@ -7,19 +7,18 @@
 generate_spt_index(covars, mode = c("spatial", "spatiotemporal"))
 }
 \arguments{
-\item{covars}{stdt.}
+\item{covars}{stdt. See \link{convert_stobj_to_stdt}}
 
-\item{mode}{One of "spatial" or "spatiotemporal"}
+\item{mode}{One of \code{"spatial"} or \code{"spatiotemporal"}}
 }
 \value{
 stdt with a new index named "sp_index"
 }
 \description{
 It generates unique spatiotemporal identifier in the
-input stdt object.
-Regardless of mode values
-(should be one of 'spatial' or 'spatiotemporal'),
-the index column will be named 'sp_index'.
+input stdt object. Regardless of mode values
+(should be one of \code{"spatial"} or \code{"spatiotemporal"}),
+the index column will be named "sp_index".
 }
 \author{
 Insang Song

@@ -1,14 +1,14 @@
-# Generic script to apply a base learner to data and then a meta learner
-#
-#' define a base learner dummy: this illustrates one way to wrap a learning
+# nolint start
+#' Generic script to apply a base learner to data and then a meta learner
+#' @description
+#' Define a base learner dummy: this illustrates one way to wrap a learning
 #' algorithm and return an object that makes predictions
-#'
 #' @param response the dependent variable, numeric, vector
 #' @param covariate independent variables, design matrix, numeric
 #' @param obs_locs geospatial locations as sf object
 #' @param model_attr option model attributes or metadata
 #' @export
-
+# nolint end
 generic_base_learner <- function(response, covariate, obs_locs, model_attr) {
   # check that all required parameters are present
   if (any(is.na(model_attr))) print("Null attributes")
@@ -23,11 +23,11 @@ generic_base_learner <- function(response, covariate, obs_locs, model_attr) {
   return(predict_fun)
 }
 
-
-# a generic meta learner that takes as input the set of fitted base predictors
-# and a set of locations at which to make predictions
-#' Title Generic_Meta_Learner
-#'
+# nocov start
+#' Generic meta learner
+#' @description a generic meta learner that takes as input
+#' the set of fitted base predictors and a set of locations
+#' at which to make predictions
 #' @param base_predictor_list list of the base predictor output
 #' @param pred_loc geospatial information on the locations for predicting
 #'
@@ -60,11 +60,10 @@ generic_meta_learner <- function(base_predictor_list, pred_loc) {
 }
 
 
-# a function that takes a set of base learners and a meta learner,
-# fits the base learners, and then makes predictions with the meta learner
-# at the prediction locations
-#' Title Build_Pipeline
-#'
+#' Build generic pipeline
+#' @description This function takes a set of base learners and
+#' a meta learner, fits the base learners, and then makes predictions with
+#' the meta learner at the prediction locations
 #' @param base_learner_list list of the base predictor output
 #' @param base_attr_list list of the base predictor attributes
 #' @param meta_learner list of meta learner attributes
@@ -75,7 +74,6 @@ generic_meta_learner <- function(base_predictor_list, pred_loc) {
 #'
 #' @return put it all together
 #' @export
-#'
 #' @examples NULL
 build_pipeline <- function(
     base_learner_list,
@@ -128,3 +126,4 @@ build_pipeline(
   obs_locs,
   pred_locs
 )
+# nocov end

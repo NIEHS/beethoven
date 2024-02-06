@@ -8,7 +8,12 @@
 #'   - \code{attr(., "ecoregion3_code")}: Ecoregion lv.3 code and key
 #' @author Insang Song
 #' @importFrom methods is
-#' @import terra
+#' @importFrom terra vect
+#' @importFrom terra project
+#' @importFrom terra intersect
+#' @importFrom terra snap
+#' @importFrom terra extract
+#' @importFrom terra crs
 #' @export
 calc_ecoregion <-
   function(

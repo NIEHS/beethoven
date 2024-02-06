@@ -5,7 +5,7 @@ vignette: >
   %\VignetteIndexEntry{Spatiotemporal cross validation types}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
-date: "2023-11-13"
+date: "2024-01-22"
 author: "Insang Song"
 ---
 
@@ -13,8 +13,8 @@ author: "Insang Song"
 knitr::opts_chunk$set(
   warning = FALSE,
   message = FALSE,
-  fig.width = 8,
-  fig.height = 6,
+  fig.width = 6,
+  fig.height = 3.9,
   res = "retina"
 )
 pkgs <- c("data.table", "sf", "terra", "sftime", "dplyr", "ggplot2")
@@ -25,7 +25,7 @@ source("../R/manipulate_spacetime_data.R")
 source("../R/cross_validation.R")
 ```
 
-```{r data conversion}
+```{r data-conversion}
 set.seed(202311)
 nco <- sf::st_read("../tests/testdata/test_nc_output.nc") |>
   unique()
@@ -76,7 +76,7 @@ ggplot(
   mapping = aes(x = lon, y = lat, color = value)
 ) +
   geom_point() +
-  labs(title = "LOLO and LOTO") +
+  labs(title = "Leave-one-location-out and Leave-one-time-out") +
   facet_grid(variable ~ time)
 
 ggplot(
@@ -84,7 +84,7 @@ ggplot(
   mapping = aes(x = lon, y = lat, color = value)
 ) +
   geom_point() +
-  labs(title = "LOLTO") +
+  labs(title = "Leave-one-location-time-out") +
   facet_wrap(~time)
 ```
 
@@ -112,7 +112,7 @@ index_lbto <- generate_cv_index(ncostdt, "lbto", cv_fold = 5L)
 index_lblto <- generate_cv_index(ncostdt, "lblto", sp_fold = 3, t_fold = 5)
 ```
 
-```{r lb-family plot}
+```{r lb-family-plot}
 ncodt <- data.table::copy(ncostdt$stdt)
 ncodt$lblo <- index_lblo
 ncodt$lbto <- index_lbto

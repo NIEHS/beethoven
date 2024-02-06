@@ -2,31 +2,30 @@
 % Please edit documentation in R/meta_learner.R
 \name{meta_learner_fit}
 \alias{meta_learner_fit}
-\title{meta_learner_fit
-Fit a BART (Bayesian Additive Regression Tree) meta learner. It takes
-predictions of other models such as kriging, GLM, machine learning models as
-input and fits a BART Model}
+\title{Fit a BART (Bayesian Additive Regression Tree) meta learner. It takes predictions of other models such as kriging, GLM, machine learning models as input and fits a BART Model}
 \usage{
-meta_learner_fit(base_predictor_list, kfolds, y)
+meta_learner_fit(base_predictor_list, kfolds, y, ...)
 }
 \arguments{
-\item{base_predictor_list}{- P x 1 list where P = p is a base predictor
+\item{base_predictor_list}{\itemize{
+\item P x 1 list where P = p is a base predictor
 vector (numeric). Each predictor vector should be the same length and
-named.}
+named.
+}}
 
 \item{kfolds}{integer, index of k-folds for cross-validation. This should be
-produced with regards to spatial and/or temporal considerations}
+produced with regards to spatial and/or temporal considerations
+To make cross-validation indices, see \link{generate_cv_index}}
 
 \item{y}{dependent variable}
+
+\item{...}{Passed arguments to \link[BART]{wbart}}
 }
 \value{
 meta_fit_obj object of meta learner
 }
 \description{
-meta_learner_fit
-Fit a BART (Bayesian Additive Regression Tree) meta learner. It takes
-predictions of other models such as kriging, GLM, machine learning models as
-input and fits a BART Model
+Fit a BART (Bayesian Additive Regression Tree) meta learner. It takes predictions of other models such as kriging, GLM, machine learning models as input and fits a BART Model
 }
 \examples{
 NULL

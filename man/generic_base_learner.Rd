@@ -2,8 +2,7 @@
 % Please edit documentation in R/generic_pipeline_example.R
 \name{generic_base_learner}
 \alias{generic_base_learner}
-\title{define a base learner dummy: this illustrates one way to wrap a learning
-algorithm and return an object that makes predictions}
+\title{Generic script to apply a base learner to data and then a meta learner}
 \usage{
 generic_base_learner(response, covariate, obs_locs, model_attr)
 }
@@ -17,6 +16,6 @@ generic_base_learner(response, covariate, obs_locs, model_attr)
 \item{model_attr}{option model attributes or metadata}
 }
 \description{
-define a base learner dummy: this illustrates one way to wrap a learning
+Define a base learner dummy: this illustrates one way to wrap a learning
 algorithm and return an object that makes predictions
 }

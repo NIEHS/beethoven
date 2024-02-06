@@ -2,7 +2,7 @@
 % Please edit documentation in R/download.R
 \name{download_modis_data}
 \alias{download_modis_data}
-\title{download_modis_data:}
+\title{Download MODIS product files}
 \usage{
 download_modis_data(
   date_start = "2023-09-01",
@@ -21,21 +21,21 @@ download_modis_data(
 }
 \arguments{
 \item{date_start}{character(1). length of 10. Start date for downloading
-data. Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").}
+data. Format YYYY-MM-DD (ex. September 1, 2023 is \code{"2023-09-01"}).}
 
 \item{date_end}{character(1). length of 10. End date for downloading data.
-Format YYYY-MM-DD (ex. September 1, 2023 = "2023-09-01").}
+Format YYYY-MM-DD (ex. September 1, 2023 is \code{"2023-09-01"}).}
 
-\item{product}{character(1). One of c("MOD09GA", "MOD11A1", "MOD06_L2",
-"MCD19A2", "MOD13A2", "VNP46A2").}
+\item{product}{character(1).
+One of \code{c("MOD09GA", "MOD11A1", "MOD06_L2", "MCD19A2", "MOD13A2", "VNP46A2")}}
 
-\item{version}{character(1). Default is "61", meaning v061.}
+\item{version}{character(1). Default is \code{"61"}, meaning v061.}
 
 \item{horizontal_tiles}{integer(2). Horizontal tile numbers
-c([start], [end]). Default is c(7, 13).}
+\code{c({start}, {end})}. Default is \code{c(7, 13)}.}
 
 \item{vertical_tiles}{integer(2). Vertical tile numbers
-c([start], [end]). Default is c(3, 6).}
+\code{c({start}, {end})}. Default is \code{c(3, 6)}.}
 
 \item{nasa_earth_data_token}{character(1).
 Token for downloading data from NASA. Should be set before
@@ -43,12 +43,12 @@ trying running the function.}
 
 \item{directory_to_save}{character(1). Directory to save data.}
 
-\item{data_download_acknowledgement}{logical(1). By setting `= TRUE` the
+\item{data_download_acknowledgement}{logical(1). By setting \code{TRUE} the
 user acknowledge that the data downloaded using this function may be very
 large and use lots of machine storage and memory.}
 
 \item{mod06_links}{character(1). CSV file path to MOD06_L2 download links
-from NASA LPDAAC. Default is NULL.}
+from NASA LPDAAC. Default is \code{NULL}.}
 
 \item{download}{logical(1). Download data or only save wget commands.}
 
@@ -68,10 +68,10 @@ every five minutes every day.
 }
 \note{
 \code{date_start} and \code{date_end} should be in the same year.
- Directory structure looks like
- input/modis/raw/[version]/[product]/[year]/[day_of_year]
- Please note that \code{date_start} and \code{date_end} are
- ignored if \code{product == 'MOD06_L2'}.
+Directory structure looks like
+input/modis/raw/\{version\}/\{product\}/\{year\}/\{day_of_year\}
+Please note that \code{date_start} and \code{date_end} are
+ignored if \code{product == 'MOD06_L2'}.
 }
 \author{
 Mitchell Manware, Insang Song
