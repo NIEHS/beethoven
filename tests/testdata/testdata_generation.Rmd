@@ -25,7 +25,7 @@ end_date <- as.Date("2022-01-02")
 ### Load covariate file names
 
 ```{r}
-dict_path <- "../inst/extdata/downloaded_files_metadata.csv"
+dict_path <- "../../inst/extdata/downloaded_files_metadata.csv"
 dict <- data.table::fread(dict_path, sep = ",")
 ```
 
@@ -51,11 +51,11 @@ Example of output
 
 ```{r}
 nlcd_sub_2019 <- terra::rast(paste0(
-  "../tests/testdata/raw/nlcd/",
+  "raw/nlcd/",
   "nlcd_2019_land_cover_l48_20210604.tif"
 ))
 nlcd_sub_2021 <- terra::rast(paste0(
-  "../tests/testdata/raw/nlcd/",
+  "raw/nlcd/",
   "nlcd_2021_land_cover_l48_20230630.tif"
 ))
 terra::plot(nlcd_sub_2019)
@@ -74,7 +74,7 @@ Example of output
 
 ```{r}
 ecor_sub <- terra::vect(paste0(
-  "../tests/testdata/raw/",
+  "raw/",
   "ecoregions/us_eco_l3_state_boundaries.shp"
 ))
 terra::plot(ecor_sub)
@@ -92,7 +92,7 @@ Example of output
 
 ```{r}
 kg_sub <- terra::rast(paste0(
-  "../tests/testdata/raw/koppen_geiger/",
+  "raw/koppen_geiger/",
   "Beck_KG_V1_present_0p0083.tif"
 ))
 terra::plot(kp_sub)
@@ -119,7 +119,7 @@ for (n in narr_names) {
 Example of output
 
 ```{r}
-albedo_sub <- terra::rast("../tests/testdata/raw/narr/albedo.2022.nc")
+albedo_sub <- terra::rast("raw/narr/albedo.2022.nc")
 terra::plot(albedo_sub)
 ```
 
@@ -137,7 +137,7 @@ for (n in narr_lev_names) {
 Example of output
 
 ```{r}
-omega_sub <- terra::rast("../tests/testdata/raw/narr/omega.202201.nc")
+omega_sub <- terra::rast("raw/narr/omega.202201.nc")
 terra::plot(omega_sub)
 ```
 
@@ -148,7 +148,7 @@ terra::plot(omega_sub)
 Extraction
 
 ```{r, eval = FALSE}
-aqc_path <- "../tests/testdata/raw/geos/aqc_tavg_1hr_g1440x721_v1/"
+aqc_path <- "/raw/geos/aqc_tavg_1hr_g1440x721_v1/"
 testdata_geos(testdata_path = aqc_path, collection = "aqc_tavg")
 ```
 
@@ -169,7 +169,7 @@ terra::plot(aqc_sub)
 Extraction
 
 ```{r, eval = FALSE}
-# chm_path <- "../tests/testdata/raw/geos/chm_tavg_1hr_g1440x721_v1/"
+# chm_path <- "/raw/geos/chm_tavg_1hr_g1440x721_v1/"
 chm_path <- paste0(
   "/Volumes/set/Projects/NRT-AP-Model/tests/testdata/raw/",
   "geos/chm_tavg_1hr_g1440x721_v1/"
@@ -197,13 +197,15 @@ terra::plot(chm_sub[[48:52]])
 Extraction
 
 ```{r, eval = FALSE}
-testdata_tri()
+testdata_tri(dict_path = "../../inst/extdata/downloaded_files_metadata.csv",
+             year = 2022,
+             testdata_path = "raw/tri/")
 ```
 
 Example of output
 
 ```{r}
-tri_samp <- data.table::fread("../tests/testdata/raw/tri/tri_raw_2022.csv")
+tri_samp <- data.table::fread("raw/tri/tri_raw_2022.csv")
 head(tri_samp)
 ```
 
@@ -219,7 +221,7 @@ testdata_aqs()
 Example of output
 
 ```{r}
-aqs_samp <- data.table::fread("../tests/testdata/raw/aqs/daily_88101_2022.csv")
+aqs_samp <- data.table::fread("raw/aqs/daily_88101_2022.csv")
 head(aqs_samp)
 ```
 
@@ -232,7 +234,7 @@ testdata_nei()
 ```
 
 ```{r}
-nei_samp <- data.table::fread("../tests/testdata/raw/NEI/onroad_8910.csv")
+nei_samp <- data.table::fread("raw/NEI/onroad_8910.csv")
 head(nei_samp)
 ```
 
@@ -249,7 +251,7 @@ Example of output
 
 ```{r}
 smoke_samp <- terra::vect(paste0(
-  "../tests/testdata/raw/hms_smoke/",
+  "raw/hms_smoke/",
   "hms_smoke20220618.shp"
 ))
 terra::plot(x = smoke_samp, y = "Density")

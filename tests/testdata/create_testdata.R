@@ -67,7 +67,7 @@ replace_dateinfo <- function(string, date) {
 #' be stored
 testdata_nlcd <- function(
     dict_path = "../inst/extdata/downloaded_files_metadata.csv",
-    testdata_path = "../tests/testdata/raw/nlcd/") {
+    testdata_path = "raw/nlcd/") {
   name <- folder <- filename <- NULL
   create_dir(testdata_path)
   dict <- data.table::fread(dict_path, sep = ",")
@@ -90,8 +90,8 @@ testdata_nlcd <- function(
 #' @param testdata_path character path to the folder where testdata should
 #' be stored
 testdata_ecoregions <- function(
-    dict_path = "../inst/extdata/downloaded_files_metadata.csv",
-    testdata_path = "../tests/testdata/raw/ecoregions/") {
+    dict_path = "../../inst/extdata/downloaded_files_metadata.csv",
+    testdata_path = "raw/ecoregions/") {
   name <- folder <- filename <- NULL
   create_dir(testdata_path)
   dict <- data.table::fread(dict_path, sep = ",")
@@ -115,8 +115,8 @@ testdata_ecoregions <- function(
 #' @param testdata_path character path to the folder where testdata should
 #' be stored
 testdata_kg <- function(
-    dict_path = "../inst/extdata/downloaded_files_metadata.csv",
-    testdata_path = "../tests/testdata/raw/koppen_geiger/") {
+    dict_path = "../../inst/extdata/downloaded_files_metadata.csv",
+    testdata_path = "raw/koppen_geiger/") {
   name <- folder <- filename <- NULL
   create_dir(testdata_path)
   dict <- data.table::fread(dict_path, sep = ",")
@@ -142,10 +142,10 @@ testdata_kg <- function(
 #' be stored
 #' @param var character of the variable name
 testdata_narr <- function(
-    dict_path = "../inst/extdata/downloaded_files_metadata.csv",
+    dict_path = "../../inst/extdata/downloaded_files_metadata.csv",
     start_date = as.Date("2022-01-01"),
     end_date = as.Date("2022-01-02"),
-    testdata_path = "../tests/testdata/raw/narr/",
+    testdata_path = "raw/narr/",
     var) {
   name <- folder <- filename <- NULL
   create_dir(testdata_path)
@@ -186,10 +186,10 @@ testdata_narr <- function(
 #' be stored
 #' @param var character of the variable name ("omega" or "shum")
 testdata_narr_lev <- function(
-    dict_path = "../inst/extdata/downloaded_files_metadata.csv",
+    dict_path = "../../inst/extdata/downloaded_files_metadata.csv",
     start_date = as.Date("2022-01-01"),
     end_date = as.Date("2022-01-02"),
-    testdata_path = "../tests/testdata/raw/narr/",
+    testdata_path = "raw/narr/",
     var) {
   name <- folder <- filename <- NULL
   create_dir(testdata_path)
@@ -233,7 +233,7 @@ testdata_narr_lev <- function(
 #' be stored
 #' @param collection character of the data collection ("aqc" or "chm")
 testdata_geos <- function(
-    dict_path = "../inst/extdata/downloaded_files_metadata.csv",
+    dict_path = "../../inst/extdata/downloaded_files_metadata.csv",
     start_date = as.Date("2022-01-01"),
     end_date = as.Date("2022-01-02"),
     testdata_path,
@@ -281,9 +281,9 @@ testdata_geos <- function(
 #' @param testdata_path character path to the folder where testdata should
 #' be stored
 testdata_tri <- function(
-    dict_path = "../inst/extdata/downloaded_files_metadata.csv",
+    dict_path = "../../inst/extdata/downloaded_files_metadata.csv",
     year = 2022,
-    testdata_path = "../tests/testdata/raw/tri/") {
+    testdata_path = "raw/tri/") {
   name <- folder <- filename <- NULL
   create_dir(testdata_path)
   dict <- data.table::fread(dict_path, sep = ",")
@@ -293,7 +293,8 @@ testdata_tri <- function(
   ) |>
     replace_dateinfo(date = as.Date(paste0(year, "-01-01")))
   tri_samp <- data.table::fread(tri_path) |>
-    subset(`1. YEAR` == year & `7. COUNTY` %in% c("DURHAM", "WAKE", "ORANGE"))
+    subset(get("1. YEAR") == year &
+             get("7. COUNTY") %in% c("DURHAM", "WAKE", "ORANGE"))
   new_fpath <- paste0(
     testdata_path,
     dict[name == "tri", filename]
@@ -312,10 +313,10 @@ testdata_tri <- function(
 #' @param testdata_path character path to the folder where testdata should
 #' be stored
 testdata_aqs <- function(
-    dict_path = "../inst/extdata/downloaded_files_metadata.csv",
+    dict_path = "../../inst/extdata/downloaded_files_metadata.csv",
     start_date = as.Date("2022-01-01"),
     end_date = as.Date("2022-01-02"),
-    testdata_path = "../tests/testdata/raw/aqs/") {
+    testdata_path = "raw/aqs/") {
   name <- folder <- filename <- NULL
   create_dir(testdata_path)
   dict <- data.table::fread(dict_path, sep = ",")
@@ -325,7 +326,7 @@ testdata_aqs <- function(
   ) |>
     replace_dateinfo(date = start_date)
   aqs <- data.table::fread(fpath) |>
-    subset(`Date Local` >= start_date & `Date Local` <= end_date)
+    subset(get("Date Local") >= start_date & get("Date Local") <= end_date)
   aqs_vect <- terra::vect(aqs,
     geom = c("Longitude", "Latitude"),
     crs = "EPSG:4326"
@@ -350,8 +351,8 @@ testdata_aqs <- function(
 #' @param testdata_path character path to the folder where testdata should
 #' be stored
 testdata_nei <- function(
-    dict_path = "../inst/extdata/downloaded_files_metadata.csv",
-    testdata_path = "../tests/testdata/raw/NEI/") {
+    dict_path = "../../inst/extdata/downloaded_files_metadata.csv",
+    testdata_path = "raw/NEI/") {
   name <- folder <- filename <- NULL
   create_dir(testdata_path)
   dict <- data.table::fread(dict_path, sep = ",")
@@ -363,7 +364,7 @@ testdata_nei <- function(
     ) |>
       replace_dateinfo(date = "2020-01-01")
     nei_samp <- data.table::fread(nei_path) |>
-      subset(county %in% c("Durham", "Wake", "Orange"))
+      subset(get("county") %in% c("Durham", "Wake", "Orange"))
 
     new_fpath <- paste0(
       testdata_path,
@@ -388,8 +389,8 @@ testdata_nei <- function(
 #' @param testdata_path character path to the folder where testdata should
 #' be stored
 testdata_hms_smoke <- function(
-    dict_path = "../inst/extdata/downloaded_files_metadata.csv",
-    testdata_path = "../tests/testdata/raw/hms_smoke/") {
+    dict_path = "../../inst/extdata/downloaded_files_metadata.csv",
+    testdata_path = "raw/hms_smoke/") {
   name <- folder <- filename <- NULL
   create_dir(testdata_path)
   dict <- data.table::fread(dict_path, sep = ",")
