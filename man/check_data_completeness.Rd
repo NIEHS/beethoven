@@ -17,12 +17,12 @@ check_data_completeness(
 Field names where completeness will be checked.}
 
 \item{report_fields_na}{logical(1). If any fields have NA values,
-report the field names which gave the errors. Default is FALSE.}
+report the field names which gave the errors. Default is \code{FALSE}.}
 }
 \value{
-A logical (when report_fields_na is FALSE;
+A logical (when report_fields_na is \code{FALSE};
 TRUE means there are NA values at least one data value) or a list
-(when report_fields_na is TRUE) object.
+(when report_fields_na is \code{TRUE}) object.
 A list includes the list of fields that include NAs.
 }
 \description{

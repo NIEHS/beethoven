@@ -2,13 +2,13 @@
 % Please edit documentation in R/download.R
 \name{download_data}
 \alias{download_data}
-\title{download_data: a wrapper function for download covariate sources}
+\title{Download raw data from sources}
 \usage{
 download_data(
   dataset_name = c("aqs", "ecoregion", "geos", "gmted", "koppen", "koppengeiger",
     "merra2", "merra", "narr_monolevel", "modis", "narr_p_levels", "nlcd", "noaa",
     "sedac_groads", "sedac_population", "groads", "population", "plevels", "p_levels",
-    "monolevel", "hms", "smoke"),
+    "monolevel", "hms", "smoke", "tri", "nei"),
   directory_to_save = NULL,
   data_download_acknowledgement = FALSE,
   ...
@@ -20,32 +20,40 @@ download_data(
 \item{directory_to_save}{character(1). Directory to save / unzip
 (if zip files are downloaded) data.}
 
-\item{data_download_acknowledgement}{logical(1). By setting `= TRUE` the
+\item{data_download_acknowledgement}{logical(1). By setting \code{TRUE} the
 user acknowledge that the data downloaded using this function may be very
 large and use lots of machine storage and memory.}
 
 \item{...}{Arguments passed to each download function.}
 }
 \description{
-download_data: a wrapper function for download covariate sources
+Download raw data from sources
 }
 \note{
-- All download function names are in \code{download_*_data} formats
+\itemize{
+\item All download function names are in \code{download_*_data} formats
+}
 }
 \seealso{
-- [download_aqs_data()]: "aqs"
-- [download_ecoregion_data()]: "ecoregion"
-- [download_geos_cf_data()]: "geos"
-- [download_gmted_data()]: "gmted"
-- [download_koppen_geiger_data()]: "koppen", "koppengeiger"
-- [download_merra2_data()]: "merra2", "merra"
-- [download_narr_monolevel_data()]: "narr_monolevel", "monolevel"
-- [download_narr_p_levels_data()]: "narr_p_levels", "p_levels", "plevels"
-- [download_nlcd_data()]: "nlcd",
-- [download_noaa_hms_smoke_data()]: "noaa", "smoke", "hms"
-- [download_sedac_groads_data()]: "sedac_groads", "groads"
-- [download_sedac_population_data()]: "sedac_population", "population"
-- [download_modis_data()]: "modis", "MODIS"
+For details of each download function per dataset,
+Please refer to:
+\itemize{
+\item \link{download_aqs_data}: "aqs", "AQS"
+\item \link{download_ecoregion_data}: "ecoregion"
+\item \link{download_geos_cf_data}: "geos"
+\item \link{download_gmted_data}: "gmted", "GMTED"
+\item \link{download_koppen_geiger_data}: "koppen", "koppengeiger"
+\item \link{download_merra2_data}: "merra2", "merra", "MERRA", "MERRA2"
+\item \link{download_narr_monolevel_data}: "narr_monolevel", "monolevel"
+\item \link{download_narr_p_levels_data}: "narr_p_levels", "p_levels", "plevels"
+\item \link{download_nlcd_data}: "nlcd", "NLCD"
+\item \link{download_noaa_hms_smoke_data}: "noaa", "smoke", "hms"
+\item \link{download_sedac_groads_data}: "sedac_groads", "groads"
+\item \link{download_sedac_population_data}: "sedac_population", "population"
+\item \link{download_modis_data}: "modis", "MODIS"
+\item \link{download_tri_data}: "tri", "TRI"
+\item \link{download_nei_data}: "nei", "NEI"
+}
 }
 \author{
 Insang Song

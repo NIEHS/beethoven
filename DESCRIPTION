@@ -1,23 +1,28 @@
-Package: NRTAPmodel
+Package: beethoven
 Title: The SET group near real time air pollution model
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: c(
-    person("Kyle", "Messier", , "kyle.messier@nih.gov", role = c("aut", "cre")),
-    person("Insang", "Song", role = c("aut", "ctb")),
-    person("Eva", "Marques", role = c("aut", "ctb")),
-    person("Mitchell", "Manware", role = c("aut", "ctb")),
-    person("Daniel", "Zilber", role = c("aut", "ctb")),
-    person("Anisha", "Singh", role = c("aut", "ctb")),
-    person("Lara", "Clark", role = c("aut", "ctb")),
-    person("Cavin", "Ward-Caviness", role = c("aut", "ctb"))
+    person("Kyle", "Messier", , "kyle.messier@nih.gov", role = c("aut", "cre"), comment = c(ORCID = "0000-0001-9508-9623")),
+    person("Insang", "Song", role = c("aut", "ctb"), comment = c(ORCID = "0000-0001-8732-3256")),
+    person("Eva", "Marques", role = c("aut", "ctb"), comment = c(ORCID = "0000-0001-9817-6546")),
+    person("Ranadeep", "Daw", role = c("aut", "ctb"), comment = c(ORCID = "0000-0003-3590-909X")),	
+    person("Mitchell", "Manware", role = c("aut", "ctb"), comment = c(ORCID = "0009-0003-6440-6106")),
+    person("Daniel", "Zilber", role = c("aut", "ctb"), comment = c(ORCID = "0000-0002-4387-0271")),
+    person("Anisha", "Singh", role = c("aut", "ctb"), comment = c(ORCID = "0000-0002-7540-0856")),
+    person("Lara", "Clark", role = c("aut", "ctb"), comment = c(ORCID = "0000-0001-6940-5442")),
+    person("Cavin", "Ward-Caviness", role = c("aut", "ctb"), comment = c(ORCID = "0000-0002-6322-4349")),
+    person("Mariana", "Alifa Kassien", role = c("aut", "ctb"), comment = c(ORCID = "0000-0003-2295-406X"))
   )
 Description: Near Real Time air pollution model results and code produced by the SET group. It is fully tested, versioned, and open source and open access.
 Depends: R (>= 4.1.0)
-Imports: dplyr, sf, stats, terra, methods, BART, data.table, httr, rvest, spData, exactextractr, ggplot2, scatterpie, utils, stringr, testthat (>= 3.0.0)
-Suggests: covr, withr, knitr, rmarkdown, stars, sftime
+Imports: dplyr, sf, stats, terra, methods, BART, data.table, httr, rvest, spData, exactextractr, utils, stringr, testthat (>= 3.0.0), doParallel, parallelly, stars, foreach, future, ranger, xgboost, torch
+Suggests: covr, withr, knitr, rmarkdown, sftime, lwgeom, FNN, ggplot2, scatterpie, doRNG
 Encoding: UTF-8
 VignetteBuilder: knitr, rmarkdown
-RoxygenNote: 7.2.3
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
+Config/Needs/website: tidyverse/tidytemplate
 Config/testhat/edition: 3
 License: MIT + file LICENSE
-URL: https://spatiotemporal-exposures-and-toxicology.github.io/NRTAPmodel/
+URL: https://github.com/Spatiotemporal-Exposures-and-Toxicology/beethoven, 
+https: //spatiotemporal-exposures-and-toxicology.github.io/beethoven/

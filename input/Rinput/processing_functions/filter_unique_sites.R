@@ -25,7 +25,7 @@ options(sf_use_s2 = FALSE)
 #' - "lat": in WGS 1984 (EPSG:4326)
 #' - "date"
 #' "date" field will be attached only when include_time == TRUE.
-#' @import data.table
+#' @importFrom data.table as.data.table
 #' @note \code{include_time = TRUE} will return a massive data.table
 #' object. Please choose proper \code{date_start} and \code{date_end} values.
 #' @export
@@ -53,7 +53,7 @@ filter_unique_sites <-
     # select relevant fields only
     sites_v <- unique(sites[, c("site_id", "Longitude", "Latitude", "Datum")])
     names(sites_v)[2:3] <- c("lon", "lat")
-    sites_v <- as.data.table(sites_v)
+    sites_v <- data.table::as.data.table(sites_v)
 
     # subset mainland
     sites_v <- sites_v[!grepl("^(02|15|72|78|6|80)", site_id), ]

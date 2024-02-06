@@ -1,6 +1,6 @@
-#' Convert spatio-temporal object to a datatable with lon, lat, time, predictors
-#' columns. It also returns the crs.
-#'
+# nolint start
+#' Convert spatio-temporal object to a datatable with lon, lat, time, predictors columns. It also returns the crs.
+# nolint end
 #' @param stobj object containing space-time data. It can be a data.frame,
 #' a data.table, an sf or sftime, a SpatVector or a SpatRastDataset.
 #' @return a list with a "stdt" a data.table of locations identified by
@@ -126,7 +126,7 @@ is_stdt <- function(obj) {
 #' Convert a stdt to sf/sftime/SpatVector
 #' @param stdt A stdt object
 #' @param class_to character(1). Should be one of
-#' "sf", "sftime", "SpatRasterDataset", or "SpatVector"
+#' `"sf"`, `"sftime"`, `"SpatRasterDataset"`, or `"SpatVector"`
 #' @return a sf/sftime/SpatRasterDataset/SpatVector
 #' @importFrom sf st_as_sf
 #' @importFrom terra vect
@@ -314,11 +314,11 @@ dt_to_sftime <- function(datatable, crs) {
 #' @return same datatable object with "lon", "lat",
 #' "lon_ori", "lat_ori" columns
 project_dt <- function(datatable, crs_ori, crs_dest) {
-  if (!is.character(crs_ori) || !is.character(crs_dest)) {
-    stop("crs are not characters")
-  }
   if (!("data.table" %in% class(datatable))) {
     stop("datatable is not a data.table")
+  }
+  if (!is.character(crs_ori) || !is.character(crs_dest)) {
+    stop("crs are not characters")
   }
   if (!("lat" %in% colnames(datatable))) {
     stop("datatable does not contain lat column")

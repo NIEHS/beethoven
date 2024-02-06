@@ -2,7 +2,7 @@
 % Please edit documentation in R/download.R
 \name{download_aqs_data}
 \alias{download_aqs_data}
-\title{download_aqs_data: download daily data from AQS datamart}
+\title{Download daily data from AQS datamart}
 \usage{
 download_aqs_data(
   parameter_code = 88101,
@@ -21,9 +21,8 @@ download_aqs_data(
 }
 \arguments{
 \item{parameter_code}{integer(1). length of 5.
-EPA pollutant parameter code.
-For details, please refer to
-https://aqs.epa.gov/aqsweb/documents/codetables/parameters.html}
+EPA pollutant parameter code. For details, please refer to
+\href{https://aqs.epa.gov/aqsweb/documents/codetables/parameters.html}{AQS parameter codes}}
 
 \item{year_start}{integer(1). length of 4.
 Start year for downloading data.}
@@ -33,7 +32,7 @@ End year for downloading data.}
 
 \item{resolution_temporal}{character(1).
 Name of column containing POC values.
-Currently, no value other than "daily" works.}
+Currently, no value other than \code{"daily"} works.}
 
 \item{directory_to_download}{character(1).
 Directory to download zip files from AQS data mart.}
@@ -44,29 +43,30 @@ Directory to decompress zip files.}
 \item{url_aqs_download}{character(1).
 URL to the AQS pre-generated datasets.}
 
-\item{data_download_acknowledgement}{logical(1). By setting `= TRUE` the
+\item{data_download_acknowledgement}{logical(1). By setting \code{TRUE} the
 user acknowledge that the data downloaded using this function may be very
 large and use lots of machine storage and memory.}
 
-\item{unzip}{logical(1). Unzip zip files. Default = `TRUE`.}
+\item{unzip}{logical(1). Unzip zip files. Default \code{TRUE}.}
 
 \item{remove_zip}{logical(1). Remove zip file from directory_to_download.
-Default = `FALSE`.}
+Default \code{FALSE}.}
 
-\item{download}{logical(1). `= FALSE` will generate a `.txt` file containing
-all download commands. By setting `= TRUE` the function will download all of
-the requested data files. Default is FALSE.}
+\item{download}{logical(1). \code{FALSE} will generate a *.txt file
+containing all download commands. By setting \code{TRUE} the function
+will download all of the requested data files.}
 
-\item{remove_command}{logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
+\item{remove_command}{logical(1).
+Remove (\code{TRUE}) or keep (\code{FALSE})
 the text file containing download commands. Default is FALSE.}
 }
 \value{
 NULL; Separate comma-separated value (CSV) files of
- monitors and the daily representative values
- will be stored in directory_to_save.
+monitors and the daily representative values
+will be stored in \code{directory_to_save}.
 }
 \description{
-download_aqs_data: download daily data from AQS datamart
+Download daily data from AQS datamart
 }
 \author{
 Mariana Kassien, Insang Song, Mitchell Manware

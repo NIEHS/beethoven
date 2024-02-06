@@ -2,7 +2,7 @@
 % Please edit documentation in R/generic_pipeline_example.R
 \name{generic_meta_learner}
 \alias{generic_meta_learner}
-\title{Title Generic_Meta_Learner}
+\title{Generic meta learner}
 \usage{
 generic_meta_learner(base_predictor_list, pred_loc)
 }
@@ -15,7 +15,9 @@ generic_meta_learner(base_predictor_list, pred_loc)
 mean and variance of the meta learner at prediction locations
 }
 \description{
-Title Generic_Meta_Learner
+a generic meta learner that takes as input
+the set of fitted base predictors and a set of locations
+at which to make predictions
 }
 \examples{
 NULL

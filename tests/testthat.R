@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(NRTAPmodel)
+library(beethoven)
 
-test_check("NRTAPmodel")
+test_check("beethoven")

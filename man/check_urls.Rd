@@ -2,20 +2,20 @@
 % Please edit documentation in R/download_test_support.R
 \name{check_urls}
 \alias{check_urls}
-\title{Sample download URLs and apply `check_url_file_exist` function}
+\title{Sample download URLs and apply \code{check_url_status} function}
 \usage{
-check_urls(urls = urls, size = NULL, method = "HEAD")
+check_urls(urls = urls, size = NULL, method = c("HEAD", "GET"))
 }
 \arguments{
 \item{urls}{character vector of URLs}
 
-\item{size}{number of observations to be sampled from `urls`}
+\item{size}{number of observations to be sampled from \code{urls}}
 
-\item{method}{httr method to obtain URL ("HEAD" or "GET")}
+\item{method}{httr method to obtain URL (\code{"HEAD"} or \code{"GET"})}
 }
 \value{
 logical vector for URL status = 200
 }
 \description{
-Sample download URLs and apply `check_url_file_exist` function
+Sample download URLs and apply \code{check_url_status} function
 }

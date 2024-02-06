@@ -2,9 +2,9 @@
 ## Output data refers to outputs of base/meta learners
 ## Last edited 11/13/2023
 
-#' Check output locations are in
-#' the reference spatial domain of the mainland US
-#'
+# nolint start
+#' Check output locations are in the reference spatial domain of the mainland US
+# nolint end
 #' @param model_output sf/sftime object of the model output
 #' @param spatial_domain sf/sftime object of spatial domain
 #' @return A logical vector of length nrow(model_output)
@@ -110,7 +110,7 @@ check_variances_are_valid <- function(
 #'
 #' @param model_output Spat*/sf* object of model output.
 #' @param crs_list a character/integer vector of acceptable CRS.
-#' Default is c("EPSG:4326", "EPSG:5070")
+#' Default is `c("EPSG:4326", "EPSG:5070")`
 #' @return A logical value indicating the model is compliant to one of
 #'  elements in crs_list.
 #' @author Insang Song
@@ -146,10 +146,10 @@ check_crs_is_valid <- function(
 #' @param fields_to_check character(varying).
 #' Field names where completeness will be checked.
 #' @param report_fields_na logical(1). If any fields have NA values,
-#' report the field names which gave the errors. Default is FALSE.
-#' @return A logical (when report_fields_na is FALSE;
+#' report the field names which gave the errors. Default is `FALSE`.
+#' @return A logical (when report_fields_na is `FALSE`;
 #' TRUE means there are NA values at least one data value) or a list
-#' (when report_fields_na is TRUE) object.
+#' (when report_fields_na is `TRUE`) object.
 #' A list includes the list of fields that include NAs.
 #' @importFrom sf st_drop_geometry
 #' @importFrom methods is

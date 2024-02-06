@@ -2,12 +2,11 @@
 % Please edit documentation in R/download.R
 \name{download_sedac_population_data}
 \alias{download_sedac_population_data}
-\title{download_sedac_population_data: download UN WPP-Adjusted population density
-data from NASA Socioeconomic Data and Applications Center (SEDAC).}
+\title{Download UN WPP-Adjusted population density data from NASA Socioeconomic Data and Applications Center (SEDAC)}
 \usage{
 download_sedac_population_data(
   year = "2020",
-  data_format = "GeoTIFF",
+  data_format = c("GeoTIFF", "ASCII", "netCDF"),
   data_resolution = "60 minute",
   directory_to_download = "./input/sedac_population/",
   directory_to_save = "./input/sedac_population/",
@@ -19,46 +18,45 @@ download_sedac_population_data(
 )
 }
 \arguments{
-\item{year}{character(1). Available years are 2000, 2005, 2010, 2015, and
-2020, or "all" for all years.}
+\item{year}{character(1). Available years are \code{2000}, \code{2005}, \code{2010}, \code{2015}, and
+\code{2020}, or \code{"all"} for all years.}
 
 \item{data_format}{character(1). Individual year data can be downloaded as
-"ASCII" or "GeoTIFF". "all" years is downloaded as "netCDF".}
+\code{"ASCII"} or \code{"GeoTIFF"}. "all" years is downloaded as \code{"netCDF"}.}
 
 \item{data_resolution}{character(1). Available resolutions are 30 second
-(~1km), 2.5 minute (~5km), 15 minute (~30km), 30 minute (~55km), and 60
-minute (~110km).}
+(approx. 1 km), 2.5 minute (approx. 5 km), 15 minute (approx. 30 km),
+30 minute (approx. 55 km), and 60 minute (approx. 110 km).}
 
 \item{directory_to_download}{character(1). Directory to download zip files
 from NASA UN WPP-Adjusted Population Density, v4.11.}
 
 \item{directory_to_save}{character(1). Directory to decompress zip files.}
 
-\item{data_download_acknowledgement}{logical(1). By setting `= TRUE` the user
-acknowledge that the data downloaded using this function may be very large
-and use lots of machine storage and memory.}
+\item{data_download_acknowledgement}{logical(1). By setting \code{TRUE} the
+user acknowledge that the data downloaded using this function may be very
+large and use lots of machine storage and memory.}
 
-\item{download}{logical(1). `= FALSE` will generate a `.txt` file containing
-all download commands. By setting `= TRUE` the function will download all of
-the requested data files.}
+\item{download}{logical(1). \code{FALSE} will generate a *.txt file
+containing all download commands. By setting \code{TRUE} the function
+will download all of the requested data files.}
 
-\item{unzip}{logical(1). Unzip zip files. Default = `TRUE`.}
+\item{unzip}{logical(1). Unzip zip files. Default is \code{TRUE}.}
 
 \item{remove_zip}{logical(1). Remove zip files from directory_to_download.
-Default = `FALSE`.}
+Default is \code{FALSE}.}
 
-\item{remove_command}{logical(1). Remove (\code{TRUE}) or keep (\code{FALSE})
+\item{remove_command}{logical(1).
+Remove (\code{TRUE}) or keep (\code{FALSE})
 the text file containing download commands.}
 }
 \value{
 NULL;
 }
 \description{
-The `download_sedac_population_data()` function accesses and downloads
+The \code{download_sedac_population_data()} function accesses and downloads
 population density data from the National Aeronatuics and Space
-Administration's (NASA) [UN WPP-Adjusted Population Density, v4.11]
-(https://sedac.ciesin.columbia.edu/data/set/gpw-v4-population-density-adjuste
-d-to-2015-unwpp-country-totals-rev11).
+Administration's (NASA) \href{https://sedac.ciesin.columbia.edu/data/set/gpw-v4-population-density-adjusted-to-2015-unwpp-country-totals-rev11}{UN WPP-Adjusted Population Density, v4.11}.
 }
 \author{
 Mitchell Manware, Insang Song

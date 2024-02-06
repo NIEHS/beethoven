@@ -2,21 +2,18 @@
 % Please edit documentation in R/cross_validation.R
 \name{generate_cv_index_lolto}
 \alias{generate_cv_index_lolto}
-\title{Generate spatio-temporal cross-validation index
-(leave-one-location-time-out)}
+\title{Generate spatio-temporal cross-validation index leave-one-location-time-out)}
 \usage{
 generate_cv_index_lolto(covars)
 }
 \arguments{
-\item{covars}{stdt. See \code{\link{convert_stobj_to_stdt}}
-for details.}
+\item{covars}{stdt. See \code{\link{convert_stobj_to_stdt}} for details.}
 }
 \value{
 An integer vector.
 }
 \description{
-Generate spatio-temporal cross-validation index
-(leave-one-location-time-out)
+Generate spatio-temporal cross-validation index leave-one-location-time-out)
 }
 \author{
 Insang Song

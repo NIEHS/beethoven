@@ -2,14 +2,12 @@
 % Please edit documentation in R/cross_validation.R
 \name{generate_cv_index_lblo}
 \alias{generate_cv_index_lblo}
-\title{Generate spatio-temporal cross-validation index
-(leave-block-location-out)}
+\title{Generate spatio-temporal cross-validation index (leave-block-location-out)}
 \usage{
 generate_cv_index_lblo(covars, cv_fold = NULL, blocks = NULL, block_id = NULL)
 }
 \arguments{
-\item{covars}{stdt. See \code{\link{convert_stobj_to_stdt}}
-for details.}
+\item{covars}{stdt. See \code{\link{convert_stobj_to_stdt}} for details.}
 
 \item{cv_fold}{integer(1). Number of folds for cross-validation.}
 
@@ -21,8 +19,7 @@ for details.}
 An integer vector.
 }
 \description{
-Generate spatio-temporal cross-validation index
-(leave-block-location-out)
+Generate spatio-temporal cross-validation index (leave-block-location-out)
 }
 \author{
 Insang Song

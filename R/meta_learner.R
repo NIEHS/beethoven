@@ -1,18 +1,19 @@
-#' meta_learner_fit
-#' Fit a BART (Bayesian Additive Regression Tree) meta learner. It takes
-#' predictions of other models such as kriging, GLM, machine learning models as
-#' input and fits a BART Model
+# nolint start
+#' Fit a BART (Bayesian Additive Regression Tree) meta learner. It takes predictions of other models such as kriging, GLM, machine learning models as input and fits a BART Model
 #' @param base_predictor_list - P x 1 list where P = p is a base predictor
 #' vector (numeric). Each predictor vector should be the same length and
 #' named.
-#' @param y dependent variable
 #' @param kfolds integer, index of k-folds for cross-validation. This should be
 #' produced with regards to spatial and/or temporal considerations
+#' To make cross-validation indices, see [generate_cv_index]
+#' @param y dependent variable
+#' @param ... Passed arguments to \link[BART]{wbart}
 #' @return meta_fit_obj object of meta learner
 #' @export
 #' @examples NULL
+# nolint end
 meta_learner_fit <- function(base_predictor_list,
-                             kfolds, y) {
+                             kfolds, y, ...) {
   # Unnamed base_predictor_list is not accepted
   if (is.null(names(base_predictor_list)) ||
         any(is.na(names(base_predictor_list)))) {
@@ -60,23 +61,24 @@ meta_learner_fit <- function(base_predictor_list,
     meta_fit_obj[[i]] <- BART::wbart(
       x.train = x_tr,
       y.train = y_tr,
-      x.test = x_te
+      x.test = x_te,
+      ...
     )
   }
   return(meta_fit_obj)
 }
 
 
-#' meta_learner_predict - take the list of BART fit objects and
-#' predictions of baselearners to create meta_learner predictions. The BART
-#' meta learner is not explicitly a S-T model, but the input covariates
-#' (outputs of each base learner) are S-T based.
-#'
+# nolint start
+#' Create meta_learner predictions from the list of BART fit objects and predictions of base learners
+#' @description
+#' The meta learner used in this package, Bayesian Additive Regression Tree (BART), is not explicitly a spatiotemporal model, but the input covariates (outputs of each base learner) are S-T based.
+# nolint end
 #' @param meta_fit list of BART objects from meta_learner_fit
-#' @param base_outputs_stdt stdt object (see convert_spacetime_data.R):
+#' @param base_outputs_stdt stdt object. See [convert_stobj_to_stdt]
 #' list with datatable containing lat, lon, time and the covariates
 #' (outputs of each base learner) at prediction locations and crs.
-#' @param nthreads integer(1). Number of threads used in BART::predict.wbart
+#' @param nthreads integer(1). Number of threads used in [BART::predict.wbart]
 #' @note  The predictions can be a rast or sf, which depends on the same
 #' respective format of the covariance matrix input - cov_pred
 #' @return meta_pred: the final meta learner predictions
