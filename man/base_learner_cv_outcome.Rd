@@ -16,7 +16,8 @@ See \code{\link{generate_cv_index}}}
 }
 \value{
 List length of \code{max(cv_index)}
-with numeric vectors
+with numeric vectors when \code{length(dependent_name) == 1} or
+data.frames \code{length(dependent_name) > 1}
 }
 \description{
 Return cvfold outcome values
