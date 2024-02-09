@@ -66,7 +66,7 @@ replace_dateinfo <- function(string, date) {
 #' @param testdata_path character path to the folder where testdata should
 #' be stored
 testdata_nlcd <- function(
-    dict_path = "../inst/extdata/downloaded_files_metadata.csv",
+    dict_path = "../../inst/extdata/downloaded_files_metadata.csv",
     testdata_path = "raw/nlcd/") {
   name <- folder <- filename <- NULL
   create_dir(testdata_path)
