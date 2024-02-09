@@ -138,7 +138,7 @@ Extraction
 narr_lev_names <- c("omega", "shum")
 testdata_path <- paste0(raw_path, "narr/")
 for (n in narr_lev_names) {
-  testdata_narr_lev(var = n,testdata_path = testdata_path)
+  testdata_narr_lev(var = n, testdata_path = testdata_path)
 }
 ```
 
