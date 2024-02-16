@@ -18,7 +18,8 @@ pkgs <- c(
   "stringr",
   "spData",
   "ggplot2",
-  "scatterpie"
+  "scatterpie",
+  "amadeus"
 )
 sapply(pkgs, library, character.only = TRUE)
 ```

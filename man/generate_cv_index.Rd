@@ -60,6 +60,10 @@ states, counties, hydrological unit code areas, etc.
 \code{lblto} mode will accept \code{sp_fold} and \code{t_fold}.
 The maximum of results in this case is \code{sp_fold * t_fold}.
 }
+\note{
+\code{sp_fold} and \code{t_fold} are only applicable in \code{cv_mode == lblto}.
+These arguments will be ignored otherwise.
+}
 \author{
 Insang Song
 }
