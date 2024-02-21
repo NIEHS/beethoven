@@ -135,8 +135,16 @@ calculate_multi <-
 
 
 combine <-
-  function() {
-
+  function(
+    by = c(mr("timeid")),
+    time = FALSE,
+    ...
+  ) {
+    if (time) {
+      by <- c(mr("pointid"), mr("timeid"))
+    }
+    do.call(function(x, y) merge(x, y, by = by), ...)
+    
   }
 
 fit_base <-

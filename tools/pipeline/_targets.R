@@ -24,7 +24,7 @@ list(
   ,
   targets::tar_target(sites_time, read_locs(mr("dir_input_aqs")))
   ,
-  # tar_target for download and checking presence
+  # tar_target for download and checking existence
   targets::tar_target(
     status_modis_mod11,
     fastdown(mr("dir_input_mod11"))
@@ -110,16 +110,89 @@ list(
     fastdown(mr("dir_input_sedacroad"))
   )
   ,
+  # covariate calculation: multi vs single cases
   targets::tar_target(
-    calculate_tri,
+    covariates_tri,
     calculate_multi(
       status = status_tri,
+      domain = c(2017, 2017, 2020, 2020, 2020),
       outpath =
         file.path(
           mr("dir_output"), mr("file_covar_tri")
         ),
       locs = sites_spat,
       path = mr("dir_input_tri"),
+      ... # other args
+    )
+  )
+  ,
+  targets::tar_target(
+    covariates_ecoregion,
+    calculate_single(
+      status = status_ecoregion,
+      outpath =
+        file.path(
+          mr("dir_output"), mr("file_covar_ecoregion")
+        ),
+      locs = sites_spat,
+      path = mr("dir_input_ecoregion"),
+      ... # other args
+    )
+  )
+  ,
+  targets::tar_target(
+    covariates_koppen,
+    calculate_single(
+      status = status_koppen,
+      outpath =
+        file.path(
+          mr("dir_output"), mr("file_covar_koppen")
+        ),
+      locs = sites_spat,
+      path = mr("dir_input_koppen"),
+      ... # other args
+    )
+  )
+  ,
+  targets::tar_target(
+    covariates_hms,
+    calculate_multi(
+      status = status_hms,
+      outpath =
+        file.path(
+          mr("dir_output"), mr("file_covar_hms")
+        ),
+      locs = sites_spat,
+      path = mr("dir_input_hms"),
+      ... # other args
+    )
+  )
+  ,
+  targets::tar_target(
+    covariates_sedac_population,
+    calculate_multi(
+      status = status_sedac_population,
+      outpath =
+        file.path(
+          mr("dir_output"), mr("file_covar_sedac_population")
+        ),
+      locs = sites_spat,
+      path = mr("dir_input_sedac_population"),
+      ... # other args
+    )
+  )
+  ,
+
+  targets::tar_target(
+    covariates_sedac_groads,
+    calculate_multi(
+      status = status_sedac_groads,
+      outpath =
+        file.path(
+          mr("dir_output"), mr("file_covar_sedac_groads")
+        ),
+      locs = sites_spat,
+      path = mr("dir_input_sedac_groads"),
       ... # other args
     )
   )

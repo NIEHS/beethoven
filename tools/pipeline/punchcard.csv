@@ -12,8 +12,8 @@ dir_input_nlcd,input/nlcd,10,path,file.path
 dir_input_ecoregion,input/ecoregions,11,path,file.path
 dir_input_koppen,input/koppengeiger,12,path,file.path
 dir_input_gmted,input/gmted,13,path,file.path
-dir_input_sedacpop,input/sedac_population,14,path,file.path
-dir_input_sedacroad,input/sedac_groads,15,path,file.path
+dir_input_sedac_population,input/sedac_population,14,path,file.path
+dir_input_sedac_groads,input/sedac_groads,15,path,file.path
 dir_input_hms,input/noaa_hms,16,path,file.path
 dir_input_tri,input/tri,17,path,file.path
 dir_input_geos,input/geos,18,path,file.path
@@ -65,3 +65,5 @@ file_covar_geos,covar_geos.rds,63,status,paste0
 file_covar_hms,covar_hms.rds,64,status,paste0
 file_covar_sedac_population,covar_sedac_population.rds,65,status,paste0
 file_covar_sedac_groads,covar_sedac_groads.rds,66,status,paste0
+pointid,site_id,67,identifier,paste0
+timeid,time,68,identifier,paste0
