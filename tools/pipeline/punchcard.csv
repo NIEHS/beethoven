@@ -70,9 +70,9 @@ timeid,time,68,identifier,paste0
 file_covar_dummies,covar_dummies.rds,69,status,paste0
 file_aqs_pm,aqs_cleaned.rds,70,status,paste0
 name_dep,pm2.5,71,label,paste0
-file_name_indep,list_covariate_names.txt,72,status,readLines
-,,73,,
-,,74,,
+file_name_indep,list_covariate_names.txt,72,label,readLines
+file_grid_prediction,prediction_grid.rds,73,status,paste0
+nthreads_predict,16,74,setting,as.integer
 ,,75,,
 ,,76,,
 ,,77,,

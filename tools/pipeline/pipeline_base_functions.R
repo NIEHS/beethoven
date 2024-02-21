@@ -1,5 +1,9 @@
 ## pipeline base functions
 
+#' Running commands with a punchcard
+#' @param varname variable name to call
+#' @param file Path to the punchcard
+#' @returns Depending on the specification in the punchcard.
 meta_run <-
   function(
     varname = NULL,
@@ -22,6 +26,11 @@ meta_run(varname = "y2018")
 meta_run(varname = "dir_input_modis_mod11")
 
 
+#' Read AQS data
+#' @param fun_aqs function to import AQS data.
+#' Default is `get("import_aqs")`
+#' @param ... Passed arguments to `fun_aqs`
+#' @returns Depending on `fun_aqs` specification.
 read_locs <-
   function(
     fun_aqs = get("import_aqs"),
@@ -88,7 +97,13 @@ get_aqs_data <-
     #nocov end
   }
 
-
+#' Join dependent variable (y) and covariates (x)
+#' @param df_pm PM2.5 data.frame
+#' @param df_covar covariates data.frame
+#' @param locs_id location identifier
+#' @param time_id time identifier
+#' @returns data.frame
+#' @author Insang Song
 join_yx <-
   function(
     df_pm,
@@ -99,7 +114,18 @@ join_yx <-
     merge(df_pm, df_covar, by = c(locs_id, time_id))
   }
 
-
+#' Check file status with a static list
+#' @description A static list refers to a fixed state of
+#' the list of files at a certain time point. Users should update the static
+#' list if needed. The static list could reduce the risk of rerunning the
+#' entire pipeline due to a trivial or accidental change in files
+#' @note Directory representations should match in `dir` and `static_list`.
+#' Both should be absolute or relative, but should not be crossed.
+#' @param dir Directory path to search files
+#' @param extension File extension according to raw data
+#' @param static_list character. A static list of files.
+#' Its elements should match `extension` with their extensions.
+#' @returns Length of the number of files with `extension` in `dir`.
 check_file_status <-
   function(
     dir,
@@ -118,9 +144,15 @@ check_file_status <-
 
 
 
-# is it possible to download missing files only?
+# TODO: is it possible to download missing files only?
+#' Check file status and download if necessary
+#' @param file_status Output of `check_file_status`
+#' @param path 
+#' @param dname Dataset name. See [`amadeus::download_data`] for details.
+#' @returns logical(1).
 fastdown <-
   function(
+    file_status = NULL,
     path = NULL,
     dname = NULL,
     ...
@@ -141,6 +173,17 @@ fastdown <-
 
 
 # calculate (no year is concerned)
+#' Temporally marginal calculation
+#' @note As `amadeus::calc_covariates` suggests,
+#' covariate data are managed by raw datasets.
+#' @param status File status. Output of `check_file_status`
+#' @param outpath character(1). Full file path of calculated covariates.
+#' Should end with `"rds"`.
+#' @param calc_function Covariate calculator. Default is
+#' [`amadeus::calc_covariates`]
+#' @param ... Arguments passed to `calc_function`
+#' @returns Nothing. It will automatically save xz-compressed
+#' RDS file to `outpath`
 calculate_single <-
   function(
     status = NULL,
@@ -163,6 +206,18 @@ calculate_single <-
   }
 
 # calculate over a list
+#' Spatiotemporal covariate calculation
+#' @param status File status. Output of `check_file_status`
+#' @param outpath character(1). Full file path of calculated covariates.
+#' Should end with `"rds"`
+#' @param domain vector of integer/character/Date.
+#' Depending on temporal resolution of raw datasets.
+#' @param process_function Function to prepare raw datasets.
+#' [`amadeus::process_raw`]
+#' @param calc_function Function to calculate covariates.
+#' [`amadeus::calc_covariates`]
+#' @param ... Arguments passed to `process_function` and `calc_function`
+#' @returns Nothing. RDS file is saved.
 calculate_multi <-
   function(
     status = NULL,
@@ -202,7 +257,12 @@ calculate_multi <-
   }
 
 
-
+#' Merge input data.frame objects
+#' @param by character. Joining keys. See [`merge`] for details.
+#' @param time logical(1). Whether or not include time identifier.
+#' Set this `TRUE` will supersede `by` value by appending time identifier.
+#' @param ... data.frame objects to merge
+#' @returns data.frame
 combine <-
   function(
     by = c(mr("pointid")),
@@ -217,7 +277,16 @@ combine <-
   }
 
 
-
+### WARNING  THIS WILL NOT WORK PROPERLY ####
+#' Merge spatial and spatiotemporal covariate data
+#' @param locs Location. e.g., AQS sites.
+#' @param locs_id character(1). Location identifier.
+#' @param time_id character(1). Location identifier.
+#' @param target_years integer. Used to dummify nominal year.
+#' @param df_sp data.frame. Spatial-only covariates.
+#' @param df_spt data.frame. Spatiotemporal covariates.
+#' @note This version assumes the time_id contains Date-like strings.
+#' Year-only covariate processing submodule should be added.
 combine_final <-
   function(
     locs,
@@ -244,7 +313,11 @@ combine_final <-
     return(locs_combined)
   }
 
-
+#' Configure cross-validation row indices
+#' @param covars Merged covariate data.frame
+#' @param cvtypes character. Cross-validation types.
+#' @returns List of cross-validation row indices
+#' @seealso [`generate_cv_index`]
 configure_cv <-
   function(
     covars = NULL,
@@ -307,11 +380,17 @@ fit_base <-
 
   }
 
-fit_meta <-
+predict_meta <-
   function(
-
+    metalearner = NULL,
+    targetdf = NULL,
+    threads = NULL
   ) {
-
+    beethoven::meta_predict(
+      metalearner,
+      targetdf,
+      nthreads = threads
+    )
   }
 
 export_res <-

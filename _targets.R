@@ -160,6 +160,20 @@ list(
   )
   ,
   targets::tar_target(
+    covariates_nlcd,
+    calculate_multi(
+      status = status_nlcd,
+      outpath =
+        file.path(
+          mr("dir_output"), mr("file_covar_nlcd")
+        ),
+      locs = sites_spat,
+      path = mr("dir_input_nlcd"),
+      ... # other args
+    )
+  )
+  ,
+  targets::tar_target(
     covariates_hms,
     calculate_multi(
       status = status_hms,
@@ -501,12 +515,6 @@ list(
     read_covar_pred(mr("file_grid_prediction"))
   )
   ,
-  # prediction: tar_target for 8+M point covariate calculation
-  targets::tar_target(
-    predict_target_grid,
-    predict_target(meta_fit, covar_prediction)
-  )
-  ,
   # ... calculate covariates at prediction grid
   # something similar to calculation at sites
   # predict
@@ -518,7 +526,8 @@ list(
       threads = mr("nthreads_predict")
     )
   )
-  ,  # documents and summary statistics
+  ,
+  # documents and summary statistics
   targets::tar_target(
     summary_urban_rural,
     summary_prediction(
@@ -535,7 +544,6 @@ list(
     )
   )
 )
-
 
 # targets::tar_visnetwork()
 # END OF FILE
