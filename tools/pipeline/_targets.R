@@ -24,6 +24,11 @@ list(
   ,
   targets::tar_target(sites_time, read_locs(mr("dir_input_aqs")))
   ,
+  targets::tar_target(
+    sites_pm,
+    get_aqs_data()
+  )
+  ,
   # tar_target for download and checking existence
   targets::tar_target(
     status_modis_mod11,
@@ -115,7 +120,7 @@ list(
     covariates_tri,
     calculate_multi(
       status = status_tri,
-      domain = c(2017, 2017, 2020, 2020, 2020),
+      domain = c(2018, 2019, 2020, 2021, 2022),
       outpath =
         file.path(
           mr("dir_output"), mr("file_covar_tri")
@@ -182,7 +187,6 @@ list(
     )
   )
   ,
-
   targets::tar_target(
     covariates_sedac_groads,
     calculate_multi(
@@ -197,47 +201,314 @@ list(
     )
   )
   ,
-  # ...
-  # covariate file existence check then calculate covariates
-  targets::tar_target(covar_modis, calculate_covariates("modis", ...))
+  targets::tar_target(
+    covariates_sedac_narrmono,
+    calculate_multi(
+      status = status_sedac_narrmono,
+      outpath =
+        file.path(
+          mr("dir_output"), mr("file_covar_sedac_narrmono")
+        ),
+      locs = sites_spat,
+      path = mr("dir_input_sedac_narrmono"),
+      ... # other args
+    )
+  )
   ,
-  # ...
+  targets::tar_target(
+    covariates_sedac_narrplevels,
+    calculate_multi(
+      status = status_sedac_narrplevels,
+      outpath =
+        file.path(
+          mr("dir_output"), mr("file_covar_sedac_narrplevels")
+        ),
+      locs = sites_spat,
+      path = mr("dir_input_sedac_narrplevels"),
+      ... # other args
+    )
+  )
+  ,
+  targets::tar_target(
+    covariates_nei,
+    calculate_multi(
+      status = status_nei,
+      domain = c(2017, 2017, 2020, 2020, 2020),
+      outpath =
+        file.path(
+          mr("dir_output"), mr("file_covar_nei")
+        ),
+      locs = sites_spat,
+      path = mr("dir_input_nei"),
+      ... # other args
+    )
+  )
+  ,
+  targets::tar_target(
+    covariates_geos,
+    calculate_multi(
+      status = status_geos,
+      outpath =
+        file.path(
+          mr("dir_output"), mr("file_covar_geos")
+        ),
+      locs = sites_spat,
+      path = mr("dir_input_geos"),
+      ... # other args
+    )
+  )
+  ,
+  targets::tar_target(
+    covariates_modis_mod11,
+    calculate_multi(
+      status = status_modis_mod11,
+      outpath =
+        file.path(
+          mr("dir_output"), mr("file_covar_modis_mod11")
+        ),
+      locs = sites_spat,
+      path = mr("dir_input_modis_mod11"),
+      ... # other args
+    )
+  )
+  ,
+  targets::tar_target(
+    covariates_modis_mod06,
+    calculate_multi(
+      status = status_modis_mod06,
+      outpath =
+        file.path(
+          mr("dir_output"), mr("file_covar_modis_mod06")
+        ),
+      locs = sites_spat,
+      path = mr("dir_input_modis_mod06"),
+      ... # other args
+    )
+  )
+  ,
+  targets::tar_target(
+    covariates_modis_mod13,
+    calculate_multi(
+      status = status_modis_mod13,
+      outpath =
+        file.path(
+          mr("dir_output"), mr("file_covar_modis_mod13")
+        ),
+      locs = sites_spat,
+      path = mr("dir_input_modis_mod13"),
+      ... # other args
+    )
+  )
+  ,
+  targets::tar_target(
+    covariates_modis_mcd19,
+    calculate_multi(
+      status = status_modis_mcd19,
+      outpath =
+        file.path(
+          mr("dir_output"), mr("file_covar_modis_mcd19")
+        ),
+      locs = sites_spat,
+      path = mr("dir_input_modis_mcd19"),
+      ... # other args
+    )
+  )
+  ,
+  targets::tar_target(
+    covariates_modis_mod09,
+    calculate_multi(
+      status = status_modis_mod09,
+      outpath =
+        file.path(
+          mr("dir_output"), mr("file_covar_modis_mod09")
+        ),
+      locs = sites_spat,
+      path = mr("dir_input_modis_mod09"),
+      ... # other args
+    )
+  )
+  ,
+  targets::tar_target(
+    covariates_modis_vnp46,
+    calculate_multi(
+      status = status_modis_vnp46,
+      outpath =
+        file.path(
+          mr("dir_output"), mr("file_covar_modis_vnp46")
+        ),
+      locs = sites_spat,
+      path = mr("dir_input_modis_vnp46"),
+      ... # other args
+    )
+  )
+  ,
   # combine each covariate set into one data.frame (data.table; if any)
-  targets::tar_target(covar_all, concatenate_covariates(...))
+  targets::tar_target(
+    covariates_combined_sp,
+    combine(
+      by = mr("pointid"),
+      time = FALSE,
+      covariates_koppen,
+      covariates_ecoregion
+    )
+  )
   ,
-  # tar_target for initial model fitting and tuning
-  targets::tar_target(fitted_ranger, base_learner("randomforest"))
+  targets::tar_target(
+    covariates_combined_spt,
+    combine(
+      by = mr("pointid"),
+      time = FALSE,
+      covariates_nlcd,
+      covariates_hms,
+      covariates_geos,
+      covariates_gmted,
+      covariates_nei,
+      covariates_tri,
+      covariates_modis_mod11,
+      covariates_modis_mod06,
+      covariates_modis_mod13,
+      covariates_modis_mod09,
+      covariates_modis_mcd19,
+      covariates_modis_vnp46
+    )
+  )
   ,
-  targets::tar_target(fitted_xgb, base_learner("xgboost"))
+  targets::tar_target(
+    covariates_final,
+    combine_final(
+      locs = sites_time,
+      locs_id = mr("pointid"),
+      time_id = mr("timeid"),
+      target_years = seq(2018, 2022),
+      df_sp = covariates_combined_sp,
+      df_spt = covariates_combined_spt
+    )
+  )
   ,
-  # CNN, if any
+  targets::tar_target(
+    data_full,
+    join_yx(
+      df_pm = sites_pm,
+      df_covar = covariates_final,
+      locs_id = mr("pointid"),
+      time_id = mr("timeid")
+    )
+  )
+  ,
+  targets::tar_target(
+    cv_config,
+    configure_cv(
+      covars = covariates_final
+    )
+  )
+  ,
+  targets::tar_target(
+    base_prep_rf,
+    base_learner_prep(
+      learner = "randomforest",
+      data = data_full,
+      dependent_name = mr("name_dep"),
+      independent_name = file.path(mr("dir_output"), mr("file_name_indep"))
+    )
+  )
+  ,
+  targets::tar_target(
+    base_prep_xgboost,
+    base_learner_prep(
+      learner = "xgboost",
+      data = data_full,
+      dependent_name = mr("name_dep"),
+      independent_name = file.path(mr("dir_output"), mr("file_name_indep"))
+    )
+  )
+  ,
+  targets::tar_target(
+    base_prep_cnn,
+    base_learner_prep(
+      learner = "cnn",
+      data = data_full,
+      dependent_name = mr("name_dep"),
+      independent_name = file.path(mr("dir_output"), mr("file_name_indep"))
+    )
+  )
+  ,
+  targets::tar_target(
+    base_fit_rf,
+    base_learner_cv_fit(
+      "randomforest",
+      ymat = base_prep_rf$ymat,
+      xmat = base_prep_rf$xmat,
+      cv_index = cv_config$lblto,
+      fun = base_learner_fit_ranger
+    )
+  )
+  ,
+  targets::tar_target(
+    base_fit_xgboost,
+    base_learner_cv_fit(
+      "xgboost",
+      ymat = base_prep_xgboost$ymat,
+      xmat = base_prep_xgboost$xmat,
+      cv_index = cv_config$lblto,
+      fun = base_learner_fit_xgboost
+    )
+  )
+  ,
+  targets::tar_target(
+    base_fit_cnn,
+    base_learner_cv_fit(
+      "cnn",
+      ymat = base_prep_cnn$ymat,
+      xmat = base_prep_cnn$xmat,
+      cv_index = cv_config$lblto,
+      fun = base_learner_fit_cnn
+    )
+  )
+  ,
   # meta learner
-  targets::tar_target(fitted_meta, meta_learner(list(fitted_ranger, fitted_xgb, fitted_cnn, ...)))
+  targets::tar_target(
+    meta_fit,
+    meta_learner(
+      list(base_fit_rf, base_fit_xgboost, base_fit_cnn),
+      kfolds = 10L,
+      y = data_full[[mr("name_dep")]]
+    )
+  )
   ,
   # tar_target for initial model update if pre-fitted
-  # model exists; is it possible to nest pipelines?
-  targets::tar_target(data_updated, foo_above_all(...))
+  targets::tar_target(
+    meta_exported,
+    export_res()
+  )
   ,
-  targets::tar_target(fitted_2025_ranger, base_learner("randomforest", data_updated, ...))
+  # ... calculate covariates for prediction grid
+  targets::tar_target(
+    covar_prediction,
+    read_covar_pred()
+  )
   ,
-  targets::tar_target(fitted_2025_xgb, base_learner("xgboost", data_updated, ...))
-  ,
-  # if any
-  # tar_target for 8+M point covariate calculation
-  targets::tar_target(covar_modis_pred, calculate_covariates("modis", usmain_p8m))
-  ,
-  targets::tar_target(covar_ncep_pred, calculate_covariates("ncep", usmain_p8m, ...))
-  ,
-  # others
-  targets::tar_target(covar_all_pred, concateneate_covariates(...))
-  ,
-  # tar_target for prediction using pre-fitted models
-  targets::tar_target(pred_p8m, predict_meta(fitted_meta, covar_all_pred))
+  # prediction: tar_target for 8+M point covariate calculation
+  targets::tar_target(
+    predict_target_grid,
+    predict_target(meta_fit, covar_prediction)
+  )
   ,
   # documents and summary statistics
-  targets::tar_target(summary_urban_rural, summary_prediction(pred_p8m, level = "point", contrast = "urbanrural"))
+  targets::tar_target(
+    summary_urban_rural,
+    summary_prediction(
+      predict_target_grid,
+      level = "point",
+      contrast = "urbanrural"))
   ,
-  targets::tar_target(summary_state, summary_prediction(pred_p8m, level = "point", contrast = "state"))
+  targets::tar_target(
+    summary_state,
+    summary_prediction(
+      predict_target_grid,
+      level = "point",
+      contrast = "state"
+    )
+  )
 )
 
 
