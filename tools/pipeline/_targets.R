@@ -29,7 +29,7 @@ list(
     get_aqs_data()
   )
   ,
-  # tar_target for download and checking existence
+  # tar_target for download and checking existence (for fitting models)
   targets::tar_target(
     status_modis_mod11,
     fastdown(mr("dir_input_mod11"))
@@ -155,6 +155,20 @@ list(
         ),
       locs = sites_spat,
       path = mr("dir_input_koppen"),
+      ... # other args
+    )
+  )
+  ,
+  targets::tar_target(
+    covariates_nlcd,
+    calculate_multi(
+      status = status_nlcd,
+      outpath =
+        file.path(
+          mr("dir_output"), mr("file_covar_nlcd")
+        ),
+      locs = sites_spat,
+      path = mr("dir_input_nlcd"),
       ... # other args
     )
   )
@@ -497,14 +511,306 @@ list(
   ,
   # ... calculate covariates for prediction grid
   targets::tar_target(
-    covar_prediction,
+    covar_prediction_grid,
     read_covar_pred(mr("file_grid_prediction"))
   )
   ,
-  # prediction: tar_target for 8+M point covariate calculation
+  # covariate calculation: multi vs single cases
   targets::tar_target(
-    predict_target_grid,
-    predict_target(meta_fit, covar_prediction)
+    covariates_predict_tri,
+    calculate_multi(
+      status = status_tri,
+      domain = c(2018, 2019, 2020, 2021, 2022),
+      outpath =
+        file.path(
+          mr("dir_output"), mr("file_covar_predict_tri")
+        ),
+      locs = covar_prediction_grid,
+      path = mr("dir_input_tri"),
+      ... # other args
+    )
+  )
+  ,
+  targets::tar_target(
+    covariates_predict_ecoregion,
+    calculate_single(
+      status = status_ecoregion,
+      outpath =
+        file.path(
+          mr("dir_output"), mr("file_covar_predict_ecoregion")
+        ),
+      locs = covar_prediction_grid,
+      path = mr("dir_input_ecoregion"),
+      ... # other args
+    )
+  )
+  ,
+  targets::tar_target(
+    covariates_predict_koppen,
+    calculate_single(
+      status = status_koppen,
+      outpath =
+        file.path(
+          mr("dir_output"), mr("file_covar_predict_koppen")
+        ),
+      locs = covar_prediction_grid,
+      path = mr("dir_input_koppen"),
+      ... # other args
+    )
+  )
+  ,
+  targets::tar_target(
+    covariates_predict_nlcd,
+    calculate_multi(
+      status = status_nlcd,
+      outpath =
+        file.path(
+          mr("dir_output"), mr("file_covar_predict_nlcd")
+        ),
+      locs = covar_prediction_grid,
+      path = mr("dir_input_nlcd"),
+      ... # other args
+    )
+  )
+  ,
+  targets::tar_target(
+    covariates_predict_hms,
+    calculate_multi(
+      status = status_hms,
+      outpath =
+        file.path(
+          mr("dir_output"), mr("file_covar_predict_hms")
+        ),
+      locs = covar_prediction_grid,
+      path = mr("dir_input_hms"),
+      ... # other args
+    )
+  )
+  ,
+  targets::tar_target(
+    covariates_predict_sedac_population,
+    calculate_multi(
+      status = status_sedac_population,
+      outpath =
+        file.path(
+          mr("dir_output"), mr("file_covar_predict_sedac_population")
+        ),
+      locs = covar_prediction_grid,
+      path = mr("dir_input_sedac_population"),
+      ... # other args
+    )
+  )
+  ,
+  targets::tar_target(
+    covariates_predict_sedac_groads,
+    calculate_multi(
+      status = status_sedac_groads,
+      outpath =
+        file.path(
+          mr("dir_output"), mr("file_covar_predict_sedac_groads")
+        ),
+      locs = covar_prediction_grid,
+      path = mr("dir_input_sedac_groads"),
+      ... # other args
+    )
+  )
+  ,
+  targets::tar_target(
+    covariates_predict_narrmono,
+    calculate_multi(
+      status = status_narrmono,
+      outpath =
+        file.path(
+          mr("dir_output"), mr("file_covar_predict_narrmono")
+        ),
+      locs = covar_prediction_grid,
+      path = mr("dir_input_narrmono"),
+      ... # other args
+    )
+  )
+  ,
+  targets::tar_target(
+    covariates_predict_narrplevels,
+    calculate_multi(
+      status = status_narrplevels,
+      outpath =
+        file.path(
+          mr("dir_output"), mr("file_covar_predict_narrplevels")
+        ),
+      locs = covar_prediction_grid,
+      path = mr("dir_input_narrplevels"),
+      ... # other args
+    )
+  )
+  ,
+  targets::tar_target(
+    covariates_predict_nei,
+    calculate_multi(
+      status = status_nei,
+      domain = c(2017, 2017, 2020, 2020, 2020),
+      outpath =
+        file.path(
+          mr("dir_output"), mr("file_covar_predict_nei")
+        ),
+      locs = covar_prediction_grid,
+      path = mr("dir_input_nei"),
+      ... # other args
+    )
+  )
+  ,
+  targets::tar_target(
+    covariates_predict_gmted,
+    calculate_multi(
+      status = status_gmted,
+      outpath =
+        file.path(
+          mr("dir_output"), mr("file_covar_predict_gmted")
+        ),
+      locs = covar_prediction_grid,
+      path = mr("dir_input_gmted"),
+      ... # other args
+    )
+  )
+  ,
+  targets::tar_target(
+    covariates_predict_geos,
+    calculate_multi(
+      status = status_geos,
+      outpath =
+        file.path(
+          mr("dir_output"), mr("file_covar_predict_geos")
+        ),
+      locs = covar_prediction_grid,
+      path = mr("dir_input_geos"),
+      ... # other args
+    )
+  )
+  ,
+  targets::tar_target(
+    covariates_predict_modis_mod11,
+    calculate_multi(
+      status = status_modis_mod11,
+      outpath =
+        file.path(
+          mr("dir_output"), mr("file_covar_predict_modis_mod11")
+        ),
+      locs = covar_prediction_grid,
+      path = mr("dir_input_modis_mod11"),
+      ... # other args
+    )
+  )
+  ,
+  targets::tar_target(
+    covariates_predict_modis_mod06,
+    calculate_multi(
+      status = status_modis_mod06,
+      outpath =
+        file.path(
+          mr("dir_output"), mr("file_covar_predict_modis_mod06")
+        ),
+      locs = covar_prediction_grid,
+      path = mr("dir_input_modis_mod06"),
+      ... # other args
+    )
+  )
+  ,
+  targets::tar_target(
+    covariates_predict_modis_mod13,
+    calculate_multi(
+      status = status_modis_mod13,
+      outpath =
+        file.path(
+          mr("dir_output"), mr("file_covar_predict_modis_mod13")
+        ),
+      locs = covar_prediction_grid,
+      path = mr("dir_input_modis_mod13"),
+      ... # other args
+    )
+  )
+  ,
+  targets::tar_target(
+    covariates_predict_modis_mcd19,
+    calculate_multi(
+      status = status_modis_mcd19,
+      outpath =
+        file.path(
+          mr("dir_output"), mr("file_covar_predict_modis_mcd19")
+        ),
+      locs = covar_prediction_grid,
+      path = mr("dir_input_modis_mcd19"),
+      ... # other args
+    )
+  )
+  ,
+  targets::tar_target(
+    covariates_predict_modis_mod09,
+    calculate_multi(
+      status = status_modis_mod09,
+      outpath =
+        file.path(
+          mr("dir_output"), mr("file_covar_predict_modis_mod09")
+        ),
+      locs = covar_prediction_grid,
+      path = mr("dir_input_modis_mod09"),
+      ... # other args
+    )
+  )
+  ,
+  targets::tar_target(
+    covariates_predict_modis_vnp46,
+    calculate_multi(
+      status = status_modis_vnp46,
+      outpath =
+        file.path(
+          mr("dir_output"), mr("file_covar_predict_modis_vnp46")
+        ),
+      locs = covar_prediction_grid,
+      path = mr("dir_input_modis_vnp46"),
+      ... # other args
+    )
+  )
+  ,
+  # combine each covariate set into one data.frame (data.table; if any)
+  targets::tar_target(
+    covariates_predict_combined_sp,
+    combine(
+      by = mr("pointid"),
+      time = FALSE,
+      covariates_predict_koppen,
+      covariates_predict_ecoregion
+    )
+  )
+  ,
+  targets::tar_target(
+    covariates_predict_combined_spt,
+    combine(
+      by = mr("pointid"),
+      time = FALSE,
+      covariates_predict_nlcd,
+      covariates_predict_hms,
+      covariates_predict_geos,
+      covariates_predict_gmted,
+      covariates_predict_nei,
+      covariates_predict_tri,
+      covariates_predict_modis_mod11,
+      covariates_predict_modis_mod06,
+      covariates_predict_modis_mod13,
+      covariates_predict_modis_mod09,
+      covariates_predict_modis_mcd19,
+      covariates_predict_modis_vnp46
+    )
+  )
+  ,
+  targets::tar_target(
+    covariates_predict_final,
+    combine_final(
+      locs = covar_prediction_grid,
+      locs_id = mr("pointid"),
+      time_id = mr("timeid"),
+      target_years = seq(2018, 2022),
+      df_sp = covariates_predict_combined_sp,
+      df_spt = covariates_predict_combined_spt
+    )
   )
   ,
   # ... calculate covariates at prediction grid
@@ -514,11 +820,12 @@ list(
     grid_filled,
     predict_meta(
       metalearner = meta_fit,
-      targetdf = covariates_target_all,
+      targetdf = covariates_predict_final,
       threads = mr("nthreads_predict")
     )
   )
-  ,  # documents and summary statistics
+  ,
+  # documents and summary statistics
   targets::tar_target(
     summary_urban_rural,
     summary_prediction(
@@ -535,7 +842,6 @@ list(
     )
   )
 )
-
 
 # targets::tar_visnetwork()
 # END OF FILE
