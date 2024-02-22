@@ -8,7 +8,7 @@ source("./tools/pipeline/pipeline_base_functions.R")
 # targets options
 tar_option_set(
   packages =
-    c("beethoven", "amadeus", "scomps",
+    c("beethoven", "amadeus", "chopin",
       "data.table", "sf", "terra", "exactextractr",
       "sftime", "stars", "rlang", "foreach", "parallelly"),
   repository = "local",
