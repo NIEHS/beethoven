@@ -10,15 +10,13 @@ tar_option_set(
   packages =
     c("beethoven", "amadeus", "chopin",
       "data.table", "sf", "terra", "exactextractr",
-      "crew", "crew.cluster",
-      "future", "future.apply", "future.callr",
       "sftime", "stars", "rlang", "foreach", "parallelly"),
   repository = "local",
   controller =
-  crew.cluster::crew_controller_slurm(
+  crew.cluster::crew_class_launcher_slurm(
     slurm_log_output = "output/slurm_pipeline_log.out",
     slurm_log_error = "output/slurm_pipeline_error.err",
-    slurm_memory_gigabytes_per_cpu = 8,
+    slurm_memory_gigabytes_per_cpu = "8g",
     slurm_cpus_per_task = 8L,
     slurm_time_minutes = NULL,
     slurm_partition = "geo"
@@ -40,34 +38,93 @@ list(
     get_aqs_data()
   )
   ,
+  # tar_target for download and checking existence (for fitting models)
   targets::tar_target(
-    dirs,
-    command = sprintf("dir_input_%s",
-            c("aqs", "nei", "narrmono", "narrplevels",
-              paste0("modis_",
-                c("mod11", "mod13", "mcd19", "mod06", "mod09", "vnp46")
-              ),
-              "nlcd", "ecoregion", "koppen", "gmted",
-              "sedac_population", "sedac_groads",
-              "hms", "tri", "geos")),
-    iteration = "vector"
+    status_modis_mod11,
+    fastdown(mr("dir_input_mod11"))
   )
   ,
   targets::tar_target(
-    download_raw,
-    command = fastdown(mr(dirs)),
-    pattern = map(dirs),
-    iteration = "vector"
+    status_modis_mod13,
+    fastdown(mr("dir_input_mod13"))
   )
   ,
   targets::tar_target(
-    file_target,
-    command = download_raw
+    status_modis_mod09,
+    fastdown(mr("dir_input_mod09"))
+  )
+  ,
+  targets::tar_target(
+    status_modis_mod06,
+    fastdown(mr("dir_input_mod06"))
+  )
+  ,
+  targets::tar_target(
+    status_modis_vnp46,
+    fastdown(mr("dir_input_vnp46"))
+  )
+  ,
+  targets::tar_target(
+    status_ecoregion,
+    fastdown(mr("dir_input_ecoregion"))
+  )
+  ,
+  targets::tar_target(
+    status_koppen,
+    fastdown(mr("dir_input_koppen"))
+  )
+  ,
+  targets::tar_target(
+    status_nlcd,
+    fastdown(mr("dir_input_nlcd"))
+  )
+  ,
+  targets::tar_target(
+    status_nei,
+    fastdown(mr("dir_input_nei"))
+  )
+  ,
+  targets::tar_target(
+    status_geos,
+    fastdown(mr("dir_input_geos"))
+  )
+  ,
+  targets::tar_target(
+    status_gmted,
+    fastdown(mr("dir_input_gmted"))
+  )
+  ,
+  targets::tar_target(
+    status_tri,
+    fastdown(mr("dir_input_tri"))
+  )
+  ,
+  targets::tar_target(
+    status_narrmono,
+    fastdown(mr("dir_input_narrmono"))
+  )
+  ,
+  targets::tar_target(
+    status_narrplevels,
+    fastdown(mr("dir_input_narrplevels"))
+  )
+  ,
+  targets::tar_target(
+    status_hms,
+    fastdown(mr("dir_input_hms"))
+  )
+  ,
+  targets::tar_target(
+    status_sedac_population,
+    fastdown(mr("dir_input_sedac_population"))
+  )
+  ,
+  targets::tar_target(
+    status_sedac_groads,
+    fastdown(mr("dir_input_sedac_groads"))
   )
   ,
   # covariate calculation: multi vs single cases
-  # single: ecoregion, koppen
-  # multi: tri, nlcd, hms, sedac_population, sedac_groads, narrmono, narrplevels, nei, gmted, geos, modis_mod11, modis_mod06, modis_mod13, modis_mcd19, modis_mod09, modis_vnp46
   targets::tar_target(
     covariates_tri,
     calculate_multi(

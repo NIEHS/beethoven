@@ -179,6 +179,8 @@ fastdown <-
 #' @param status File status. Output of `check_file_status`
 #' @param outpath character(1). Full file path of calculated covariates.
 #' Should end with `"rds"`.
+#' @param process_function Raw data processor. Default is
+#' [`amadeus::process_covariates`]
 #' @param calc_function Covariate calculator. Default is
 #' [`amadeus::calc_covariates`]
 #' @param ... Arguments passed to `calc_function`
@@ -186,23 +188,38 @@ fastdown <-
 #' RDS file to `outpath`
 calculate_single <-
   function(
-    status = NULL,
-    outpath = NULL,
+    # status = NULL,
+    # outpath = NULL,
+    process_function = amadeus::process_covariates,
     calc_function = amadeus::calc_covariates,
     ...
   ) {
-    if (!status) {
+    # if (!status) {
+      prep_calc <-
+        try(
+          rlang::inject(
+            process_function(
+              !!!list(...)
+            )
+          )
+        )
+      arg_ext <- list(...)
+      arg_ext$from <- prep_calc
+      
       res_calc <-
         try(
-          calc_function(
-            ...
+          rlang::inject(
+            calc_function(
+              !!!arg_ext
+            )
           )
         )
       if (inherits(res_calc, "try-error")) {
         stop("Results do not match expectations.")
       }
-      saveRDS(res_calc, file = outpath, compress = "xz")
-    }
+      return(res_calc)
+      # saveRDS(res_calc, file = outpath, compress = "xz")
+    # }
   }
 
 # calculate over a list
@@ -212,22 +229,22 @@ calculate_single <-
 #' Should end with `"rds"`
 #' @param domain vector of integer/character/Date.
 #' Depending on temporal resolution of raw datasets.
-#' @param process_function Function to prepare raw datasets.
-#' [`amadeus::process_raw`]
+#' @param process_function Raw data processor. Default is
+#' [`amadeus::process_covariates`]
 #' @param calc_function Function to calculate covariates.
 #' [`amadeus::calc_covariates`]
 #' @param ... Arguments passed to `process_function` and `calc_function`
 #' @returns Nothing. RDS file is saved.
 calculate_multi <-
   function(
-    status = NULL,
-    outpath = NULL,
+    # status = NULL,
+    # outpath = NULL,
     domain = NULL,
-    process_function = amadeus::process_raw,
+    process_function = amadeus::process_covariates,
     calc_function = amadeus::calc_covariates,
     ...
   ) {
-    if (!status) {
+    # if (!status) {
       domainlist <- split(domain, seq_along(domain))
       res_calc <-
         try(
@@ -250,9 +267,11 @@ calculate_multi <-
       if (inherits(res_calc, "try-error")) {
         stop("Results do not match expectations.")
       }
+
       res_calc <- data.table::rbindlist(res_calc)
-      saveRDS(res_calc, file = outpath, compress = "xz")
-    }
+      return(res_calc)
+      # saveRDS(res_calc, file = outpath, compress = "xz")
+    # }
 
   }
 

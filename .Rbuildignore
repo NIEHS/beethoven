@@ -13,3 +13,8 @@
 ^docs$
 ^pkgdown$
 ^.lintr
+input
+Rinput
+tools
+.github
+tests
