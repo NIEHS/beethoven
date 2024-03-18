@@ -211,12 +211,12 @@ for (epoch in 1:100) {
   # Forward pass
   prediction <- model(x)
   loss <- loss_fn(prediction, y)
-  
+
   # Backward pass and optimization
   loss$backward()
   optimizer$step()
   optimizer$zero_grad()
-  
+
   # Print loss for every 10 epochs
   if (epoch %% 10 == 0) {
     cat("Epoch: ", epoch, " Loss: ", as.numeric(loss), "\n")

@@ -180,14 +180,15 @@ TCN <- nn_module(
   
   forward = function(x) {
     output <- torch::torch_transpose(self$tcn(torch::torch_transpose(x, 1, 2)), 1, 2)
-    pred <- self$linear(output[ , -1, ])
-    return(pred)
+    self$linear(output[ , output$size()[[1]], ])
+    
   }
 )
 
 TCN(32, 16, c(16, 48, 64, 256, 128, 32, 4), 2, 0.25)
 
 
+# remove the remnants of convolutional layers
 Chomp1d <- nn_module(
     classname = "Chomp1d",
 
@@ -196,7 +197,7 @@ Chomp1d <- nn_module(
     },
 
     forward = function(x) {
-        x[, , 1:(x$size(3) - self$chomp_size)]
+        torch_contiguous_format(x[, , 1:(x$size(3) - self$chomp_size)])
     }
 )
 
@@ -205,23 +206,24 @@ TemporalBlock <- nn_module(
   classname = "TemporalBlock",
   
   initialize = function(n_inputs, n_outputs, kernel_size, stride, dilation, padding, dropout = 0.2) {
-    
-    self$conv1 <- nn_conv1d(n_inputs, n_outputs, kernel_size, stride = stride, padding = padding, dilation = dilation)
-    self$chomp1 <- Chomp1d(padding)  # You need to implement this
+    wn1 <- torch::nn_utils_weight_norm$new(name = "weight", dim = 1)
+    wn2 <- torch::nn_utils_weight_norm$new(name = "weight", dim = 1)
+    self$conv1 <- wn1$apply(nn_conv1d(n_inputs, n_outputs, kernel_size, stride = stride, padding = padding, dilation = dilation))
+    self$chomp1 <- Chomp1d(padding)
     self$relu1 <- nn_relu()
     self$dropout1 <- nn_dropout(dropout)
     
-    self$conv2 <- nn_conv1d(n_outputs, n_outputs, kernel_size, stride = stride, padding = padding, dilation = dilation)
-    self$chomp2 <- Chomp1d(padding)  # You need to implement this
+    self$conv2 <- wn2$apply(nn_conv1d(n_outputs, n_outputs, kernel_size, stride = stride, padding = padding, dilation = dilation))
+    self$chomp2 <- Chomp1d(padding)
     self$relu2 <- nn_relu()
     self$dropout2 <- nn_dropout(dropout)
     
-    self$net <- nn_module_list(
-        list(
+    self$net <- nn_sequential(
+        
             self$conv1, self$chomp1, self$relu1, self$dropout1,
             self$conv2, self$chomp2, self$relu2, self$dropout2)
-    )
     
+
     if (n_inputs != n_outputs) {
       self$downsample <- nn_conv1d(n_inputs, n_outputs, 1)
     } else {
@@ -244,11 +246,14 @@ TemporalBlock <- nn_module(
   },
   
   forward = function(x) {
-    out <- self$net$forward(x)
-    res <- if (is.null(self$downsample)) x else self$downsample$forward(x)
-    self$relu$forward(out + res)
+    out <- self$net(x)
+    res <- if (is.null(self$downsample)) x else self$downsample(x)
+    self$relu(out + res)
   }
 )
+
+TemporalBlock(12, 18, 4, 3, 2, 3, 0.1)
+
 
 TemporalConvNet <- nn_module(
   classname = "TemporalConvNet",
@@ -295,14 +300,14 @@ STCN <- torch::nn_module(
     },
 
     forward = function(x) {
-        conv_out <- torch::torch_squeeze(self$conv(x), 1)
+        conv_out <- torch::torch_squeeze(self$conv(x), 0)
         output <- torch::torch_transpose(self$tcn(torch::torch_transpose(conv_out, 1, 2)), 1, 2)
-        pred <- self$linear(output[, -1, ])
-        return(pred)
+        self$linear(output[, output$size()[[1]], ])
+        
     }
 )
 
-STCN(18, c(64, 128, 64, 8), 64, 4, 4, 0.25)
+STCN(24, 18, 1, c(18, 36, 144, 36, 3), 4, 0.25)
 
 ```
 
@@ -318,7 +323,7 @@ exvec[-1]
 config <- list(
   rand_seed = 2024,
   model_name = 'STCN',  # ['RNN', 'GRU', 'LSTM', 'TCN', 'STCN']
-  device = 'mps',  # 'cpu' or 'cuda'
+  device = 'cuda',  # 'cpu' or 'cuda'
   input_size = 12,
   hidden_size = 32,
   output_size = 1,
@@ -339,7 +344,7 @@ config <- list(
 ```{r data_process_port}
 pkgs <- c("data.table")
 invisible(sapply(pkgs, library, character.only = TRUE, quietly = TRUE))
-DATA_DIR <- "../ST-CausalConvNet"
+DATA_DIR <- "../../github/ST-CausalConvNet"
 
 # extract station id list in Beijing
 df_airq <- fread(file.path(DATA_DIR, "data/microsoft_urban_air_data/airquality.csv"))
@@ -629,12 +634,12 @@ train_main <- function(
 
 ```{r}
 prep_tensor <- make_tensors()
-xtss <- load_data(as.array(prep_tensor$xtensor[, 13, , ]), as.array(prep_tensor$ytensor))
+xtss <- load_data(as.array(prep_tensor$xtensor), as.array(prep_tensor$ytensor))
 
 
 torch::torch_device(config$device)
 xtsstr <-
-train_main(model_name = "LSTM", fulldata = lapply(xtss, torch::torch_tensor, device = torch_device(config$device)), dinput = config$input_size, doutput = config$output_size, dhidden = config$hidden_size, nlayers = config$num_layers, nchannels = config$in_channels, nlvs = config$nlevels, dkernel = config$kernel_size, p_dropout = config$dropout)
+train_main(model_name = "STCN", fulldata = lapply(xtss, torch::torch_tensor, device = torch_device(config$device)), dinput = config$input_size, doutput = config$output_size, dhidden = config$hidden_size, nlayers = config$num_layers, nchannels = config$in_channels, nlvs = config$nlevels, dkernel = config$kernel_size, p_dropout = config$dropout)
 
 
 ```
