@@ -66,13 +66,13 @@ sf_use_s2(F)
 library(torch)
 library(coro)
 library(luz)
-
+library(zeallot)
 
 
 SimpleRNN <- nn_module(
   classname = "SimpleRNN",
   
-  initialize = function(input_size, hidden_size, output_size = 1, num_layers = 1, dropout = 0.25) {
+  initialize = function(input_size = config$input_size, hidden_size = config$hidden_size, output_size = 1, num_layers = 1, dropout = 0.25) {
     self$hidden_size <- hidden_size
     self$rnn <- nn_rnn(
         input_size = input_size,
@@ -86,12 +86,11 @@ SimpleRNN <- nn_module(
   },
   
   forward = function(x) {
-    output <- torch::nn_rnn(x)$output
-    hidden <- torch::nn_rnn(x)$h_n
-    pred <- torch::nn_linear(output[, -1, ])
-    return(list(pred, hidden))
+    output <- self$rnn(x)[[1]]
+    pred <- self$linear(output[ , nrow(output), , drop = TRUE])
+    return(nn_flatten(pred))
   },
-
+  
   init_hidden = function() {
     return(torch::torch_randn(1, 24, self$hidden_size))
   }
@@ -103,7 +102,7 @@ SimpleRNN(24, 32, 1, 1, 0.25)
 SimpleGRU <- nn_module(
   classname = "SimpleGRU",
   
-  initialize = function(input_size, hidden_size, output_size = 1, num_layers = 1, dropout = 0.25) {
+  initialize = function(input_size, hidden_size = config$hidden_size, output_size = 1, num_layers = 1, dropout = 0.25) {
     self$hidden_size <- hidden_size
     self$gru <- nn_gru(
         input_size = input_size,
@@ -115,12 +114,12 @@ SimpleGRU <- nn_module(
     self$linear <- nn_linear(hidden_size, output_size)
   },
   
-  forward = function(x) {
+  forward = function(x, hidden = NULL) {
     
-    output <- torch::nn_gru(x)$output
-    hidden <- torch::nn_gru(x)$h_n
+    output <- torch::nn_gru(x, hidden)$output
+    hidden <- torch::nn_gru(x, hidden)$h_n
     pred <- torch::nn_linear(output[, -1, ])
-    return(list(pred, hidden))
+    return(list(output = pred, h_n = hidden))
   },
 
   init_hidden = function() {
@@ -140,25 +139,27 @@ SimpleLSTM <- nn_module(
         input_size = input_size,
         hidden_size = hidden_size,
         num_layers = num_layers,
-        dropout = dropout,
+        #dropout = dropout,
         batch_first = TRUE
     )
     self$linear <- nn_linear(hidden_size, output_size)
   },
   
   forward = function(x) {
-    h <- torch::zeros(x$size(1), self$lstm$hidden_size)
-    c <- torch::zeros(x$size(1), self$lstm$hidden_size)
+    # h <- torch::torch_zeros(x$size()[[1]], self$lstm$hidden_size)
+    # c <- torch::torch_zeros(x$size()[[1]], self$lstm$hidden_size)
     out <- list()
-    for (i in seq_len(x$size(2))) {
-      out[[i]] <- self$lstm$forward(x[, i, ], h, c)
-    }
+    # for (i in seq_len(x$size()[[2]])) {
+    #   out[[i]] <- self$lstm$forward(x[, i, ]) %>%
+    #     as.array %>%
+    #     torch_tensor(., dtype = torch_float32())
+    # }
+    out <- self$lstm(x)[[1]]
     ## check above
-    pred <- torch::nn_linear(output[, -1, ])
-    return(pred)
-    # out <- torch::stack(out, dim = 1)
-    # out <- self$linear$forward(out)
-    # return(out)
+    # return(pred)
+    # out <- torch::torch_stack(out, dim = 1)
+    self$linear(out[, x$size()[[2]], ])
+    
   },
 
   init_hidden = function() {
@@ -166,7 +167,7 @@ SimpleLSTM <- nn_module(
   }
 )
 
-SimpleLSTM(24, 32, 1, 1, 0.25)
+SimpleLSTM(24, 12, 1, 1, 0.25)$forward(torch_randn(24, 12))
 
 TCN <- nn_module(
   classname = "TCN",
@@ -282,25 +283,26 @@ TemporalConvNet(64, c(64, 128, 256, 512), 5, 0.25)
 STCN <- torch::nn_module(
     initialize = function(input_size, in_channels, output_size, num_channels, kernel_size, dropout) {
         self$conv = torch::nn_sequential(
-            torch::nn_conv2d(in_channels=in_channels, out_channels=64, kernel_size=c(1, 1), stride=1, padding=0),
+            torch::nn_conv2d(in_channels=in_channels, out_channels=64, kernel_size=1, stride=1, padding=0),
             torch::nn_batch_norm2d(64),
             torch::nn_relu(),
-            torch::nn_conv2d(in_channels=64, out_channels=1, kernel_size=c(1, 1), stride=1, padding=0),
+            torch::nn_conv2d(in_channels=64, out_channels=1, kernel_size=1, stride=1, padding=0),
             torch::nn_batch_norm2d(1),
             torch::nn_relu()
         )
         self$tcn = TemporalConvNet$new(input_size, num_channels, kernel_size, dropout=dropout)
-        self$linear = torch::nn_linear(num_channels[-length(num_channels)], output_size)
+        self$linear = torch::nn_linear(num_channels[length(num_channels)], output_size)
     },
 
     forward = function(x) {
-        conv_out <- torch::torch_squeeze(self$conv(x), 0)
+        conv_out <- torch::torch_squeeze(self$conv(x), 1)
         output <- torch::torch_transpose(self$tcn(torch::torch_transpose(conv_out, 1, 2)), 1, 2)
         pred <- self$linear(output[, -1, ])
         return(pred)
     }
 )
 
+STCN(18, c(64, 128, 64, 8), 64, 4, 4, 0.25)
 
 ```
 
@@ -312,23 +314,24 @@ exvec[-1]
 ```
 
 ```{r torch-config}
-rand_seed = 2024
 
-model_name = 'STCN'  # ['RNN', 'GRU', 'LSTM', 'TCN', 'STCN']
-device = 'cpu'  # 'cpu' or 'cuda'
-input_size = 12
-hidden_size = 32
-output_size = 1
-num_layers = 4
-nlevels = 4
-kernel_size = 4
-dropout = 0.25
-in_channels = 18
+config <- list(
+  rand_seed = 2024,
+  model_name = 'STCN',  # ['RNN', 'GRU', 'LSTM', 'TCN', 'STCN']
+  device = 'mps',  # 'cpu' or 'cuda'
+  input_size = 12,
+  hidden_size = 32,
+  output_size = 1,
+  num_layers = 4,
+  nlevels = 4,
+  kernel_size = 4,
+  dropout = 0.25,
+  in_channels = 18,
 
-batch_size = 1
-learning_rate = 1e-3
-n_epochs = 50
-
+  batch_size = 1,
+  learning_rate = 1e-3,
+  n_epochs = 50
+)
 
 ```
 
@@ -336,10 +339,10 @@ n_epochs = 50
 ```{r data_process_port}
 pkgs <- c("data.table")
 invisible(sapply(pkgs, library, character.only = TRUE, quietly = TRUE))
-
+DATA_DIR <- "../ST-CausalConvNet"
 
 # extract station id list in Beijing
-df_airq <- fread('./data/microsoft_urban_air_data/airquality.csv')
+df_airq <- fread(file.path(DATA_DIR, "data/microsoft_urban_air_data/airquality.csv"))
 station_id_list <- unique(df_airq$station_id)[1:36]     # first 36 stations are in Beijing -- Why 36?
 print(station_id_list)
     
@@ -356,28 +359,30 @@ center_station_id <- 1013
 #' @note Assume that the data is stored in the `./data/stations_data` directory.
 #' @returns A list containing the input tensor (x) and the target tensor (y).
 make_tensors <- function(
-    center_station_id = center_station_id,
-    station_id_list = station_id_list,
-    r_thred = r_thred
+    center_station = center_station_id,
+    station_list = station_id_list,
+    r_thre = r_thred
 ) {
     station_id_related_list <- c()
-    df_one_station <- fread(paste0('./data/stations_data/df_station_', center_station_id, '.csv'))
+    df_one_station <-
+      fread(file.path(DATA_DIR, paste0("data/stations_data/df_station_", center_station, ".csv")))
     v_list_1 <- df_one_station$PM25_Concentration
-    for (station_id_other in station_id_list) {
-        df_one_station_other <- fread(paste0('./data/stations_data/df_station_', station_id_other, '.csv'))
+    for (station_id_other in station_list) {
+        df_one_station_other <-
+          fread(file.path(DATA_DIR, paste0("data/stations_data/df_station_", station_id_other, ".csv")))
         v_list_2 <- df_one_station_other$PM25_Concentration
         r <- cor(v_list_1, v_list_2)
-        if (r > r_thred) {
+        if (r > r_thre) {
             station_id_related_list <- c(station_id_related_list, station_id_other)
         }
-        print(paste(center_station_id, station_id_other, round(r, 3)))
+        print(paste(center_station, station_id_other, round(r, 3)))
     }
     print(sprintf("%d %s", length(station_id_related_list), station_id_related_list))
     
     # generate x and y
     # x_shape: [example_count, num_releated, seq_step, feat_size]
     # y_shape: [example_count,]
-    print(paste('Center station:', center_station_id))
+    print(paste('Center station:', center_station))
     print(paste('Related stations:', station_id_related_list))
     feat_names <- c('PM25_Concentration', 'PM10_Concentration', 'NO2_Concentration', 'CO_Concentration', 'O3_Concentration', 'SO2_Concentration',
                   'weather', 'temperature', 'pressure', 'humidity', 'wind_speed', 'wind_direction')
@@ -387,12 +392,13 @@ make_tensors <- function(
     x <- list()
     y <- list()
     for (station_id in station_id_related_list) {
-        df_one_station <- fread(paste0('./data/stations_data/df_station_', station_id, '.csv'))
+        df_one_station <-
+          fread(file.path(DATA_DIR, paste0("data/stations_data/df_station_", station_id, ".csv")))
         x_one <- list()
         for (start_id in seq(1, nrow(df_one_station) - x_length - y_length + 1 - y_step + 1, y_length)) {
             x_data <- as.matrix(df_one_station[start_id:(start_id + x_length - 1), feat_names, with = FALSE])
             y_list <- df_one_station[(start_id + x_length + y_step - 1):(start_id + x_length + y_length + y_step - 2), PM25_Concentration, with = TRUE]
-            if (any(is.na(x_data)) || any(is.na(y_list))) {
+            if (any(is.na(x_data)) || any(is.na(y_list)) || is.null(x_data)) {
                 next
             }
             x_one <- c(x_one, torch_tensor(x_data))
@@ -400,10 +406,10 @@ make_tensors <- function(
                 y <- c(y, mean(y_list))
             }
         }
-        x_one <- torch_stack(x_one)
         if (length(x_one) <= 0) {
             next
         }
+        x_one <- torch_stack(x_one)
         x <- c(x, x_one)
         print(paste('station_id: ', station_id, ' x_shape: (', paste(dim(x_one), collapse = ", "), ")", sep = ""))
     }
@@ -412,7 +418,7 @@ make_tensors <- function(
     xx <- torch::torch_transpose(xx, 1, 2)
     y <- torch::torch_tensor(unlist(y))
     
-    print(paste('x_shape:', dim(x), 'y_shape:', dim(y)))
+    print(paste('x_shape:', paste(dim(x), sep = ", "), 'y_shape:', dim(y)))
     return(list(xtensor = xx, ytensor = y))
 }
 
@@ -420,9 +426,6 @@ make_tensors <- function(
 
 
 ```{r utils}
-# FILEPATH: /home/felix/GitHub/ST-CausalConvNet/allflow.qmd
-# BEGIN: ed8c6549bwf9
-
 get_ids_for_tvt <- function() {
     train_ids <- c()
     valid_ids <- c()
@@ -468,15 +471,13 @@ load_data <- function(x, y) {
     return(list(x_train = x_train, y_train = y_train, x_valid = x_valid, y_valid = y_valid, x_test = x_test, y_test = y_test))
 }
 
-xtss <- load_data(as.array(xx[, 13L, , ]), as.array(y))
 
 get_param_number <- function(net) {
-    total_num <- sum(sapply(net$parameters(), function(p) length(p)))
-    trainable_num <- sum(sapply(net$parameters(), function(p) length(p[p$requires_grad])))
+    total_num <- sum(sapply(net$parameters, function(p) length(p)))
+    trainable_num <- sum(sapply(net$parameters, function(p) length(p[p$requires_grad])))
     return(list(total_num = total_num, trainable_num = trainable_num))
 }
 
-# END: ed8c6549bwf9
 
 ```
 
@@ -492,7 +493,11 @@ train <- function(
     y_valid,
     x_test,
     y_test,
-    learning_rate = learning_rate,
+    model_name = config$model_name,
+    learning_rate = config$learning_rate,
+    hidden_size = config$hidden_size,
+    epochs = config$n_epochs,
+    batch_size = config$batch_size,
     plot = FALSE
 ) {
     rmse_train_list <- vector()
@@ -503,7 +508,7 @@ train <- function(
     criterion <- torch::nn_mse_loss()
     h_state <- NULL
 
-    for (epoch in 1:n_epochs) {
+    for (epoch in 1:epochs) {
         rmse_train <- 0.0
         cnt <- 0
         for (start in 1:(length(x_train) - batch_size + 1)) {
@@ -511,13 +516,14 @@ train <- function(
             progress <- start / (length(x_train) - batch_size + 1)
 
             x_input <- torch::torch_tensor(x_train[start:(start + batch_size)], dtype=torch::torch_float32())
-            y_true <- torch::tensor(y_train[start:(start + batch_size)], dtype=torch::torch_float32())
+            y_true <- torch::torch_tensor(y_train[start:(start + batch_size)], dtype=torch::torch_float32())
 
             if (model_name == 'RNN' || model_name == 'GRU') {
                 y_pred <- net(x_input, h_state)
                 h_state <- y_pred$h_state$data
             } else {
-                y_pred <- net(x_input)
+                y_pred <- net(x_input) %>%
+                  torch_flatten()
             }
 
             loss <- criterion(y_pred, y_true)
@@ -525,7 +531,7 @@ train <- function(
             loss$backward()
             optimizer$step()
 
-            mse_train_batch <- loss$data
+            mse_train_batch <- loss$item()
             rmse_train_batch <- sqrt(mse_train_batch)
             rmse_train <- rmse_train + mse_train_batch
             if (start %% ((length(x_train) - batch_size) / 5) == 0) {
@@ -576,36 +582,37 @@ train <- function(
 train_main <- function(
     model_name = "STCN",
     fulldata = NULL,
-    input_size = input_size,
-    output_size = output_size,
-    hidden_size = NULL,
-    num_layers = num_layers,
-    in_channels = NULL,
-    nlevels = nlevels,
-    kernel_size = kernel_size,
-    dropout = dropout
+    dinput = config$input_size,
+    doutput = config$output_size,
+    dhidden = config$hidden_size,
+    nlayers = config$num_layers,
+    nchannels = config$in_channels,
+    nlvs = config$nlevels,
+    dkernel = config$kernel_size,
+    p_dropout = config$dropout,
+    seed = config$rand_seed
 ) {
     # Hyper Parameters
-    set.seed(rand_seed)
-    torch::local_torch_manual_seed(rand_seed)
+    set.seed(seed)
+    torch::local_torch_manual_seed(seed)
 
     # Load data
     # print('\nLoading data...\n')
     # x_train, y_train, x_valid, y_valid, x_test, y_test <- utils::load_data(f_x=f_x, f_y=f_y)
 
     # Generate model
-    net <- NULL
+    #net <- NULL
     if (model_name == 'RNN') {
-        net <- SimpleRNN(input_size=input_size, hidden_size=hidden_size, output_size=output_size, num_layers=num_layers)
+        net <- SimpleRNN(input_size=dinput, hidden_size=dhidden, output_size=doutput, num_layers=nlayers)
     } else if (model_name == 'GRU') {
-        net <- SimpleGRU(input_size=input_size, hidden_size=hidden_size, output_size=output_size, num_layers=num_layers)
+        net <- SimpleGRU(input_size=dinput, hidden_size=dhidden, output_size=doutput, num_layers=nlayers)
     } else if (model_name == 'LSTM') {
-        net <- SimpleLSTM(input_size=input_size, hidden_size=hidden_size, output_size=output_size, num_layers=num_layers)
+        net <- SimpleLSTM(input_size=dinput, hidden_size=dhidden, output_size=doutput, num_layers=nlayers)
     } else if (model_name == 'TCN') {
-        net <- TCN(input_size=input_size, output_size=output_size, num_channels=rep(hidden_size, levels), kernel_size=kernel_size, dropout=dropout)
+        net <- TCN(input_size=dinput, output_size=doutput, num_channels=rep(dhidden, nlvs), kernel_size=dkernel, dropout=p_dropout)
     } else if (model_name == 'STCN') {
-        net <- STCN(input_size=input_size, in_channels=in_channels, output_size=output_size,
-                            num_channels=rep(hidden_size, nlevels), kernel_size=kernel_size, dropout=dropout)
+        net <- STCN(input_size=dinput, in_channels=nchannels, output_size=doutput,
+                            num_channels=rep(dhidden, nlvs), kernel_size=dkernel, dropout=p_dropout)
     }
     print(paste('\n------------ Model structure ------------\nmodel name:', model_name, '\n', #net,
      '\n-----------------------------------------\n'))
@@ -618,7 +625,16 @@ train_main <- function(
 }
 
 
+```
+
+```{r}
+prep_tensor <- make_tensors()
+xtss <- load_data(as.array(prep_tensor$xtensor[, 13, , ]), as.array(prep_tensor$ytensor))
+
+
+torch::torch_device(config$device)
 xtsstr <-
-train_main(model_name = "GRU", fulldata = lapply(xtss, torch::torch_tensor), input_size = input_size, output_size = output_size, hidden_size = hidden_size, num_layers = num_layers, in_channels = in_channels, nlevels = nlevels, kernel_size = kernel_size, dropout = dropout)
+train_main(model_name = "LSTM", fulldata = lapply(xtss, torch::torch_tensor, device = torch_device(config$device)), dinput = config$input_size, doutput = config$output_size, dhidden = config$hidden_size, nlayers = config$num_layers, nchannels = config$in_channels, nlvs = config$nlevels, dkernel = config$kernel_size, p_dropout = config$dropout)
+
 
 ```
