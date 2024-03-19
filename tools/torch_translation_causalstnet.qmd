@@ -194,7 +194,7 @@ Chomp1d <- nn_module(
     },
 
     forward = function(x) {
-        torch_contiguous_format(x[, , 1:(x$size(3) - self$chomp_size)])
+        x[, , 1:(x$size(3) - self$chomp_size)]
     }
 )
 
@@ -203,8 +203,8 @@ TemporalBlock <- nn_module(
   classname = "TemporalBlock",
   
   initialize = function(n_inputs, n_outputs, kernel_size, stride, dilation, padding, dropout = 0.2) {
-    wn1 <- torch::nn_utils_weight_norm$new(name = "weight", dim = 1)
-    wn2 <- torch::nn_utils_weight_norm$new(name = "weight", dim = 1)
+    wn1 <- torch::nn_utils_weight_norm$new(name = "weight1", dim = 1)
+    wn2 <- torch::nn_utils_weight_norm$new(name = "weight2", dim = 1)
     self$conv1 <- wn1$apply(nn_conv1d(n_inputs, n_outputs, kernel_size, stride = stride, padding = padding, dilation = dilation))
     self$chomp1 <- Chomp1d(padding)
     self$relu1 <- nn_relu()
@@ -249,8 +249,8 @@ TemporalBlock <- nn_module(
   }
 )
 
-TemporalBlock(12, 18, 4, 3, 2, 3, 0.1)
-
+ktb <- TemporalBlock(12, 12, 4, 3, 2, 3, 0.1)
+ktb(torch_randn(12, 12, 4))
 
 TemporalConvNet <- nn_module(
   classname = "TemporalConvNet",
@@ -263,7 +263,7 @@ TemporalConvNet <- nn_module(
       dilation_size <- 2 ** (i - 1)
       in_channels <- if (i == 1) num_inputs else num_channels[[i - 1]]
       out_channels <- num_channels[[i]]
-      layers <- c(layers, TemporalBlock$new(in_channels, out_channels, kernel_size, stride = 1, dilation = dilation_size,
+      layers <- c(layers, TemporalBlock(in_channels, out_channels, kernel_size, stride = 1, dilation = dilation_size,
                                             padding = (kernel_size - 1) * dilation_size, dropout = dropout))
     }
     
@@ -272,7 +272,7 @@ TemporalConvNet <- nn_module(
   },
   
   forward = function(x) {
-    self$network$forward(x)
+    self$network(x)
   }
 )
 
@@ -283,7 +283,6 @@ TemporalConvNet(64, c(64, 128, 256, 512), 5, 0.25)
 
 
 STCN <- torch::nn_module(
-    classname = "STCN",
     initialize = function(input_size, in_channels, output_size, num_channels, kernel_size, dropout) {
         self$conv <- torch::nn_sequential(
             torch::nn_conv2d(in_channels=in_channels, out_channels=64, kernel_size=1, stride=1, padding=0),
@@ -293,16 +292,19 @@ STCN <- torch::nn_module(
             torch::nn_batch_norm2d(1),
             torch::nn_relu()
         )
-        self$tcn <- TemporalConvNet$new(input_size, num_channels, kernel_size, dropout = dropout)
+        self$tcn <- TemporalConvNet(input_size, num_channels, kernel_size, dropout = dropout)
         self$linear <- torch::nn_linear(num_channels[length(num_channels)], output_size)
     },
 
     forward = function(x) {
-        conv_out <- torch::torch_squeeze(self$conv(x), 1)
+        #conv_out <- 
+        self$conv(x)$squeeze(1) %>%
+          self$tcn() %>%
+          self$linear()
         # output <- torch::torch_transpose(self$tcn(torch::torch_transpose(conv_out, 1, 2)), 1, 2)
-        output <- self$tcn(conv_out)
-        self$linear(output[, output$size(1), ])
-        
+        # output <- self$tcn(conv_out)
+        # x <- self$linear(output[, output$size(1), ])
+        # x
     }
 )
 
@@ -344,7 +346,7 @@ config <- list(
 ```{r data_process_port}
 pkgs <- c("data.table")
 invisible(sapply(pkgs, library, character.only = TRUE, quietly = TRUE))
-DATA_DIR <- "../ST-CausalConvNet"
+DATA_DIR <- "../../github/ST-CausalConvNet"
 
 # extract station id list in Beijing
 df_airq <- fread(file.path(DATA_DIR, "data/microsoft_urban_air_data/airquality.csv"))
@@ -522,14 +524,14 @@ train <- function(
 
             # x_input <- torch::torch_tensor(x_train[start:(start + batch_size)], dtype=torch::torch_float32())
             # y_true <- torch::torch_tensor(y_train[start:(start + batch_size)], dtype=torch::torch_float32())
-            x_input <- x_train[start:(start + batch_size - 1)]
+            x_input <- x_train[start:(start + batch_size - 1),,,]
             y_true <- y_train[start:(start + batch_size - 1)]
 
             if (model_name == 'RNN' || model_name == 'GRU') {
-                y_pred <- net(x_input$x$to(config$device), h_state$h_state$to(config$device))
+                y_pred <- net(x_input, h_state)
                 h_state <- y_pred$h_state$data
             } else {
-                y_pred <- net(x_input$x$to(config$device))
+                y_pred <- net(x_input)
             }
 
             loss <- criterion(y_pred, y_true)
@@ -555,13 +557,13 @@ train <- function(
         for (start in 1:(length(x_valid) - batch_size + 1)) {
             # x_input_valid <- torch::torch_tensor(x_valid[start:(start + batch_size)], dtype = torch::torch_float32())
             # y_true_valid <- torch::torch_tensor(y_valid[start:(start + batch_size)], dtype = torch::torch_float32())
-            x_input_valid <- x_valid[start:(start + batch_size - 1)]
+            x_input_valid <- x_valid[start:(start + batch_size - 1),,,]
             y_true_valid <- y_valid[start:(start + batch_size - 1)]
 
             if (model_name == 'RNN' || model_name == 'GRU') {
-                y_valid_pred <- net(x_input_valid$to(config$device), h_state$h_state$to(config$device))
+                y_valid_pred <- net(x_input_valid, h_state)
             } else {
-                y_valid_pred <- net(x_input_valid$to(config$device))
+                y_valid_pred <- net(x_input_valid)
             }
             y_valid_pred_final <- c(y_valid_pred_final, as.vector(y_valid_pred$data))
             loss_valid <- criterion(y_valid_pred, y_true_valid)$data
@@ -662,5 +664,113 @@ tcntest <- TCN(12, 32, c(50, 50, 50, 50), 4, 0.25)
 train_main(STCN(12, 18, 32, c(50, 50, 50, 50), 4, 0.25), xtss$x_train, xtss$y_train, xtss$x_valid, xtss$y_valid, xtss$x_test, xtss$y_test)
 train_main("STCN", xtss)
 train_main("TCN", xtss)
+
+```
+
+
+```{r}
+
+net0 <- nn_lstm(12, 32, 2, batch_first = TRUE)
+net0(torch_randn(1, 24, 12))
+
+stcntest(torch_randn(1, 18, 24, 12))
+
+reticulate::py_install("torch")
+
+
+```
+
+
+
+```{r mlp}
+simplenn <-
+nn_module(
+  initialize = function(input_size, hidden_sizes, output_size) {
+    self$input_size <- input_size
+    self$hidden_sizes <- hidden_sizes
+    self$output_size <- output_size
+
+    self$mlp <- nn_sequential(
+      nn_linear(input_size, hidden_sizes[1]),
+      nn_relu(),
+      nn_linear(hidden_sizes[1], hidden_sizes[2]),
+      nn_relu(),
+      nn_linear(hidden_sizes[2], hidden_sizes[3]),
+      nn_relu(),
+      nn_linear(hidden_sizes[3], hidden_sizes[4]),
+      nn_relu(),
+      nn_linear(hidden_sizes[4], output_size)
+    )
+
+
+  },
+  forward = function(x) {
+    self$mlp(x)
+  }
+)
+
+
+simplecnn <-
+nn_module(
+  initialize = function(input_size, output_size) {
+    self$input_size <- input_size
+    self$output_size <- output_size
+
+    self$cnn <- nn_sequential(
+      nn_conv2d(input_size, 32, 3, padding = 1),
+      nn_relu(),
+      nn_max_pool2d(2),
+      nn_conv2d(32, 64, 3, padding = 1),
+      nn_relu(),
+      nn_max_pool2d(2),
+      nn_flatten(),
+      nn_linear(24 * (input_size %/% 4), output_size)
+    )
+  },
+  forward = function(x) {
+    self$cnn(x)
+  }
+)
+
+
+simplernn <-
+nn_module(
+  initialize = function(input_size, hidden_size, output_size) {
+    self$input_size <- input_size
+    self$hidden_size <- hidden_size
+    self$output_size <- output_size
+
+    self$rnn <- nn_rnn(
+      input_size = input_size,
+      hidden_size = hidden_size,
+      num_layers = 1,
+      nonlinearity = "relu",
+      dropout = 0.25,
+      batch_first = TRUE
+    )
+    self$linear <- nn_linear(hidden_size, output_size)
+  },
+  forward = function(x) {
+    output <- self$rnn(x)[[1]]
+    self$linear(output[ , output$size(1), , drop = TRUE])
+    #nn_flatten(pred)
+  }
+
+)
+
+
+spnn <- simplenn(1, c(32, 64, 24, 4), 1)
+spcnn <- simplecnn(16, 1)
+sprnn <- simplernn(16, 48, 1)
+spnn$parameters
+
+
+ttn <- torch_tensor(array(rpois(4800, 15), dim = c(4800, 1)), dtype = torch_float32())
+ttcn <- torch_tensor(array(rpois(1024 * 24, 42), dim = c(16, 64, 24)), dtype = torch_float32())
+tttn <- torch_tensor(array(rpois(1024, 40), dim = c(16, 64)), dtype = torch_float32())
+spnn(ttn)
+spcnn(ttcn)
+sprnn(tttn)
+spnn(torch_randn(4800, 1))
 
 ```
