@@ -683,6 +683,12 @@ reticulate::py_install("torch")
 
 
 ```{r mlp}
+# to use CUDA on the location elsewhere:
+# add export PATH and LD_LIBRARY_PATH to .bashrc or .profile
+# ...cuda11.8
+# Sys.setenv(CUDA="11.8")
+# install_torch()
+# before open R interactive, open . ~/.bashrc or . ~/.profile
 simplenn <-
 nn_module(
   initialize = function(input_size, hidden_sizes, output_size) {
@@ -759,18 +765,101 @@ nn_module(
 )
 
 
-spnn <- simplenn(1, c(32, 64, 24, 4), 1)
-spcnn <- simplecnn(16, 1)
-sprnn <- simplernn(16, 48, 1)
+spnn <- simplenn(1, c(32, 64, 24, 4), 1)$to(device = "cuda:0")
+spcnn <- simplecnn(32, 1)$to(device = "cuda:0")
+sprnn <- simplernn(16, 48, 1)$to(device = "cuda:0")
 spnn$parameters
 
 
-ttn <- torch_tensor(array(rpois(4800, 15), dim = c(4800, 1)), dtype = torch_float32())
-ttcn <- torch_tensor(array(rpois(1024 * 24, 42), dim = c(16, 64, 24)), dtype = torch_float32())
-tttn <- torch_tensor(array(rpois(1024, 40), dim = c(16, 64)), dtype = torch_float32())
+ttn <- torch_tensor(array(rpois(4800, 15), dim = c(4800, 1)), dtype = torch_float32())$to(device = "cuda:0")
+ttcn <- torch_tensor(array(rpois(1024 * 24, 42), dim = c(16, 64, 24)), dtype = torch_float32())$to(device = "cuda:0")
+tttn <- torch_tensor(array(rpois(1024, 40), dim = c(16, 64)), dtype = torch_float32())$to(device = "cuda:0")
 spnn(ttn)
 spcnn(ttcn)
 sprnn(tttn)
 spnn(torch_randn(4800, 1))
+
+```
+
+
+```{r}
+mydataset <- dataset(
+  name = "my_dataset",
+  
+  initialize = function(x, batch_size) {
+
+    self$batch_size <- batch_size
+    self$x <- x
+    
+
+  },
+  
+  .getitem = function(i) {
+    
+    self$x[((i - 1) * self$batch_size + 1):((i * self$batch_size) + self$batch_size), ,]
+
+  },
+  
+  .length = function() {
+    length(self$x$size(1)) 
+  }
+)
+
+tensor0 <- torch_randn(16384, 32, 32, dtype = torch_float32())$to(device = "cuda:0")
+mydata <- mydataset(tensor0, 64)
+
+
+coro::loop(for (de in mydata) spnn(de))
+```
+
+
+```{r}
+loadx <- readRDS("../../../../group/set/Projects/NRT-AP-Model/output/")
+
+```
+
+```{r}
+library(data.table)
+library(torch)
+
+# FIXME: remove self from the selected
+create_tensor <- function(dt, num_rows, covariates) {
+  tensor_list <- list()
+  
+  for (i in 1:nrow(dt)) {
+    # Select fixed number of rows based on coordinate columns
+    selected_rows <- dt[order(sqrt((longitude - dt[i, longitude])^2 + (latitude - dt[i, latitude])^2))][1:num_rows]
+    
+    # Remove PM2.5 column
+    selected_rows[, PM2.5 := NULL]
+    
+    # Convert to torch_tensor
+    tensor <- torch_tensor(as.matrix(selected_rows[, ..covariates]), dtype = torch_float32())
+    
+    tensor_list[[i]] <- tensor
+  }
+  
+  tensor <- torch_stack(tensor_list, dim = 1)
+  
+  return(tensor)
+}
+
+dtex <- fread("input/unique_sites.csv")
+dtex2 <- dtex[, `:=`(PM2.5 = rgamma(1058, 1, 0.2), cov1 = rnorm(1058), cov2 = rnorm(1058))]
+names(dtex2)[2:3] <- c("longitude", "latitude")
+
+system.time(
+  result_tensor <- create_tensor(dtex2, 25, c("cov1", "cov2"))
+)
+
+# The last two dimensions are supposed to be a 5 by 5 grid
+# To avoid confusions, organize tensors in this order:
+# nsites * time * x * y
+# nsites * time * (reorganized 25 sites [number can vary])
+# sites are disjunct and not ordered by any means at first;
+# we could consider some criteria to order them, but for now, we'll just use the order they are in the data into 5 by 5
+result_tensor2 <- result_tensor$reshape(list(1058, 5, 5, 2))
+result_tensor3 <- result_tensor2$transpose(2, 4)
+result_tensor3[1, 1, , ]
 
 ```
