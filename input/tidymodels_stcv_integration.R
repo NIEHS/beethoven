@@ -12,8 +12,8 @@ source("R/cross_validation.R")
 source("input/Rinput/processing_functions/filter_unique_sites.R")
 
 # Data prep
-sitesk <- filter_unique_sites(include_time = FALSE, date_start = "2022-01-01", date_end = "2022-06-30")
-sitest <- filter_unique_sites(include_time = TRUE, date_start = "2022-01-01", date_end = "2022-06-30")
+sitesk <- filter_unique_sites(include_time = FALSE, date_start = "2021-01-01", date_end = "2021-06-30")
+sitest <- filter_unique_sites(include_time = TRUE, date_start = "2021-01-01", date_end = "2021-06-30")
 colnames(sitest)[4] <- "time"
 sitestdt <- convert_stobj_to_stdt(sitest)
 sitestdt$crs_stdt <- "OGC:CRS84"
@@ -85,11 +85,14 @@ pm25e <- pm25 |>
   dplyr::filter(POC == min(POC)) |>
   dplyr::summarize(pm2.5 = mean(Arithmetic.Mean, na.rm = TRUE)) |>
   dplyr::ungroup()
+pm25sub <- pm25e |>
+  dplyr::mutate(time = as.Date(time)) |>
+  dplyr::filter(time >= as.Date("2021-01-01") & time <= as.Date("2021-06-30"))
 
 ## covariate join
 covarsets <-
   list.files(
-    file.path(".", "output"),
+    file.path("..", "../../..", "group/set/Projects/NRT-AP-Model", "output"),
     "NRTAP_Covars_*.*.rds", full.names = TRUE)
 
 ## Code chunk here is based on songi2 user directory
@@ -103,13 +106,14 @@ covarsets_spt <-
 dfcovarst <-
   Reduce(function(x, y) merge(x, y, by = c("site_id", "time")),
          covarsets[covarsets_spt])
-dfcovarst <- merge(dfcovarst, pm25e, by = c("site_id", "time"))
+dfcovarst <- merge(dfcovarst, pm25sub, by = c("site_id", "time"))
 
 dfcovarstdt <- convert_stobj_to_stdt(dfcovarst)
 dfcovarstdt$stdt$time <- as.Date(dfcovarstdt$stdt$time)
+# saveRDS(dfcovarstdt, "~/stcv_test_data.rds", compress = "xz")
+dfcovarstdt <- readRDS("~/stcv_test_data.rds")
 dfcovars_lblto <-
-  generate_cv_index(dfcovarstdt, "lblto", blocks = c(10, 10), t_fold = 60L)
-
+  generate_cv_index(dfcovarstdt, "lblto", blocks = c(30, 15), t_fold = 5L)
 dfcovarstdt_cv <-
   convert_cv_index_rset(dfcovars_lblto, dfcovarstdt$stdt, "lblto")
 
@@ -124,4 +128,20 @@ pm25mod <- workflow() |>
   add_model(xgb_mod) |>
   add_formula(pm2.5 ~ .) |>
   tune::tune_bayes(resamples = dfcovarstdt_cv, iter = 50) |>
+  fit_resamples(dfcovarstdt_cv, yardstick::metric_set(rmse, mae))
+
+terms0 <- names(dfcovarstdt[[1]])
+terms0 <- terms0[5:160]
+mlp_mod <-
+  parsnip::mlp(
+    hidden_units = tune::tune(),
+    dropout = tune::tune(),
+    learn_rate = tune::tune()
+  ) |>
+  set_engine("brulee") |>
+  set_mode("regression")
+mlp_workflow <- workflow() |>
+  add_model(mlp_mod) |>
+  add_formula(reformulate(response = "pm2.5", termlabels = terms0)) |>
+  tune::tune_bayes(resamples = dfcovarstdt_cv, iter = 10) |>
   fit_resamples(dfcovarstdt_cv, yardstick::metric_set(rmse, mae))

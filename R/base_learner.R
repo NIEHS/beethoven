@@ -60,6 +60,51 @@ base_learner_prep <- function(
 }
 
 
+
+
+#' CV data generator
+#'
+#' @description It generates a list of cross-validation sets for a given dataset.
+#'
+#' @param data The dataset containing the input features and target variable.
+#' @param cv_index The cross-validation index indicating the fold for each observation.
+#'
+#' @returns A list of cross-validation sets, where each set contains the training and testing data.
+#'
+#' @examples
+#' data <- list(xmat = matrix(1:12, nrow = 4), ymat = c(1, 2, 3, 4))
+#' cv_index <- c(1, 2, 1, 2)
+#' cvlist <- base_learner_cv_set(data, cv_index)
+#' cvlist[[1]]$xtrain
+#' cvlist[[1]]$xtest
+#' cvlist[[1]]$ytrain
+#' cvlist[[1]]$ytest
+#'
+#' @export
+base_learner_cv_set <- function(
+  data,
+  cv_index
+) {
+
+  cviter <- sort(unique(cv_index))
+  cvlist <- vector("list", length = length(cviter))
+
+  for (iter in cviter) {
+    # row
+    xtrain <- data$xmat[cviter != iter, ]
+    xtest <- data$xmat[cviter == iter, ]
+    ytrain <- data$ymat[cviter != iter, ]
+    ytest <- data$ymat[cviter == iter, ]
+
+    cvlist[[iter]] <-
+      list(xtrain = xtrain, xtest = xtest, ytrain = ytrain, ytest = ytest)
+  }
+  return(cvlist)
+}
+
+
+
+
 #' Split training-test data for base learner fitting
 #' @param learner character(1). Currently one of `"randomforest"`, `"xgboost"`,
 #' and `"cnn"`
@@ -296,3 +341,91 @@ base_learner_cv_outcome <-
     }
     return(cvindex_l)
   }
+
+
+#' Base Learner Tune
+#'
+#' This function tunes a base learner model using the specified data and tuning specifications.
+#'
+#' @param data The data used for tuning the base learner model.
+#' Output of [`base_learner_cv_set`]
+#' @param learner The type of base learner model to tune. Options are "randomforest", "xgboost", and "cnn".
+#' @param tunespec The tuning specifications, which should be a data frame.
+#' All column names should match the arguments in the fitting function.
+#'
+#' @returns A tuned base learner model. nrow(tunespec) * nrow(data) rows.
+#'
+#' @examples
+#' base_learner_tune(data, learner = "randomforest", tunespec = tuning_data)
+#' @importFrom mirai mirai
+#' @importFrom data.table rbindlist
+#' @importFrom rlang inject
+#' @importFrom ranger ranger
+#' @importFrom xgboost xgboost
+#' @export
+base_learner_tune <- function(
+  data,
+  learner = c("randomforest", "xgboost", "cnn"),
+  tunespec = NULL,
+  ncores = 1L) {
+  #mirai::make_cluster(n = ncores)
+  # Determine the reference fitting function based on the learner type
+  ref_fit <- switch(learner,
+                    randomforest = ranger::ranger,
+                    xgboost = xgboost::xgboost,
+                    cnn = simpleError("Not implemented.\n")
+  )
+  
+  # Determine the fitting function based on the learner type
+  fun_fit <- switch(learner,
+                    randomforest = base_learner_fit_ranger,
+                    xgboost = base_learner_fit_xgboost,
+                    cnn = simpleError("Not implemented.\n")
+  )
+  
+  # Get all arguments in the fitting functions
+  ref_args <- formals(ref_fit)
+  
+  # Check if tunespec is a data frame
+  if (!is.data.frame(tunespec)) {
+    stop("tunespec should be a data.frame.\n")
+  }
+  
+  # Check if all arguments in tunespec are valid
+  if (any(!names(tunespec) %in% names(ref_args))) {
+    missing_args <- names(tunespec)[!names(tunespec) %in% names(ref_args)]
+    stop(
+      sprintf(
+        "No arguments in the fitting function. Check arguments: %s\n",
+        paste(missing_args, collapse = ", ")
+      )
+    )
+  }
+  
+  # Tune the base learner model
+  tuned <- mirai::mirai({
+    rex <- lapply(data, function(d) {
+      tune_res <- vector("list", length = nrow(tunespec))
+      for (idx in seq_len(nrow(tunespec))) {
+        tune_args <- tunespec[idx, ]
+        tune_args <- as.list(tune_args)
+        tune_args <- c(tune_args, list(ymat = d$ytrain, xmat = d$xtrain))
+
+        tune_fit <- rlang::inject(fun_fit(!!!tune_args))
+        tune_res[[idx]] <- tune_fit
+      }
+      return(tune_res)
+    })
+    return(rex)
+  }, data = data)
+
+  tunedx <- mirai::call_mirai(tuned)$data
+  
+  # Postprocessing
+  tunedx <- lapply(tunedx, function(x) {
+    data.table::rbindlist(x)
+  })
+  tunedx <- data.table::rbindlist(tunedx)
+  
+  return(tunedx)
+}

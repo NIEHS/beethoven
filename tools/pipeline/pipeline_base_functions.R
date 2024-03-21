@@ -399,6 +399,17 @@ fit_base <-
 
   }
 
+
+predict_base <-
+  function(
+    fitted,
+    targetdf
+  ) {
+    
+  }
+
+
+
 predict_meta <-
   function(
     metalearner = NULL,
