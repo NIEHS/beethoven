@@ -234,7 +234,7 @@ calc_nlcd_ratio <- function(path,
   us_main <- sf::st_union(get("us_states")) |>
     terra::vect() |>
     terra::project(y = terra::crs(sites))
-  data_vect_b <- sites |>
+  sites <- data_vect_b <- sites |>
     terra::intersect(x = us_main)
   if (!terra::same.crs(data_vect_b, nlcd)) {
     data_vect_b <- terra::project(data_vect_b, terra::crs(nlcd))
