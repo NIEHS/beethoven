@@ -44,6 +44,11 @@ tar_option_set(
 
 list(
   target_init,
+  targets::tar_target(
+    radii,
+    command = c(1e3, 1e4, 5e4),
+    iteration = "vector"
+  ),
   target_download,
   target_calculate_fit,
   target_calculate_predict,

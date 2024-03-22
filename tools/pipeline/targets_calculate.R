@@ -51,7 +51,8 @@ target_calculate_fit <-
       calculate_single(
         locs = sites_spat,
         path = mr("dir_input_ecoregion"),
-        ... # other args
+        locs_id = mr("pointid"),
+        covariate = "ecoregion"
       )
     )
     ,
@@ -59,27 +60,65 @@ target_calculate_fit <-
       covariates_koppen,
       calculate_single(
         locs = sites_spat,
-        path = mr("dir_input_koppen"),
-        ... # other args
+        path = file.path(mr("dir_input_koppen"), "Beck_KG_V1_present_0p083.tif"),
+        locs_id = mr("pointid"),
+        covariate = "koppen"
       )
     )
     ,
+    # 3 branches
     targets::tar_target(
       covariates_nlcd,
-      calculate_multi(
+      command = calculate_multi(
+        domain = c(2019, 2019, 2019, 2021, 2021),
         locs = sites_spat,
         path = mr("dir_input_nlcd"),
-        ... # other args
+        locs_id = mr("pointid"),
+        covariate = "nlcd",
+        buffer = radii
+      ),
+      pattern = map(radii),
+      iteration = "vector"
+    )
+    ,
+    targets::tar_target(
+      hms_dates,
+      command =
+      as.Date(
+        stringi::stri_extract_first_regex(
+          list.files(
+            mr("dir_input_hms"), pattern = "*.shp$", full.names = FALSE
+          ),
+          pattern = "2[0-1][0-9]{2}[0-1][0-9]([0-2][0-9]|3[0-1])"
+        ), format = "%Y-%m-%d"
       )
     )
     ,
     targets::tar_target(
+      hms_level,
+      command = c("Light", "Medium", "Heavy"),
+      iteration = "vector"
+    )
+    ,
+    # 3 branches
+    targets::tar_target(
       covariates_hms,
-      calculate_multi(
-        locs = sites_spat,
-        path = mr("dir_input_hms"),
-        ... # other args
-      )
+      do.call(rbind,
+        purrr::map(
+          .x = hms_dates,
+          .f = function(d) {
+            calculate_single(
+              locs = sites_spat,
+              path = mr("dir_input_hms"),
+              date = c(d, d),
+              variable = hms_level,
+              locs_id = mr("pointid")
+            )
+          }
+        )
+      ),
+      iteration = "vector",
+      pattern = map(hms_level)
     )
     ,
     targets::tar_target(
@@ -91,18 +130,23 @@ target_calculate_fit <-
       )
     )
     ,
+    # 3 branches
     targets::tar_target(
       covariates_sedac_groads,
-      calculate_multi(
-        locs = sites_spat,
+      command = calculate_single(
+        locs = as.data.frame(sites_spat),
         path = mr("dir_input_sedac_groads"),
-        ... # other args
-      )
+        locs_id = mr("pointid"),
+        covariate = "sedac_groads",
+        radius = radii
+      ),
+      pattern = map(radii),
+      iteration = "vector"
     )
     ,
     targets::tar_target(
       covariates_narrmono,
-        calculate_multi(
+      calculate_multi(
         locs = sites_spat,
         path = mr("dir_input_narrmono"),
         ... # other args
@@ -120,14 +164,27 @@ target_calculate_fit <-
     )
     ,
     targets::tar_target(
+      county_poly,
+      command = load_county()
+    )
+    ,
+    targets::tar_target(
+      nei_dirs,
+      command = c(rep(mr("dir_input_nei2017"), 2), rep(mr("dir_input_nei2020"), 3)),
+      iteration = "vector"
+    )
+    ,
+    targets::tar_target(
       covariates_nei,
       calculate_multi(
-        # manual domain
         domain = c(2017, 2017, 2020, 2020, 2020),
         locs = sites_spat,
-        path = mr("dir_input_nei"),
-        ... # other args
-      )
+        path = nei_dirs,
+        county = county_poly,
+        locs_id = mr("pointid")
+      ),
+      pattern = map(nei_dirs),
+      iteration = "vector"
     )
     ,
     targets::tar_target(
@@ -150,57 +207,57 @@ target_calculate_fit <-
     )
     ,
     targets::tar_target(
-        covariates_modis_mod11,
-        calculate_multi(
+      covariates_modis_mod11,
+      calculate_multi(
         locs = sites_spat,
         path = mr("dir_input_modis_mod11"),
         ... # other args
-        )
+      )
     )
     ,
     targets::tar_target(
-        covariates_modis_mod06,
-        calculate_multi(
+      covariates_modis_mod06,
+      calculate_multi(
         locs = sites_spat,
         path = mr("dir_input_modis_mod06"),
         ... # other args
-        )
+      )
     )
     ,
     targets::tar_target(
-        covariates_modis_mod13,
-        calculate_multi(
+      covariates_modis_mod13,
+      calculate_multi(
         locs = sites_spat,
         path = mr("dir_input_modis_mod13"),
         ... # other args
-        )
+      )
     )
     ,
     targets::tar_target(
-        covariates_modis_mcd19,
-        calculate_multi(
+      covariates_modis_mcd19,
+      calculate_multi(
         locs = sites_spat,
         path = mr("dir_input_modis_mcd19"),
         ... # other args
-        )
+      )
     )
     ,
     targets::tar_target(
-        covariates_modis_mod09,
-        calculate_multi(
+      covariates_modis_mod09,
+      calculate_multi(
         locs = sites_spat,
         path = mr("dir_input_modis_mod09"),
         ... # other args
-        )
+      )
     )
     ,
     targets::tar_target(
-        covariates_modis_vnp46,
-        calculate_multi(
+      covariates_modis_vnp46,
+      calculate_multi(
         locs = sites_spat,
         path = mr("dir_input_modis_vnp46"),
         ... # other args
-        )
+      )
     ),
   # combine each covariate set into one data.frame (data.table; if any)
   targets::tar_target(

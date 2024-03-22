@@ -168,6 +168,14 @@ fastdown <-
   }
 
 
+load_county <- function() {
+  options(tigris_use_cache = TRUE)
+  cnty <- tigris::counties(year = 2020)
+  cnty <- cnty[!cnty$STATEFP %in% c("02", "15", "60", "66", "68", "69", "72", "78"), ]
+  return(cnty)
+}
+
+
 # calculate (no year is concerned)
 #' Temporally marginal calculation
 #' @note As `amadeus::calc_covariates` suggests,

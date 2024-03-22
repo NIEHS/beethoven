@@ -89,3 +89,5 @@ file_covar_predict_geos,covar_predict_geos.rds,87,status,paste0
 file_covar_predict_hms,covar_predict_hms.rds,88,status,paste0
 file_covar_predict_sedac_population,covar_predict_sedac_population.rds,89,status,paste0
 file_covar_predict_sedac_groads,covar_predict_sedac_groads.rds,90,status,paste0
+dir_input_nei2017,input/nei/nei_onroad_byregions_2017,91,path,file.path
+dir_input_nei2020,input/nei/nei_onroad_byregions_2020,92,path,file.path
