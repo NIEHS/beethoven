@@ -11,6 +11,12 @@ source("./tools/pipeline/targets_baselearner.R")
 source("./tools/pipeline/targets_metalearner.R")
 source("./tools/pipeline/targets_predict.R")
 
+Sys.setenv("BTV_DOWNLOAD_PASS" = "FALSE")
+
+if (Sys.getenv("BTV_DOWNLOAD_PASS") == "TRUE") {
+  target_download <- NULL
+}
+
 # targets options
 tar_option_set(
   packages =
@@ -24,7 +30,7 @@ tar_option_set(
   crew.cluster::crew_controller_slurm(
     slurm_log_output = "output/slurm_pipeline_log.out",
     slurm_log_error = "output/slurm_pipeline_error.err",
-    tasks_max = 50L,
+    tasks_max = 32L,
     slurm_memory_gigabytes_per_cpu = 8,
     slurm_cpus_per_task = 8L,
     slurm_time_minutes = NULL,

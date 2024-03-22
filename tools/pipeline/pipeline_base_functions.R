@@ -67,9 +67,6 @@ get_aqs_data <-
     return_format = "terra"
   ) {
     #nocov start
-    if (!is(input_df, "data.frame")) {
-      stop("input_df should be data.frame/tbl_df/data.table.\n")
-    }
     if (!is.character(locs_id)) {
       stop("locs_id should be character.\n")
     }
@@ -79,9 +76,7 @@ get_aqs_data <-
     aqs_prep <-
       amadeus::process_aqs(
         path = path,
-        include_time = TRUE,
-        date_start = date_start,
-        date_end = date_end,
+        date = NULL,
         return_format = return_format
       )
     input_df <- readRDS(path)
@@ -115,6 +110,7 @@ join_yx <-
   }
 
 #' Check file status with a static list
+#' @concept obsolete
 #' @description A static list refers to a fixed state of
 #' the list of files at a certain time point. Users should update the static
 #' list if needed. The static list could reduce the risk of rerunning the
@@ -224,9 +220,6 @@ calculate_single <-
 
 # calculate over a list
 #' Spatiotemporal covariate calculation
-#' @param status File status. Output of `check_file_status`
-#' @param outpath character(1). Full file path of calculated covariates.
-#' Should end with `"rds"`
 #' @param domain vector of integer/character/Date.
 #' Depending on temporal resolution of raw datasets.
 #' @param process_function Raw data processor. Default is
@@ -268,7 +261,7 @@ calculate_multi <-
         stop("Results do not match expectations.")
       }
 
-      res_calc <- data.table::rbindlist(res_calc)
+      res_calc <- data.table::rbindlist(res_calc, fill = TRUE)
       return(res_calc)
       # saveRDS(res_calc, file = outpath, compress = "xz")
     # }
@@ -387,11 +380,6 @@ configure_cv <-
   }
 
 
-batch_base_learner <-
-  function(
-
-  )
-
 fit_base <-
   function(
 
@@ -405,7 +393,7 @@ predict_base <-
     fitted,
     targetdf
   ) {
-    
+
   }
 
 
@@ -429,3 +417,24 @@ export_res <-
   ) {
 
   }
+
+
+
+search_function <- function(package, search){
+  library(package, character.only = TRUE)
+  grep(search, ls(sprintf("package:%s", package)), value = TRUE)
+}
+
+df_params <- function(functions) {
+  params <- lapply(functions, function(x) {
+    args <- dplyr::as_tibble(lapply(as.list(formals(get(x))), \(p) list(p)), .name_repair = "minimal")
+    return(args)
+  })
+  paramsdf <- Reduce(dplyr::bind_rows, params)
+  return(paramsdf)
+}
+
+# sched <- search_params("amadeus", "process_")
+# schec <- search_params("amadeus", "calc_")
+# df_params(sched[-c(1, 2, 3, 4, 5, 6, 8, 11, 14, 15, 17, 18, 19, 20, 21, 25)])
+# df_params(schec[-c(1, 16)]) |> colnames()

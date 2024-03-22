@@ -1,188 +1,157 @@
+## Some domains are manually defined
+
+amadeusArgs <- list(
+  path = NULL,
+  date = NULL,
+  variable = NULL,
+  year = NULL,
+  county = NULL,
+  variables = NULL,
+  from = NULL,
+  locs = NULL,
+  locs_id = NULL,
+  radius = NULL,
+  fun = NULL,
+  name_extracted = NULL,
+  fun_summary = NULL,
+  max_cells = NULL,
+  preprocess = NULL,
+  name_covariates = NULL,
+  subdataset = NULL,
+  nthreads = NULL,
+  package_list_add = NULL,
+  export_list_add = NULL,
+  sedc_bandwidth = NULL,
+  target_fields = NULL
+)
+
+
 target_calculate_fit <-
   list(
     # covariate calculation: multi vs single cases
     # single: ecoregion, koppen
     # multi: tri, nlcd, hms, sedac_population, sedac_groads,
-		# narrmono, narrplevels, nei, gmted, geos,
-		# modis_mod11, modis_mod06, modis_mod13, modis_mcd19, modis_mod09, modis_vnp46
+    # narrmono, narrplevels, nei, gmted, geos,
+    # modis_mod11, modis_mod06, modis_mod13, modis_mcd19, modis_mod09, modis_vnp46
     targets::tar_target(
-			covariates_tri,
-			calculate_multi(
-        status = status_tri,
+      covariates_tri,
+      calculate_multi(
+        # sequence: could be refered from dates
         domain = c(2018, 2019, 2020, 2021, 2022),
-        outpath =
-					file.path(
-            mr("dir_output"), mr("file_covar_tri")
-					),
         locs = sites_spat,
         path = mr("dir_input_tri"),
-        ... # other args
-			)
+        covariate = "tri",
+        locs = sites_spat,
+        locs_id = mr("pointid")
+      )
     )
     ,
     targets::tar_target(
-			covariates_ecoregion,
-			calculate_single(
-        status = status_ecoregion,
-        outpath =
-					file.path(
-            mr("dir_output"), mr("file_covar_ecoregion")
-					),
+      covariates_ecoregion,
+      calculate_single(
         locs = sites_spat,
         path = mr("dir_input_ecoregion"),
         ... # other args
-			)
+      )
     )
     ,
     targets::tar_target(
-        covariates_koppen,
-        calculate_single(
-        status = status_koppen,
-        outpath =
-            file.path(
-            mr("dir_output"), mr("file_covar_koppen")
-            ),
+      covariates_koppen,
+      calculate_single(
         locs = sites_spat,
         path = mr("dir_input_koppen"),
         ... # other args
-        )
+      )
     )
     ,
     targets::tar_target(
-        covariates_nlcd,
-        calculate_multi(
-        status = status_nlcd,
-        outpath =
-            file.path(
-            mr("dir_output"), mr("file_covar_nlcd")
-            ),
+      covariates_nlcd,
+      calculate_multi(
         locs = sites_spat,
         path = mr("dir_input_nlcd"),
         ... # other args
-        )
+      )
     )
     ,
     targets::tar_target(
-        covariates_hms,
-        calculate_multi(
-        status = status_hms,
-        outpath =
-            file.path(
-            mr("dir_output"), mr("file_covar_hms")
-            ),
+      covariates_hms,
+      calculate_multi(
         locs = sites_spat,
         path = mr("dir_input_hms"),
         ... # other args
-        )
+      )
     )
     ,
     targets::tar_target(
-        covariates_sedac_population,
-        calculate_multi(
-        status = status_sedac_population,
-        outpath =
-            file.path(
-            mr("dir_output"), mr("file_covar_sedac_population")
-            ),
+      covariates_sedac_population,
+      calculate_multi(
         locs = sites_spat,
         path = mr("dir_input_sedac_population"),
         ... # other args
-        )
+      )
     )
     ,
     targets::tar_target(
-        covariates_sedac_groads,
-        calculate_multi(
-        status = status_sedac_groads,
-        outpath =
-            file.path(
-            mr("dir_output"), mr("file_covar_sedac_groads")
-            ),
+      covariates_sedac_groads,
+      calculate_multi(
         locs = sites_spat,
         path = mr("dir_input_sedac_groads"),
         ... # other args
-        )
+      )
     )
     ,
     targets::tar_target(
-        covariates_narrmono,
+      covariates_narrmono,
         calculate_multi(
-        status = status_narrmono,
-        outpath =
-            file.path(
-            mr("dir_output"), mr("file_covar_narrmono")
-            ),
         locs = sites_spat,
         path = mr("dir_input_narrmono"),
         ... # other args
-        )
+      )
     )
     ,
     targets::tar_target(
-        covariates_narrplevels,
-        calculate_multi(
+      covariates_narrplevels,
+      calculate_multi(
         status = status_narrplevels,
-        outpath =
-            file.path(
-            mr("dir_output"), mr("file_covar_narrplevels")
-            ),
         locs = sites_spat,
         path = mr("dir_input_narrplevels"),
         ... # other args
-        )
+      )
     )
     ,
     targets::tar_target(
-        covariates_nei,
-        calculate_multi(
-        status = status_nei,
+      covariates_nei,
+      calculate_multi(
+        # manual domain
         domain = c(2017, 2017, 2020, 2020, 2020),
-        outpath =
-            file.path(
-            mr("dir_output"), mr("file_covar_nei")
-            ),
         locs = sites_spat,
         path = mr("dir_input_nei"),
         ... # other args
-        )
+      )
     )
     ,
     targets::tar_target(
-        covariates_gmted,
-        calculate_multi(
+      covariates_gmted,
+      calculate_multi(
         status = status_gmted,
-        outpath =
-            file.path(
-            mr("dir_output"), mr("file_covar_gmted")
-            ),
         locs = sites_spat,
         path = mr("dir_input_gmted"),
         ... # other args
-        )
+      )
     )
     ,
     targets::tar_target(
-			covariates_geos,
-			calculate_multi(
-        status = status_geos,
-        outpath =
-					file.path(
-            mr("dir_output"), mr("file_covar_geos")
-					),
+      covariates_geos,
+      calculate_multi(
         locs = sites_spat,
         path = mr("dir_input_geos"),
         ... # other args
-			)
+      )
     )
     ,
     targets::tar_target(
         covariates_modis_mod11,
         calculate_multi(
-        status = status_modis_mod11,
-        outpath =
-            file.path(
-            mr("dir_output"), mr("file_covar_modis_mod11")
-            ),
         locs = sites_spat,
         path = mr("dir_input_modis_mod11"),
         ... # other args
@@ -192,11 +161,6 @@ target_calculate_fit <-
     targets::tar_target(
         covariates_modis_mod06,
         calculate_multi(
-        status = status_modis_mod06,
-        outpath =
-            file.path(
-            mr("dir_output"), mr("file_covar_modis_mod06")
-            ),
         locs = sites_spat,
         path = mr("dir_input_modis_mod06"),
         ... # other args
@@ -206,11 +170,6 @@ target_calculate_fit <-
     targets::tar_target(
         covariates_modis_mod13,
         calculate_multi(
-        status = status_modis_mod13,
-        outpath =
-            file.path(
-            mr("dir_output"), mr("file_covar_modis_mod13")
-            ),
         locs = sites_spat,
         path = mr("dir_input_modis_mod13"),
         ... # other args
@@ -220,11 +179,6 @@ target_calculate_fit <-
     targets::tar_target(
         covariates_modis_mcd19,
         calculate_multi(
-        status = status_modis_mcd19,
-        outpath =
-            file.path(
-            mr("dir_output"), mr("file_covar_modis_mcd19")
-            ),
         locs = sites_spat,
         path = mr("dir_input_modis_mcd19"),
         ... # other args
@@ -234,11 +188,6 @@ target_calculate_fit <-
     targets::tar_target(
         covariates_modis_mod09,
         calculate_multi(
-        status = status_modis_mod09,
-        outpath =
-            file.path(
-            mr("dir_output"), mr("file_covar_modis_mod09")
-            ),
         locs = sites_spat,
         path = mr("dir_input_modis_mod09"),
         ... # other args
@@ -248,11 +197,6 @@ target_calculate_fit <-
     targets::tar_target(
         covariates_modis_vnp46,
         calculate_multi(
-        status = status_modis_vnp46,
-        outpath =
-          file.path(
-            mr("dir_output"), mr("file_covar_modis_vnp46")
-          ),
         locs = sites_spat,
         path = mr("dir_input_modis_vnp46"),
         ... # other args

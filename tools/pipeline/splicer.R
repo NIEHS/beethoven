@@ -36,3 +36,27 @@ shQuote(as.symbol(sprintf("%s_%d", "target0", 1)))
 
 targets::tar_target("c", 1)
 targets::tar_target(name = sprintf("%s", "c"), 1)
+
+path0 <-
+  list.files(
+    file.path("../../../..", "group/set/Projects/NRT-AP-Model", "input", "aqs"),
+    "daily_88101_[0-9]{4}.csv",
+    full.names = TRUE
+  )
+sspat <- amadeus::process_aqs(
+  path = path0
+) #read_locs(mr("dir_input_aqs"))
+
+sspat[, 1:3] |>
+  sf::st_as_sf() |>
+  unique() -> sspat0
+
+dyn <-
+  calculate_multi(
+    # sequence: could be refered from dates
+    domain = c(2018, 2019, 2020, 2021, 2022),
+    locs = sspat0[1:10, ],
+    path = mr("dir_input_tri"),
+    covariate = "tri",
+    locs_id = mr("pointid")
+  )
