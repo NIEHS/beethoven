@@ -282,16 +282,18 @@ testthat::test_that("Check extract_nlcd_ratio works", {
   withr::local_package("exactextractr")
   withr::local_package("spData")
 
-  point_wake <- cbind(lon = -78.72, lat = 35.71, dem = 20)
-  point_durham <- cbind(lon = -78.86, lat = 36.06, dem = 15)
+  point_us1 <- cbind(lon = -114.7, lat = 38.9, dem = 40)
+  point_us2 <- cbind(lon = -114, lat = 39, dem = 15)
+  point_ak <- cbind(lon = -155.997, lat = 69.3884, dem = 100) # alaska
   point_fr <- cbind(lon = 2.957, lat = 43.976, dem = 15) # france
-  eg_data <- rbind(point_wake, point_durham, point_fr) |>
+  eg_data <- rbind(point_us1, point_us2, point_ak, point_fr) |>
     as.data.frame() |>
     terra::vect(crs = "EPSG:4326")
 
   path_testdata <-
     testthat::test_path(
-      "../testdata/raw/nlcd/"
+      "..",
+      "testdata"
     )
   # CHECK INPUT (error message)
   # -- buf_radius is numeric
@@ -315,7 +317,7 @@ testthat::test_that("Check extract_nlcd_ratio works", {
                     path = path_testdata),
     "year is not a numeric."
   )
-  # -- year has not likely value
+  # -- year has likely value
   testthat::expect_error(
     calc_nlcd_ratio(sites = eg_data,
                     year = 20192,
@@ -369,16 +371,16 @@ testthat::test_that("Check extract_nlcd_ratio works", {
   testthat::expect_equal(class(output)[1], "SpatVector")
   # -- crs is the same than input
   testthat::expect_true(terra::same.crs(eg_data, output))
-  # -- out-of-mainland-US points removed (France)
+  # -- out-of-mainland-US points removed (France and Alaska)
   testthat::expect_equal(nrow(output), 2)
   # -- initial names are still in the output SpatVector
   testthat::expect_true(all(names(eg_data) %in% names(output)))
   # -- check the value of some of the points in the US
   testthat::expect_equal(
-    output$LDU_EFO_0_03000_2021[1], 0.1266191, tolerance = 1e-7
+    output$LDU_EFO_0_03000_2021[1], 0.7940682, tolerance = 1e-7
   )
   testthat::expect_equal(
-    output$LDU_SHB_0_03000_2021[2], 0.01309295, tolerance = 1e-7
+    output$LDU_SHB_0_03000_2021[2], 0.9987249, tolerance = 1e-7
   )
   # -- class fraction rows should sum to 1
   testthat::expect_equal(
