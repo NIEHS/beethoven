@@ -1,12 +1,11 @@
-[![test-coverage](https://github.com/Spatiotemporal-Exposures-and-Toxicology/beethoven/actions/workflows/test-coverage.yaml/badge.svg)](https://github.com/Spatiotemporal-Exposures-and-Toxicology/beethoven/actions/workflows/test-coverage.yaml)
-[![codecov](https://codecov.io/gh/Spatiotemporal-Exposures-and-Toxicology/beethoven/graph/badge.svg?token=T6QZW69X55)](https://codecov.io/gh/Spatiotemporal-Exposures-and-Toxicology/beethoven)
-[![R-CMD-check](https://github.com/Spatiotemporal-Exposures-and-Toxicology/beethoven/actions/workflows/check-standard.yaml/badge.svg)](https://github.com/Spatiotemporal-Exposures-and-Toxicology/beethoven/actions/workflows/check-standard.yaml)
-[![lint](https://github.com/Spatiotemporal-Exposures-and-Toxicology/beethoven/actions/workflows/lint.yaml/badge.svg)](https://github.com/Spatiotemporal-Exposures-and-Toxicology/beethoven/actions/workflows/lint.yaml)
+[![R-CMD-check](https://github.com/NIEHS/beethoven/actions/workflows/check-standard.yaml/badge.svg)](https://github.com/NIEHS/beethoven/actions/workflows/check-standard.yaml)
+[![cov](https://NIEHS.github.io/beethoven/badges/coverage.svg)](https://github.com/NIEHS/beethoven/actions)
+[![lint](https://github.com/NIEHS/beethoven/actions/workflows/lint.yaml/badge.svg)](https://github.com/NIEHS/beethoven/actions/workflows/lint.yaml)
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 
-# Air Pollution Data for the Masses: An Open-Access, Test-Driven, and Reproducible Pipeline  PM<sub>2.5</sub> Hybrid Model 
- Group Project for the Spatiotemporal Exposures and Toxicology group with help from friends :smiley: :cowboy_hat_face: :earth_americas:
+# Building an Extensible, rEproducible, Test-driven, Harmonized, Open-source, Versioned, ENsemble model for air quality
+Group Project for the Spatiotemporal Exposures and Toxicology group with help from friends :smiley: :cowboy_hat_face: :earth_americas:
 
 ## GitHub Push/Pull Workflow
 1) Each collaborator has a local copy of the github repo - suggested location is ddn/gs1/username/home
