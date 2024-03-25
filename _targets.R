@@ -11,8 +11,10 @@ source("./tools/pipeline/targets_baselearner.R")
 source("./tools/pipeline/targets_metalearner.R")
 source("./tools/pipeline/targets_predict.R")
 
+# bypass option
 Sys.setenv("BTV_DOWNLOAD_PASS" = "FALSE")
 
+# nullify download target if bypass option is set
 if (Sys.getenv("BTV_DOWNLOAD_PASS") == "TRUE") {
   target_download <- NULL
 }
