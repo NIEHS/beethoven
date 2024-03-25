@@ -38,22 +38,22 @@ replace_dateinfo <- function(string, date) {
     gsub(
       pattern = "yday",
       replacement = stringr::str_pad(lubridate::yday(date),
-                                     3,
-                                     pad = "0"
+        3,
+        pad = "0"
       )
     ) |>
     gsub(
       pattern = "mm",
       replacement = stringr::str_pad(lubridate::month(date),
-                                     2,
-                                     pad = "0"
+        2,
+        pad = "0"
       )
     ) |>
     gsub(
       pattern = "dd",
       replacement = stringr::str_pad(lubridate::day(date),
-                                     2,
-                                     pad = "0"
+        2,
+        pad = "0"
       )
     )
   return(output)
@@ -167,11 +167,11 @@ testdata_narr <- function(
   ) |>
     replace_dateinfo(start_date)
   terra::writeCDF(r_var_samp,
-                  new_fpath,
-                  varname = names(r_var_samp),
-                  unit = terra::units(r_var_samp),
-                  split = TRUE,
-                  overwrite = TRUE
+    new_fpath,
+    varname = names(r_var_samp),
+    unit = terra::units(r_var_samp),
+    split = TRUE,
+    overwrite = TRUE
   )
   cat("✓ ", new_fpath, "\n")
 }
@@ -211,11 +211,11 @@ testdata_narr_lev <- function(
   ) |>
     replace_dateinfo(start_date)
   terra::writeCDF(r_var_samp,
-                  new_fpath,
-                  varname = names(r_var_samp),
-                  unit = terra::units(r_var_samp),
-                  split = TRUE,
-                  overwrite = TRUE
+    new_fpath,
+    varname = names(r_var_samp),
+    unit = terra::units(r_var_samp),
+    split = TRUE,
+    overwrite = TRUE
   )
   cat("✓ ", new_fpath, "\n")
 }
@@ -262,11 +262,11 @@ testdata_geos <- function(
         terra::crs(r) <- "EPSG:4326"
         r_samp <- sp_subset(r)
         terra::writeCDF(r_samp,
-                        new_fpath,
-                        varname = names(r_samp),
-                        split = TRUE,
-                        unit = terra::units(r_samp),
-                        overwrite = TRUE
+          new_fpath,
+          varname = names(r_samp),
+          split = TRUE,
+          unit = terra::units(r_samp),
+          overwrite = TRUE
         )
         cat("\n✓ ", new_fpath)
       }
@@ -328,8 +328,8 @@ testdata_aqs <- function(
   aqs <- data.table::fread(fpath) |>
     subset(get("Date Local") >= start_date & get("Date Local") <= end_date)
   aqs_vect <- terra::vect(aqs,
-                          geom = c("Longitude", "Latitude"),
-                          crs = "EPSG:4326"
+    geom = c("Longitude", "Latitude"),
+    crs = "EPSG:4326"
   )
   aqs_samp <- sp_subset(aqs_vect) |>
     data.table::as.data.table()
@@ -365,7 +365,7 @@ testdata_nei <- function(
       replace_dateinfo(date = "2020-01-01")
     nei_samp <- data.table::fread(nei_path) |>
       subset(get("county") %in% c("Durham", "Wake", "Orange"))
-    
+
     new_fpath <- paste0(
       testdata_path,
       dict[name == paste0("nei_onroad_", onr), filename]
