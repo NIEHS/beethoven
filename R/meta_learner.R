@@ -5,7 +5,6 @@
 #' named.
 #' @param kfolds integer, index of k-folds for cross-validation. This should be
 #' produced with regards to spatial and/or temporal considerations
-#' To make cross-validation indices, see [generate_cv_index]
 #' @param y dependent variable
 #' @param ... Passed arguments to \link[BART]{wbart}
 #' @return meta_fit_obj object of meta learner
