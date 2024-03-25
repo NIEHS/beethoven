@@ -198,12 +198,28 @@ target_calculate_fit <-
     )
     ,
     targets::tar_target(
-      covariates_geos,
-      calculate_multi(
+      geos_dates,
+      command = seq(as.Date("2018-01-01"), as.Date("2022-12-31"), by = "1 day"),
+      iteration = "list"
+    )
+    ,
+    targets::tar_target(
+      covariates_geos_list,
+      calc_geos_strict(
+        date = c(geos_dates, geos_dates),
         locs = sites_spat,
+        locs_id = mr("pointid"),
         path = mr("dir_input_geos"),
-        ... # other args
-      )
+        win = c(-126, -62, 22, 52),
+        snap = "out"
+      ),
+      pattern = map(geos_dates),
+      iteration = "list"
+    )
+    ,
+    targets::tar_target(
+      covariates_geos,
+      command = do.call(rbind, covariates_geos_list)
     )
     ,
     targets::tar_target(
@@ -211,7 +227,14 @@ target_calculate_fit <-
       calculate_multi(
         locs = sites_spat,
         path = mr("dir_input_modis_mod11"),
-        ... # other args
+        process_function = NULL,
+        calc_function = amadeus::calc_modis_par,
+        locs_id = mr("pointid"),
+        from = mr("dir_input_modis_mod11"),
+        preprocess = amadeus::process_modis_merge,
+        name_covariates = c("MOD_SFCTD_0_", "MOD_SFCTN_0_"),
+        subdataset = "(LST_Day_|LST_Night_)",
+        nthreads = 8
       )
     )
     ,
@@ -220,25 +243,14 @@ target_calculate_fit <-
       calculate_multi(
         locs = sites_spat,
         path = mr("dir_input_modis_mod06"),
-        ... # other args
-      )
-    )
-    ,
-    targets::tar_target(
-      covariates_modis_mod13,
-      calculate_multi(
-        locs = sites_spat,
-        path = mr("dir_input_modis_mod13"),
-        ... # other args
-      )
-    )
-    ,
-    targets::tar_target(
-      covariates_modis_mcd19,
-      calculate_multi(
-        locs = sites_spat,
-        path = mr("dir_input_modis_mcd19"),
-        ... # other args
+        process_function = NULL,
+        calc_function = amadeus::calc_modis_par,
+        locs_id = mr("pointid"),
+        from = mr("dir_input_modis_mod06"),
+        preprocess = amadeus::process_modis_swath,
+        name_covariates = c("MOD_CLCVD_0_", "MOD_CLCVN_0_"),
+        subdataset = "(Cloud_Fraction_Day|Cloud_Fraction_Night)",
+        nthreads = 8
       )
     )
     ,
@@ -247,7 +259,49 @@ target_calculate_fit <-
       calculate_multi(
         locs = sites_spat,
         path = mr("dir_input_modis_mod09"),
-        ... # other args
+        process_function = NULL,
+        calc_function = amadeus::calc_modis_par,
+        locs_id = mr("pointid"),
+        from = mr("dir_input_modis_mod09"),
+        preprocess = amadeus::process_modis_merge,
+        name_covariates = sprintf("MOD_SFCRF_%d_", seq(1, 7)),
+        subdataset = seq(2, 8),
+        nthreads = 8
+      )
+    )
+    ,
+    targets::tar_target(
+      covariates_modis_mcd19_1km,
+      calculate_multi(
+        locs = sites_spat,
+        path = mr("dir_input_modis_mcd19"),
+        process_function = NULL,
+        calc_function = amadeus::calc_modis_par,
+        locs_id = mr("pointid"),
+        from = mr("dir_input_modis_mcd19"),
+        preprocess = amadeus::process_modis_merge,
+        name_covariates =
+          c("MOD_AD4TA_0_", "MOD_AD5TA_0_"),
+        subdataset = "(Optical_Depth)",
+        nthreads = 8
+      )
+    )
+    ,
+    targets::tar_target(
+      covariates_modis_mcd19_5km,
+      calculate_multi(
+        locs = sites_spat,
+        path = mr("dir_input_modis_mcd19"),
+        process_function = NULL,
+        calc_function = amadeus::calc_modis_par,
+        locs_id = mr("pointid"),
+        from = mr("dir_input_modis_mcd19"),
+        preprocess = amadeus::process_modis_merge,
+        name_covariates =
+          c("MOD_CSZAN_0_", "MOD_CVZAN_0_", "MOD_RAZAN_0_",
+            "MOD_SCTAN_0_", "MOD_GLNAN_0_"),
+        subdataset = "(cos|RelAZ|Angle)",
+        nthreads = 8
       )
     )
     ,
@@ -256,9 +310,17 @@ target_calculate_fit <-
       calculate_multi(
         locs = sites_spat,
         path = mr("dir_input_modis_vnp46"),
-        ... # other args
+        process_function = NULL,
+        calc_function = amadeus::calc_modis_par,
+        locs_id = mr("pointid"),
+        from = mr("dir_input_modis_vnp46"),
+        preprocess = amadeus::process_bluemarble,
+        name_covariates = "MOD_LGHTN_0_",
+        subdataset = 3,
+        nthreads = 8
       )
-    ),
+    )
+  ,
   # combine each covariate set into one data.frame (data.table; if any)
   targets::tar_target(
     covariates_combined_sp,

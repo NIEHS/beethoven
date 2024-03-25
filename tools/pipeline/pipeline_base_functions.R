@@ -733,7 +733,8 @@ process_geos_bulk <-
 #' Process atmospheric composition data by chunks (v3)
 #' @description
 #' Returning a single `SpatRasterDataset` object.
-#' Removed `tapp` for performance
+#' Removed `tapp` for performance; strict assumption that
+#' there are no missing values
 #' @param date character(2). length of 10. Format "YYYY-MM-DD".
 #' @param path character(1). Directory with downloaded netCDF (.nc4) files. or
 #' netCDF file paths.
@@ -750,13 +751,14 @@ process_geos_bulk <-
 #' @importFrom terra crs
 #' @importFrom terra subset
 #' @export
-process_geos_strict <-
+calc_geos_strict <-
   function(path = NULL,
            date = c("2018-01-01", "2018-01-01"),
+           locs = NULL,
+           locs_id = NULL,
            ...) {
     #### directory setup
     if (length(path) == 1) {
-
       if (dir.exists(path)) {
         path <- amadeus::download_sanitize_path(path)
         paths <- list.files(
@@ -823,8 +825,10 @@ process_geos_strict <-
         "Some dates include less than 24 hours. Check the downloaded files."
       )
     }
-    if (length(unique(filename_date)) > 10) {
-      message("More than 10 unique dates detected. Try 10-day chunks...")
+    if (length(unique(filename_date)) > 1) {
+      message(
+        "Dates are not supposed to be different. Put in the same date's files."
+      )
     }
 
     # split filename date every 10 days
@@ -837,6 +841,7 @@ process_geos_strict <-
 
     summary_byvar <- function(x = data_variables, fs) {
       rast_in <- rlang::inject(terra::rast(fs, !!!other_args))
+      sds_proc <-
       terra::sds(lapply(
         x,
         function(v) {
@@ -853,25 +858,39 @@ process_geos_strict <-
           # rast_summary <- terra::tapp(rast_in, index = "days", fun = "mean")
           names(rast_summary) <-
             paste0(
-              rep(v, terra::nlyr(rast_summary)), "_", terra::time(rast_summary)
+              rep(gsub("_lev*", "", v), terra::nlyr(rast_summary))
+              #, "_", terra::time(rast_summary)
             )
           terra::set.crs(rast_summary, "EPSG:4326")
           return(rast_summary)
         }
       ))
+
+      rast_ext <- terra::extract(sds_proc, locs, ID = TRUE)
+      rast_ext <- lapply(rast_ext,
+        function(df) {
+          df$ID <- unlist(locs[[locs_id]])
+          return(df)
+        }
+      )
+      rast_ext <-
+        Reduce(function(dfa, dfb) dplyr::full_join(dfa, dfb, by = "ID"),
+          rast_ext
+        )
+      rast_ext$time <- unique(as.Date(terra::time(rast_in)))
+      return(rast_ext)
+
     }
 
     # summary by 10 days
-    # TODO: dropping furrr?
     rast_10d_summary <-
-      furrr::future_map(
+      purrr::map(
         .x = future_inserted,
-        .f = ~summary_byvar(fs = .x),
-        .options = furrr::furrr_options(
-          globals = c("other_args", "data_variables")
-        )
+        .f = ~summary_byvar(fs = .x)
       )
-    rast_10d_summary <- do.call(c, rast_10d_summary)
+    # rast_10d_summary <- do.call(c, rast_10d_summary)
+    # extract
+
     return(rast_10d_summary)
 
   }
