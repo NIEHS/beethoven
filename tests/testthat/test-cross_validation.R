@@ -34,7 +34,9 @@ testthat::test_that("leave-ones run without errors", {
   ncostdte <- ncostdt
   ncostdte$stdt$sp_index <- seq(1, nrow(ncostdte$stdt))
   testthat::expect_no_error(sppre <- generate_spt_index(ncostdte, "spatial"))
-  testthat::expect_no_error(spprest <- generate_spt_index(ncostdt, "spatiotemporal"))
+  testthat::expect_no_error(
+    spprest <- generate_spt_index(ncostdt, "spatiotemporal")
+  )
 
   # spatial and temporal unique values
   slength <- nrow(nco_s)
