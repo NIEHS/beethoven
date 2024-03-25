@@ -5,8 +5,10 @@
 testthat::test_that("covariates are within temporal range.", {
   withr::local_package("terra")
   # use NCEP-NCAR Reanalysis 1 data as example
-  paths <- list.files("../testdata/NCEP-NCAR-Reanalysis-1/",
-                      full.names = TRUE)
+  paths <- list.files(
+    testthat::test_path("../testdata/NCEP-NCAR-Reanalysis-1/"),
+    full.names = TRUE
+  )
   iswithin <- NULL
   for (p in seq_along(paths)) {
     iswithin <- check_temporal_range(data = paths[p],
@@ -20,7 +22,7 @@ testthat::test_that("covariates are within temporal range.", {
 testthat::test_that("test_nc_output.nc is within temporal range.", {
   withr::local_package("terra")
   # assumes that test_nc_output.nc is point data
-  path <- "../testdata/test_nc_output.nc"
+  path <- testthat::test_path("../testdata/test_nc_output.nc")
   iswithin <- check_temporal_range(data = path,
                                    data_type = "Point")
   # expect all elements equal true

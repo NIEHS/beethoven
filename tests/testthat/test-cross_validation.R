@@ -70,8 +70,8 @@ testthat::test_that("leave-block-outs work as expected", {
   withr::local_package("data.table")
   withr::local_package("dplyr")
   withr::local_options(list(sf_use_s2 = FALSE))
+  withr::local_seed(202311)
 
-  set.seed(202311)
   nco <-
     sf::st_read(
       testthat::test_path("..", "testdata/test_nc_output.nc")
