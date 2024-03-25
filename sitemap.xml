@@ -10,12 +10,6 @@
     <loc>/LICENSE.html</loc>
   </url>
   <url>
-    <loc>/articles/cross_validation_types.html</loc>
-  </url>
-  <url>
-    <loc>/articles/download_functions.html</loc>
-  </url>
-  <url>
     <loc>/articles/epa_download.html</loc>
   </url>
   <url>
@@ -29,27 +23,6 @@
   </url>
   <url>
     <loc>/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/base_learner_cv_fit.html</loc>
-  </url>
-  <url>
-    <loc>/reference/base_learner_cv_outcome.html</loc>
-  </url>
-  <url>
-    <loc>/reference/base_learner_fit.html</loc>
-  </url>
-  <url>
-    <loc>/reference/base_learner_fit_cnn.html</loc>
-  </url>
-  <url>
-    <loc>/reference/base_learner_fit_ranger.html</loc>
-  </url>
-  <url>
-    <loc>/reference/base_learner_fit_xgboost.html</loc>
-  </url>
-  <url>
-    <loc>/reference/base_learner_prep.html</loc>
   </url>
   <url>
     <loc>/reference/build_pipeline.html</loc>
@@ -85,9 +58,6 @@
     <loc>/reference/check_data_completeness.html</loc>
   </url>
   <url>
-    <loc>/reference/check_for_null_parameters.html</loc>
-  </url>
-  <url>
     <loc>/reference/check_input_raster_in_extent.html</loc>
   </url>
   <url>
@@ -95,15 +65,6 @@
   </url>
   <url>
     <loc>/reference/check_output_locs_are_valid.html</loc>
-  </url>
-  <url>
-    <loc>/reference/check_temporal_range.html</loc>
-  </url>
-  <url>
-    <loc>/reference/check_url_status.html</loc>
-  </url>
-  <url>
-    <loc>/reference/check_urls.html</loc>
   </url>
   <url>
     <loc>/reference/check_variances_are_valid.html</loc>
@@ -124,118 +85,10 @@
     <loc>/reference/convert_stobj_to_stdt.html</loc>
   </url>
   <url>
-    <loc>/reference/download_aqs_data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/download_data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/download_ecoregion_data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/download_geos_cf_data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/download_gmted_data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/download_koppen_geiger_data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/download_merra2_data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/download_modis_data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/download_narr_monolevel_data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/download_narr_p_levels_data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/download_nei_data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/download_nlcd_data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/download_noaa_hms_smoke_data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/download_permit.html</loc>
-  </url>
-  <url>
-    <loc>/reference/download_remove_command.html</loc>
-  </url>
-  <url>
-    <loc>/reference/download_remove_zips.html</loc>
-  </url>
-  <url>
-    <loc>/reference/download_run.html</loc>
-  </url>
-  <url>
-    <loc>/reference/download_sanitize_path.html</loc>
-  </url>
-  <url>
-    <loc>/reference/download_sedac_groads_data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/download_sedac_population_data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/download_setup_dir.html</loc>
-  </url>
-  <url>
-    <loc>/reference/download_sink.html</loc>
-  </url>
-  <url>
-    <loc>/reference/download_tri_data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/download_unzip.html</loc>
-  </url>
-  <url>
     <loc>/reference/dt_to_sf.html</loc>
   </url>
   <url>
     <loc>/reference/dt_to_sftime.html</loc>
-  </url>
-  <url>
-    <loc>/reference/extract_urls.html</loc>
-  </url>
-  <url>
-    <loc>/reference/generate_block_sp_index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/generate_cv_index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/generate_cv_index_lblo.html</loc>
-  </url>
-  <url>
-    <loc>/reference/generate_cv_index_lblto.html</loc>
-  </url>
-  <url>
-    <loc>/reference/generate_cv_index_lbto.html</loc>
-  </url>
-  <url>
-    <loc>/reference/generate_cv_index_lolo.html</loc>
-  </url>
-  <url>
-    <loc>/reference/generate_cv_index_lolto.html</loc>
-  </url>
-  <url>
-    <loc>/reference/generate_cv_index_loto.html</loc>
-  </url>
-  <url>
-    <loc>/reference/generate_cv_index_random.html</loc>
-  </url>
-  <url>
-    <loc>/reference/generate_date_sequence.html</loc>
-  </url>
-  <url>
-    <loc>/reference/generate_spt_index.html</loc>
   </url>
   <url>
     <loc>/reference/generic_base_learner.html</loc>
@@ -278,11 +131,5 @@
   </url>
   <url>
     <loc>/reference/project_dt.html</loc>
-  </url>
-  <url>
-    <loc>/reference/read_commands.html</loc>
-  </url>
-  <url>
-    <loc>/reference/test_download_functions.html</loc>
   </url>
 </urlset>
