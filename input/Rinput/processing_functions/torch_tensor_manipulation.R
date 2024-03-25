@@ -155,5 +155,4 @@ luz::setup(model, loss= luz::luz_metric_rmse(), optimizer = torch::optim_adam(mo
 luz::evaluate()
 luz::fit(model, vart)
 
-torch::nnf_avg_pool2d(inputs = )
 
