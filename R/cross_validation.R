@@ -46,7 +46,6 @@ generate_cv_index <- function(
     using convert_stobj_to_stdt.\n")
   }
   cv_mode <- match.arg(cv_mode)
-
   # no block check
   # sensible cv_mode and cv_fold
   if (startsWith(cv_mode, "lb") && is.null(cv_fold)) {
@@ -221,8 +220,7 @@ generate_block_sp_index <- function(
 #' @export
 generate_cv_index_loto <-
   function(
-    covars
-  ) {
+      covars) {
     origin_ts <- covars$stdt$time
     sorted_ts <- sort(unique(origin_ts))
     cv_index <- as.numeric(factor(origin_ts, levels = sorted_ts))
@@ -236,8 +234,7 @@ generate_cv_index_loto <-
 #' @export
 generate_cv_index_lolo <-
   function(
-    covars
-  ) {
+      covars) {
     covars_sp_index <- generate_spt_index(covars, mode = "spatial")
     sp_index_origin <- unlist(covars_sp_index$stdt[["sp_index"]])
     sp_index_unique <- sort(unique(sp_index_origin))
@@ -253,8 +250,7 @@ generate_cv_index_lolo <-
 #' @export
 generate_cv_index_lolto <-
   function(
-    covars
-  ) {
+      covars) {
     rows <- nrow(covars$stdt)
     cv_index <- seq(1, rows)
     return(cv_index)
@@ -272,11 +268,10 @@ generate_cv_index_lolto <-
 # nolint end
 generate_cv_index_lblo <-
   function(
-    covars,
-    cv_fold = NULL,
-    blocks = NULL,
-    block_id = NULL
-  ) {
+      covars,
+      cv_fold = NULL,
+      blocks = NULL,
+      block_id = NULL) {
     if (is.null(cv_fold) && is.null(blocks)) {
       stop("Argument cv_fold cannot be NULL unless
       valid argument for blocks is entered.

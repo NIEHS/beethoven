@@ -10,7 +10,7 @@ testthat::test_that("leave-ones run without errors", {
   withr::local_options(list(sf_use_s2 = FALSE))
 
   set.seed(202311)
-  nco <- sf::st_read(testthat::test_path("../testdata/test_nc_output.nc")) |>
+  nco <- sf::st_read("../testdata/test_nc_output.nc") |>
     unique()
   nco_s <- nco |>
     dplyr::sample_n(10)
@@ -22,21 +22,20 @@ testthat::test_that("leave-ones run without errors", {
   # to sftime
   ncost <-
     sftime::st_as_sftime(
-                         ncost,
-                         time_column_name = "time")
+      ncost,
+      time_column_name = "time"
+    )
 
-  testthat::expect_error(generate_cv_index(ncost, "lolo"))
-  testthat::expect_error(generate_cv_index(ncost, "lolo", sp_fold = 3L))
+  expect_error(generate_cv_index(ncost, "lolo"))
+  expect_error(generate_cv_index(ncost, "lolo", sp_fold = 3L))
 
   # convert to stdt
   ncostdt <- convert_stobj_to_stdt(ncost)
 
   ncostdte <- ncostdt
   ncostdte$stdt$sp_index <- seq(1, nrow(ncostdte$stdt))
-  testthat::expect_no_error(sppre <- generate_spt_index(ncostdte, "spatial"))
-  testthat::expect_no_error(
-    spprest <- generate_spt_index(ncostdt, "spatiotemporal")
-  )
+  expect_no_error(sppre <- generate_spt_index(ncostdte, "spatial"))
+  expect_no_error(spprest <- generate_spt_index(ncostdt, "spatiotemporal"))
 
   # spatial and temporal unique values
   slength <- nrow(nco_s)
@@ -61,9 +60,7 @@ testthat::test_that("leave-ones run without errors", {
   testthat::expect_equal(max(index_lolo), slength)
   testthat::expect_equal(max(index_loto), tlength)
   testthat::expect_equal(max(index_lolto), rlength)
-
-}
-)
+})
 
 
 testthat::test_that("leave-block-outs work as expected", {
@@ -91,8 +88,9 @@ testthat::test_that("leave-block-outs work as expected", {
 
   ncost <-
     sftime::st_as_sftime(
-                         ncost,
-                         time_column_name = "time")
+      ncost,
+      time_column_name = "time"
+    )
 
   # to stdt
   ncostdt <- convert_stobj_to_stdt(ncost)
@@ -113,10 +111,11 @@ testthat::test_that("leave-block-outs work as expected", {
   testthat::expect_no_error(
     index_lblto <-
       generate_cv_index(
-                        ncostdt,
-                        "lblto",
-                        sp_fold = ncv_sp,
-                        t_fold = ncv_t)
+        ncostdt,
+        "lblto",
+        sp_fold = ncv_sp,
+        t_fold = ncv_t
+      )
   )
 
   # max value test
@@ -146,30 +145,34 @@ testthat::test_that("leave-block-outs work as expected", {
   # when sf input is entered
   index_lblo_sf <-
     generate_cv_index(
-                      ncostdt, "lblo",
-                      blocks = eco4d,
-                      block_id = "US_L3NAME")
+      ncostdt, "lblo",
+      blocks = eco4d,
+      block_id = "US_L3NAME"
+    )
   # error case: blocks are sf, but no block_id
   testthat::expect_error(
     generate_cv_index(
-                      ncostdt, "lblo",
-                      blocks = eco4d,
-                      block_id = NULL)
+      ncostdt, "lblo",
+      blocks = eco4d,
+      block_id = NULL
+    )
   )
 
   # when SpatVector input is entered
   index_lblo_tr <-
     generate_cv_index(
-                      ncostdt, "lblo",
-                      blocks = terra::vect(eco4d),
-                      block_id = "US_L3NAME")
+      ncostdt, "lblo",
+      blocks = terra::vect(eco4d),
+      block_id = "US_L3NAME"
+    )
 
   # no block_id
   expect_error(
     generate_cv_index(
-                      ncostdt, "lblo",
-                      blocks = terra::vect(eco4d),
-                      block_id = "USS")
+      ncostdt, "lblo",
+      blocks = terra::vect(eco4d),
+      block_id = "USS"
+    )
   )
 
 
@@ -193,9 +196,10 @@ testthat::test_that("leave-block-outs work as expected", {
   eco4e$US_L3NAME[2] <- eco4e$US_L3NAME[1]
   testthat::expect_error(
     generate_cv_index(
-                      ncostdt, "lblo",
-                      blocks = terra::vect(eco4e),
-                      block_id = "US_L3NAME")
+      ncostdt, "lblo",
+      blocks = terra::vect(eco4e),
+      block_id = "US_L3NAME"
+    )
   )
 
   # numeric block case
@@ -218,8 +222,7 @@ testthat::test_that("leave-block-outs work as expected", {
   testthat::expect_error(
     generate_cv_index(ncostdt, "lbto", 20L)
   )
-}
-)
+})
 
 
 testthat::test_that("random cross-validation abides", {
@@ -242,8 +245,9 @@ testthat::test_that("random cross-validation abides", {
 
   ncost <-
     sftime::st_as_sftime(
-                         ncost,
-                         time_column_name = "time")
+      ncost,
+      time_column_name = "time"
+    )
 
   # to stdt
   ncostdt <- convert_stobj_to_stdt(ncost)
