@@ -37,7 +37,7 @@ date <- as.Date("2022-08-01")
 replace_dateinfo(string, date)
 ```
 ```{r}
-raw_path <- "/Volumes/set/Projects/NRT-AP-Model/tests/testdata/raw/"
+raw_path <- "./raw/"
 ```
 
 # Extract sampled area from each downloaded data
