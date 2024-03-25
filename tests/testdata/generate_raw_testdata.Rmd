@@ -274,7 +274,7 @@ if (requireNamespace("spData", quietly = TRUE)) {
   data(us_states)
 }
 hms_jun18 <- terra::vect(paste0(
-  "/Volumes/set/Projects/NRT-AP-Model/input/",
+  "../../input/",
   "HMS_Smoke/data/hms_smoke20220618.shp"
 ))
 terra::plot(terra::project(terra::vect(us_states), terra::crs(hmsday)))
