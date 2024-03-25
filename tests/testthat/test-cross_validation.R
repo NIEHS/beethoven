@@ -8,9 +8,9 @@ testthat::test_that("leave-ones run without errors", {
   withr::local_package("data.table")
   withr::local_package("dplyr")
   withr::local_options(list(sf_use_s2 = FALSE))
+  withr::local_seed(202311)
 
-  set.seed(202311)
-  nco <- sf::st_read("../testdata/test_nc_output.nc") |>
+  nco <- sf::st_read(testthat::test_path("../testdata/test_nc_output.nc")) |>
     unique()
   nco_s <- nco |>
     dplyr::sample_n(10)
