@@ -10,7 +10,7 @@ testthat::test_that("leave-ones run without errors", {
   withr::local_options(list(sf_use_s2 = FALSE))
 
   set.seed(202311)
-  nco <- sf::st_read("../testdata/test_nc_output.nc") |>
+  nco <- sf::st_read(testthat::test_path("../testdata/test_nc_output.nc")) |>
     unique()
   nco_s <- nco |>
     dplyr::sample_n(10)
@@ -25,16 +25,16 @@ testthat::test_that("leave-ones run without errors", {
                          ncost,
                          time_column_name = "time")
 
-  expect_error(generate_cv_index(ncost, "lolo"))
-  expect_error(generate_cv_index(ncost, "lolo", sp_fold = 3L))
+  testthat::expect_error(generate_cv_index(ncost, "lolo"))
+  testthat::expect_error(generate_cv_index(ncost, "lolo", sp_fold = 3L))
 
   # convert to stdt
   ncostdt <- convert_stobj_to_stdt(ncost)
 
   ncostdte <- ncostdt
   ncostdte$stdt$sp_index <- seq(1, nrow(ncostdte$stdt))
-  expect_no_error(sppre <- generate_spt_index(ncostdte, "spatial"))
-  expect_no_error(spprest <- generate_spt_index(ncostdt, "spatiotemporal"))
+  testthat::expect_no_error(sppre <- generate_spt_index(ncostdte, "spatial"))
+  testthat::expect_no_error(spprest <- generate_spt_index(ncostdt, "spatiotemporal"))
 
   # spatial and temporal unique values
   slength <- nrow(nco_s)
