@@ -33,7 +33,7 @@ meta_run(varname = "dir_input_modis_mod11")
 #' @returns Depending on `fun_aqs` specification.
 read_locs <-
   function(
-    fun_aqs = get("import_aqs"),
+    fun_aqs = amadeus::process_aqs,
     ...
   ) {
     fun_aqs(...)
@@ -41,8 +41,8 @@ read_locs <-
 
 
 #' Filter monitors with the minimum POC value
-#'
-#' @param input_df data.frame/tbl_df/data.table
+#' @param path data.frame/tbl_df/data.table
+#' @param site_spt Space-time site data.
 #' @param locs_id character(1). Name of site id (not monitor id)
 #' @param poc_name character(1). Name of column containing POC values.
 #' @param date_start character(1).
@@ -54,11 +54,13 @@ read_locs <-
 #' @importFrom dplyr filter
 #' @importFrom dplyr ungroup
 #' @importFrom data.table data.table
+#' @importFrom data.table rbindlist
 #' @importFrom rlang sym
 #' @export
 get_aqs_data <-
   function(
     path = file.path(mr("dir_output"), mr("file_aqs_pm")),
+    site_spt = NULL,
     locs_id = mr("pointid"),
     time_id = mr("timeid"),
     poc_name = "POC",
@@ -73,21 +75,27 @@ get_aqs_data <-
     if (!is.character(poc_name)) {
       stop("poc_name should be character.\n")
     }
-    aqs_prep <-
-      amadeus::process_aqs(
-        path = path,
-        date = NULL,
-        return_format = return_format
-      )
-    input_df <- readRDS(path)
-
+    # aqs_prep <-
+    #   amadeus::process_aqs(
+    #     path = path,
+    #     date = NULL,
+    #     return_format = return_format
+    #   )
+    input_df <- lapply(path, read.csv) |> data.table::rbindlist()
+    input_df <- input_df[,
+      list(
+        pm2.5 = Arithmetic.Mean,
+        site_id = sprintf("%02d%03d%04d%05d", State.Code, County.Code, Site.Num, Parameter.Code),
+        time = as.Date(Date.Local),
+        POC = POC
+      )]
     poc_filtered <- input_df |>
       dplyr::group_by(!!rlang::sym(locs_id), !!rlang::sym(time_id)) |>
       dplyr::filter(!!rlang::sym(poc_name) == min(!!rlang::sym(poc_name))) |>
       dplyr::ungroup() |>
       data.table::data.table()
 
-    poc_res <- merge(poc_filtered, aqs_prep, by = c(locs_id, time_id))
+    poc_res <- merge(poc_filtered, as.data.frame(site_spt), by = c(locs_id, time_id))
     return(poc_res)
     #nocov end
   }

@@ -145,22 +145,22 @@ target_calculate_fit <-
     )
     ,
     targets::tar_target(
-      covariates_narrmono,
-      calculate_multi(
-        locs = sites_spat,
-        path = mr("dir_input_narrmono"),
-        ... # other args
-      )
+      narr_variables,
+      command = read.csv(mr("file_narr_variables"))$dirs,
+      iteration = "vector"
     )
     ,
     targets::tar_target(
-      covariates_narrplevels,
+      covariates_narr,
       calculate_multi(
-        status = status_narrplevels,
         locs = sites_spat,
-        path = mr("dir_input_narrplevels"),
-        ... # other args
-      )
+        path = narr_variables,
+        date = c(mr("date_start"), mr("date_end")),
+        variable = strsplit(narr_variables, "/")[[1]][3],
+        locs_id = mr("pointid")
+      ),
+      pattern = map(narr_variables),
+      iteration = "vector"
     )
     ,
     targets::tar_target(
@@ -170,7 +170,8 @@ target_calculate_fit <-
     ,
     targets::tar_target(
       nei_dirs,
-      command = c(rep(mr("dir_input_nei2017"), 2), rep(mr("dir_input_nei2020"), 3)),
+      command =
+      c(rep(mr("dir_input_nei2017"), 2), rep(mr("dir_input_nei2020"), 3)),
       iteration = "vector"
     )
     ,
@@ -188,19 +189,44 @@ target_calculate_fit <-
     )
     ,
     targets::tar_target(
+      gmted_combination_stat,
+      command = rep(
+        c(
+          "Breakline Emphasis", "Systematic Subsample",
+          "Median Statistic", "Minimum Statistic",
+          "Mean Statistic", "Maximum Statistic",
+          "Standard Deviation Statistic"
+        ), 3L),
+        iteration = "vector"
+    )
+    ,
+    targets::tar_target(
+      gmted_combination_res,
+      command = rep(
+        c("7.5 arc-seconds", "15 arc-seconds", "30 arc-seconds"),
+        each = 7L
+      ),
+      iteration = "vector"
+    )
+    ,
+    targets::tar_target(
       covariates_gmted,
       calculate_multi(
-        status = status_gmted,
         locs = sites_spat,
         path = mr("dir_input_gmted"),
-        ... # other args
-      )
+        locs_id = mr("pointid"),
+        covariate = "gmted",
+        radius = 0,
+        variable = c(gmted_combination_stat, gmted_combination_res)
+      ),
+      pattern = map(gmted_combination_stat, gmted_combination_res),
+      iteration = "vector"
     )
     ,
     targets::tar_target(
       geos_dates,
-      command = seq(as.Date("2018-01-01"), as.Date("2022-12-31"), by = "1 day"),
-      iteration = "list"
+      command = as.character(seq(as.Date("2018-01-01"), as.Date("2022-12-31"), by = "1 day")),
+      iteration = "vector"
     )
     ,
     targets::tar_target(
@@ -214,12 +240,72 @@ target_calculate_fit <-
         snap = "out"
       ),
       pattern = map(geos_dates),
-      iteration = "list"
+      iteration = "vector"
     )
     ,
     targets::tar_target(
       covariates_geos,
       command = do.call(rbind, covariates_geos_list)
+    )
+    ,
+    targets::tar_target(
+      modis_mod06_paths,
+      list.files(
+        mr("dir_input_modis_mod06"),
+        pattern = "hdf$",
+        full.names = TRUE,
+        recursive = TRUE
+      )
+    )
+    ,
+    targets::tar_target(
+      modis_mod11_paths,
+      list.files(
+        mr("dir_input_modis_mod11"),
+        pattern = "hdf$",
+        full.names = TRUE,
+        recursive = TRUE
+      )
+    )
+    ,
+    targets::tar_target(
+      modis_mod13_paths,
+      list.files(
+        mr("dir_input_modis_mod13"),
+        pattern = "hdf$",
+        full.names = TRUE,
+        recursive = TRUE
+      )
+    )
+    ,
+    targets::tar_target(
+      modis_mod09_paths,
+      list.files(
+        mr("dir_input_modis_mod09"),
+        pattern = "hdf$",
+        full.names = TRUE,
+        recursive = TRUE
+      )
+    )
+    ,
+    targets::tar_target(
+      modis_mcd19_paths,
+      list.files(
+        mr("dir_input_modis_mcd19"),
+        pattern = "hdf$",
+        full.names = TRUE,
+        recursive = TRUE
+      )
+    )
+    ,
+    targets::tar_target(
+      modis_vnp46_paths,
+      list.files(
+        mr("dir_input_modis_vnp46"),
+        pattern = "h5$",
+        full.names = TRUE,
+        recursive = TRUE
+      )
     )
     ,
     targets::tar_target(
@@ -240,18 +326,25 @@ target_calculate_fit <-
     ,
     targets::tar_target(
       covariates_modis_mod06,
-      calculate_multi(
-        locs = sites_spat,
-        path = mr("dir_input_modis_mod06"),
-        process_function = NULL,
-        calc_function = amadeus::calc_modis_par,
+      amadeus::calc_modis_par(
+        from = modis_mod06_paths,
+        locs = sf::st_as_sf(sites_spat),
         locs_id = mr("pointid"),
-        from = mr("dir_input_modis_mod06"),
-        preprocess = amadeus::process_modis_swath,
         name_covariates = c("MOD_CLCVD_0_", "MOD_CLCVN_0_"),
-        subdataset = "(Cloud_Fraction_Day|Cloud_Fraction_Night)",
-        nthreads = 8
+        subdataset = "(Cloud_Fraction_Day|Cloud_Fraction_Night)"
       )
+      # calculate_multi(
+      #   locs = sites_spat,
+      #   path = mr("dir_input_modis_mod06"),
+      #   process_function = NULL,
+      #   calc_function = amadeus::calc_modis_par,
+      #   locs_id = mr("pointid"),
+      #   from = mr("dir_input_modis_mod06"),
+      #   preprocess = amadeus::process_modis_swath,
+      #   name_covariates = c("MOD_CLCVD_0_", "MOD_CLCVN_0_"),
+      #   subdataset = "(Cloud_Fraction_Day|Cloud_Fraction_Night)",
+      #   nthreads = 8
+      # )
     )
     ,
     targets::tar_target(
@@ -307,19 +400,27 @@ target_calculate_fit <-
     ,
     targets::tar_target(
       covariates_modis_vnp46,
-      calculate_multi(
-        locs = sites_spat,
-        path = mr("dir_input_modis_vnp46"),
-        process_function = NULL,
-        calc_function = amadeus::calc_modis_par,
+      amadeus::calc_modis_par(
+        from = modis_vnp46_paths,
+        locs = sf::st_as_sf(sites_spat),
         locs_id = mr("pointid"),
-        from = mr("dir_input_modis_vnp46"),
-        preprocess = amadeus::process_bluemarble,
         name_covariates = "MOD_LGHTN_0_",
         subdataset = 3,
-        nthreads = 8
-      )
+        preprocess = amadeus::process_bluemarble
+      # calculate_multi(
+      #         locs = sites_spat,
+      #         path = mr("dir_input_modis_vnp46"),
+      #         process_function = NULL,
+      #         calc_function = amadeus::calc_modis_par,
+      #         locs_id = mr("pointid"),
+      #         from = mr("dir_input_modis_vnp46"),
+      #         preprocess = amadeus::process_bluemarble,
+      #         name_covariates = "MOD_LGHTN_0_",
+      #         subdataset = 3,
+      #         nthreads = 8
+      #       )
     )
+  )
   ,
   # combine each covariate set into one data.frame (data.table; if any)
   targets::tar_target(

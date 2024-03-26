@@ -96,3 +96,6 @@ input/nlcd
 input/tri
 input/NCEP-NCAR-Reanalysis-1
 input/nei
+
+# pipeline
+_targets
