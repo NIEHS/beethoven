@@ -225,7 +225,8 @@ target_calculate_fit <-
     ,
     targets::tar_target(
       geos_dates,
-      command = as.character(seq(as.Date("2018-01-01"), as.Date("2022-12-31"), by = "1 day")),
+      # revert to the original range for running the entire pipeline
+      command = "2018-01-01",#as.character(seq(as.Date("2018-01-01"), as.Date("2022-12-31"), by = "1 day")),
       iteration = "vector"
     )
     ,
@@ -235,7 +236,7 @@ target_calculate_fit <-
         date = c(geos_dates, geos_dates),
         locs = sites_spat,
         locs_id = mr("pointid"),
-        path = mr("dir_input_geos"),
+        path = file.path(mr("dir_input_geos"), "aqc_tavg_1hr_g1440x721_v1"),
         win = c(-126, -62, 22, 52),
         snap = "out"
       ),

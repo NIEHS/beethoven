@@ -802,11 +802,14 @@ calc_geos_strict <-
         value = TRUE
       )
     )
+    print(data_paths)
     #### identify collection
-    collection <- amadeus::process_collection(
+    collection <- regmatches(
       data_paths[1],
-      source = "geos",
-      collection = TRUE
+      regexpr(
+        "GEOS-CF.v01.rpl.(aqc|chm)_[[:alpha:]]{3,4}_[[:alnum:]]{3,4}_[[:alnum:]]{8,9}_v[1-9]",
+        data_paths[1]
+      )
     )
     cat(
       paste0(
@@ -841,16 +844,16 @@ calc_geos_strict <-
 
     # split filename date every 10 days
     filename_date <- as.Date(filename_date, format = "%Y%m%d")
-    filename_date_cl <- as.integer(cut(filename_date, "10 days"))
+    #filename_date_cl <- as.integer(cut(filename_date, "1 day"))
 
-    future_inserted <- split(data_paths, filename_date_cl)
+    future_inserted <- data_paths #split(data_paths, filename_date_cl)
     other_args <- list(...)
     data_variables <- names(terra::rast(data_paths[1]))
 
     summary_byvar <- function(x = data_variables, fs) {
       rast_in <- rlang::inject(terra::rast(fs, !!!other_args))
       sds_proc <-
-      terra::sds(lapply(
+        lapply(
         x,
         function(v) {
           rast_inidx <- grep(v, names(rast_in))
@@ -866,13 +869,14 @@ calc_geos_strict <-
           # rast_summary <- terra::tapp(rast_in, index = "days", fun = "mean")
           names(rast_summary) <-
             paste0(
-              rep(gsub("_lev*", "", v), terra::nlyr(rast_summary))
+              rep(gsub("_lev=.*", "", v), terra::nlyr(rast_summary))
               #, "_", terra::time(rast_summary)
             )
           terra::set.crs(rast_summary, "EPSG:4326")
           return(rast_summary)
         }
-      ))
+      )
+      sds_proc <- terra::sds(sds_proc)
 
       rast_ext <- terra::extract(sds_proc, locs, ID = TRUE)
       rast_ext <- lapply(rast_ext,
@@ -891,6 +895,7 @@ calc_geos_strict <-
     }
 
     # summary by 10 days
+    # FIXME: .x is an hourly data -> to daily data for proper use
     rast_10d_summary <-
       purrr::map(
         .x = future_inserted,
@@ -902,3 +907,16 @@ calc_geos_strict <-
     return(rast_10d_summary)
 
   }
+
+
+
+cgeo <- calc_geos_strict(path = "input/geos/chm_tavg_1hr_g1440x721_v1",
+           date = c("2018-03-17", "2018-03-17"),
+           locs = terra::vect(data.frame(site_id = 1, lon = -90, lat = 40)),
+           locs_id = "site_id",
+           win = c(-126, -62, 22, 52),
+           snap = "out")
+cc <- rast(
+  c("input/geos/chm_tavg_1hr_g1440x721_v1//GEOS-CF.v01.rpl.chm_tavg_1hr_g1440x721_v1.20180317_0130z.nc4",
+  "input/geos/chm_tavg_1hr_g1440x721_v1//GEOS-CF.v01.rpl.chm_tavg_1hr_g1440x721_v1.20180317_0230z.nc4"))
+time(cc)
