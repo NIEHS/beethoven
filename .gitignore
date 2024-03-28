@@ -83,19 +83,7 @@ tools/metalearner_test
 .dodsrc
 
 # raw data
-input/aqs
-input/ecoregions
-input/geos
-input/gmted
-input/HMS_Smoke
-input/koppen_geiger
-input/merra2
-input/modis
-input/narr
-input/nlcd
-input/tri
-input/NCEP-NCAR-Reanalysis-1
-input/nei
+input
 
 # pipeline
 _targets

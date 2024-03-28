@@ -28,7 +28,7 @@ meta_run(varname = "dir_input_modis_mod11")
 
 #' Read AQS data
 #' @param fun_aqs function to import AQS data.
-#' Default is `get("import_aqs")`
+#' Default is `amadeus::process_aqs`
 #' @param ... Passed arguments to `fun_aqs`
 #' @returns Depending on `fun_aqs` specification.
 read_locs <-
@@ -274,9 +274,10 @@ calculate_multi <-
           )
         )
       if (inherits(res_calc, "try-error")) {
+        cat(paste0(attr(res_calc, "condition")$message, "\n"))
         stop("Results do not match expectations.")
       }
-
+      res_calc <- lapply(res_calc, function(x) as.data.frame(x))
       res_calc <- data.table::rbindlist(res_calc, fill = TRUE)
       return(res_calc)
       # saveRDS(res_calc, file = outpath, compress = "xz")
@@ -284,6 +285,26 @@ calculate_multi <-
 
   }
 
+
+# sspat <- readRDS("~/sites_unique.rds")
+# kk <- calculate_multi(
+#         # sequence: could be refered from dates
+#         domain = 2018,#c(2018, 2019, 2020, 2021, 2022),
+#         path = mr("dir_input_tri"),
+#         covariate = "tri",
+#         locs = sspat,
+#         locs_id = mr("pointid")
+#       )
+
+# rr <-
+# read_locs(
+#         path = list.files(
+#           path = mr("dir_input_aqs"),
+#           pattern = "daily_88101_[0-9]{4}.csv",
+#           full.names = TRUE),
+#         date = NULL,
+#         return_format = "sf"
+#       )
 
 #' Merge input data.frame objects
 #' @param by character. Joining keys. See [`merge`] for details.
@@ -301,7 +322,7 @@ combine <-
       by <- c(mr("pointid"), mr("timeid"))
     }
     ellipsis <- list(...)
-    do.call(function(x, y) merge(x, y, by = by), ellipsis)
+    Reduce(function(x, y) merge(x, y, by = by), ellipsis)
   }
 
 
@@ -394,6 +415,16 @@ configure_cv <-
     names(configured) <- cvtypes
     return(configured)
   }
+
+
+read_paths <- function(path, extension = ".hdf") {
+  list.files(
+    path = path,
+    pattern = sprintf("%s$", extension),
+    full.names = TRUE
+  )
+}
+
 
 
 fit_base <-
@@ -802,10 +833,12 @@ calc_geos_strict <-
         value = TRUE
       )
     )
-    print(data_paths)
+
     #### identify collection
     collection <- regmatches(
       data_paths[1],
+      # the pattern accommodates 3-4 characters for the variable name,
+      # 3-4 alphanumerics for the temporal resolution, 8-9 alphanumerics for the output dimensions
       regexpr(
         "GEOS-CF.v01.rpl.(aqc|chm)_[[:alpha:]]{3,4}_[[:alnum:]]{3,4}_[[:alnum:]]{8,9}_v[1-9]",
         data_paths[1]
@@ -824,13 +857,13 @@ calc_geos_strict <-
       )
     }
 
-    filename_date <- regmatches(
+    filename_date <- sort(regmatches(
       data_paths,
       regexpr(
         "20[0-9]{2}(0[1-9]|1[0-2])([0-2][0-9]|3[0-1])",
         data_paths
       )
-    )
+    ))
     if (any(table(filename_date) < 24)) {
       warning(
         "Some dates include less than 24 hours. Check the downloaded files."
@@ -842,35 +875,42 @@ calc_geos_strict <-
       )
     }
 
+    # to export locs (pointers are not exportable)
+    locs <- sf::st_as_sf(locs)
+
     # split filename date every 10 days
     filename_date <- as.Date(filename_date, format = "%Y%m%d")
-    #filename_date_cl <- as.integer(cut(filename_date, "1 day"))
+    filename_date_cl <- as.integer(as.factor(filename_date))
 
-    future_inserted <- data_paths #split(data_paths, filename_date_cl)
+    future_inserted <- split(data_paths, filename_date_cl)
     other_args <- list(...)
     data_variables <- names(terra::rast(data_paths[1]))
 
     summary_byvar <- function(x = data_variables, fs) {
       rast_in <- rlang::inject(terra::rast(fs, !!!other_args))
+      # strongly assume that we take the single day. no need to filter dates
       sds_proc <-
         lapply(
         x,
         function(v) {
-          rast_inidx <- grep(v, names(rast_in))
-          rast_in <- rast_in[[rast_inidx]]
+          rast_inidx <- grep(v, x)
+          #rast_in <- mean(rast_in[[rast_inidx]])
+          rast_summary <- terra::mean(rast_in[[rast_inidx]])
           rtin <- as.Date(terra::time(rast_in))
           rtin_u <- unique(rtin)
-          rast_summary <- vector("list", length = length(unique(rtin)))
-          for (d in seq_along(rtin_u)) {
-            rast_d <- rast_in[[rtin == rtin_u[d]]]
-            rast_summary[[d]] <- mean(rast_d)
-          }
-          rast_summary <- do.call(c, rast_summary)
+          # rast_summary <- vector("list", length = length(rtin_u))
+          # for (d in seq_along(rtin_u)) {
+          #   rast_d <- rast_in[[rtin == rtin_u[d]]]
+          #   rast_summary[[d]] <- mean(rast_d)
+          # }
+          # rast_summary <- do.call(c, rast_summary)
+
+          # the next line is deprecated
           # rast_summary <- terra::tapp(rast_in, index = "days", fun = "mean")
+          terra::time(rast_summary) <- rtin_u
           names(rast_summary) <-
             paste0(
               rep(gsub("_lev=.*", "", v), terra::nlyr(rast_summary))
-              #, "_", terra::time(rast_summary)
             )
           terra::set.crs(rast_summary, "EPSG:4326")
           return(rast_summary)
@@ -878,18 +918,20 @@ calc_geos_strict <-
       )
       sds_proc <- terra::sds(sds_proc)
 
-      rast_ext <- terra::extract(sds_proc, locs, ID = TRUE)
-      rast_ext <- lapply(rast_ext,
-        function(df) {
-          df$ID <- unlist(locs[[locs_id]])
-          return(df)
-        }
-      )
+      locstr <- terra::vect(locs)
+      rast_ext <- terra::extract(sds_proc, locstr, ID = TRUE)
+      # rast_ext <- lapply(rast_ext,
+      #   function(df) {
+      #     df$ID <- unlist(locs[[locs_id]])
+      #     return(df)
+      #   }
+      # )
       rast_ext <-
         Reduce(function(dfa, dfb) dplyr::full_join(dfa, dfb, by = "ID"),
           rast_ext
         )
       rast_ext$time <- unique(as.Date(terra::time(rast_in)))
+      rast_ext$ID <- unlist(locs[[locs_id]])[rast_ext$ID]
       return(rast_ext)
 
     }
@@ -897,11 +939,11 @@ calc_geos_strict <-
     # summary by 10 days
     # FIXME: .x is an hourly data -> to daily data for proper use
     rast_10d_summary <-
-      purrr::map(
-        .x = future_inserted,
-        .f = ~summary_byvar(fs = .x)
+      lapply(
+        future_inserted,
+        function(x) summary_byvar(fs = x)
       )
-    # rast_10d_summary <- do.call(c, rast_10d_summary)
+    rast_10d_summary <- data.table::rbindlist(rast_10d_summary)
     # extract
 
     return(rast_10d_summary)
@@ -909,14 +951,174 @@ calc_geos_strict <-
   }
 
 
+# system.time(
+#   cgeo <- calc_geos_strict(path = "input/geos/chm_tavg_1hr_g1440x721_v1",
+#             date = c("2018-05-17", "2018-05-17"),
+#             locs = terra::vect(data.frame(site_id = 1, lon = -90, lat = 40)),
+#             locs_id = "site_id",
+#             win = c(-126, -62, 22, 52),
+#             snap = "out")
+# )
 
-cgeo <- calc_geos_strict(path = "input/geos/chm_tavg_1hr_g1440x721_v1",
-           date = c("2018-03-17", "2018-03-17"),
-           locs = terra::vect(data.frame(site_id = 1, lon = -90, lat = 40)),
-           locs_id = "site_id",
-           win = c(-126, -62, 22, 52),
-           snap = "out")
-cc <- rast(
-  c("input/geos/chm_tavg_1hr_g1440x721_v1//GEOS-CF.v01.rpl.chm_tavg_1hr_g1440x721_v1.20180317_0130z.nc4",
-  "input/geos/chm_tavg_1hr_g1440x721_v1//GEOS-CF.v01.rpl.chm_tavg_1hr_g1440x721_v1.20180317_0230z.nc4"))
-time(cc)
+
+# calc_geos_strictlite <-
+#   function(path = NULL,
+#            date = c("2018-01-01", "2018-01-01"),
+#            locs = NULL,
+#            locs_id = NULL,
+#            ...) {
+#     #### directory setup
+#     if (length(path) == 1) {
+#       if (dir.exists(path)) {
+#         path <- amadeus::download_sanitize_path(path)
+#         paths <- list.files(
+#           path,
+#           pattern = "GEOS-CF.v01.rpl",
+#           full.names = TRUE
+#         )
+#         paths <- paths[grep(
+#           ".nc4",
+#           paths
+#         )]
+#       }
+#     } else {
+#       paths <- path
+#     }
+#     #### check for variable
+#     amadeus::check_for_null_parameters(mget(ls()))
+#     #### identify file paths
+#     #### identify dates based on user input
+#     dates_of_interest <- amadeus::generate_date_sequence(
+#       date[1],
+#       date[2],
+#       sub_hyphen = TRUE
+#     )
+#     #### subset file paths to only dates of interest
+#     data_paths <- unique(
+#       grep(
+#         paste(
+#           dates_of_interest,
+#           collapse = "|"
+#         ),
+#         paths,
+#         value = TRUE
+#       )
+#     )
+#     print(data_paths)
+#     #### identify collection
+#     collection <- regmatches(
+#       data_paths[1],
+#       regexpr(
+#         "GEOS-CF.v01.rpl.(aqc|chm)_[[:alpha:]]{3,4}_[[:alnum:]]{3,4}_[[:alnum:]]{8,9}_v[1-9]",
+#         data_paths[1]
+#       )
+#     )
+#     cat(
+#       paste0(
+#         "Identified collection ",
+#         collection,
+#         ".\n"
+#       )
+#     )
+#     if (length(unique(collection)) > 1) {
+#       warning(
+#         "Multiple collections detected. Returning data for all collections.\n"
+#       )
+#     }
+
+#     filename_date <- sort(regmatches(
+#       data_paths,
+#       regexpr(
+#         "20[0-9]{2}(0[1-9]|1[0-2])([0-2][0-9]|3[0-1])",
+#         data_paths
+#       )
+#     ))
+#     if (any(table(filename_date) < 24)) {
+#       warning(
+#         "Some dates include less than 24 hours. Check the downloaded files."
+#       )
+#     }
+#     if (length(unique(filename_date)) > 1) {
+#       message(
+#         "Dates are not supposed to be different. Put in the same date's files."
+#       )
+#     }
+
+#     # split filename date every 10 days
+#     filename_date <- as.Date(filename_date, format = "%Y%m%d")
+#     filename_date_cl <- as.integer(as.factor(filename_date))
+
+#     future_inserted <- split(data_paths, filename_date_cl)
+#     other_args <- list(...)
+#     data_variables <- names(terra::rast(data_paths[1]))
+
+#     summary_byvar <- function(x = data_variables, fs) {
+#       # rast_in <- rlang::inject(terra::rast(fs, !!!other_args))
+#       sds_proc <-
+#         lapply(
+#         x,
+#         function(v) {
+#           rast_inidx <- grep(v, data_variables)
+#           rast_in <- rlang::inject(terra::rast(fs, subds = rast_inidx, !!!other_args))
+#           rtin <- as.Date(terra::time(rast_in))
+#           rtin_u <- unique(rtin)
+#           rast_summary <- vector("list", length = length(unique(rtin)))
+#           for (d in seq_along(rtin_u)) {
+#             rast_d <- rast_in[[rtin == rtin_u[d]]]
+#             rast_summary[[d]] <- mean(rast_d)
+#           }
+#           rast_summary <- do.call(c, rast_summary)
+#           # rast_summary <- terra::tapp(rast_in, index = "days", fun = "mean")
+#           names(rast_summary) <-
+#             paste0(
+#               rep(gsub("_lev=.*", "", v), terra::nlyr(rast_summary))
+#               #, "_", terra::time(rast_summary)
+#             )
+#           terra::set.crs(rast_summary, "EPSG:4326")
+#           return(rast_summary)
+#         }
+#       )
+#       sds_proc <- terra::sds(sds_proc)
+
+#       rast_ext <- terra::extract(sds_proc, locs)
+#       rast_ext <- lapply(rast_ext,
+#         function(df) {
+#           df$ID <- unlist(locs[[locs_id]])
+#           return(df)
+#         }
+#       )
+#       rast_ext <-
+#         Reduce(function(dfa, dfb) dplyr::full_join(dfa, dfb, by = "ID"),
+#           rast_ext
+#         )
+#       # NOTE: assuming that the date is the same for all layers
+#       rast_ext$time <- date[1]
+
+#       return(rast_ext)
+
+#     }
+
+#     # summary by 10 days
+#     # FIXME: .x is an hourly data -> to daily data for proper use
+#     rast_10d_summary <-
+#       purrr::map(
+#         .x = future_inserted,
+#         .f = ~summary_byvar(fs = .x)
+#       )
+#     rast_10d_summary <- data.table::rbindlist(rast_10d_summary)
+#     # extract
+
+#     return(rast_10d_summary)
+
+#   }
+
+# system.time(
+#   cgeo2 <- calc_geos_strictlite(path = "input/geos/chm_tavg_1hr_g1440x721_v1",
+#             date = c("2018-05-17", "2018-05-17"),
+#             locs = terra::vect(data.frame(site_id = 1, lon = -90, lat = 40)),
+#             locs_id = "site_id",
+#             win = c(-126, -62, 22, 52),
+#             snap = "out")
+# )
+# 110.5 (strict)
+# 119.287 (strictlite)

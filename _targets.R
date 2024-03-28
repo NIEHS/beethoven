@@ -13,6 +13,10 @@ source("./tools/pipeline/targets_predict.R")
 
 # bypass option
 Sys.setenv("BTV_DOWNLOAD_PASS" = "TRUE")
+library(future)
+library(future.callr)
+plan(callr)
+
 
 
 tar_invalidate(any_of(tar_older(Sys.time() - as.difftime(183, units = "days"))))
@@ -24,14 +28,14 @@ if (Sys.getenv("BTV_DOWNLOAD_PASS") == "TRUE") {
 # targets options
 tar_option_set(
   packages =
-    c("beethoven", "amadeus", "chopin",
+    c("amadeus", "chopin",
       "data.table", "sf", "terra", "exactextractr",
-      "crew", "crew.cluster",
+      "crew", "crew.cluster", "tigris",
       "future", "future.apply", "future.callr",
       "sftime", "stars", "rlang", "foreach", "parallelly"),
   library = "../../r-libs",
   repository = "local",
-  controller = NULL,
+  #controller = crew::crew_controller_local(workers = 2),
   
   # crew.cluster::crew_controller_slurm(
   #   slurm_log_output = "output/slurm_pipeline_log.out",
@@ -49,15 +53,13 @@ tar_option_set(
   seed = 202401L
 )
 
-
-
 list(
   target_init,
-  # targets::tar_target(
-  #   radii,
-  #   command = c(1e3, 1e4, 5e4),
-  #   iteration = "vector"
-  # ),
+  targets::tar_target(
+    radii,
+    command = c(1e3, 1e4, 5e4),
+    iteration = "vector"
+  ),
   target_download,
   target_calculate_fit#,
   # target_baselearner,
