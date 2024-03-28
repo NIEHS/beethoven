@@ -78,6 +78,7 @@ code/mitchell_tests/
 # Insang's negative value exploration script
 tools/negative_exploration
 tools/metalearner_test
+tools/shiny_explore_pm/missingness_exploration_pm_quarto_shiny_data/
 
 # NASA Earthdata login credentials
 .dodsrc
