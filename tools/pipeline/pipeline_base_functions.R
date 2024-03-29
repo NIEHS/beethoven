@@ -4,6 +4,11 @@
 #' @param varname variable name to call
 #' @param file Path to the punchcard
 #' @returns Depending on the specification in the punchcard.
+#' @examples
+#' meta_run(varname = "root_absolute")
+#' meta_run(varname = "root_relative")
+#' meta_run(varname = "y2018")
+#' meta_run(varname = "dir_input_modis_mod11")
 meta_run <-
   function(
     varname = NULL,
@@ -20,10 +25,6 @@ meta_run <-
 
 mr <- meta_run
 
-meta_run(varname = "root_absolute")
-meta_run(varname = "root_relative")
-meta_run(varname = "y2018")
-meta_run(varname = "dir_input_modis_mod11")
 
 
 #' Read AQS data
@@ -85,7 +86,9 @@ get_aqs_data <-
     input_df <- input_df[,
       list(
         pm2.5 = Arithmetic.Mean,
-        site_id = sprintf("%02d%03d%04d%05d", State.Code, County.Code, Site.Num, Parameter.Code),
+        site_id =
+        sprintf("%02d%03d%04d%05d",
+          State.Code, County.Code, Site.Num, Parameter.Code),
         time = as.Date(Date.Local),
         POC = POC
       )]
@@ -95,7 +98,11 @@ get_aqs_data <-
       dplyr::ungroup() |>
       data.table::data.table()
 
-    poc_res <- merge(poc_filtered, as.data.frame(site_spt), by = c(locs_id, time_id))
+    poc_res <-
+      merge(poc_filtered,
+        as.data.frame(site_spt),
+        by = c(locs_id, time_id)
+      )
     return(poc_res)
     #nocov end
   }
@@ -115,35 +122,6 @@ join_yx <-
     time_id = mr("timeid")
   ) {
     merge(df_pm, df_covar, by = c(locs_id, time_id))
-  }
-
-#' Check file status with a static list
-#' @concept obsolete
-#' @description A static list refers to a fixed state of
-#' the list of files at a certain time point. Users should update the static
-#' list if needed. The static list could reduce the risk of rerunning the
-#' entire pipeline due to a trivial or accidental change in files
-#' @note Directory representations should match in `dir` and `static_list`.
-#' Both should be absolute or relative, but should not be crossed.
-#' @param dir Directory path to search files
-#' @param extension File extension according to raw data
-#' @param static_list character. A static list of files.
-#' Its elements should match `extension` with their extensions.
-#' @returns Length of the number of files with `extension` in `dir`.
-check_file_status <-
-  function(
-    dir,
-    extension,
-    static_list
-  ) {
-    your_list <-
-      list.files(
-        path = dir,
-        pattern = extension,
-        recursive = TRUE,
-        full.names = TRUE
-      )
-    all(your_list %in% static_list)
   }
 
 
@@ -175,11 +153,14 @@ fastdown <-
     )
   }
 
-
+#' Load county sf object
+#' @returns sf object
+#' @importFrom tigris counties
 load_county <- function() {
   options(tigris_use_cache = TRUE)
   cnty <- tigris::counties(year = 2020)
-  cnty <- cnty[!cnty$STATEFP %in% c("02", "15", "60", "66", "68", "69", "72", "78"), ]
+  cnty <-
+    cnty[!cnty$STATEFP %in% c("02", "15", "60", "66", "68", "69", "72", "78"), ]
   return(cnty)
 }
 
@@ -326,6 +307,11 @@ combine <-
   }
 
 
+#' Change time column name
+#' @param df data.frame
+#' @param candidates character. Candidate column names.
+#' @param replace character. New column name.
+#' @returns data.frame
 unify_timecols <-
   function(
     df,
@@ -377,116 +363,55 @@ combine_final <-
     return(locs_combined)
   }
 
-#' Configure cross-validation row indices
-#' @param covars Merged covariate data.frame
-#' @param cvtypes character. Cross-validation types.
-#' @returns List of cross-validation row indices
-#' @seealso [`generate_cv_index`]
-configure_cv <-
-  function(
-    covars = NULL,
-    cvtypes = c("lolo", "loto", "lolto", "lblo", "lbto", "lblto", "random")
-  ) {
-    config <-
-      list(
-        list(
-          covars = covars,
-          cv_mode = "lolo"
-        ),
-        list(
-          covars = covars,
-          cv_mode = "loto"
-        ),
-        list(
-          covars = covars,
-          cv_mode = "lolto"
-        ),
-        list(
-          covars = covars,
-          cv_mode = "lblo",
-          blocks = c(5, 5)
-        ),
-        list(
-          covars = covars,
-          cv_mode = "lbto",
-          cv_fold = 10L
-        ),
-        list(
-          covars = covars,
-          cv_mode = "lblto",
-          cv_fold = 10L,
-          blocks = c(5, 5)
-        ),
-        list(
-          covars = covars,
-          cv_mode = "random"
-        )
-      )
-    configured <-
-      lapply(
-        config,
-        function(x) rlang::inject(generate_cv_index(!!!x))
-      )
-    names(configured) <- cvtypes
-    return(configured)
+
+#' Read paths from a directory with a specific file extension
+#' @param path The directory path from which to read the paths.
+#' @param extension The file extension to match. Defaults to ".hdf".
+#' @param target_dates A character vector of length 2 containing the start and end dates.
+#' @returns A character vector containing the full paths of the matching files.
+#'
+#' @examples
+#' # Read paths from a directory with default extension
+#' read_paths("/path/to/directory")
+#'
+#' # Read paths from a directory with custom extension
+#' read_paths("/path/to/directory", ".txt")
+#'
+#' @export
+read_paths <- function(path, extension = ".hdf", target_dates = c("2020-01-01", "2020-01-15")) {
+  flist <-
+    list.files(
+      path = path,
+      pattern = sprintf("%s$", extension),
+      full.names = TRUE,
+      recursive = TRUE
+    )
+  if (!missing(target_dates)) {
+    dateseq <- seq(as.Date(target_dates[1]), as.Date(target_dates[2]), by = "day")
+    dateseq <- format(dateseq, "%Y%m%d")
+    dateseq <- sprintf("(%s)", paste(dateseq, collapse = "|"))
+    flist <- grep(dateseq, flist, value = TRUE)
   }
-
-
-read_paths <- function(path, extension = ".hdf") {
-  list.files(
-    path = path,
-    pattern = sprintf("%s$", extension),
-    full.names = TRUE
-  )
+  return(flist)
 }
 
 
 
-fit_base <-
-  function(
-
-  ) {
-
-  }
-
-
-predict_base <-
-  function(
-    fitted,
-    targetdf
-  ) {
-
-  }
-
-
-
-predict_meta <-
-  function(
-    metalearner = NULL,
-    targetdf = NULL,
-    threads = NULL
-  ) {
-    beethoven::meta_predict(
-      metalearner,
-      targetdf,
-      nthreads = threads
-    )
-  }
-
-export_res <-
-  function(
-
-  ) {
-
-  }
-
-
-
+#' Search package functions
+#' @param package character(1). Package name.
+#' @param search character(1). Search term.
+#' @returns A character vector containing the matching function names.
+#' @examples
+#' # Search for functions in the `amadeus` package
+#' search_function("amadeus", "process_")
 search_function <- function(package, search){
   library(package, character.only = TRUE)
   grep(search, ls(sprintf("package:%s", package)), value = TRUE)
 }
 
+#' Get data.frame of function parameters
+#' @param functions character. Vector of function names.
+#' @returns A data.frame containing the parameters of the functions.
 df_params <- function(functions) {
   params <- lapply(functions, function(x) {
     args <- dplyr::as_tibble(lapply(as.list(formals(get(x))), \(p) list(p)), .name_repair = "minimal")
@@ -496,149 +421,12 @@ df_params <- function(functions) {
   return(paramsdf)
 }
 
-# sched <- search_params("amadeus", "process_")
-# schec <- search_params("amadeus", "calc_")
+# sched <- search_function("amadeus", "process_")
+# schec <- search_function("amadeus", "calc_")
 # df_params(sched[-c(1, 2, 3, 4, 5, 6, 8, 11, 14, 15, 17, 18, 19, 20, 21, 25)])
 # df_params(schec[-c(1, 16)]) |> colnames()
 
 
-
-
-#' Process atmospheric composition data by chunks
-#' @description
-#' Returning a single `SpatRaster` object.
-#' @param date character(2). length of 10. Format "YYYY-MM-DD".
-#' @param path character(1). Directory with downloaded netCDF (.nc4) files. or
-#' netCDF file paths.
-#' @param ... Arguments passed to [`terra::rast`].
-#' @note
-#' Layer names of the returned `SpatRaster` object contain the variable,
-#' pressure level, date.
-#' @author Mitchell Manware
-#' @return a `SpatRaster` object;
-#' @importFrom terra rast
-#' @importFrom terra time
-#' @importFrom terra varnames
-#' @importFrom terra crs
-#' @importFrom terra subset
-#' @export
-process_geos_bulk_old <-
-  function(path = NULL,
-           date = c("2018-01-01", "2018-01-01"),
-           ...) {
-    #### directory setup
-    if (length(path) == 1) {
-
-      if (dir.exists(path)) {
-      path <- amadeus::download_sanitize_path(path)
-      paths <- list.files(
-        path,
-        pattern = "GEOS-CF.v01.rpl",
-        full.names = TRUE
-      )
-      paths <- paths[grep(
-        ".nc4",
-        paths
-      )]
-    }
-    } else {
-      paths <- path
-    }
-    #### check for variable
-    amadeus::check_for_null_parameters(mget(ls()))
-    #### identify file paths
-    #### identify dates based on user input
-    dates_of_interest <- amadeus::generate_date_sequence(
-      date[1],
-      date[2],
-      sub_hyphen = TRUE
-    )
-    #### subset file paths to only dates of interest
-    data_paths <- unique(
-      grep(
-        paste(
-          dates_of_interest,
-          collapse = "|"
-        ),
-        paths,
-        value = TRUE
-      )
-    )
-    #### identify collection
-    collection <- amadeus::process_collection(
-      data_paths[1],
-      source = "geos",
-      collection = TRUE
-    )
-    cat(
-      paste0(
-        "Identified collection ",
-        collection,
-        ".\n"
-      )
-    )
-    if (length(unique(collection)) > 1) {
-      warning(
-        "Multiple collections detected. Returning data for all collections.\n"
-      )
-    }
-
-    filename_date <- regmatches(
-      data_paths,
-      regexpr(
-        "20[0-9]{2}(0[1-9]|1[0-2])([0-2][0-9]|3[0-1])",
-        data_paths
-      )
-    )
-    if (any(table(filename_date) < 24)) {
-      warning(
-        "Some dates include less than 24 hours. Check the downloaded files."
-      )
-    }
-    if (length(unique(filename_date)) > 10) {
-      message("More than 10 unique dates detected. Try 10-day chunks...")
-    }
-
-    # split filename date every 10 days
-    filename_date <- as.Date(filename_date, format = "%Y%m%d")
-    filename_date_cl <- as.integer(cut(filename_date, "30 days"))
-
-    future_inserted <- split(data_paths, filename_date_cl)
-    other_args <- list(...)
-    data_variables <- names(terra::rast(data_paths[1]))
-
-    summary_byvar <- function(x = data_variables, fs) {
-      rast_in <- rlang::inject(terra::rast(fs, !!!other_args))
-      terra::sds(lapply(
-        x,
-        function(v) {
-          rast_inidx <- grep(v, names(rast_in))
-          rast_in <- rast_in[[rast_inidx]]
-          rast_summary <- terra::tapp(rast_in, index = "days", fun = "mean")
-          names(rast_summary) <-
-            paste0(
-              rep(v, terra::nlyr(rast_summary)), "_", terra::time(rast_summary)
-            )
-          terra::set.crs(rast_summary, "EPSG:4326")
-          return(rast_summary)
-        }
-      ))
-    }
-
-    # summary by 10 days
-    # TODO: dropping furrr?
-    rast_10d_summary <-
-      furrr::future_map(
-        .x = future_inserted,
-        .f = ~summary_byvar(fs = .x),
-        .options = furrr::furrr_options(
-          globals = c("other_args", "data_variables")
-        )
-      )
-    rast_10d_summary <- Reduce(c, rast_10d_summary)
-    return(rast_10d_summary)
-
-  }
 
 
 
@@ -787,7 +575,7 @@ process_geos_bulk <-
 #' Process atmospheric composition data by chunks (v3)
 #' @description
 #' Returning a single `SpatRasterDataset` object.
-#' Removed `tapp` for performance; strict assumption that
+#' Removed `tapp` for performance; impose a strict assumption that
 #' there are no missing values
 #' @param date character(2). length of 10. Format "YYYY-MM-DD".
 #' @param path character(1). Directory with downloaded netCDF (.nc4) files. or
@@ -853,7 +641,8 @@ calc_geos_strict <-
     collection <- regmatches(
       data_paths[1],
       # the pattern accommodates 3-4 characters for the variable name,
-      # 3-4 alphanumerics for the temporal resolution, 8-9 alphanumerics for the output dimensions
+      # 3-4 alphanumerics for the temporal resolution,
+      # 8-9 alphanumerics for the output dimensions
       regexpr(
         "GEOS-CF.v01.rpl.(aqc|chm)_[[:alpha:]]{3,4}_[[:alnum:]]{3,4}_[[:alnum:]]{8,9}_v[1-9]",
         data_paths[1]
@@ -975,6 +764,77 @@ calc_geos_strict <-
 #             win = c(-126, -62, 22, 52),
 #             snap = "out")
 # )
+
+
+## base & meta learner fitting
+
+fit_base <-
+  function(
+
+  ) {
+
+  }
+
+
+predict_base <-
+  function(
+    fitted,
+    targetdf
+  ) {
+
+  }
+
+
+
+predict_meta <-
+  function(
+    metalearner = NULL,
+    targetdf = NULL,
+    threads = NULL
+  ) {
+    beethoven::meta_predict(
+      metalearner,
+      targetdf,
+      nthreads = threads
+    )
+  }
+
+export_res <-
+  function(
+
+  ) {
+
+  }
+
+
+#' Check file status with a static list
+#' @concept deprecated
+#' @description A static list refers to a fixed state of
+#' the list of files at a certain time point. Users should update the static
+#' list if needed. The static list could reduce the risk of rerunning the
+#' entire pipeline due to a trivial or accidental change in files
+#' @note Directory representations should match in `dir` and `static_list`.
+#' Both should be absolute or relative, but should not be crossed.
+#' @param dir Directory path to search files
+#' @param extension File extension according to raw data
+#' @param static_list character. A static list of files.
+#' Its elements should match `extension` with their extensions.
+#' @returns Length of the number of files with `extension` in `dir`.
+check_file_status <-
+  function(
+    dir,
+    extension,
+    static_list
+  ) {
+    your_list <-
+      list.files(
+        path = dir,
+        pattern = extension,
+        recursive = TRUE,
+        full.names = TRUE
+      )
+    all(your_list %in% static_list)
+  }
 
 
 # calc_geos_strictlite <-

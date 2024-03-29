@@ -13,13 +13,13 @@ source("./tools/pipeline/targets_predict.R")
 
 # bypass option
 Sys.setenv("BTV_DOWNLOAD_PASS" = "TRUE")
-library(future)
-library(future.callr)
-plan(callr)
+# library(future)
+# library(future.callr)
+# plan(callr)
 
 
 
-tar_invalidate(any_of(tar_older(Sys.time() - as.difftime(183, units = "days"))))
+tar_invalidate(any_of(tar_older(Sys.time() - as.difftime(180, units = "days"))))
 # # nullify download target if bypass option is set
 if (Sys.getenv("BTV_DOWNLOAD_PASS") == "TRUE") {
   target_download <- NULL
@@ -33,19 +33,20 @@ tar_option_set(
       "crew", "crew.cluster", "tigris",
       "future", "future.apply", "future.callr",
       "sftime", "stars", "rlang", "foreach", "parallelly"),
-  library = "../../r-libs",
+  library = "~/r-libs",
   repository = "local",
-  #controller = crew::crew_controller_local(workers = 2),
-  
-  # crew.cluster::crew_controller_slurm(
-  #   slurm_log_output = "output/slurm_pipeline_log.out",
-  #   slurm_log_error = "output/slurm_pipeline_error.err",
-  #   tasks_max = 32L,
-  #   slurm_memory_gigabytes_per_cpu = 8,
-  #   slurm_cpus_per_task = 8L,
-  #   slurm_time_minutes = NULL,
-  #   slurm_partition = "geo"
-  # ),
+  controller = 
+    crew.cluster::crew_controller_slurm(
+      slurm_log_output = "output/slurm_pipeline_log.out",
+      slurm_log_error = "output/slurm_pipeline_error.err",
+      script_directory = "output/slurm_scripts",
+      workers = 50L,
+      tasks_max = 50L,
+      slurm_memory_gigabytes_per_cpu = 12,
+      slurm_cpus_per_task = 8L,
+      slurm_time_minutes = NULL,
+      slurm_partition = "geo"
+    ),
   error = "null",
   memory = "persistent",
   format = "qs",

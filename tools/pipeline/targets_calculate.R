@@ -37,7 +37,7 @@ target_calculate_fit <-
       covariates_tri,
       calculate_multi(
         # sequence: could be refered from dates
-        domain = 2018, #c(2018, 2019, 2020, 2021, 2022),
+        domain = 2020, #c(2018, 2019, 2020, 2021, 2022),
         path = mr("dir_input_tri"),
         covariate = "tri",
         locs = sites_spat,
@@ -49,7 +49,13 @@ target_calculate_fit <-
       covariates_ecoregion,
       calculate_single(
         locs = sites_spat,
-        path = list.files(mr("dir_input_ecoregion"), "us_eco_l3*.*.shp$", full.names = TRUE, recursive = TRUE),
+        path =
+          list.files(
+            mr("dir_input_ecoregion"),
+            "us_eco_l3*.*.shp$",
+            full.names = TRUE,
+            recursive = TRUE
+          ),
         locs_id = mr("pointid"),
         covariate = "ecoregion"
       )
@@ -59,7 +65,10 @@ target_calculate_fit <-
       covariates_koppen,
       calculate_single(
         locs = sites_spat,
-        path = file.path(mr("dir_input_koppen"), "Beck_KG_V1_present_0p083.tif"),
+        path =
+          file.path(
+            mr("dir_input_koppen"), "Beck_KG_V1_present_0p083.tif"
+          ),
         locs_id = mr("pointid"),
         covariate = "koppen"
       )
@@ -69,7 +78,7 @@ target_calculate_fit <-
     targets::tar_target(
       covariates_nlcd_list,
       command = calculate_multi(
-        domain = 2019, #c(2019, 2019, 2019, 2021, 2021),
+        domain = 2020, #c(2019, 2019, 2019, 2021, 2021),
         locs = terra::vect(sites_spat),
         path = mr("dir_input_nlcd"),
         locs_id = mr("pointid"),
@@ -99,7 +108,7 @@ target_calculate_fit <-
         locs = sites_spat,
         path = mr("dir_input_hms"),
         covariate = "hms",
-        date = c("2020-01-01", "2020-01-10"), #c(mr("date_start"), mr("date_end")),
+        date = time_range,
         variable = hms_level,
         locs_id = mr("pointid")
       ),
@@ -123,7 +132,11 @@ target_calculate_fit <-
       calculate_multi(
         domain = 2020, #rep(2020, 5)
         locs = sites_spat,
-        path = file.path(mr("dir_input_sedac_population"), mr("file_input_sedac_population")),
+        path =
+          file.path(
+            mr("dir_input_sedac_population"),
+            mr("file_input_sedac_population")
+          ),
         locs_id = mr("pointid"),
         covariate = "sedac_population",
         radius = 0,
@@ -131,12 +144,16 @@ target_calculate_fit <-
       )
     )
     ,
-    # 3 branches
+    # SEDAC GRoads calculation by three radii ####
     targets::tar_target(
       covariates_sedac_groads,
       command = calculate_single(
         locs = as.data.frame(sites_spat),
-        path = file.path(mr("dir_input_sedac_groads"), mr("file_input_sedac_groads")),
+        path =
+          file.path(
+            mr("dir_input_sedac_groads"),
+            mr("file_input_sedac_groads")
+          ),
         locs_id = mr("pointid"),
         covariate = "sedac_groads",
         radius = radii
@@ -145,25 +162,25 @@ target_calculate_fit <-
       iteration = "vector"
     )
     ,
+    # NARR variables calculation ####
     targets::tar_target(
       narr_variables,
       command = read.csv(mr("file_narr_variables"))$dirs,
-      iteration = "vector"
+      iteration = "list"
     )
     ,
     targets::tar_target(
       covariates_narr,
-      calculate_multi(
-        domain = 2018, #seq(2018, 2022),
+      calculate_single(
         locs = sites_spat,
         path = narr_variables,
-        date = c("2020-01-01", "2020-01-01"),#c(mr("date_start"), mr("date_end")),
+        date = c(mr("date_start"), mr("date_end")),
         variable = strsplit(narr_variables, "/")[[1]][3],
         covariate = "narr",
         locs_id = mr("pointid")
       ),
       pattern = map(narr_variables),
-      iteration = "vector"
+      iteration = "list"
     )
     ,
     targets::tar_target(
@@ -181,7 +198,7 @@ target_calculate_fit <-
     ,
     targets::tar_target(
       nei_years,
-      command = c(2017), #c(2017, 2017, 2020, 2020, 2020),
+      command = c(2020), #c(2017, 2017, 2020, 2020, 2020),
       iteration = "vector"
     )
     ,
@@ -196,7 +213,7 @@ target_calculate_fit <-
         locs_id = mr("pointid")
       ),
       pattern = map(nei_years, nei_dirs),
-      iteration = "vector"
+      iteration = "list"
     )
     ,
     targets::tar_target(
@@ -243,7 +260,7 @@ target_calculate_fit <-
     targets::tar_target(
       geos_dates,
       # revert to the original range for running the entire pipeline
-      command = "2020-01-01",#as.character(seq(as.Date("2018-01-01"), as.Date("2022-12-31"), by = "1 day")),
+      command = seq("2020-01-01", "2020-01-15", by = "1 day"),,#as.character(seq(as.Date("2018-01-01"), as.Date("2022-12-31"), by = "1 day")),
       iteration = "list"
     )
     ,
@@ -289,74 +306,62 @@ target_calculate_fit <-
     ,
     targets::tar_target(
       modis_mod06_paths,
-      list.files(
+      read_paths(
         mr("dir_input_modis_mod06"),
-        pattern = "hdf$",
-        full.names = TRUE,
-        recursive = TRUE
+        extension = "hdf"
       )
     )
     ,
     targets::tar_target(
       modis_mod11_paths,
-      list.files(
+      read_paths(
         mr("dir_input_modis_mod11"),
-        pattern = "hdf$",
-        full.names = TRUE,
-        recursive = TRUE
+        extension = "hdf"
       )
     )
     ,
     targets::tar_target(
       modis_mod13_paths,
-      list.files(
+      read_paths(
         mr("dir_input_modis_mod13"),
-        pattern = "hdf$",
-        full.names = TRUE,
-        recursive = TRUE
+        extension = "hdf"
       )
     )
     ,
     targets::tar_target(
       modis_mod09_paths,
-      list.files(
+      read_paths(
         mr("dir_input_modis_mod09"),
-        pattern = "hdf$",
-        full.names = TRUE,
-        recursive = TRUE
+        extension = "hdf"
       )
     )
     ,
     targets::tar_target(
       modis_mcd19_paths,
-      list.files(
+      read_paths(
         mr("dir_input_modis_mcd19"),
-        pattern = "hdf$",
-        full.names = TRUE,
-        recursive = TRUE
+        extension = "hdf"
       )
     )
     ,
     targets::tar_target(
       modis_vnp46_paths,
-      list.files(
+      read_paths(
         mr("dir_input_modis_vnp46"),
-        pattern = "h5$",
-        full.names = TRUE,
-        recursive = TRUE
+        extension = "hdf"
       )
     )
     ,
     targets::tar_target(
       covariates_modis_mod11,
       amadeus::calc_modis_par(
-        from = modis_mod11_paths[1:23],
+        from = modis_mod11_paths,
         locs = sites_spat,
         locs_id = mr("pointid"),
         name_covariates = c("MOD_SFCTD_0_", "MOD_SFCTN_0_"),
         subdataset = "(LST_Day_|LST_Night_)",
         preprocess = amadeus::process_modis_merge,
-        nthreads = 1
+        nthreads = 20
       # calculate_multi(
       #   locs = sites_spat,
       #   path = mr("dir_input_modis_mod11"),
@@ -374,12 +379,12 @@ target_calculate_fit <-
     targets::tar_target(
       covariates_modis_mod06,
       amadeus::calc_modis_par(
-        from = modis_mod06_paths[1:23],
+        from = modis_mod06_paths,
         locs = sites_spat,
         locs_id = mr("pointid"),
         name_covariates = c("MOD_CLCVD_0_", "MOD_CLCVN_0_"),
         subdataset = "(Cloud_Fraction_Day|Cloud_Fraction_Night)",
-        nthreads = 1
+        nthreads = 20
       )
       # calculate_multi(
       #   locs = sites_spat,
@@ -398,13 +403,13 @@ target_calculate_fit <-
     targets::tar_target(
       covariates_modis_mod09,
       amadeus::calc_modis_par(
-        from = modis_mod09_paths[1:23],
+        from = modis_mod09_paths,
         locs = sites_spat,
         locs_id = mr("pointid"),
         preprocess = amadeus::process_modis_merge,
         name_covariates = sprintf("MOD_SFCRF_%d_", seq(1, 7)),
         subdataset = seq(2, 8),
-        nthreads = 1
+        nthreads = 20
       # calculate_multi(
       #   locs = sites_spat,
       #   path = mr("dir_input_modis_mod09"),
@@ -422,14 +427,14 @@ target_calculate_fit <-
     targets::tar_target(
       covariates_modis_mcd19_1km,
       amadeus::calc_modis_par(
-        from = modis_mcd19_paths[1:23],
+        from = modis_mcd19_paths,
         locs = sites_spat,
         locs_id = mr("pointid"),
         name_covariates =
           c("MOD_AD4TA_0_", "MOD_AD5TA_0_"),
         subdataset = "(Optical_Depth)",
         preprocess = amadeus::process_modis_merge,
-        nthreads = 1
+        nthreads = 20
       # calculate_multi(
       #   locs = sites_spat,
       #   path = mr("dir_input_modis_mcd19"),
@@ -448,7 +453,7 @@ target_calculate_fit <-
     targets::tar_target(
       covariates_modis_mcd19_5km,
       amadeus::calc_modis_par(
-        from = modis_mcd19_paths[1:23],
+        from = modis_mcd19_paths,
         locs = sites_spat,
         locs_id = mr("pointid"),
         name_covariates =
@@ -456,7 +461,7 @@ target_calculate_fit <-
             "MOD_SCTAN_0_", "MOD_GLNAN_0_"),
         subdataset = "(cos|RelAZ|Angle)",
         preprocess = amadeus::process_modis_merge,
-        nthreads = 1
+        nthreads = 20
       # calculate_multi(
       #   locs = sites_spat,
       #   path = mr("dir_input_modis_mcd19"),
@@ -476,13 +481,13 @@ target_calculate_fit <-
     targets::tar_target(
       covariates_modis_vnp46,
       amadeus::calc_modis_par(
-        from = modis_vnp46_paths[1:23],
+        from = modis_vnp46_paths,
         locs = sites_spat,
         locs_id = mr("pointid"),
         name_covariates = "MOD_LGHTN_0_",
         subdataset = 3,
         preprocess = amadeus::process_bluemarble,
-        nthreads = 1
+        nthreads = 20
       # calculate_multi(
       #         locs = sites_spat,
       #         path = mr("dir_input_modis_vnp46"),
@@ -501,13 +506,13 @@ target_calculate_fit <-
     targets::tar_target(
       covariates_modis_mod13,
       amadeus::calc_modis_par(
-        from = modis_mod13_paths[1:23],
+        from = modis_mod13_paths,
         locs = sites_spat,
         locs_id = mr("pointid"),
         name_covariates = "MOD_NDVIV_0_",
         subdataset = "(NDVI)",
         preprocess = amadeus::process_modis_merge,
-        nthreads = 1
+        nthreads = 20
     )
   )
   ,
