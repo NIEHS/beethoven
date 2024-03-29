@@ -1,0 +1,15 @@
+
+
+```{r, eval = FALSE}
+install_github(repo = "https://github.com/NIEHS/amadeus.git")
+```
+
+```{r, eval = FALSE}
+new_aqs <- process_aqs(path = "../input/aqs/daily_88101_2018-2022.csv",
+            date = c("2018-01-01", "2022-12-31"),
+            return_format = "sf")
+saveRDS(new_aqs, file = "../output/sf_process_AQS_20180101to20221231.rds")
+```
+
+
+
