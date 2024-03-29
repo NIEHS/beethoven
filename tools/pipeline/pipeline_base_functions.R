@@ -3,6 +3,7 @@
 #' Running commands with a punchcard
 #' @param varname variable name to call
 #' @param file Path to the punchcard
+#' @param ... Arguments passed to the command
 #' @returns Depending on the specification in the punchcard.
 #' @examples
 #' meta_run(varname = "root_absolute")
@@ -12,19 +13,21 @@
 meta_run <-
   function(
     varname = NULL,
-    file = file.path("./tools/pipeline/punchcard.csv")
+    file = file.path("./tools/pipeline/punchcard.csv"),
+    ...
   ) {
     metaspec <- utils::read.csv(file)
     if (varname == "root_absolute") {
       getwd()
     } else {
       spec <- metaspec[metaspec$varname == varname, ]
-      get(spec$command)(spec$value)
+      foo_run <- get(spec$command)
+      foo_run(spec$value, ...)
     }
   }
 
 mr <- meta_run
-
+mr("nei_year_sequence", split = "|", fixed = TRUE)[[1]]
 
 
 #' Read AQS data

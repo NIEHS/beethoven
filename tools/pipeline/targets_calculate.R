@@ -1,5 +1,12 @@
-## Some domains are manually defined
+## TODO: abide by the new naming convention
 
+# meta_run, resting in the tools/pipeline/pipeline_base_functions.R,
+# is a function that returns a list of parameters for the pipeline
+# for users' convenience and make the pipeline less prone to errors.
+
+# for reference, full list of parameters in amadeus::process_*
+# and amadeus::calc_*.
+# This list will be useful for entering parameters by rlang::inject.
 amadeusArgs <- list(
   path = NULL,
   date = NULL,
@@ -25,7 +32,7 @@ amadeusArgs <- list(
   target_fields = NULL
 )
 
-
+## Targets for feature calculation ####
 target_calculate_fit <-
   list(
     # covariate calculation: multi vs single cases
@@ -37,11 +44,12 @@ target_calculate_fit <-
       covariates_tri,
       calculate_multi(
         # sequence: could be refered from dates
-        domain = 2020, #c(2018, 2019, 2020, 2021, 2022),
-        path = mr("dir_input_tri"),
+        domain = meta_run("tri_year_sequence_test")[[1]],
+        #c(2018, 2019, 2020, 2021, 2022),
+        path = meta_run("dir_input_tri"),
         covariate = "tri",
         locs = sites_spat,
-        locs_id = mr("pointid")
+        locs_id = meta_run("pointid")
       )
     )
     ,
@@ -51,12 +59,12 @@ target_calculate_fit <-
         locs = sites_spat,
         path =
           list.files(
-            mr("dir_input_ecoregion"),
+            meta_run("dir_input_ecoregion"),
             "us_eco_l3*.*.shp$",
             full.names = TRUE,
             recursive = TRUE
           ),
-        locs_id = mr("pointid"),
+        locs_id = meta_run("pointid"),
         covariate = "ecoregion"
       )
     )
@@ -67,21 +75,23 @@ target_calculate_fit <-
         locs = sites_spat,
         path =
           file.path(
-            mr("dir_input_koppen"), "Beck_KG_V1_present_0p083.tif"
+            meta_run("dir_input_koppen"), "Beck_KG_V1_present_0p083.tif"
           ),
-        locs_id = mr("pointid"),
+        locs_id = meta_run("pointid"),
         covariate = "koppen"
       )
     )
     ,
     # 3 branches
+    # NLCD years should be defined in the punchcard
+    # revert to the original range for running the entire pipeline
     targets::tar_target(
       covariates_nlcd_list,
       command = calculate_multi(
-        domain = 2020, #c(2019, 2019, 2019, 2021, 2021),
+        domain = as.integer(meta_run("nlcd_year_sequence_test")[[1]]),
         locs = terra::vect(sites_spat),
-        path = mr("dir_input_nlcd"),
-        locs_id = mr("pointid"),
+        path = meta_run("dir_input_nlcd"),
+        locs_id = meta_run("pointid"),
         covariate = "nlcd",
         radius = radii
       ),
@@ -91,7 +101,7 @@ target_calculate_fit <-
     ,
     targets::tar_target(
       covariates_nlcd,
-      Reduce(function(x, y) dplyr::full_join(x, y, by = c(mr("pointid"), mr("timeid"))),
+      Reduce(function(x, y) dplyr::full_join(x, y, by = c(meta_run("pointid"), meta_run("timeid"))),
         covariates_nlcd_list)
     )
     ,
@@ -106,11 +116,11 @@ target_calculate_fit <-
       covariates_hms_list,
       calculate_single(
         locs = sites_spat,
-        path = mr("dir_input_hms"),
+        path = meta_run("dir_input_hms"),
         covariate = "hms",
         date = time_range,
         variable = hms_level,
-        locs_id = mr("pointid")
+        locs_id = meta_run("pointid")
       ),
       iteration = "list",
       pattern = map(hms_level)
@@ -118,7 +128,7 @@ target_calculate_fit <-
     ,
     targets::tar_target(
       covariates_hms_c,
-      Reduce(function(x, y) dplyr::full_join(x, y, by = c(mr("pointid"), "date")),
+      Reduce(function(x, y) dplyr::full_join(x, y, by = c(meta_run("pointid"), "date")),
         covariates_hms_list)
     )
     ,
@@ -130,14 +140,14 @@ target_calculate_fit <-
     targets::tar_target(
       covariates_sedac_population,
       calculate_multi(
-        domain = 2020, #rep(2020, 5)
+        domain = meta_run("sedac_population_year_test"),
         locs = sites_spat,
         path =
           file.path(
-            mr("dir_input_sedac_population"),
-            mr("file_input_sedac_population")
+            meta_run("dir_input_sedac_population"),
+            meta_run("file_input_sedac_population")
           ),
-        locs_id = mr("pointid"),
+        locs_id = meta_run("pointid"),
         covariate = "sedac_population",
         radius = 0,
         fun = "mean"
@@ -151,10 +161,10 @@ target_calculate_fit <-
         locs = as.data.frame(sites_spat),
         path =
           file.path(
-            mr("dir_input_sedac_groads"),
-            mr("file_input_sedac_groads")
+            meta_run("dir_input_sedac_groads"),
+            meta_run("file_input_sedac_groads")
           ),
-        locs_id = mr("pointid"),
+        locs_id = meta_run("pointid"),
         covariate = "sedac_groads",
         radius = radii
       ),
@@ -165,7 +175,7 @@ target_calculate_fit <-
     # NARR variables calculation ####
     targets::tar_target(
       narr_variables,
-      command = read.csv(mr("file_narr_variables"))$dirs,
+      command = read.csv(meta_run("file_narr_variables"))$dirs,
       iteration = "list"
     )
     ,
@@ -174,10 +184,10 @@ target_calculate_fit <-
       calculate_single(
         locs = sites_spat,
         path = narr_variables,
-        date = c(mr("date_start"), mr("date_end")),
+        date = c(meta_run("date_start"), meta_run("date_end")),
         variable = strsplit(narr_variables, "/")[[1]][3],
         covariate = "narr",
-        locs_id = mr("pointid")
+        locs_id = meta_run("pointid")
       ),
       pattern = map(narr_variables),
       iteration = "list"
@@ -188,17 +198,19 @@ target_calculate_fit <-
       command = load_county()
     )
     ,
+    # Read NEI year range from punchcard ####
+    # revert to the original for the operation
     targets::tar_target(
       nei_dirs,
       command =
-        mr("dir_input_nei2017"),
-        #c(rep(mr("dir_input_nei2017"), 2), rep(mr("dir_input_nei2020"), 3)),
+        meta_run("dir_input_nei2017"),
+        #c(rep(meta_run("dir_input_nei2017"), 2), rep(meta_run("dir_input_nei2020"), 3)),
       iteration = "vector"
     )
     ,
     targets::tar_target(
       nei_years,
-      command = c(2020), #c(2017, 2017, 2020, 2020, 2020),
+      command = as.integer(meta_run("nei_year_sequence_test")[[1]]),
       iteration = "vector"
     )
     ,
@@ -210,7 +222,7 @@ target_calculate_fit <-
         path = nei_dirs,
         covariate = "nei",
         county = county_poly,
-        locs_id = mr("pointid")
+        locs_id = meta_run("pointid")
       ),
       pattern = map(nei_years, nei_dirs),
       iteration = "list"
@@ -218,14 +230,17 @@ target_calculate_fit <-
     ,
     targets::tar_target(
       gmted_combination_stat,
-      command = rep(
-        c(
-          "Breakline Emphasis", "Systematic Subsample",
-          "Median Statistic", "Minimum Statistic",
-          "Mean Statistic", "Maximum Statistic",
-          "Standard Deviation Statistic"
-        ), 3L),
-        iteration = "vector"
+      command =
+        rep(
+          c(
+            "Breakline Emphasis", "Systematic Subsample",
+            "Median Statistic", "Minimum Statistic",
+            "Mean Statistic", "Maximum Statistic",
+            "Standard Deviation Statistic"
+          ),
+          3L
+        ),
+      iteration = "vector"
     )
     ,
     targets::tar_target(
@@ -241,8 +256,8 @@ target_calculate_fit <-
       covariates_gmted_list,
       calculate_single(
         locs = sites_spat,
-        path = mr("dir_input_gmted"),
-        locs_id = mr("pointid"),
+        path = meta_run("dir_input_gmted"),
+        locs_id = meta_run("pointid"),
         covariate = "gmted",
         radius = 0,
         variable = c(gmted_combination_stat, gmted_combination_res)
@@ -253,14 +268,14 @@ target_calculate_fit <-
     ,
     targets::tar_target(
       covariates_gmted,
-      Reduce(function(x, y) dplyr::full_join(x, y, by = mr("pointid")),
+      Reduce(function(x, y) dplyr::full_join(x, y, by = meta_run("pointid")),
         covariates_gmted_list)
     )
     ,
     targets::tar_target(
       geos_dates,
       # revert to the original range for running the entire pipeline
-      command = seq("2020-01-01", "2020-01-15", by = "1 day"),,#as.character(seq(as.Date("2018-01-01"), as.Date("2022-12-31"), by = "1 day")),
+      command = as.character(seq(meta_run("date_start"), meta_run("date_end"), by = "1 day")),
       iteration = "list"
     )
     ,
@@ -269,9 +284,9 @@ target_calculate_fit <-
       calc_geos_strict(
         date = c(geos_dates, geos_dates),
         locs = sites_spat,
-        locs_id = mr("pointid"),
-        path = file.path(mr("dir_input_geos"), "aqc_tavg_1hr_g1440x721_v1"),
-        win = c(-126, -62, 22, 52),
+        locs_id = meta_run("pointid"),
+        path = file.path(meta_run("dir_input_geos"), "aqc_tavg_1hr_g1440x721_v1"),
+        win = as.numeric(meta_run("extent", split = "|", fixed = TRUE)),
         snap = "out"
       ),
       pattern = map(geos_dates),
@@ -283,9 +298,9 @@ target_calculate_fit <-
       calc_geos_strict(
         date = c(geos_dates, geos_dates),
         locs = sites_spat,
-        locs_id = mr("pointid"),
-        path = file.path(mr("dir_input_geos"), "chm_tavg_1hr_g1440x721_v1"),
-        win = c(-126, -62, 22, 52),
+        locs_id = meta_run("pointid"),
+        path = file.path(meta_run("dir_input_geos"), "chm_tavg_1hr_g1440x721_v1"),
+        win = as.numeric(meta_run("extent", split = "|", fixed = TRUE)),
         snap = "out"
       ),
       pattern = map(geos_dates),
@@ -294,20 +309,20 @@ target_calculate_fit <-
     ,
     targets::tar_target(
       covariates_geos_aqc,
-      Reduce(function(x, y) dplyr::full_join(x, y, by = c(mr("pointid"), mr("timeid"))),
+      Reduce(function(x, y) dplyr::full_join(x, y, by = c(meta_run("pointid"), meta_run("timeid"))),
         covariates_geos_aqc_list)
     )
     ,
     targets::tar_target(
       covariates_geos_chm,
-      Reduce(function(x, y) dplyr::full_join(x, y, by = c(mr("pointid"), mr("timeid"))),
+      Reduce(function(x, y) dplyr::full_join(x, y, by = c(meta_run("pointid"), meta_run("timeid"))),
         covariates_geos_chm_list)
     )
     ,
     targets::tar_target(
       modis_mod06_paths,
       read_paths(
-        mr("dir_input_modis_mod06"),
+        meta_run("dir_input_modis_mod06"),
         extension = "hdf"
       )
     )
@@ -315,7 +330,7 @@ target_calculate_fit <-
     targets::tar_target(
       modis_mod11_paths,
       read_paths(
-        mr("dir_input_modis_mod11"),
+        meta_run("dir_input_modis_mod11"),
         extension = "hdf"
       )
     )
@@ -323,7 +338,7 @@ target_calculate_fit <-
     targets::tar_target(
       modis_mod13_paths,
       read_paths(
-        mr("dir_input_modis_mod13"),
+        meta_run("dir_input_modis_mod13"),
         extension = "hdf"
       )
     )
@@ -331,7 +346,7 @@ target_calculate_fit <-
     targets::tar_target(
       modis_mod09_paths,
       read_paths(
-        mr("dir_input_modis_mod09"),
+        meta_run("dir_input_modis_mod09"),
         extension = "hdf"
       )
     )
@@ -339,7 +354,7 @@ target_calculate_fit <-
     targets::tar_target(
       modis_mcd19_paths,
       read_paths(
-        mr("dir_input_modis_mcd19"),
+        meta_run("dir_input_modis_mcd19"),
         extension = "hdf"
       )
     )
@@ -347,7 +362,7 @@ target_calculate_fit <-
     targets::tar_target(
       modis_vnp46_paths,
       read_paths(
-        mr("dir_input_modis_vnp46"),
+        meta_run("dir_input_modis_vnp46"),
         extension = "hdf"
       )
     )
@@ -357,18 +372,18 @@ target_calculate_fit <-
       amadeus::calc_modis_par(
         from = modis_mod11_paths,
         locs = sites_spat,
-        locs_id = mr("pointid"),
+        locs_id = meta_run("pointid"),
         name_covariates = c("MOD_SFCTD_0_", "MOD_SFCTN_0_"),
         subdataset = "(LST_Day_|LST_Night_)",
         preprocess = amadeus::process_modis_merge,
-        nthreads = 20
+        nthreads = meta_run("nthreads_calc")
       # calculate_multi(
       #   locs = sites_spat,
-      #   path = mr("dir_input_modis_mod11"),
+      #   path = meta_run("dir_input_modis_mod11"),
       #   process_function = NULL,
       #   calc_function = amadeus::calc_modis_par,
-      #   locs_id = mr("pointid"),
-      #   from = mr("dir_input_modis_mod11"),
+      #   locs_id = meta_run("pointid"),
+      #   from = meta_run("dir_input_modis_mod11"),
       #   preprocess = amadeus::process_modis_merge,
       #   name_covariates = c("MOD_SFCTD_0_", "MOD_SFCTN_0_"),
       #   subdataset = "(LST_Day_|LST_Night_)",
@@ -381,18 +396,18 @@ target_calculate_fit <-
       amadeus::calc_modis_par(
         from = modis_mod06_paths,
         locs = sites_spat,
-        locs_id = mr("pointid"),
+        locs_id = meta_run("pointid"),
         name_covariates = c("MOD_CLCVD_0_", "MOD_CLCVN_0_"),
         subdataset = "(Cloud_Fraction_Day|Cloud_Fraction_Night)",
-        nthreads = 20
+        nthreads = meta_run("nthreads_calc")
       )
       # calculate_multi(
       #   locs = sites_spat,
-      #   path = mr("dir_input_modis_mod06"),
+      #   path = meta_run("dir_input_modis_mod06"),
       #   process_function = NULL,
       #   calc_function = amadeus::calc_modis_par,
-      #   locs_id = mr("pointid"),
-      #   from = mr("dir_input_modis_mod06"),
+      #   locs_id = meta_run("pointid"),
+      #   from = meta_run("dir_input_modis_mod06"),
       #   preprocess = amadeus::process_modis_swath,
       #   name_covariates = c("MOD_CLCVD_0_", "MOD_CLCVN_0_"),
       #   subdataset = "(Cloud_Fraction_Day|Cloud_Fraction_Night)",
@@ -405,18 +420,18 @@ target_calculate_fit <-
       amadeus::calc_modis_par(
         from = modis_mod09_paths,
         locs = sites_spat,
-        locs_id = mr("pointid"),
+        locs_id = meta_run("pointid"),
         preprocess = amadeus::process_modis_merge,
         name_covariates = sprintf("MOD_SFCRF_%d_", seq(1, 7)),
         subdataset = seq(2, 8),
-        nthreads = 20
+        nthreads = meta_run("nthreads_calc")
       # calculate_multi(
       #   locs = sites_spat,
-      #   path = mr("dir_input_modis_mod09"),
+      #   path = meta_run("dir_input_modis_mod09"),
       #   process_function = NULL,
       #   calc_function = amadeus::calc_modis_par,
-      #   locs_id = mr("pointid"),
-      #   from = mr("dir_input_modis_mod09"),
+      #   locs_id = meta_run("pointid"),
+      #   from = meta_run("dir_input_modis_mod09"),
       #   preprocess = amadeus::process_modis_merge,
       #   name_covariates = sprintf("MOD_SFCRF_%d_", seq(1, 7)),
       #   subdataset = seq(2, 8),
@@ -429,19 +444,19 @@ target_calculate_fit <-
       amadeus::calc_modis_par(
         from = modis_mcd19_paths,
         locs = sites_spat,
-        locs_id = mr("pointid"),
+        locs_id = meta_run("pointid"),
         name_covariates =
           c("MOD_AD4TA_0_", "MOD_AD5TA_0_"),
         subdataset = "(Optical_Depth)",
         preprocess = amadeus::process_modis_merge,
-        nthreads = 20
+        nthreads = meta_run("nthreads_calc")
       # calculate_multi(
       #   locs = sites_spat,
-      #   path = mr("dir_input_modis_mcd19"),
+      #   path = meta_run("dir_input_modis_mcd19"),
       #   process_function = NULL,
       #   calc_function = amadeus::calc_modis_par,
-      #   locs_id = mr("pointid"),
-      #   from = mr("dir_input_modis_mcd19"),
+      #   locs_id = meta_run("pointid"),
+      #   from = meta_run("dir_input_modis_mcd19"),
       #   preprocess = amadeus::process_modis_merge,
       #   name_covariates =
       #     c("MOD_AD4TA_0_", "MOD_AD5TA_0_"),
@@ -455,20 +470,20 @@ target_calculate_fit <-
       amadeus::calc_modis_par(
         from = modis_mcd19_paths,
         locs = sites_spat,
-        locs_id = mr("pointid"),
+        locs_id = meta_run("pointid"),
         name_covariates =
           c("MOD_CSZAN_0_", "MOD_CVZAN_0_", "MOD_RAZAN_0_",
             "MOD_SCTAN_0_", "MOD_GLNAN_0_"),
         subdataset = "(cos|RelAZ|Angle)",
         preprocess = amadeus::process_modis_merge,
-        nthreads = 20
+        nthreads = meta_run("nthreads_calc")
       # calculate_multi(
       #   locs = sites_spat,
-      #   path = mr("dir_input_modis_mcd19"),
+      #   path = meta_run("dir_input_modis_mcd19"),
       #   process_function = NULL,
       #   calc_function = amadeus::calc_modis_par,
-      #   locs_id = mr("pointid"),
-      #   from = mr("dir_input_modis_mcd19"),
+      #   locs_id = meta_run("pointid"),
+      #   from = meta_run("dir_input_modis_mcd19"),
       #   preprocess = amadeus::process_modis_merge,
       #   name_covariates =
       #     c("MOD_CSZAN_0_", "MOD_CVZAN_0_", "MOD_RAZAN_0_",
@@ -483,18 +498,18 @@ target_calculate_fit <-
       amadeus::calc_modis_par(
         from = modis_vnp46_paths,
         locs = sites_spat,
-        locs_id = mr("pointid"),
+        locs_id = meta_run("pointid"),
         name_covariates = "MOD_LGHTN_0_",
         subdataset = 3,
         preprocess = amadeus::process_bluemarble,
-        nthreads = 20
+        nthreads = meta_run("nthreads_calc")
       # calculate_multi(
       #         locs = sites_spat,
-      #         path = mr("dir_input_modis_vnp46"),
+      #         path = meta_run("dir_input_modis_vnp46"),
       #         process_function = NULL,
       #         calc_function = amadeus::calc_modis_par,
-      #         locs_id = mr("pointid"),
-      #         from = mr("dir_input_modis_vnp46"),
+      #         locs_id = meta_run("pointid"),
+      #         from = meta_run("dir_input_modis_vnp46"),
       #         preprocess = amadeus::process_bluemarble,
       #         name_covariates = "MOD_LGHTN_0_",
       #         subdataset = 3,
@@ -508,11 +523,11 @@ target_calculate_fit <-
       amadeus::calc_modis_par(
         from = modis_mod13_paths,
         locs = sites_spat,
-        locs_id = mr("pointid"),
+        locs_id = meta_run("pointid"),
         name_covariates = "MOD_NDVIV_0_",
         subdataset = "(NDVI)",
         preprocess = amadeus::process_modis_merge,
-        nthreads = 20
+        nthreads = meta_run("nthreads_calc")
     )
   )
   ,
@@ -520,7 +535,7 @@ target_calculate_fit <-
   targets::tar_target(
     covariates_combined_sp,
     combine(
-      by = mr("pointid"),
+      by = meta_run("pointid"),
       time = FALSE,
       covariates_koppen,
       covariates_ecoregion,
@@ -532,7 +547,7 @@ target_calculate_fit <-
   targets::tar_target(
     covariates_combined_spt,
     combine(
-      by = mr("pointid"),
+      by = meta_run("pointid"),
       time = TRUE,
       # covariates_nlcd,
       covariates_hms,
@@ -553,9 +568,13 @@ target_calculate_fit <-
     covariates_final,
     combine_final(
       locs = sites_time,
-      locs_id = mr("pointid"),
-      time_id = mr("timeid"),
-      target_years = seq(2018, 2022),
+      locs_id = meta_run("pointid"),
+      time_id = meta_run("timeid"),
+      target_years =
+        seq(
+          as.integer(format(meta_run("date_start"), "%Y")),
+          as.integer(format(meta_run("date_end"), "%Y"))
+        ),
       df_sp = covariates_combined_sp,
       df_spt = covariates_combined_spt
     )
@@ -566,8 +585,8 @@ target_calculate_fit <-
     join_yx(
       df_pm = sites_pm,
       df_covar = covariates_final,
-      locs_id = mr("pointid"),
-      time_id = mr("timeid")
+      locs_id = meta_run("pointid"),
+      time_id = meta_run("timeid")
     )
   )
 )
@@ -575,13 +594,15 @@ target_calculate_fit <-
 
 
 
-
+## Targets for prediction grid features ####
+## FIXME: align with the "_fit" targets
+## TODO: chopin's gridset implementation
 target_calculate_predict <-
   list(
     # ... calculate covariates for prediction grid
     targets::tar_target(
       covar_prediction_grid,
-      read_covar_pred(mr("file_grid_prediction"))
+      read_covar_pred(meta_run("file_grid_prediction"))
     )
     ,
     # covariate calculation: multi vs single cases
@@ -591,10 +612,10 @@ target_calculate_predict <-
         domain = c(2018, 2019, 2020, 2021, 2022),
         outpath =
           file.path(
-            mr("dir_output"), mr("file_covar_predict_tri")
+            meta_run("dir_output"), meta_run("file_covar_predict_tri")
           ),
         locs = covar_prediction_grid,
-        path = mr("dir_input_tri"),
+        path = meta_run("dir_input_tri"),
         ... # other args
       )
     )
@@ -604,10 +625,10 @@ target_calculate_predict <-
       calculate_single(
         outpath =
           file.path(
-            mr("dir_output"), mr("file_covar_predict_ecoregion")
+            meta_run("dir_output"), meta_run("file_covar_predict_ecoregion")
           ),
         locs = covar_prediction_grid,
-        path = mr("dir_input_ecoregion"),
+        path = meta_run("dir_input_ecoregion"),
         ... # other args
       )
     )
@@ -617,10 +638,10 @@ target_calculate_predict <-
       calculate_single(
         outpath =
           file.path(
-            mr("dir_output"), mr("file_covar_predict_koppen")
+            meta_run("dir_output"), meta_run("file_covar_predict_koppen")
           ),
         locs = covar_prediction_grid,
-        path = mr("dir_input_koppen"),
+        path = meta_run("dir_input_koppen"),
         ... # other args
       )
     )
@@ -630,10 +651,10 @@ target_calculate_predict <-
       calculate_multi(
         outpath =
           file.path(
-            mr("dir_output"), mr("file_covar_predict_nlcd")
+            meta_run("dir_output"), meta_run("file_covar_predict_nlcd")
           ),
         locs = covar_prediction_grid,
-        path = mr("dir_input_nlcd"),
+        path = meta_run("dir_input_nlcd"),
         ... # other args
       )
     )
@@ -643,10 +664,10 @@ target_calculate_predict <-
       calculate_multi(
         outpath =
           file.path(
-            mr("dir_output"), mr("file_covar_predict_hms")
+            meta_run("dir_output"), meta_run("file_covar_predict_hms")
           ),
         locs = covar_prediction_grid,
-        path = mr("dir_input_hms"),
+        path = meta_run("dir_input_hms"),
         ... # other args
       )
     )
@@ -656,10 +677,10 @@ target_calculate_predict <-
       calculate_multi(
         outpath =
           file.path(
-            mr("dir_output"), mr("file_covar_predict_sedac_population")
+            meta_run("dir_output"), meta_run("file_covar_predict_sedac_population")
           ),
         locs = covar_prediction_grid,
-        path = mr("dir_input_sedac_population"),
+        path = meta_run("dir_input_sedac_population"),
         ... # other args
       )
     )
@@ -669,10 +690,10 @@ target_calculate_predict <-
       calculate_multi(
         outpath =
           file.path(
-            mr("dir_output"), mr("file_covar_predict_sedac_groads")
+            meta_run("dir_output"), meta_run("file_covar_predict_sedac_groads")
           ),
         locs = covar_prediction_grid,
-        path = mr("dir_input_sedac_groads"),
+        path = meta_run("dir_input_sedac_groads"),
         ... # other args
       )
     )
@@ -682,10 +703,10 @@ target_calculate_predict <-
       calculate_multi(
         outpath =
           file.path(
-            mr("dir_output"), mr("file_covar_predict_narrmono")
+            meta_run("dir_output"), meta_run("file_covar_predict_narrmono")
           ),
         locs = covar_prediction_grid,
-        path = mr("dir_input_narrmono"),
+        path = meta_run("dir_input_narrmono"),
         ... # other args
       )
     )
@@ -695,10 +716,10 @@ target_calculate_predict <-
       calculate_multi(
         outpath =
           file.path(
-            mr("dir_output"), mr("file_covar_predict_narrplevels")
+            meta_run("dir_output"), meta_run("file_covar_predict_narrplevels")
           ),
         locs = covar_prediction_grid,
-        path = mr("dir_input_narrplevels"),
+        path = meta_run("dir_input_narrplevels"),
         ... # other args
       )
     )
@@ -709,10 +730,10 @@ target_calculate_predict <-
         domain = c(2017, 2017, 2020, 2020, 2020),
         outpath =
           file.path(
-            mr("dir_output"), mr("file_covar_predict_nei")
+            meta_run("dir_output"), meta_run("file_covar_predict_nei")
           ),
         locs = covar_prediction_grid,
-        path = mr("dir_input_nei"),
+        path = meta_run("dir_input_nei"),
         ... # other args
       )
     )
@@ -722,10 +743,10 @@ target_calculate_predict <-
       calculate_multi(
         outpath =
           file.path(
-            mr("dir_output"), mr("file_covar_predict_gmted")
+            meta_run("dir_output"), meta_run("file_covar_predict_gmted")
           ),
         locs = covar_prediction_grid,
-        path = mr("dir_input_gmted"),
+        path = meta_run("dir_input_gmted"),
         ... # other args
       )
     )
@@ -735,10 +756,10 @@ target_calculate_predict <-
       calculate_multi(
         outpath =
           file.path(
-            mr("dir_output"), mr("file_covar_predict_geos")
+            meta_run("dir_output"), meta_run("file_covar_predict_geos")
           ),
         locs = covar_prediction_grid,
-        path = mr("dir_input_geos"),
+        path = meta_run("dir_input_geos"),
         ... # other args
       )
     )
@@ -748,10 +769,10 @@ target_calculate_predict <-
       calculate_multi(
         outpath =
           file.path(
-            mr("dir_output"), mr("file_covar_predict_modis_mod11")
+            meta_run("dir_output"), meta_run("file_covar_predict_modis_mod11")
           ),
         locs = covar_prediction_grid,
-        path = mr("dir_input_modis_mod11"),
+        path = meta_run("dir_input_modis_mod11"),
         ... # other args
       )
     )
@@ -761,10 +782,10 @@ target_calculate_predict <-
       calculate_multi(
         outpath =
           file.path(
-            mr("dir_output"), mr("file_covar_predict_modis_mod06")
+            meta_run("dir_output"), meta_run("file_covar_predict_modis_mod06")
           ),
         locs = covar_prediction_grid,
-        path = mr("dir_input_modis_mod06"),
+        path = meta_run("dir_input_modis_mod06"),
         ... # other args
       )
     )
@@ -774,10 +795,10 @@ target_calculate_predict <-
       calculate_multi(
         outpath =
           file.path(
-            mr("dir_output"), mr("file_covar_predict_modis_mod13")
+            meta_run("dir_output"), meta_run("file_covar_predict_modis_mod13")
           ),
         locs = covar_prediction_grid,
-        path = mr("dir_input_modis_mod13"),
+        path = meta_run("dir_input_modis_mod13"),
         ... # other args
       )
     )
@@ -787,10 +808,10 @@ target_calculate_predict <-
       calculate_multi(
         outpath =
           file.path(
-            mr("dir_output"), mr("file_covar_predict_modis_mcd19")
+            meta_run("dir_output"), meta_run("file_covar_predict_modis_mcd19")
           ),
         locs = covar_prediction_grid,
-        path = mr("dir_input_modis_mcd19"),
+        path = meta_run("dir_input_modis_mcd19"),
         ... # other args
       )
     )
@@ -800,10 +821,10 @@ target_calculate_predict <-
       calculate_multi(
         outpath =
           file.path(
-            mr("dir_output"), mr("file_covar_predict_modis_mod09")
+            meta_run("dir_output"), meta_run("file_covar_predict_modis_mod09")
           ),
         locs = covar_prediction_grid,
-        path = mr("dir_input_modis_mod09"),
+        path = meta_run("dir_input_modis_mod09"),
         ... # other args
       )
     )
@@ -813,10 +834,10 @@ target_calculate_predict <-
       calculate_multi(
         outpath =
           file.path(
-            mr("dir_output"), mr("file_covar_predict_modis_vnp46")
+            meta_run("dir_output"), meta_run("file_covar_predict_modis_vnp46")
           ),
         locs = covar_prediction_grid,
-        path = mr("dir_input_modis_vnp46"),
+        path = meta_run("dir_input_modis_vnp46"),
         ... # other args
       )
     )
@@ -825,7 +846,7 @@ target_calculate_predict <-
     targets::tar_target(
       covariates_predict_combined_sp,
       combine(
-        by = mr("pointid"),
+        by = meta_run("pointid"),
         time = FALSE,
         covariates_predict_koppen,
         covariates_predict_ecoregion,
@@ -836,7 +857,7 @@ target_calculate_predict <-
     targets::tar_target(
       covariates_predict_combined_spt,
       combine(
-        by = mr("pointid"),
+        by = meta_run("pointid"),
         time = TRUE,
         #covariates_predict_nlcd,
         covariates_predict_hms,
@@ -857,8 +878,8 @@ target_calculate_predict <-
       covariates_predict_final,
       combine_final(
         locs = covar_prediction_grid,
-        locs_id = mr("pointid"),
-        time_id = mr("timeid"),
+        locs_id = meta_run("pointid"),
+        time_id = meta_run("timeid"),
         target_years = seq(2018, 2022),
         df_sp = covariates_predict_combined_sp,
         df_spt = covariates_predict_combined_spt

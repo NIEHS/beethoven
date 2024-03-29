@@ -87,3 +87,7 @@ input
 
 # pipeline
 _targets
+
+# future batchtools outputs
+.future
+slurm_error.log

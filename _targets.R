@@ -13,12 +13,24 @@ source("./tools/pipeline/targets_predict.R")
 
 # bypass option
 Sys.setenv("BTV_DOWNLOAD_PASS" = "TRUE")
-# library(future)
-# library(future.callr)
-# plan(callr)
+library(future)
+library(future.batchtools)
 
+plan(
+  tweak(
+    future.batchtools::batchtools_slurm,
+    template = "tools/pipeline/template_slurm.tmpl",
+    resources =
+      list(memory = 8,
+        log.file = "slurm_run.log",
+        ncpus = 30,
+        partition = "geo", ntasks = 4,
+        email = "songi2@nih.gov",
+        error.file = "slurm_error.log")
+  )
+)
 
-
+# invalidate any nodes older than 180 days: force running the pipeline
 tar_invalidate(any_of(tar_older(Sys.time() - as.difftime(180, units = "days"))))
 # # nullify download target if bypass option is set
 if (Sys.getenv("BTV_DOWNLOAD_PASS") == "TRUE") {
@@ -26,6 +38,7 @@ if (Sys.getenv("BTV_DOWNLOAD_PASS") == "TRUE") {
 }
 
 # targets options
+# TODO: check if the controller and resources setting are required
 tar_option_set(
   packages =
     c("amadeus", "chopin",
@@ -35,18 +48,32 @@ tar_option_set(
       "sftime", "stars", "rlang", "foreach", "parallelly"),
   library = "~/r-libs",
   repository = "local",
-  controller = 
-    crew.cluster::crew_controller_slurm(
-      slurm_log_output = "output/slurm_pipeline_log.out",
-      slurm_log_error = "output/slurm_pipeline_error.err",
-      script_directory = "output/slurm_scripts",
-      workers = 50L,
-      tasks_max = 50L,
-      slurm_memory_gigabytes_per_cpu = 12,
-      slurm_cpus_per_task = 8L,
-      slurm_time_minutes = NULL,
-      slurm_partition = "geo"
-    ),
+  # controller = 
+  #   crew.cluster::crew_controller_slurm(
+  #     slurm_log_output = "output/slurm_pipeline_log.out",
+  #     slurm_log_error = "output/slurm_pipeline_error.err",
+  #     script_directory = "output/slurm_scripts",
+  #     workers = 50L,
+  #     tasks_max = 50L,
+  #     slurm_memory_gigabytes_per_cpu = 12,
+  #     slurm_cpus_per_task = 8L,
+  #     slurm_time_minutes = NULL,
+  #     slurm_partition = "geo"
+  #   ),
+  resources = tar_resources(
+    future = tar_resources_future(
+      plan =
+        tweak(
+          future.batchtools::batchtools_slurm,
+          template = "tools/pipeline/template_slurm.tmpl",
+          resources = list(memory = "12",
+                          log.file = "slurm_run.log",
+                          ncpus = 30, partition = "geo", tasks = 4,
+                          email = "songi2@nih.gov",
+                          error.file = "slurm_error.log")
+        )
+    )
+  ),
   error = "null",
   memory = "persistent",
   format = "qs",
@@ -85,5 +112,5 @@ list(
   # )
 )
 
-# targets::tar_visnetwork()
+# targets::tar_visnetwork(targets_only = TRUE)
 # END OF FILE
