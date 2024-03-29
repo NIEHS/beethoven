@@ -84,81 +84,158 @@
 </h1></div>
 <p>Group Project for the Spatiotemporal Exposures and Toxicology group with help from friends <span class="emoji" data-emoji="smiley">😃</span> <span class="emoji" data-emoji="cowboy_hat_face">🤠</span> <span class="emoji" data-emoji="earth_americas">🌎</span></p>
 <div class="section level2">
-<h2 id="github-pushpull-workflow">GitHub Push/Pull Workflow<a class="anchor" aria-label="anchor" href="#github-pushpull-workflow"></a>
+<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<ol style="list-style-type: decimal">
-<li>Each collaborator has a local copy of the github repo - suggested location is ddn/gs1/username/home</li>
-<li>Work locally</li>
-<li>Push to remote</li>
-<li>Kyle [or delegate] will pull to MAIN local copy on SET group ddn location</li>
-</ol>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"NIEHS/beethoven"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="repo-rules">Repo Rules<a class="anchor" aria-label="anchor" href="#repo-rules"></a>
+<h2 id="getting-started">Getting Started<a class="anchor" aria-label="anchor" href="#getting-started"></a>
 </h2>
-<ol style="list-style-type: decimal">
-<li>To PUSH changes to the repo, the changes must be made to a non-MAIN branch</li>
-<li>Then a PULL request must be made</li>
-<li>Then it requires the REVIEW of 1 person (can be anyone)</li>
-<li>Then the change from the branch is MERGED to the MAIN branch</li>
-</ol>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">TODO</span> </span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="overall-project-workflow">Overall Project Workflow<a class="anchor" aria-label="anchor" href="#overall-project-workflow"></a>
 </h2>
 <p>Targets: Make-like Reproducible Analysis Pipeline 1) AQS Data 2) Generate Covariates 3) Fit Base Learners 4) Fit Meta Learners 5) Predictions 6) Summary Stats</p>
+<p><strong>Placeholder for up-to-date rendering of targets</strong></p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">tar_visnetwork</span><span class="op">(</span><span class="va">targets</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="unit-and-integration-testing">Unit and Integration Testing<a class="anchor" aria-label="anchor" href="#unit-and-integration-testing"></a>
+<h2 id="project-organization">Project Organization<a class="anchor" aria-label="anchor" href="#project-organization"></a>
 </h2>
-<p>We will utilize various testing approaches to ensure functionality and quality of code</p>
+<p>Here, we describe the structure of the project and the naming conventions used. The most up to date file paths and names are recorded here for reference.</p>
 <div class="section level3">
-<h3 id="processes-to-test-or-check">Processes to test or check<a class="anchor" aria-label="anchor" href="#processes-to-test-or-check"></a>
-</h3>
-<ol style="list-style-type: decimal">
-<li>data type</li>
-<li>data name</li>
-<li>data size</li>
-<li>relative paths</li>
-<li>output of one module is the expectation of the input of the next module</li>
-</ol>
-</div>
-<div class="section level3">
-<h3 id="test-drive-development">Test Drive Development<a class="anchor" aria-label="anchor" href="#test-drive-development"></a>
-</h3>
-<p>Starting from the end product, we work backwards while articulating the tests needed at each stage.</p>
-<div class="section level4">
-<h4 id="key-points-of-unit-and-integration-testing">Key Points of Unit and Integration Testing<a class="anchor" aria-label="anchor" href="#key-points-of-unit-and-integration-testing"></a>
-</h4>
-<p>File Type 1. NetCDF 2. Numeric, double precision 3. NA 4. Variable Names Exist 5. Naming Convention</p>
-<p>Stats 1. Non-negative variance (<span class="math inline"><em>σ</em><sup>2</sup></span>) 2. Mean is reasonable (<span class="math inline"><em>μ</em></span>) 3. SI Units</p>
-<p>Domain 1. In the US (+ buffer) 2. In Time range (2018-2022)</p>
-<p>Geographic 1. Projections 2. Coordinate names (e.g. lat/lon) 3. Time in acceptable format</p>
-</div>
-</div>
-<div class="section level3">
-<h3 id="frameworks-for-testing-of-this-project-with-help-from-chatgpt">Frameworks for Testing of this project (with help from ChatGPT)<a class="anchor" aria-label="anchor" href="#frameworks-for-testing-of-this-project-with-help-from-chatgpt"></a>
+<h3 id="file-structure">File Structure<a class="anchor" aria-label="anchor" href="#file-structure"></a>
 </h3>
 <div class="section level4">
-<h4 id="test-driven-development-tdd--key-steps">Test Driven Development (TDD)- Key Steps<a class="anchor" aria-label="anchor" href="#test-driven-development-tdd--key-steps"></a>
+<h4 id="folder-structure">Folder Structure<a class="anchor" aria-label="anchor" href="#folder-structure"></a>
 </h4>
-<ol style="list-style-type: decimal">
-<li><p><strong>Write a Test</strong>: Before you start writing any code, you write a test case for the functionality you want to implement. This test should fail initially because you haven’t written the code to make it pass yet. The test defines the expected behavior of your code.</p></li>
-<li><p><strong>Run the Test</strong>: Run the test to ensure it fails. This step confirms that your test is correctly assessing the functionality you want to implement.</p></li>
-<li><p><strong>Write the Minimum Code</strong>: Write the minimum amount of code required to make the test pass. Don’t worry about writing perfect or complete code at this stage; the goal is just to make the test pass.</p></li>
-<li><p><strong>Run the Test Again</strong>: After writing the code, run the test again. If it passes, it means your code now meets the specified requirements.</p></li>
-<li><p><strong>Refactor (if necessary)</strong>: If your code is working and the test passes, you can refactor your code to improve its quality, readability, or performance. The key here is that you should have test coverage to ensure you don’t introduce new bugs while refactoring.</p></li>
-<li><p><strong>Repeat</strong>: Continue this cycle of writing a test, making it fail, writing the code to make it pass, and refactoring as needed. Each cycle should be very short and focused on a small piece of functionality.</p></li>
-<li><p><strong>Complete the Feature</strong>: Keep repeating the process until your code meets all the requirements for the feature you’re working on.</p></li>
-</ol>
-<p>TDD helps ensure that your code is reliable and that it remains functional as you make changes and updates. It also encourages a clear understanding of the requirements and promotes better code design.</p>
+<p>Root Directory - R/ - input/ - output/ - tests/ - inst/ - docs/ - tools/ - man/ - vignettes/</p>
+</div>
+<div class="section level4">
+<h4 id="input">input/<a class="anchor" aria-label="anchor" href="#input"></a>
+</h4>
+</div>
+<div class="section level4">
+<h4 id="output">output/<a class="anchor" aria-label="anchor" href="#output"></a>
+</h4>
+<p>Currently, as of 3/29/24, the output folder contains .rds files for each of the covariates/features for model development. e.g.:</p>
+<ul>
+<li>NRTAP_Covars_NLCD.rds</li>
+<li>NRTAP_Covars_TRI.rds</li>
+</ul>
+</div>
+<div class="section level4">
+<h4 id="tests">tests/<a class="anchor" aria-label="anchor" href="#tests"></a>
+</h4>
+<div class="section level5">
+<h5 id="testthat">testthat/<a class="anchor" aria-label="anchor" href="#testthat"></a>
+</h5>
+</div>
+<div class="section level5">
+<h5 id="testdata">testdata/<a class="anchor" aria-label="anchor" href="#testdata"></a>
+</h5>
 </div>
 </div>
+<div class="section level4">
+<h4 id="relevant-files">Relevant files<a class="anchor" aria-label="anchor" href="#relevant-files"></a>
+</h4>
+<ul>
+<li>LICENSE</li>
+<li>DESCRIPTION</li>
+<li>NAMESPACE</li>
+<li>README.md</li>
+</ul>
 </div>
-<div class="section level2">
-<h2 id="base-learners">Base Learners<a class="anchor" aria-label="anchor" href="#base-learners"></a>
-</h2>
-<p>Potential base learners we can use: 1) PrestoGP (lasso + GP) 2) XGBOOST 3) RF 4) CNN 5) UMAP covariates 6) Encoder NN covariates</p>
+</div>
+<div class="section level3">
+<h3 id="naming-conventions">Naming Conventions<a class="anchor" aria-label="anchor" href="#naming-conventions"></a>
+</h3>
+<p>For <code>tar_target</code> functions, we use the following naming conventions:</p>
+<p>Example from CF conventions: [surface] [component] standard_name [at surface] [in medium] [due to process] [assuming condition]</p>
+<p>Naming conventions for tar objects:</p>
+<p>Long Version: [R object type]<em>[role]</em>[stage]<em>[source]</em>[spacetime]</p>
+<ul>
+<li><p>R object type: sf, datatable, tibble, SpatRaster, SpatVector</p></li>
+<li>
+<p>role : Detailed description of the role of the object in the pipeline. Allowable keywords:</p>
+<ul>
+<li>PM25</li>
+<li>feature (i.e. geographic covariate)</li>
+<li>base_model
+<ul>
+<li>base_model suffix types: linear, random_forest, xgboost, neural_net etc.</li>
+</ul>
+</li>
+<li>meta_model</li>
+<li>prediction</li>
+<li>plot -plot suffix types: scatter, map, time_series, histogram, density etc.</li>
+</ul>
+</li>
+<li>
+<p>stage: the stage of the pipeline the object is used in. Object transformations are also articulated here. Allowable keywords:</p>
+<ul>
+<li>raw</li>
+<li>process</li>
+<li>fit: Ready for base/meta learner fitting</li>
+<li>result: Final result</li>
+<li>log</li>
+<li>log10</li>
+</ul>
+</li>
+<li>
+<p>source: the original data source</p>
+<ul>
+<li>AQS</li>
+<li>MODIS</li>
+<li>GMTED</li>
+<li>NLCD</li>
+<li>NARR</li>
+<li>GEOSCF</li>
+<li>TRI</li>
+</ul>
+</li>
+<li>
+<p>spacetime: relevant spatial or temporal information</p>
+<ul>
+<li>spatial:
+<ul>
+<li>site_id</li>
+<li>census_tract</li>
+<li>grid</li>
+</ul>
+</li>
+<li>time:
+<ul>
+<li>daily [optional YYYYMMDD]</li>
+<li>annual [optional YYYY]</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>Short Verion:</p>
+<p>Cross-walk lives on the punchcard.</p>
+</div>
+<div class="section level3">
+<h3 id="function-naming-convenctions">Function Naming Convenctions<a class="anchor" aria-label="anchor" href="#function-naming-convenctions"></a>
+</h3>
+<p>TBD</p>
+<ul>
+<li>download</li>
+<li>calc</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="punchcard">Punchcard<a class="anchor" aria-label="anchor" href="#punchcard"></a>
+</h3>
+<p>The punchard is a single list of paths, variables, and functions that are used throughout the pipeline.</p>
+<p>If a path is used in multiple places, it is only listed once. Then updates only require changing the path in one place.</p>
+<p>tools/pipeline/punchcard.csv</p>
+</div>
 </div>
 </div>
 
