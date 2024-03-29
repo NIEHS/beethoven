@@ -1,0 +1,26 @@
+---
+title: "Contibuting Guide for beethoven"
+format: html
+---
+
+
+## GitHub Push/Pull Workflow
+1) Each collaborator has a local copy of the github repo
+2) Work locally
+3) Push to remote
+4) Admin will pull to MAIN local copy on SET group ddn location
+
+## Repo Rules 
+1) To PUSH changes to the repo, the changes must be made to a non-MAIN branch
+2) Then a PULL request must be made
+3) Then it requires the REVIEW of 1 person (can be anyone)
+4) Then the change from the branch is MERGED to the MAIN branch
+   
+   
+## Areas for Contribution
+
+1. **Documentation**: We are always looking for help in improving our documentation. This includes the README, contributing guide, and any other documentation that you think could be improved.
+2. **Code**: We are always looking for help in improving our code. This includes fixing bugs, adding new features, and improving existing features.
+3. **Testing**: We are always looking for help in improving our testing. This includes writing new tests, improving existing tests, and ensuring that all tests pass.
+4. **Base Learners**: Novel and efficient base learners are always welcome and can be integrated into the overall model workflow
+5. **Model Workflow**: Improvements to the model workflow are always welcome. This includes improving the efficiency of the workflow, adding new features, and improving existing features.

@@ -10,6 +10,9 @@
 output/
 manuscript/
 
+# README html 
+README.html
+
 # User-specific files
 .Ruserdata
 

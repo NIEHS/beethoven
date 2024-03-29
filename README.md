@@ -7,18 +7,18 @@ experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](h
 # Building an Extensible, rEproducible, Test-driven, Harmonized, Open-source, Versioned, ENsemble model for air quality
 Group Project for the Spatiotemporal Exposures and Toxicology group with help from friends :smiley: :cowboy_hat_face: :earth_americas:
 
-## GitHub Push/Pull Workflow
-1) Each collaborator has a local copy of the github repo - suggested location is ddn/gs1/username/home
-2) Work locally
-3) Push to remote
-4) Kyle [or delegate] will pull to MAIN local copy on SET group ddn location
+## Installation
 
-## Repo Rules 
-1) To PUSH changes to the repo, the changes must be made to a non-MAIN branch
-2) Then a PULL request must be made
-3) Then it requires the REVIEW of 1 person (can be anyone)
-4) Then the change from the branch is MERGED to the MAIN branch
-   
+```r
+remotes::install_github("NIEHS/beethoven")
+```
+
+## Getting Started
+
+```r
+TODO 
+```
+
 ## Overall Project Workflow
 
 Targets: Make-like Reproducible Analysis Pipeline
@@ -28,74 +28,133 @@ Targets: Make-like Reproducible Analysis Pipeline
  4) Fit Meta Learners
  5) Predictions
  6) Summary Stats
+ 
+**Placeholder for up-to-date rendering of targets**
+
+```r
+tar_visnetwork(targets)
+```
     
-##  Unit and Integration Testing 
 
-We will utilize various testing approaches to ensure functionality and quality of code
+## Project Organization
 
-### Processes to test or check 
-1) data type
-2) data name
-3) data size
-4) relative paths
-5) output of one module is the expectation of the input of the next module
+Here, we describe the structure of the project and the naming conventions used. The most up to date file paths and names are recorded here for reference.
 
-### Test Drive Development
-Starting from the end product, we work backwards while articulating the tests needed at each stage.
+### File Structure
 
-#### Key Points of Unit and Integration Testing
-File Type
-1. NetCDF
-2. Numeric, double precision
-3. NA
-4. Variable Names Exist
-5. Naming Convention
+#### Folder Structure
+Root Directory
+- R/ 
+- input/
+- output/
+- tests/
+- inst/
+- docs/
+- tools/
+- man/
+- vignettes/
 
-Stats 
-1. Non-negative variance ($\sigma^2$)
-2. Mean is reasonable ($\mu$)
-3. SI Units
+#### input/ 
 
-Domain 
-1. In the US (+ buffer)
-2. In Time range (2018-2022)
+#### output/ 
 
-Geographic 
-1. Projections
-2. Coordinate names (e.g. lat/lon)
-3. Time in acceptable format 
+Currently, as of 3/29/24, the output folder contains .rds files for each
+of the covariates/features for model development. e.g.:
+
+- NRTAP_Covars_NLCD.rds
+- NRTAP_Covars_TRI.rds 
 
 
-### Frameworks for Testing of this project (with help from ChatGPT)
+#### tests/ 
 
-#### Test Driven Development (TDD)- Key Steps
-1. **Write a Test**: Before you start writing any code, you write a test case for the functionality you want to implement. This test should fail initially because you haven't written the code to make it pass yet. The test defines the expected behavior of your code.
+##### testthat/
 
-2. **Run the Test**: Run the test to ensure it fails. This step confirms that your test is correctly assessing the functionality you want to implement.
+##### testdata/
+  
+#### Relevant files 
 
-3. **Write the Minimum Code**: Write the minimum amount of code required to make the test pass. Don't worry about writing perfect or complete code at this stage; the goal is just to make the test pass.
+- LICENSE
+- DESCRIPTION
+- NAMESPACE 
+- README.md
 
-4. **Run the Test Again**: After writing the code, run the test again. If it passes, it means your code now meets the specified requirements.
+### Naming Conventions
 
-5. **Refactor (if necessary)**: If your code is working and the test passes, you can refactor your code to improve its quality, readability, or performance. The key here is that you should have test coverage to ensure you don't introduce new bugs while refactoring.
+For `tar_target` functions, we use the following naming conventions:
 
-6. **Repeat**: Continue this cycle of writing a test, making it fail, writing the code to make it pass, and refactoring as needed. Each cycle should be very short and focused on a small piece of functionality.
+Example from CF conventions: 
+[surface] [component] standard_name [at surface] [in medium] [due to process] [assuming condition]
 
-7. **Complete the Feature**: Keep repeating the process until your code meets all the requirements for the feature you're working on.
+Naming conventions for tar objects: 
 
-TDD helps ensure that your code is reliable and that it remains functional as you make changes and updates. It also encourages a clear understanding of the requirements and promotes better code design.
+Long Version:
+[R object type]_[role]_[stage]_[source]_[spacetime]
+
+- R object type: sf, datatable, tibble, SpatRaster, SpatVector
+
+- role : Detailed description of the role of the object in the pipeline. Allowable keywords:
+
+  - PM25
+  - feature (i.e. geographic covariate) 
+  - base_model
+    - base_model suffix types: linear, random_forest, xgboost, neural_net etc.
+  - meta_model 
+  - prediction
+  - plot
+    -plot suffix types: scatter, map, time_series, histogram, density etc. 
+  
+- stage: the stage of the pipeline the object is used in. Object transformations
+are also articulated here. Allowable keywords: 
+
+  - raw
+  - process
+  - fit: Ready for base/meta learner fitting
+  - result: Final result
+  - log
+  - log10 
+
+- source: the original data source
+
+  - AQS
+  - MODIS
+  - GMTED 
+  - NLCD
+  - NARR
+  - GEOSCF
+  - TRI
+
+  
+- spacetime: relevant spatial or temporal information 
+
+  - spatial: 
+    - site_id
+    - census_tract
+    - grid
+  - time: 
+    - daily  [optional YYYYMMDD]
+    - annual  [optional YYYY]
 
 
 
+Short Verion: 
 
-## Base Learners 
-Potential base learners we can use: 
-1) PrestoGP (lasso + GP)
-2) XGBOOST
-3) RF
-4) CNN
-5) UMAP covariates
-6) Encoder NN covariates
+Cross-walk lives on the punchcard.
+
+### Function Naming Convenctions 
+
+TBD
+
+  - download
+  - calc
+
+### Punchcard 
+
+The punchard is a single list of paths, variables, and functions that are used throughout the pipeline. 
+
+If a path is used in multiple places, it is only listed once. Then updates only require changing the path in one place.
+
+tools/pipeline/punchcard.csv
+
 
 
 
