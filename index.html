@@ -113,7 +113,19 @@
 <div class="section level4">
 <h4 id="folder-structure">Folder Structure<a class="anchor" aria-label="anchor" href="#folder-structure"></a>
 </h4>
-<p>Root Directory - R/ - input/ - output/ - tests/ - inst/ - docs/ - tools/ - man/ - vignettes/</p>
+<p>Within the project main or root directory, we have the following folder structure. We provide a brief description of each folder.</p>
+<ul>
+<li>
+<strong>R/</strong> This is where the main R code (e.g. .R files) lives. Nothing else but .R files should be in here</li>
+<li><strong>input/</strong></li>
+<li><strong>output/</strong></li>
+<li><strong>tests/</strong></li>
+<li><strong>inst/</strong></li>
+<li><strong>docs/</strong></li>
+<li><strong>tools/</strong></li>
+<li><strong>man/</strong></li>
+<li><strong>vignettes/</strong></li>
+</ul>
 </div>
 <div class="section level4">
 <h4 id="input">input/<a class="anchor" aria-label="anchor" href="#input"></a>
@@ -154,14 +166,20 @@
 <div class="section level3">
 <h3 id="naming-conventions">Naming Conventions<a class="anchor" aria-label="anchor" href="#naming-conventions"></a>
 </h3>
-<p>For <code>tar_target</code> functions, we use the following naming conventions:</p>
-<p>Example from CF conventions: [surface] [component] standard_name [at surface] [in medium] [due to process] [assuming condition]</p>
-<p>Naming conventions for tar objects:</p>
-<p>Long Version: [R object type]<em>[role]</em>[stage]<em>[source]</em>[spacetime]</p>
+<p>Naming things is hard and somewhat subjective. Nonetheless, consistent naming conventions make for better reproducibility, interpretability, and future extensibility. Here, we provide the <code>beethoven</code> naming conventions for objects as used in <code>targets</code> and for naming functions within the package (i.e. <strong>R/</strong>). For <code>tar_target</code> functions, we use the following naming conventions:</p>
+<p>Naming conventions for <code>tar</code> objects. We are motivated by the <a href="https://cfconventions.org/Data/cf-standard-names/docs/guidelines.html" class="external-link">Compositional Forecast</a> (CF) model naming conventions:</p>
+<p>e.g. [surface] [component] standard_name [at surface] [in medium] [due to process] [assuming condition] In CF, the entire process can be known from the required and optional naming pieces.</p>
+<p>Here, we use the following naming convention:</p>
+<p><strong>[R object type]_[role-suffix]_[stage]_[source]_[spacetime]</strong></p>
+<p>Each section is in the brackets [] and appears in this order. For some objects, not all naming sections are required. If two keywords in a section apply, then they are appended with a <code>-</code></p>
+<p>Examples: 1) <code>sf_PM25_log10-fit_AQS_siteid</code> is an <code>sf</code> object for <code>PM25</code> data that is log-transformed and ready for base-learner fitting, derived from AQS data and located at the siteid locations. 2) <code>SpatRast_process_MODIS</code> is a terra <code>SpatRast</code> object that has been processed from MODIS.</p>
+<div class="section level4">
+<h4 id="naming-section-definitions">Naming section definitions:<a class="anchor" aria-label="anchor" href="#naming-section-definitions"></a>
+</h4>
 <ul>
-<li><p>R object type: sf, datatable, tibble, SpatRaster, SpatVector</p></li>
+<li><p><strong>R object type</strong>: sf, datatable, tibble, SpatRaster, SpatVector</p></li>
 <li>
-<p>role : Detailed description of the role of the object in the pipeline. Allowable keywords:</p>
+<p><strong>role:</strong> Detailed description of the role of the object in the pipeline. Allowable keywords:</p>
 <ul>
 <li>PM25</li>
 <li>feature (i.e. geographic covariate)</li>
@@ -176,7 +194,7 @@
 </ul>
 </li>
 <li>
-<p>stage: the stage of the pipeline the object is used in. Object transformations are also articulated here. Allowable keywords:</p>
+<p><strong>stage</strong>: the stage of the pipeline the object is used in. Object transformations are also articulated here. Allowable keywords:</p>
 <ul>
 <li>raw</li>
 <li>process</li>
@@ -187,7 +205,7 @@
 </ul>
 </li>
 <li>
-<p>source: the original data source</p>
+<p><strong>source:</strong> the original data source</p>
 <ul>
 <li>AQS</li>
 <li>MODIS</li>
@@ -196,15 +214,21 @@
 <li>NARR</li>
 <li>GEOSCF</li>
 <li>TRI</li>
+<li>KOPPENGEIGER</li>
+<li>MERRA2</li>
+<li>HMS</li>
+<li>gROADS</li>
+<li>POPULATION</li>
+<li>[Note, we can add and/or update these sources as needed]</li>
 </ul>
 </li>
 <li>
-<p>spacetime: relevant spatial or temporal information</p>
+<p><strong>spacetime:</strong> relevant spatial or temporal information</p>
 <ul>
 <li>spatial:
 <ul>
-<li>site_id</li>
-<li>census_tract</li>
+<li>siteid</li>
+<li>censustract</li>
 <li>grid</li>
 </ul>
 </li>
@@ -218,15 +242,32 @@
 </li>
 </ul>
 <p>Short Verion:</p>
-<p>Cross-walk lives on the punchcard.</p>
+<p>A shortened version for filenames is available on the punchcard at <code>tools/pipeline/punchcard.csv</code></p>
+</div>
 </div>
 <div class="section level3">
 <h3 id="function-naming-convenctions">Function Naming Convenctions<a class="anchor" aria-label="anchor" href="#function-naming-convenctions"></a>
 </h3>
-<p>TBD</p>
+<p>We have adopted naming conventions in functions in this package as well as <code>amadeus</code> which is a key input package.</p>
+<p><strong>[High-Level-Process]_[Source]_[Object]</strong></p>
+<ul>
+<li>
+<p><strong>High-Level-Process</strong></p>
 <ul>
 <li>download</li>
+<li>process</li>
 <li>calc</li>
+</ul>
+</li>
+<li><p><strong>source:</strong> the original data source. Same as source section for tar objects</p></li>
+<li>
+<p><strong>Object</strong> An object that the function may be acting on</p>
+<ul>
+<li>base_model</li>
+<li>meta_model</li>
+<li>feature</li>
+</ul>
+</li>
 </ul>
 </div>
 <div class="section level3">
@@ -234,7 +275,7 @@
 </h3>
 <p>The punchard is a single list of paths, variables, and functions that are used throughout the pipeline.</p>
 <p>If a path is used in multiple places, it is only listed once. Then updates only require changing the path in one place.</p>
-<p>tools/pipeline/punchcard.csv</p>
+<p><code>tools/pipeline/punchcard.csv</code></p>
 </div>
 </div>
 </div>
