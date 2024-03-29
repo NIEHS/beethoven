@@ -43,16 +43,17 @@ Here, we describe the structure of the project and the naming conventions used. 
 ### File Structure
 
 #### Folder Structure
-Root Directory
-- R/ 
-- input/
-- output/
-- tests/
-- inst/
-- docs/
-- tools/
-- man/
-- vignettes/
+Within the project main or root directory, we have the following folder structure. We provide a brief description of each folder.
+
+- **R/** This is where the main R code (e.g. .R files) lives. Nothing else but .R files should be in here
+- **input/**
+- **output/**
+- **tests/**
+- **inst/**
+- **docs/**
+- **tools/**
+- **man/**
+- **vignettes/**
 
 #### input/ 
 
@@ -80,19 +81,31 @@ of the covariates/features for model development. e.g.:
 
 ### Naming Conventions
 
+Naming things is hard and somewhat subjective. Nonetheless, consistent naming conventions make for better reproducibility, interpretability, and future extensibility. 
+Here, we provide the `beethoven` naming conventions for objects as used in `targets` and for naming functions within the package (i.e. **R/**). 
 For `tar_target` functions, we use the following naming conventions:
 
-Example from CF conventions: 
-[surface] [component] standard_name [at surface] [in medium] [due to process] [assuming condition]
 
-Naming conventions for tar objects: 
+Naming conventions for `tar` objects. We are motivated by the [Compositional Forecast](https://cfconventions.org/Data/cf-standard-names/docs/guidelines.html) (CF) model naming conventions:
 
-Long Version:
-[R object type]_[role]_[stage]_[source]_[spacetime]
+e.g. [surface] [component] standard_name [at surface] [in medium] [due to process] [assuming condition]
+In CF, the entire process can be known from the required and optional naming pieces. 
 
-- R object type: sf, datatable, tibble, SpatRaster, SpatVector
+Here, we use the following naming convention:
 
-- role : Detailed description of the role of the object in the pipeline. Allowable keywords:
+**[R object type]\_[role-suffix]\_[stage]\_[source]\_[spacetime]**
+
+ Each section is in the brackets [] and appears in this order. For some objects, not all naming sections are required. If two keywords in a section apply, then they are appended with a `-`
+
+Examples: 1) `sf_PM25_log10-fit_AQS_siteid` is an `sf` object for `PM25` data that is log-transformed and ready for base-learner fitting, derived from AQS data and located at the siteid locations. 
+2) `SpatRast_process_MODIS` is a terra `SpatRast` object that has been processed from MODIS.
+
+
+#### Naming section definitions:
+
+- **R object type**: sf, datatable, tibble, SpatRaster, SpatVector
+
+- **role:** Detailed description of the role of the object in the pipeline. Allowable keywords:
 
   - PM25
   - feature (i.e. geographic covariate) 
@@ -103,7 +116,7 @@ Long Version:
   - plot
     -plot suffix types: scatter, map, time_series, histogram, density etc. 
   
-- stage: the stage of the pipeline the object is used in. Object transformations
+- **stage**: the stage of the pipeline the object is used in. Object transformations
 are also articulated here. Allowable keywords: 
 
   - raw
@@ -113,7 +126,8 @@ are also articulated here. Allowable keywords:
   - log
   - log10 
 
-- source: the original data source
+- **source:** the original data source
+
 
   - AQS
   - MODIS
@@ -122,13 +136,18 @@ are also articulated here. Allowable keywords:
   - NARR
   - GEOSCF
   - TRI
+  - KOPPENGEIGER
+  - MERRA2
+  - HMS
+  - gROADS
+  - POPULATION
+  - [Note, we can add and/or update these sources as needed] 
 
-  
-- spacetime: relevant spatial or temporal information 
+- **spacetime:** relevant spatial or temporal information 
 
   - spatial: 
-    - site_id
-    - census_tract
+    - siteid
+    - censustract
     - grid
   - time: 
     - daily  [optional YYYYMMDD]
@@ -138,22 +157,35 @@ are also articulated here. Allowable keywords:
 
 Short Verion: 
 
-Cross-walk lives on the punchcard.
+A shortened version for filenames is available on the punchcard at `tools/pipeline/punchcard.csv`
 
 ### Function Naming Convenctions 
 
-TBD
+We have adopted naming conventions in functions in this package as well as `amadeus` which is a key input package. 
 
-  - download
-  - calc
+**[High-Level-Process]\_[Source]\_[Object]**
 
+- **High-Level-Process**
+     - download
+     - process
+     - calc
+
+- **source:** the original data source. Same as source section for tar objects
+
+- **Object** An object that the function may be acting on
+     - base_model
+     - meta_model
+     - feature 
+
+
+ 
 ### Punchcard 
 
 The punchard is a single list of paths, variables, and functions that are used throughout the pipeline. 
 
 If a path is used in multiple places, it is only listed once. Then updates only require changing the path in one place.
 
-tools/pipeline/punchcard.csv
+`tools/pipeline/punchcard.csv`
 
 
 
