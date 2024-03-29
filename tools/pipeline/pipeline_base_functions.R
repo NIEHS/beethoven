@@ -322,8 +322,23 @@ combine <-
       by <- c(mr("pointid"), mr("timeid"))
     }
     ellipsis <- list(...)
-    Reduce(function(x, y) merge(x, y, by = by), ellipsis)
+    Reduce(function(x, y) dplyr::full_join(x, y, by = by), ellipsis)
   }
+
+
+unify_timecols <-
+  function(
+    df,
+    candidates = c("date"),
+    replace = mr("timeid")
+  ) {
+    if (sum(names(df) %in% candidates) > 1) {
+      stop("More than a candidate is detected in the input.")
+    }
+    names(df)[names(df) %in% candidates] <- replace
+    return(df)
+  }
+
 
 
 ### WARNING  THIS WILL NOT WORK PROPERLY ####
@@ -932,6 +947,7 @@ calc_geos_strict <-
         )
       rast_ext$time <- unique(as.Date(terra::time(rast_in)))
       rast_ext$ID <- unlist(locs[[locs_id]])[rast_ext$ID]
+      names(rast_ext)[names(rast_ext) == "ID"] <- locs_id
       return(rast_ext)
 
     }

@@ -15,7 +15,7 @@ dir_input_koppen,input/koppen_geiger,12,path,file.path
 dir_input_gmted,input/gmted,13,path,file.path
 dir_input_sedac_population,input/sedac_population,14,path,file.path
 dir_input_sedac_groads,input/sedac_groads,15,path,file.path
-dir_input_hms,input/noaa_hms,16,path,file.path
+dir_input_hms,input/HMS_Smoke,16,path,file.path
 dir_input_tri,input/tri,17,path,file.path
 dir_input_geos,input/geos,18,path,file.path
 dir_input_modis_mod11,input/modis/raw/61/MOD11A1,19,path,file.path

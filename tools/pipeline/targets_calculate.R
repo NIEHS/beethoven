@@ -67,7 +67,7 @@ target_calculate_fit <-
     ,
     # 3 branches
     targets::tar_target(
-      covariates_nlcd,
+      covariates_nlcd_list,
       command = calculate_multi(
         domain = 2019, #c(2019, 2019, 2019, 2021, 2021),
         locs = terra::vect(sites_spat),
@@ -77,47 +77,45 @@ target_calculate_fit <-
         radius = radii
       ),
       pattern = map(radii),
-      iteration = "vector"
+      iteration = "list"
     )
     ,
     targets::tar_target(
-      hms_dates,
-      command =
-      as.Date(
-        stringi::stri_extract_first_regex(
-          list.files(
-            mr("dir_input_hms"), pattern = "*.shp$", full.names = FALSE
-          ),
-          pattern = "2[0-1][0-9]{2}[0-1][0-9]([0-2][0-9]|3[0-1])"
-        ), format = "%Y-%m-%d"
-      )
+      covariates_nlcd,
+      Reduce(function(x, y) dplyr::full_join(x, y, by = c(mr("pointid"), mr("timeid"))),
+        covariates_nlcd_list)
     )
     ,
     targets::tar_target(
       hms_level,
       command = c("Light", "Medium", "Heavy"),
-      iteration = "vector"
+      iteration = "list"
     )
     ,
     # 3 branches
     targets::tar_target(
-      covariates_hms,
-      do.call(rbind,
-        purrr::map(
-          .x = hms_dates,
-          .f = function(d) {
-            calculate_single(
-              locs = sites_spat,
-              path = mr("dir_input_hms"),
-              date = c(d, d),
-              variable = hms_level,
-              locs_id = mr("pointid")
-            )
-          }
-        )
+      covariates_hms_list,
+      calculate_single(
+        locs = sites_spat,
+        path = mr("dir_input_hms"),
+        covariate = "hms",
+        date = c("2020-01-01", "2020-01-10"), #c(mr("date_start"), mr("date_end")),
+        variable = hms_level,
+        locs_id = mr("pointid")
       ),
-      iteration = "vector",
+      iteration = "list",
       pattern = map(hms_level)
+    )
+    ,
+    targets::tar_target(
+      covariates_hms_c,
+      Reduce(function(x, y) dplyr::full_join(x, y, by = c(mr("pointid"), "date")),
+        covariates_hms_list)
+    )
+    ,
+    targets::tar_target(
+      covariates_hms,
+      unify_timecols(covariates_hms_c)
     )
     ,
     targets::tar_target(
@@ -223,7 +221,7 @@ target_calculate_fit <-
     )
     ,
     targets::tar_target(
-      covariates_gmted,
+      covariates_gmted_list,
       calculate_single(
         locs = sites_spat,
         path = mr("dir_input_gmted"),
@@ -233,7 +231,13 @@ target_calculate_fit <-
         variable = c(gmted_combination_stat, gmted_combination_res)
       ),
       pattern = map(gmted_combination_stat, gmted_combination_res),
-      iteration = "vector"
+      iteration = "list"
+    )
+    ,
+    targets::tar_target(
+      covariates_gmted,
+      Reduce(function(x, y) dplyr::full_join(x, y, by = mr("pointid")),
+        covariates_gmted_list)
     )
     ,
     targets::tar_target(
@@ -244,7 +248,7 @@ target_calculate_fit <-
     )
     ,
     targets::tar_target(
-      covariates_geos_list,
+      covariates_geos_aqc_list,
       calc_geos_strict(
         date = c(geos_dates, geos_dates),
         locs = sites_spat,
@@ -258,8 +262,29 @@ target_calculate_fit <-
     )
     ,
     targets::tar_target(
-      covariates_geos,
-      command = do.call(rbind, covariates_geos_list)
+      covariates_geos_chm_list,
+      calc_geos_strict(
+        date = c(geos_dates, geos_dates),
+        locs = sites_spat,
+        locs_id = mr("pointid"),
+        path = file.path(mr("dir_input_geos"), "chm_tavg_1hr_g1440x721_v1"),
+        win = c(-126, -62, 22, 52),
+        snap = "out"
+      ),
+      pattern = map(geos_dates),
+      iteration = "list"
+    )
+    ,
+    targets::tar_target(
+      covariates_geos_aqc,
+      Reduce(function(x, y) dplyr::full_join(x, y, by = c(mr("pointid"), mr("timeid"))),
+        covariates_geos_aqc_list)
+    )
+    ,
+    targets::tar_target(
+      covariates_geos_chm,
+      Reduce(function(x, y) dplyr::full_join(x, y, by = c(mr("pointid"), mr("timeid"))),
+        covariates_geos_chm_list)
     )
     ,
     targets::tar_target(
@@ -493,7 +518,9 @@ target_calculate_fit <-
       by = mr("pointid"),
       time = FALSE,
       covariates_koppen,
-      covariates_ecoregion
+      covariates_ecoregion,
+      covariates_gmted,
+      covariates_nei
     )
   )
   ,
@@ -502,12 +529,11 @@ target_calculate_fit <-
     combine(
       by = mr("pointid"),
       time = TRUE,
-      covariates_nlcd,
+      # covariates_nlcd,
       covariates_hms,
-      covariates_geos,
-      covariates_gmted,
-      covariates_nei,
-      covariates_tri,
+      covariates_geos_aqc,
+      covariates_geos_chm,
+      # covariates_tri,
       covariates_modis_mod11,
       covariates_modis_mod06,
       covariates_modis_mod13,
@@ -797,7 +823,8 @@ target_calculate_predict <-
         by = mr("pointid"),
         time = FALSE,
         covariates_predict_koppen,
-        covariates_predict_ecoregion
+        covariates_predict_ecoregion,
+        covariates_predict_gmted
       )
     )
     ,
@@ -806,10 +833,9 @@ target_calculate_predict <-
       combine(
         by = mr("pointid"),
         time = TRUE,
-        covariates_predict_nlcd,
+        #covariates_predict_nlcd,
         covariates_predict_hms,
         covariates_predict_geos,
-        covariates_predict_gmted,
         covariates_predict_nei,
         covariates_predict_tri,
         covariates_predict_modis_mod11,
