@@ -39,8 +39,7 @@ target_init <-
           path = mr("dir_input_aqs"),
           pattern = "daily_88101_[0-9]{4}.csv",
           full.names = TRUE),
-        site_spt = sites_time,
-        return_format = "sf"
+        site_spt = sf::st_drop_geometry(sites_time)
       ) |> dplyr::filter(time >= as.Date("2020-01-01") & time <= as.Date("2020-01-15"))
     )
   )

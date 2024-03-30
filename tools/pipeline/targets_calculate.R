@@ -4,6 +4,7 @@
 # is a function that returns a list of parameters for the pipeline
 # for users' convenience and make the pipeline less prone to errors.
 
+library(dplyr)
 # for reference, full list of parameters in amadeus::process_*
 # and amadeus::calc_*.
 # This list will be useful for entering parameters by rlang::inject.
@@ -106,7 +107,7 @@ target_calculate_fit <-
     ,
     targets::tar_target(
       covariates_nlcd,
-      Reduce(function(x, y) dplyr::full_join(x, y, by = c(meta_run("pointid"), meta_run("timeid"))),
+      Reduce(function(x, y) dplyr::full_join(x[, -2:-3], y[, -2:-3], by = c(meta_run("pointid"), "time")),
         covariates_nlcd_list)
     )
     ,
@@ -139,7 +140,8 @@ target_calculate_fit <-
     ,
     targets::tar_target(
       covariates_hms,
-      unify_timecols(covariates_hms_c)
+      unify_timecols(covariates_hms_c) %>%
+        dplyr::mutate(time = as.character(time))
     )
     ,
     targets::tar_target(
@@ -319,14 +321,15 @@ target_calculate_fit <-
     ,
     targets::tar_target(
       covariates_geos_aqc,
-      Reduce(function(x, y) dplyr::full_join(x, y, by = c(meta_run("pointid"), meta_run("timeid"))),
-        covariates_geos_aqc_list)
+      data.table::rbindlist(covariates_geos_aqc_list, fill = TRUE) %>%
+        setNames(c("site_id", paste0(names(x = .)[c(-1, -7)], "_AQC"), "time")) %>%
+        dplyr::mutate(time = as.character(time))
     )
     ,
     targets::tar_target(
       covariates_geos_chm,
-      Reduce(function(x, y) dplyr::full_join(x, y, by = c(meta_run("pointid"), meta_run("timeid"))),
-        covariates_geos_chm_list)
+      data.table::rbindlist(covariates_geos_chm_list, fill = TRUE) %>%
+        dplyr::mutate(time = as.character(time))
     )
     ,
     targets::tar_target(
@@ -398,7 +401,7 @@ target_calculate_fit <-
       modis_vnp46_paths,
       read_paths(
         meta_run("dir_input_modis_vnp46"),
-        extension = "hdf",
+        extension = "h5",
         julian = TRUE,
         target_dates = c(
           as.Date(meta_run("date_start")),
@@ -440,8 +443,9 @@ target_calculate_fit <-
         from = modis_mod06_paths,
         locs = sites_spat,
         locs_id = meta_run("pointid"),
+        preprocess = amadeus::process_modis_swath,
         name_covariates = c("MOD_CLCVD_0_", "MOD_CLCVN_0_"),
-        subdataset = "(Cloud_Fraction_Day|Cloud_Fraction_Night)",
+        subdataset = c("Cloud_Fraction_Day", "Cloud_Fraction_Night"),
         nthreads = meta_run("nthreads_calc")
       ),
       resources = set_slurm_resource(
@@ -570,12 +574,12 @@ target_calculate_fit <-
       #         subdataset = 3,
       #         nthreads = 8
       #       )
-    ),
+      ),
       resources = set_slurm_resource(
         ntasks = 1, ncpus = 20, memory = 12
       )
-  )
-  ,
+    )
+    ,
     targets::tar_target(
       covariates_modis_mod13,
       amadeus::calc_modis_par(
@@ -586,71 +590,93 @@ target_calculate_fit <-
         subdataset = "(NDVI)",
         preprocess = amadeus::process_modis_merge,
         nthreads = meta_run("nthreads_calc")
-    ),
+      ),
       resources = set_slurm_resource(
         ntasks = 1, ncpus = 20, memory = 12
       )
-  )
-  ,
-  # combine each covariate set into one data.frame (data.table; if any)
-  targets::tar_target(
-    covariates_combined_sp,
-    combine(
-      by = meta_run("pointid"),
-      time = FALSE,
-      covariates_koppen,
-      covariates_ecoregion,
-      covariates_gmted,
-      covariates_nei
+    )
+    ,
+    # combine each covariate set into one data.frame (data.table; if any)
+    targets::tar_target(
+      covariates_combined_sp,
+      combine(
+        by = meta_run("pointid"),
+        time = FALSE,
+        covariates_koppen,
+        covariates_ecoregion,
+        covariates_gmted,
+        covariates_nei[, -2:-3]
+      )
+    )
+    ,
+    targets::tar_target(
+      covariates_combined_spt_base,
+      combine(
+        by = meta_run("pointid"),
+        time = TRUE,
+      #   # covariates_nlcd,
+        covariates_hms,
+        covariates_geos_aqc,
+        covariates_geos_chm,
+        # covariates_tri,
+        covariates_modis_mod11,
+        covariates_modis_mod06,
+        covariates_modis_mod13,
+        covariates_modis_mod09,
+        covariates_modis_mcd19_1km,
+        covariates_modis_mcd19_5km,
+        covariates_modis_vnp46
+      )
+    )
+    ,
+    targets::tar_target(
+      covariates_combined_spt_nlcd,
+      join_yeardate(
+        covariates_nlcd,
+        covariates_combined_spt_base,
+        field_year = "time",
+        field_date = "time",
+        spid = meta_run("pointid")
+      )
+    )
+    ,
+    targets::tar_target(
+      covariates_combined_spt,
+      join_yeardate(
+        covariates_tri,
+        covariates_combined_spt_nlcd,
+        field_year = "time",
+        field_date = "time",
+        spid = meta_run("pointid")
+      )
+    )
+    ,
+    targets::tar_target(
+      covariates_final,
+      combine_final(
+        locs = sites_time,
+        locs_id = meta_run("pointid"),
+        time_id = meta_run("timeid"),
+        target_years =
+          seq(
+            as.integer(format(meta_run("date_start"), "%Y")),
+            as.integer(format(meta_run("date_end"), "%Y"))
+          ),
+        df_sp = covariates_combined_sp,
+        df_spt = covariates_combined_spt
+      )
+    )
+    ,
+    targets::tar_target(
+      data_full,
+      join_yx(
+        df_pm = sites_pm,
+        df_covar = covariates_final,
+        locs_id = meta_run("pointid"),
+        time_id = meta_run("timeid")
+      )
     )
   )
-  ,
-  targets::tar_target(
-    covariates_combined_spt,
-    combine(
-      by = meta_run("pointid"),
-      time = TRUE,
-      # covariates_nlcd,
-      covariates_hms,
-      covariates_geos_aqc,
-      covariates_geos_chm,
-      # covariates_tri,
-      covariates_modis_mod11,
-      covariates_modis_mod06,
-      covariates_modis_mod13,
-      covariates_modis_mod09,
-      covariates_modis_mcd19_1km,
-      covariates_modis_mcd19_5km,
-      covariates_modis_vnp46
-    )
-  )
-  ,
-  targets::tar_target(
-    covariates_final,
-    combine_final(
-      locs = sites_time,
-      locs_id = meta_run("pointid"),
-      time_id = meta_run("timeid"),
-      target_years =
-        seq(
-          as.integer(format(meta_run("date_start"), "%Y")),
-          as.integer(format(meta_run("date_end"), "%Y"))
-        ),
-      df_sp = covariates_combined_sp,
-      df_spt = covariates_combined_spt
-    )
-  )
-  ,
-  targets::tar_target(
-    data_full,
-    join_yx(
-      df_pm = sites_pm,
-      df_covar = covariates_final,
-      locs_id = meta_run("pointid"),
-      time_id = meta_run("timeid")
-    )
-  )
-)
 
 
 

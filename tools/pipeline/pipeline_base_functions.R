@@ -111,8 +111,7 @@ get_aqs_data <-
     time_id = mr("timeid"),
     poc_name = "POC",
     date_start = "2018-01-01",
-    date_end = "2022-12-31",
-    return_format = "terra"
+    date_end = "2022-12-31"
   ) {
     #nocov start
     if (!is.character(locs_id)) {
@@ -138,7 +137,7 @@ get_aqs_data <-
         POC = POC
       )]
     poc_filtered <- input_df |>
-      dplyr::group_by(!!rlang::sym(locs_id), !!rlang::sym(time_id)) |>
+      dplyr::group_by(!!rlang::sym(locs_id)) |>
       dplyr::filter(!!rlang::sym(poc_name) == min(!!rlang::sym(poc_name))) |>
       dplyr::ungroup() |>
       data.table::data.table()
@@ -166,7 +165,9 @@ join_yx <-
     locs_id = mr("pointid"),
     time_id = mr("timeid")
   ) {
-    merge(df_pm, df_covar, by = c(locs_id, time_id))
+    # full join
+    merge(df_pm, df_covar, by = c(locs_id, time_id),
+      all.x = TRUE, all.y = TRUE)
   }
 
 
@@ -340,15 +341,32 @@ calculate_multi <-
 #' @returns data.frame
 combine <-
   function(
-    by = c(mr("pointid")),
+    by = c(meta_run("pointid")),
     time = FALSE,
     ...
   ) {
-    if (time) {
-      by <- c(mr("pointid"), mr("timeid"))
-    }
     ellipsis <- list(...)
-    Reduce(function(x, y) dplyr::full_join(x, y, by = by), ellipsis)
+    if (time) {
+      by <- c(meta_run("pointid"), meta_run("timeid"))
+      ellipsis_clean <-
+        lapply(ellipsis,
+          function(x) {
+            x <- as.data.frame(x)
+            col_coords <- grep("(lon|lat)", names(x))
+            if (length(col_coords) > 0 && !is.null(col_coords)) {
+              x <- x[, -col_coords]
+            }
+            x$time <- as.character(x$time)
+            return(x)
+          })
+    } else {
+      ellipsis_clean <- ellipsis
+    }
+    joined <-
+      Reduce(function(x, y) {
+        dplyr::left_join(x, y, by = by)
+      }, ellipsis_clean)
+    return(joined)
   }
 
 
@@ -368,6 +386,38 @@ unify_timecols <-
     }
     names(df)[names(df) %in% candidates] <- replace
     return(df)
+  }
+
+
+#' Join a data.frame with a year-only date column to that with a full date column
+#' @description The full date column will be converted to a year column
+#' as a new column, then the data.frame with the year-only column will
+#' be joined.
+#' @param df_year data.frame with a year-only date column
+#' @param df_date data.frame with a full date column
+#' @param field_year character(1). Year column in `df_year`
+#' @param field_date character(1). Date column in `df_date`
+#' @param spid character(1). Name of the unique location identifier field.
+#' @importFrom methods is
+#' @importFrom dplyr full_join
+#' @returns data.frame
+join_yeardate <-
+  function(
+    df_year,
+    df_date,
+    field_year = "time",
+    field_date = "time",
+    spid = meta_run("pointid")
+  ) {
+    if (!inherits(df_year, "data.frame") && !inherits(df_date, "data.frame")) {
+      stop("Both inputs should be data.frame.")
+    }
+    year <- NULL
+    names(df_year)[names(df_year) %in% field_year] <- "year"
+    df_date$year <- as.integer(format(as.Date(df_date[[field_date]]), "%Y"))
+    df_joined <- dplyr::left_join(df_date, df_year, by = c(spid, "year")) |>
+      dplyr::select(-year)
+    return(df_joined)
   }
 
 

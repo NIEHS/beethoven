@@ -43,7 +43,7 @@ tar_option_set(
   packages =
     c("amadeus", "chopin",
       "data.table", "sf", "terra", "exactextractr",
-      "crew", "crew.cluster", "tigris",
+      "crew", "crew.cluster", "tigris", "dplyr",
       "future", "future.apply", "future.callr", "callr",
       "sftime", "stars", "rlang", "foreach", "parallelly"),
   library = "~/r-libs",
