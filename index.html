@@ -113,43 +113,48 @@
 <div class="section level4">
 <h4 id="folder-structure">Folder Structure<a class="anchor" aria-label="anchor" href="#folder-structure"></a>
 </h4>
-<p>Within the project main or root directory, we have the following folder structure. We provide a brief description of each folder.</p>
 <ul>
 <li>
-<strong>R/</strong> This is where the main R code (e.g. .R files) lives. Nothing else but .R files should be in here</li>
-<li><strong>input/</strong></li>
-<li><strong>output/</strong></li>
-<li><strong>tests/</strong></li>
-<li><strong>inst/</strong></li>
-<li><strong>docs/</strong></li>
-<li><strong>tools/</strong></li>
-<li><strong>man/</strong></li>
-<li><strong>vignettes/</strong></li>
-</ul>
-</div>
-<div class="section level4">
-<h4 id="input">input/<a class="anchor" aria-label="anchor" href="#input"></a>
-</h4>
-</div>
-<div class="section level4">
-<h4 id="output">output/<a class="anchor" aria-label="anchor" href="#output"></a>
-</h4>
-<p>Currently, as of 3/29/24, the output folder contains .rds files for each of the covariates/features for model development. e.g.:</p>
+<code>R/</code> This is where the main R code (e.g. .R files) lives. Nothing else but .R files should be in here. i.e. Target helper functions, model fitting and post-processing, plotting and summary functions.</li>
+<li>
+<code>tests/</code> This is where the unit and integration tests reside. The structure is based off the standard practices of the <a href="https://testthat.r-lib.org/" class="external-link">testthat</a> R package for unit testing.
 <ul>
-<li>NRTAP_Covars_NLCD.rds</li>
-<li>NRTAP_Covars_TRI.rds</li>
+<li>
+<code>testthat</code> Unit and integration tests for CI/CD reside here</li>
+<li>
+<code>testdata</code> Small test datasets including our small (in size) complete pipeline testing.</li>
+<li>
+<code>testthat.R</code> Special script created and maintained by testthat</li>
 </ul>
-</div>
-<div class="section level4">
-<h4 id="tests">tests/<a class="anchor" aria-label="anchor" href="#tests"></a>
-</h4>
+</li>
+<li>
+<code>man/</code> This sub-directory contains .Rd and othe files created by the <a href="https://roxygen2.r-lib.org/" class="external-link">roxygen2</a> package for assisted documentation of R packages</li>
+<li>
+<code>vignettes/</code> Rmd (and potentially Qmd) narrative text and code files. These are rendered into the <strong>Articles</strong> for the package website created by <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+</li>
+<li>
+<code>inst/</code> Is a sub-directory for arbitrary files outside of the main <code>R/</code> directory
+<ul>
+<li>
+<code>targets</code> which include the important pipeline file <code>_targets.R</code>
+</li>
+<li>
+<code>lookup</code> Is a subdirectory for text file lookup table used in the pipeline to synchronize paths, names, abbreviations, etc.</li>
+</ul>
+</li>
+<li>
+<code>.github/workflows/</code> This hidden directory is where the GitHub CI/CD yaml files reside</li>
+</ul>
 <div class="section level5">
-<h5 id="testthat">testthat/<a class="anchor" aria-label="anchor" href="#testthat"></a>
+<h5 id="the-following-sub-directories-are-not-including-the-package-build-and-included-only-in-the-source-code-here">The following sub-directories are not including the package build and included only in the source code here<a class="anchor" aria-label="anchor" href="#the-following-sub-directories-are-not-including-the-package-build-and-included-only-in-the-source-code-here"></a>
 </h5>
-</div>
-<div class="section level5">
-<h5 id="testdata">testdata/<a class="anchor" aria-label="anchor" href="#testdata"></a>
-</h5>
+<ul>
+<li><p><code>tools/</code> This sub-directory is dedicated to educational or demonstration material (e.g. Rshiny).</p></li>
+<li><p><code>input/</code> <strong><em>warning soon to be deprecated</em></strong> This sub-directory contains data used during the analysis. It is going to be superceded by the use of <code>targets</code></p></li>
+<li><p><code>output/</code> <strong><em>warning: soon to be deprecated</em></strong> This sub-directory contains data used during the analysis. It is going to be superceded by the use of <code>targets</code> Currently, as of 3/29/24, the output folder contains .rds files for each of the covariates/features for model development. e.g.:</p></li>
+<li><p>NRTAP_Covars_NLCD.rds</p></li>
+<li><p>NRTAP_Covars_TRI.rds</p></li>
+</ul>
 </div>
 </div>
 <div class="section level4">
