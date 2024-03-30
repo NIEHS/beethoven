@@ -43,34 +43,28 @@ Here, we describe the structure of the project and the naming conventions used. 
 ### File Structure
 
 #### Folder Structure
-Within the project main or root directory, we have the following folder structure. We provide a brief description of each folder.
 
-- **R/** This is where the main R code (e.g. .R files) lives. Nothing else but .R files should be in here
-- **input/**
-- **output/**
-- **tests/**
-- **inst/**
-- **docs/**
-- **tools/**
-- **man/**
-- **vignettes/**
+- `R/` This is where the main R code (e.g. .R files) lives. Nothing else but .R files should be in here. i.e. Target helper functions, model fitting and post-processing, plotting and summary functions. 
+- `tests/` This is where the unit and integration tests reside. The structure is based off the standard practices of the [testthat](https://testthat.r-lib.org/) R package for unit testing.
+    - `testthat` Unit and integration tests for CI/CD reside here
+    - `testdata` Small test datasets including our small (in size) complete pipeline testing. 
+    - `testthat.R` Special script created and maintained by testthat
+- `man/` This sub-directory contains .Rd and othe files created by the [roxygen2](https://roxygen2.r-lib.org/) package for assisted documentation of R packages
+- `vignettes/` Rmd (and potentially Qmd) narrative text and code files. These are rendered into the **Articles** for the package website created by [pkgdown](https://pkgdown.r-lib.org/) 
+- `inst/` Is a sub-directory for arbitrary files outside of the main `R/` directory
+     - `targets` which include the important pipeline file `_targets.R`
+     - `lookup` Is a subdirectory for text file lookup table used in the pipeline to synchronize paths, names, abbreviations, etc.
+- `.github/workflows/` This hidden directory is where the GitHub CI/CD yaml files reside
 
-#### input/ 
-
-#### output/ 
-
+##### The following sub-directories are not including the package build and included only in the source code here
+- `tools/` This sub-directory is dedicated to educational or demonstration material (e.g. Rshiny). 
+- `input/` ***warning soon to be deprecated*** This sub-directory contains data used during the analysis. It is going to be superceded by the use of `targets`
+- `output/` ***warning: soon to be deprecated*** This sub-directory contains data used during the analysis. It is going to be superceded by the use of `targets`
 Currently, as of 3/29/24, the output folder contains .rds files for each
 of the covariates/features for model development. e.g.:
 
 - NRTAP_Covars_NLCD.rds
 - NRTAP_Covars_TRI.rds 
-
-
-#### tests/ 
-
-##### testthat/
-
-##### testdata/
   
 #### Relevant files 
 
