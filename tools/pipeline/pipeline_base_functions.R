@@ -30,6 +30,48 @@ mr <- meta_run
 mr("nei_year_sequence", split = "|", fixed = TRUE)[[1]]
 
 
+#' Set resource management for SLURM
+#' @param template_file SLURM job submission shell template path.
+#' @param partition character(1). Name of partition. Default is `"geo"`
+#' @param ncpus integer(1). Number of CPU cores assigned to each task.
+#' @param ntasks integer(1). Number of tasks to submit.
+#' @param memory integer(1). Specifically odds to 2*x GB.
+#' @param user_email character(1). User email address.
+#' @param error_log character(1). Error log file name.
+#' @notes This function is designed to be used with `tar_resources`.
+#' Suggested number of `ncpus` is more than 1 for typical multicore R tasks.
+#' @returns A list of resources for `tar_resources`
+#' @author Insang Song
+set_slurm_resource <-
+  function(
+    template_file = "tools/pipeline/template_slurm.tmpl",
+    partition = "geo",
+    ncpus = 2L,
+    ntasks = 2L,
+    memory = 8,
+    user_email = meta_run("slurm_user_email"),
+    error_log = "slurm_error.log"
+  ) {
+    targets::tar_resources(
+      future = targets::tar_resources_future(
+        plan = future::tweak(
+          future.batchtools::batchtools_slurm,
+          template = template_file,
+          resources =
+            list(
+              partition = partition,
+              # template = template_file,
+              ntasks = ntasks,
+              ncpus = ncpus,
+              memory = memory,
+              error.file = error_log
+            )
+        )
+      )
+    )
+  }
+
+
 #' Read AQS data
 #' @param fun_aqs function to import AQS data.
 #' Default is `amadeus::process_aqs`
@@ -381,7 +423,7 @@ combine_final <-
 #' read_paths("/path/to/directory", ".txt")
 #'
 #' @export
-read_paths <- function(path, extension = ".hdf", target_dates = c("2020-01-01", "2020-01-15")) {
+read_paths <- function(path, extension = ".hdf", target_dates = c("2020-01-01", "2020-01-15"), julian = FALSE) {
   flist <-
     list.files(
       path = path,
@@ -391,8 +433,8 @@ read_paths <- function(path, extension = ".hdf", target_dates = c("2020-01-01", 
     )
   if (!missing(target_dates)) {
     dateseq <- seq(as.Date(target_dates[1]), as.Date(target_dates[2]), by = "day")
-    dateseq <- format(dateseq, "%Y%m%d")
-    dateseq <- sprintf("(%s)", paste(dateseq, collapse = "|"))
+    dateseq <- if (julian) format(dateseq, "%Y%j") else format(dateseq, "%Y%m%d")
+    dateseq <- sprintf("A(%s)", paste(dateseq, collapse = "|"))
     flist <- grep(dateseq, flist, value = TRUE)
   }
   return(flist)

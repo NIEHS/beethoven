@@ -103,6 +103,7 @@ recorded,varname,value,index,class,command
 2024-03-29,nei_year_sequence_test,2020,1001,domain,paste0
 2024-03-29,nlcd_year_sequence_test,2019,1002,domain,paste0
 2024-03-29,sedac_population_year_test,2020,1003,domain,as.integer
-2024-03-29,tri_year_test,2020,1004,domain,as.integer
+2024-03-29,tri_year_sequence_test,2020|2020,1004,domain,strsplit
 2024-03-29,nthreads_calc,20,100,setting,as.integer
 2024-03-29,tri_year_sequence,2018|2019|2020|2021|2022,102,domain,strsplit
+2024-03-29,slurm_user_email,songi2@nih.gov,103,supplement,paste0

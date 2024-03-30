@@ -44,7 +44,12 @@ target_calculate_fit <-
       covariates_tri,
       calculate_multi(
         # sequence: could be refered from dates
-        domain = meta_run("tri_year_sequence_test")[[1]],
+        domain =
+          unique(
+            as.integer(
+              meta_run("tri_year_sequence_test", split = "|", fixed = TRUE)[[1]]
+            )
+          ),
         #c(2018, 2019, 2020, 2021, 2022),
         path = meta_run("dir_input_tri"),
         covariate = "tri",
@@ -215,7 +220,7 @@ target_calculate_fit <-
     )
     ,
     targets::tar_target(
-      covariates_nei,
+      covariates_nei_list,
       calculate_multi(
         domain = nei_years,
         locs = sites_spat,
@@ -226,6 +231,11 @@ target_calculate_fit <-
       ),
       pattern = map(nei_years, nei_dirs),
       iteration = "list"
+    )
+    ,
+    targets::tar_target(
+      covariates_nei,
+      data.table::rbindlist(covariates_nei_list, fill = TRUE)
     )
     ,
     targets::tar_target(
@@ -286,7 +296,7 @@ target_calculate_fit <-
         locs = sites_spat,
         locs_id = meta_run("pointid"),
         path = file.path(meta_run("dir_input_geos"), "aqc_tavg_1hr_g1440x721_v1"),
-        win = as.numeric(meta_run("extent", split = "|", fixed = TRUE)),
+        win = as.numeric(meta_run("extent", split = "|", fixed = TRUE)[[1]]),
         snap = "out"
       ),
       pattern = map(geos_dates),
@@ -300,7 +310,7 @@ target_calculate_fit <-
         locs = sites_spat,
         locs_id = meta_run("pointid"),
         path = file.path(meta_run("dir_input_geos"), "chm_tavg_1hr_g1440x721_v1"),
-        win = as.numeric(meta_run("extent", split = "|", fixed = TRUE)),
+        win = as.numeric(meta_run("extent", split = "|", fixed = TRUE)[[1]]),
         snap = "out"
       ),
       pattern = map(geos_dates),
@@ -323,7 +333,12 @@ target_calculate_fit <-
       modis_mod06_paths,
       read_paths(
         meta_run("dir_input_modis_mod06"),
-        extension = "hdf"
+        extension = "hdf",
+        julian = TRUE,
+        target_dates = c(
+          as.Date(meta_run("date_start")),
+          as.Date(meta_run("date_end"))
+        )
       )
     )
     ,
@@ -331,7 +346,12 @@ target_calculate_fit <-
       modis_mod11_paths,
       read_paths(
         meta_run("dir_input_modis_mod11"),
-        extension = "hdf"
+        extension = "hdf",
+        julian = TRUE,
+        target_dates = c(
+          as.Date(meta_run("date_start")),
+          as.Date(meta_run("date_end"))
+        )
       )
     )
     ,
@@ -339,7 +359,12 @@ target_calculate_fit <-
       modis_mod13_paths,
       read_paths(
         meta_run("dir_input_modis_mod13"),
-        extension = "hdf"
+        extension = "hdf",
+        julian = TRUE,
+        target_dates = c(
+          as.Date(meta_run("date_start")),
+          as.Date(meta_run("date_end"))
+        )
       )
     )
     ,
@@ -347,7 +372,12 @@ target_calculate_fit <-
       modis_mod09_paths,
       read_paths(
         meta_run("dir_input_modis_mod09"),
-        extension = "hdf"
+        extension = "hdf",
+        julian = TRUE,
+        target_dates = c(
+          as.Date(meta_run("date_start")),
+          as.Date(meta_run("date_end"))
+        )
       )
     )
     ,
@@ -355,7 +385,12 @@ target_calculate_fit <-
       modis_mcd19_paths,
       read_paths(
         meta_run("dir_input_modis_mcd19"),
-        extension = "hdf"
+        extension = "hdf",
+        julian = TRUE,
+        target_dates = c(
+          as.Date(meta_run("date_start")),
+          as.Date(meta_run("date_end"))
+        )
       )
     )
     ,
@@ -363,7 +398,12 @@ target_calculate_fit <-
       modis_vnp46_paths,
       read_paths(
         meta_run("dir_input_modis_vnp46"),
-        extension = "hdf"
+        extension = "hdf",
+        julian = TRUE,
+        target_dates = c(
+          as.Date(meta_run("date_start")),
+          as.Date(meta_run("date_end"))
+        )
       )
     )
     ,
@@ -388,6 +428,9 @@ target_calculate_fit <-
       #   name_covariates = c("MOD_SFCTD_0_", "MOD_SFCTN_0_"),
       #   subdataset = "(LST_Day_|LST_Night_)",
       #   nthreads = 8
+      ),
+      resources = set_slurm_resource(
+        ntasks = 1, ncpus = 20, memory = 12
       )
     )
     ,
@@ -400,6 +443,9 @@ target_calculate_fit <-
         name_covariates = c("MOD_CLCVD_0_", "MOD_CLCVN_0_"),
         subdataset = "(Cloud_Fraction_Day|Cloud_Fraction_Night)",
         nthreads = meta_run("nthreads_calc")
+      ),
+      resources = set_slurm_resource(
+        ntasks = 1, ncpus = 20, memory = 12
       )
       # calculate_multi(
       #   locs = sites_spat,
@@ -436,6 +482,9 @@ target_calculate_fit <-
       #   name_covariates = sprintf("MOD_SFCRF_%d_", seq(1, 7)),
       #   subdataset = seq(2, 8),
       #   nthreads = 8
+      ),
+      resources = set_slurm_resource(
+        ntasks = 1, ncpus = 20, memory = 12
       )
     )
     ,
@@ -462,6 +511,9 @@ target_calculate_fit <-
       #     c("MOD_AD4TA_0_", "MOD_AD5TA_0_"),
       #   subdataset = "(Optical_Depth)",
       #   nthreads = 8
+      ),
+      resources = set_slurm_resource(
+        ntasks = 1, ncpus = 20, memory = 12
       )
     )
     ,
@@ -490,6 +542,9 @@ target_calculate_fit <-
       #       "MOD_SCTAN_0_", "MOD_GLNAN_0_"),
       #   subdataset = "(cos|RelAZ|Angle)",
       #   nthreads = 8
+      ),
+      resources = set_slurm_resource(
+        ntasks = 1, ncpus = 20, memory = 12
       )
     )
     ,
@@ -515,7 +570,10 @@ target_calculate_fit <-
       #         subdataset = 3,
       #         nthreads = 8
       #       )
-    )
+    ),
+      resources = set_slurm_resource(
+        ntasks = 1, ncpus = 20, memory = 12
+      )
   )
   ,
     targets::tar_target(
@@ -528,7 +586,10 @@ target_calculate_fit <-
         subdataset = "(NDVI)",
         preprocess = amadeus::process_modis_merge,
         nthreads = meta_run("nthreads_calc")
-    )
+    ),
+      resources = set_slurm_resource(
+        ntasks = 1, ncpus = 20, memory = 12
+      )
   )
   ,
   # combine each covariate set into one data.frame (data.table; if any)

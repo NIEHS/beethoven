@@ -16,19 +16,19 @@ Sys.setenv("BTV_DOWNLOAD_PASS" = "TRUE")
 library(future)
 library(future.batchtools)
 
-plan(
-  tweak(
-    future.batchtools::batchtools_slurm,
-    template = "tools/pipeline/template_slurm.tmpl",
-    resources =
-      list(memory = 8,
-        log.file = "slurm_run.log",
-        ncpus = 30,
-        partition = "geo", ntasks = 4,
-        email = "songi2@nih.gov",
-        error.file = "slurm_error.log")
-  )
-)
+# plan(
+#   tweak(
+#     future.batchtools::batchtools_slurm,
+#     template = "tools/pipeline/template_slurm.tmpl"#,
+#     # resources =
+#     #   list(memory = 8,
+#     #     log.file = "slurm_run.log",
+#     #     ncpus = 20,
+#     #     partition = "geo", ntasks = 4,
+#     #     email = "songi2@nih.gov",
+#     #     error = "slurm_error.log")
+#   )
+# )
 
 # invalidate any nodes older than 180 days: force running the pipeline
 tar_invalidate(any_of(tar_older(Sys.time() - as.difftime(180, units = "days"))))
@@ -44,7 +44,7 @@ tar_option_set(
     c("amadeus", "chopin",
       "data.table", "sf", "terra", "exactextractr",
       "crew", "crew.cluster", "tigris",
-      "future", "future.apply", "future.callr",
+      "future", "future.apply", "future.callr", "callr",
       "sftime", "stars", "rlang", "foreach", "parallelly"),
   library = "~/r-libs",
   repository = "local",
@@ -66,11 +66,11 @@ tar_option_set(
         tweak(
           future.batchtools::batchtools_slurm,
           template = "tools/pipeline/template_slurm.tmpl",
-          resources = list(memory = "12",
+          resources = list(memory = 8,
                           log.file = "slurm_run.log",
-                          ncpus = 30, partition = "geo", tasks = 4,
+                          ncpus = 2, partition = "geo", tasks = 4,
                           email = "songi2@nih.gov",
-                          error.file = "slurm_error.log")
+                          error = "slurm_error.log")
         )
     )
   ),
