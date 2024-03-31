@@ -115,6 +115,7 @@ are also articulated here. Allowable keywords:
 
   - raw
   - process
+  - calc
   - fit: Ready for base/meta learner fitting
   - result: Final result
   - log
