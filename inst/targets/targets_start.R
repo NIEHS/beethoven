@@ -2,13 +2,14 @@
 library(targets)
 
 # assume that the working directory is beethoven git repository directory
+# only runs after package deployment
 file.copy(
   from = system.file("targets", "_targets.R", package = "beethoven"),
   to = "_targets.R"
 )
 
 tar_make_future(
-  workers = 20
+  workers = 30
 )
 
 

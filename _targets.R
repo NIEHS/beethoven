@@ -3,32 +3,30 @@ if (!require(targets)) {
   library(targets)
 }
 
-source("./tools/pipeline/pipeline_base_functions.R")
-source("./tools/pipeline/targets_initialize.R")
-source("./tools/pipeline/targets_download.R")
-source("./tools/pipeline/targets_calculate.R")
-source("./tools/pipeline/targets_baselearner.R")
-source("./tools/pipeline/targets_metalearner.R")
-source("./tools/pipeline/targets_predict.R")
+source("./inst/targets/pipeline_base_functions.R")
+source("./inst/targets/targets_initialize.R")
+source("./inst/targets/targets_download.R")
+source("./inst/targets/targets_calculate.R")
+source("./inst/targets/targets_baselearner.R")
+source("./inst/targets/targets_metalearner.R")
+source("./inst/targets/targets_predict.R")
 
 # bypass option
 Sys.setenv("BTV_DOWNLOAD_PASS" = "TRUE")
 library(future)
 library(future.batchtools)
 
-# plan(
-#   tweak(
-#     future.batchtools::batchtools_slurm,
-#     template = "tools/pipeline/template_slurm.tmpl"#,
-#     # resources =
-#     #   list(memory = 8,
-#     #     log.file = "slurm_run.log",
-#     #     ncpus = 20,
-#     #     partition = "geo", ntasks = 4,
-#     #     email = "songi2@nih.gov",
-#     #     error = "slurm_error.log")
-#   )
-# )
+plan(
+  future.batchtools::batchtools_slurm,
+  template = "inst/targets/template_slurm.tmpl",
+  resources =
+    list(memory = 8,
+      log.file = "slurm_run.log",
+      ncpus = 2,
+      partition = "geo", ntasks = 4,
+      email = meta_run("slurm_user_email"),
+      error.file = "slurm_error.log")
+)
 
 # invalidate any nodes older than 180 days: force running the pipeline
 tar_invalidate(any_of(tar_older(Sys.time() - as.difftime(180, units = "days"))))
@@ -65,12 +63,12 @@ tar_option_set(
       plan =
         tweak(
           future.batchtools::batchtools_slurm,
-          template = "tools/pipeline/template_slurm.tmpl",
+          template = "inst/targets/template_slurm.tmpl",
           resources = list(memory = 8,
                           log.file = "slurm_run.log",
                           ncpus = 2, partition = "geo", tasks = 4,
-                          email = "songi2@nih.gov",
-                          error = "slurm_error.log")
+                          email = meta_run("slurm_user_email"),
+                          error.file = "slurm_error.log")
         )
     )
   ),
@@ -84,7 +82,7 @@ tar_option_set(
 list(
   target_init,
   targets::tar_target(
-    radii,
+    int_feat_calc_radii,
     command = c(1e3, 1e4, 5e4),
     iteration = "vector"
   ),

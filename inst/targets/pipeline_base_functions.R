@@ -51,7 +51,7 @@ meta_run <-
 #' @export
 set_slurm_resource <-
   function(
-    template_file = "tools/pipeline/template_slurm.tmpl",
+    template_file = "inst/targets/template_slurm.tmpl",
     partition = "geo",
     ncpus = 2L,
     ntasks = 2L,
@@ -71,6 +71,7 @@ set_slurm_resource <-
               ntasks = ntasks,
               ncpus = ncpus,
               memory = memory,
+              email = user_email,
               error.file = error_log
             )
         )
@@ -206,17 +207,19 @@ feature_raw_download <-
   }
 
 #' Load county sf object
+#' @param year integer(1). Year of the county shapefile.
 #' @param exclude character. State FIPS codes to exclude.
 #' Default is c("02", "15", "60", "66", "68", "69", "72", "78").
 #' @returns sf object
 #' @importFrom tigris counties
 #' @export
-load_county <-
+process_counties <-
   function(
+    year = 2020,
     exclude = c("02", "15", "60", "66", "68", "69", "72", "78")
   ) {
     options(tigris_use_cache = TRUE)
-    cnty <- tigris::counties(year = 2020)
+    cnty <- tigris::counties(year = year)
     cnty <-
       cnty[!cnty$STATEFP %in%
            c("02", "15", "60", "66", "68", "69", "72", "78"), ]

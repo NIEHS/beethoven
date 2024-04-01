@@ -1,16 +1,16 @@
 target_init <-
   list(
     targets::tar_target(
-      character,
+      char_feat_proc_timerange,
       command = c("2020-01-01", "2020-01-15"),
-      #c(mr("date_start"), mr("date_end"))
+      #c(meta_run("date_start"), meta_run("date_end"))
     )
     ,
     targets::tar_target(
-      sites_spat,
+      sf_feat_proc_aqs_sites,
       read_locs(
         path = list.files(
-          path = mr("dir_input_aqs"),
+          path = meta_run("dir_input_aqs"),
           pattern = "daily_88101_[0-9]{4}.csv",
           full.names = TRUE
         ),
@@ -20,26 +20,26 @@ target_init <-
     )
     ,
     targets::tar_target(
-      sites_time,
+      sf_feat_proc_aqs_sites_time,
       read_locs(
         path = list.files(
-          path = mr("dir_input_aqs"),
+          path = meta_run("dir_input_aqs"),
           pattern = "daily_88101_[0-9]{4}.csv",
           full.names = TRUE
         ),
-        date = time_range,
+        date = char_feat_proc_timerange,
         return_format = "sf"
       )
     )
     ,
     targets::tar_target(
-      sites_pm,
+      sf_feat_proc_aqs_pm25,
       get_aqs_data(
         path = list.files(
-          path = mr("dir_input_aqs"),
+          path = meta_run("dir_input_aqs"),
           pattern = "daily_88101_[0-9]{4}.csv",
           full.names = TRUE),
-        site_spt = sf::st_drop_geometry(sites_time)
-      ) |> dplyr::filter(time >= as.Date("2020-01-01") & time <= as.Date("2020-01-15"))
+        site_spt = sf::st_drop_geometry(sf_feat_proc_aqs_sites_time)
+      ) |> dplyr::filter(time >= meta_run("date_start") & time <= meta_run("date_end"))
     )
   )

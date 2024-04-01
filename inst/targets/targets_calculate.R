@@ -43,7 +43,7 @@ target_calculate_fit <-
     # modis_mod11, modis_mod06, modis_mod13,
     # modis_mcd19, modis_mod09, modis_vnp46
     targets::tar_target(
-      covariates_tri,
+      dt_feat_calc_tri,
       calculate_multi(
         domain =
           unique(
@@ -54,18 +54,18 @@ target_calculate_fit <-
         #c(2018, 2019, 2020, 2021, 2022),
         path = meta_run("dir_input_tri"),
         covariate = "tri",
-        locs = sites_spat,
+        locs = sf_feat_proc_aqs_sites,
         locs_id = meta_run("char_siteid")
       )
     )
     ,
     targets::tar_target(
-      covariates_ecoregion,
+      dt_feat_calc_ecoregions,
       calculate_single(
-        locs = sites_spat,
+        locs = sf_feat_proc_aqs_sites,
         path =
           list.files(
-            meta_run("dir_input_ecoregion"),
+            meta_run("dir_input_ecoregions"),
             "us_eco_l3*.*.shp$",
             full.names = TRUE,
             recursive = TRUE
@@ -76,9 +76,9 @@ target_calculate_fit <-
     )
     ,
     targets::tar_target(
-      covariates_koppen,
+      dt_feat_calc_koppen,
       calculate_single(
-        locs = sites_spat,
+        locs = sf_feat_proc_aqs_sites,
         path =
           file.path(
             meta_run("dir_input_koppen"), "Beck_KG_V1_present_0p083.tif"
@@ -92,65 +92,61 @@ target_calculate_fit <-
     # NLCD years should be defined in the punchcard
     # revert to the original range for running the entire pipeline
     targets::tar_target(
-      covariates_nlcd_list,
+      list_feat_calc_nlcd,
       command = calculate_multi(
         domain = as.integer(meta_run("nlcd_year_sequence_test")[[1]]),
-        locs = terra::vect(sites_spat),
+        locs = terra::vect(sf_feat_proc_aqs_sites),
         path = meta_run("dir_input_nlcd"),
         locs_id = meta_run("char_siteid"),
         covariate = "nlcd",
-        radius = radii
+        radius = int_feat_calc_radii
       ),
-      pattern = map(radii),
+      pattern = map(int_feat_calc_radii),
       iteration = "list"
     )
     ,
     targets::tar_target(
-      covariates_nlcd,
+      dt_feat_calc_nlcd,
       Reduce(function(x, y) dplyr::full_join(x[, -2:-3], y[, -2:-3], by = c(meta_run("char_siteid"), "time")),
-        covariates_nlcd_list)
+        list_feat_calc_nlcd)
     )
     ,
     targets::tar_target(
-      hms_level,
+      char_feat_proc_hms_level,
       command = c("Light", "Medium", "Heavy"),
       iteration = "list"
     )
     ,
     # 3 branches
     targets::tar_target(
-      covariates_hms_list,
+      list_feat_calc_hms,
       calculate_single(
-        locs = sites_spat,
+        locs = sf_feat_proc_aqs_sites,
         path = meta_run("dir_input_hms"),
         covariate = "hms",
-        date = time_range,
-        variable = hms_level,
+        date = char_feat_proc_timerange,
+        variable = char_feat_proc_hms_level,
         locs_id = meta_run("char_siteid")
       ),
       iteration = "list",
-      pattern = map(hms_level)
+      pattern = map(char_feat_proc_hms_level)
     )
     ,
     targets::tar_target(
-      covariates_hms_c,
+      dt_feat_calc_hms,
       Reduce(function(x, y) {
         merge(x, y, by = c(meta_run("char_siteid"), "date"), all = TRUE)
       },
-      covariates_hms_list)
+      list_feat_calc_hms) |>
+        post_calc_unify_timecols() |>
+        post_calc_convert_time()
     )
     ,
     targets::tar_target(
-      covariates_hms,
-      post_calc_unify_timecols(covariates_hms_c) %>%
-        dplyr::mutate(time = as.character(time))
-    )
-    ,
-    targets::tar_target(
-      covariates_sedac_population,
+      dt_feat_calc_population,
       calculate_multi(
         domain = meta_run("sedac_population_year_test"),
-        locs = sites_spat,
+        locs = sf_feat_proc_aqs_sites,
         path =
           file.path(
             meta_run("dir_input_sedac_population"),
@@ -165,9 +161,9 @@ target_calculate_fit <-
     ,
     # SEDAC GRoads calculation by three radii ####
     targets::tar_target(
-      covariates_sedac_groads,
+      dt_feat_calc_groads,
       command = calculate_single(
-        locs = as.data.frame(sites_spat),
+        locs = as.data.frame(sf_feat_proc_aqs_sites),
         path =
           file.path(
             meta_run("dir_input_sedac_groads"),
@@ -175,42 +171,42 @@ target_calculate_fit <-
           ),
         locs_id = meta_run("char_siteid"),
         covariate = "sedac_groads",
-        radius = radii
+        radius = int_feat_calc_radii
       ),
-      pattern = map(radii),
+      pattern = map(int_feat_calc_radii),
       iteration = "vector"
     )
     ,
     # NARR variables calculation ####
     targets::tar_target(
-      narr_variables,
-      command = read.csv(meta_run("file_narr_variables"))$dirs,
+      char_feat_proc_narr_variables,
+      command = meta_run("file_narr_variables")$dirs,
       iteration = "list"
     )
     ,
     targets::tar_target(
-      covariates_narr,
+      dt_feat_calc_narr,
       calculate_single(
-        locs = sites_spat,
-        path = narr_variables,
+        locs = sf_feat_proc_aqs_sites,
+        path = char_feat_proc_narr_variables,
         date = c(meta_run("date_start"), meta_run("date_end")),
-        variable = strsplit(narr_variables, "/")[[1]][3],
+        variable = strsplit(char_feat_proc_narr_variables, "/")[[1]][3],
         covariate = "narr",
         locs_id = meta_run("char_siteid")
       ),
-      pattern = map(narr_variables),
+      pattern = map(char_feat_proc_narr_variables),
       iteration = "list"
     )
     ,
     targets::tar_target(
-      county_poly,
-      command = load_county()
+      sf_feat_proc_counties_2020,
+      command = process_counties(year = 2020)
     )
     ,
-    # Read NEI year range from punchcard ####
+    # Read NEI year range from configuration file ####
     # revert to the original for the operation
     targets::tar_target(
-      nei_dirs,
+      char_feat_proc_nei_dirs,
       command =
         meta_run("dir_input_nei2017"),
         #c(rep(meta_run("dir_input_nei2017"), 2), rep(meta_run("dir_input_nei2020"), 3)),
@@ -218,7 +214,7 @@ target_calculate_fit <-
     )
     ,
     targets::tar_target(
-      nei_years,
+      int_feat_proc_nei_years,
       command = as.integer(meta_run("nei_year_sequence_test")[[1]]),
       iteration = "vector"
     )
@@ -226,14 +222,14 @@ target_calculate_fit <-
     targets::tar_target(
       list_feat_calc_nei,
       calculate_multi(
-        domain = nei_years,
-        locs = sites_spat,
-        path = nei_dirs,
+        domain = int_feat_proc_nei_years,
+        locs = sf_feat_proc_aqs_sites,
+        path = char_feat_proc_nei_dirs,
         covariate = "nei",
-        county = county_poly,
+        county = sf_feat_proc_counties_2020,
         locs_id = meta_run("char_siteid")
       ),
-      pattern = map(nei_years, nei_dirs),
+      pattern = map(int_feat_proc_nei_years, char_feat_proc_nei_dirs),
       iteration = "list"
     )
     ,
@@ -264,14 +260,14 @@ target_calculate_fit <-
     targets::tar_target(
       list_feat_calc_gmted,
       calculate_single(
-        locs = sites_spat,
+        locs = sf_feat_proc_aqs_sites,
         path = meta_run("dir_input_gmted"),
         locs_id = meta_run("char_siteid"),
         covariate = "gmted",
         radius = 0,
         variable = c(char_feat_proc_gmted_vars, char_feat_proc_gmted_res)
       ),
-      pattern = cross(char_feat_proc_gmted_vars, char_feat_proc_gmted_res
+      pattern = cross(char_feat_proc_gmted_vars, char_feat_proc_gmted_res),
       iteration = "list"
     )
     ,
@@ -295,7 +291,7 @@ target_calculate_fit <-
       list_feat_calc_geoscf_aqc,
       calc_geos_strict(
         date = c(list_config_timerange, list_config_timerange),
-        locs = sites_spat,
+        locs = sf_feat_proc_aqs_sites,
         locs_id = meta_run("char_siteid"),
         path = file.path(meta_run("dir_input_geos"), "aqc_tavg_1hr_g1440x721_v1"),
         win = as.numeric(meta_run("extent", split = "|", fixed = TRUE)[[1]]),
@@ -309,7 +305,7 @@ target_calculate_fit <-
       list_feat_calc_geoscf_chm,
       calc_geos_strict(
         date = c(list_config_timerange, list_config_timerange),
-        locs = sites_spat,
+        locs = sf_feat_proc_aqs_sites,
         locs_id = meta_run("char_siteid"),
         path = file.path(meta_run("dir_input_geoscf"), "chm_tavg_1hr_g1440x721_v1"),
         win = as.numeric(meta_run("extent", split = "|", fixed = TRUE)[[1]]),
@@ -414,7 +410,7 @@ target_calculate_fit <-
       dt_feat_calc_modis_mod11,
       amadeus::calc_modis_par(
         from = char_filepaths_raw_modis_mod11,
-        locs = sites_spat,
+        locs = sf_feat_proc_aqs_sites,
         locs_id = meta_run("char_siteid"),
         name_covariates = c("MOD_SFCTD_0_", "MOD_SFCTN_0_"),
         subdataset = "(LST_Day_|LST_Night_)",
@@ -430,7 +426,7 @@ target_calculate_fit <-
       dt_feat_calc_modis_mod06,
       amadeus::calc_modis_par(
         from = char_filepaths_raw_modis_mod06,
-        locs = sites_spat,
+        locs = sf_feat_proc_aqs_sites,
         locs_id = meta_run("char_siteid"),
         preprocess = amadeus::process_modis_swath,
         name_covariates = c("MOD_CLCVD_0_", "MOD_CLCVN_0_"),
@@ -446,7 +442,7 @@ target_calculate_fit <-
       dt_feat_calc_modis_mod09,
       amadeus::calc_modis_par(
         from = char_filepaths_raw_modis_mod09,
-        locs = sites_spat,
+        locs = sf_feat_proc_aqs_sites,
         locs_id = meta_run("char_siteid"),
         preprocess = amadeus::process_modis_merge,
         name_covariates = sprintf("MOD_SFCRF_%d_", seq(1, 7)),
@@ -462,7 +458,7 @@ target_calculate_fit <-
       dt_feat_calc_modis_mcd19_1km,
       amadeus::calc_modis_par(
         from = char_filepaths_raw_modis_mcd19,
-        locs = sites_spat,
+        locs = sf_feat_proc_aqs_sites,
         locs_id = meta_run("char_siteid"),
         name_covariates =
           c("MOD_AD4TA_0_", "MOD_AD5TA_0_"),
@@ -479,7 +475,7 @@ target_calculate_fit <-
       dt_feat_calc_modis_mcd19_5km,
       amadeus::calc_modis_par(
         from = char_filepaths_raw_modis_mcd19,
-        locs = sites_spat,
+        locs = sf_feat_proc_aqs_sites,
         locs_id = meta_run("char_siteid"),
         name_covariates =
           c("MOD_CSZAN_0_", "MOD_CVZAN_0_", "MOD_RAZAN_0_",
@@ -497,7 +493,7 @@ target_calculate_fit <-
       dt_feat_calc_viirs,
       amadeus::calc_modis_par(
         from = char_filepaths_raw_viirs,
-        locs = sites_spat,
+        locs = sf_feat_proc_aqs_sites,
         locs_id = meta_run("char_siteid"),
         name_covariates = "MOD_LGHTN_0_",
         subdataset = 3,
@@ -511,10 +507,10 @@ target_calculate_fit <-
     )
     ,
     targets::tar_target(
-      dt_feat_calc_modis_mod11,
+      dt_feat_calc_modis_mod13,
       amadeus::calc_modis_par(
         from = char_filepaths_raw_modis_mod13,
-        locs = sites_spat,
+        locs = sf_feat_proc_aqs_sites,
         locs_id = meta_run("char_siteid"),
         name_covariates = "MOD_NDVIV_0_",
         subdataset = "(NDVI)",
@@ -583,7 +579,7 @@ target_calculate_fit <-
     targets::tar_target(
       dt_feat_fit_x,
       post_calc_merge_all(
-        locs = sites_time,
+        locs = sf_feat_proc_aqs_sites_time,
         locs_id = meta_run("char_siteid"),
         time_id = meta_run("char_timeid"),
         target_years =
@@ -599,7 +595,7 @@ target_calculate_fit <-
     targets::tar_target(
       dt_feat_fit,
       post_calc_join_pm25_features(
-        df_pm = sites_pm,
+        df_pm = sf_feat_proc_aqs_pm25,
         df_covar = dt_feat_fit_x,
         locs_id = meta_run("char_siteid"),
         time_id = meta_run("char_timeid")
