@@ -40,11 +40,11 @@ target_calculate_fit <-
     # single: ecoregion, koppen
     # multi: tri, nlcd, hms, sedac_population, sedac_groads,
     # narrmono, narrplevels, nei, gmted, geos,
-    # modis_mod11, modis_mod06, modis_mod13, modis_mcd19, modis_mod09, modis_vnp46
+    # modis_mod11, modis_mod06, modis_mod13,
+    # modis_mcd19, modis_mod09, modis_vnp46
     targets::tar_target(
       covariates_tri,
       calculate_multi(
-        # sequence: could be refered from dates
         domain =
           unique(
             as.integer(
@@ -55,7 +55,7 @@ target_calculate_fit <-
         path = meta_run("dir_input_tri"),
         covariate = "tri",
         locs = sites_spat,
-        locs_id = meta_run("pointid")
+        locs_id = meta_run("char_siteid")
       )
     )
     ,
@@ -70,7 +70,7 @@ target_calculate_fit <-
             full.names = TRUE,
             recursive = TRUE
           ),
-        locs_id = meta_run("pointid"),
+        locs_id = meta_run("char_siteid"),
         covariate = "ecoregion"
       )
     )
@@ -83,7 +83,7 @@ target_calculate_fit <-
           file.path(
             meta_run("dir_input_koppen"), "Beck_KG_V1_present_0p083.tif"
           ),
-        locs_id = meta_run("pointid"),
+        locs_id = meta_run("char_siteid"),
         covariate = "koppen"
       )
     )
@@ -97,7 +97,7 @@ target_calculate_fit <-
         domain = as.integer(meta_run("nlcd_year_sequence_test")[[1]]),
         locs = terra::vect(sites_spat),
         path = meta_run("dir_input_nlcd"),
-        locs_id = meta_run("pointid"),
+        locs_id = meta_run("char_siteid"),
         covariate = "nlcd",
         radius = radii
       ),
@@ -107,7 +107,7 @@ target_calculate_fit <-
     ,
     targets::tar_target(
       covariates_nlcd,
-      Reduce(function(x, y) dplyr::full_join(x[, -2:-3], y[, -2:-3], by = c(meta_run("pointid"), "time")),
+      Reduce(function(x, y) dplyr::full_join(x[, -2:-3], y[, -2:-3], by = c(meta_run("char_siteid"), "time")),
         covariates_nlcd_list)
     )
     ,
@@ -126,7 +126,7 @@ target_calculate_fit <-
         covariate = "hms",
         date = time_range,
         variable = hms_level,
-        locs_id = meta_run("pointid")
+        locs_id = meta_run("char_siteid")
       ),
       iteration = "list",
       pattern = map(hms_level)
@@ -134,13 +134,15 @@ target_calculate_fit <-
     ,
     targets::tar_target(
       covariates_hms_c,
-      Reduce(function(x, y) dplyr::full_join(x, y, by = c(meta_run("pointid"), "date")),
-        covariates_hms_list)
+      Reduce(function(x, y) {
+        merge(x, y, by = c(meta_run("char_siteid"), "date"), all = TRUE)
+      },
+      covariates_hms_list)
     )
     ,
     targets::tar_target(
       covariates_hms,
-      unify_timecols(covariates_hms_c) %>%
+      post_calc_unify_timecols(covariates_hms_c) %>%
         dplyr::mutate(time = as.character(time))
     )
     ,
@@ -154,7 +156,7 @@ target_calculate_fit <-
             meta_run("dir_input_sedac_population"),
             meta_run("file_input_sedac_population")
           ),
-        locs_id = meta_run("pointid"),
+        locs_id = meta_run("char_siteid"),
         covariate = "sedac_population",
         radius = 0,
         fun = "mean"
@@ -171,7 +173,7 @@ target_calculate_fit <-
             meta_run("dir_input_sedac_groads"),
             meta_run("file_input_sedac_groads")
           ),
-        locs_id = meta_run("pointid"),
+        locs_id = meta_run("char_siteid"),
         covariate = "sedac_groads",
         radius = radii
       ),
@@ -194,7 +196,7 @@ target_calculate_fit <-
         date = c(meta_run("date_start"), meta_run("date_end")),
         variable = strsplit(narr_variables, "/")[[1]][3],
         covariate = "narr",
-        locs_id = meta_run("pointid")
+        locs_id = meta_run("char_siteid")
       ),
       pattern = map(narr_variables),
       iteration = "list"
@@ -222,183 +224,181 @@ target_calculate_fit <-
     )
     ,
     targets::tar_target(
-      covariates_nei_list,
+      list_feat_calc_nei,
       calculate_multi(
         domain = nei_years,
         locs = sites_spat,
         path = nei_dirs,
         covariate = "nei",
         county = county_poly,
-        locs_id = meta_run("pointid")
+        locs_id = meta_run("char_siteid")
       ),
       pattern = map(nei_years, nei_dirs),
       iteration = "list"
     )
     ,
     targets::tar_target(
-      covariates_nei,
-      data.table::rbindlist(covariates_nei_list, fill = TRUE)
+      dt_feat_calc_nei,
+      data.table::rbindlist(list_feat_calc_nei, fill = TRUE)
     )
     ,
     targets::tar_target(
-      gmted_combination_stat,
+      char_feat_proc_gmted_vars,
       command =
-        rep(
-          c(
-            "Breakline Emphasis", "Systematic Subsample",
-            "Median Statistic", "Minimum Statistic",
-            "Mean Statistic", "Maximum Statistic",
-            "Standard Deviation Statistic"
-          ),
-          3L
+        c(
+          "Breakline Emphasis", "Systematic Subsample",
+          "Median Statistic", "Minimum Statistic",
+          "Mean Statistic", "Maximum Statistic",
+          "Standard Deviation Statistic"
         ),
       iteration = "vector"
     )
     ,
     targets::tar_target(
-      gmted_combination_res,
-      command = rep(
+      char_feat_proc_gmted_res,
+      command =
         c("7.5 arc-seconds", "15 arc-seconds", "30 arc-seconds"),
-        each = 7L
-      ),
       iteration = "vector"
     )
     ,
     targets::tar_target(
-      covariates_gmted_list,
+      list_feat_calc_gmted,
       calculate_single(
         locs = sites_spat,
         path = meta_run("dir_input_gmted"),
-        locs_id = meta_run("pointid"),
+        locs_id = meta_run("char_siteid"),
         covariate = "gmted",
         radius = 0,
-        variable = c(gmted_combination_stat, gmted_combination_res)
+        variable = c(char_feat_proc_gmted_vars, char_feat_proc_gmted_res)
       ),
-      pattern = map(gmted_combination_stat, gmted_combination_res),
+      pattern = cross(char_feat_proc_gmted_vars, char_feat_proc_gmted_res
       iteration = "list"
     )
     ,
     targets::tar_target(
-      covariates_gmted,
-      Reduce(function(x, y) dplyr::full_join(x, y, by = meta_run("pointid")),
-        covariates_gmted_list)
+      dt_feat_calc_gmted,
+      Reduce(function(x, y) {
+        merge(x, y, by = meta_run("char_siteid"), all = TRUE)
+      },
+      list_feat_calc_gmted)
     )
     ,
     targets::tar_target(
-      geos_dates,
+      list_config_timerange,
       # revert to the original range for running the entire pipeline
-      command = as.character(seq(meta_run("date_start"), meta_run("date_end"), by = "1 day")),
+      command =
+      as.character(seq(meta_run("date_start"), meta_run("date_end"), by = "1 day")),
       iteration = "list"
     )
     ,
     targets::tar_target(
-      covariates_geos_aqc_list,
+      list_feat_calc_geoscf_aqc,
       calc_geos_strict(
-        date = c(geos_dates, geos_dates),
+        date = c(list_config_timerange, list_config_timerange),
         locs = sites_spat,
-        locs_id = meta_run("pointid"),
+        locs_id = meta_run("char_siteid"),
         path = file.path(meta_run("dir_input_geos"), "aqc_tavg_1hr_g1440x721_v1"),
         win = as.numeric(meta_run("extent", split = "|", fixed = TRUE)[[1]]),
         snap = "out"
       ),
-      pattern = map(geos_dates),
+      pattern = map(list_config_timerange),
       iteration = "list"
     )
     ,
     targets::tar_target(
-      covariates_geos_chm_list,
+      list_feat_calc_geoscf_chm,
       calc_geos_strict(
-        date = c(geos_dates, geos_dates),
+        date = c(list_config_timerange, list_config_timerange),
         locs = sites_spat,
-        locs_id = meta_run("pointid"),
-        path = file.path(meta_run("dir_input_geos"), "chm_tavg_1hr_g1440x721_v1"),
+        locs_id = meta_run("char_siteid"),
+        path = file.path(meta_run("dir_input_geoscf"), "chm_tavg_1hr_g1440x721_v1"),
         win = as.numeric(meta_run("extent", split = "|", fixed = TRUE)[[1]]),
         snap = "out"
       ),
-      pattern = map(geos_dates),
+      pattern = map(list_config_timerange),
       iteration = "list"
     )
     ,
     targets::tar_target(
-      covariates_geos_aqc,
-      data.table::rbindlist(covariates_geos_aqc_list, fill = TRUE) %>%
-        setNames(c("site_id", paste0(names(x = .)[c(-1, -7)], "_AQC"), "time")) %>%
+      dt_feat_calc_geoscf_aqc,
+      data.table::rbindlist(list_feat_calc_geoscf_aqc, fill = TRUE) %>%
+        setNames(c(meta_run("char_siteid"), paste0(names(x = .)[c(-1, -7)], "_AQC"), "time")) %>%
         dplyr::mutate(time = as.character(time))
     )
     ,
     targets::tar_target(
-      covariates_geos_chm,
-      data.table::rbindlist(covariates_geos_chm_list, fill = TRUE) %>%
+      dt_feat_calc_geoscf_chm,
+      data.table::rbindlist(list_feat_calc_geoscf_chm, fill = TRUE) %>%
         dplyr::mutate(time = as.character(time))
     )
     ,
     targets::tar_target(
-      modis_mod06_paths,
+      char_filepaths_raw_modis_mod06,
       read_paths(
         meta_run("dir_input_modis_mod06"),
         extension = "hdf",
         julian = TRUE,
         target_dates = c(
-          as.Date(meta_run("date_start")),
-          as.Date(meta_run("date_end"))
+          meta_run("date_start"),
+          meta_run("date_end")
         )
       )
     )
     ,
     targets::tar_target(
-      modis_mod11_paths,
+      char_filepaths_raw_modis_mod11,
       read_paths(
         meta_run("dir_input_modis_mod11"),
         extension = "hdf",
         julian = TRUE,
         target_dates = c(
-          as.Date(meta_run("date_start")),
-          as.Date(meta_run("date_end"))
+          meta_run("date_start"),
+          meta_run("date_end")
         )
       )
     )
     ,
     targets::tar_target(
-      modis_mod13_paths,
+      char_filepaths_raw_modis_mod13,
       read_paths(
         meta_run("dir_input_modis_mod13"),
         extension = "hdf",
         julian = TRUE,
         target_dates = c(
-          as.Date(meta_run("date_start")),
-          as.Date(meta_run("date_end"))
+          meta_run("date_start"),
+          meta_run("date_end")
         )
       )
     )
     ,
     targets::tar_target(
-      modis_mod09_paths,
+      char_filepaths_raw_modis_mod09,
       read_paths(
         meta_run("dir_input_modis_mod09"),
         extension = "hdf",
         julian = TRUE,
         target_dates = c(
-          as.Date(meta_run("date_start")),
-          as.Date(meta_run("date_end"))
+          meta_run("date_start"),
+          meta_run("date_end")
         )
       )
     )
     ,
     targets::tar_target(
-      modis_mcd19_paths,
+      char_filepaths_raw_modis_mcd19,
       read_paths(
         meta_run("dir_input_modis_mcd19"),
         extension = "hdf",
         julian = TRUE,
         target_dates = c(
-          as.Date(meta_run("date_start")),
-          as.Date(meta_run("date_end"))
+          meta_run("date_start"),
+          meta_run("date_end")
         )
       )
     )
     ,
     targets::tar_target(
-      modis_vnp46_paths,
+      char_filepaths_raw_viirs,
       read_paths(
         meta_run("dir_input_modis_vnp46"),
         extension = "h5",
@@ -411,26 +411,15 @@ target_calculate_fit <-
     )
     ,
     targets::tar_target(
-      covariates_modis_mod11,
+      dt_feat_calc_modis_mod11,
       amadeus::calc_modis_par(
-        from = modis_mod11_paths,
+        from = char_filepaths_raw_modis_mod11,
         locs = sites_spat,
-        locs_id = meta_run("pointid"),
+        locs_id = meta_run("char_siteid"),
         name_covariates = c("MOD_SFCTD_0_", "MOD_SFCTN_0_"),
         subdataset = "(LST_Day_|LST_Night_)",
         preprocess = amadeus::process_modis_merge,
         nthreads = meta_run("nthreads_calc")
-      # calculate_multi(
-      #   locs = sites_spat,
-      #   path = meta_run("dir_input_modis_mod11"),
-      #   process_function = NULL,
-      #   calc_function = amadeus::calc_modis_par,
-      #   locs_id = meta_run("pointid"),
-      #   from = meta_run("dir_input_modis_mod11"),
-      #   preprocess = amadeus::process_modis_merge,
-      #   name_covariates = c("MOD_SFCTD_0_", "MOD_SFCTN_0_"),
-      #   subdataset = "(LST_Day_|LST_Night_)",
-      #   nthreads = 8
       ),
       resources = set_slurm_resource(
         ntasks = 1, ncpus = 20, memory = 12
@@ -438,54 +427,31 @@ target_calculate_fit <-
     )
     ,
     targets::tar_target(
-      covariates_modis_mod06,
+      dt_feat_calc_modis_mod06,
       amadeus::calc_modis_par(
-        from = modis_mod06_paths,
+        from = char_filepaths_raw_modis_mod06,
         locs = sites_spat,
-        locs_id = meta_run("pointid"),
+        locs_id = meta_run("char_siteid"),
         preprocess = amadeus::process_modis_swath,
         name_covariates = c("MOD_CLCVD_0_", "MOD_CLCVN_0_"),
         subdataset = c("Cloud_Fraction_Day", "Cloud_Fraction_Night"),
-        nthreads = meta_run("nthreads_calc")
+        nthreads = meta_run("nthreads")
       ),
       resources = set_slurm_resource(
         ntasks = 1, ncpus = 20, memory = 12
       )
-      # calculate_multi(
-      #   locs = sites_spat,
-      #   path = meta_run("dir_input_modis_mod06"),
-      #   process_function = NULL,
-      #   calc_function = amadeus::calc_modis_par,
-      #   locs_id = meta_run("pointid"),
-      #   from = meta_run("dir_input_modis_mod06"),
-      #   preprocess = amadeus::process_modis_swath,
-      #   name_covariates = c("MOD_CLCVD_0_", "MOD_CLCVN_0_"),
-      #   subdataset = "(Cloud_Fraction_Day|Cloud_Fraction_Night)",
-      #   nthreads = 8
-      # )
     )
     ,
     targets::tar_target(
-      covariates_modis_mod09,
+      dt_feat_calc_modis_mod09,
       amadeus::calc_modis_par(
-        from = modis_mod09_paths,
+        from = char_filepaths_raw_modis_mod09,
         locs = sites_spat,
-        locs_id = meta_run("pointid"),
+        locs_id = meta_run("char_siteid"),
         preprocess = amadeus::process_modis_merge,
         name_covariates = sprintf("MOD_SFCRF_%d_", seq(1, 7)),
         subdataset = seq(2, 8),
-        nthreads = meta_run("nthreads_calc")
-      # calculate_multi(
-      #   locs = sites_spat,
-      #   path = meta_run("dir_input_modis_mod09"),
-      #   process_function = NULL,
-      #   calc_function = amadeus::calc_modis_par,
-      #   locs_id = meta_run("pointid"),
-      #   from = meta_run("dir_input_modis_mod09"),
-      #   preprocess = amadeus::process_modis_merge,
-      #   name_covariates = sprintf("MOD_SFCRF_%d_", seq(1, 7)),
-      #   subdataset = seq(2, 8),
-      #   nthreads = 8
+        nthreads = meta_run("nthreads")
       ),
       resources = set_slurm_resource(
         ntasks = 1, ncpus = 20, memory = 12
@@ -493,28 +459,16 @@ target_calculate_fit <-
     )
     ,
     targets::tar_target(
-      covariates_modis_mcd19_1km,
+      dt_feat_calc_modis_mcd19_1km,
       amadeus::calc_modis_par(
-        from = modis_mcd19_paths,
+        from = char_filepaths_raw_modis_mcd19,
         locs = sites_spat,
-        locs_id = meta_run("pointid"),
+        locs_id = meta_run("char_siteid"),
         name_covariates =
           c("MOD_AD4TA_0_", "MOD_AD5TA_0_"),
         subdataset = "(Optical_Depth)",
         preprocess = amadeus::process_modis_merge,
-        nthreads = meta_run("nthreads_calc")
-      # calculate_multi(
-      #   locs = sites_spat,
-      #   path = meta_run("dir_input_modis_mcd19"),
-      #   process_function = NULL,
-      #   calc_function = amadeus::calc_modis_par,
-      #   locs_id = meta_run("pointid"),
-      #   from = meta_run("dir_input_modis_mcd19"),
-      #   preprocess = amadeus::process_modis_merge,
-      #   name_covariates =
-      #     c("MOD_AD4TA_0_", "MOD_AD5TA_0_"),
-      #   subdataset = "(Optical_Depth)",
-      #   nthreads = 8
+        nthreads = meta_run("nthreads")
       ),
       resources = set_slurm_resource(
         ntasks = 1, ncpus = 20, memory = 12
@@ -522,30 +476,17 @@ target_calculate_fit <-
     )
     ,
     targets::tar_target(
-      covariates_modis_mcd19_5km,
+      dt_feat_calc_modis_mcd19_5km,
       amadeus::calc_modis_par(
-        from = modis_mcd19_paths,
+        from = char_filepaths_raw_modis_mcd19,
         locs = sites_spat,
-        locs_id = meta_run("pointid"),
+        locs_id = meta_run("char_siteid"),
         name_covariates =
           c("MOD_CSZAN_0_", "MOD_CVZAN_0_", "MOD_RAZAN_0_",
             "MOD_SCTAN_0_", "MOD_GLNAN_0_"),
         subdataset = "(cos|RelAZ|Angle)",
         preprocess = amadeus::process_modis_merge,
-        nthreads = meta_run("nthreads_calc")
-      # calculate_multi(
-      #   locs = sites_spat,
-      #   path = meta_run("dir_input_modis_mcd19"),
-      #   process_function = NULL,
-      #   calc_function = amadeus::calc_modis_par,
-      #   locs_id = meta_run("pointid"),
-      #   from = meta_run("dir_input_modis_mcd19"),
-      #   preprocess = amadeus::process_modis_merge,
-      #   name_covariates =
-      #     c("MOD_CSZAN_0_", "MOD_CVZAN_0_", "MOD_RAZAN_0_",
-      #       "MOD_SCTAN_0_", "MOD_GLNAN_0_"),
-      #   subdataset = "(cos|RelAZ|Angle)",
-      #   nthreads = 8
+        nthreads = meta_run("nthreads")
       ),
       resources = set_slurm_resource(
         ntasks = 1, ncpus = 20, memory = 12
@@ -553,127 +494,115 @@ target_calculate_fit <-
     )
     ,
     targets::tar_target(
-      covariates_modis_vnp46,
+      dt_feat_calc_viirs,
       amadeus::calc_modis_par(
-        from = modis_vnp46_paths,
+        from = char_filepaths_raw_viirs,
         locs = sites_spat,
-        locs_id = meta_run("pointid"),
+        locs_id = meta_run("char_siteid"),
         name_covariates = "MOD_LGHTN_0_",
         subdataset = 3,
         preprocess = amadeus::process_bluemarble,
-        nthreads = meta_run("nthreads_calc")
-      # calculate_multi(
-      #         locs = sites_spat,
-      #         path = meta_run("dir_input_modis_vnp46"),
-      #         process_function = NULL,
-      #         calc_function = amadeus::calc_modis_par,
-      #         locs_id = meta_run("pointid"),
-      #         from = meta_run("dir_input_modis_vnp46"),
-      #         preprocess = amadeus::process_bluemarble,
-      #         name_covariates = "MOD_LGHTN_0_",
-      #         subdataset = 3,
-      #         nthreads = 8
-      #       )
-      ),
+        nthreads = meta_run("nthreads")
+      )
+      ,
       resources = set_slurm_resource(
         ntasks = 1, ncpus = 20, memory = 12
       )
     )
     ,
     targets::tar_target(
-      covariates_modis_mod13,
+      dt_feat_calc_modis_mod11,
       amadeus::calc_modis_par(
-        from = modis_mod13_paths,
+        from = char_filepaths_raw_modis_mod13,
         locs = sites_spat,
-        locs_id = meta_run("pointid"),
+        locs_id = meta_run("char_siteid"),
         name_covariates = "MOD_NDVIV_0_",
         subdataset = "(NDVI)",
         preprocess = amadeus::process_modis_merge,
-        nthreads = meta_run("nthreads_calc")
+        nthreads = meta_run("nthreads")
       ),
       resources = set_slurm_resource(
         ntasks = 1, ncpus = 20, memory = 12
       )
     )
     ,
-    # combine each covariate set into one data.frame (data.table; if any)
+    # Merge spatial-only features ####
     targets::tar_target(
-      covariates_combined_sp,
-      combine(
-        by = meta_run("pointid"),
+      dt_feat_fit_xsp_base,
+      post_calc_merge_features(
+        by = meta_run("char_siteid"),
         time = FALSE,
-        covariates_koppen,
-        covariates_ecoregion,
-        covariates_gmted,
-        covariates_nei[, -2:-3]
+        df_feat_calc_koppen,
+        df_feat_calc_ecoregions,
+        df_feat_calc_gmted,
+        df_feat_calc_nei
       )
     )
     ,
+    # Merge spatiotemporal features ####
     targets::tar_target(
-      covariates_combined_spt_base,
-      combine(
-        by = meta_run("pointid"),
+      dt_feat_fit_xst_base,
+      post_calc_merge_features(
+        by = meta_run("char_siteid"),
         time = TRUE,
-      #   # covariates_nlcd,
-        covariates_hms,
-        covariates_geos_aqc,
-        covariates_geos_chm,
-        # covariates_tri,
-        covariates_modis_mod11,
-        covariates_modis_mod06,
-        covariates_modis_mod13,
-        covariates_modis_mod09,
-        covariates_modis_mcd19_1km,
-        covariates_modis_mcd19_5km,
-        covariates_modis_vnp46
+        dt_feat_calc_hms,
+        dt_feat_calc_geossf_aqc,
+        dt_feat_calc_geossf_chm,
+        dt_feat_calc_modis_mod11,
+        dt_feat_calc_modis_mod06,
+        dt_feat_calc_modis_mod13,
+        dt_feat_calc_modis_mod09,
+        dt_feat_calc_modis_mcd19_1km,
+        dt_feat_calc_modis_mcd19_5km,
+        dt_feat_calc_viirs
       )
     )
     ,
     targets::tar_target(
-      covariates_combined_spt_nlcd,
-      join_yeardate(
-        covariates_nlcd,
-        covariates_combined_spt_base,
+      dt_feat_fit_xst_nlcd,
+      post_calc_join_yeardate(
+        dt_feat_calc_nlcd,
+        dt_feat_fit_xst_base,
         field_year = "time",
         field_date = "time",
-        spid = meta_run("pointid")
+        spid = meta_run("char_siteid")
       )
     )
     ,
     targets::tar_target(
-      covariates_combined_spt,
-      join_yeardate(
-        covariates_tri,
-        covariates_combined_spt_nlcd,
+      dt_feat_fit_xst,
+      post_calc_join_yeardate(
+        dt_feat_calc_tri,
+        dt_feat_fit_xst_nlcd,
         field_year = "time",
         field_date = "time",
-        spid = meta_run("pointid")
+        spid = meta_run("char_siteid")
       )
     )
     ,
     targets::tar_target(
-      covariates_final,
-      combine_final(
+      dt_feat_fit_x,
+      post_calc_merge_all(
         locs = sites_time,
-        locs_id = meta_run("pointid"),
-        time_id = meta_run("timeid"),
+        locs_id = meta_run("char_siteid"),
+        time_id = meta_run("char_timeid"),
         target_years =
           seq(
             as.integer(format(meta_run("date_start"), "%Y")),
             as.integer(format(meta_run("date_end"), "%Y"))
           ),
-        df_sp = covariates_combined_sp,
-        df_spt = covariates_combined_spt
+        df_sp = dt_feat_fit_xsp_base,
+        df_spt = dt_feat_fit_xst
       )
     )
     ,
     targets::tar_target(
-      data_full,
-      join_yx(
+      dt_feat_fit,
+      post_calc_join_pm25_features(
         df_pm = sites_pm,
-        df_covar = covariates_final,
-        locs_id = meta_run("pointid"),
-        time_id = meta_run("timeid")
+        df_covar = dt_feat_fit_x,
+        locs_id = meta_run("char_siteid"),
+        time_id = meta_run("char_timeid")
       )
     )
   )
@@ -686,292 +615,5 @@ target_calculate_fit <-
 ## TODO: chopin's gridset implementation
 target_calculate_predict <-
   list(
-    # ... calculate covariates for prediction grid
-    targets::tar_target(
-      covar_prediction_grid,
-      read_covar_pred(meta_run("file_grid_prediction"))
-    )
-    ,
-    # covariate calculation: multi vs single cases
-    targets::tar_target(
-      covariates_predict_tri,
-      calculate_multi(
-        domain = c(2018, 2019, 2020, 2021, 2022),
-        outpath =
-          file.path(
-            meta_run("dir_output"), meta_run("file_covar_predict_tri")
-          ),
-        locs = covar_prediction_grid,
-        path = meta_run("dir_input_tri"),
-        ... # other args
-      )
-    )
-    ,
-    targets::tar_target(
-      covariates_predict_ecoregion,
-      calculate_single(
-        outpath =
-          file.path(
-            meta_run("dir_output"), meta_run("file_covar_predict_ecoregion")
-          ),
-        locs = covar_prediction_grid,
-        path = meta_run("dir_input_ecoregion"),
-        ... # other args
-      )
-    )
-    ,
-    targets::tar_target(
-      covariates_predict_koppen,
-      calculate_single(
-        outpath =
-          file.path(
-            meta_run("dir_output"), meta_run("file_covar_predict_koppen")
-          ),
-        locs = covar_prediction_grid,
-        path = meta_run("dir_input_koppen"),
-        ... # other args
-      )
-    )
-    ,
-    targets::tar_target(
-      covariates_predict_nlcd,
-      calculate_multi(
-        outpath =
-          file.path(
-            meta_run("dir_output"), meta_run("file_covar_predict_nlcd")
-          ),
-        locs = covar_prediction_grid,
-        path = meta_run("dir_input_nlcd"),
-        ... # other args
-      )
-    )
-    ,
-    targets::tar_target(
-      covariates_predict_hms,
-      calculate_multi(
-        outpath =
-          file.path(
-            meta_run("dir_output"), meta_run("file_covar_predict_hms")
-          ),
-        locs = covar_prediction_grid,
-        path = meta_run("dir_input_hms"),
-        ... # other args
-      )
-    )
-    ,
-    targets::tar_target(
-      covariates_predict_sedac_population,
-      calculate_multi(
-        outpath =
-          file.path(
-            meta_run("dir_output"), meta_run("file_covar_predict_sedac_population")
-          ),
-        locs = covar_prediction_grid,
-        path = meta_run("dir_input_sedac_population"),
-        ... # other args
-      )
-    )
-    ,
-    targets::tar_target(
-      covariates_predict_sedac_groads,
-      calculate_multi(
-        outpath =
-          file.path(
-            meta_run("dir_output"), meta_run("file_covar_predict_sedac_groads")
-          ),
-        locs = covar_prediction_grid,
-        path = meta_run("dir_input_sedac_groads"),
-        ... # other args
-      )
-    )
-    ,
-    targets::tar_target(
-      covariates_predict_narrmono,
-      calculate_multi(
-        outpath =
-          file.path(
-            meta_run("dir_output"), meta_run("file_covar_predict_narrmono")
-          ),
-        locs = covar_prediction_grid,
-        path = meta_run("dir_input_narrmono"),
-        ... # other args
-      )
-    )
-    ,
-    targets::tar_target(
-      covariates_predict_narrplevels,
-      calculate_multi(
-        outpath =
-          file.path(
-            meta_run("dir_output"), meta_run("file_covar_predict_narrplevels")
-          ),
-        locs = covar_prediction_grid,
-        path = meta_run("dir_input_narrplevels"),
-        ... # other args
-      )
-    )
-    ,
-    targets::tar_target(
-      covariates_predict_nei,
-      calculate_multi(
-        domain = c(2017, 2017, 2020, 2020, 2020),
-        outpath =
-          file.path(
-            meta_run("dir_output"), meta_run("file_covar_predict_nei")
-          ),
-        locs = covar_prediction_grid,
-        path = meta_run("dir_input_nei"),
-        ... # other args
-      )
-    )
-    ,
-    targets::tar_target(
-      covariates_predict_gmted,
-      calculate_multi(
-        outpath =
-          file.path(
-            meta_run("dir_output"), meta_run("file_covar_predict_gmted")
-          ),
-        locs = covar_prediction_grid,
-        path = meta_run("dir_input_gmted"),
-        ... # other args
-      )
-    )
-    ,
-    targets::tar_target(
-      covariates_predict_geos,
-      calculate_multi(
-        outpath =
-          file.path(
-            meta_run("dir_output"), meta_run("file_covar_predict_geos")
-          ),
-        locs = covar_prediction_grid,
-        path = meta_run("dir_input_geos"),
-        ... # other args
-      )
-    )
-    ,
-    targets::tar_target(
-      covariates_predict_modis_mod11,
-      calculate_multi(
-        outpath =
-          file.path(
-            meta_run("dir_output"), meta_run("file_covar_predict_modis_mod11")
-          ),
-        locs = covar_prediction_grid,
-        path = meta_run("dir_input_modis_mod11"),
-        ... # other args
-      )
-    )
-    ,
-    targets::tar_target(
-      covariates_predict_modis_mod06,
-      calculate_multi(
-        outpath =
-          file.path(
-            meta_run("dir_output"), meta_run("file_covar_predict_modis_mod06")
-          ),
-        locs = covar_prediction_grid,
-        path = meta_run("dir_input_modis_mod06"),
-        ... # other args
-      )
-    )
-    ,
-    targets::tar_target(
-      covariates_predict_modis_mod13,
-      calculate_multi(
-        outpath =
-          file.path(
-            meta_run("dir_output"), meta_run("file_covar_predict_modis_mod13")
-          ),
-        locs = covar_prediction_grid,
-        path = meta_run("dir_input_modis_mod13"),
-        ... # other args
-      )
-    )
-    ,
-    targets::tar_target(
-      covariates_predict_modis_mcd19,
-      calculate_multi(
-        outpath =
-          file.path(
-            meta_run("dir_output"), meta_run("file_covar_predict_modis_mcd19")
-          ),
-        locs = covar_prediction_grid,
-        path = meta_run("dir_input_modis_mcd19"),
-        ... # other args
-      )
-    )
-    ,
-    targets::tar_target(
-      covariates_predict_modis_mod09,
-      calculate_multi(
-        outpath =
-          file.path(
-            meta_run("dir_output"), meta_run("file_covar_predict_modis_mod09")
-          ),
-        locs = covar_prediction_grid,
-        path = meta_run("dir_input_modis_mod09"),
-        ... # other args
-      )
-    )
-    ,
-    targets::tar_target(
-      covariates_predict_modis_vnp46,
-      calculate_multi(
-        outpath =
-          file.path(
-            meta_run("dir_output"), meta_run("file_covar_predict_modis_vnp46")
-          ),
-        locs = covar_prediction_grid,
-        path = meta_run("dir_input_modis_vnp46"),
-        ... # other args
-      )
-    )
-    ,
-    # combine each covariate set into one data.frame (data.table; if any)
-    targets::tar_target(
-      covariates_predict_combined_sp,
-      combine(
-        by = meta_run("pointid"),
-        time = FALSE,
-        covariates_predict_koppen,
-        covariates_predict_ecoregion,
-        covariates_predict_gmted
-      )
-    )
-    ,
-    targets::tar_target(
-      covariates_predict_combined_spt,
-      combine(
-        by = meta_run("pointid"),
-        time = TRUE,
-        #covariates_predict_nlcd,
-        covariates_predict_hms,
-        covariates_predict_geos,
-        covariates_predict_nei,
-        covariates_predict_tri,
-        covariates_predict_modis_mod11,
-        covariates_predict_modis_mod06,
-        covariates_predict_modis_mod13,
-        covariates_predict_modis_mod09,
-        covariates_predict_modis_mcd19_1km,
-        covariates_predict_modis_mcd19_5km,
-        covariates_predict_modis_vnp46
-      )
-    )
-    ,
-    targets::tar_target(
-      covariates_predict_final,
-      combine_final(
-        locs = covar_prediction_grid,
-        locs_id = meta_run("pointid"),
-        time_id = meta_run("timeid"),
-        target_years = seq(2018, 2022),
-        df_sp = covariates_predict_combined_sp,
-        df_spt = covariates_predict_combined_spt
-      )
-    )
+
   )
-
-

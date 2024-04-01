@@ -1,33 +1,35 @@
 ## pipeline base functions
 
 #' Running commands with a punchcard
-#' @param varname variable name to call
-#' @param file Path to the punchcard
+#' @param var_short Short variable name to call from the CSV fiel
+#' @param file Path to the configuration file
 #' @param ... Arguments passed to the command
 #' @returns Depending on the specification in the punchcard.
 #' @examples
-#' meta_run(varname = "root_absolute")
-#' meta_run(varname = "root_relative")
-#' meta_run(varname = "y2018")
-#' meta_run(varname = "dir_input_modis_mod11")
+#' meta_run("root_absolute")
+#' meta_run("root_relative")
+#' meta_run("y2018")
+#' meta_run("dir_input_modis_mod11")
+#' @importFrom utils read.csv
+#' @export
 meta_run <-
   function(
-    varname = NULL,
-    file = file.path("./tools/pipeline/punchcard.csv"),
+    var_short = NULL,
+    file = file.path("./inst/targets/targets_configuration.csv"),
+    # after completion, file path should be replaced by system.file
+    # reference path is ./targets or depending on the location of the pipeline
     ...
   ) {
     metaspec <- utils::read.csv(file)
-    if (varname == "root_absolute") {
+    if (var_short == "root_absolute") {
       getwd()
     } else {
-      spec <- metaspec[metaspec$varname == varname, ]
+      spec <- metaspec[metaspec$name_targets_short == var_short, ]
       foo_run <- get(spec$command)
       foo_run(spec$value, ...)
     }
   }
 
-mr <- meta_run
-mr("nei_year_sequence", split = "|", fixed = TRUE)[[1]]
 
 
 #' Set resource management for SLURM
@@ -42,6 +44,11 @@ mr("nei_year_sequence", split = "|", fixed = TRUE)[[1]]
 #' Suggested number of `ncpus` is more than 1 for typical multicore R tasks.
 #' @returns A list of resources for `tar_resources`
 #' @author Insang Song
+#' @importFrom future tweak
+#' @importFrom future.batchtools batchtools_slurm
+#' @importFrom targets tar_resources
+#' @importFrom targets tar_resources_future
+#' @export
 set_slurm_resource <-
   function(
     template_file = "tools/pipeline/template_slurm.tmpl",
@@ -77,6 +84,8 @@ set_slurm_resource <-
 #' Default is `amadeus::process_aqs`
 #' @param ... Passed arguments to `fun_aqs`
 #' @returns Depending on `fun_aqs` specification.
+#' @import amadeus process_aqs
+#' @export
 read_locs <-
   function(
     fun_aqs = amadeus::process_aqs,
@@ -87,7 +96,7 @@ read_locs <-
 
 
 #' Filter monitors with the minimum POC value
-#' @param path data.frame/tbl_df/data.table
+#' @param path data.frame/tibble/data.table
 #' @param site_spt Space-time site data.
 #' @param locs_id character(1). Name of site id (not monitor id)
 #' @param poc_name character(1). Name of column containing POC values.
@@ -105,10 +114,10 @@ read_locs <-
 #' @export
 get_aqs_data <-
   function(
-    path = file.path(mr("dir_output"), mr("file_aqs_pm")),
+    path = file.path(meta_run("dir_output"), meta_run("file_aqs_pm")),
     site_spt = NULL,
-    locs_id = mr("pointid"),
-    time_id = mr("timeid"),
+    locs_id = meta_run("pointid"),
+    time_id = meta_run("timeid"),
     poc_name = "POC",
     date_start = "2018-01-01",
     date_end = "2022-12-31"
@@ -129,7 +138,7 @@ get_aqs_data <-
     input_df <- lapply(path, read.csv) |> data.table::rbindlist()
     input_df <- input_df[,
       list(
-        pm2.5 = Arithmetic.Mean,
+        pm25 = Arithmetic.Mean,
         site_id =
         sprintf("%02d%03d%04d%05d",
           State.Code, County.Code, Site.Num, Parameter.Code),
@@ -143,7 +152,7 @@ get_aqs_data <-
       data.table::data.table()
 
     poc_res <-
-      merge(poc_filtered,
+      data.table::merge(poc_filtered,
         as.data.frame(site_spt),
         by = c(locs_id, time_id)
       )
@@ -158,66 +167,65 @@ get_aqs_data <-
 #' @param time_id time identifier
 #' @returns data.frame
 #' @author Insang Song
-join_yx <-
+#' @importFrom data.table merge
+post_calc_join_pm25_features <-
   function(
     df_pm,
     df_covar,
-    locs_id = mr("pointid"),
-    time_id = mr("timeid")
+    locs_id = meta_run("pointid"),
+    time_id = meta_run("timeid")
   ) {
     # full join
     merge(df_pm, df_covar, by = c(locs_id, time_id),
-      all.x = TRUE, all.y = TRUE)
+      all = TRUE)
   }
 
 
 
 # TODO: is it possible to download missing files only?
 #' Check file status and download if necessary
-#' @param file_status Output of `check_file_status`
-#' @param path 
+#' @param path download path.
 #' @param dname Dataset name. See [`amadeus::download_data`] for details.
+#' @param ... Arguments passed to `amadeus::download_data`
 #' @returns logical(1).
-fastdown <-
+feature_raw_download <-
   function(
-    file_status = NULL,
     path = NULL,
     dname = NULL,
     ...
   ) {
-    # if no files exist in path (comparing with static list)
     # run amadeus::download_data
     tryCatch(
       {
         amadeus::download_data(dname, ...)
-        return(TRUE)
       },
       error = function(e) {
-        print(e)
-        return(FALSE)
+        stop(e)
       }
     )
   }
 
 #' Load county sf object
+#' @param exclude character. State FIPS codes to exclude.
+#' Default is c("02", "15", "60", "66", "68", "69", "72", "78").
 #' @returns sf object
 #' @importFrom tigris counties
-load_county <- function() {
-  options(tigris_use_cache = TRUE)
-  cnty <- tigris::counties(year = 2020)
-  cnty <-
-    cnty[!cnty$STATEFP %in% c("02", "15", "60", "66", "68", "69", "72", "78"), ]
-  return(cnty)
-}
+#' @export
+load_county <-
+  function(
+    exclude = c("02", "15", "60", "66", "68", "69", "72", "78")
+  ) {
+    options(tigris_use_cache = TRUE)
+    cnty <- tigris::counties(year = 2020)
+    cnty <-
+      cnty[!cnty$STATEFP %in%
+           c("02", "15", "60", "66", "68", "69", "72", "78"), ]
+    return(cnty)
+  }
 
 
 # calculate (no year is concerned)
-#' Temporally marginal calculation
-#' @note As `amadeus::calc_covariates` suggests,
-#' covariate data are managed by raw datasets.
-#' @param status File status. Output of `check_file_status`
-#' @param outpath character(1). Full file path of calculated covariates.
-#' Should end with `"rds"`.
+#' Single-year or spatial-only calculation
 #' @param process_function Raw data processor. Default is
 #' [`amadeus::process_covariates`]
 #' @param calc_function Covariate calculator. Default is
@@ -225,40 +233,37 @@ load_county <- function() {
 #' @param ... Arguments passed to `calc_function`
 #' @returns Nothing. It will automatically save xz-compressed
 #' RDS file to `outpath`
+#' @importFrom rlang inject
+#' @export
 calculate_single <-
   function(
-    # status = NULL,
-    # outpath = NULL,
     process_function = amadeus::process_covariates,
     calc_function = amadeus::calc_covariates,
     ...
   ) {
-    # if (!status) {
-      prep_calc <-
-        try(
-          rlang::inject(
-            process_function(
-              !!!list(...)
-            )
+    prep_calc <-
+      try(
+        rlang::inject(
+          process_function(
+            !!!list(...)
           )
         )
-      arg_ext <- list(...)
-      arg_ext$from <- prep_calc
-      
-      res_calc <-
-        try(
-          rlang::inject(
-            calc_function(
-              !!!arg_ext
-            )
+      )
+    arg_ext <- list(...)
+    arg_ext$from <- prep_calc
+
+    res_calc <-
+      try(
+        rlang::inject(
+          calc_function(
+            !!!arg_ext
           )
         )
-      if (inherits(res_calc, "try-error")) {
-        stop("Results do not match expectations.")
-      }
-      return(res_calc)
-      # saveRDS(res_calc, file = outpath, compress = "xz")
-    # }
+      )
+    if (inherits(res_calc, "try-error")) {
+      stop("Results do not match expectations.")
+    }
+    return(res_calc)
   }
 
 # calculate over a list
@@ -270,7 +275,11 @@ calculate_single <-
 #' @param calc_function Function to calculate covariates.
 #' [`amadeus::calc_covariates`]
 #' @param ... Arguments passed to `process_function` and `calc_function`
-#' @returns Nothing. RDS file is saved.
+#' @returns A data.table object.
+#' @importFrom data.table rbindlist
+#' @importFrom rlang inject
+#' @export
+#' @examples
 calculate_multi <-
   function(
     # status = NULL,
@@ -280,35 +289,32 @@ calculate_multi <-
     calc_function = amadeus::calc_covariates,
     ...
   ) {
-    # if (!status) {
-      domainlist <- split(domain, seq_along(domain))
-      res_calc <-
-        try(
-          lapply(
-            domainlist,
-            function(el) {
-              from_in <-
-                rlang::inject(
-                  process_function(year = el, !!!list(...))
-                )
+    domainlist <- split(domain, seq_along(domain))
+    res_calc <-
+      try(
+        lapply(
+          domainlist,
+          function(el) {
+            from_in <-
               rlang::inject(
-                calc_function(
-                  from = from_in,
-                  !!!list(...)
-                )
+                process_function(year = el, !!!list(...))
               )
-            }
-          )
+            rlang::inject(
+              calc_function(
+                from = from_in,
+                !!!list(...)
+              )
+            )
+          }
         )
-      if (inherits(res_calc, "try-error")) {
-        cat(paste0(attr(res_calc, "condition")$message, "\n"))
-        stop("Results do not match expectations.")
-      }
-      res_calc <- lapply(res_calc, function(x) as.data.frame(x))
-      res_calc <- data.table::rbindlist(res_calc, fill = TRUE)
-      return(res_calc)
-      # saveRDS(res_calc, file = outpath, compress = "xz")
-    # }
+      )
+    if (inherits(res_calc, "try-error")) {
+      cat(paste0(attr(res_calc, "condition")$message, "\n"))
+      stop("Results do not match expectations.")
+    }
+    res_calc <- lapply(res_calc, function(x) as.data.frame(x))
+    res_calc <- data.table::rbindlist(res_calc, fill = TRUE)
+    return(res_calc)
 
   }
 
@@ -338,23 +344,24 @@ calculate_multi <-
 #' @param time logical(1). Whether or not include time identifier.
 #' Set this `TRUE` will supersede `by` value by appending time identifier.
 #' @param ... data.frame objects to merge
-#' @returns data.frame
-combine <-
+#' @returns data.table
+#' @export
+post_calc_merge_features <-
   function(
-    by = c(meta_run("pointid")),
+    by = c(meta_run("char_siteid")),
     time = FALSE,
     ...
   ) {
     ellipsis <- list(...)
     if (time) {
-      by <- c(meta_run("pointid"), meta_run("timeid"))
+      by <- c(meta_run("char_siteid"), meta_run("char_timeid"))
       ellipsis_clean <-
         lapply(ellipsis,
           function(x) {
             x <- as.data.frame(x)
             col_coords <- grep("(lon|lat)", names(x))
             if (length(col_coords) > 0 && !is.null(col_coords)) {
-              x <- x[, -col_coords]
+              x <- x[, -col_coords, with = FALSE]
             }
             x$time <- as.character(x$time)
             return(x)
@@ -375,16 +382,31 @@ combine <-
 #' @param candidates character. Candidate column names.
 #' @param replace character. New column name.
 #' @returns data.frame
-unify_timecols <-
+#' @export
+post_calc_unify_timecols <-
   function(
     df,
     candidates = c("date"),
-    replace = mr("timeid")
+    replace = meta_run("timeid")
   ) {
     if (sum(names(df) %in% candidates) > 1) {
       stop("More than a candidate is detected in the input.")
     }
     names(df)[names(df) %in% candidates] <- replace
+    return(df)
+  }
+
+
+#' Convert time column to character
+#' @param df data.table
+#' @note This function takes preprocessed data.table with a column named `"time"`.
+#' @importFrom data.table as.data.table
+#' @export
+post_calc_convert_time <-
+  function(
+    df
+  ) {
+    df <- df[, time := as.character(time)]
     return(df)
   }
 
@@ -399,9 +421,9 @@ unify_timecols <-
 #' @param field_date character(1). Date column in `df_date`
 #' @param spid character(1). Name of the unique location identifier field.
 #' @importFrom methods is
-#' @importFrom dplyr full_join
+#' @importFrom data.table merge
 #' @returns data.frame
-join_yeardate <-
+post_calc_join_yeardate <-
   function(
     df_year,
     df_date,
@@ -412,11 +434,11 @@ join_yeardate <-
     if (!inherits(df_year, "data.frame") && !inherits(df_date, "data.frame")) {
       stop("Both inputs should be data.frame.")
     }
-    year <- NULL
     names(df_year)[names(df_year) %in% field_year] <- "year"
     df_date$year <- as.integer(format(as.Date(df_date[[field_date]]), "%Y"))
-    df_joined <- dplyr::left_join(df_date, df_year, by = c(spid, "year")) |>
-      dplyr::select(-year)
+    df_joined <-
+      data.table::merge(df_date, df_year, by = c(spid, "year"), all.x = TRUE)
+    df_joined <- df_joined[, setdiff(names(df_joined), c("year"))]
     return(df_joined)
   }
 
@@ -431,8 +453,10 @@ join_yeardate <-
 #' @param df_sp data.frame. Spatial-only covariates.
 #' @param df_spt data.frame. Spatiotemporal covariates.
 #' @note This version assumes the time_id contains Date-like strings.
-#' Year-only covariate processing submodule should be added.
-combine_final <-
+#' @returns data.frame
+#' @importFrom amadeus calc_temporal_dummies
+#' @export
+post_calc_merge_all <-
   function(
     locs,
     locs_id,
@@ -442,20 +466,20 @@ combine_final <-
     df_spt
   ) {
     locs <- as.data.frame(locs)
-    locs_combined <-
+    locs_merged <-
       merge(locs, df_sp, by = c(locs_id))
-    locs_combined <-
+    locs_merged <-
       merge(
-        locs_combined, df_spt,
+        locs_merged, df_spt,
         by = c(locs_id, time_id)
       )
-    locs_combined <-
+    locs_merged <-
       amadeus::calc_temporal_dummies(
-        locs = locs_combined,
+        locs = locs_merged,
         locs_id = locs_id,
         year = target_years
       )
-    return(locs_combined)
+    return(locs_merged)
   }
 
 
@@ -899,36 +923,6 @@ export_res <-
 
   ) {
 
-  }
-
-
-#' Check file status with a static list
-#' @concept deprecated
-#' @description A static list refers to a fixed state of
-#' the list of files at a certain time point. Users should update the static
-#' list if needed. The static list could reduce the risk of rerunning the
-#' entire pipeline due to a trivial or accidental change in files
-#' @note Directory representations should match in `dir` and `static_list`.
-#' Both should be absolute or relative, but should not be crossed.
-#' @param dir Directory path to search files
-#' @param extension File extension according to raw data
-#' @param static_list character. A static list of files.
-#' Its elements should match `extension` with their extensions.
-#' @returns Length of the number of files with `extension` in `dir`.
-check_file_status <-
-  function(
-    dir,
-    extension,
-    static_list
-  ) {
-    your_list <-
-      list.files(
-        path = dir,
-        pattern = extension,
-        recursive = TRUE,
-        full.names = TRUE
-      )
-    all(your_list %in% static_list)
   }
 
 

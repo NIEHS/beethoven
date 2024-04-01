@@ -4,13 +4,13 @@ target_download <-
       dirs,
       command =
         sprintf("dir_input_%s",
-          c("aqs", "nei", "narrmono", "narrplevels",
+          c("aqs", "nei", "narr",
             paste0("modis_",
-              c("mod11", "mod13", "mcd19", "mod06", "mod09", "vnp46")
+              c("mod11", "mod13", "mcd19", "mod06", "mod09")
             ),
-            "nlcd", "ecoregion", "koppen", "gmted",
-            "sedac_population", "sedac_groads",
-            "hms", "tri", "geos" # add covariate lists below if necessary
+            "viirs", "nlcd", "ecoregions", "koppen", "gmted",
+            "population", "groads",
+            "hms", "tri", "geoscf" # add covariate lists below if necessary
           )
         ),
       iteration = "vector"
@@ -19,9 +19,10 @@ target_download <-
     # each dataset is branched
     targets::tar_target(
       download_raw,
-      command = fastdown(mr(dirs)),
+      command = feature_raw_download(meta_run(dirs)),
       pattern = map(dirs),
       iteration = "vector"
     )
   )
 ## Status up to here is stored in meta as hash and rds/qs files
+## How do we know if downloaded files were exactly what we expected?

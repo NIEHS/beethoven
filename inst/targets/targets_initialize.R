@@ -1,7 +1,7 @@
 target_init <-
   list(
     targets::tar_target(
-      time_range,
+      character,
       command = c("2020-01-01", "2020-01-15"),
       #c(mr("date_start"), mr("date_end"))
     )
