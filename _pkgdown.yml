@@ -10,10 +10,17 @@ navbar:
     right: [github]
 
 reference:
+- subtitle: Output validation
+  desc: Validating pipeline outputs
+  contents:
+  - contains("check_")
+
+
 - subtitle: Meta learner
   desc: Fitting meta learner
-- contents:
+  contents:
   - contains("meta_learner")
+
 
 articles:
 - title: List of features
