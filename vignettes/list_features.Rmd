@@ -9,10 +9,10 @@ pkgdown:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(message = FALSE)
-pkgs <- c("DT", "knitr", "data.table", "dplyr")
+library(DT)
 
 tab_feature <-
-  fread(
+  read.csv(
     system.file(
       "extdata",
       "beethoven_covariate_list.csv",
