@@ -74,7 +74,7 @@ meta_learner_fit <- function(base_predictor_list,
 #' The meta learner used in this package, Bayesian Additive Regression Tree (BART), is not explicitly a spatiotemporal model, but the input covariates (outputs of each base learner) are S-T based.
 # nolint end
 #' @param meta_fit list of BART objects from meta_learner_fit
-#' @param base_outputs_stdt stdt object. See [convert_stobj_to_stdt]
+#' @param base_outputs_stdt stdt object. 
 #' list with datatable containing lat, lon, time and the covariates
 #' (outputs of each base learner) at prediction locations and crs.
 #' @param nthreads integer(1). Number of threads used in [BART::predict.wbart]

@@ -27,3 +27,13 @@ articles:
   desc: Features (covariates) used in beethoven
   contents:
   - list_features
+
+- title: Downloading EPA Daily Data
+  desc: Download AQS data from EPA
+  contents:
+  - epa_download
+
+- title: Generate prediction points
+  desc: Generate 8 millions of prediction points
+  contents:
+  - prediction_points
