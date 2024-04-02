@@ -109,16 +109,22 @@ read_locs <-
 #' @importFrom dplyr group_by
 #' @importFrom dplyr filter
 #' @importFrom dplyr ungroup
-#' @importFrom data.table data.table
+#' @importFrom data.table as.data.table
+#' @importFrom data.table merge.data.table
 #' @importFrom data.table rbindlist
 #' @importFrom rlang sym
 #' @export
 get_aqs_data <-
   function(
-    path = file.path(meta_run("dir_output"), meta_run("file_aqs_pm")),
+    path = list.files(
+      path = meta_run("dir_input_aqs"),
+      pattern = "daily_88101_[0-9]{4}.csv",
+      full.names = TRUE
+    ),
+    #file.path(meta_run("dir_output"), meta_run("file_aqs_pm")),
     site_spt = NULL,
-    locs_id = meta_run("pointid"),
-    time_id = meta_run("timeid"),
+    locs_id = meta_run("char_siteid"),
+    time_id = meta_run("char_timeid"),
     poc_name = "POC",
     date_start = "2018-01-01",
     date_end = "2022-12-31"
@@ -136,25 +142,26 @@ get_aqs_data <-
     #     date = NULL,
     #     return_format = return_format
     #   )
-    input_df <- lapply(path, read.csv) |> data.table::rbindlist()
+    input_df <- lapply(path, data.table::fread) |> data.table::rbindlist()
     input_df <- input_df[,
       list(
-        pm25 = Arithmetic.Mean,
+        pm25 = `Arithmetic Mean`,
         site_id =
         sprintf("%02d%03d%04d%05d",
-          State.Code, County.Code, Site.Num, Parameter.Code),
-        time = as.Date(Date.Local),
+          `State Code`, `County Code`, `Site Num`, `Parameter Code`),
+        time = as.character(`Date Local`),
         POC = POC
       )]
+    
     poc_filtered <- input_df |>
       dplyr::group_by(!!rlang::sym(locs_id)) |>
       dplyr::filter(!!rlang::sym(poc_name) == min(!!rlang::sym(poc_name))) |>
       dplyr::ungroup() |>
-      data.table::data.table()
-
+      data.table::as.data.table()
+    return(poc_filtered)
     poc_res <-
-      data.table::merge(poc_filtered,
-        as.data.frame(site_spt),
+      data.table::merge.data.table(poc_filtered,
+        data.table::as.data.table(site_spt),
         by = c(locs_id, time_id)
       )
     return(poc_res)
@@ -168,17 +175,20 @@ get_aqs_data <-
 #' @param time_id time identifier
 #' @returns data.frame
 #' @author Insang Song
-#' @importFrom data.table merge
+#' @importFrom data.table merge.data.table
 post_calc_join_pm25_features <-
   function(
     df_pm,
     df_covar,
-    locs_id = meta_run("pointid"),
-    time_id = meta_run("timeid")
+    locs_id = meta_run("char_siteid"),
+    time_id = meta_run("char_timeid")
   ) {
     # full join
-    merge(df_pm, df_covar, by = c(locs_id, time_id),
-      all = TRUE)
+    data.table::merge.data.table(
+      df_pm, df_covar,
+      by = c(locs_id, time_id),
+      all = TRUE
+    )
   }
 
 
@@ -348,6 +358,7 @@ calculate_multi <-
 #' Set this `TRUE` will supersede `by` value by appending time identifier.
 #' @param ... data.frame objects to merge
 #' @returns data.table
+#' @importFrom data.table as.data.table
 #' @export
 post_calc_merge_features <-
   function(
@@ -361,7 +372,7 @@ post_calc_merge_features <-
       ellipsis_clean <-
         lapply(ellipsis,
           function(x) {
-            x <- as.data.frame(x)
+            x <- data.table::as.data.table(x)
             col_coords <- grep("(lon|lat)", names(x))
             if (length(col_coords) > 0 && !is.null(col_coords)) {
               x <- x[, -col_coords, with = FALSE]
@@ -374,7 +385,7 @@ post_calc_merge_features <-
     }
     joined <-
       Reduce(function(x, y) {
-        dplyr::left_join(x, y, by = by)
+        data.table::merge.data.table(x, y, by = by, all.x = TRUE, suffixes = c("_Ma", "_Mb"))
       }, ellipsis_clean)
     return(joined)
   }
@@ -390,7 +401,7 @@ post_calc_unify_timecols <-
   function(
     df,
     candidates = c("date"),
-    replace = meta_run("timeid")
+    replace = meta_run("char_timeid")
   ) {
     if (sum(names(df) %in% candidates) > 1) {
       stop("More than a candidate is detected in the input.")
@@ -409,7 +420,8 @@ post_calc_convert_time <-
   function(
     df
   ) {
-    df <- df[, time := as.character(time)]
+    df <- data.table::copy(data.table::as.data.table(df))
+    df <- df[, `:=`(time, as.character(time))]
     return(df)
   }
 
@@ -424,7 +436,7 @@ post_calc_convert_time <-
 #' @param field_date character(1). Date column in `df_date`
 #' @param spid character(1). Name of the unique location identifier field.
 #' @importFrom methods is
-#' @importFrom data.table merge
+#' @importFrom data.table merge.data.table
 #' @returns data.frame
 post_calc_join_yeardate <-
   function(
@@ -438,16 +450,20 @@ post_calc_join_yeardate <-
       stop("Both inputs should be data.frame.")
     }
     names(df_year)[names(df_year) %in% field_year] <- "year"
-    df_date$year <- as.integer(format(as.Date(df_date[[field_date]]), "%Y"))
+    df_date$year <- as.integer(substr(df_date[[field_date]], 1, 4))
+    #as.integer(format(as.Date(df_date[[field_date]]), "%Y"))
     df_joined <-
-      data.table::merge(df_date, df_year, by = c(spid, "year"), all.x = TRUE)
-    df_joined <- df_joined[, setdiff(names(df_joined), c("year"))]
+      data.table::merge.data.table(
+        df_date, df_year,
+        by = c(spid, "year"),
+        all.x = TRUE
+      )
+
+    df_joined <- df_joined[, c("year") := NULL]
     return(df_joined)
   }
 
 
-
-### WARNING  THIS WILL NOT WORK PROPERLY ####
 #' Merge spatial and spatiotemporal covariate data
 #' @param locs Location. e.g., AQS sites.
 #' @param locs_id character(1). Location identifier.
@@ -468,11 +484,17 @@ post_calc_merge_all <-
     df_sp,
     df_spt
   ) {
-    locs <- as.data.frame(locs)
+    if (methods::is(locs, "sf")) {
+      locs <- sf::st_drop_geometry(locs)
+    }
+    locs$time <- as.character(locs$time)
+    locs <- data.table::as.data.table(locs)
     locs_merged <-
-      merge(locs, df_sp, by = c(locs_id))
+      data.table::merge.data.table(
+        locs, df_sp, by = c(locs_id)
+      )
     locs_merged <-
-      merge(
+      data.table::merge.data.table(
         locs_merged, df_spt,
         by = c(locs_id, time_id)
       )

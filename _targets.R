@@ -66,7 +66,7 @@ tar_option_set(
           template = "inst/targets/template_slurm.tmpl",
           resources = list(memory = 8,
                           log.file = "slurm_run.log",
-                          ncpus = 2, partition = "geo", tasks = 4,
+                          ncpus = 2, partition = "geo", ntasks = 4,
                           email = meta_run("slurm_user_email"),
                           error.file = "slurm_error.log")
         )

@@ -41,7 +41,7 @@ target_calculate_fit <-
     # multi: tri, nlcd, hms, sedac_population, sedac_groads,
     # narrmono, narrplevels, nei, gmted, geos,
     # modis_mod11, modis_mod06, modis_mod13,
-    # modis_mcd19, modis_mod09, modis_vnp46
+    # modis_mcd19, modis_mod09, viirs
     targets::tar_target(
       dt_feat_calc_tri,
       calculate_multi(
@@ -293,7 +293,7 @@ target_calculate_fit <-
         date = c(list_config_timerange, list_config_timerange),
         locs = sf_feat_proc_aqs_sites,
         locs_id = meta_run("char_siteid"),
-        path = file.path(meta_run("dir_input_geos"), "aqc_tavg_1hr_g1440x721_v1"),
+        path = file.path(meta_run("dir_input_geoscf"), "aqc_tavg_1hr_g1440x721_v1"),
         win = as.numeric(meta_run("extent", split = "|", fixed = TRUE)[[1]]),
         snap = "out"
       ),
@@ -317,15 +317,15 @@ target_calculate_fit <-
     ,
     targets::tar_target(
       dt_feat_calc_geoscf_aqc,
-      data.table::rbindlist(list_feat_calc_geoscf_aqc, fill = TRUE) %>%
-        setNames(c(meta_run("char_siteid"), paste0(names(x = .)[c(-1, -7)], "_AQC"), "time")) %>%
-        dplyr::mutate(time = as.character(time))
+      data.table::rbindlist(list_feat_calc_geoscf_aqc, fill = TRUE) |>
+        # setNames(c(meta_run("char_siteid"), paste0(names(x = _)[c(-1, -7)], "_AQC"), "time")) |>
+        post_calc_convert_time()
     )
     ,
     targets::tar_target(
       dt_feat_calc_geoscf_chm,
-      data.table::rbindlist(list_feat_calc_geoscf_chm, fill = TRUE) %>%
-        dplyr::mutate(time = as.character(time))
+      data.table::rbindlist(list_feat_calc_geoscf_chm, fill = TRUE) |>
+        post_calc_convert_time()
     )
     ,
     targets::tar_target(
@@ -396,7 +396,7 @@ target_calculate_fit <-
     targets::tar_target(
       char_filepaths_raw_viirs,
       read_paths(
-        meta_run("dir_input_modis_vnp46"),
+        meta_run("dir_input_viirs"),
         extension = "h5",
         julian = TRUE,
         target_dates = c(
@@ -415,10 +415,10 @@ target_calculate_fit <-
         name_covariates = c("MOD_SFCTD_0_", "MOD_SFCTN_0_"),
         subdataset = "(LST_Day_|LST_Night_)",
         preprocess = amadeus::process_modis_merge,
-        nthreads = meta_run("nthreads_calc")
+        nthreads = meta_run("nthreads")
       ),
       resources = set_slurm_resource(
-        ntasks = 1, ncpus = 20, memory = 12
+        ntasks = 1, ncpus = 20, memory = 10
       )
     )
     ,
@@ -434,7 +434,7 @@ target_calculate_fit <-
         nthreads = meta_run("nthreads")
       ),
       resources = set_slurm_resource(
-        ntasks = 1, ncpus = 20, memory = 12
+        ntasks = 1, ncpus = 20, memory = 10
       )
     )
     ,
@@ -450,7 +450,7 @@ target_calculate_fit <-
         nthreads = meta_run("nthreads")
       ),
       resources = set_slurm_resource(
-        ntasks = 1, ncpus = 20, memory = 12
+        ntasks = 1, ncpus = 20, memory = 10
       )
     )
     ,
@@ -467,7 +467,7 @@ target_calculate_fit <-
         nthreads = meta_run("nthreads")
       ),
       resources = set_slurm_resource(
-        ntasks = 1, ncpus = 20, memory = 12
+        ntasks = 1, ncpus = 20, memory = 10
       )
     )
     ,
@@ -485,7 +485,7 @@ target_calculate_fit <-
         nthreads = meta_run("nthreads")
       ),
       resources = set_slurm_resource(
-        ntasks = 1, ncpus = 20, memory = 12
+        ntasks = 1, ncpus = 20, memory = 10
       )
     )
     ,
@@ -502,7 +502,7 @@ target_calculate_fit <-
       )
       ,
       resources = set_slurm_resource(
-        ntasks = 1, ncpus = 20, memory = 12
+        ntasks = 1, ncpus = 20, memory = 10
       )
     )
     ,
@@ -518,7 +518,7 @@ target_calculate_fit <-
         nthreads = meta_run("nthreads")
       ),
       resources = set_slurm_resource(
-        ntasks = 1, ncpus = 20, memory = 12
+        ntasks = 1, ncpus = 20, memory = 10
       )
     )
     ,
@@ -528,10 +528,10 @@ target_calculate_fit <-
       post_calc_merge_features(
         by = meta_run("char_siteid"),
         time = FALSE,
-        df_feat_calc_koppen,
-        df_feat_calc_ecoregions,
-        df_feat_calc_gmted,
-        df_feat_calc_nei
+        dt_feat_calc_koppen,
+        dt_feat_calc_ecoregions,
+        dt_feat_calc_gmted,
+        dt_feat_calc_nei
       )
     )
     ,
@@ -542,15 +542,15 @@ target_calculate_fit <-
         by = meta_run("char_siteid"),
         time = TRUE,
         dt_feat_calc_hms,
-        dt_feat_calc_geossf_aqc,
-        dt_feat_calc_geossf_chm,
-        dt_feat_calc_modis_mod11,
-        dt_feat_calc_modis_mod06,
-        dt_feat_calc_modis_mod13,
-        dt_feat_calc_modis_mod09,
-        dt_feat_calc_modis_mcd19_1km,
-        dt_feat_calc_modis_mcd19_5km,
-        dt_feat_calc_viirs
+        dt_feat_calc_geoscf_aqc,
+        dt_feat_calc_geoscf_chm,
+        dt_feat_calc_modis_mod06 |> data.table::as.data.table(),
+        dt_feat_calc_modis_mod09 |> data.table::as.data.table(),
+        dt_feat_calc_modis_mod11 |> data.table::as.data.table(),
+        dt_feat_calc_modis_mod13 |> data.table::as.data.table(),
+        dt_feat_calc_modis_mcd19_1km |> data.table::as.data.table(),
+        dt_feat_calc_modis_mcd19_5km |> data.table::as.data.table(),
+        dt_feat_calc_viirs  |> data.table::as.data.table()
       )
     )
     ,
