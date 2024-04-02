@@ -334,10 +334,7 @@ target_calculate_fit <-
         meta_run("dir_input_modis_mod06"),
         extension = "hdf",
         julian = TRUE,
-        target_dates = c(
-          meta_run("date_start"),
-          meta_run("date_end")
-        )
+        target_dates = char_feat_proc_timerange
       )
     )
     ,
@@ -347,10 +344,7 @@ target_calculate_fit <-
         meta_run("dir_input_modis_mod11"),
         extension = "hdf",
         julian = TRUE,
-        target_dates = c(
-          meta_run("date_start"),
-          meta_run("date_end")
-        )
+        target_dates = char_feat_proc_timerange
       )
     )
     ,
@@ -360,10 +354,7 @@ target_calculate_fit <-
         meta_run("dir_input_modis_mod13"),
         extension = "hdf",
         julian = TRUE,
-        target_dates = c(
-          meta_run("date_start"),
-          meta_run("date_end")
-        )
+        target_dates = char_feat_proc_timerange
       )
     )
     ,
@@ -373,10 +364,7 @@ target_calculate_fit <-
         meta_run("dir_input_modis_mod09"),
         extension = "hdf",
         julian = TRUE,
-        target_dates = c(
-          meta_run("date_start"),
-          meta_run("date_end")
-        )
+        target_dates = char_feat_proc_timerange
       )
     )
     ,
@@ -386,10 +374,7 @@ target_calculate_fit <-
         meta_run("dir_input_modis_mcd19"),
         extension = "hdf",
         julian = TRUE,
-        target_dates = c(
-          meta_run("date_start"),
-          meta_run("date_end")
-        )
+        target_dates = char_feat_proc_timerange
       )
     )
     ,
@@ -399,10 +384,7 @@ target_calculate_fit <-
         meta_run("dir_input_viirs"),
         extension = "h5",
         julian = TRUE,
-        target_dates = c(
-          as.Date(meta_run("date_start")),
-          as.Date(meta_run("date_end"))
-        )
+        target_dates = char_feat_proc_timerange
       )
     )
     ,
