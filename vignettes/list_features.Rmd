@@ -12,14 +12,18 @@ knitr::opts_chunk$set(message = FALSE)
 pkgs <- c("DT", "knitr", "data.table", "dplyr")
 
 tab_feature <-
-  fread(system.file("extdata", "beethoven_covariate_list.csv", package = "beethoven"))
+  fread(
+    system.file(
+      "extdata",
+      "beethoven_covariate_list.csv",
+      package = "beethoven"
+    )
+  )
 ```
 
 ```{r}
-
 DT::datatable(
   tab_feature,
   filter = "top"
 )
-
 ```

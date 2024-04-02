@@ -25,3 +25,5 @@ reference:
 articles:
 - title: List of features
   desc: Features (covariates) used in beethoven
+  contents:
+  - list_features

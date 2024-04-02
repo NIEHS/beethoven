@@ -62,7 +62,11 @@ jobs:
         shell: bash
         run: |
           cov_patch="${{ steps.get-values.outputs.coverage }}"
-          cov_current=$(cat cov_current.Rout)
+          if [[ ! -f cov_current.Rout ]]; then
+            cov_current=0
+          else
+            cov_current=$(cat cov_current.Rout)
+          fi
           echo "Current coverage: $cov_current"
 
           if (( $(echo "$cov_patch >= $cov_current" | bc -l) )); then
