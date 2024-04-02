@@ -27,10 +27,6 @@ jobs:
           extra-packages: any::covr
           needs: coverage
 
-      - uses: quarto-dev/quarto-actions/setup@v2
-        with:
-          version: 1.4.515
-
       - name: Cache C++ and R dependencies
         uses: actions/cache@v2
         with:
