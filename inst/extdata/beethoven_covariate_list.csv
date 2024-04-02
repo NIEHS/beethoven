@@ -1,0 +1,206 @@
+﻿Category,Covariate,Short Name
+Meteorological ,Accumulated snow,MET_ACSNW_0_00000
+Meteorological ,Accumulated total evaporation,MET_ACEVP_0_00000
+Meteorological ,Accumulated total precipitation,MET_ACPRC_0_00000
+Meteorological ,Air temperature (surface),MET_ATSFC_0_00000
+Meteorological ,Albedo,MET_ALBDO_0_00000
+Meteorological ,Cloud coverage,MET_CLDCV_0_00000
+Meteorological ,Downard shortwave radition flux (surface),MET_DSWRF_0_00000
+Meteorological ,High cloud area fraction,MET_HCLAF_0_00000
+Meteorological ,Latent heat flux,MET_LATHF_0_00000
+Meteorological ,Low cloud area fraction,MET_LCLAF_0_00000
+Meteorological ,Medium cloud area fraction,MET_MCLAF_0_00000
+Meteorological ,Omega,MET_OMEGA_0_00000
+Meteorological ,Planetary boundary layer height,MET_PLBLH_0_00000
+Meteorological ,Precipitable water for the entire atmosphere,MET_PRWEA_0_00000
+Meteorological ,Precipitation rate,MET_PRRTE_0_00000
+Meteorological ,Pressure (surface),MET_PRSFC_0_00000
+Meteorological ,Sensible heat flux,MET_SENHF_0_00000
+Meteorological ,Snow cover,MET_SNWCV_0_00000
+Meteorological ,Soil moisture content,MET_SLMSC_0_00000
+Meteorological ,Specific humidty at 2 m,MET_SPHUM_0_00000
+Meteorological ,u-wind at 10 m (east-west component),MET_UWIND_0_00000
+Meteorological ,Upward longwave radiation on flux (surface),MET_ULWRF_0_00000
+Meteorological ,v-wind at 10 m (north-south component),MET_VWIND_0_00000
+Meteorological ,Visibility,MET_VISIB_0_00000
+Meteorological ,Wind Speed⏀,MET_WNDSP_0_00000
+Meteorological ,Air temperature (surface) (1-day lag),MET_ATSFC_1_00000
+Meteorological ,Accumulated total precipitation (1-day lag),MET_ACPRC_1_00000
+Meteorological ,Pressure (surface) (1-day lag),MET_PRSFC_1_00000
+Meteorological ,Specific humidty at 2 m (1-day lag),MET_SPHUM_1_00000
+Meteorological ,Wind speed (1-day lag)⏀,MET_WNDSP_1_00000
+Land Use,Land-use type: wetland (100m),LDU_TWTLD_0_00100
+Land Use,Land-use type: water (100m),LDU_TWATR_0_00100
+Land Use,Land-use type: planted (100m),LDU_TPLNT_0_00100
+Land Use,Land-use type: herbaceous (100m),LDU_THERB_0_00100
+Land Use,Land-use type: shrubland (100m),LDU_TSHRB_0_00100
+Land Use,Land-use type: barren (100m),LDU_TBARN_0_00100
+Land Use,Land-use type: developed (100m),LDU_TDEVL_0_00100
+Land Use,Land-use type: wetland (1km),LDU_TWTLD_0_01000
+Land Use,Land-use type: water (1km),LDU_TWATR_0_01000
+Land Use,Land-use type: planted (1km),LDU_TPLNT_0_01000
+Land Use,Land-use type: herbaceous (1km),LDU_THERB_0_01000
+Land Use,Land-use type: shrubland (1km),LDU_TSHRB_0_01000
+Land Use,Land-use type: barren (1km),LDU_TBARN_0_01000
+Land Use,Land-use type: developed (1km),LDU_TDEVL_0_01000
+Land Use,Land-use type: wetland (10km),LDU_TWTLD_0_10000
+Land Use,Land-use type: water (10km),LDU_TWATR_0_10000
+Land Use,Land-use type: planted (10km),LDU_TPLNT_0_10000
+Land Use,Land-use type: herbaceous (10km),LDU_THERB_0_10000
+Land Use,Land-use type: shrubland (10km),LDU_TSHRB_0_10000
+Land Use,Land-use type: barren (10km),LDU_TBARN_0_10000
+Land Use,Land-use type: developed (10km),LDU_TDEVL_0_10000
+Land Use,Elevation: maximal (100m),LDU_EMAXL_0_00100
+Land Use,Elevation: minimal (100m),LDU_EMINL_0_00100
+Land Use,Elevation: median (100m),LDU_EMEDN_0_00100
+Land Use,Elevation: mean (100m),LDU_EMEAN_0_00100
+Land Use,Elevation: systematic subsample (100m),LDU_ESSUB_0_00100
+Land Use,Elevation: breakline emphasis (100m),LDU_EBRKL_0_00100
+Land Use,Elevation: standard deviation (100m),LDU_ESTDV_0_00100
+Land Use,Elevation: maximal (1km),LDU_EMAXL_0_01000
+Land Use,Elevation: minimal (1km),LDU_EMINL_0_01000
+Land Use,Elevation: median (1km),LDU_EMEDN_0_01000
+Land Use,Elevation: mean (1km),LDU_EMEAN_0_01000
+Land Use,Elevation: systematic subsample (1km),LDU_ESSUB_0_01000
+Land Use,Elevation: breakline emphasis (1km),LDU_EBRKL_0_01000
+Land Use,Elevation: standard deviation (1km),LDU_ESTDV_0_01000
+Land Use,Elevation: maximal (10km),LDU_EMAXL_0_10000
+Land Use,Elevation: minimal (10km),LDU_EMINL_0_10000
+Land Use,Elevation: median (10km),LDU_EMEDN_0_10000
+Land Use,Elevation: mean (10km),LDU_EMEAN_0_10000
+Land Use,Elevation: systematic subsample (10km),LDU_ESSUB_0_10000
+Land Use,Elevation: breakline emphasis (10km),LDU_EBRKL_0_10000
+Land Use,Elevation: standard deviation (10km),LDU_ESTDV_0_10000
+Land Use,Road density: highway density (100m),LDU_HWYDN_0_00100
+Land Use,Road density: highway density (1km),LDU_HWYDN_0_01000
+Land Use,Road density: highway density (10km),LDU_HWYDN_0_10000
+Land Use,Road density: highway and primary road density (100m),LDU_HPRDN_0_00100
+Land Use,Road density: highway and primary road density (1km),LDU_HPRDN_0_01000
+Land Use,Road density: highway and primary road density (10km),LDU_HPRDN_0_10000
+Land Use,"Road density: all road (highway, primary, secondary) density (100m)",LDU_HPSDN_0_00100
+Land Use,"Road density: all road (highway, primary, secondary) density (1km)",LDU_HPSDN_0_01000
+Land Use,"Road density: all road (highway, primary, secondary) density (10km)",LDU_HPSDN_0_10000
+Land Use,Annual average daily traffic volume (100m),LDU_TRAFC_0_00100
+Land Use,Annual average daily traffic volume (1km),LDU_TRAFC_0_01000
+Land Use,Annual average daily traffic volume (10km),LDU_TRAFC_0_10000
+MODIS,Surface reflectance,MOD_SFCRF_0_00000
+MODIS,Surface temperature during the day,MOD_SFCTD_0_00000
+MODIS,Surface temperature at night,MOD_SFCTN_0_00000
+MODIS,Cloud coverage during the day,MOD_CLCVD_0_00000
+MODIS,Cloud coverage at night,MOD_CLCVN_0_00000
+MODIS,Aerosol optical depth at 470 nm (MCD19A2),MOD_AD4TA_0_00000
+MODIS,Aerosol optical depth at 550 nm (MCD19A2),MOD_AD5TA_0_00000
+MODIS,Cosine of Solar Zenith Angle (MCD19A2),MOD_CSZAN_0_00000
+MODIS,Cosine of View Zenith Angle (MCD19A2),MOD_CVZAN_0_00000
+MODIS,Relative Azimuth Angle (MCD19A2),MOD_RAZAN_0_00000
+MODIS,Scattering Angle (MCD19A2),MOD_SCTAN_0_00000
+MODIS,Glint Angle (MCD19A2),MOD_GLNAN_0_00000
+MODIS,Normalized Difference Vegetation Index (NDVI) value,MOD_NDVIV_0_00000
+MODIS,Light at night (VNP46A2),MOD_LGHTN_0_00500
+MERRA2,Hydrophilic Black Carbon,MER_PHOBC_0_00000
+GEOS-CF,Acetone,GEO_ACETO_0_00000
+GEOS-CF,Acetaldehyde,GEO_ACETA_0_00000
+GEOS-CF,C4 alkanes,GEO_CALKA_0_00000
+GEOS-CF,Hydrophilic black carbon aerosol,GEO_HIBCA_0_00000
+GEOS-CF,Hydrophobic black carbon aerosol,GEO_HOBCA_0_00000
+GEOS-CF,Benzene,GEO_BENZE_0_00000
+GEOS-CF,Ethane,GEO_ETHTE_0_00000
+GEOS-CF,Propane,GEO_PROPA_0_00000
+GEOS-CF,Methane,GEO_METHA_0_00000
+GEOS-CF,Carbon monoxide,GEO_CMONO_0_00000
+GEOS-CF,Dust (0.7 microns),GEO_DUST1_0_00000
+GEOS-CF,Dust (1.4 microns),GEO_DUST2_0_00000
+GEOS-CF,Dust (2.4 microns),GEO_DUST3_0_00000
+GEOS-CF,Dust (4.5 microns),GEO_DUST4_0_00000
+GEOS-CF,Ethanol,GEO_ETHOL_0_00000
+GEOS-CF,Hydrogen peroxide,GEO_HYPER_0_00000
+GEOS-CF,Formaldehyde,GEO_FORMA_0_00000
+GEOS-CF,Nitric acid,GEO_NITAC_0_00000
+GEOS-CF,Peroynitric acid,GEO_PERAC_0_00000
+GEOS-CF,Isoprene,GEO_ISOPR_0_00000
+GEOS-CF,Methacrolein,GEO_METHC_0_00000
+GEOS-CF,Methyl ethyl ketone,GEO_MEKET_0_00000
+GEOS-CF,Methyl vinyl ketone,GEO_MVKET_0_00000
+GEOS-CF,Dinitrogen pentoxide,GEO_DIPEN_0_00000
+GEOS-CF,Ammonia,GEO_AMNIA_0_00000
+GEOS-CF,Ammonium,GEO_AMNUM_0_00000
+GEOS-CF,Inorganic nitrates,GEO_INNIT_0_00000
+GEOS-CF,Nitrogen oxide,GEO_NIOXI_0_00000
+GEOS-CF,Nitrogen dioxide,GEO_NIDIO_0_00000
+GEOS-CF,Reactive nitrogren,GEO_NITRO_0_00000
+GEOS-CF,Hydrophilic organic carbon,GEO_HIORG_0_00000
+GEOS-CF,Hydrophobic organic carbon,GEO_HOORG_0_00000
+GEOS-CF,Peroyacetyl nitrate,GEO_PERNI_0_00000
+GEOS-CF,PM2.5 at RH 35,GEO_PM25X_0_00000
+GEOS-CF,PM2.5 at RH 35 (reconstructed),GEO_PM25R_0_00000
+GEOS-CF,Black carbon PM2.5,GEO_BLCPM_0_00000
+GEOS-CF,Dust PM2.5,GEO_DUSPM_0_00000
+GEOS-CF,Nitrate PM2.5,GEO_NITPM_0_00000
+GEOS-CF,Organic carbon PM2.5,GEO_ORCPM_0_00000
+GEOS-CF,Secondary organic aerosol PM2.5,GEO_SORPM_0_00000
+GEOS-CF,Sea salt PM2.5,GEO_SEAPM_0_00000
+GEOS-CF,Sulfate PM2.5,GEO_SULPM_0_00000
+GEOS-CF,Lumped C3 alkenes,GEO_CALKE_0_00000
+GEOS-CF,Lumped aldehyde,GEO_CALDH_0_00000
+GEOS-CF,Fine sea salt aerosol (0.01 - 0.05 microns),GEO_FSEAS_0_00000
+GEOS-CF,Coarse sea salt aerosol (0.5 - 8 microns),GEO_CSEAS_0_00000
+GEOS-CF,Sulfer dioxide,GEO_SULDI_0_00000
+GEOS-CF,SOA Precursor,GEO_SOAPR_0_00000
+GEOS-CF,SOA Simple,GEO_SOASI_0_00000
+GEOS-CF,Toluene,GEO_TOLUE_0_00000
+GEOS-CF,Xylene,GEO_XYLEN_0_00000
+GEOS-CF,CO volume mixing ratio dry air,GEO_COVMR_0_00000
+GEOS-CF,NO2 volume mixing raito dry air,GEO_NOVMR_0_00000
+GEOS-CF,O3 volume mixing ratio dry air,GEO_OZVMR_0_00000
+GEOS-CF,SO2 volume mixing ratio dry air,GEO_SOVMR_0_00000
+Dummy,Year 2018 ,DUM_Y2018_0_00000
+Dummy,Year 2019 ,DUM_Y2019_0_00000
+Dummy,Year 2020 ,DUM_Y2020_0_00000
+Dummy,Year 2021 ,DUM_Y2021_0_00000
+Dummy,Year 2022 ,DUM_Y2022_0_00000
+Dummy,January ,DUM_JANUA_0_00000
+Dummy,February ,DUM_FEBRU_0_00000
+Dummy,March ,DUM_MARCH_0_00000
+Dummy,April ,DUM_APRIL_0_00000
+Dummy,May ,DUM_MAYMA_0_00000
+Dummy,June ,DUM_JUNEJ_0_00000
+Dummy,July ,DUM_JULYJ_0_00000
+Dummy,August ,DUM_AUGUS_0_00000
+Dummy,September ,DUM_SEPTE_0_00000
+Dummy,October ,DUM_OCTOB_0_00000
+Dummy,November ,DUM_NOVEM_0_00000
+Dummy,December ,DUM_DECEM_0_00000
+Dummy,Weekday 1,DUM_WKDY1_0_00000
+Dummy,Weekday 2,DUM_WKDY2_0_00000
+Dummy,Weekday 3,DUM_WKDY3_0_00000
+Dummy,Weekday 4,DUM_WKDY4_0_00000
+Dummy,Weekday 5,DUM_WKDY5_0_00000
+Dummy,Weekday 6,DUM_WKDY6_0_00000
+Dummy,Weekday 7,DUM_WKDY7_0_00000
+Dummy,Climate Region A,DUM_CLRGA_0_00000
+Dummy,Climate Region B,DUM_CLRGB_0_00000
+Dummy,Climate Region C,DUM_CLRGC_0_00000
+Dummy,Climate Region D,DUM_CLRGD_0_00000
+Dummy,Climate Region E,DUM_CLRGE_0_00000
+Dummy,Ecoregion Level 2: Mixed wood shield,DUM_E2052_0_00000
+Dummy,Ecoregion Level 2: Atlantic highlands,DUM_E2053_0_00000
+Dummy,Ecoregion Level 2: Marine West coast forest,DUM_E2071_0_00000
+Dummy,Ecoregion Level 2: Mixed wood plains,DUM_E2081_0_00000
+Dummy,Ecoregion Level 2: Central USA plains,DUM_E2082_0_00000
+Dummy,Ecoregion Level 2: Southeastern USA plains,DUM_E2083_0_00000
+Dummy,"Ecoregion Level 2: Ozark, Ouachita-Appalachian forests",DUM_E2084_0_00000
+Dummy,Ecoregion Level 2: Mississippi alluvial and Southeast USA coastal plains,DUM_E2085_0_00000
+Dummy,Ecoregion Level 2: Temperate prairies,DUM_E2092_0_00000
+Dummy,Ecoregion Level 2: West-Central semi-arid prairies,DUM_E2093_0_00000
+Dummy,Ecoregion Level 2: South Central semi-arid prairies,DUM_E2094_0_00000
+Dummy,Ecoregion Level 2: Texas-Louisiana coastal plain,DUM_E2095_0_00000
+Dummy,Ecoregion Level 2: Tamaulipas-Texas semiarid plain,DUM_E2096_0_00000
+Dummy,Ecoregion Level 2: Cold deserts,DUM_E2101_0_00000
+Dummy,Ecoregion Level 2: Warm deserts,DUM_E2102_0_00000
+Dummy,Ecoregion Level 2: Mediterranean California,DUM_E2111_0_00000
+Dummy,Ecoregion Level 2: Western Sierra Madre Piedmont,DUM_E2121_0_00000
+Dummy,Ecoregion Level 2: Everglades,DUM_E2154_0_00000
+Other,Population density,OTH_POPDN_0_00000
+Other,Wildfire smoke plume coverage (light),OTH_HMSWL_0_00000
+Other,Wildfire smoke plume coverage (medium),OTH_HMSWM_0_00000
+Other,Wildfire smoke plume coverage (heavy),OTH_HMSWH_0_00000

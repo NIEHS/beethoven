@@ -16,14 +16,15 @@ Authors@R: c(
 Description: Near Real Time air pollution model results and code produced by the SET group. It is fully tested, versioned, and open source and open access.
 Depends: R (>= 4.1.0)
 Imports: dplyr, sf, stats, terra, methods, BART, data.table, httr, rvest, spData, exactextractr, utils, stringr, testthat (>= 3.0.0), doParallel, parallelly, stars, foreach, future, ranger, xgboost, torch
-Suggests: covr, withr, knitr, rmarkdown, sftime, lwgeom, FNN, ggplot2, scatterpie, doRNG
+Suggests: covr, withr, knitr, rmarkdown, sftime, lwgeom, FNN, ggplot2, scatterpie, doRNG, DT, quarto
 Remotes: NIEHS/amadeus, NIEHS/chopin
 Encoding: UTF-8
-VignetteBuilder: knitr, rmarkdown
+VignetteBuilder: knitr, rmarkdown, quarto
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.1
 Config/Needs/website: tidyverse/tidytemplate
 Config/testhat/edition: 3
+SystemRequirements: Quarto command line tools (https://github.com/quarto-dev/quarto-cli)
 License: MIT + file LICENSE
 URL: https://github.com/NIEHS/beethoven, 
 https: //NIEHS.github.io/beethoven/

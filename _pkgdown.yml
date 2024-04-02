@@ -1,0 +1,20 @@
+# _pkgdown.yml
+url: https://niehs.github.io/beethoven/
+template:
+  bootstrap: 5
+  bootswatch: minty
+
+navbar:
+  structure:
+    left:  [reference, articles, search]
+    right: [github]
+
+reference:
+- subtitle: Meta learner
+  desc: Fitting meta learner
+- contents:
+  - contains("meta_learner")
+
+articles:
+- title: List of features
+  desc: Features (covariates) used in beethoven
