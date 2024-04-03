@@ -87,16 +87,6 @@ tools/shiny_explore_pm/missingness_exploration_pm_quarto_shiny_data/
 .dodsrc
 
 # raw data
-input/aqs
-input/ecoregions
-input/geos
-input/gmted
-input/HMS_Smoke
-input/koppen_geiger
-input/merra2
-input/modis
-input/narr
-input/nlcd
-input/tri
-input/NCEP-NCAR-Reanalysis-1
-input/nei
+input
+.future
+_targets
