@@ -1,177 +1,5 @@
 ## pipeline base functions
 
-## file check: chunking
-## if using tarchetypes::tar_files,
-## the file *lists* should be stored as a single file
-## Provided that the download is completed in a defined
-## time period such that users can distiguish a **set** of files
-## from each other,
-## timestamp check: `fs::file_info(...)$modification_time`
-## can be used in bulk file check (will be time consuming as
-## the number of files grow, though).
-## The file list of the previous successful run will be stored as a file
-## and we just save the file list of the current run, which are
-## older than a certain rerun interval (e.g., 6 months).
-## If one really wants to keep the shorter rerun interval,
-## the strategy should be changed.
-## THINK: How can we know the downloaded files are complete and correct?
-## quick diagram:
-## file set 1 ...  file set x
-## (listing function runs)
-## list1.rds  ...  listx.rds
-## (hashed; not modified) ...   (not run)
-## (pass)    ...   (run)
-## ...       ...   (downstream process + calculation)
-## (as-is)   ...   (as-is)    --- unless modified or manually invalidated
-
-
-# basic idea: all-in-one, but compact tibble that provides
-# anything needed for the pipeline
-# ultimately the name "dataset" is a key for iteration to make
-# the outermost pipeline look as simple as possible
-blueprint <-
-    tribble(
-        ~dataset,   ~buffers, ~input,
-        "mod11",    c(1e3, 1e4, 5e4),    "input/modis/raw/61/MOD11A1",
-        "mod13",    c(1e3, 1e4, 5e4),    "input/modis/raw/61/MOD13A2",
-        "mcd19",    c(1e3, 1e4, 5e4),    "input/modis/raw/61/MCD19A2",
-        "mod06",    c(1e3, 1e4, 5e4),    "input/modis/raw/61/MOD06_L2",
-        "mod09",    c(1e3, 1e4, 5e4),    "input/modis/raw/61/MOD09GA",
-        "viirs",    c(1e3, 1e4, 5e4),    "input/modis/raw/5000/VNP46A2",
-        "ecoregions",    c(-1),    "input/ecoregions",
-        "tri",  c(1e3, 1e4, 5e4),    "input/tri",
-        "nei",  c(-1),   "input/nei",
-        "hms",  c(-1),    "input/hms",
-        "koppen_geiger",   c(0),    "input/koppen_geiger",
-        "groads",   c(1e3, 1e4, 5e4),    "input/sedac_groads/gROADS-v1-americas.gdb",
-        "population",  c(1e3, 1e4, 5e4),    "input/sedac_population/gpw_v4_population_density_adjusted_to_2015_unwpp_country_totals_rev11_2020_30_sec.tif",
-        "nlcd", c(1e3, 1e4, 5e4),    "input/nlcd",
-        "geoscf", c(1e3, 1e4, 5e4),    "input/geos",
-        "gmted",  c(0),    "input/gmted",
-        "narr", c(0),    "input/narr"
-    )
-
-
-arglist <-
-  list(
-    char_siteid = "site_id",
-    char_timeid = "time",
-    extent = c(-126, -62, 22, 52),
-    mod11 = list(name_covariates = sprintf("MOD_SFCT%s_0_", c("D", "N")),
-                 subdataset = sprintf("LST_%s_", c("Day", "Night"))),
-    mod06 = list(name_covariates = sprintf("MOD_CLCV%s_0_", c("Day", "Night")),
-                 subdataset = sprintf("Cloud_Fraction_%s", c("Day", "Night"))),
-    mod09 = list(name_covariates = sprintf("MOD_SFCRF_%d_", seq(1, 7)),
-                 subdataset = seq(2, 8)),
-    mcd19 = list(name_covariates =
-                 list(
-                   res1km = sprintf("MOD_AD%dTA_0_", c(4, 5)),
-                   res5km = sprintf("MOD_%sAN_0_", c("CSZ", "CVZ", "RAZ", "SCT", "GLN"))
-                 ),
-                 subdataset =
-                 list(
-                   res1km = c("Optical_Depth"),
-                   res5km = c("cos|RelAZ|Angle")
-                 )
-    ),
-    mod13 = list(name_covariates = "MOD_NDVIV_0_",
-                 subdataset = "(NDVI)"),
-    viirs = list(name_covariates = "MOD_LGHTN_0_",
-                 subdataset = 3),
-    hms = list(levels = c("Light", "Medium", "Heavy")),
-    geoscf = list(element = list(aqc = "aqc", chm = "chm")),
-    gmted = list(
-      variables = c(
-        "Breakline Emphasis", "Systematic Subsample",
-        "Median Statistic", "Minimum Statistic",
-        "Mean Statistic", "Maximum Statistic",
-        "Standard Deviation Statistic"
-      ),
-      resolution = sprintf("%s arc-seconds", c("7.5", "15", "30"))
-    ),
-    nei = list(
-      years = c(2017, 2017, 2020, 2020, 2020),
-      county = process_counties(year = 2020)
-    ),
-    tri = list(
-      years = seq(2018, 2022)
-    ),
-    nlcd = list(
-      years = c(2019, 2019, 2019, 2021, 2021)
-    ),
-    koppen_geiger = list(),
-    ecoregions = list(),
-    narr = list(
-      variables = c("air.sfc", "albedo", "apcp", "dswrf", "evap", "hcdc",
-                    "hpbl", "lcdc", "lhtfl", "mcdc", "omega", "pr_wtr",
-                    "prate", "pres.sfc", "shtfl", "shum", "snowc", "soilm",    
-                    "tcdc", "ulwrf.sfc", "uwnd.10m", "vis", "vwnd.10m", "weasd")
-    ),
-    groads = list(),
-    population = list(fun = "mean")
-  )
-
-
-# calculate over a list
-#' Spatiotemporal covariate calculation
-#' @param domain vector of integer/character/Date.
-#' Depending on temporal resolution of raw datasets.
-#' Nullable; If `NULL`, it will be set to `c(1)`.
-#' @param process_function Raw data processor. Default is
-#' [`amadeus::process_covariates`]
-#' @param calc_function Function to calculate covariates.
-#' [`amadeus::calc_covariates`]
-#' @param ... Arguments passed to `process_function` and `calc_function`
-#' @returns A data.table object.
-#' @importFrom data.table rbindlist
-#' @importFrom rlang inject
-#' @export
-#' @examples
-calculate <-
-  function(
-    domain = NULL,
-    process_function = amadeus::process_covariates,
-    calc_function = amadeus::calc_covariates,
-    ...
-  ) {
-    if (is.null(domain)) {
-      domain <- c(1)
-    }
-
-    domainlist <- split(domain, seq_along(domain))
-    res_calc <-
-      try(
-        lapply(
-          domainlist,
-          function(el) {
-            # we assume that ... have no "year" and "from" arguments
-            from_in <-
-              rlang::inject(
-                process_function(year = el, !!!list(...))
-              )
-            rlang::inject(
-              calc_function(
-                from = from_in,
-                !!!list(...)
-              )
-            )
-          }
-        )
-      )
-    if (inherits(res_calc, "try-error")) {
-      cat(paste0(attr(res_calc, "condition")$message, "\n"))
-      stop("Results do not match expectations.")
-    }
-    res_calc <- lapply(res_calc, function(x) as.data.frame(x))
-    res_calc <- data.table::rbindlist(res_calc, fill = TRUE)
-    return(res_calc)
-
-  }
-
-
-
-
-
 #' Running commands with a punchcard
 #' @param var_short Short variable name to call from the CSV fiel
 #' @param file Path to the configuration file
@@ -365,6 +193,7 @@ post_calc_join_pm25_features <-
 
 
 
+# TODO: is it possible to download missing files only?
 #' Check file status and download if necessary
 #' @param path download path.
 #' @param dname Dataset name. See [`amadeus::download_data`] for details.
@@ -373,13 +202,13 @@ post_calc_join_pm25_features <-
 feature_raw_download <-
   function(
     path = NULL,
-    dataset_name = NULL,
+    dname = NULL,
     ...
   ) {
     # run amadeus::download_data
     tryCatch(
       {
-        amadeus::download_data(dataset_name = dataset_name, ...)
+        amadeus::download_data(dname, ...)
       },
       error = function(e) {
         stop(e)

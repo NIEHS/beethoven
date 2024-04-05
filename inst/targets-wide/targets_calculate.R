@@ -33,30 +33,6 @@ amadeusArgs <- list(
   target_fields = NULL
 )
 
-
-target_calculate_fit <-
-  list(
-    tar_target(
-      chr_features,
-      command = c(
-                 "tri", "ecoregions", "koppen", "nlcd", "hms", "population",
-                 "groads", "narr", "nei", "gmted", "geos", "modis_mod11",
-                 "modis_mod06", "modis_mod13", "modis_mcd19", "modis_mod09",
-                 "viirs"
-               ),
-      iteration = "list"
-    )
-    ,
-    tar_target(
-      list_features,
-      command = calculate(covariate = chr_features,
-        !!runargs),
-      pattern = map(runargs)
-    )
-  )
-
-
-
 ## Targets for feature calculation ####
 target_calculate_fit <-
   list(
