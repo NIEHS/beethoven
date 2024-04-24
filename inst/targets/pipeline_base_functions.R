@@ -24,7 +24,12 @@
 ## ...       ...   (downstream process + calculation)
 ## (as-is)   ...   (as-is)    --- unless modified or manually invalidated
 
+# 2018-2022 (target) + 2023 (manpower saving demonstration)
+# compacting the pipeline with branching
+# TODO: file path is the same, but binary is different; could targets
+# handle?
 
+library(dplyr)
 # basic idea: all-in-one, but compact tibble that provides
 # anything needed for the pipeline
 # ultimately the name "dataset" is a key for iteration to make
@@ -52,65 +57,78 @@ blueprint <-
     )
 
 
-arglist <-
-  list(
-    char_siteid = "site_id",
-    char_timeid = "time",
-    extent = c(-126, -62, 22, 52),
-    mod11 = list(name_covariates = sprintf("MOD_SFCT%s_0_", c("D", "N")),
-                 subdataset = sprintf("LST_%s_", c("Day", "Night"))),
-    mod06 = list(name_covariates = sprintf("MOD_CLCV%s_0_", c("Day", "Night")),
-                 subdataset = sprintf("Cloud_Fraction_%s", c("Day", "Night"))),
-    mod09 = list(name_covariates = sprintf("MOD_SFCRF_%d_", seq(1, 7)),
-                 subdataset = seq(2, 8)),
-    mcd19 = list(name_covariates =
-                 list(
-                   res1km = sprintf("MOD_AD%dTA_0_", c(4, 5)),
-                   res5km = sprintf("MOD_%sAN_0_", c("CSZ", "CVZ", "RAZ", "SCT", "GLN"))
-                 ),
-                 subdataset =
-                 list(
-                   res1km = c("Optical_Depth"),
-                   res5km = c("cos|RelAZ|Angle")
-                 )
-    ),
-    mod13 = list(name_covariates = "MOD_NDVIV_0_",
-                 subdataset = "(NDVI)"),
-    viirs = list(name_covariates = "MOD_LGHTN_0_",
-                 subdataset = 3),
-    hms = list(levels = c("Light", "Medium", "Heavy")),
-    geoscf = list(element = list(aqc = "aqc", chm = "chm")),
-    gmted = list(
-      variables = c(
-        "Breakline Emphasis", "Systematic Subsample",
-        "Median Statistic", "Minimum Statistic",
-        "Mean Statistic", "Maximum Statistic",
-        "Standard Deviation Statistic"
-      ),
-      resolution = sprintf("%s arc-seconds", c("7.5", "15", "30"))
-    ),
-    nei = list(
-      years = c(2017, 2017, 2020, 2020, 2020),
-      county = process_counties(year = 2020)
-    ),
-    tri = list(
-      years = seq(2018, 2022)
-    ),
-    nlcd = list(
-      years = c(2019, 2019, 2019, 2021, 2021)
-    ),
-    koppen_geiger = list(),
-    ecoregions = list(),
-    narr = list(
-      variables = c("air.sfc", "albedo", "apcp", "dswrf", "evap", "hcdc",
-                    "hpbl", "lcdc", "lhtfl", "mcdc", "omega", "pr_wtr",
-                    "prate", "pres.sfc", "shtfl", "shum", "snowc", "soilm",    
-                    "tcdc", "ulwrf.sfc", "uwnd.10m", "vis", "vwnd.10m", "weasd")
-    ),
-    groads = list(),
-    population = list(fun = "mean")
-  )
 
+#' Load arguments from the formatted argument list file
+#' @param argfile character(1). Path to the argument file. RDS format.
+#' @param dataset character(1). Dataset name.
+#' @returns A list of arguments.
+#' @importFrom base readRDS
+#' @export
+loadargs <- function(argfile, dataset) {
+  arglist <- readRDS(argfile)
+  arglist[[dataset]]
+}
+
+
+inject_calculate <- function(injection) {
+  rlang::inject(
+    calculate(
+      covariate = chr_features,
+      locs = sf_feat_proc_aqs_sites,
+      !!!injection
+    )
+
+  )
+}
+
+
+inject_modis_par <- function(injection) {
+  rlang::inject(
+    amadeus::calc_modis_par(
+      locs = sf_feat_proc_aqs_sites,
+      locs_id = "site_id",
+      !!!injection
+    )
+  )
+}
+
+# 2018~2022, 2017, 2020
+# 2017 ... 2020 ...
+# 2017 
+#' Map the available raw data years over the given period
+#' @description
+#' Many raw datasets are periodically updated and the period could
+#' be longer than a year. This function maps the available years
+#' over the given period.
+#' @param time_start integer(1). Starting year.
+#' @param time_end integer(1). Ending year.
+#' @param time_unit character(1). Time unit. Default is `"year"`.
+#' @param time_available vector. Available years.
+#' @returns integer vector of length (time_end - time_start + 1).
+#' Each element will get the nearest preceeding available year.
+#' @note
+#' The minimum of `time_available` will be filled in front of the first available year
+#' when the minimum of `time_available` is greater than `time_start`.
+#' @examples
+#' process_year_expand(2018, 2022, "year", c(2017, 2020, 2021))
+#' process_year_expand(2018, 2022, "year", c(2020, 2021))
+#' @export
+process_year_expand <-
+  function(
+    time_start = NULL,
+    time_end = NULL,
+    time_unit = "year",
+    time_available = NULL
+  ) {
+    time_seq <- seq(time_start, time_end)
+    time_target_seq <- findInterval(time_seq, time_available)
+    time_target_seq <- time_target[time_target_seq]
+    if (min(time_available) > time_start) {
+      time_target_seq <-
+        c(rep(min(time_available), min(time_available) - time_start), time_target_seq)
+    }
+    return(time_target_seq)
+  }
 
 # calculate over a list
 #' Spatiotemporal covariate calculation
@@ -736,11 +754,12 @@ df_params <- function(functions) {
   return(paramsdf)
 }
 
+schedo <- search_function("amadeus", "download_")
 # sched <- search_function("amadeus", "process_")
 # schec <- search_function("amadeus", "calc_")
 # df_params(sched[-c(1, 2, 3, 4, 5, 6, 8, 11, 14, 15, 17, 18, 19, 20, 21, 25)])
 # df_params(schec[-c(1, 16)]) |> colnames()
-
+df_params(schedo) |> colnames()
 
 
 

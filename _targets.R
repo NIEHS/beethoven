@@ -1,20 +1,19 @@
-if (!require(targets)) {
-  pak::pak("targets")
-  library(targets)
-}
+library(targets)
+library(tarchetypes)
+library(future)
+library(future.batchtools)
 
-source("./inst/targets/pipeline_base_functions.R")
-source("./inst/targets/targets_initialize.R")
-source("./inst/targets/targets_download.R")
-source("./inst/targets/targets_calculate.R")
-source("./inst/targets/targets_baselearner.R")
-source("./inst/targets/targets_metalearner.R")
-source("./inst/targets/targets_predict.R")
+tar_source("./inst/targets/pipeline_base_functions.R")
+tar_source("./inst/targets/targets_initialize.R")
+tar_source("./inst/targets/targets_download.R")
+tar_source("./inst/targets/targets_calculate.R")
+tar_source("./inst/targets/targets_baselearner.R")
+tar_source("./inst/targets/targets_metalearner.R")
+tar_source("./inst/targets/targets_predict.R")
+tar_source("./inst/targets/targets_arglist.R")
 
 # bypass option
 Sys.setenv("BTV_DOWNLOAD_PASS" = "TRUE")
-library(future)
-library(future.batchtools)
 
 plan(
   future.batchtools::batchtools_slurm,

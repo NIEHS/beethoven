@@ -5,6 +5,7 @@
 # for users' convenience and make the pipeline less prone to errors.
 
 library(dplyr)
+library(sf)
 # for reference, full list of parameters in amadeus::process_*
 # and amadeus::calc_*.
 # This list will be useful for entering parameters by rlang::inject.
@@ -36,29 +37,135 @@ amadeusArgs <- list(
 
 target_calculate_fit <-
   list(
+    tar_files_input(
+      file_calc_args,
+      files = list.files("./inst/targets", pattern = "*.*.rds$", full.names = TRUE),
+      format = "file",
+      iteration = "vector"
+    )
+    ,
     tar_target(
       chr_features,
       command = c(
                  "tri", "ecoregions", "koppen", "nlcd", "hms", "population",
-                 "groads", "narr", "nei", "gmted", "geos", "modis_mod11",
-                 "modis_mod06", "modis_mod13", "modis_mcd19", "modis_mod09",
-                 "viirs"
+                 "groads", "narr", "nei", "gmted", "geos"
                ),
-      iteration = "list"
+      iteration = "vector"
+    )
+    ,
+    tar_target(
+      chr_nasa,
+      command = c(
+         "mod11", "mod06", "mod13",
+         "mcd19_1km", "mcd19_5km", "mod09", "viirs"
+          ),
+      iteration = "vector"
     )
     ,
     tar_target(
       list_features,
-      command = calculate(covariate = chr_features,
-        !!runargs),
-      pattern = map(runargs)
+      command =
+        inject_calculate(loadargs(file_calc_args, chr_features)),
+      pattern = cross(file_calc_args, chr_features),
+      iteration = "list"
     )
+    ,
+    tar_target(
+      list_nasa,
+      command =
+        inject_modis_par(loadargs(file_calc_args, chr_nasa)),
+      pattern = cross(file_calc_args, chr_nasa),
+      resources = set_slurm_resource(
+            ntasks = 1, ncpus = 20, memory = 10
+          ),
+      iteration = "list"
+    )
+    # ,
+    #   # Merge spatial-only features ####
+    # targets::tar_target(
+    #   dt_feat_fit_xsp_base,
+    #   post_calc_merge_features(
+    #     by = meta_run("char_siteid"),
+    #     time = FALSE,
+    #     dt_feat_calc_koppen,
+    #     dt_feat_calc_ecoregions,
+    #     dt_feat_calc_gmted,
+    #     dt_feat_calc_nei
+    #   )
+    # )
+    # ,
+    # # Merge spatiotemporal features ####
+    # targets::tar_target(
+    #   dt_feat_fit_xst_base,
+    #   post_calc_merge_features(
+    #     by = meta_run("char_siteid"),
+    #     time = TRUE,
+    #     dt_feat_calc_hms,
+    #     dt_feat_calc_geoscf_aqc,
+    #     dt_feat_calc_geoscf_chm,
+    #     dt_feat_calc_modis_mod06 |> data.table::as.data.table(),
+    #     dt_feat_calc_modis_mod09 |> data.table::as.data.table(),
+    #     dt_feat_calc_modis_mod11 |> data.table::as.data.table(),
+    #     dt_feat_calc_modis_mod13 |> data.table::as.data.table(),
+    #     dt_feat_calc_modis_mcd19_1km |> data.table::as.data.table(),
+    #     dt_feat_calc_modis_mcd19_5km |> data.table::as.data.table(),
+    #     dt_feat_calc_viirs  |> data.table::as.data.table()
+    #   )
+    # )
+    # ,
+    # targets::tar_target(
+    #   dt_feat_fit_xst_nlcd,
+    #   post_calc_join_yeardate(
+    #     dt_feat_calc_nlcd,
+    #     dt_feat_fit_xst_base,
+    #     field_year = "time",
+    #     field_date = "time",
+    #     spid = meta_run("char_siteid")
+    #   )
+    # )
+    # ,
+    # targets::tar_target(
+    #   dt_feat_fit_xst,
+    #   post_calc_join_yeardate(
+    #     dt_feat_calc_tri,
+    #     dt_feat_fit_xst_nlcd,
+    #     field_year = "time",
+    #     field_date = "time",
+    #     spid = meta_run("char_siteid")
+    #   )
+    # )
+    # ,
+    # targets::tar_target(
+    #   dt_feat_fit_x,
+    #   post_calc_merge_all(
+    #     locs = sf_feat_proc_aqs_sites_time,
+    #     locs_id = meta_run("char_siteid"),
+    #     time_id = meta_run("char_timeid"),
+    #     target_years =
+    #       seq(
+    #         as.integer(format(meta_run("date_start"), "%Y")),
+    #         as.integer(format(meta_run("date_end"), "%Y"))
+    #       ),
+    #     df_sp = dt_feat_fit_xsp_base,
+    #     df_spt = dt_feat_fit_xst
+    #   )
+    # )
+    # ,
+    # targets::tar_target(
+    #   dt_feat_fit,
+    #   post_calc_join_pm25_features(
+    #     df_pm = sf_feat_proc_aqs_pm25,
+    #     df_covar = dt_feat_fit_x,
+    #     locs_id = meta_run("char_siteid"),
+    #     time_id = meta_run("char_timeid")
+    #   )
+    # )
   )
 
 
 
 ## Targets for feature calculation ####
-target_calculate_fit <-
+target_calculate_fitold <-
   list(
     # covariate calculation: multi vs single cases
     # single: ecoregion, koppen
