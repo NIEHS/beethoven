@@ -10,7 +10,7 @@ tar_source("./inst/targets/targets_calculate.R")
 tar_source("./inst/targets/targets_baselearner.R")
 tar_source("./inst/targets/targets_metalearner.R")
 tar_source("./inst/targets/targets_predict.R")
-tar_source("./inst/targets/targets_arglist.R")
+# tar_source("./inst/targets/targets_arglist.R")
 
 # bypass option
 Sys.setenv("BTV_DOWNLOAD_PASS" = "TRUE")

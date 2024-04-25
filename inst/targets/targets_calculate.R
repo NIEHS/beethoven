@@ -65,7 +65,10 @@ target_calculate_fit <-
     tar_target(
       list_features,
       command =
-        inject_calculate(loadargs(file_calc_args, chr_features)),
+        inject_calculate(
+          locs = sf_feat_proc_aqs_sites,
+          domain = 2020,
+          injection = loadargs(file_calc_args, chr_features)),
       pattern = cross(file_calc_args, chr_features),
       iteration = "list"
     )
@@ -73,12 +76,42 @@ target_calculate_fit <-
     tar_target(
       list_nasa,
       command =
-        inject_modis_par(loadargs(file_calc_args, chr_nasa)),
+        inject_modis_par(
+          locs = sf_feat_proc_aqs_sites,
+          injection = loadargs(file_calc_args, chr_nasa)),
       pattern = cross(file_calc_args, chr_nasa),
       resources = set_slurm_resource(
             ntasks = 1, ncpus = 20, memory = 10
           ),
       iteration = "list"
+    )
+    ,
+    tar_target(
+      list_features_flat,
+      command =
+        lapply(list_features,
+               function(x) {
+                 Reduce(function(x, y) {
+                   merge(x, y, by = c("locs_id", "time"))
+                 }, x)})
+    )
+    ,
+    tar_target(
+      list_nasa_flat,
+      command =
+        lapply(list_nasa,
+               function(x) {
+                 Reduce(function(x, y) {
+                   merge(x, y, by = c("locs_id", "time"))
+                 }, x)})
+    )
+    ,
+    tar_target(
+      dt_feat_fit,
+      command = merge(
+        Reduce(merge, list_features_flat, by = c("locs_id", "time"), all = TRUE),
+        Reduce(merge, list_nasa_flat, by = c("locs_id", "time"), all = TRUE),
+        by = c("locs_id", "time"), all = TRUE)
     )
     # ,
     #   # Merge spatial-only features ####

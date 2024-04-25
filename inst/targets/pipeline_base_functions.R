@@ -29,34 +29,6 @@
 # TODO: file path is the same, but binary is different; could targets
 # handle?
 
-library(dplyr)
-# basic idea: all-in-one, but compact tibble that provides
-# anything needed for the pipeline
-# ultimately the name "dataset" is a key for iteration to make
-# the outermost pipeline look as simple as possible
-blueprint <-
-    tribble(
-        ~dataset,   ~buffers, ~input,
-        "mod11",    c(1e3, 1e4, 5e4),    "input/modis/raw/61/MOD11A1",
-        "mod13",    c(1e3, 1e4, 5e4),    "input/modis/raw/61/MOD13A2",
-        "mcd19",    c(1e3, 1e4, 5e4),    "input/modis/raw/61/MCD19A2",
-        "mod06",    c(1e3, 1e4, 5e4),    "input/modis/raw/61/MOD06_L2",
-        "mod09",    c(1e3, 1e4, 5e4),    "input/modis/raw/61/MOD09GA",
-        "viirs",    c(1e3, 1e4, 5e4),    "input/modis/raw/5000/VNP46A2",
-        "ecoregions",    c(-1),    "input/ecoregions",
-        "tri",  c(1e3, 1e4, 5e4),    "input/tri",
-        "nei",  c(-1),   "input/nei",
-        "hms",  c(-1),    "input/hms",
-        "koppen_geiger",   c(0),    "input/koppen_geiger",
-        "groads",   c(1e3, 1e4, 5e4),    "input/sedac_groads/gROADS-v1-americas.gdb",
-        "population",  c(1e3, 1e4, 5e4),    "input/sedac_population/gpw_v4_population_density_adjusted_to_2015_unwpp_country_totals_rev11_2020_30_sec.tif",
-        "nlcd", c(1e3, 1e4, 5e4),    "input/nlcd",
-        "geoscf", c(1e3, 1e4, 5e4),    "input/geos",
-        "gmted",  c(0),    "input/gmted",
-        "narr", c(0),    "input/narr"
-    )
-
-
 
 #' Load arguments from the formatted argument list file
 #' @param argfile character(1). Path to the argument file. RDS format.
@@ -70,11 +42,22 @@ loadargs <- function(argfile, dataset) {
 }
 
 
-inject_calculate <- function(injection) {
+load_modis_files <- function(path, pattern = "hdf$") {
+  modis_files <-
+    list.files(
+      path, pattern = pattern,
+      recursive = TRUE,
+      full.names = TRUE
+    )
+  return(modis_files)
+}
+
+inject_calculate <- function(locs, buffer, domain, injection) {
   rlang::inject(
     calculate(
       covariate = chr_features,
-      locs = sf_feat_proc_aqs_sites,
+      locs = locs,
+      radius = ifelse(missing(buffer), buffer, NULL),
       !!!injection
     )
 
@@ -82,10 +65,10 @@ inject_calculate <- function(injection) {
 }
 
 
-inject_modis_par <- function(injection) {
+inject_modis_par <- function(locs, domain, injection) {
   rlang::inject(
     amadeus::calc_modis_par(
-      locs = sf_feat_proc_aqs_sites,
+      locs = locs,
       locs_id = "site_id",
       !!!injection
     )
