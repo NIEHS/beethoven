@@ -41,6 +41,10 @@ loadargs <- function(argfile, dataset) {
   arglist[[dataset]]
 }
 
+`%tin%` <- function(query_date, tvec) {
+  tvec <- sort(tvec)
+  query_date <= tvec[1] & query_date >= tvec[2]
+}
 
 load_modis_files <- function(path, pattern = "hdf$") {
   modis_files <-
@@ -72,6 +76,29 @@ inject_modis_par <- function(locs, domain, injection) {
       locs_id = "site_id",
       !!!injection
     )
+  )
+}
+
+
+inject_geos <- function(locs, injection) {
+  rlang::inject(
+    calc_geos_strict(
+      locs = locs,
+      locs_id = "site_id",
+      win = c(-126, -62, 22, 52),
+      snap = "out",
+      !!!injection
+    )
+  )
+}
+
+
+reduce_merge <- function(list_in, by = c("site_id", "time")) {
+  Reduce(
+    function(x, y) {
+      data.table::merge.data.table(x, y, by = by, all.x = TRUE)
+    },
+    list_in
   )
 }
 
@@ -118,6 +145,7 @@ process_year_expand <-
 #' @param domain vector of integer/character/Date.
 #' Depending on temporal resolution of raw datasets.
 #' Nullable; If `NULL`, it will be set to `c(1)`.
+#' @param domain_name character(1). Name of the domain. Default is `"year"`.
 #' @param process_function Raw data processor. Default is
 #' [`amadeus::process_covariates`]
 #' @param calc_function Function to calculate covariates.
@@ -131,6 +159,7 @@ process_year_expand <-
 calculate <-
   function(
     domain = NULL,
+    domain_name = "year",
     process_function = amadeus::process_covariates,
     calc_function = amadeus::calc_covariates,
     ...
@@ -146,14 +175,16 @@ calculate <-
           domainlist,
           function(el) {
             # we assume that ... have no "year" and "from" arguments
+            args_process <- c(arg = el, list(...))
+            names(args_process)[1] <- domain_name
             from_in <-
               rlang::inject(
-                process_function(year = el, !!!list(...))
+                process_function(!!!args_process)
               )
             rlang::inject(
               calc_function(
                 from = from_in,
-                !!!list(...)
+                !!!args_process
               )
             )
           }
@@ -999,7 +1030,7 @@ calc_geos_strict <-
     # to export locs (pointers are not exportable)
     locs <- sf::st_as_sf(locs)
 
-    # split filename date every 10 days
+    # split filename dates daily
     filename_date <- as.Date(filename_date, format = "%Y%m%d")
     filename_date_cl <- as.integer(as.factor(filename_date))
 
@@ -1058,14 +1089,12 @@ calc_geos_strict <-
 
     }
 
-    # summary by 10 days
-    # FIXME: .x is an hourly data -> to daily data for proper use
-    rast_10d_summary <-
+    rast_summary <-
       lapply(
         future_inserted,
         function(x) summary_byvar(fs = x)
       )
-    rast_10d_summary <- data.table::rbindlist(rast_10d_summary)
+    rast_summary <- data.table::rbindlist(rast_summary)
     # extract
 
     return(rast_10d_summary)

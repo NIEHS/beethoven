@@ -1,11 +1,6 @@
 target_init <-
   list(
     targets::tar_target(
-      char_feat_proc_timerange,
-      command = c(meta_run("date_start"), meta_run("date_end"))
-    )
-    ,
-    targets::tar_target(
       sf_feat_proc_aqs_sites,
       read_locs(
         path = list.files(
@@ -15,7 +10,8 @@ target_init <-
         ),
         date = NULL,
         return_format = "sf"
-      )
+      ),
+      description = "AQS sites"
     )
     ,
     targets::tar_target(
@@ -26,9 +22,10 @@ target_init <-
           pattern = "daily_88101_[0-9]{4}.csv",
           full.names = TRUE
         ),
-        date = char_feat_proc_timerange,
+        date = arglist_common$common$char_period,
         return_format = "sf"
-      )
+      ),
+      description = "AQS sites with time"
     )
     ,
     targets::tar_target(
@@ -40,6 +37,7 @@ target_init <-
           full.names = TRUE),
         site_spt = sf::st_drop_geometry(sf_feat_proc_aqs_sites_time) |>
           dplyr::mutate(time = as.character(time))
-      ) |> dplyr::filter(time >= meta_run("date_start") & time <= meta_run("date_end"))
+      ) |> dplyr::filter(time %tin% arglist_common$common$char_period),
+      description = "AQS sites with PM2.5"
     )
   )

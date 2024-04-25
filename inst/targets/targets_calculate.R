@@ -41,16 +41,18 @@ target_calculate_fit <-
       file_calc_args,
       files = list.files("./inst/targets", pattern = "*.*.rds$", full.names = TRUE),
       format = "file",
-      iteration = "vector"
+      iteration = "vector",
+      description = "Calculation arguments in RDS file"
     )
     ,
     tar_target(
       chr_features,
       command = c(
                  "tri", "ecoregions", "koppen", "nlcd", "hms", "population",
-                 "groads", "narr", "nei", "gmted", "geos"
+                 "groads", "narr", "nei", "gmted"
                ),
-      iteration = "vector"
+      iteration = "vector",
+      description = "Feature calculation"
     )
     ,
     tar_target(
@@ -59,22 +61,31 @@ target_calculate_fit <-
          "mod11", "mod06", "mod13",
          "mcd19_1km", "mcd19_5km", "mod09", "viirs"
           ),
-      iteration = "vector"
+      iteration = "vector",
+      description = "MODIS/VIIRS feature calculation"
     )
     ,
     tar_target(
-      list_features,
+      chr_geoscf,
+      command = c("chm", "aqc"),
+      iteration = "vector",
+      description = "GEOS-CF feature calculation"
+    )
+    ,
+    tar_target(
+      list_feat_base,
       command =
         inject_calculate(
           locs = sf_feat_proc_aqs_sites,
           domain = 2020,
           injection = loadargs(file_calc_args, chr_features)),
       pattern = cross(file_calc_args, chr_features),
-      iteration = "list"
+      iteration = "list",
+      description = "Base feature list"
     )
     ,
     tar_target(
-      list_nasa,
+      list_feat_nasa,
       command =
         inject_modis_par(
           locs = sf_feat_proc_aqs_sites,
@@ -83,35 +94,69 @@ target_calculate_fit <-
       resources = set_slurm_resource(
             ntasks = 1, ncpus = 20, memory = 10
           ),
-      iteration = "list"
+      iteration = "list",
+      description = "MODIS/VIIRS feature list"
     )
     ,
     tar_target(
-      list_features_flat,
-      command =
-        lapply(list_features,
-               function(x) {
-                 Reduce(function(x, y) {
-                   merge(x, y, by = c("locs_id", "time"))
-                 }, x)})
+      list_feat_geoscf,
+      inject_geos(
+        locs = sf_feat_proc_aqs_sites,
+        injection = loadargs(file_calc_args, chr_geoscf)
+      ),
+      pattern = map(chr_geoscf),
+      iteration = "list",
+      description = "GEOS-CF feature list"
     )
     ,
     tar_target(
-      list_nasa_flat,
+      list_feat_base_flat,
       command =
-        lapply(list_nasa,
+        lapply(list_feat_base,
                function(x) {
                  Reduce(function(x, y) {
                    merge(x, y, by = c("locs_id", "time"))
-                 }, x)})
+                 }, x)}),
+      description = "data.table of base features"
+    )
+    ,
+    tar_target(
+      list_feat_nasa_flat,
+      command =
+        lapply(list_feat_nasa,
+               function(x) reduce_merge(x, by = c("locs_id", "time"))),
+      description = "data.table of MODIS/VIIRS features"
+    )
+    ,
+    tar_target(
+      list_feat_geoscf_flat,
+      command =
+        lapply(list_feat_geoscf,
+               function(x) reduce_merge(x, by = c("locs_id", "time"))),
+      description = "data.table of GEOS-CF features"
     )
     ,
     tar_target(
       dt_feat_fit,
-      command = merge(
-        Reduce(merge, list_features_flat, by = c("locs_id", "time"), all = TRUE),
-        Reduce(merge, list_nasa_flat, by = c("locs_id", "time"), all = TRUE),
-        by = c("locs_id", "time"), all = TRUE)
+      command = reduce_merge(
+        list(
+          reduce_merge(list_feat_base_flat),
+          reduce_merge(list_feat_nasa_flat),
+          reduce_merge(list_feat_geoscf_flat)
+        )
+      ),
+      description = "data.table of all features"
+    )
+    ,
+    targets::tar_target(
+      dt_feat_fit_pm,
+      post_calc_join_pm25_features(
+        df_pm = sf_feat_proc_aqs_pm25,
+        df_covar = dt_feat_fit,
+        locs_id = "site_id",
+        time_id = "time"
+      ),
+      description = "data.table of all features with PM2.5"
     )
     # ,
     #   # Merge spatial-only features ####

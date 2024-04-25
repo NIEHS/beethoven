@@ -1,5 +1,5 @@
 library(dplyr)
-# basic idea: all-in-one, but compact tibble that provides
+# basic idea: a list that provides
 # anything needed for the pipeline
 # ultimately the name "dataset" is a key for iteration to make
 # the outermost pipeline look as simple as possible
@@ -78,9 +78,11 @@ arglist_proccalc <-
                  preprocess = amadeus::process_bluemarble),
     hms = list(from = "./input/HMS_Smoke/data",
                covariate = "hms", levels = c("Light", "Medium", "Heavy")),
-    geoscf_aqc = list(from = "./input/geos/aqc_tavg_1hr_g1440x721_v1",
+    geoscf_aqc = list(date = arglist_common$common$char_period,
+                      from = "./input/geos/aqc_tavg_1hr_g1440x721_v1",
                       covariate = "geoscf", element = "aqc"),
-    geoscf_chm = list(from = "./input/geos/chm_tavg_1hr_g1440x721_v1",
+    geoscf_chm = list(date = arglist_common$common$char_period,
+                      from = "./input/geos/chm_tavg_1hr_g1440x721_v1",
                       covariate = "geoscf", element = "chm"),
     gmted = list(
       from = "./input/gmted",
@@ -94,17 +96,20 @@ arglist_proccalc <-
       resolution = sprintf("%s arc-seconds", c("7.5", "15", "30"))
     ),
     nei = list(
+      domain = c(2017, 2017, 2020, 2020, 2020),
       from = "./input/nei",
       covariate = "nei",
       years = c(2017, 2020),
       county = process_counties(year = 2020)
     ),
     tri = list(
+      domain = seq(2018, 2022),
       from = "./input/tri",
       covariate = "tri",
       years = seq(2018, 2022)
     ),
     nlcd = list(
+      domain = c(2019, 2019, 2019, 2021, 2021),
       from = "./input/nlcd/raw",
       covariate = "nlcd",
       years = c(2019, 2021)
@@ -123,8 +128,11 @@ arglist_proccalc <-
     ),
     groads = list(from = "./input/sedac_groads/gROADS-v1-americas.gdb",
                   covariate = "groads"),
-    population = list(from = "./input/sedac_population//ddn/gs1/home/songi2/projects/beethoven/input/sedac_population/gpw_v4_population_density_adjusted_to_2015_unwpp_country_totals_rev11_2020_30_sec.tif",
-                      covariate = "population", years = c(2020), fun = "mean")
+    population = list(
+      domain = rep(2020, 5),
+      from = "./input/sedac_population//ddn/gs1/home/songi2/projects/beethoven/input/sedac_population/gpw_v4_population_density_adjusted_to_2015_unwpp_country_totals_rev11_2020_30_sec.tif",
+      covariate = "population", years = c(2020), fun = "mean"
+    )
   )
 
 attr(arglist_proccalc, "description") <-
