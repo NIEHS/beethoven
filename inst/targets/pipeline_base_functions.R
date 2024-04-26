@@ -41,34 +41,95 @@ loadargs <- function(argfile, dataset) {
   arglist[[dataset]]
 }
 
+#' Check if a query date falls within a time interval
+#'
+#' This function checks if a given query date falls within a time interval defined by a vector of two dates.
+#'
+#' @param query_date The query date to check.
+#' @param tvec A vector of two dates defining the time interval.
+#'
+#' @return TRUE if the query date falls within the time interval, FALSE otherwise.
+#'
+#' @examples
+#' query_date <- as.Date("2022-01-01")
+#' tvec <- c(as.Date("2021-01-01"), as.Date("2023-01-01"))
+#' `%tin%`(query_date, tvec)
+#'
+#' @export
 `%tin%` <- function(query_date, tvec) {
   tvec <- sort(tvec)
   query_date <= tvec[1] & query_date >= tvec[2]
 }
 
-load_modis_files <- function(path, pattern = "hdf$") {
+#' Load MODIS files from a specified path.
+#'
+#' This function takes a path and an optional pattern as input and returns a list of MODIS files found in the specified path.
+#'
+#' @param path The path where the MODIS files are located.
+#' @param pattern An optional regular expression pattern to filter the files. The default pattern is "hdf$".
+#' @param date A vector of two dates to filter the files by. The default is an empty character vector.
+#' @return A list of full file names of the MODIS files found in the specified path.
+#'
+#' @examples
+#' # Load MODIS files from the current directory
+#' modis_files <- load_modis_files(".")
+#' 
+#' # Load MODIS files from a specific directory with a custom pattern
+#' modis_files <- load_modis_files("/path/to/files", pattern = "MOD.*hdf$")
+#'
+#' @export
+load_modis_files <- function(path, pattern = "hdf$", date = character(2)) {
   modis_files <-
     list.files(
       path, pattern = pattern,
       recursive = TRUE,
       full.names = TRUE
     )
+  date_exp <- amadeus::generate_date_sequence(date[1], date[2], sub_hyphen = FALSE)
+  date_exp <- strftime(date_exp, format = "%Y%j")
+  modis_files <- grep(sprintf("(%s)", paste(paste0("A", date_exp), collapse = "|")), modis_files, value = TRUE)
   return(modis_files)
 }
 
-inject_calculate <- function(locs, buffer, domain, injection) {
+#' Injects the calculate function with specified arguments.
+#'
+#' This function injects the calculate function with the specified arguments,
+#' allowing for dynamic customization of the function's behavior.
+#'
+#' @param locs The locations to be used in the calculation.
+#' @param buffer The buffer size for the calculation. If not provided, the
+#'   default buffer size will be used.
+#' @param domain The domain for the calculation.
+#' @param injection Additional arguments to be injected into the calculate function.
+#'
+#' @return The result of the calculate function with the injected arguments.
+#'
+#' @examples
+#' inject_calculate(locs = my_locs, buffer = 10, domain = my_domain, injection = list(arg1 = "value1", arg2 = "value2"))
+#'
+#' @export
+inject_calculate <- function(covariate, locs, buffer, injection) {
   rlang::inject(
     calculate(
-      covariate = chr_features,
+      covariate = covariate,
       locs = locs,
       radius = ifelse(missing(buffer), buffer, NULL),
       !!!injection
     )
-
   )
 }
 
 
+#' Injects MODIS PAR data into the specified locations.
+#'
+#' This function calculates MODIS PAR (Photosynthetically Active Radiation) data for the given locations
+#' and injects it into the specified domain.
+#'
+#' @param locs A data frame containing the locations for which MODIS PAR data needs to be calculated.
+#' @param domain The domain in which the MODIS PAR data should be injected.
+#' @param injection Additional parameters to be passed to the `calc_modis_par` function.
+#' @return The modified domain with the injected MODIS PAR data.
+#' @export
 inject_modis_par <- function(locs, domain, injection) {
   rlang::inject(
     amadeus::calc_modis_par(
@@ -80,6 +141,16 @@ inject_modis_par <- function(locs, domain, injection) {
 }
 
 
+#' Injects geographic information into a data frame
+#'
+#' This function injects geographic information into a data frame using the `calc_geos_strict` function.
+#' The injected information includes latitude and longitude coordinates based on the specified locations,
+#' a location ID column, a window range, and a snapping option.
+#'
+#' @param locs A data frame containing the locations for which geographic information needs to be injected.
+#' @param injection A list of additional arguments to be passed to the `calc_geos_strict` function.
+#' @return A modified data frame with injected geographic information.
+#' @export
 inject_geos <- function(locs, injection) {
   rlang::inject(
     calc_geos_strict(
@@ -93,6 +164,26 @@ inject_geos <- function(locs, injection) {
 }
 
 
+#' Reduce and merge a list of data tables
+#'
+#' This function takes a list of data tables and merges them together using the specified columns.
+#' It uses the `merge.data.table` function from the `data.table` package to perform the merge.
+#'
+#' @param list_in A list of data tables to be merged.
+#' @param by The columns to merge the data tables on.
+#' @return A merged data table.
+#'
+#' @examples
+#' # Create example data tables
+#' dt1 <- data.table(a = 1:3, b = 4:6)
+#' dt2 <- data.table(a = 2:4, c = 7:9)
+#' dt3 <- data.table(a = 3:5, d = 10:12)
+#'
+#' # Merge the data tables
+#' reduce_merge(list(dt1, dt2, dt3), by = "a")
+#'
+#' @import data.table
+#' @export
 reduce_merge <- function(list_in, by = c("site_id", "time")) {
   Reduce(
     function(x, y) {
@@ -101,6 +192,31 @@ reduce_merge <- function(list_in, by = c("site_id", "time")) {
     list_in
   )
 }
+
+
+#' Add Time Column
+#'
+#' This function adds a time column to a data frame.
+#'
+#' @param df The data frame to which the time column will be added.
+#' @param time_value The value to be assigned to the time column.
+#' @param time_id The name of the time column (default is "time").
+#'
+#' @return The data frame with the added time column.
+#'
+#' @examples
+#' df <- data.frame(x = 1:5, y = letters[1:5])
+#' add_time_col(df, "2022-01-01")
+#'
+#' @export
+add_time_col <- function(df, time_value, time_id = "time") {
+  if (!time_id %in% names(df)) {
+    df[[time_id]] <- time_value
+  }
+  return(df)
+}
+
+
 
 # 2018~2022, 2017, 2020
 # 2017 ... 2020 ...
@@ -155,7 +271,13 @@ process_year_expand <-
 #' @importFrom data.table rbindlist
 #' @importFrom rlang inject
 #' @export
-#' @examples
+# FIXME: this function works inefficiently in expense of
+# returning uniform list of length(|years|) output.
+# It could seriously affect the performance in scaled calculation
+# as it calculates the same covariate for several years.
+# Future updates should reduce the workload by calculating
+# source data years only then assign proper preceding years
+# to the output as another target. 
 calculate <-
   function(
     domain = NULL,
@@ -169,24 +291,32 @@ calculate <-
     }
 
     domainlist <- split(domain, seq_along(domain))
+    years_data <- seq_along(domain) + 2017
     res_calc <-
       try(
-        lapply(
-          domainlist,
-          function(el) {
+        mapply(
+          function(domain_each, year_each) {
             # we assume that ... have no "year" and "from" arguments
-            args_process <- c(arg = el, list(...))
+            args_process <- c(arg = domain_each, list(...))
             names(args_process)[1] <- domain_name
             from_in <-
               rlang::inject(
                 process_function(!!!args_process)
               )
-            rlang::inject(
+            res <- rlang::inject(
               calc_function(
                 from = from_in,
                 !!!args_process
               )
             )
+            # using domain_name, add both
+            # data year and covariate year
+            if (domain_name == "year") {
+              res <- add_time_col(res, domain_each,
+                                  sprintf("%s_year", unname(args_process$covariate)))
+              res <- add_time_col(res, year_each, "year")
+            }
+            return(res)
           }
         )
       )
@@ -950,7 +1080,7 @@ calc_geos_strict <-
     #### directory setup
     if (length(path) == 1) {
       if (dir.exists(path)) {
-        path <- amadeus::download_sanitize_path(path)
+        # path <- amadeus::download_sanitize_path(path)
         paths <- list.files(
           path,
           pattern = "GEOS-CF.v01.rpl",
@@ -965,13 +1095,18 @@ calc_geos_strict <-
       paths <- path
     }
     #### check for variable
-    amadeus::check_for_null_parameters(mget(ls()))
+    # amadeus::check_for_null_parameters(mget(ls()))
     #### identify file paths
     #### identify dates based on user input
     dates_of_interest <- amadeus::generate_date_sequence(
       date[1],
       date[2],
       sub_hyphen = TRUE
+    )
+    dates_of_interest_incl <- amadeus::generate_date_sequence(
+      date[1],
+      date[2],
+      sub_hyphen = FALSE
     )
     #### subset file paths to only dates of interest
     data_paths <- unique(
@@ -1021,17 +1156,13 @@ calc_geos_strict <-
         "Some dates include less than 24 hours. Check the downloaded files."
       )
     }
-    if (length(unique(filename_date)) > 1) {
-      message(
-        "Dates are not supposed to be different. Put in the same date's files."
-      )
-    }
 
     # to export locs (pointers are not exportable)
     locs <- sf::st_as_sf(locs)
 
     # split filename dates daily
     filename_date <- as.Date(filename_date, format = "%Y%m%d")
+    filename_date <- filename_date[filename_date %in% dates_of_interest_incl]
     filename_date_cl <- as.integer(as.factor(filename_date))
 
     future_inserted <- split(data_paths, filename_date_cl)
@@ -1041,6 +1172,8 @@ calc_geos_strict <-
     summary_byvar <- function(x = data_variables, fs) {
       rast_in <- rlang::inject(terra::rast(fs, !!!other_args))
       # strongly assume that we take the single day. no need to filter dates
+      # per variable,
+      # all files (hourly) are cleaned and processed
       sds_proc <-
         lapply(
         x,
@@ -1050,6 +1183,7 @@ calc_geos_strict <-
           rast_summary <- terra::mean(rast_in[[rast_inidx]])
           rtin <- as.Date(terra::time(rast_in))
           rtin_u <- unique(rtin)
+          cat(sprintf("Processing %s, date: %s\n", v, rtin_u))
           # rast_summary <- vector("list", length = length(rtin_u))
           # for (d in seq_along(rtin_u)) {
           #   rast_d <- rast_in[[rtin == rtin_u[d]]]
@@ -1097,7 +1231,7 @@ calc_geos_strict <-
     rast_summary <- data.table::rbindlist(rast_summary)
     # extract
 
-    return(rast_10d_summary)
+    return(rast_summary)
 
   }
 

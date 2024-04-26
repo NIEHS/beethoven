@@ -51,7 +51,7 @@ target_calculate_fit <-
                  "tri", "ecoregions", "koppen", "nlcd", "hms", "population",
                  "groads", "narr", "nei", "gmted"
                ),
-      iteration = "vector",
+      iteration = "list",
       description = "Feature calculation"
     )
     ,
@@ -61,13 +61,13 @@ target_calculate_fit <-
          "mod11", "mod06", "mod13",
          "mcd19_1km", "mcd19_5km", "mod09", "viirs"
           ),
-      iteration = "vector",
+      iteration = "list",
       description = "MODIS/VIIRS feature calculation"
     )
     ,
     tar_target(
       chr_geoscf,
-      command = c("chm", "aqc"),
+      command = c("geoscf_chm", "geoscf_aqc"),
       iteration = "vector",
       description = "GEOS-CF feature calculation"
     )
@@ -104,7 +104,7 @@ target_calculate_fit <-
         locs = sf_feat_proc_aqs_sites,
         injection = loadargs(file_calc_args, chr_geoscf)
       ),
-      pattern = map(chr_geoscf),
+      pattern = cross(file_calc_args, chr_geoscf),
       iteration = "list",
       description = "GEOS-CF feature list"
     )
@@ -115,7 +115,7 @@ target_calculate_fit <-
         lapply(list_feat_base,
                function(x) {
                  Reduce(function(x, y) {
-                   merge(x, y, by = c("locs_id", "time"))
+                   merge(x, y, all = TRUE)
                  }, x)}),
       description = "data.table of base features"
     )
@@ -124,7 +124,7 @@ target_calculate_fit <-
       list_feat_nasa_flat,
       command =
         lapply(list_feat_nasa,
-               function(x) reduce_merge(x, by = c("locs_id", "time"))),
+               function(x) reduce_merge(x)),
       description = "data.table of MODIS/VIIRS features"
     )
     ,
@@ -132,7 +132,7 @@ target_calculate_fit <-
       list_feat_geoscf_flat,
       command =
         lapply(list_feat_geoscf,
-               function(x) reduce_merge(x, by = c("locs_id", "time"))),
+               function(x) reduce_merge(x)),
       description = "data.table of GEOS-CF features"
     )
     ,

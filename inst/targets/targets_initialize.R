@@ -22,7 +22,7 @@ target_init <-
           pattern = "daily_88101_[0-9]{4}.csv",
           full.names = TRUE
         ),
-        date = arglist_common$common$char_period,
+        date = arglist_common$char_period,
         return_format = "sf"
       ),
       description = "AQS sites with time"
@@ -37,7 +37,7 @@ target_init <-
           full.names = TRUE),
         site_spt = sf::st_drop_geometry(sf_feat_proc_aqs_sites_time) |>
           dplyr::mutate(time = as.character(time))
-      ) |> dplyr::filter(time %tin% arglist_common$common$char_period),
+      ) |> dplyr::filter(time %tin% arglist_common$char_period),
       description = "AQS sites with PM2.5"
     )
   )

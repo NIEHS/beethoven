@@ -10,22 +10,22 @@ tar_source("./inst/targets/targets_calculate.R")
 tar_source("./inst/targets/targets_baselearner.R")
 tar_source("./inst/targets/targets_metalearner.R")
 tar_source("./inst/targets/targets_predict.R")
-# tar_source("./inst/targets/targets_arglist.R")
+tar_source("./inst/targets/targets_arglist.R")
 
 # bypass option
 Sys.setenv("BTV_DOWNLOAD_PASS" = "TRUE")
 
-plan(
-  future.batchtools::batchtools_slurm,
-  template = "inst/targets/template_slurm.tmpl",
-  resources =
-    list(memory = 8,
-      log.file = "slurm_run.log",
-      ncpus = 2,
-      partition = "geo", ntasks = 4,
-      email = meta_run("slurm_user_email"),
-      error.file = "slurm_error.log")
-)
+# plan(
+#   future.batchtools::batchtools_slurm,
+#   template = "./inst/targets/template_slurm.tmpl",
+#   resources =
+#     list(memory = 8,
+#       log.file = "slurm_run.log",
+#       ncpus = 1,
+#       partition = "geo", ntasks = 4,
+#       email = arglist_common$user_email,
+#       error.file = "slurm_error.log")
+# )
 
 # invalidate any nodes older than 180 days: force running the pipeline
 tar_invalidate(any_of(tar_older(Sys.time() - as.difftime(180, units = "days"))))
@@ -41,6 +41,7 @@ tar_option_set(
     c("amadeus", "chopin",
       "data.table", "sf", "terra", "exactextractr",
       "crew", "crew.cluster", "tigris", "dplyr",
+      "future.batchtools",
       "future", "future.apply", "future.callr", "callr",
       "sftime", "stars", "rlang", "foreach", "parallelly"),
   library = "~/r-libs",
@@ -60,15 +61,18 @@ tar_option_set(
   resources = tar_resources(
     future = tar_resources_future(
       plan =
-        tweak(
+        plan(
           future.batchtools::batchtools_slurm,
-          template = "inst/targets/template_slurm.tmpl",
-          resources = list(memory = 8,
-                          log.file = "slurm_run.log",
-                          ncpus = 2, partition = "geo", ntasks = 4,
-                          email = meta_run("slurm_user_email"),
-                          error.file = "slurm_error.log")
-        )
+          template = "./inst/targets/template_slurm.tmpl",
+          resources =
+            list(
+              memory = 8,
+              log.file = "slurm_run.log",
+              ncpus = 1, partition = "geo", ntasks = 1,
+              email = arglist_common$user_email,
+              error.file = "slurm_error.log"
+            )
+        ),
     )
   ),
   error = "null",
@@ -78,13 +82,15 @@ tar_option_set(
   seed = 202401L
 )
 
+# should run tar_make_future()
+
 list(
   target_init,
-  targets::tar_target(
-    int_feat_calc_radii,
-    command = c(1e3, 1e4, 5e4),
-    iteration = "vector"
-  ),
+  # targets::tar_target(
+  #   int_feat_calc_radii,
+  #   command = c(1e3, 1e4, 5e4),
+  #   iteration = "vector"
+  # ),
   target_download,
   target_calculate_fit#,
   # target_baselearner,
