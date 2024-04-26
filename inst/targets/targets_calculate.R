@@ -47,10 +47,8 @@ target_calculate_fit <-
     ,
     tar_target(
       chr_features,
-      command = c(
-                 "tri", "ecoregions", "koppen", "nlcd", "hms", "population",
-                 "groads", "narr", "nei", "gmted"
-               ),
+      command = c("tri", "ecoregions", "koppen", "nlcd", "hms", "population",
+                 "groads", "narr", "nei", "gmted"),
       iteration = "list",
       description = "Feature calculation"
     )
@@ -76,12 +74,14 @@ target_calculate_fit <-
       list_feat_base,
       command =
         inject_calculate(
+          covariate = chr_features,
           locs = sf_feat_proc_aqs_sites,
-          domain = 2020,
           injection = loadargs(file_calc_args, chr_features)),
       pattern = cross(file_calc_args, chr_features),
       iteration = "list",
-      description = "Base feature list"
+      description = "Base feature list",
+      resources = set_slurm_resource(
+        ntasks = 1, ncpus = loadargs(file_calc_args, chr_features)$nthreads)
     )
     ,
     tar_target(
@@ -106,6 +106,10 @@ target_calculate_fit <-
       ),
       pattern = cross(file_calc_args, chr_geoscf),
       iteration = "list",
+      resources = set_slurm_resource(
+            ntasks = 1, ncpus = 10, memory = 4
+          ),
+
       description = "GEOS-CF feature list"
     )
     ,
@@ -113,26 +117,21 @@ target_calculate_fit <-
       list_feat_base_flat,
       command =
         lapply(list_feat_base,
-               function(x) {
-                 Reduce(function(x, y) {
-                   merge(x, y, all = TRUE)
-                 }, x)}),
+               function(x) { 
+                 reduce_merge(x)
+               }),
       description = "data.table of base features"
     )
     ,
     tar_target(
       list_feat_nasa_flat,
-      command =
-        lapply(list_feat_nasa,
-               function(x) reduce_merge(x)),
+      command = reduce_merge(list_feat_nasa),
       description = "data.table of MODIS/VIIRS features"
     )
     ,
     tar_target(
       list_feat_geoscf_flat,
-      command =
-        lapply(list_feat_geoscf,
-               function(x) reduce_merge(x)),
+      command = reduce_merge(list_feat_geoscf),
       description = "data.table of GEOS-CF features"
     )
     ,
@@ -142,7 +141,7 @@ target_calculate_fit <-
         list(
           reduce_merge(list_feat_base_flat),
           reduce_merge(list_feat_nasa_flat),
-          reduce_merge(list_feat_geoscf_flat)
+          list_feat_geoscf_flat
         )
       ),
       description = "data.table of all features"

@@ -15,17 +15,23 @@ tar_source("./inst/targets/targets_arglist.R")
 # bypass option
 Sys.setenv("BTV_DOWNLOAD_PASS" = "TRUE")
 
-# plan(
-#   future.batchtools::batchtools_slurm,
-#   template = "./inst/targets/template_slurm.tmpl",
-#   resources =
-#     list(memory = 8,
-#       log.file = "slurm_run.log",
-#       ncpus = 1,
-#       partition = "geo", ntasks = 4,
-#       email = arglist_common$user_email,
-#       error.file = "slurm_error.log")
-# )
+plan(
+  list(
+    tweak(
+      future.batchtools::batchtools_slurm,
+      template = "inst/targets/template_slurm.tmpl",
+      resources =
+        list(
+          memory = 8,
+          log.file = "slurm_run.log",
+          ncpus = 1, partition = "geo", ntasks = 1,
+          email = arglist_common$user_email,
+          error.file = "slurm_error.log"
+        )
+    ),
+    multicore
+  )
+)
 
 # invalidate any nodes older than 180 days: force running the pipeline
 tar_invalidate(any_of(tar_older(Sys.time() - as.difftime(180, units = "days"))))
@@ -61,9 +67,9 @@ tar_option_set(
   resources = tar_resources(
     future = tar_resources_future(
       plan =
-        plan(
+        tweak(
           future.batchtools::batchtools_slurm,
-          template = "./inst/targets/template_slurm.tmpl",
+          template = "inst/targets/template_slurm.tmpl",
           resources =
             list(
               memory = 8,
@@ -72,7 +78,7 @@ tar_option_set(
               email = arglist_common$user_email,
               error.file = "slurm_error.log"
             )
-        ),
+        )
     )
   ),
   error = "null",

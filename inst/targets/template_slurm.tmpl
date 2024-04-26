@@ -25,7 +25,6 @@ log.file = fs::path_expand(log.file)
 error.file = fs::path_expand(resources$error.file)
 -%>
 
-
 #SBATCH --job-name=<%= job.name %>
 #SBATCH --output=<%= log.file %>
 #SBATCH --error=<%= error.file %>

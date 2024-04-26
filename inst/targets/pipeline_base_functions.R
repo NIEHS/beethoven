@@ -95,11 +95,10 @@ load_modis_files <- function(path, pattern = "hdf$", date = character(2)) {
 #'
 #' This function injects the calculate function with the specified arguments,
 #' allowing for dynamic customization of the function's behavior.
-#'
+#' @param covariate character(1). The name of the covariate to be calculated.
 #' @param locs The locations to be used in the calculation.
 #' @param buffer The buffer size for the calculation. If not provided, the
 #'   default buffer size will be used.
-#' @param domain The domain for the calculation.
 #' @param injection Additional arguments to be injected into the calculate function.
 #'
 #' @return The result of the calculate function with the injected arguments.
@@ -108,12 +107,10 @@ load_modis_files <- function(path, pattern = "hdf$", date = character(2)) {
 #' inject_calculate(locs = my_locs, buffer = 10, domain = my_domain, injection = list(arg1 = "value1", arg2 = "value2"))
 #'
 #' @export
-inject_calculate <- function(covariate, locs, buffer, injection) {
+inject_calculate <- function(covariate, locs, injection) {
   rlang::inject(
     calculate(
-      covariate = covariate,
       locs = locs,
-      radius = ifelse(missing(buffer), buffer, NULL),
       !!!injection
     )
   )
@@ -282,6 +279,7 @@ calculate <-
   function(
     domain = NULL,
     domain_name = "year",
+    nthreads = 1L,
     process_function = amadeus::process_covariates,
     calc_function = amadeus::calc_covariates,
     ...
@@ -289,37 +287,67 @@ calculate <-
     if (is.null(domain)) {
       domain <- c(1)
     }
-
+    # split the domain, make years from the domain list
+    # assuming that domain length is the same as the number of years
     domainlist <- split(domain, seq_along(domain))
     years_data <- seq_along(domain) + 2017
+
+    future::plan(future::multicore, workers = nthreads)
+    # double twists: list_iteration is made to distinguish
+    # cases where a single radius is accepted or ones have no radius
+    # argument.
     res_calc <-
       try(
-        mapply(
+        future.apply::future_mapply(
           function(domain_each, year_each) {
             # we assume that ... have no "year" and "from" arguments
             args_process <- c(arg = domain_each, list(...))
             names(args_process)[1] <- domain_name
-            from_in <-
-              rlang::inject(
-                process_function(!!!args_process)
-              )
-            res <- rlang::inject(
-              calc_function(
-                from = from_in,
-                !!!args_process
-              )
-            )
-            # using domain_name, add both
-            # data year and covariate year
-            if (domain_name == "year") {
-              res <- add_time_col(res, domain_each,
-                                  sprintf("%s_year", unname(args_process$covariate)))
-              res <- add_time_col(res, year_each, "year")
+
+            # load balancing strategy
+            # if radius is detected, split the list
+            if (any(names(args_process) %in% c("radius"))) {
+              list_iteration <- split(args_process$radius, seq_along(args_process$radius))
+            } else {
+              list_iteration <- list(1)
             }
-            return(res)
-          }
+
+            list_iteration_calc <-
+              lapply(
+                list_iteration,
+                function(r) {
+                  args_process$radius <- r
+                  from_in <-
+                    rlang::inject(
+                      process_function(!!!args_process)
+                    )
+                  res <- rlang::inject(
+                    calc_function(
+                      from = from_in,
+                      !!!args_process
+                    )
+                  )
+                  # using domain_name, add both
+                  # data year and covariate year
+                  if (!is.null(domain) && domain_name == "year") {
+                    res <- add_time_col(res, domain_each,
+                                        sprintf(
+                                          "%s_year",
+                                          unname(args_process$covariate)))
+                    res <- add_time_col(res, year_each, "year")
+                  }
+                  return(res)
+                })
+            df_iteration_calc <- if (length(list_iteration_calc) == 1) {
+              unlist(list_iteration_calc) } else {
+                reduce_merge(list_iteration_calc)
+              }
+            return(df_iteration_calc)
+          },
+          domainlist, years_data, SIMPLIFY = FALSE
         )
       )
+    future::plan(future::sequential)
     if (inherits(res_calc, "try-error")) {
       cat(paste0(attr(res_calc, "condition")$message, "\n"))
       stop("Results do not match expectations.")
@@ -455,7 +483,6 @@ get_aqs_data <-
       pattern = "daily_88101_[0-9]{4}.csv",
       full.names = TRUE
     ),
-    #file.path(meta_run("dir_output"), meta_run("file_aqs_pm")),
     site_spt = NULL,
     locs_id = meta_run("char_siteid"),
     time_id = meta_run("char_timeid"),
@@ -1169,6 +1196,7 @@ calc_geos_strict <-
     other_args <- list(...)
     data_variables <- names(terra::rast(data_paths[1]))
 
+    # fs is the hourly file paths per day (each element with N=24)
     summary_byvar <- function(x = data_variables, fs) {
       rast_in <- rlang::inject(terra::rast(fs, !!!other_args))
       # strongly assume that we take the single day. no need to filter dates
@@ -1222,12 +1250,13 @@ calc_geos_strict <-
       return(rast_ext)
 
     }
-
+    future::plan(future::multicore, workers = 10)
     rast_summary <-
-      lapply(
+      future.apply::future_lapply(
         future_inserted,
         function(x) summary_byvar(fs = x)
       )
+    future::plan(future::sequential)
     rast_summary <- data.table::rbindlist(rast_summary)
     # extract
 
