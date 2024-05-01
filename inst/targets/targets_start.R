@@ -9,7 +9,7 @@ library(targets)
 # )
 
 tar_make_future(
-  workers = 10
+  workers = 30
 )
 
 # Even if configuration (aka punchcard) date range has changed,

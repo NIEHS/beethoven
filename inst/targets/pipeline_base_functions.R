@@ -161,6 +161,33 @@ inject_geos <- function(locs, injection) {
 }
 
 
+
+inject_gmted <- function(locs, variable, radii, injection, nthreads = 4L) {
+  future::plan(future::multicore, workers = nthreads)
+
+  radii_list <- split(radii, seq_along(radii))
+  radii_rep <-
+    future.apply::future_lapply(
+      radii_list,
+      function(r) {
+        rlang::inject(
+          calc_gmted_direct(
+            locs = locs,
+            locs_id = "site_id",
+            radius = r,
+            variable = c(variable, "7.5 arc-seconds"),
+            !!!injection
+          )
+        )
+      }
+    )
+  radii_rep <- lapply(radii_rep, function(x) as.data.frame(x))
+  radii_join <- reduce_merge(radii_rep, "site_id")
+  future::plan(future::sequential)
+  return(radii_join)
+}
+
+
 #' Reduce and merge a list of data tables
 #'
 #' This function takes a list of data tables and merges them together using the specified columns.
@@ -184,6 +211,7 @@ inject_geos <- function(locs, injection) {
 reduce_merge <- function(list_in, by = c("site_id", "time")) {
   Reduce(
     function(x, y) {
+      if (is.null(by)) by <- intersect(names(x), names(y))
       data.table::merge.data.table(x, y, by = by, all.x = TRUE)
     },
     list_in
@@ -292,17 +320,26 @@ calculate <-
     domainlist <- split(domain, seq_along(domain))
     years_data <- seq_along(domain) + 2017
 
-    future::plan(future::multicore, workers = nthreads)
+    if (nthreads == 1L) {
+      future::plan(future::sequential)
+    } else {
+      future::plan(future::multicore, workers = nthreads)
+    }
     # double twists: list_iteration is made to distinguish
     # cases where a single radius is accepted or ones have no radius
     # argument.
     res_calc <-
-      try(
+      #try(
         future.apply::future_mapply(
           function(domain_each, year_each) {
             # we assume that ... have no "year" and "from" arguments
             args_process <- c(arg = domain_each, list(...))
             names(args_process)[1] <- domain_name
+            if (!is.null(args_process$covariate) && any(names(args_process) %in% c("covariate"))) {
+              if (args_process$covariate == "nei") {
+                args_process$county <- process_counties()
+              }
+            }
 
             # load balancing strategy
             # if radius is detected, split the list
@@ -313,8 +350,7 @@ calculate <-
             }
 
             list_iteration_calc <-
-              lapply(
-                list_iteration,
+              Map(
                 function(r) {
                   args_process$radius <- r
                   from_in <-
@@ -336,26 +372,35 @@ calculate <-
                                           unname(args_process$covariate)))
                     res <- add_time_col(res, year_each, "year")
                   }
+                  res <- data.table::as.data.table(res)
                   return(res)
-                })
+                },
+                list_iteration)
             df_iteration_calc <- if (length(list_iteration_calc) == 1) {
-              unlist(list_iteration_calc) } else {
-                reduce_merge(list_iteration_calc)
+              list_iteration_calc[[1]] } else {
+                by_detected <- Reduce(intersect, lapply(list_iteration_calc, names))
+                reduce_merge(list_iteration_calc, by = by_detected)
               }
             return(df_iteration_calc)
           },
-          domainlist, years_data, SIMPLIFY = FALSE
+          domainlist, years_data, SIMPLIFY = FALSE,
+          future.seed = TRUE
         )
-      )
+      #)
     future::plan(future::sequential)
     if (inherits(res_calc, "try-error")) {
       cat(paste0(attr(res_calc, "condition")$message, "\n"))
       stop("Results do not match expectations.")
     }
-    res_calc <- lapply(res_calc, function(x) as.data.frame(x))
-    res_calc <- data.table::rbindlist(res_calc, fill = TRUE)
+    res_calc <- lapply(res_calc, function(x) data.table::as.data.table(x))
+    # res_calcdf <- if (length(res_calc) == 1) {
+    #   data.table::as.data.table(res_calc[[1]])
+    # } else if (domain_name %in% c("year", "date")) {
+    #   data.table::rbindlist(res_calc, use.names = TRUE, fill = TRUE)
+    # } else {
+    #   reduce_merge(res_calc, by = c("site_id", "time"))
+    # }
     return(res_calc)
-
   }
 
 
@@ -1090,6 +1135,7 @@ process_geos_bulk <-
 #' Layer names of the returned `SpatRaster` object contain the variable,
 #' pressure level, date
 #' Reference duration: 1 day summary, all layers: 106 seconds
+#' hard-coded subsets for subdataset selection
 #' @author Mitchell Manware, Insang Song
 #' @return a `SpatRaster` object;
 #' @importFrom terra rast
@@ -1194,10 +1240,17 @@ calc_geos_strict <-
 
     future_inserted <- split(data_paths, filename_date_cl)
     other_args <- list(...)
-    data_variables <- names(terra::rast(data_paths[1]))
+    data_variables <- terra::describe(data_paths[1], sds = TRUE)$var
+
+    search_variables <-
+      if (grepl("chm", collection)) {
+        c("ACET", "ALD2", "ALK4", "BCPI", "BCPO", "BENZ", "C2H6", "C3H8", "CH4", "CO", "DST1", "DST2", "DST3", "DST4", "EOH", "H2O2", "HCHO", "HNO3", "HNO4", "ISOP", "MACR", "MEK", "MVK", "N2O5", "NH3", "NH4", "NIT", "NO", "NO2", "NOy", "OCPI", "OCPO", "PAN", "PM25_RH35_GCC", "PM25_RH35_GOCART", "PM25bc_RH35_GCC", "PM25du_RH35_GCC", "PM25ni_RH35_GCC", "PM25oc_RH35_GCC", "PM25soa_RH35_GCC", "PM25ss_RH35_GCC", "PM25su_RH35_GCC", "PRPE", "RCHO", "SALA", "SALC", "SO2", "SOAP", "SOAS", "TOLU", "XYLE")
+      } else {
+        c("CO", "NO2", "O3", "SO2")
+      }
 
     # fs is the hourly file paths per day (each element with N=24)
-    summary_byvar <- function(x = data_variables, fs) {
+    summary_byvar <- function(x = search_variables, fs) {
       rast_in <- rlang::inject(terra::rast(fs, !!!other_args))
       # strongly assume that we take the single day. no need to filter dates
       # per variable,
@@ -1206,7 +1259,7 @@ calc_geos_strict <-
         lapply(
         x,
         function(v) {
-          rast_inidx <- grep(v, x)
+          rast_inidx <- grep(v, data_variables)
           #rast_in <- mean(rast_in[[rast_inidx]])
           rast_summary <- terra::mean(rast_in[[rast_inidx]])
           rtin <- as.Date(terra::time(rast_in))
@@ -1254,7 +1307,7 @@ calc_geos_strict <-
     rast_summary <-
       future.apply::future_lapply(
         future_inserted,
-        function(x) summary_byvar(fs = x)
+        function(fs) summary_byvar(fs = fs)
       )
     future::plan(future::sequential)
     rast_summary <- data.table::rbindlist(rast_summary)
@@ -1263,6 +1316,345 @@ calc_geos_strict <-
     return(rast_summary)
 
   }
+
+
+
+
+#' Reflown gmted processing
+#' 
+calc_gmted_direct <- function(
+    variable = NULL,
+    path = NULL,
+    locs = NULL,
+    locs_id = NULL,
+    win = c(-126, -62, 22, 52),
+    radius = 0,
+    fun = "mean",
+    ...) {
+  #### directory setup
+  path <- download_sanitize_path(path)
+  #### check for length of variable
+  if (!(length(variable) == 2)) {
+    stop(
+      paste0(
+        "Please provide a vector with the statistic and resolution.\n"
+      )
+    )
+  }
+  #### identify statistic and resolution
+  statistic <- variable[1]
+  statistic_code <- amadeus::process_gmted_codes(
+    statistic,
+    statistic = TRUE,
+    invert = FALSE
+  )
+  resolution <- variable[2]
+  resolution_code <- amadeus::process_gmted_codes(
+    resolution,
+    resolution = TRUE,
+    invert = FALSE
+  )
+  cat(paste0(
+    "Cleaning ",
+    statistic,
+    " data at ",
+    resolution,
+    " resolution.\n"
+  ))
+  statistic_from <- c(
+          "Breakline Emphasis", "Systematic Subsample",
+          "Median Statistic", "Minimum Statistic",
+          "Mean Statistic", "Maximum Statistic",
+          "Standard Deviation Statistic"
+        )
+  statistic_to <- c(
+    "BRKL", "SSUB", "MEDN", "MEAN", "MEAN", "MAXL", "STDV"
+  )
+  statistic_to <-
+    sprintf("LDU_E%s", statistic_to[match(statistic, statistic_from)])
+
+  #### identify file path
+  paths <- list.dirs(
+    path,
+    full.names = TRUE
+  )
+  data_path <- grep(sprintf("%s%s_grd", statistic_code, as.character(resolution_code)), paths, value = TRUE)
+
+  #### import data
+  data <- terra::rast(data_path, win = win)
+  #### layer name
+  names(data) <- paste0(
+    "elevation_",
+    gsub(
+      "_grd",
+      "",
+      names(data)
+    )
+  )
+  #### varnames
+  terra::varnames(data) <- paste0(
+    "Elevation: ",
+    statistic,
+    " (",
+    resolution,
+    ")"
+  )
+  from <- data
+  #return(from)
+  #### prepare locations list
+  sites_list <- calc_prepare_locs(
+    from = from,
+    locs = locs,
+    locs_id = locs_id,
+    radius = radius
+  )
+  sites_e <- sites_list[[1]]
+  sites_id <- sites_list[[2]]
+  #### perform extraction
+  sites_extracted <- calc_worker(
+    dataset = "gmted",
+    from = from,
+    locs_vector = sites_e,
+    locs_df = sites_id,
+    radius = radius,
+    fun = fun,
+    variable = 2,
+    time = NULL,
+    time_type = "timeless"
+  )
+  #### convert integer to numeric
+  sites_extracted[, 2] <- as.numeric(sites_extracted[, 2])
+  #### define column names
+  colnames(sites_extracted) <- c(
+    locs_id,
+    paste0(
+      statistic_to, "_", sprintf("%05d", radius)
+    )
+  )
+  #### return data.frame
+  return(data.frame(sites_extracted))
+}
+
+
+
+process_narr2 <- function(
+    date = c("2023-09-01", "2023-09-01"),
+    variable = NULL,
+    path = NULL,
+    ...) {
+  #### directory setup
+  path <- amadeus::download_sanitize_path(path)
+  #### check for variable
+  amadeus::check_for_null_parameters(mget(ls()))
+  #### identify file paths
+  data_paths <- list.files(
+    path,
+    pattern = variable,
+    recursive = TRUE,
+    full.names = TRUE
+  )
+  # data_paths <- grep(
+  #   sprintf("%s*.*.nc", variable),
+  #   data_paths,
+  #   value = TRUE
+  # )
+  #### define date sequence
+  date_sequence <- amadeus::generate_date_sequence(
+    date[1],
+    date[2],
+    sub_hyphen = TRUE
+  )
+  #### path ncar
+  ym_from <- regmatches(
+    data_paths,
+    regexpr(
+      "2[0-9]{3,5}",
+      data_paths
+    ))
+  ym_of_interest <-
+    substr(date_sequence,
+           1, ifelse(all(nchar(ym_from) == 6), 6, 4))
+  ym_of_interest <- unique(ym_of_interest)
+  #### subset file paths to only dates of interest
+  data_paths_ym <- unique(
+    grep(
+      paste(
+        ym_of_interest,
+        collapse = "|"
+      ),
+      data_paths,
+      value = TRUE
+    )
+  )
+  
+  search_abbr <- list.dirs(path)[-1]
+  search_abbr <- sub(paste0(path, "/"), "", search_abbr)
+  search_to <- c(
+    "ATSFC", "ALBDO", "ACPRC", "DSWRF", "ACEVP",
+    "HCLAF", "PLBLH", "LCLAF", "LATHF", "MCLAF",
+    "OMEGA", "PRWEA", "PRRTE", "PRSFC", "SENHF",
+    "SPHUM", "SNWCV", "SLMSC", "CLDCV", "ULWRF",
+    "UWIND", "VISIB", "VWIND", "ACSNW"
+  )
+  search_to <-
+    sprintf("MET_%s", search_to[match(variable, search_abbr)])
+
+  #### initiate for loop
+  data_full <- terra::rast()
+  for (p in seq_along(data_paths_ym)) {
+    #### import data
+    data_year <- terra::rast(data_paths_ym[p])
+    data_year_tinfo <- terra::time(data_year)
+    time_processed <- as.POSIXlt(data_year_tinfo)
+    time_this <- time_processed[1]
+    cat(paste0(
+      "Cleaning ", variable, " data for ",
+      sprintf(
+        "%s, %d %s",
+        strftime(time_this, "%B"),
+        time_this$year + 1900,
+        "...\n"
+      )
+    ))
+    #### check for mono or pressure levels
+    lvinfo <- regmatches(
+      names(data_year),
+      regexpr("level=[0-9]{3,4}", names(data_year))
+    )
+    if (length(lvinfo) == 0) {
+      cat("Detected monolevel data...\n")
+      names(data_year) <- paste0(
+          search_to, "_",
+          gsub("-", "", data_year_tinfo)
+        )
+    } else {
+      cat("Detected pressure levels data...\n")
+      lvinfo <- sub("level=", "", lvinfo)
+      lvinfo <- sprintf("%04d", as.integer(lvinfo))
+      lvinfo <- paste0("L", lvinfo)
+      terra::time(data_year) <- as.Date(
+            data_year_tinfo
+      )
+      names(data_year) <- sprintf(
+        "%s_%s_%s",
+        search_to,
+        lvinfo,
+        gsub("-", "", data_year_tinfo)
+      )
+    }
+    data_full <- c(
+      data_full,
+      data_year,
+      warn = FALSE
+    )
+  }
+
+  #### subset years to dates of interest
+  data_full_cn <- names(data_full)
+  data_return <- terra::subset(
+    data_full,
+    which(
+      substr(
+        data_full_cn,
+        nchar(data_full_cn) - 7,
+        nchar(data_full_cn)
+      ) %in% date_sequence
+    )
+  )
+  cat(paste0(
+    "Returning daily ",
+    variable,
+    " data from ",
+    as.Date(date_sequence[1], format = "%Y%m%d"),
+    " to ",
+    as.Date(
+      date_sequence[length(date_sequence)],
+      format = "%Y%m%d"
+    ),
+    ".\n"
+  ))
+  #### return SpatRaster
+  return(data_return)
+}
+
+calc_narr2 <- function(
+    from,
+    locs,
+    locs_id = NULL,
+    radius = 0,
+    fun = "mean",
+    ...) {
+  #### prepare locations list
+  sites_list <- amadeus::calc_prepare_locs(
+    from = from,
+    locs = locs,
+    locs_id = locs_id,
+    radius = radius
+  )
+  sites_e <- sites_list[[1]]
+  sites_id <- sites_list[[2]]
+  #### identify pressure level or monolevel data
+  time_from <- terra::time(from)
+  timetab <- table(time_from)
+  if (!all(timetab == 1)) {
+    time_split <- split(time_from, as.integer(as.factor(time_from)))
+    sites_extracted <- Map(
+      function(day) {
+        cat(sprintf("Processing %s...\n", day))
+        from_day <- from[[time_from == day]]
+        sites_extracted_day <- terra::extract(
+          from_day,
+          sites_e,
+          bind = TRUE
+        )
+        sites_extracted_day <- data.frame(sites_extracted_day)
+        sites_extracted_day <- sites_extracted_day |>
+          dplyr::select(-geometry)
+        return(sites_extracted_day)
+      },
+      time_split
+    )
+    sites_extracted <- reduce_merge(sites_extracted, by = c("site_id"))
+  } else {
+    sites_extracted <-
+      terra::extract(
+        from,
+        sites_e,
+        bind = TRUE
+      )
+    sites_extracted <- data.frame(sites_extracted)
+    sites_extracted <- sites_extracted |>
+      dplyr::select(-geometry)
+  }
+  sites_extracted <-
+    sites_extracted |>
+    tidyr::pivot_longer(cols = tidyselect::starts_with("MET_")) |>
+    dplyr::rowwise() |>
+    dplyr::mutate(
+      time = regmatches(name,
+      regexpr(
+        "20[0-9]{2,2}[0-1][0-9][0-3][0-9]",
+        name
+      ))
+    ) |>
+    dplyr::mutate(
+      name = sub(paste0("_", time), "", name)
+    ) |>
+    dplyr::ungroup() |>
+    dplyr::mutate(
+      time = as.character(as.Date(time, format = "%Y%m%d"))
+    ) |>
+    tidyr::pivot_wider(
+      names_from = name,
+      values_from = value,
+      id_cols = c("site_id", "time")
+    )
+  sites_extracted <- data.table::as.data.table(sites_extracted)
+  names(sites_extracted)[-1:-2] <- sprintf("%s_%05d", names(sites_extracted)[-1:-2], radius)
+
+  #### return data.frame
+  return(sites_extracted)
+}
 
 
 # system.time(
@@ -1275,6 +1667,68 @@ calc_geos_strict <-
 # )
 
 
+#' Append Predecessors
+#'
+#' This function appends predecessors to an existing object or creates a new object if none exists.
+#'
+#' @param path_qs The path where the predecessors will be stored.
+#' @param period_new The new period to be appended.
+#' @param input_new The new input object to be appended.
+#' @param nthreads The number of threads to be used.
+#'
+#' @return If no existing predecessors are found, the function saves the new input object and returns the name of the saved file.
+#' If existing predecessors are found, the function appends the new input object to the existing ones and returns the combined object.
+#'
+#' @examples
+#' # Append predecessors with a new input object
+#' append_predecessors(path_qs = "output/qs", period_new = c("2022-01-01", "2022-01-31"), input_new = my_data)
+#'
+#' # Append predecessors with an existing input object
+#' append_predecessors(path_qs = "output/qs", period_new = c("2022-02-01", "2022-02-28"), input_new = my_data)
+#'
+#' @export
+append_predecessors <-
+  function(
+    path_qs = "output/qs",
+    period_new = NULL,
+    input_new = NULL,
+    nthreads = 8L
+  ) {
+    if (is.null(input_new)) {
+      stop("Please provide a valid object.")
+    }
+    if (!dir.exists(path_qs)) {
+      dir.create(path_qs, recursive = TRUE)
+    }
+    input_old <- list.files(path_qs, "*.*.qs$", full.names = TRUE)
+    
+    period_new <- sapply(period_new, as.character)
+    time_create <- gsub("[[:punct:]]|[[:blank:]]", "", Sys.time())
+    name_qs <-
+      sprintf(
+        "dt_feat_pm25_%s_%s_%s.qs",
+        period_new[1], period_new[2], time_create
+      )
+    if (length(input_old) == 0) {
+      qs::qsave(input_new, file = file.path(path_qs, name_qs))
+      return(name_qs)
+    } else {
+      vv <- list()
+      bound_large <-
+        Reduce(
+          function(x, y) {
+            if (inherits(x, "data.frame")) {
+              bound <- rbind(x, qs::qread(y))
+            } else {
+              bound <- rbind(qs::qread(x), qs::qread(y))
+            }
+            return(bound)
+          },
+          input_old
+        )
+      return(bound_large)
+    }
+  }
 ## base & meta learner fitting
 
 fit_base <-
@@ -1315,165 +1769,3 @@ export_res <-
 
   }
 
-
-# calc_geos_strictlite <-
-#   function(path = NULL,
-#            date = c("2018-01-01", "2018-01-01"),
-#            locs = NULL,
-#            locs_id = NULL,
-#            ...) {
-#     #### directory setup
-#     if (length(path) == 1) {
-#       if (dir.exists(path)) {
-#         path <- amadeus::download_sanitize_path(path)
-#         paths <- list.files(
-#           path,
-#           pattern = "GEOS-CF.v01.rpl",
-#           full.names = TRUE
-#         )
-#         paths <- paths[grep(
-#           ".nc4",
-#           paths
-#         )]
-#       }
-#     } else {
-#       paths <- path
-#     }
-#     #### check for variable
-#     amadeus::check_for_null_parameters(mget(ls()))
-#     #### identify file paths
-#     #### identify dates based on user input
-#     dates_of_interest <- amadeus::generate_date_sequence(
-#       date[1],
-#       date[2],
-#       sub_hyphen = TRUE
-#     )
-#     #### subset file paths to only dates of interest
-#     data_paths <- unique(
-#       grep(
-#         paste(
-#           dates_of_interest,
-#           collapse = "|"
-#         ),
-#         paths,
-#         value = TRUE
-#       )
-#     )
-#     print(data_paths)
-#     #### identify collection
-#     collection <- regmatches(
-#       data_paths[1],
-#       regexpr(
-#         "GEOS-CF.v01.rpl.(aqc|chm)_[[:alpha:]]{3,4}_[[:alnum:]]{3,4}_[[:alnum:]]{8,9}_v[1-9]",
-#         data_paths[1]
-#       )
-#     )
-#     cat(
-#       paste0(
-#         "Identified collection ",
-#         collection,
-#         ".\n"
-#       )
-#     )
-#     if (length(unique(collection)) > 1) {
-#       warning(
-#         "Multiple collections detected. Returning data for all collections.\n"
-#       )
-#     }
-
-#     filename_date <- sort(regmatches(
-#       data_paths,
-#       regexpr(
-#         "20[0-9]{2}(0[1-9]|1[0-2])([0-2][0-9]|3[0-1])",
-#         data_paths
-#       )
-#     ))
-#     if (any(table(filename_date) < 24)) {
-#       warning(
-#         "Some dates include less than 24 hours. Check the downloaded files."
-#       )
-#     }
-#     if (length(unique(filename_date)) > 1) {
-#       message(
-#         "Dates are not supposed to be different. Put in the same date's files."
-#       )
-#     }
-
-#     # split filename date every 10 days
-#     filename_date <- as.Date(filename_date, format = "%Y%m%d")
-#     filename_date_cl <- as.integer(as.factor(filename_date))
-
-#     future_inserted <- split(data_paths, filename_date_cl)
-#     other_args <- list(...)
-#     data_variables <- names(terra::rast(data_paths[1]))
-
-#     summary_byvar <- function(x = data_variables, fs) {
-#       # rast_in <- rlang::inject(terra::rast(fs, !!!other_args))
-#       sds_proc <-
-#         lapply(
-#         x,
-#         function(v) {
-#           rast_inidx <- grep(v, data_variables)
-#           rast_in <- rlang::inject(terra::rast(fs, subds = rast_inidx, !!!other_args))
-#           rtin <- as.Date(terra::time(rast_in))
-#           rtin_u <- unique(rtin)
-#           rast_summary <- vector("list", length = length(unique(rtin)))
-#           for (d in seq_along(rtin_u)) {
-#             rast_d <- rast_in[[rtin == rtin_u[d]]]
-#             rast_summary[[d]] <- mean(rast_d)
-#           }
-#           rast_summary <- do.call(c, rast_summary)
-#           # rast_summary <- terra::tapp(rast_in, index = "days", fun = "mean")
-#           names(rast_summary) <-
-#             paste0(
-#               rep(gsub("_lev=.*", "", v), terra::nlyr(rast_summary))
-#               #, "_", terra::time(rast_summary)
-#             )
-#           terra::set.crs(rast_summary, "EPSG:4326")
-#           return(rast_summary)
-#         }
-#       )
-#       sds_proc <- terra::sds(sds_proc)
-
-#       rast_ext <- terra::extract(sds_proc, locs)
-#       rast_ext <- lapply(rast_ext,
-#         function(df) {
-#           df$ID <- unlist(locs[[locs_id]])
-#           return(df)
-#         }
-#       )
-#       rast_ext <-
-#         Reduce(function(dfa, dfb) dplyr::full_join(dfa, dfb, by = "ID"),
-#           rast_ext
-#         )
-#       # NOTE: assuming that the date is the same for all layers
-#       rast_ext$time <- date[1]
-
-#       return(rast_ext)
-
-#     }
-
-#     # summary by 10 days
-#     # FIXME: .x is an hourly data -> to daily data for proper use
-#     rast_10d_summary <-
-#       purrr::map(
-#         .x = future_inserted,
-#         .f = ~summary_byvar(fs = .x)
-#       )
-#     rast_10d_summary <- data.table::rbindlist(rast_10d_summary)
-#     # extract
-
-#     return(rast_10d_summary)
-
-#   }
-
-# system.time(
-#   cgeo2 <- calc_geos_strictlite(path = "input/geos/chm_tavg_1hr_g1440x721_v1",
-#             date = c("2018-05-17", "2018-05-17"),
-#             locs = terra::vect(data.frame(site_id = 1, lon = -90, lat = 40)),
-#             locs_id = "site_id",
-#             win = c(-126, -62, 22, 52),
-#             snap = "out")
-# )
-# 110.5 (strict)
-# 119.287 (strictlite)

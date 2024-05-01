@@ -39,7 +39,7 @@ target_calculate_fit <-
   list(
     tar_files_input(
       file_calc_args,
-      files = list.files("./inst/targets", pattern = "*.*.rds$", full.names = TRUE),
+      files = list.files("inst/targets", pattern = "*.*.rds$", full.names = TRUE),
       format = "file",
       iteration = "vector",
       description = "Calculation arguments in RDS file"
@@ -48,7 +48,7 @@ target_calculate_fit <-
     tar_target(
       chr_features,
       command = c("tri", "ecoregions", "koppen", "nlcd", "hms", "population",
-                 "groads", "narr", "nei", "gmted"),
+                 "groads", "nei"),
       iteration = "list",
       description = "Feature calculation"
     )
@@ -71,6 +71,18 @@ target_calculate_fit <-
     )
     ,
     tar_target(
+      name = chr_gmted_vars,
+      command = c(
+          "Breakline Emphasis", "Systematic Subsample",
+          "Median Statistic", "Minimum Statistic",
+          "Mean Statistic", "Maximum Statistic",
+          "Standard Deviation Statistic"
+        ),
+      iteration = "list",
+      description = "GMTED variables"
+    )
+    ,
+    tar_target(
       list_feat_base,
       command =
         inject_calculate(
@@ -79,9 +91,7 @@ target_calculate_fit <-
           injection = loadargs(file_calc_args, chr_features)),
       pattern = cross(file_calc_args, chr_features),
       iteration = "list",
-      description = "Base feature list",
-      resources = set_slurm_resource(
-        ntasks = 1, ncpus = loadargs(file_calc_args, chr_features)$nthreads)
+      description = "Base feature list"
     )
     ,
     tar_target(
@@ -92,7 +102,7 @@ target_calculate_fit <-
           injection = loadargs(file_calc_args, chr_nasa)),
       pattern = cross(file_calc_args, chr_nasa),
       resources = set_slurm_resource(
-            ntasks = 1, ncpus = 20, memory = 10
+            ntasks = 1, ncpus = 20, memory = 8
           ),
       iteration = "list",
       description = "MODIS/VIIRS feature list"
@@ -114,50 +124,126 @@ target_calculate_fit <-
     )
     ,
     tar_target(
+      name = list_feat_gmted,
+      command = inject_gmted(
+        locs = sf_feat_proc_aqs_sites,
+        variable = chr_gmted_vars,
+        radii = c(0, 1e3, 1e4, 5e4),
+        injection = loadargs(file_calc_args, "gmted")
+      ),
+      iteration = "list",
+      pattern = cross(file_calc_args, chr_gmted_vars),
+      resources = set_slurm_resource(
+            ntasks = 1, ncpus = 4, memory = 8
+          )
+    )
+    ,
+    targets::tar_target(
+      name = list_feat_calc_narr,
+      command = #rlang::inject(
+        lapply(
+          loadargs(file_calc_args, "narr")$domain,
+          function(x) {
+            from <- process_narr2(
+              path = "input/narr",
+              variable = x,
+              date = arglist_common$char_period
+            )
+            calc_narr2(
+              from = from,
+              locs = sf_feat_proc_aqs_sites,
+              locs_id = "site_id")
+          }),
+        
+      
+      # command = inject_calculate(
+      #   covariate = "narr",
+      #   locs = sf_feat_proc_aqs_sites,
+      #   injection = loadargs(file_calc_args, "narr")
+      # ),
+      pattern = map(file_calc_args),
+      iteration = "list",
+      resources = set_slurm_resource(
+            ntasks = 1, ncpus = 1, memory = 32
+          )
+    )
+    ,
+    tar_target(
       list_feat_base_flat,
       command =
         lapply(list_feat_base,
                function(x) { 
-                 reduce_merge(x)
+                 reduce_merge(x, by = NULL)
                }),
       description = "data.table of base features"
     )
     ,
     tar_target(
-      list_feat_nasa_flat,
+      dt_feat_nasa,
       command = reduce_merge(list_feat_nasa),
       description = "data.table of MODIS/VIIRS features"
     )
     ,
     tar_target(
-      list_feat_geoscf_flat,
+      dt_feat_geoscf,
       command = reduce_merge(list_feat_geoscf),
       description = "data.table of GEOS-CF features"
+    )
+    ,
+    tar_target(
+      dt_feat_gmted,
+      command = reduce_merge(list_feat_gmted, "site_id"),
+      description = "data.table of GMTED features"
+    )
+    ,
+    tar_target(
+      dt_feat_calc_narr,
+      command = reduce_merge(list_feat_calc_narr)
     )
     ,
     tar_target(
       dt_feat_fit,
       command = reduce_merge(
         list(
-          reduce_merge(list_feat_base_flat),
-          reduce_merge(list_feat_nasa_flat),
-          list_feat_geoscf_flat
+          reduce_merge(list_feat_base_flat, by = NULL),
+          dt_feat_nasa,
+          dt_feat_geoscf,
+          dt_feat_calc_narr
         )
       ),
-      description = "data.table of all features"
+      description = "data.table of all but GMTED features"
+    )
+    ,
+    tar_target(
+      dt_feat_fit_gmted,
+      command = data.table::merge(dt_feat_fit, dt_feat_gmted, by = "site_id", all = TRUE),
+      description = "data.table of all features with GMTED"
     )
     ,
     targets::tar_target(
       dt_feat_fit_pm,
       post_calc_join_pm25_features(
         df_pm = sf_feat_proc_aqs_pm25,
-        df_covar = dt_feat_fit,
+        df_covar = dt_feat_fit_gmted,
         locs_id = "site_id",
         time_id = "time"
       ),
       description = "data.table of all features with PM2.5"
     )
-    # ,
+    ,
+    tar_target(
+      dt_feat_calc_cumulative,
+      command = append_predecessors(
+        path_qs = "output/qs",
+        period_new = arglist_common$char_period,
+        input_new = dt_feat_fit_pm,
+        nthreads = 8L
+      ),
+      description = "Cumulative feature calculation",
+      resources = set_slurm_resource(
+            ntasks = 1, ncpus = 8, memory = 100
+          )
+    )
     #   # Merge spatial-only features ####
     # targets::tar_target(
     #   dt_feat_fit_xsp_base,

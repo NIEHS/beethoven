@@ -44,14 +44,15 @@ if (Sys.getenv("BTV_DOWNLOAD_PASS") == "TRUE") {
 # TODO: check if the controller and resources setting are required
 tar_option_set(
   packages =
-    c("amadeus", "chopin",
+    c("amadeus", "chopin", "targets", "tarchetypes",
       "data.table", "sf", "terra", "exactextractr",
       "crew", "crew.cluster", "tigris", "dplyr",
-      "future.batchtools",
+      "future.batchtools", "qs",
       "future", "future.apply", "future.callr", "callr",
       "sftime", "stars", "rlang", "foreach", "parallelly"),
   library = "~/r-libs",
   repository = "local",
+  error = "continue",
   # controller = 
   #   crew.cluster::crew_controller_slurm(
   #     slurm_log_output = "output/slurm_pipeline_log.out",
@@ -72,7 +73,7 @@ tar_option_set(
           template = "inst/targets/template_slurm.tmpl",
           resources =
             list(
-              memory = 8,
+              memory = 10,
               log.file = "slurm_run.log",
               ncpus = 1, partition = "geo", ntasks = 1,
               email = arglist_common$user_email,
@@ -81,10 +82,9 @@ tar_option_set(
         )
     )
   ),
-  error = "null",
   memory = "persistent",
   format = "qs",
-  storage = "worker",
+  storage = "main",
   seed = 202401L
 )
 
