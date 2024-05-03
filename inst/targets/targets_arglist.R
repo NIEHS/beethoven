@@ -3,6 +3,35 @@ library(dplyr)
 # anything needed for the pipeline
 # ultimately the name "dataset" is a key for iteration to make
 # the outermost pipeline look as simple as possible
+
+# for reference, full list of parameters in amadeus::process_*
+# and amadeus::calc_*.
+# This list will be useful for entering parameters by rlang::inject.
+# amadeusArgs <- list(
+#   path = NULL,
+#   date = NULL,
+#   variable = NULL,
+#   year = NULL,
+#   county = NULL,
+#   variables = NULL,
+#   from = NULL,
+#   locs = NULL,
+#   locs_id = NULL,
+#   radius = NULL,
+#   fun = NULL,
+#   name_extracted = NULL,
+#   fun_summary = NULL,
+#   max_cells = NULL,
+#   preprocess = NULL,
+#   name_covariates = NULL,
+#   subdataset = NULL,
+#   nthreads = NULL,
+#   package_list_add = NULL,
+#   export_list_add = NULL,
+#   sedc_bandwidth = NULL,
+#   target_fields = NULL
+# )
+
 # blueprint <-
 #     tribble(
 #         ~dataset,   ~buffers, ~input,
@@ -30,7 +59,7 @@ arglist_common <-
   list(
     char_siteid = "site_id",
     char_timeid = "time",
-    char_period = c("2018-01-01", "2018-12-31"),
+    char_period = c("2018-02-12", "2018-03-05"),
     extent = c(-126, -62, 22, 52),
     user_email = "songi2@nih.gov"
   )
@@ -47,155 +76,156 @@ arglist_common <-
 #   )
 
 
-arglist_proccalc <-
-  list(
-    mod11 = list(from = arglist_paths$mod11,
-                 name_covariates = sprintf("MOD_SFCT%s_0_", c("D", "N")),
-                 subdataset = sprintf("LST_%s_", c("Day", "Night")),
-                 nthreads = 20L,
-                 radius = c(1e3, 1e4, 5e4)),
-    mod06 = list(from = arglist_paths$mod06,
-                 name_covariates = sprintf("MOD_CLCV%s_0_", c("D", "N")),
-                 subdataset = sprintf("Cloud_Fraction_%s", c("Day", "Night")),
-                 nthreads = 20L,
-                 preprocess = amadeus::process_modis_swath,
-                 radius = c(1e3, 1e4, 5e4)),
-    mod09 = list(from = arglist_paths$mod09,
-                 name_covariates = sprintf("MOD_SFCRF_%d_", seq(1, 7)),
-                 subdataset = seq(2, 8),
-                 nthreads = 20L,
-                 radius = c(1e3, 1e4, 5e4)),
-    mcd19_1km = list(from = arglist_paths$mcd19,
-                     name_covariates = sprintf("MOD_AD%dTA_0_", c(4, 5)),
-                     subdataset = "Optical_Depth",
-                     nthreads = 20L,
-                     radius = c(1e3, 1e4, 5e4)),
-    mcd19_5km = list(from = arglist_paths$mcd19,
-                     name_covariates = sprintf("MOD_%sAN_0_", c("CSZ", "CVZ", "RAZ", "SCT", "GLN")),
-                     subdataset = c("cos|RelAZ|Angle"),
-                     nthreads = 20L,
-                     radius = c(1e3, 1e4, 5e4)),
-    mod13 = list(from = arglist_paths$mod13,
-                 name_covariates = "MOD_NDVIV_0_",
-                 subdataset = "(NDVI)",
-                 nthreads = 20L,
-                 radius = c(1e3, 1e4, 5e4)),
-    viirs = list(from = arglist_paths$viirs,
-                 name_covariates = "MOD_LGHTN_0_",
-                 subdataset = 3,
-                 nthreads = 20L,
-                 preprocess = amadeus::process_bluemarble,
-                 radius = c(1e3, 1e4, 5e4)),
-    geoscf_aqc = list(date = arglist_common$char_period,
-                      path = "input/geos/aqc_tavg_1hr_g1440x721_v1"),
-    geoscf_chm = list(date = arglist_common$char_period,
-                      path = "input/geos/chm_tavg_1hr_g1440x721_v1"),
-    # base class covariates start here
-    hms = list(path = "input/HMS_Smoke/data",
-               date = arglist_common$char_period,
-               covariate = "hms", 
-               domain = c("Light", "Medium", "Heavy"),
-               nthreads = 3L,
-               domain_name = "variable"),
-    gmted = list(
-      path = "input/gmted",
-      covariate = "gmted"#,
-      # domain =
-      # expand.grid(
-      #   variables = c(
-      #     "Breakline Emphasis", "Systematic Subsample",
-      #     "Median Statistic", "Minimum Statistic",
-      #     "Mean Statistic", "Maximum Statistic",
-      #     "Standard Deviation Statistic"
-      #   ),
-      #   resolution = sprintf("%s arc-seconds", c("7.5"))
-      # ) %>%
-      #   split(., seq_len(nrow(.))) %>%
-      #   lapply(unlist) %>%
-      #   lapply(unname) %>%
-      #   lapply(as.character),
-      # domain_name = "variable"
-    ),
-    nei = list(
-      domain = c(2017, 2017, 2020, 2020, 2020),
-      domain_name = "year",
-      path = "input/nei",
-      covariate = "nei"
-    ),
-    tri = list(
-      domain = seq(2018, 2022),
-      domain_name = "year",
-      path = "input/tri",
-      radius = c(1e3, 1e4, 5e4),
-      covariate = "tri",
-      nthreads = 5L
-      #year = seq(2018, 2022)
-    ),
-    nlcd = list(
-      domain = c(2019, 2021), # rep(_,c(3,2)) -- how to parametrize?
-      domain_name = "year",
-      path = "input/nlcd/raw",
-      covariate = "nlcd",
-      radius = c(1e3, 1e4, 5e4),
-      nthreads = 2L,
-      max_cells = 2e8
-      #years = c(2019, 2021)
-    ),
-    koppen = list(path = "input/koppen_geiger/raw/Beck_KG_V1_present_0p0083.tif", 
-                  covariate = "koppen",
-                  nthreads = 1L),
-    ecoregions = list(path = "input/ecoregions/raw/us_eco_l3_state_boundaries.shp",
-                      covariate = "ecoregions",
-                      nthreads = 1L),
-    narr = list(
-      path = "input/narr",
-      covariate = "narr",
-      domain = c("air.sfc", "albedo", "apcp", "dswrf", "evap", "hcdc",
-                    "hpbl", "lcdc", "lhtfl", "mcdc", "omega", "pr_wtr",
-                    "prate", "pres.sfc", "shtfl", "shum", "snowc", "soilm",    
-                    "tcdc", "ulwrf.sfc", "uwnd.10m", "vis", "vwnd.10m", "weasd"),
-      domain_name = "variable",
-      date = arglist_common$char_period,
-      process_function = process_narr2,
-      calc_function = calc_narr2,
-      nthreads = 10L
-    ),
-    groads = list(
-                  path = "input/sedac_groads/groads-v1-americas-gdb/gROADS-v1-americas.gdb",
-                  covariate = "groads",
-                  radius = c(1e3, 1e4, 5e4),
-                  nthreads = 3L),
-    population = list(
-      path = "input/sedac_population/gpw_v4_population_density_adjusted_to_2015_unwpp_country_totals_rev11_2020_30_sec.tif",
-      covariate = "population", fun = "mean",
-      radius = c(1e3, 1e4, 5e4),
-      nthreads = 3L
-    )
-  )
+# arglist_proccalc <-
+#   list(
+#     aqs = list(path = "input/aqs"),
+#     mod11 = list(from = arglist_paths$mod11,
+#                  name_covariates = sprintf("MOD_SFCT%s_0_", c("D", "N")),
+#                  subdataset = sprintf("LST_%s_", c("Day", "Night")),
+#                  nthreads = 20L,
+#                  radius = c(1e3, 1e4, 5e4)),
+#     mod06 = list(from = arglist_paths$mod06,
+#                  name_covariates = sprintf("MOD_CLCV%s_0_", c("D", "N")),
+#                  subdataset = sprintf("Cloud_Fraction_%s", c("Day", "Night")),
+#                  nthreads = 20L,
+#                  preprocess = amadeus::process_modis_swath,
+#                  radius = c(1e3, 1e4, 5e4)),
+#     mod09 = list(from = arglist_paths$mod09,
+#                  name_covariates = sprintf("MOD_SFCRF_%d_", seq(1, 7)),
+#                  subdataset = seq(2, 8),
+#                  nthreads = 20L,
+#                  radius = c(1e3, 1e4, 5e4)),
+#     mcd19_1km = list(from = arglist_paths$mcd19,
+#                      name_covariates = sprintf("MOD_AD%dTA_0_", c(4, 5)),
+#                      subdataset = "Optical_Depth",
+#                      nthreads = 20L,
+#                      radius = c(1e3, 1e4, 5e4)),
+#     mcd19_5km = list(from = arglist_paths$mcd19,
+#                      name_covariates = sprintf("MOD_%sAN_0_", c("CSZ", "CVZ", "RAZ", "SCT", "GLN")),
+#                      subdataset = c("cos|RelAZ|Angle"),
+#                      nthreads = 20L,
+#                      radius = c(1e3, 1e4, 5e4)),
+#     mod13 = list(from = arglist_paths$mod13,
+#                  name_covariates = "MOD_NDVIV_0_",
+#                  subdataset = "(NDVI)",
+#                  nthreads = 20L,
+#                  radius = c(1e3, 1e4, 5e4)),
+#     viirs = list(from = arglist_paths$viirs,
+#                  name_covariates = "MOD_LGHTN_0_",
+#                  subdataset = 3,
+#                  nthreads = 20L,
+#                  preprocess = amadeus::process_bluemarble,
+#                  radius = c(1e3, 1e4, 5e4)),
+#     geoscf_aqc = list(date = arglist_common$char_period,
+#                       path = "input/geos/aqc_tavg_1hr_g1440x721_v1"),
+#     geoscf_chm = list(date = arglist_common$char_period,
+#                       path = "input/geos/chm_tavg_1hr_g1440x721_v1"),
+#     # base class covariates start here
+#     hms = list(path = "input/HMS_Smoke/data",
+#                date = arglist_common$char_period,
+#                covariate = "hms", 
+#                domain = c("Light", "Medium", "Heavy"),
+#                nthreads = 3L,
+#                domain_name = "variable"),
+#     gmted = list(
+#       path = "input/gmted",
+#       covariate = "gmted"#,
+#       # domain =
+#       # expand.grid(
+#       #   variables = c(
+#       #     "Breakline Emphasis", "Systematic Subsample",
+#       #     "Median Statistic", "Minimum Statistic",
+#       #     "Mean Statistic", "Maximum Statistic",
+#       #     "Standard Deviation Statistic"
+#       #   ),
+#       #   resolution = sprintf("%s arc-seconds", c("7.5"))
+#       # ) %>%
+#       #   split(., seq_len(nrow(.))) %>%
+#       #   lapply(unlist) %>%
+#       #   lapply(unname) %>%
+#       #   lapply(as.character),
+#       # domain_name = "variable"
+#     ),
+#     nei = list(
+#       domain = c(2017, 2020),
+#       domain_name = "year",
+#       path = "input/nei",
+#       covariate = "nei"
+#     ),
+#     tri = list(
+#       domain = seq(2018, 2022),
+#       domain_name = "year",
+#       path = "input/tri",
+#       radius = c(1e3, 1e4, 5e4),
+#       covariate = "tri",
+#       nthreads = 5L
+#       #year = seq(2018, 2022)
+#     ),
+#     nlcd = list(
+#       domain = c(2019, 2021), # rep(_,c(3,2)) -- how to parametrize?
+#       domain_name = "year",
+#       path = "input/nlcd/raw",
+#       covariate = "nlcd",
+#       radius = c(1e3, 1e4, 5e4),
+#       nthreads = 2L,
+#       max_cells = 1e7
+#       #years = c(2019, 2021)
+#     ),
+#     koppen = list(path = "input/koppen_geiger/raw/Beck_KG_V1_present_0p0083.tif", 
+#                   covariate = "koppen",
+#                   nthreads = 1L),
+#     ecoregions = list(path = "input/ecoregions/raw/us_eco_l3_state_boundaries.shp",
+#                       covariate = "ecoregions",
+#                       nthreads = 1L),
+#     narr = list(
+#       path = "input/narr",
+#       covariate = "narr",
+#       domain = c("air.sfc", "albedo", "apcp", "dswrf", "evap", "hcdc",
+#                     "hpbl", "lcdc", "lhtfl", "mcdc", "omega", "pr_wtr",
+#                     "prate", "pres.sfc", "shtfl", "shum", "snowc", "soilm",    
+#                     "tcdc", "ulwrf.sfc", "uwnd.10m", "vis", "vwnd.10m", "weasd"),
+#       domain_name = "variable",
+#       date = arglist_common$char_period,
+#       process_function = process_narr2,
+#       calc_function = calc_narr2,
+#       nthreads = 10L
+#     ),
+#     groads = list(
+#                   path = "input/sedac_groads/groads-v1-americas-gdb/gROADS-v1-americas.gdb",
+#                   covariate = "groads",
+#                   radius = c(1e3, 1e4, 5e4),
+#                   nthreads = 3L),
+#     population = list(
+#       path = "input/sedac_population/gpw_v4_population_density_adjusted_to_2015_unwpp_country_totals_rev11_2020_30_sec.tif",
+#       covariate = "population", fun = "mean",
+#       radius = c(1e3, 1e4, 5e4),
+#       nthreads = 3L
+#     )
+#   )
 
-attr(arglist_proccalc, "description") <-
-  tibble::tribble(
-    ~dataset, ~description,
-    "mod11", "MODIS Land Surface Temperature Day/Night",
-    "mod06", "MODIS Cloud Fraction Day/Night",
-    "mod09", "MODIS Surface Reflectance",
-    "mcd19_1km", "MCD19A2 1km",
-    "mcd19_5km", "MCD19A2 5km",
-    "mod13", "MODIS Normalized Difference Vegetation Indexß",
-    "viirs", "VIIRS Nighttime Lights",
-    "hms", "NOAA Hazard Mapping System Smoke",
-    "geoscf_aqc", "GEOS-CF AQC",
-    "geoscf_chm", "GEOS-CF CHM",
-    "gmted", "GMTED elevation",
-    "nei", "National Emission Inventory",
-    "tri", "Toxic Release Inventory",
-    "nlcd", "National Land Cover Database",
-    "koppen", "Koppen-Geiger Climate Classification",
-    "ecoregions", "EPA Ecoregions",
-    "narr", "NARR",
-    "groads", "SEDAC Global Roads",
-    "population", "SEDAC Population Density"
-  )
+# attr(arglist_proccalc, "description") <-
+#   tibble::tribble(
+#     ~dataset, ~description,
+#     "mod11", "MODIS Land Surface Temperature Day/Night",
+#     "mod06", "MODIS Cloud Fraction Day/Night",
+#     "mod09", "MODIS Surface Reflectance",
+#     "mcd19_1km", "MCD19A2 1km",
+#     "mcd19_5km", "MCD19A2 5km",
+#     "mod13", "MODIS Normalized Difference Vegetation Indexß",
+#     "viirs", "VIIRS Nighttime Lights",
+#     "hms", "NOAA Hazard Mapping System Smoke",
+#     "geoscf_aqc", "GEOS-CF AQC",
+#     "geoscf_chm", "GEOS-CF CHM",
+#     "gmted", "GMTED elevation",
+#     "nei", "National Emission Inventory",
+#     "tri", "Toxic Release Inventory",
+#     "nlcd", "National Land Cover Database",
+#     "koppen", "Koppen-Geiger Climate Classification",
+#     "ecoregions", "EPA Ecoregions",
+#     "narr", "NARR",
+#     "groads", "SEDAC Global Roads",
+#     "population", "SEDAC Population Density"
+#   )
 
 
 
@@ -259,6 +289,6 @@ attr(arglist_proccalc, "description") <-
 
 # export
 # time_create <- gsub("[[:punct:]]|[[:blank:]]", "", Sys.time())
-saveRDS(arglist_proccalc, 
-        "./inst/targets/punchcard_calc.rds",
-        compress = "xz")
+# saveRDS(arglist_proccalc, 
+#         "./inst/targets/punchcard_calc.rds",
+#         compress = "xz")

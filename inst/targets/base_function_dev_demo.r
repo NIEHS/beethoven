@@ -37,21 +37,24 @@ system.time(
     )
 jj
 
-calc_covariates(
+profvis::profvis(
+kx <- amadeus::calc_covariates(
     covariate = "nlcd",
-    from = process_covariates(covariate = "nlcd", path = "input/nlcd/raw", year = 2019L),
-    locs = tar_read(sf_feat_proc_aqs_sites),
+    from = amadeus::process_covariates(covariate = "nlcd", path = "input/nlcd/raw", year = 2019L),
+    locs = tar_read(sf_feat_proc_aqs_sites)[1:200,],
     locs_id = "site_id",
-    radius = 1000
+    radius = 50000,
+    max_cells = 1e8
+)
 )
 
 system.time(
     jk <-
     calc_gmted_direct(
-        locs = tar_read(sf_feat_proc_aqs_sites)[1,],
+        locs = tar_read(sf_feat_proc_aqs_sites)[1:100,],
         locs_id = "site_id",
         path = "input/gmted",
-        radius = 0,
+        radius = 1000,
         variable = c("Breakline Emphasis", "7.5 arc-seconds")
     )
 )
@@ -163,3 +166,226 @@ kx <- amadeus::calc_ecoregion(from = kk, locs = tar_read(sf_feat_proc_aqs_sites)
 kl <- amadeus::process_covariates("ecoregions", path = "input/ecoregions/raw")
 kz <- amadeus::calc_covariates("ecoregions", from = kl, locs = tar_read(sf_feat_proc_aqs_sites) |> terra::vect())
 as.data.table(kz)
+
+
+
+## R code example for temporal join utilizing join_by and between in dplyr package
+library(dplyr)
+
+# Create two data frames for the example
+df1 <- data.frame(
+    id = 1:3,
+    start_date = as.Date(c("2020-01-01", "2020-02-01", "2020-03-01")),
+    end_date = as.Date(c("2020-01-31", "2020-02-29", "2020-03-31"))
+)
+
+df2 <- data.frame(
+    id = c(1, 2, 2, 3, 3),
+    date = as.Date(c("2020-01-15", "2020-02-15", "2020-02-20", "2020-03-15", "2020-03-20"))
+)
+
+btw <- function(x, from, to) (x >= from & x <= to)
+# Perform the temporal join
+result <- df2 %>%
+    left_join(df1, by = join_by(id == id, !!rlang::sym("date") <= end_date))# %>%
+    #filter(between(date, start_date, end_date))
+
+result
+
+
+post_calc_join_yeardate <-
+  function(
+    df_year,
+    df_date,
+    field_year = "time",
+    field_date = "time",
+    spid = "site_id"
+  ) {
+    if (!inherits(df_year, "data.frame") && !inherits(df_date, "data.frame")) {
+      stop("Both inputs should be data.frame.")
+    }
+    df_date_joined <-
+    df_date[df_year,
+            on = .(spid == spid, field_year == as.POSIXlt(field_date)$year)
+            #union(names(df_year), names(df_date)),
+            #with = FALSE
+           ]
+
+    # names(df_year)[names(df_year) %in% field_year] <- "year"
+    # df_date$year <- as.integer(substr(df_date[[field_date]], 1, 4))
+    # #as.integer(format(as.Date(df_date[[field_date]]), "%Y"))
+    # df_joined <-
+    #   data.table::merge.data.table(
+    #     df_date, df_year,
+    #     by = c(spid, "year"),
+    #     all.x = TRUE
+    #   )
+
+    # df_joined <- df_joined[, c("year") := NULL]
+    return(df_date_joined)
+  }
+
+jj <- \(x) eval(x);quote(x)
+jj("joy")
+eval("joy")
+quote("joy")
+  library(data.table)
+
+  # Generate sample data
+  df_year <- data.table(
+    site_id = rep(1:10, each = 10),
+    time = rep(2000:2009, times = 10),
+    x = rnorm(100, 3, 1)
+  )
+  df_year[["year"]] = 1:100
+  df_date <- data.table(
+    site_id = rep(1:10, each = 10),
+    time = rep(as.Date("2000-01-01") + 0:9, times = 10),
+    y = rpois(100, 4)
+  )
+  
+  # Call the function
+  result <- post_calc_join_yeardate(df_year, df_date)
+  
+
+
+## read_locs
+rr <- read_locs(
+    fun_aqs = amadeus::process_aqs,
+    path = 
+      list.files("input/aqs", pattern = "daily_88101_2018.csv$", full.names = TRUE),
+    date = c("2018-01-15", "2018-02-21"),
+    mode = "sparse",
+    return_format = "data.table")
+
+
+terra::crs("EPSG:4326")
+
+kx <-
+amadeus::process_nlcd(
+  path = "input/nlcd/raw",
+  year = 2019
+)
+
+kxt <- amadeus::calc_nlcd(
+  from = kx,
+  locs = tar_read(sf_feat_proc_aqs_sites),
+  locs_id = "site_id",
+  radius = 1000,
+  max_cells = 1e8
+)
+
+tar_read(sf_feat_proc_aqs_sites) -> kk
+sf::st_as_sf(kk, coords = 2:3, crs = 4326) -> kk
+
+
+calc_nlcd <- function(from,
+                      locs,
+                      locs_id = "site_id",
+                      radius = 1000,
+                      max_cells = 1e8,
+                      ...) {
+  # check inputs
+  if (!is.numeric(radius)) {
+    stop("radius is not a numeric.")
+  }
+  if (radius <= 0) {
+    stop("radius has not a likely value.")
+  }
+  if (!methods::is(locs, "SpatVector")) {
+    message("locs is not a terra::SpatVector.")
+    locs <- tryCatch({
+      if (data.table::is.data.table(locs)) {
+        locs <- as.data.frame(locs)
+      }
+      locsa <- terra::deepcopy(terra::vect(locs))
+      locs_crs <- terra::crs(locsa)
+      if (locs_crs == "" || is.na(locs_crs)) {
+        terra::crs(locsa) <- "EPSG:4326"
+      }
+      locsa
+    },
+    error = function(e) {
+      stop("Failed to locs to a terra::SpatVector.")
+    }
+    )
+  }
+  if (!methods::is(from, "SpatRaster")) {
+    stop("from is not a SpatRaster.")
+  }
+  year <- try(as.integer(terra::metags(from, name = "year")))
+  # select points within mainland US and reproject on nlcd crs if necessary
+  us_main <-
+    terra::ext(c(xmin = -127, xmax = -65, ymin = 24, ymax = 51)) |>
+    terra::vect() |>
+    terra::set.crs("EPSG:4326") |>
+    terra::project(y = terra::crs(locs))
+  data_vect_b <- locs |>
+    terra::intersect(x = us_main)
+  data_vect_b <- terra::project(data_vect_b, terra::crs(from))
+  # create circle buffers with buf_radius
+  bufs_pol <- terra::buffer(data_vect_b, width = radius) |>
+    sf::st_as_sf() |>
+    sf::st_geometry()
+  # ratio of each nlcd class per buffer
+  nlcd_at_bufs <-
+    exactextractr::exact_extract(
+      from,
+      bufs_pol,
+      fun = "frac",
+      #stack_apply = TRUE,
+      force_df = TRUE,
+      progress = FALSE,
+      max_cells_in_memory = max_cells)
+  # select only the columns of interest
+  cfpath <- system.file("extdata", "nlcd_classes.csv", package = "amadeus")
+  nlcd_classes <- utils::read.csv(cfpath)
+  nlcd_at_bufs <-
+    nlcd_at_bufs[
+      sort(names(nlcd_at_bufs)[
+        grepl(paste0("frac_(", paste(nlcd_classes$value, collapse = "|"), ")"),
+              names(nlcd_at_bufs))
+      ])
+    ]
+  # change column names
+  nlcd_names <- names(nlcd_at_bufs)
+  nlcd_names <- sub(pattern = "frac_", replacement = "", x = nlcd_names)
+  nlcd_names <- as.numeric(nlcd_names)
+  nlcd_names <- nlcd_classes[nlcd_classes$value %in% nlcd_names, c("class")]
+  new_names <- sapply(
+    nlcd_names,
+    function(x) {
+      sprintf("LDU_%s_0_%05d", x, radius)
+    }
+  )
+  names(nlcd_at_bufs) <- new_names
+  # merge data_vect with nlcd class fractions (and reproject)
+  new_data_vect <- cbind(data_vect_b, nlcd_at_bufs)
+  new_data_vect <- terra::project(new_data_vect, terra::crs(locs))
+  new_data_vect$time <- as.integer(year)
+  return(new_data_vect)
+}
+
+
+system.time(
+kxt <- amadeus::calc_nlcd(
+  from = kx,
+  locs = tar_read(sf_feat_proc_aqs_sites),
+  locs_id = "site_id",
+  radius = 1000,
+  max_cells = 1e6
+)
+)
+
+read_locs(
+  path = list.files("input/aqs", pattern = "daily_88101_*.*.csv$", full.names = TRUE),
+  date = c("2018-01-15", "2018-02-21"),
+  mode = "location",
+  return_format = "sf"
+)
+
+
+##
+xl <- tar_read(list_feat_calc_base)[[1]]
+xlr <- lapply(xl, \(dt) dt[, time := as.character(time)])
+reduce_merge(xlr)

@@ -28,7 +28,7 @@
 # compacting the pipeline with branching
 # TODO: file path is the same, but binary is different; could targets
 # handle?
-
+library(amadeus)
 
 #' Load arguments from the formatted argument list file
 #' @param argfile character(1). Path to the argument file. RDS format.
@@ -208,15 +208,19 @@ inject_gmted <- function(locs, variable, radii, injection, nthreads = 4L) {
 #'
 #' @import data.table
 #' @export
-reduce_merge <- function(list_in, by = c("site_id", "time")) {
+reduce_merge <- function(list_in, by = c("site_id", "time"), all.x = TRUE, all.y = FALSE) {
   Reduce(
     function(x, y) {
       if (is.null(by)) by <- intersect(names(x), names(y))
-      data.table::merge.data.table(x, y, by = by, all.x = TRUE)
+      #post_calc_autojoin(x, y)
+      data.table::merge.data.table(x, y, by = by, all.x = all.x, all.y = all.y)
     },
     list_in
   )
 }
+
+
+
 
 
 #' Add Time Column
@@ -264,7 +268,7 @@ add_time_col <- function(df, time_value, time_id = "time") {
 #' process_year_expand(2018, 2022, "year", c(2017, 2020, 2021))
 #' process_year_expand(2018, 2022, "year", c(2020, 2021))
 #' @export
-process_year_expand <-
+post_calc_year_expand <-
   function(
     time_start = NULL,
     time_end = NULL,
@@ -273,13 +277,76 @@ process_year_expand <-
   ) {
     time_seq <- seq(time_start, time_end)
     time_target_seq <- findInterval(time_seq, time_available)
-    time_target_seq <- time_target[time_target_seq]
+    time_target_seq <- time_available[time_target_seq]
     if (min(time_available) > time_start) {
       time_target_seq <-
         c(rep(min(time_available), min(time_available) - time_start), time_target_seq)
     }
     return(time_target_seq)
   }
+
+
+#' Expand a data frame by year
+#'
+#' This function expands a data frame by year, creating multiple rows for each year based on the time period specified.
+#'
+#' @param df The input data frame.
+#' @param locs_id The column name of the location identifier in the data frame.
+#' @param time_field The column name of the time field in the data frame.
+#' @param time_start The start of the time period.
+#' @param time_end The end of the time period.
+#' @param time_unit The unit of time to expand the data frame. Only for record.
+#' @param time_available A vector of available time periods.
+#' @param ... Placeholders.
+#' @note Year expansion rule is to assign the nearest past year in the available years,
+#' if there is no past year in the available years, the first available year is
+#' rolled back to the start of the time period.
+#' @returns The expanded data frame with multiple rows for each year.
+#' @seealso [`process_year_expand()`]
+#' @examples
+#' df <- data.frame(year = c(2010, 2010, 2011, 2012),
+#'                  value = c(1, 2, 3, 4))
+#' df_expanded <- df_year_expand(df, locs_id = "site_id", time_field = "year",
+#'                               time_start = 2011, time_end = 2012,
+#'                               time_unit = "year")
+#' print(df_expanded)
+#'
+#' @export
+post_calc_df_year_expand <- function(
+  df,
+  locs_id = "site_id",
+  time_field = "time",
+  time_start = NULL,
+  time_end = NULL,
+  time_unit = "year",
+  time_available = NULL,
+  ...
+) {
+  if (!sd(table(unlist(df[[time_field]]))) == 0) {
+    stop("df should be a data frame with the same number of rows per year")
+  }
+  # assume that df is the row-bound data frame
+  df_years <- unique(df[[time_field]])
+  nlocs <- length(unique(df[[locs_id]]))
+  year_period <- seq(time_start, time_end)
+  # assign the time period to the available years
+  year_assigned <- post_calc_year_expand(time_start, time_end, time_unit, df_year)
+  df_years_repeats <- table(year_assigned)
+  
+  # repeat data frames
+  df_expanded <- Map(
+    function(y) {
+      df_sub <- df[df[[time_field]] == df_years[y], ]
+      df_sub <- df_sub[rep(seq_len(nrow(df_sub)), df_years_repeats[y]), ]
+      return(df_sub)
+    },
+    seq_along(year_assigned)
+  )
+  df_expanded <- do.call(rbind, df_expanded)
+  df_expanded[[time_field]] <- rep(year_period, each = nlocs)
+  return(df_expanded)
+}
+
 
 # calculate over a list
 #' Spatiotemporal covariate calculation
@@ -403,6 +470,98 @@ calculate <-
     return(res_calc)
   }
 
+
+#' Automatic joining by the time and spatial identifiers
+#' @description The key assumption is that all data frames will have
+#' time field and spatial field and the data should have one of date or year.
+#' Whether the input time unit is year or date
+#' is determined by the coercion of the **first row value** of the time field
+#' into a character with `as.Date()`. This function will fail if it
+#' gets year-like string with length 4.
+#'
+#' @param df_fine The fine-grained data frame.
+#' @param df_coarse The coarse-grained data frame.
+#' @param field_sp The name of the spatial field in the data frames.
+#' @param field_t The name of the time field in the data frames.
+#'
+#' @returns A merged data table.
+#' @returns
+#' df_fine0 <- data.frame(site_id = c("A", "B", "B", "C"),
+#'                       time = as.Date(c("2022-01-01", "2022-01-02", "2021-12-31", "2021-01-03")),
+#'                       value = c(1, 2, 3, 5))
+#' df_coarse0 <- data.frame(site_id = c("A", "B", "C"),
+#'                         time = c("2022", "2022", "2021"),
+#'                         other_value = c(10, 20, 30))
+#' jdf <- post_calc_autojoin(df_fine0, df_coarse0)
+#' print(jdf)
+#' @importFrom data.table merge.data.table
+#' @importFrom rlang as_name
+#' @importFrom rlang sym
+#' @export
+post_calc_autojoin <-
+  function(
+    df_fine,
+    df_coarse,
+    field_sp = "site_id",
+    field_t = "time"
+  ) {
+    common_field <- intersect(names(df_fine), names(df_coarse))
+    df_fine <- data.table::as.data.table(df_fine)
+    df_coarse <- data.table::as.data.table(df_coarse)
+    df_fine <- post_calc_drop_cols(df_fine)
+    df_coarse <- post_calc_drop_cols(df_coarse)
+
+    if (length(common_field) > 2) {
+      message("The data frames have more than two common fields.")
+      message("Trying to remove the redundant common fields...")
+      common_field <- intersect(names(df_fine), names(df_coarse))
+      print(common_field)
+    }
+    if (length(common_field) == 1) {
+      if (common_field == field_sp) {
+        joined <- data.table::merge.data.table(
+          df_fine, df_coarse,
+          by = field_sp,
+          all.x = TRUE
+        )
+      }
+    }
+    if (length(common_field) == 2) {
+      if (all(common_field %in% c(field_sp, field_t))) {
+        # t_fine <- try(as.Date(df_fine[[field_t]][1]))
+        df_coarse[[field_t]] <- as.character(df_coarse[[field_t]])
+        t_coarse <- try(as.Date(df_coarse[[field_t]][1]))
+        if (inherits(t_coarse, "try-error")) {
+          message("The time field includes years. Trying different join strategy.")
+          joined <- post_calc_join_yeardate(df_coarse, df_fine, field_t, field_t)
+        } else {
+          joined <- data.table::merge.data.table(
+            df_fine, df_coarse,
+            by = c(field_sp, field_t),
+            all.x = TRUE
+          )
+        }
+      }
+    }
+    return(joined)
+  }
+
+# xx <- Reduce(post_calc_autojoin, c(list(j2), j1))
+# sapply(j1, \(x) names(x)[1:8])
+
+# # Example usage
+# df_fine0 <- data.frame(site_id = c("A", "B", "B", "C"),
+#                       lon = rep("barns", 4),
+#                       time = as.Date(c("2022-01-01", "2022-01-02", "2021-12-31", "2021-01-03")),
+#                       value = c(1, 2, 3, 5))
+
+# df_coarse0 <- data.frame(site_id = c("A", "B", "C"),
+#                         lon = rep("J", 3),
+#                         time = c("2022", "2022", "2021"),
+#                         other_value = c(10, 20, 30))
+
+# jdf <- post_calc_autojoin(df_fine0, df_coarse0)
+# print(jdf)
 
 
 
@@ -805,8 +964,8 @@ post_calc_merge_features <-
 post_calc_unify_timecols <-
   function(
     df,
-    candidates = c("date"),
-    replace = meta_run("char_timeid")
+    candidates = c("year"),
+    replace = "time"
   ) {
     if (sum(names(df) %in% candidates) > 1) {
       stop("More than a candidate is detected in the input.")
@@ -849,13 +1008,22 @@ post_calc_join_yeardate <-
     df_date,
     field_year = "time",
     field_date = "time",
-    spid = meta_run("pointid")
+    spid = "site_id"
   ) {
     if (!inherits(df_year, "data.frame") && !inherits(df_date, "data.frame")) {
       stop("Both inputs should be data.frame.")
     }
+    # df_year[[field_year]] <- as.integer(df_year[[field_year]])
+    # df_date[[field_date]] <- as.POSIXlt(df_date[[field_date]])$year + 1900
+    
+    # df_date_joined <-
+    # df_date[df_year,
+    #          on = .(site_id == site_id, time >= time)
+    #        ]
+
     names(df_year)[names(df_year) %in% field_year] <- "year"
-    df_date$year <- as.integer(substr(df_date[[field_date]], 1, 4))
+    df_year[["year"]] <- as.character(df_year[["year"]])
+    df_date$year <- substr(df_date[[field_date]], 1, 4)
     #as.integer(format(as.Date(df_date[[field_date]]), "%Y"))
     df_joined <-
       data.table::merge.data.table(
@@ -910,6 +1078,42 @@ post_calc_merge_all <-
         year = target_years
       )
     return(locs_merged)
+  }
+
+
+#' Remove columns from a data frame based on regular expression patterns.
+#'
+#' This function removes columns from a data frame that match any of the specified
+#' regular expression patterns. By default, it removes columns with names that
+#' match the patterns "^lon$|^lat$|geoid|year$|description".
+#'
+#' @param df The input data frame.
+#' @param candidates A character vector of regular expression patterns to match
+#'   against column names. Columns that match any of the patterns will be removed.
+#'   The default value is "^lon$|^lat$|geoid|year$|description".
+#' @param strict logical(1). If `TRUE`, only `c("site_id", "time")` will be kept.
+#' @returns The modified data frame with the specified columns removed.
+#'
+#' @examples
+#' df <- data.frame(lon = 1:5, lat = 6:10, geoid = 11:15, year = 2010:2014,
+#'                  description = letters[1:5], other = 16:20)
+#' post_calc_drop_cols(df)
+#'
+#' @export
+post_calc_drop_cols <-
+  function(
+    df,
+    candidates = "(^lon$|^lat$|geoid|year$|description|geometry)",
+    strict = FALSE
+  ) {
+    idx_remove <-
+      if (!strict) {
+        grep(candidates, names(df), value = TRUE)
+      } else {
+        grep("site_id|time", names(df), value = TRUE, invert = TRUE)
+      }
+    df <- df[, -idx_remove, with = FALSE]
+    return(df)
   }
 
 
@@ -970,12 +1174,12 @@ df_params <- function(functions) {
   return(paramsdf)
 }
 
-schedo <- search_function("amadeus", "download_")
+# schedo <- search_function("amadeus", "download_")
 # sched <- search_function("amadeus", "process_")
 # schec <- search_function("amadeus", "calc_")
 # df_params(sched[-c(1, 2, 3, 4, 5, 6, 8, 11, 14, 15, 17, 18, 19, 20, 21, 25)])
 # df_params(schec[-c(1, 16)]) |> colnames()
-df_params(schedo) |> colnames()
+# df_params(schedo) |> colnames()
 
 
 
@@ -1329,10 +1533,10 @@ calc_gmted_direct <- function(
     locs_id = NULL,
     win = c(-126, -62, 22, 52),
     radius = 0,
-    fun = "mean",
+    fun = mean,
     ...) {
   #### directory setup
-  path <- download_sanitize_path(path)
+  path <- amadeus::download_sanitize_path(path)
   #### check for length of variable
   if (!(length(variable) == 2)) {
     stop(
@@ -1402,7 +1606,7 @@ calc_gmted_direct <- function(
   from <- data
   #return(from)
   #### prepare locations list
-  sites_list <- calc_prepare_locs(
+  sites_list <- amadeus::calc_prepare_locs(
     from = from,
     locs = locs,
     locs_id = locs_id,
@@ -1411,7 +1615,7 @@ calc_gmted_direct <- function(
   sites_e <- sites_list[[1]]
   sites_id <- sites_list[[2]]
   #### perform extraction
-  sites_extracted <- calc_worker(
+  sites_extracted <- amadeus::calc_worker(
     dataset = "gmted",
     from = from,
     locs_vector = sites_e,
@@ -1701,7 +1905,29 @@ append_predecessors <-
       dir.create(path_qs, recursive = TRUE)
     }
     input_old <- list.files(path_qs, "*.*.qs$", full.names = TRUE)
-    
+
+    # validate input_old with period_new
+    # if (length(input_old) > 0) {
+      # periods_old <- do.call(rbind, strsplit(input_old, "_"))
+      # periods_old <- periods_old[, 4:5]
+      # periods_old_check <- vapply(
+      #   seq(1, nrow(periods_old)),
+      #   function(i) {
+      #     period_old <- periods_old[i, ]
+      #     period_old <- as.Date(period_old, format = "%Y-%m-%d")
+      #     period_new <- as.Date(period_new, format = "%Y-%m-%d")
+      #     if (period_new[1] < period_old[1] | period_new[2] < period_old[2]) {
+      #       return(FALSE)
+      #     } else {
+      #       return(TRUE)
+      #     }
+      #   },
+      #   logical(1)
+      # )
+      # if (!all(periods_old_check)) {
+      #   stop("Results have an overlap period. Please provide a valid period.")
+      # }
+    # }
     period_new <- sapply(period_new, as.character)
     time_create <- gsub("[[:punct:]]|[[:blank:]]", "", Sys.time())
     name_qs <-
@@ -1714,6 +1940,8 @@ append_predecessors <-
       return(name_qs)
     } else {
       vv <- list()
+      qs::qsave(input_new, file = file.path(path_qs, name_qs))
+      input_update <- list.files(path_qs, "*.*.qs$", full.names = TRUE)
       bound_large <-
         Reduce(
           function(x, y) {
@@ -1724,7 +1952,7 @@ append_predecessors <-
             }
             return(bound)
           },
-          input_old
+          input_update
         )
       return(bound_large)
     }

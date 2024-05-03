@@ -4,41 +4,10 @@
 # is a function that returns a list of parameters for the pipeline
 # for users' convenience and make the pipeline less prone to errors.
 
-library(dplyr)
-library(sf)
-# for reference, full list of parameters in amadeus::process_*
-# and amadeus::calc_*.
-# This list will be useful for entering parameters by rlang::inject.
-amadeusArgs <- list(
-  path = NULL,
-  date = NULL,
-  variable = NULL,
-  year = NULL,
-  county = NULL,
-  variables = NULL,
-  from = NULL,
-  locs = NULL,
-  locs_id = NULL,
-  radius = NULL,
-  fun = NULL,
-  name_extracted = NULL,
-  fun_summary = NULL,
-  max_cells = NULL,
-  preprocess = NULL,
-  name_covariates = NULL,
-  subdataset = NULL,
-  nthreads = NULL,
-  package_list_add = NULL,
-  export_list_add = NULL,
-  sedc_bandwidth = NULL,
-  target_fields = NULL
-)
-
-
 target_calculate_fit <-
   list(
     tar_files_input(
-      file_calc_args,
+      file_prep_calc_args,
       files = list.files("inst/targets", pattern = "*.*.rds$", full.names = TRUE),
       format = "file",
       iteration = "vector",
@@ -46,15 +15,17 @@ target_calculate_fit <-
     )
     ,
     tar_target(
-      chr_features,
-      command = c("tri", "ecoregions", "koppen", "nlcd", "hms", "population",
-                 "groads", "nei"),
+      chr_iter_calc_features,
+      command = c("hms", "nlcd", "tri", "nei",
+                  "ecoregions", "koppen", "population", "groads"),
       iteration = "list",
       description = "Feature calculation"
     )
     ,
+    # "year" is included: tri, nlcd, nei
+    # "time" is included: hms
     tar_target(
-      chr_nasa,
+      chr_iter_calc_nasa,
       command = c(
          "mod11", "mod06", "mod13",
          "mcd19_1km", "mcd19_5km", "mod09", "viirs"
@@ -64,14 +35,14 @@ target_calculate_fit <-
     )
     ,
     tar_target(
-      chr_geoscf,
+      chr_iter_calc_geoscf,
       command = c("geoscf_chm", "geoscf_aqc"),
       iteration = "vector",
       description = "GEOS-CF feature calculation"
     )
     ,
     tar_target(
-      name = chr_gmted_vars,
+      name = chr_iter_calc_gmted_vars,
       command = c(
           "Breakline Emphasis", "Systematic Subsample",
           "Median Statistic", "Minimum Statistic",
@@ -83,24 +54,47 @@ target_calculate_fit <-
     )
     ,
     tar_target(
-      list_feat_base,
+      list_feat_calc_base,
       command =
         inject_calculate(
-          covariate = chr_features,
+          covariate = chr_iter_calc_features,
           locs = sf_feat_proc_aqs_sites,
-          injection = loadargs(file_calc_args, chr_features)),
-      pattern = cross(file_calc_args, chr_features),
+          injection = loadargs(file_prep_calc_args, chr_iter_calc_features)),
+      pattern = cross(file_prep_calc_args, chr_iter_calc_features),
       iteration = "list",
-      description = "Base feature list"
+      description = "Base feature list",
+      priority = 1
     )
     ,
     tar_target(
-      list_feat_nasa,
+      list_feat_calc_base_flat,
+      command = lapply(list_feat_calc_base, 
+        function(x) {
+          if (length(x) == 1) {
+            x[[1]]
+          } else if (
+            sum(grepl("light|medium|heavy",
+                  sapply(x, \(t) names(t)))) == 3) {
+            xr <- lapply(x, \(dt) {
+                    dta <- data.table::copy(dt)[, time := as.character(time)]
+                    return(dta)
+                  })
+            xrr <- reduce_merge(xr)
+            return(xrr)
+          } else {
+            data.table::rbindlist(x, use.names = TRUE, fill = TRUE)
+          }
+          }),
+      description = "Base feature list (all dt)"
+    )
+    ,
+    tar_target(
+      list_feat_calc_nasa,
       command =
         inject_modis_par(
           locs = sf_feat_proc_aqs_sites,
-          injection = loadargs(file_calc_args, chr_nasa)),
-      pattern = cross(file_calc_args, chr_nasa),
+          injection = loadargs(file_prep_calc_args, chr_iter_calc_nasa)),
+      pattern = cross(file_prep_calc_args, chr_iter_calc_nasa),
       resources = set_slurm_resource(
             ntasks = 1, ncpus = 20, memory = 8
           ),
@@ -109,12 +103,12 @@ target_calculate_fit <-
     )
     ,
     tar_target(
-      list_feat_geoscf,
+      list_feat_calc_geoscf,
       inject_geos(
         locs = sf_feat_proc_aqs_sites,
-        injection = loadargs(file_calc_args, chr_geoscf)
+        injection = loadargs(file_prep_calc_args, chr_iter_calc_geoscf)
       ),
-      pattern = cross(file_calc_args, chr_geoscf),
+      pattern = cross(file_prep_calc_args, chr_iter_calc_geoscf),
       iteration = "list",
       resources = set_slurm_resource(
             ntasks = 1, ncpus = 10, memory = 4
@@ -124,25 +118,26 @@ target_calculate_fit <-
     )
     ,
     tar_target(
-      name = list_feat_gmted,
+      name = list_feat_calc_gmted,
       command = inject_gmted(
         locs = sf_feat_proc_aqs_sites,
-        variable = chr_gmted_vars,
+        variable = chr_iter_calc_gmted_vars,
         radii = c(0, 1e3, 1e4, 5e4),
-        injection = loadargs(file_calc_args, "gmted")
+        injection = loadargs(file_prep_calc_args, "gmted")
       ),
       iteration = "list",
-      pattern = cross(file_calc_args, chr_gmted_vars),
+      pattern = cross(file_prep_calc_args, chr_iter_calc_gmted_vars),
       resources = set_slurm_resource(
             ntasks = 1, ncpus = 4, memory = 8
-          )
+          ),
+      description = "GMTED feature list"
     )
     ,
     targets::tar_target(
       name = list_feat_calc_narr,
       command = #rlang::inject(
         lapply(
-          loadargs(file_calc_args, "narr")$domain,
+          loadargs(file_prep_calc_args, "narr")$domain,
           function(x) {
             from <- process_narr2(
               path = "input/narr",
@@ -154,14 +149,7 @@ target_calculate_fit <-
               locs = sf_feat_proc_aqs_sites,
               locs_id = "site_id")
           }),
-        
-      
-      # command = inject_calculate(
-      #   covariate = "narr",
-      #   locs = sf_feat_proc_aqs_sites,
-      #   injection = loadargs(file_calc_args, "narr")
-      # ),
-      pattern = map(file_calc_args),
+      pattern = map(file_prep_calc_args),
       iteration = "list",
       resources = set_slurm_resource(
             ntasks = 1, ncpus = 1, memory = 32
@@ -169,31 +157,21 @@ target_calculate_fit <-
     )
     ,
     tar_target(
-      list_feat_base_flat,
-      command =
-        lapply(list_feat_base,
-               function(x) { 
-                 reduce_merge(x, by = NULL)
-               }),
-      description = "data.table of base features"
+      dt_feat_calc_gmted,
+      command = reduce_merge(list_feat_calc_gmted, "site_id"),
+      description = "data.table of GMTED features"
     )
     ,
     tar_target(
-      dt_feat_nasa,
-      command = reduce_merge(list_feat_nasa),
+      dt_feat_calc_nasa,
+      command = reduce_merge(list_feat_calc_nasa),
       description = "data.table of MODIS/VIIRS features"
     )
     ,
     tar_target(
-      dt_feat_geoscf,
-      command = reduce_merge(list_feat_geoscf),
+      dt_feat_calc_geoscf,
+      command = reduce_merge(list_feat_calc_geoscf),
       description = "data.table of GEOS-CF features"
-    )
-    ,
-    tar_target(
-      dt_feat_gmted,
-      command = reduce_merge(list_feat_gmted, "site_id"),
-      description = "data.table of GMTED features"
     )
     ,
     tar_target(
@@ -202,41 +180,60 @@ target_calculate_fit <-
     )
     ,
     tar_target(
-      dt_feat_fit,
-      command = reduce_merge(
+      dt_feat_calc_date,
+      command = 
+      Reduce(
+        post_calc_autojoin,
         list(
-          reduce_merge(list_feat_base_flat, by = NULL),
-          dt_feat_nasa,
-          dt_feat_geoscf,
-          dt_feat_calc_narr
+          reduce_merge(dt_feat_calc_narr, by = NULL),
+          dt_feat_calc_geoscf,
+          dt_feat_calc_nasa
         )
       ),
-      description = "data.table of all but GMTED features"
+      description = "data.table of all daily features"
     )
     ,
     tar_target(
-      dt_feat_fit_gmted,
-      command = data.table::merge(dt_feat_fit, dt_feat_gmted, by = "site_id", all = TRUE),
-      description = "data.table of all features with GMTED"
+      dt_feat_calc_base,
+      command = 
+      Reduce(
+        post_calc_autojoin,
+        c(
+          list(dt_feat_proc_aqs_sites_time),
+          list_feat_calc_base_flat,
+          list(dt_feat_calc_gmted)
+        )
+      ),
+      description = "Base features with PM2.5"
     )
     ,
     targets::tar_target(
-      dt_feat_fit_pm,
-      post_calc_join_pm25_features(
-        df_pm = sf_feat_proc_aqs_pm25,
-        df_covar = dt_feat_fit_gmted,
-        locs_id = "site_id",
-        time_id = "time"
-      ),
+      dt_feat_calc_design,
+      command =
+        post_calc_autojoin(
+          dt_feat_calc_base,
+          dt_feat_calc_date
+        ),
       description = "data.table of all features with PM2.5"
     )
+    # ,
+    # tar_target(
+    #   dt_feat_fit_pm,
+    #   post_calc_join_pm25_features(
+    #     df_pm = sf_feat_proc_aqs_pm25,
+    #     df_covar = dt_feat_fit_x,
+    #     locs_id = "site_id",
+    #     time_id = "time"
+    #   ),
+    #   description = "data.table of all features with PM2.5"
+    # )
     ,
     tar_target(
       dt_feat_calc_cumulative,
       command = append_predecessors(
         path_qs = "output/qs",
         period_new = arglist_common$char_period,
-        input_new = dt_feat_fit_pm,
+        input_new = dt_feat_calc_design,
         nthreads = 8L
       ),
       description = "Cumulative feature calculation",
@@ -244,85 +241,7 @@ target_calculate_fit <-
             ntasks = 1, ncpus = 8, memory = 100
           )
     )
-    #   # Merge spatial-only features ####
-    # targets::tar_target(
-    #   dt_feat_fit_xsp_base,
-    #   post_calc_merge_features(
-    #     by = meta_run("char_siteid"),
-    #     time = FALSE,
-    #     dt_feat_calc_koppen,
-    #     dt_feat_calc_ecoregions,
-    #     dt_feat_calc_gmted,
-    #     dt_feat_calc_nei
-    #   )
-    # )
-    # ,
-    # # Merge spatiotemporal features ####
-    # targets::tar_target(
-    #   dt_feat_fit_xst_base,
-    #   post_calc_merge_features(
-    #     by = meta_run("char_siteid"),
-    #     time = TRUE,
-    #     dt_feat_calc_hms,
-    #     dt_feat_calc_geoscf_aqc,
-    #     dt_feat_calc_geoscf_chm,
-    #     dt_feat_calc_modis_mod06 |> data.table::as.data.table(),
-    #     dt_feat_calc_modis_mod09 |> data.table::as.data.table(),
-    #     dt_feat_calc_modis_mod11 |> data.table::as.data.table(),
-    #     dt_feat_calc_modis_mod13 |> data.table::as.data.table(),
-    #     dt_feat_calc_modis_mcd19_1km |> data.table::as.data.table(),
-    #     dt_feat_calc_modis_mcd19_5km |> data.table::as.data.table(),
-    #     dt_feat_calc_viirs  |> data.table::as.data.table()
-    #   )
-    # )
-    # ,
-    # targets::tar_target(
-    #   dt_feat_fit_xst_nlcd,
-    #   post_calc_join_yeardate(
-    #     dt_feat_calc_nlcd,
-    #     dt_feat_fit_xst_base,
-    #     field_year = "time",
-    #     field_date = "time",
-    #     spid = meta_run("char_siteid")
-    #   )
-    # )
-    # ,
-    # targets::tar_target(
-    #   dt_feat_fit_xst,
-    #   post_calc_join_yeardate(
-    #     dt_feat_calc_tri,
-    #     dt_feat_fit_xst_nlcd,
-    #     field_year = "time",
-    #     field_date = "time",
-    #     spid = meta_run("char_siteid")
-    #   )
-    # )
-    # ,
-    # targets::tar_target(
-    #   dt_feat_fit_x,
-    #   post_calc_merge_all(
-    #     locs = sf_feat_proc_aqs_sites_time,
-    #     locs_id = meta_run("char_siteid"),
-    #     time_id = meta_run("char_timeid"),
-    #     target_years =
-    #       seq(
-    #         as.integer(format(meta_run("date_start"), "%Y")),
-    #         as.integer(format(meta_run("date_end"), "%Y"))
-    #       ),
-    #     df_sp = dt_feat_fit_xsp_base,
-    #     df_spt = dt_feat_fit_xst
-    #   )
-    # )
-    # ,
-    # targets::tar_target(
-    #   dt_feat_fit,
-    #   post_calc_join_pm25_features(
-    #     df_pm = sf_feat_proc_aqs_pm25,
-    #     df_covar = dt_feat_fit_x,
-    #     locs_id = meta_run("char_siteid"),
-    #     time_id = meta_run("char_timeid")
-    #   )
-    # )
+  # TODO: compute lagged variables
   )
 
 

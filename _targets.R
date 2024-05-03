@@ -3,14 +3,14 @@ library(tarchetypes)
 library(future)
 library(future.batchtools)
 
-tar_source("./inst/targets/pipeline_base_functions.R")
-tar_source("./inst/targets/targets_initialize.R")
-tar_source("./inst/targets/targets_download.R")
-tar_source("./inst/targets/targets_calculate.R")
-tar_source("./inst/targets/targets_baselearner.R")
-tar_source("./inst/targets/targets_metalearner.R")
-tar_source("./inst/targets/targets_predict.R")
-tar_source("./inst/targets/targets_arglist.R")
+tar_source("inst/targets/pipeline_base_functions.R")
+tar_source("inst/targets/targets_initialize.R")
+tar_source("inst/targets/targets_download.R")
+tar_source("inst/targets/targets_calculate.R")
+tar_source("inst/targets/targets_baselearner.R")
+tar_source("inst/targets/targets_metalearner.R")
+tar_source("inst/targets/targets_predict.R")
+tar_source("inst/targets/targets_arglist.R")
 
 # bypass option
 Sys.setenv("BTV_DOWNLOAD_PASS" = "TRUE")
@@ -33,8 +33,10 @@ plan(
   )
 )
 
-# invalidate any nodes older than 180 days: force running the pipeline
-tar_invalidate(any_of(tar_older(Sys.time() - as.difftime(180, units = "days"))))
+# # invalidate any nodes older than 180 days: force running the pipeline
+# tar_invalidate(any_of(tar_older(Sys.time() - as.difftime(180, units = "days"))))
+
+
 # # nullify download target if bypass option is set
 if (Sys.getenv("BTV_DOWNLOAD_PASS") == "TRUE") {
   target_download <- NULL
@@ -46,10 +48,12 @@ tar_option_set(
   packages =
     c("amadeus", "chopin", "targets", "tarchetypes",
       "data.table", "sf", "terra", "exactextractr",
-      "crew", "crew.cluster", "tigris", "dplyr",
+      #"crew", "crew.cluster", 
+      "tigris", "dplyr",
       "future.batchtools", "qs",
       "future", "future.apply", "future.callr", "callr",
-      "sftime", "stars", "rlang", "foreach", "parallelly"),
+      #"sftime",
+      "stars", "rlang", "foreach", "parallelly"),
   library = "~/r-libs",
   repository = "local",
   error = "continue",
