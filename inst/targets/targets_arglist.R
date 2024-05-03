@@ -59,7 +59,7 @@ arglist_common <-
   list(
     char_siteid = "site_id",
     char_timeid = "time",
-    char_period = c("2018-02-12", "2018-03-05"),
+    char_period = c("2018-01-01", "2018-12-31"),
     extent = c(-126, -62, 22, 52),
     user_email = "songi2@nih.gov"
   )
