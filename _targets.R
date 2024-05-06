@@ -89,6 +89,8 @@ tar_option_set(
   memory = "persistent",
   format = "qs",
   storage = "main",
+  deployment = "worker",
+  garbage_collection = TRUE,
   seed = 202401L
 )
 
