@@ -410,3 +410,178 @@ calc_narr2(
   locs_id = "site_id",
   radius = 0
 )
+
+
+
+# post_calc_df_year_expand example
+dttime <- tar_read(dt_feat_proc_aqs_sites_time)
+dtnlcd <- tar_read(list_feat_calc_base_flat)[[2]]
+dtnei <- tar_read(list_feat_calc_base_flat)[[4]]
+
+dtnlcde <-
+post_calc_df_year_expand(
+  dtnlcd,
+  time_start = 2018L,
+  time_end = 2022L,
+  time_available = c(2019L, 2021L)
+)
+dtnlcd
+dtneie <-
+post_calc_df_year_expand(
+  dtnei,
+  time_start = 2018L,
+  time_end = 2022L,
+  time_available = c(2017L, 2020L)
+)
+table(dtneie$time, dtneie$nei_year)
+
+
+sfsts <- tar_read(sf_feat_proc_aqs_sites)
+nlcd <- amadeus::process_nlcd(path = "input/nlcd/raw", year = 2019L)
+nlcdcalc <- amadeus::calc_nlcd(nlcd, sfsts, max_cells = 3e7)
+
+calc_nlcd0 <- function(from,
+                      locs,
+                      locs_id = "site_id",
+                      radius = 1000,
+                      max_cells = 1e8,
+                      geom = FALSE,
+                      ...) {
+  # check inputs
+  if (!is.numeric(radius)) {
+    stop("radius is not a numeric.")
+  }
+  if (radius <= 0 && terra::geomtype(locs) == "points") {
+    stop("radius has not a likely value.")
+  }
+
+  if (!methods::is(from, "SpatRaster")) {
+    stop("from is not a SpatRaster.")
+  }
+
+  # prepare locations
+  locs_prepared <- calc_prepare_locs(
+    from = from,
+    locs = locs,
+    locs_id = locs_id,
+    radius = radius,
+    geom = geom
+  )
+  locs_vector <- locs_prepared[[1]]
+  locs_df <- locs_prepared[[2]]
+
+  year <- try(as.integer(terra::metags(from, name = "year")))
+
+  data_vect_b <- locs_vector |>
+    terra::project(y = terra::crs(from))
+
+  # subset locs_df to those in us extent
+  # locs_dfs <- locs_df[
+  #   unlist(locs_df[[locs_id]]) %in% unlist(data_vect_b[[locs_id]]),
+  # ]
+
+  # create circle buffers with buf_radius
+  bufs_pol <- terra::buffer(data_vect_b, width = radius) |>
+    sf::st_as_sf() |>
+    sf::st_geometry()
+  # ratio of each nlcd class per buffer
+  nlcd_at_bufs <-
+    exactextractr::exact_extract(
+      from,
+      bufs_pol,
+      fun = "frac",
+      stack_apply = TRUE,
+      force_df = TRUE,
+      progress = FALSE,
+      max_cells_in_memory = max_cells
+    )
+
+  # select only the columns of interest
+  cfpath <- system.file("extdata", "nlcd_classes.csv", package = "amadeus")
+  nlcd_classes <- utils::read.csv(cfpath)
+  nlcd_at_bufs <-
+    nlcd_at_bufs[
+      sort(names(nlcd_at_bufs)[
+        grepl(paste0("frac_(", paste(nlcd_classes$value, collapse = "|"), ")"),
+              names(nlcd_at_bufs))
+      ])
+    ]
+  # change column names
+  nlcd_names <- names(nlcd_at_bufs)
+  nlcd_names <- sub(pattern = "frac_", replacement = "", x = nlcd_names)
+  nlcd_names <- sort(as.numeric(nlcd_names))
+  nlcd_names <- nlcd_classes[nlcd_classes$value %in% nlcd_names, c("class")]
+  new_names <- sapply(
+    nlcd_names,
+    function(x) {
+      sprintf("LDU_%s_0_%05d", x, radius)
+    }
+  )
+  names(nlcd_at_bufs) <- new_names
+  # merge locs_df with nlcd class fractions
+  new_data_vect <- cbind(locs_df, as.integer(year), nlcd_at_bufs)
+  if (geom) {
+    names(new_data_vect)[1:3] <- c(locs_id, "geometry", "time")
+  } else {
+    names(new_data_vect)[1:2] <- c(locs_id, "time")
+  }
+  calc_check_time(covar = new_data_vect, POSIXt = FALSE)
+  return(new_data_vect)
+}
+
+nlcdcalc0 <- calc_nlcd0(nlcd, sfsts, radius = 1e4, max_cells = 5e7)
+nlcdcalc <- amadeus::calc_nlcd(nlcd, sfsts, radius = 1e4, max_cells = 3e8)
+
+
+
+
+
+
+## tidymodel specification
+xgb_mod <-
+  parsnip::boost_tree(learn_rate = tune::tune()) |>
+  set_engine("xgboost", eval_metric = list("rmse", "mae")) |>
+  set_mode("regression")
+
+pm25mod <- workflow() |>
+  add_model(xgb_mod) |>
+  add_formula(pm2.5 ~ .) |>
+  tune::tune_bayes(resamples = dfcovarstdt_cv, iter = 50) |>
+  fit_resamples(dfcovarstdt_cv, yardstick::metric_set(rmse, mae))
+
+terms0 <- names(dfcovarstdt[[1]])
+terms0 <- terms0[5:160]
+mlp_mod <-
+  parsnip::mlp(
+    hidden_units = tune::tune(),
+    dropout = tune::tune(),
+    learn_rate = tune::tune()
+  ) |>
+  set_engine("brulee") |>
+  set_mode("regression")
+mlp_workflow <- workflow() |>
+  add_model(mlp_mod) |>
+  add_formula(reformulate(response = "pm2.5", termlabels = terms0)) |>
+  tune::tune_bayes(resamples = dfcovarstdt_cv, iter = 10) |>
+  fit_resamples(dfcovarstdt_cv, yardstick::metric_set(rmse, mae))
+
+
+
+## 
+t1 <-
+process_narr2(
+  date = c("2018-01-01", "2018-03-31"),
+  variable = "omega",
+  path = "input/narr"
+)
+cc <-
+calc_narr2(
+  from = t1,
+  locs = tar_read(sf_feat_proc_aqs_sites)[1:10,],
+  locs_id = "site_id",
+  radius = 0
+)
+
+
+# NLCD rerun: "list_feat_calc_base_80d971c6df0131b6"
+# tar_make_future(c(list_feat_calc_base_80d971c6df0131b6, list_feat_calc_narr), workers = 2)

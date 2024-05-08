@@ -137,23 +137,17 @@ target_calculate_fit <-
     targets::tar_target(
       name = list_feat_calc_narr,
       command = #rlang::inject(
-        lapply(
-          loadargs(file_prep_calc_args, "narr")$domain,
-          function(x) {
-            from <- process_narr2(
-              path = "input/narr",
-              variable = x,
-              date = arglist_common$char_period
-            )
-            calc_narr2(
-              from = from,
-              locs = sf_feat_proc_aqs_sites,
-              locs_id = "site_id")
-          }),
+        par_narr(
+          domain = loadargs(file_prep_calc_args, "narr")$domain,
+          date = arglist_common$char_period,
+          locs = sf_feat_proc_aqs_sites,
+          nthreads = 24L
+        )
+      ,
       pattern = map(file_prep_calc_args),
       iteration = "list",
       resources = set_slurm_resource(
-            ntasks = 1, ncpus = 1, memory = 32
+            ntasks = 1, ncpus = 24, memory = 8
           )
     )
     ,

@@ -208,7 +208,10 @@ inject_gmted <- function(locs, variable, radii, injection, nthreads = 4L) {
 #'
 #' @import data.table
 #' @export
-reduce_merge <- function(list_in, by = c("site_id", "time"), all.x = TRUE, all.y = TRUE) {
+reduce_merge <- function(list_in, by = c("site_id", "time"), all.x = TRUE, all.y = FALSE) {
+  list_check <- sapply(list_in, nrow)
+  list_checkdiff <- diff(list_check)
+  if (any(list_checkdiff > 0)) all.y <- TRUE
   Reduce(
     function(x, y) {
       if (is.null(by)) by <- intersect(names(x), names(y))
@@ -220,8 +223,29 @@ reduce_merge <- function(list_in, by = c("site_id", "time"), all.x = TRUE, all.y
 }
 
 
+par_narr <- function(domain, date, locs, nthreads = 24L) {
 
+  future::plan(future::multicore, workers = nthreads)
 
+  res <-
+    future.apply::future_lapply(
+      domain,
+      function(x) {
+        from <- process_narr2(
+          path = "input/narr",
+          variable = x,
+          date = date
+        )
+        calc_narr2(
+          from = from,
+          locs = locs,
+          locs_id = "site_id")
+      },
+      future.seed = TRUE)
+  future::plan(future::sequential)
+  return(res)
+
+}
 
 #' Add Time Column
 #'
@@ -330,7 +354,7 @@ post_calc_df_year_expand <- function(
   nlocs <- length(unique(df[[locs_id]]))
   year_period <- seq(time_start, time_end)
   # assign the time period to the available years
-  year_assigned <- post_calc_year_expand(time_start, time_end, time_unit, df_year)
+  year_assigned <- post_calc_year_expand(time_start, time_end, time_unit, df_years)
   df_years_repeats <- table(year_assigned)
   
   # repeat data frames
@@ -437,7 +461,7 @@ calculate <-
                                         sprintf(
                                           "%s_year",
                                           unname(args_process$covariate)))
-                    res <- add_time_col(res, year_each, "year")
+                    # res <- add_time_col(res, year_each, "year")
                   }
                   res <- data.table::as.data.table(res)
                   return(res)
@@ -1811,11 +1835,14 @@ calc_narr2 <- function(
   time_from <- terra::time(from)
   timetab <- table(time_from)
   if (!all(timetab == 1)) {
-    time_split <- split(time_from, as.integer(as.factor(time_from)))
+    time_split <-
+      split(time_from,
+            #ceiling(seq_along(time_from) / 29L)) 
+            ceiling(as.integer(as.factor(time_from)) / 10L))
     sites_extracted <- Map(
       function(day) {
-        cat(sprintf("Processing %s...\n", day))
-        from_day <- from[[time_from == day]]
+        cat(sprintf("Processing %s...\n", paste(day[1], "-", day[length(day)])))
+        from_day <- from[[time_from %in% day]]
         sites_extracted_day <- terra::extract(
           from_day,
           sites_e,
