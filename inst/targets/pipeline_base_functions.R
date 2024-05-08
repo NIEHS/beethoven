@@ -208,7 +208,7 @@ inject_gmted <- function(locs, variable, radii, injection, nthreads = 4L) {
 #'
 #' @import data.table
 #' @export
-reduce_merge <- function(list_in, by = c("site_id", "time"), all.x = TRUE, all.y = FALSE) {
+reduce_merge <- function(list_in, by = c("site_id", "time"), all.x = TRUE, all.y = TRUE) {
   Reduce(
     function(x, y) {
       if (is.null(by)) by <- intersect(names(x), names(y))
@@ -459,7 +459,17 @@ calculate <-
       cat(paste0(attr(res_calc, "condition")$message, "\n"))
       stop("Results do not match expectations.")
     }
-    res_calc <- lapply(res_calc, function(x) data.table::as.data.table(x))
+    res_calc <- lapply(res_calc,
+      function(x) {
+        if ("time" %in% names(x)) {
+          if (nchar(x$time[1]) != 4) {
+            x$time <- data.table::as.IDate(x$time)
+          }
+        }
+        xconvt <- data.table::as.data.table(x)
+        return(xconvt)
+      }
+    )
     # res_calcdf <- if (length(res_calc) == 1) {
     #   data.table::as.data.table(res_calc[[1]])
     # } else if (domain_name %in% c("year", "date")) {
@@ -1533,7 +1543,7 @@ calc_gmted_direct <- function(
     locs_id = NULL,
     win = c(-126, -62, 22, 52),
     radius = 0,
-    fun = mean,
+    fun = "mean",
     ...) {
   #### directory setup
   path <- amadeus::download_sanitize_path(path)
@@ -1791,7 +1801,7 @@ calc_narr2 <- function(
   #### prepare locations list
   sites_list <- amadeus::calc_prepare_locs(
     from = from,
-    locs = locs,
+    locs = locs[, "site_id"],
     locs_id = locs_id,
     radius = radius
   )
@@ -1812,8 +1822,10 @@ calc_narr2 <- function(
           bind = TRUE
         )
         sites_extracted_day <- data.frame(sites_extracted_day)
-        sites_extracted_day <- sites_extracted_day |>
-          dplyr::select(-geometry)
+        if ("geometry" %in% names(sites_extracted_day)) {
+          sites_extracted_day <- sites_extracted_day |>
+            dplyr::select(-geometry)
+        }
         return(sites_extracted_day)
       },
       time_split
@@ -1826,9 +1838,11 @@ calc_narr2 <- function(
         sites_e,
         bind = TRUE
       )
-    sites_extracted <- data.frame(sites_extracted)
-    sites_extracted <- sites_extracted |>
-      dplyr::select(-geometry)
+    sites_extracted <- as.data.frame(sites_extracted)
+    if ("geometry" %in% names(sites_extracted)) {
+      sites_extracted <- sites_extracted |>
+        dplyr::select(-geometry)
+    }
   }
   sites_extracted <-
     sites_extracted |>

@@ -76,7 +76,8 @@ target_calculate_fit <-
             sum(grepl("light|medium|heavy",
                   sapply(x, \(t) names(t)))) == 3) {
             xr <- lapply(x, \(dt) {
-                    dta <- data.table::copy(dt)[, time := as.character(time)]
+                    dta <- data.table::copy(dt)
+                    dta <- dta[, time := as.character(time)]
                     return(dta)
                   })
             xrr <- reduce_merge(xr)

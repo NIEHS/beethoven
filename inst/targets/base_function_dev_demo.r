@@ -389,3 +389,24 @@ read_locs(
 xl <- tar_read(list_feat_calc_base)[[1]]
 xlr <- lapply(xl, \(dt) dt[, time := as.character(time)])
 reduce_merge(xlr)
+
+
+
+
+
+# list_feat_calc_narr_08994ec6855ea923
+source("inst/targets/pipeline_base_functions.R")
+gg <-
+  process_narr2(
+    date = c("2018-01-01", "2018-05-31"),
+    variable = "air.sfc",
+    path = "input/narr"
+  )
+
+gge <-
+calc_narr2(
+  from = gg,
+  locs = tar_read(sf_feat_proc_aqs_sites),
+  locs_id = "site_id",
+  radius = 0
+)

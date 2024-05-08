@@ -69,26 +69,27 @@ tar_option_set(
   #     slurm_time_minutes = NULL,
   #     slurm_partition = "geo"
   #   ),
-  resources = tar_resources(
-    future = tar_resources_future(
-      plan =
-        tweak(
-          future.batchtools::batchtools_slurm,
-          template = "inst/targets/template_slurm.tmpl",
-          resources =
-            list(
-              memory = 10,
-              log.file = "slurm_run.log",
-              ncpus = 1, partition = "geo", ntasks = 1,
-              email = arglist_common$user_email,
-              error.file = "slurm_error.log"
-            )
-        )
-    )
-  ),
-  memory = "persistent",
+  # resources = tar_resources(
+  #   future = tar_resources_future(
+  #     plan =
+  #       tweak(
+  #         future.batchtools::batchtools_slurm,
+  #         template = "inst/targets/template_slurm.tmpl",
+  #         resources =
+  #           list(
+  #             memory = 10,
+  #             log.file = "slurm_run.log",
+  #             ncpus = 1, partition = "geo", ntasks = 1,
+  #             email = arglist_common$user_email,
+  #             error.file = "slurm_error.log"
+  #           )
+  #       ),
+  #       multicore
+  #   )
+  # ),
+  memory = "transient",
   format = "qs",
-  storage = "main",
+  storage = "worker",
   deployment = "worker",
   garbage_collection = TRUE,
   seed = 202401L
