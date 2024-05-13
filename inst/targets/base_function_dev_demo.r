@@ -435,6 +435,41 @@ post_calc_df_year_expand(
 )
 table(dtneie$time, dtneie$nei_year)
 
+datf <- tar_read(dt_feat_calc_date)
+post_calc_drop_cols(dtnlcd)
+datjj <- post_calc_autojoin(datf, dtnlcd)
+dtnlcdv <- data.table::setkeyv(dtnlcd, c("site_id", "time"))
+datkk <- post_calc_join_yeardate(dtnlcdv[, -c("year"), with=F], datf)
+
+datff <- datf[, `:=`(year = as.integer(substr(time, 1, 4)))]
+datkkk <- merge(dtnlcde, datff, by = c("site_id", "year"))
+
+which(names(datf) %in% "time")
+
+post_calc_year_expand(
+  2018, 2022, time_available = c(2017, 2021)
+)
+post_calc_year_expand(
+  2018, 2022, time_available = c(2019, 2021)
+)
+sort(unique(unlist(dtneie[["time"]])))
+
+
+datex1 <-
+post_calc_df_year_expand(
+  dtneie,
+  time_start = 2018,
+  time_end = 2022,
+  time_available = c(2017, 2021)
+)
+datex2 <-
+post_calc_df_year_expand(
+  dtnlcd,
+  time_start = 2018,
+  time_end = 2022,
+  time_available = c(2019, 2021)
+)
+
 
 sfsts <- tar_read(sf_feat_proc_aqs_sites)
 nlcd <- amadeus::process_nlcd(path = "input/nlcd/raw", year = 2019L)
@@ -585,3 +620,31 @@ calc_narr2(
 
 # NLCD rerun: "list_feat_calc_base_80d971c6df0131b6"
 # tar_make_future(c(list_feat_calc_base_80d971c6df0131b6, list_feat_calc_narr), workers = 2)
+# tar_make_future(list_feat_calc_base_80d971c6df0131b6, workers = 2)
+
+
+# NARR error in 1+ year runs
+# Warning: [rast] GDAL did not find an extent. Cells not equally spaced?
+narrk <- "input/narr"
+narrvars = c("air.sfc", "albedo", "apcp", "dswrf", "evap", "hcdc",
+              "hpbl", "lcdc", "lhtfl", "mcdc", "omega", "pr_wtr",
+              "prate", "pres.sfc", "shtfl", "shum", "snowc", "soilm",    
+              "tcdc", "ulwrf.sfc", "uwnd.10m", "vis", "vwnd.10m", "weasd")
+
+for (i in narrvars) {
+  cat(sprintf("processing %s\n", i))
+  narrproc <- process_narr2(
+    date = c("2018-01-01", "2019-12-31"),
+    variable = i,
+    path = narrk
+  )
+}
+
+
+source("inst/targets/pipeline_base_functions.R")
+fl <- tar_read(list_feat_calc_base_flat)
+dtt <- tar_read(dt_feat_proc_aqs_sites_time)
+fld <- Reduce(post_calc_autojoin, fl[1:7])
+post_calc_autojoin(fl[[1]], fl[[7]])
+fl[[7]]
+post_calc_autojoin(dtt, fl)

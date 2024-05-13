@@ -304,7 +304,11 @@ post_calc_year_expand <-
     time_target_seq <- time_available[time_target_seq]
     if (min(time_available) > time_start) {
       time_target_seq <-
-        c(rep(min(time_available), min(time_available) - time_start), time_target_seq)
+        c(
+          rep(min(time_available),
+              min(time_available) - time_start),
+          time_target_seq
+        )
     }
     return(time_target_seq)
   }
@@ -346,10 +350,16 @@ post_calc_df_year_expand <- function(
   time_available = NULL,
   ...
 ) {
-  if (!sd(table(unlist(df[[time_field]]))) == 0) {
-    stop("df should be a data frame with the same number of rows per year")
+  time_summary <- table(unlist(df[[time_field]]))
+  if (length(time_summary) != 1) {
+    if (sd(time_summary) != 0) {
+      stop("df should be a data frame with the same number of rows per year")
+    }
   }
   # assume that df is the row-bound data frame
+  if (is.character(df[[time_field]])) {
+    df[[time_field]] <- as.integer(df[[time_field]])
+  }
   df_years <- unique(df[[time_field]])
   nlocs <- length(unique(df[[locs_id]]))
   year_period <- seq(time_start, time_end)
@@ -505,80 +515,7 @@ calculate <-
   }
 
 
-#' Automatic joining by the time and spatial identifiers
-#' @description The key assumption is that all data frames will have
-#' time field and spatial field and the data should have one of date or year.
-#' Whether the input time unit is year or date
-#' is determined by the coercion of the **first row value** of the time field
-#' into a character with `as.Date()`. This function will fail if it
-#' gets year-like string with length 4.
-#'
-#' @param df_fine The fine-grained data frame.
-#' @param df_coarse The coarse-grained data frame.
-#' @param field_sp The name of the spatial field in the data frames.
-#' @param field_t The name of the time field in the data frames.
-#'
-#' @returns A merged data table.
-#' @returns
-#' df_fine0 <- data.frame(site_id = c("A", "B", "B", "C"),
-#'                       time = as.Date(c("2022-01-01", "2022-01-02", "2021-12-31", "2021-01-03")),
-#'                       value = c(1, 2, 3, 5))
-#' df_coarse0 <- data.frame(site_id = c("A", "B", "C"),
-#'                         time = c("2022", "2022", "2021"),
-#'                         other_value = c(10, 20, 30))
-#' jdf <- post_calc_autojoin(df_fine0, df_coarse0)
-#' print(jdf)
-#' @importFrom data.table merge.data.table
-#' @importFrom rlang as_name
-#' @importFrom rlang sym
-#' @export
-post_calc_autojoin <-
-  function(
-    df_fine,
-    df_coarse,
-    field_sp = "site_id",
-    field_t = "time"
-  ) {
-    common_field <- intersect(names(df_fine), names(df_coarse))
-    df_fine <- data.table::as.data.table(df_fine)
-    df_coarse <- data.table::as.data.table(df_coarse)
-    df_fine <- post_calc_drop_cols(df_fine)
-    df_coarse <- post_calc_drop_cols(df_coarse)
 
-    if (length(common_field) > 2) {
-      message("The data frames have more than two common fields.")
-      message("Trying to remove the redundant common fields...")
-      common_field <- intersect(names(df_fine), names(df_coarse))
-      print(common_field)
-    }
-    if (length(common_field) == 1) {
-      if (common_field == field_sp) {
-        joined <- data.table::merge.data.table(
-          df_fine, df_coarse,
-          by = field_sp,
-          all.x = TRUE
-        )
-      }
-    }
-    if (length(common_field) == 2) {
-      if (all(common_field %in% c(field_sp, field_t))) {
-        # t_fine <- try(as.Date(df_fine[[field_t]][1]))
-        df_coarse[[field_t]] <- as.character(df_coarse[[field_t]])
-        t_coarse <- try(as.Date(df_coarse[[field_t]][1]))
-        if (inherits(t_coarse, "try-error")) {
-          message("The time field includes years. Trying different join strategy.")
-          joined <- post_calc_join_yeardate(df_coarse, df_fine, field_t, field_t)
-        } else {
-          joined <- data.table::merge.data.table(
-            df_fine, df_coarse,
-            by = c(field_sp, field_t),
-            all.x = TRUE
-          )
-        }
-      }
-    }
-    return(joined)
-  }
 
 # xx <- Reduce(post_calc_autojoin, c(list(j2), j1))
 # sapply(j1, \(x) names(x)[1:8])
@@ -1055,9 +992,9 @@ post_calc_join_yeardate <-
     #          on = .(site_id == site_id, time >= time)
     #        ]
 
-    names(df_year)[names(df_year) %in% field_year] <- "year"
-    df_year[["year"]] <- as.character(df_year[["year"]])
-    df_date$year <- substr(df_date[[field_date]], 1, 4)
+    names(df_year)[which(names(df_year) %in% field_year)] <- "year"
+    df_year$year <- as.character(unlist(df_year$year))
+    df_date$year <- as.character(substr(df_date[[field_date]], 1, 4))
     #as.integer(format(as.Date(df_date[[field_date]]), "%Y"))
     df_joined <-
       data.table::merge.data.table(
@@ -1149,6 +1086,97 @@ post_calc_drop_cols <-
     df <- df[, -idx_remove, with = FALSE]
     return(df)
   }
+
+#' Automatic joining by the time and spatial identifiers
+#' @description The key assumption is that all data frames will have
+#' time field and spatial field and the data should have one of date or year.
+#' Whether the input time unit is year or date
+#' is determined by the coercion of the **first row value** of the time field
+#' into a character with `as.Date()`. This function will fail if it
+#' gets year-like string with length 4.
+#'
+#' @param df_fine The fine-grained data frame.
+#' @param df_coarse The coarse-grained data frame.
+#' @param field_sp The name of the spatial field in the data frames.
+#' @param field_t The name of the time field in the data frames.
+#'
+#' @returns A merged data table.
+#' @returns
+#' df_fine0 <- data.frame(site_id = c("A", "B", "B", "C"),
+#'                       time = as.Date(c("2022-01-01", "2022-01-02", "2021-12-31", "2021-01-03")),
+#'                       value = c(1, 2, 3, 5))
+#' df_coarse0 <- data.frame(site_id = c("A", "B", "C"),
+#'                         time = c("2022", "2022", "2021"),
+#'                         other_value = c(10, 20, 30))
+#' jdf <- post_calc_autojoin(df_fine0, df_coarse0)
+#' print(jdf)
+#' @importFrom data.table merge.data.table
+#' @importFrom rlang as_name
+#' @importFrom rlang sym
+#' @export
+post_calc_autojoin <-
+  function(
+    df_fine,
+    df_coarse,
+    field_sp = "site_id",
+    field_t = "time",
+    year_start = 2018L,
+    year_end = 2022L
+  ) {
+    if (any(grepl("population", names(df_coarse)))) {
+      df_coarse <- df_coarse[, -c("time"), with = FALSE]
+    }
+    common_field <- intersect(names(df_fine), names(df_coarse))
+    df_fine <- data.table::as.data.table(df_fine)
+    df_coarse <- data.table::as.data.table(df_coarse)
+    df_fine <- post_calc_drop_cols(df_fine)
+    df_coarse <- post_calc_drop_cols(df_coarse)
+    # if (length(common_field) > 2) {
+    #   message("The data frames have more than two common fields.")
+    #   message("Trying to remove the redundant common fields...")
+    #   common_field <- intersect(names(df_fine), names(df_coarse))
+    #   print(common_field)
+    #   common_field <-
+    #     common_field[-which(!common_field %in% c(field_sp, field_t))]
+    # }
+    if (length(common_field) == 1) {
+      print(common_field)
+      if (common_field == field_sp) {
+        joined <- data.table::merge.data.table(
+          df_fine, df_coarse,
+          by = field_sp,
+          all.x = TRUE
+        )
+      }
+    }
+    if (length(common_field) == 2) {
+      if (all(common_field %in% c(field_sp, field_t))) {
+        # t_fine <- try(as.Date(df_fine[[field_t]][1]))
+        df_fine[[field_t]] <- as.character(df_fine[[field_t]])
+        df_coarse[[field_t]] <- as.character(df_coarse[[field_t]])
+        t_coarse <- try(as.Date(df_coarse[[field_t]][1]))
+        if (inherits(t_coarse, "try-error")) {
+          message("The time field includes years. Trying different join strategy.")
+          coarse_years <- sort(unique(unlist(as.integer(df_coarse[[field_t]]))))
+          df_coarse2 <- post_calc_df_year_expand(
+            df_coarse,
+            time_start = year_start,
+            time_end = year_end,
+            time_available = coarse_years
+          )
+          joined <- post_calc_join_yeardate(df_coarse2, df_fine, field_t, field_t)
+        } else {
+          joined <- data.table::merge.data.table(
+            df_fine, df_coarse,
+            by = c(field_sp, field_t),
+            all.x = TRUE
+          )
+        }
+      }
+    }
+    return(joined)
+  }
+
 
 
 #' Read paths from a directory with a specific file extension
@@ -1900,6 +1928,9 @@ calc_narr2 <- function(
   #### return data.frame
   return(sites_extracted)
 }
+
+
+
 
 
 # system.time(

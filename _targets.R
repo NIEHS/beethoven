@@ -56,7 +56,7 @@ tar_option_set(
       "stars", "rlang", "foreach", "parallelly"),
   library = "~/r-libs",
   repository = "local",
-  error = "continue",
+  error = "stop",
   # controller = 
   #   crew.cluster::crew_controller_slurm(
   #     slurm_log_output = "output/slurm_pipeline_log.out",

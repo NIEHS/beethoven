@@ -6,9 +6,10 @@
 
 target_calculate_fit <-
   list(
-    tar_files_input(
-      file_prep_calc_args,
+    tarchetypes::tar_files_input(
+      name = file_prep_calc_args,
       files = list.files("inst/targets", pattern = "*.*.rds$", full.names = TRUE),
+      cue = tar_invalidate(any_of(tar_older(Sys.time() - as.difftime(4, units = "weeks")))),
       format = "file",
       iteration = "vector",
       description = "Calculation arguments in RDS file"
@@ -141,13 +142,13 @@ target_calculate_fit <-
           domain = loadargs(file_prep_calc_args, "narr")$domain,
           date = arglist_common$char_period,
           locs = sf_feat_proc_aqs_sites,
-          nthreads = 24L
+          nthreads = 12L 
         )
       ,
       pattern = map(file_prep_calc_args),
       iteration = "list",
       resources = set_slurm_resource(
-            ntasks = 1, ncpus = 24, memory = 8
+            ntasks = 1, ncpus = 12, memory = 16
           )
     )
     ,
