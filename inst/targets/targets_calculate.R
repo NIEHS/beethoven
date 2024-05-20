@@ -1,4 +1,3 @@
-## TODO: abide by the new naming convention
 
 # meta_run, resting in the tools/pipeline/pipeline_base_functions.R,
 # is a function that returns a list of parameters for the pipeline
@@ -172,7 +171,7 @@ target_calculate_fit <-
     ,
     tar_target(
       dt_feat_calc_narr,
-      command = reduce_merge(list_feat_calc_narr)
+      command = reduce_merge(list_feat_calc_narr, by = NULL)
     )
     ,
     tar_target(
@@ -181,7 +180,7 @@ target_calculate_fit <-
       Reduce(
         post_calc_autojoin,
         list(
-          reduce_merge(dt_feat_calc_narr, by = NULL),
+          dt_feat_calc_narr,
           dt_feat_calc_geoscf,
           dt_feat_calc_nasa
         )

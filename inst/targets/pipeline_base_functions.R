@@ -212,6 +212,10 @@ reduce_merge <- function(list_in, by = c("site_id", "time"), all.x = TRUE, all.y
   list_check <- sapply(list_in, nrow)
   list_checkdiff <- diff(list_check)
   if (any(list_checkdiff > 0)) all.y <- TRUE
+  for (i in seq_len(length(list_in))) {
+    list_in[[i]] <- data.table::as.data.table(list_in[[i]])
+  }
+  
   Reduce(
     function(x, y) {
       if (is.null(by)) by <- intersect(names(x), names(y))
@@ -221,6 +225,32 @@ reduce_merge <- function(list_in, by = c("site_id", "time"), all.x = TRUE, all.y
     list_in
   )
 }
+
+
+reduce_merge <- function(list_in, by = c("site_id", "time"), all.x = TRUE, all.y = FALSE) {
+  if (all.x && !all.y) how <- "left"
+  if (!all.x && all.y) how <- "right"
+  if (!all.x && !all.y) how <- "inner"
+  if (all.x && all.y) how <- "full"
+
+  # ignore initial argument settings
+  list_check <- sapply(list_in, nrow)
+  list_checkdiff <- diff(list_check)
+  if (any(list_checkdiff > 0)) how <- "full"
+  # for (i in seq_len(length(list_in))) {
+  #   list_in[[i]] <- data.table::as.data.table(list_in[[i]])
+  # }
+  
+  Reduce(
+    function(x, y) {
+      if (is.null(by)) by <- intersect(names(x), names(y))
+      #post_calc_autojoin(x, y)
+      collapse::join(x, y, how = how, on = by)
+    },
+    list_in
+  )
+}
+
 
 
 par_narr <- function(domain, date, locs, nthreads = 24L) {
@@ -1866,7 +1896,7 @@ calc_narr2 <- function(
     time_split <-
       split(time_from,
             #ceiling(seq_along(time_from) / 29L)) 
-            ceiling(as.integer(as.factor(time_from)) / 10L))
+            ceiling(as.integer(as.factor(time_from)) / 14L))
     sites_extracted <- Map(
       function(day) {
         cat(sprintf("Processing %s...\n", paste(day[1], "-", day[length(day)])))
@@ -2067,5 +2097,42 @@ export_res <-
 
   ) {
 
+  }
+
+
+run_apptainer <-
+  function(
+    image_path = "/ddn/gs1/home/songi2/apptainer_build/r-image-05202024.sif",
+    pass_path = "/ddn/gs1/home/songi2/projects/beethoven",
+    inner_path = "/data",
+    export_file = "apptainer_out.qs",
+    expr = "a<-data.frame(a = 1:8, b = 11:18)
+    saveRDS(a, file = \"output/apptainer_out.rds\")"
+  ) {
+    expr <-
+    stringi::stri_replace_all_fixed(
+      expr,
+      pass_path,
+      inner_path
+    )
+
+    # exec, save to QS and read it back
+    # should note that the file is saved in the inner path
+    # in the container. We will have the actual file in the
+    # outer path.
+    ## TODO: set dynamic file path to avoid duplicates & overwriting
+    system(
+      sprintf(
+        "apptainer exec --writable-tmpfs --bind %s:%s %s Rscript -e '%s'",
+        pass_path,
+        inner_path,
+        image_path,
+        expr
+      )
+    )
+    path_target <- file.path(pass_path, "output", export_file)
+    readin <- qs::qread(path_target)
+    file.remove(path_target)
+    return(readin)
   }
 
