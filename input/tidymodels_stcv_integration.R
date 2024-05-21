@@ -116,7 +116,8 @@ dfcovars_lblto <-
   generate_cv_index(dfcovarstdt, "lblto", blocks = c(30, 15), t_fold = 5L)
 dfcovarstdt_cv <-
   convert_cv_index_rset(dfcovars_lblto, dfcovarstdt$stdt, "lblto")
-
+dfcovarstdt_cv <-
+  rsample::clustering_cv(dfcovarstdt$stdt, vars = c("lon", "lat"), v = 5)
 
 ## tidymodel specification
 xgb_mod <-
@@ -125,6 +126,7 @@ xgb_mod <-
   set_mode("regression")
 
 pm25mod <- workflow() |>
+  recipes::step_zv(all_predictors(), threshold = 0.9) |>
   add_model(xgb_mod) |>
   add_formula(pm2.5 ~ .) |>
   tune::tune_bayes(resamples = dfcovarstdt_cv, iter = 50) |>
@@ -138,10 +140,17 @@ mlp_mod <-
     dropout = tune::tune(),
     learn_rate = tune::tune()
   ) |>
-  set_engine("brulee") |>
+  set_engine("brulee", device = "cuda") |>
   set_mode("regression")
+
+torch::torch_device("cuda")
+
 mlp_workflow <- workflow() |>
   add_model(mlp_mod) |>
   add_formula(reformulate(response = "pm2.5", termlabels = terms0)) |>
-  tune::tune_bayes(resamples = dfcovarstdt_cv, iter = 10) |>
-  fit_resamples(dfcovarstdt_cv, yardstick::metric_set(rmse, mae))
+  recipes::step_zv(all_predictors(), threshold = 0.9) |>
+  tune::tune_bayes(resamples = dfcovarstdt_cv, iter = 5) #|>
+  #fit_resamples(dfcovarstdt_cv, yardstick::metric_set(rmse, mae))
+
+mlp_workflow
+tune::show_best(mlp_workflow)

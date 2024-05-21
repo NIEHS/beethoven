@@ -1664,7 +1664,7 @@ calc_gmted_direct <- function(
           "Standard Deviation Statistic"
         )
   statistic_to <- c(
-    "BRKL", "SSUB", "MEDN", "MEAN", "MEAN", "MAXL", "STDV"
+    "BRKL", "SSUB", "MEDN", "MINI", "MEAN", "MAXL", "STDV"
   )
   statistic_to <-
     sprintf("LDU_E%s", statistic_to[match(statistic, statistic_from)])
@@ -1788,7 +1788,7 @@ process_narr2 <- function(
   search_to <- c(
     "ATSFC", "ALBDO", "ACPRC", "DSWRF", "ACEVP",
     "HCLAF", "PLBLH", "LCLAF", "LATHF", "MCLAF",
-    "OMEGA", "PRWEA", "PRRTE", "PRSFC", "SENHF",
+    "OMEGA", "PRWTR", "PRATE", "PRSFC", "SENHF",
     "SPHUM", "SNWCV", "SLMSC", "CLDCV", "ULWRF",
     "UWIND", "VISIB", "VWIND", "ACSNW"
   )
@@ -1959,7 +1959,22 @@ calc_narr2 <- function(
   return(sites_extracted)
 }
 
-
+#' Impute missing values and attach lagged features
+#' @note under construction.
+## impute
+impute_all <- function(dt, date) {
+  # zero-variance exclusion
+  # NaN & NA to zero for selected variables
+  var_impute <- grep()
+  dt <- dt[, (var_impute) := lapply(.SD, function(x) ifelse(is.na(x) | is.nan(x), 0, x)), .SDcols = var_impute]
+  # Q: Do we use all other features to impute?
+  imputed <- missRanger::missRanger(data = dt, maxiter = 100)
+  imputed_dat <- imputed$data
+  # TODO: add index for lagged features
+  lagging_target <- imputed_dat[, index, with = FALSE]
+  output <- amadeus::calc_lagged(lagging_target, date - as.difftime(1, "day"), 1, "site_id")
+  return(output)
+}
 
 
 
