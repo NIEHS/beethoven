@@ -650,6 +650,7 @@ set_slurm_resource <-
 #' Read AQS data
 #' @param fun_aqs function to import AQS data.
 #' Default is `amadeus::process_aqs`
+#' @param export Export the file to qs. Default is FALSE.
 #' @param ... Passed arguments to `fun_aqs`
 #' @returns Depending on `fun_aqs` specification.
 #' @import amadeus process_aqs
@@ -657,9 +658,12 @@ set_slurm_resource <-
 read_locs <-
   function(
     fun_aqs = amadeus::process_aqs,
+    export = FALSE,
     ...
   ) {
-    fun_aqs(...)
+    aqs_read <- fun_aqs(...)
+    if (export) qs::qsave(aqs_read, file = "input/sf_feat_proc_aqs_sites.qs")
+    return(aqs_read)
   }
 
 
@@ -668,9 +672,9 @@ read_locs <-
 #' @param site_spt Space-time site data.
 #' @param locs_id character(1). Name of site id (not monitor id)
 #' @param poc_name character(1). Name of column containing POC values.
+#' @param sampling character(1). Name of column with sampling duration.
 #' @param date_start character(1).
 #' @param date_end character(1).
-#' @param return_format character(1). One of `"sf"` or `"terra"`
 #' @author Insang Song
 #' @returns a data.table object
 #' @importFrom dplyr group_by
@@ -692,6 +696,7 @@ get_aqs_data <-
     locs_id = meta_run("char_siteid"),
     time_id = meta_run("char_timeid"),
     poc_name = "POC",
+    sampling = "Sample.Duration",
     date_start = "2018-01-01",
     date_end = "2022-12-31"
   ) {
@@ -721,6 +726,7 @@ get_aqs_data <-
     
     poc_filtered <- input_df |>
       dplyr::group_by(!!rlang::sym(locs_id)) |>
+      dplyr::filter(startsWith(!!rlang::sym(sampling), "24")) |>
       dplyr::filter(!!rlang::sym(poc_name) == min(!!rlang::sym(poc_name))) |>
       dplyr::ungroup() |>
       data.table::as.data.table()
@@ -2138,7 +2144,7 @@ run_apptainer <-
     ## TODO: set dynamic file path to avoid duplicates & overwriting
     system(
       sprintf(
-        "apptainer exec --writable-tmpfs --bind %s:%s %s Rscript -e '%s'",
+        "apptainer exec --writable-tmpfs --env R_PROFILE_USER=/dev/null --bind %s:%s %s Rscript -e '%s'",
         pass_path,
         inner_path,
         image_path,
@@ -2151,3 +2157,92 @@ run_apptainer <-
     return(readin)
   }
 
+
+exprrr <-
+  sprintf(
+    "
+    source(\"/ddn/gs1/home/songi2/projects/beethoven/inst/targets/pipeline_base_functions.R\")
+    library(sf)
+    sf::sf_use_s2(FALSE)
+    library(qs)
+    library(terra)
+    library(future.apply)
+    library(amadeus)
+    library(dplyr)
+    library(collapse)
+    locs <- qs::qread(\"/ddn/gs1/home/songi2/projects/beethoven/input/sf_feat_proc_aqs_sites.qs\")
+
+    from <- process_narr2(
+      path = \"/ddn/gs1/home/songi2/projects/beethoven/input/narr\",
+      variable = %s,
+      date = c(\"%s\", \"%s\")
+    )
+    calced <-
+      calc_narr2(
+        from = from,
+        locs = locs,
+        locs_id = \"site_id\")
+    qs::qsave(calced, \"/ddn/gs1/home/songi2/projects/beethoven/output/apptainer_out_%s.qs\")
+    ",
+    "prate", "2018-01-01", "2019-12-31", "prate"
+  )
+# raw apptainer runs.
+# sprintf apptainer cannot find the path.
+# system(sprintf("apptainer exec --env R_PROFILE_USER=/dev/null --writable-tmpfs --bind /ddn/gs1/home/songi2/projects/beethoven:/data /ddn/gs1/home/songi2/apptainer_build/r-image-05202024.sif Rscript -e '%s'", exprrr))
+
+par_narr_appt <-
+  function(
+    domain,
+    period
+  ) {
+    future::plan(future::multicore, workers = 2L)
+    narr_appt <-
+      future.apply::future_lapply(
+        domain,
+        function(elem) {
+          # in the character string,
+          # path should point to the inner directory
+          # **in the container**
+          expr <-
+            sprintf(
+              "
+              source(\"/ddn/gs1/home/songi2/projects/beethoven/inst/targets/pipeline_base_functions.R\")
+              library(sf)
+              sf::sf_use_s2(FALSE)
+              library(qs)
+              library(terra)
+              library(future)
+              library(future.apply)
+              library(amadeus)
+              library(dplyr)
+              library(collapse)
+              locs <- qs::qread(\"/ddn/gs1/home/songi2/projects/beethoven/input/sf_feat_proc_aqs_sites.qs\")
+
+              from <- process_narr2(
+                path = \"/ddn/gs1/home/songi2/projects/beethoven/input/narr\",
+                variable = %s,
+                date = c(\"%s\", \"%s\")
+              )
+              calced <-
+                calc_narr2(
+                  from = from,
+                  locs = locs,
+                  locs_id = \"site_id\")
+              qs::qsave(calced, \"/ddn/gs1/home/songi2/projects/beethoven/output/apptainer_out_%s.qs\")
+              ",
+              elem, period[1], period[2], elem
+            )
+              run_apptainer(
+                expr = expr,
+                export_file = sprintf("apptainer_out_%s.qs", elem)
+              )
+        },
+        future.seed = TRUE
+      )
+    future::plan(future::sequential)
+    return(narr_appt)
+  }
+# x <- par_narr_appt(
+#   domain = c("prate", "shum"),
+#   period = c("2018-01-01", "2019-12-31")
+# )

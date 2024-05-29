@@ -1,4 +1,5 @@
 library(dplyr)
+library(qs)
 # basic idea: a list that provides
 # anything needed for the pipeline
 # ultimately the name "dataset" is a key for iteration to make
@@ -66,7 +67,7 @@ arglist_common <-
   list(
     char_siteid = "site_id",
     char_timeid = "time",
-    char_period = c("2022-01-01", "2022-10-31"),
+    char_period = c("2018-01-01", "2022-10-31"),
     extent = c(-126, -62, 22, 52),
     user_email = "songi2@nih.gov"
   )
@@ -207,6 +208,11 @@ arglist_common <-
 #     narr = list(
 #       path = "input/narr",
 #       covariate = "narr",
+#       domain_reduced = c("air.sfc", "albedo", "apcp", "dswrf", "evap", "hcdc",
+#                     "hpbl", "lcdc", "lhtfl", "mcdc", "omega", "pr_wtr",
+#                     "pres.sfc", "shtfl", "snowc", "soilm",    
+#                     "tcdc", "ulwrf.sfc", "uwnd.10m", "vis", "vwnd.10m", "weasd"),
+#       domain_appt = c("prate", "shum"),
 #       domain = c("air.sfc", "albedo", "apcp", "dswrf", "evap", "hcdc",
 #                     "hpbl", "lcdc", "lhtfl", "mcdc", "omega", "pr_wtr",
 #                     "prate", "pres.sfc", "shtfl", "shum", "snowc", "soilm",    
@@ -320,6 +326,7 @@ arglist_common <-
 # Generated argument list for the pipeline is stored to
 # the desired location. The current pipeline setting accepts
 # the argument list in RDS format.
-# saveRDS(arglist_proccalc, 
-#         "./inst/targets/punchcard_calc.rds",
-#         compress = "xz")
+# qs::qsave(
+#   arglist_proccalc, 
+#   "./inst/targets/punchcard_calc.qs"
+# )

@@ -10,5 +10,6 @@
 #SBATCH --partition=geo
 #SBATCH --mail-user=songi2@nih.gov
 
+source /ddn/gs1/home/songi2/.profile
 
 nohup nice -4 Rscript /ddn/gs1/home/songi2/projects/beethoven/inst/targets/targets_start.R

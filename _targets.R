@@ -15,6 +15,14 @@ tar_source("inst/targets/targets_arglist.R")
 # bypass option
 Sys.setenv("BTV_DOWNLOAD_PASS" = "TRUE")
 
+# bind custom built GDAL
+.libPaths(
+  c(
+    "/ddn/gs1/biotools/R/lib64/R/custompkg",
+    .libPaths()
+  )
+)
+
 plan(
   list(
     tweak(
@@ -50,11 +58,11 @@ tar_option_set(
       "data.table", "sf", "terra", "exactextractr",
       #"crew", "crew.cluster", 
       "tigris", "dplyr",
-      "future.batchtools", "qs",
+      "future.batchtools", "qs", "collapse",
       "future", "future.apply", "future.callr", "callr",
       #"sftime",
       "stars", "rlang", "foreach", "parallelly"),
-  library = "~/r-libs",
+  library = c("/ddn/gs1/biotools/R/lib64/R/custompkg", "/ddn/gs1/home/songi2/r-libs"),
   repository = "local",
   error = "stop",
   # controller = 

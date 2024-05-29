@@ -7,11 +7,11 @@ target_calculate_fit <-
   list(
     tarchetypes::tar_files_input(
       name = file_prep_calc_args,
-      files = list.files("inst/targets", pattern = "*.*.rds$", full.names = TRUE),
+      files = list.files("inst/targets", pattern = "*.*.qs$", full.names = TRUE),
       cue = tar_invalidate(any_of(tar_older(Sys.time() - as.difftime(4, units = "weeks")))),
       format = "file",
       iteration = "vector",
-      description = "Calculation arguments in RDS file"
+      description = "Calculation arguments in QS file"
     )
     ,
     tar_target(
@@ -68,7 +68,7 @@ target_calculate_fit <-
     ,
     tar_target(
       list_feat_calc_base_flat,
-      command = lapply(list_feat_calc_base, 
+      command = lapply(list_feat_calc_base,
         function(x) {
           if (length(x) == 1) {
             x[[1]]
@@ -141,16 +141,30 @@ target_calculate_fit <-
           domain = loadargs(file_prep_calc_args, "narr")$domain,
           date = arglist_common$char_period,
           locs = sf_feat_proc_aqs_sites,
-          nthreads = 12L 
+          nthreads = 12L
         )
       ,
       pattern = map(file_prep_calc_args),
       iteration = "list",
       resources = set_slurm_resource(
-            ntasks = 1, ncpus = 12, memory = 16
+            ntasks = 1, ncpus = 12, memory = 30 
           )
     )
     ,
+    # targets::tar_target(
+    #   name = list_feat_calc_narr_apptainer,
+    #   command = #rlang::inject(
+    #     par_narr_appt(
+    #       domain = loadargs(file_prep_calc_args, "narr")$domain_appt,
+    #       period = arglist_common$char_period
+    #     ),
+    #   pattern = map(file_prep_calc_args),
+    #   iteration = "list",
+    #   resources = set_slurm_resource(
+    #         ntasks = 1, ncpus = 2, memory = 40 
+    #       )
+    # )
+    # ,
     tar_target(
       dt_feat_calc_gmted,
       command = reduce_merge(list_feat_calc_gmted, "site_id"),
@@ -171,7 +185,13 @@ target_calculate_fit <-
     ,
     tar_target(
       dt_feat_calc_narr,
-      command = reduce_merge(list_feat_calc_narr, by = NULL)
+      command =
+        # collapse::join(
+          reduce_merge(list_feat_calc_narr, by = NULL),
+        #   reduce_merge(list_feat_calc_narr_apptainer, by = NULL),
+        #   on = c("site_id", "time"),
+        #   how = "full"
+        # )
     )
     ,
     tar_target(

@@ -3,6 +3,7 @@ target_init <-
     targets::tar_target(
       sf_feat_proc_aqs_sites,
       read_locs(
+        export = TRUE, # deprecated after apptainer is no longer used
         path = list.files(
           path = "input/aqs",
           pattern = "daily_88101_[0-9]{4}.csv",
@@ -25,6 +26,7 @@ target_init <-
         ),
         date = arglist_common$char_period,
         mode = "sparse",
+        data_field = c("Arithmetic.Mean", "Event.Type"),
         return_format = "data.table"
       ),
       description = "AQS sites with time"

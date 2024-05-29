@@ -38,7 +38,10 @@ error.file = fs::path_expand(resources$error.file)
 
 ## Initialize work environment like
 ## source /etc/profile
-
+## The prepended directory should match users' directory with .profile
+## this line can be ignored if users' environments are not restricted
+## such that GDAL 3.3.3+ is equipped as default
+. /ddn/gs1/home/songi2/.profile
 
 ## Export value of DEBUGME environemnt var to slave
 # export DEBUGME=<%= Sys.getenv("DEBUGME") %>
@@ -49,4 +52,4 @@ error.file = fs::path_expand(resources$error.file)
 
 ## Run R:
 ## we merge R output with stdout from SLURM, which gets then logged via --output option
-Rscript -e '.libPaths("/ddn/gs1/home/songi2/r-libs");batchtools::doJobCollection("<%= uri %>")'
+Rscript -e '.libPaths(c("/ddn/gs1/biotools/R/lib64/R/custompkg", "/ddn/gs1/home/songi2/r-libs", .libPaths()));batchtools::doJobCollection("<%= uri %>")'
