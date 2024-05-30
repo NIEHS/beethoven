@@ -99,3 +99,6 @@ slurm_error.log
 # SLURM messages and logs
 **/*.err
 **/*.out
+
+# Apptainer images
+**/*.sif

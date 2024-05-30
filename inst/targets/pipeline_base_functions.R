@@ -37,7 +37,13 @@ library(amadeus)
 #' @importFrom base readRDS
 #' @export
 loadargs <- function(argfile, dataset) {
-  arglist <- readRDS(argfile)
+  if (endsWith(argfile, ".rds")) {
+    arglist <- readRDS(argfile)
+  } else if (endsWith(argfile, ".qs")) {
+    arglist <- qs::qread(argfile)
+  } else {
+    stop("Invalid format.")
+  }
   arglist[[dataset]]
 }
 
