@@ -200,7 +200,7 @@ target_calculate_fit <-
       Reduce(
         post_calc_autojoin,
         list(
-          dt_feat_calc_narr,
+          reduce_merge(dt_feat_calc_narr, by = NULL),
           dt_feat_calc_geoscf,
           dt_feat_calc_nasa
         )
@@ -253,7 +253,7 @@ target_calculate_fit <-
       ),
       description = "Cumulative feature calculation",
       resources = set_slurm_resource(
-            ntasks = 1, ncpus = 8, memory = 100
+            ntasks = 1, ncpus = 8, memory = 16
           )
     ),
     tar_target(
@@ -261,7 +261,7 @@ target_calculate_fit <-
       command = impute_all(dt_feat_calc_cumulative),
       description = "Imputed features + lags",
       resources = set_slurm_resource(
-            ntasks = 1, ncpus = 8, memory = 100
+            ntasks = 1, ncpus = 32, memory = 4
           )
     )
   # TODO: compute lagged variables
