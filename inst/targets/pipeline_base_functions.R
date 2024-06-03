@@ -2068,15 +2068,14 @@ impute_all <-
   # For each site_id, backward filling for 16-day NDVI
   # Last Observation Carried Forward is the method used;
   # it assumes that the rows are ordered by date
-  dt <- dt[order(site_id, time)]
-  dt <- dt[, MOD_NDVIV_0_01000 := data.table::nafill(MOD_NDVIV_0_01000, type = "nocb"), by = c("site_id", "time")]
-  dt <- dt[, MOD_NDVIV_0_10000 := data.table::nafill(MOD_NDVIV_0_10000, type = "nocb"), by = c("site_id", "time")]
-  dt <- dt[, MOD_NDVIV_0_50000 := data.table::nafill(MOD_NDVIV_0_50000, type = "nocb"), by = c("site_id", "time")]
+  dt <- dt[order(site_id, time), ]
+  col_ndviv <- grep("MOD_NDVIV_", names(dt))
+  dtndviv <- data.table::setnafill(dt, type = "nocb", nan = NA, cols = col_ndviv)
 
   collapse::set_collapse(mask = "manip", nthreads = nthreads_collapse)
 
   target_replace <- grep("^MOD_", names(dt), invert = TRUE)
-  dt <- collapse::replace_inf(dt, value = NA, replace.nan = TRUE)
+  dt <- collapse::replace_inf(dtndviv, value = NA, replace.nan = TRUE)
   dt <- collapse::replace_na(dt, value = 0, cols = target_replace)
 
   # zero-variance exclusion
@@ -2089,19 +2088,23 @@ impute_all <-
   # Store the name of zero variance fields as an attribute of the input object
   attr(dt, "zero_var_fields") <- zero_var_fields
 
+  # excluding columns with excessive "true zeros"
+  # we should have a threshold for the zero rate
+  # exc_zero <- collapse::fnth(dt[, 5:ncol(dt), with = FALSE], n = 0.8)
+  # exc_zero <- which(exc_zero) + 5L
+  # dt <- dt[, exc_zero := NULL]
+
   # Q: Do we use all other features to impute? -- Yes.
   # 32-thread, 10% for tree building, 200 trees, 4 rounds: 11 hours
   imputed <-
     missRanger::missRanger(
       data = dt,
       maxiter = 30L,
-      num.trees = 200L,
+      num.trees = 500L,
       num.threads = nthreads_imputation,
       mtry = 50L,
-      sample.fraction = 0.1,
-      )
-  # return(imputed)
-  # imputed_dat <- imputed$data
+      sample.fraction = 0.1
+    )
   # TODO: add index for lagged features
   index_lag <-
     c("MET_ATSFC_0_00000", "MET_ACPRC_1_00000",
@@ -2115,7 +2118,8 @@ impute_all <-
 
 # test
 # qssf<-impute_all(qss)
-
+aqi <- impute_all(aq)
+aqi <- aqi |> tidytable::select(1:2, tidytable::starts_with("MOD_NDVIV"))
 
 # system.time(
 #   cgeo <- calc_geos_strict(path = "input/geos/chm_tavg_1hr_g1440x721_v1",
