@@ -1974,10 +1974,15 @@ calc_narr2 <- function(
 #' Impute missing values and attach lagged features
 #' @note under construction.
 ## impute
-impute_all <- function(dt, date) {
+impute_all <-
+  function(
+    dt,
+    nthreads_dt = 32L,
+    nthreads_collapse = 32L,
+    nthreads_imputation = 32L) {
   library(collapse)
   library(data.table)
-  data.table::setDTthreads(32L)
+  data.table::setDTthreads(nthreads_dt)
   # name cleaning
   allcns <- names(dt)
   allcns_smoke <- grep("(light|medium|heavy)_", allcns)
@@ -2068,7 +2073,7 @@ impute_all <- function(dt, date) {
   dt <- dt[, MOD_NDVIV_0_10000 := data.table::nafill(MOD_NDVIV_0_10000, type = "nocb"), by = c("site_id", "time")]
   dt <- dt[, MOD_NDVIV_0_50000 := data.table::nafill(MOD_NDVIV_0_50000, type = "nocb"), by = c("site_id", "time")]
 
-  collapse::set_collapse(mask = "manip", nthreads = 32L)
+  collapse::set_collapse(mask = "manip", nthreads = nthreads_collapse)
 
   target_replace <- grep("^MOD_", names(dt), invert = TRUE)
   dt <- collapse::replace_inf(dt, value = NA, replace.nan = TRUE)
@@ -2085,25 +2090,31 @@ impute_all <- function(dt, date) {
   attr(dt, "zero_var_fields") <- zero_var_fields
 
   # Q: Do we use all other features to impute? -- Yes.
+  # 32-thread, 10% for tree building, 200 trees, 4 rounds: 11 hours
   imputed <-
     missRanger::missRanger(
       data = dt,
       maxiter = 30L,
       num.trees = 200L,
-      num.threads = 32L,
+      num.threads = nthreads_imputation,
       mtry = 50L,
-      sample.fraction = 0.2,
+      sample.fraction = 0.1,
       )
-  return(imputed)
-  imputed_dat <- imputed$data
+  # return(imputed)
+  # imputed_dat <- imputed$data
   # TODO: add index for lagged features
-  lagging_target <- imputed_dat[, index, with = FALSE]
+  index_lag <-
+    c("MET_ATSFC_0_00000", "MET_ACPRC_1_00000",
+      "MET_PRSFC_1_00000", "MET_SPHUM_1_00000",
+      "MET_WNDSP_1_00000"
+    )
+  lagging_target <- imputed[, index_lag, with = FALSE]
   output <- amadeus::calc_lagged(lagging_target, date - as.difftime(1, "day"), 1, "site_id")
   return(output)
 }
 
 # test
-qssf<-impute_all(qss)
+# qssf<-impute_all(qss)
 
 
 # system.time(

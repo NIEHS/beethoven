@@ -258,10 +258,10 @@ target_calculate_fit <-
     ),
     tar_target(
       dt_feat_calc_imputed,
-      command = impute_all(dt_feat_calc_cumulative),
+      command = impute_all(dt_feat_calc_cumulative, 64L, 64L, 64L),
       description = "Imputed features + lags",
       resources = set_slurm_resource(
-            ntasks = 1, ncpus = 32, memory = 4
+            ntasks = 1, ncpus = 64, memory = 6
           )
     )
   # TODO: compute lagged variables
