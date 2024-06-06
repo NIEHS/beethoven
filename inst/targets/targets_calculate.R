@@ -258,10 +258,13 @@ target_calculate_fit <-
     ),
     tar_target(
       dt_feat_calc_imputed,
-      command = impute_all(dt_feat_calc_cumulative, 64L, 64L, 64L),
+      command =
+      impute_all(
+        dt_feat_calc_cumulative,
+        period = arglist_common$char_period, 64L, 64L, 64L),
       description = "Imputed features + lags",
       resources = set_slurm_resource(
-            ntasks = 1, ncpus = 64, memory = 6
+            ntasks = 1, ncpus = 64, memory = 8
           )
     )
   # TODO: compute lagged variables
@@ -276,4 +279,15 @@ target_calculate_fit <-
 target_calculate_predict <-
   list(
 
+  )
+
+  # Create a data.frame with five variables for ten consecutive days
+  dfo <- data.frame(
+    site_id = rep(1:5, each = 10),
+    time = as.POSIXlt(rep(seq.Date(from = as.Date("2021-01-01"), by = "day", length.out = 10), 5)),
+    var1 = rep(1:10, each = 5),
+    var2 = rep(11:20, each = 5),
+    var3 = rep(21:30, each = 5),
+    var4 = rep(31:40, each = 5),
+    var5 = rep(41:50, each = 5)
   )

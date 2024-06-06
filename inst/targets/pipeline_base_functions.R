@@ -1974,15 +1974,47 @@ calc_narr2 <- function(
 #' Impute missing values and attach lagged features
 #' @note under construction.
 ## impute
+#' Impute All Function
+#'
+#' This function performs imputation on a given data table by replacing missing values with imputed values.
+#' It follows a series of steps including data cleaning, name cleaning, geoscn processing, NDVI 16-day backward filling,
+#' zero-variance exclusion, excessive "true zeros" exclusion, and imputation using missRanger.
+#'
+#' @param dt The input data table to be imputed.
+#' @param period The period for lagged features in the imputation process.
+#' @param nthreads_dt The number of threads to be used for data.table operations.
+#' @param nthreads_collapse The number of threads to be used for collapse operations.
+#' @param nthreads_imputation The number of threads to be used for the imputation process.
+#'
+#' @return The imputed data table with lagged features.
+#'
+#' @importFrom collapse set_collapse replace_inf replace_na fvar fnth
+#' @importFrom data.table setDTthreads setnafill
+#' @importFrom qs qread
+#' @importFrom stats setNames
+#' @importFrom stringi stri_replace_all_regex
+#' @importFrom missRanger missRanger
+#' @importFrom amadeus calc_lagged
+#'
+#' @examples
+#' dt <- data.table(a = c(1, 2, NA, 4), b = c(NA, 2, 3, 4))
+#' impute_all(dt, period = 1)
+#'
+#' @export
 impute_all <-
   function(
     dt,
+    period,
     nthreads_dt = 32L,
     nthreads_collapse = 32L,
     nthreads_imputation = 32L) {
   library(collapse)
   library(data.table)
   data.table::setDTthreads(nthreads_dt)
+  if (is.character(dt)) {
+    dt <- file.path("output/qs", dt)
+    dt <- qs::qread(dt)
+  }
   # name cleaning
   allcns <- names(dt)
   allcns_smoke <- grep("(light|medium|heavy)_", allcns)
@@ -2090,9 +2122,9 @@ impute_all <-
 
   # excluding columns with excessive "true zeros"
   # we should have a threshold for the zero rate
-  # exc_zero <- collapse::fnth(dt[, 5:ncol(dt), with = FALSE], n = 0.8)
-  # exc_zero <- which(exc_zero) + 5L
-  # dt <- dt[, exc_zero := NULL]
+  exc_zero <- collapse::fnth(dt[, 5:ncol(dt), with = FALSE], n = 0.9)
+  exc_zero <- unname(which(exc_zero == 0)) + 5L
+  dt <- dt[, (exc_zero) := NULL]
 
   # Q: Do we use all other features to impute? -- Yes.
   # 32-thread, 10% for tree building, 200 trees, 4 rounds: 11 hours
@@ -2105,21 +2137,23 @@ impute_all <-
       mtry = 50L,
       sample.fraction = 0.1
     )
-  # TODO: add index for lagged features
+  
+  # lagged features: changing period (period[1] - 1 day)
+  period <- as.Date(period)
+  period[1] <- period[1] - as.difftime(1, units = "days")
+  period <- as.character(period)
   index_lag <-
-    c("MET_ATSFC_0_00000", "MET_ACPRC_1_00000",
-      "MET_PRSFC_1_00000", "MET_SPHUM_1_00000",
-      "MET_WNDSP_1_00000"
-    )
+    sprintf("MET_%s", c("ATSFC", "ACPRC", "PRSFC", "SPHUM", "WNDSP"))
+  index_lag <- grep(paste(index_lag, collapse = "|"), names(dt))
   lagging_target <- imputed[, index_lag, with = FALSE]
-  output <- amadeus::calc_lagged(lagging_target, date - as.difftime(1, "day"), 1, "site_id")
+  output <- amadeus::calc_lagged(lagging_target, period, 1, "site_id")
   return(output)
 }
 
 # test
 # qssf<-impute_all(qss)
-aqi <- impute_all(aq)
-aqi <- aqi |> tidytable::select(1:2, tidytable::starts_with("MOD_NDVIV"))
+# aqi <- impute_all(aq)
+# aqi <- aqi |> tidytable::select(1:2, tidytable::starts_with("MOD_NDVIV"))
 
 # system.time(
 #   cgeo <- calc_geos_strict(path = "input/geos/chm_tavg_1hr_g1440x721_v1",
