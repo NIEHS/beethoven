@@ -8,13 +8,19 @@ library(targets)
 #   to = "_targets.R"
 # )
 
-tar_make_future(
-  workers = 24 
+.libPaths(
+  c(
+    "/ddn/gs1/biotools/R/lib64/R/custompkg",
+    .libPaths()
+  )
 )
 
-# Even if configuration (aka punchcard) date range has changed,
-# the spatiotemporal targets will not be reprocessed as
-# they basically depend on sites (parallelized by time).
+
+tar_make_future(
+  dt_feat_calc_imputed,
+  workers = 1 #24
+)
+
 # TODO: should find a way of auto-invalidate feat_calc_(modis|viirs|geoscf)
 #     when the date range changes in the configuration.
 # manual example includes:

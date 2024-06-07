@@ -2122,9 +2122,9 @@ impute_all <-
 
   # excluding columns with excessive "true zeros"
   # we should have a threshold for the zero rate
-  exc_zero <- collapse::fnth(dt[, 5:ncol(dt), with = FALSE], n = 0.9)
-  exc_zero <- unname(which(exc_zero == 0)) + 5L
-  dt <- dt[, (exc_zero) := NULL]
+  # exc_zero <- collapse::fnth(dt[, 5:ncol(dt), with = FALSE], n = 0.9)
+  # exc_zero <- unname(which(exc_zero == 0)) + 5L
+  # dt <- dt[, (exc_zero) := NULL]
 
   # Q: Do we use all other features to impute? -- Yes.
   # 32-thread, 10% for tree building, 200 trees, 4 rounds: 11 hours
@@ -2132,22 +2132,24 @@ impute_all <-
     missRanger::missRanger(
       data = dt,
       maxiter = 30L,
-      num.trees = 500L,
+      num.trees = 300L,
       num.threads = nthreads_imputation,
       mtry = 50L,
       sample.fraction = 0.1
     )
-  
-  # lagged features: changing period (period[1] - 1 day)
-  period <- as.Date(period)
-  period[1] <- period[1] - as.difftime(1, units = "days")
-  period <- as.character(period)
-  index_lag <-
-    sprintf("MET_%s", c("ATSFC", "ACPRC", "PRSFC", "SPHUM", "WNDSP"))
-  index_lag <- grep(paste(index_lag, collapse = "|"), names(dt))
-  lagging_target <- imputed[, index_lag, with = FALSE]
-  output <- amadeus::calc_lagged(lagging_target, period, 1, "site_id")
-  return(output)
+  return(imputed)
+  # lagged features: changing period (period[1] + 1 day)
+  # period <- as.Date(period)
+  # period[1] <- period[1] + as.difftime(1, units = "days")
+  # period <- as.character(period)
+  # index_lag <-
+  #   sprintf("MET_%s", c("ATSFC", "ACPRC", "PRSFC", "SPHUM", "WNDSP"))
+  # index_lag <- grep(paste(index_lag, collapse = "|"), names(dt))
+  # target_lag <- imputed[, index_lag, with = FALSE]
+  # target_nolag <- 
+
+  # output <- amadeus::calc_lagged(target_lag, period, 1, "site_id")
+  # return(output)
 }
 
 # test
