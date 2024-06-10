@@ -2280,12 +2280,37 @@ par_nest <-
 # random subsample (~30%) ; row based
 # P times...
 
+#' Base learner: Multilayer perceptron with brulee
+#'
+#' Multilayer perceptron model with different configurations of
+#' hidden units, dropout, activation, and learning rate using brulee
+#' and tidymodels. With proper settings, users can utilize graphics
+#' processing units (GPU) to speed up the training process.
+#' @note Spatiotemporal cross-validation strategy is not yet implemented.
+#' @param dt_imputed The input data table to be used for fitting.
+#' @param r_subsample The proportion of rows to be sampled.
+#' @param yvar The target variable.
+#' @param xvar The predictor variables.
+#' @param vfold The number of folds for cross-validation.
+#' @param cv_config The cross-validation configuration. To be added.
+#' @param ... Additional arguments to be passed.
+#'
+#' @returns The fitted workflow.
+#' @importFrom recipes recipe update_role
+#' @importFrom parsnip mlp set_engine set_mode
+#' @importFrom workflows workflow add_recipe add_model
+#' @importFrom tune tune_grid
+#' @importFrom tidyselect all_of
+#' @importFrom yardstick metric_set rmse
+#' @importFrom rsample vfold_cv
+#' @export
 fit_base_brulee <-
   function(
     dt_imputed,
     r_subsample = 0.3,
     yvar = "Arithmetic.Mean",
-    xvar,
+    xvar = seq(6, ncol(dt_imputed)),
+    vfold = 5L,
     cv_config,
     ...
   ) {
@@ -2294,7 +2319,7 @@ fit_base_brulee <-
       expand.grid(
         hidden_units = list(c(16, 16, 16), c(32, 32, 32), c(8, 8, 8)),
         dropout = 1 / seq(4, 2, -1),
-        activation = c("relu", "elu"),
+        activation = c("relu", "elu", "sigmoid"),
         learn_rate = c(0.05, 0.01, 0.005, 0.001)
       )
     dt_imputed <-
@@ -2305,12 +2330,14 @@ fit_base_brulee <-
       recipes::recipe(
         dt_imputed
       ) %>%
-      recipes::step_normalize(recipes::all_numeric_predictors()) %>%
-      recipes::update_role(all_of(6:ncol(dt_imputed))) %>%
+      # do we want to normalize the predictors?
+      # if so, an additional definition of truly continuous variables is needed
+      # recipes::step_normalize(recipes::all_numeric_predictors()) %>%
+      recipes::update_role(all_of(xvar)) %>%
       recipes::update_role(all_of(yvar), new_role = "outcome")
 
     # fix this part to implement SPT CV strategy
-    base_vfold <- rsample::vfold_cv(dt_imputed, v = 5)
+    base_vfold <- rsample::vfold_cv(dt_imputed, v = vfold)
     base_model <-
       parsnip::mlp(
         hidden_units = tune(),
@@ -2336,12 +2363,37 @@ fit_base_brulee <-
 # dtfit <- fit_base_brulee(dtd, xvar = names(dtd)[6:100], r_subsample = 0.3)
 
 
+#' Base learner: Extreme gradient boosting (XGBoost)
+#'
+#' XGBoost model is fitted at the defined rate (`r_subsample`) of
+#' the input dataset by grid search.
+#' With proper settings, users can utilize graphics
+#' processing units (GPU) to speed up the training process.
+#' @note Spatiotemporal cross-validation strategy is not yet implemented.
+#' @param dt_imputed The input data table to be used for fitting.
+#' @param r_subsample The proportion of rows to be sampled.
+#' @param yvar The target variable.
+#' @param xvar The predictor variables.
+#' @param vfold The number of folds for cross-validation.
+#' @param cv_config The cross-validation configuration. To be added.
+#' @param ... Additional arguments to be passed.
+#'
+#' @returns The fitted workflow.
+#' @importFrom recipes recipe update_role
+#' @importFrom parsnip boost_tree set_engine set_mode
+#' @importFrom workflows workflow add_recipe add_model
+#' @importFrom tune tune_grid
+#' @importFrom tidyselect all_of
+#' @importFrom yardstick metric_set rmse
+#' @importFrom rsample vfold_cv
+#' @export
 fit_base_xgb <-
   function(
     dt_imputed,
     r_subsample = 0.3,
     yvar = "Arithmetic.Mean",
-    xvar,
+    xvar = seq(6, ncol(dt_imputed)),
+    vfold = 5L,
     cv_config,
     ...
   ) {
@@ -2359,8 +2411,8 @@ fit_base_xgb <-
       recipes::recipe(
         dt_imputed
       ) %>%
-      recipes::step_normalize(recipes::all_numeric_predictors()) %>%
-      recipes::update_role(all_of(6:ncol(dt_imputed))) %>%
+      # recipes::step_normalize(recipes::all_numeric_predictors()) %>%
+      recipes::update_role(all_of(xvar)) %>%
       recipes::update_role(all_of(yvar), new_role = "outcome")
     base_vfold <- rsample::vfold_cv(dt_imputed, v = 5)
     base_model <-
@@ -2388,13 +2440,35 @@ fit_base_xgb <-
 # dtfitx <- fit_base_xgb(dtd, xvar = names(dtd)[6:105], r_subsample = 0.3)
 
 
-
+#' Base learner: Elastic net
+#'
+#' Elastic net model is fitted at the defined rate (`r_subsample`) of
+#' the input dataset by grid search.
+#' @note Spatiotemporal cross-validation strategy is not yet implemented.
+#' @param dt_imputed The input data table to be used for fitting.
+#' @param r_subsample The proportion of rows to be sampled.
+#' @param yvar The target variable.
+#' @param xvar The predictor variables.
+#' @param vfold The number of folds for cross-validation.
+#' @param cv_config The cross-validation configuration. To be added.
+#' @param ... Additional arguments to be passed.
+#'
+#' @returns The fitted workflow.
+#' @importFrom recipes recipe update_role
+#' @importFrom parsnip linear_reg set_engine set_mode
+#' @importFrom workflows workflow add_recipe add_model
+#' @importFrom tune tune_grid
+#' @importFrom tidyselect all_of
+#' @importFrom yardstick metric_set rmse
+#' @importFrom rsample vfold_cv
+#' @export
 fit_base_elnet <-
   function(
     dt_imputed,
     r_subsample = 0.3,
     yvar = "Arithmetic.Mean",
-    xvar,
+    xvar = seq(6, ncol(dt_imputed)),
+    vfold = 5L,
     cv_config,
     ...
   ) {
@@ -2411,8 +2485,8 @@ fit_base_elnet <-
       recipes::recipe(
         dt_imputed
       ) %>%
-      recipes::step_normalize(recipes::all_numeric_predictors()) %>%
-      recipes::update_role(all_of(6:ncol(dt_imputed))) %>%
+      # recipes::step_normalize(recipes::all_numeric_predictors()) %>%
+      recipes::update_role(all_of(xvar)) %>%
       recipes::update_role(all_of(yvar), new_role = "outcome")
     base_vfold <- rsample::vfold_cv(dt_imputed, v = 5)
     base_model <-
@@ -2420,7 +2494,7 @@ fit_base_elnet <-
         mixture = tune(),
         penalty = tune()
       ) %>%
-      parsnip::set_engine("glmnet", device = "cuda") %>%
+      parsnip::set_engine("glmnet") %>%
       parsnip::set_mode("regression")
 
     wf_config <- control_resamples(save_pred = TRUE, save_workflow = TRUE)
@@ -2434,7 +2508,10 @@ fit_base_elnet <-
     
   }
 
-dtfite <- fit_base_elnet(dtd, r_subsample = 0.3)
+# dtfite <- fit_base_elnet(dtd, r_subsample = 0.3)
+
+### TODO: retrieve predictions, quick prediction checking (spatial/temporal)
+
 
 
 predict_base <-
