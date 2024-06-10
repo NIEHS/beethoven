@@ -2139,6 +2139,8 @@ impute_all <-
       mtry = 50L,
       sample.fraction = 0.1
     )
+  
+  imputed <- amadeus::calc_temporal_dummies(imputed, "time")
   return(imputed)
   # lagged features: changing period (period[1] + 1 day)
   # period <- as.Date(period)
@@ -2274,13 +2276,120 @@ par_nest <-
 
 
 ## base & meta learner fitting
+# strategy:
+# random subsample (~30%) ; row based
+# P times...
 
-fit_base <-
+fit_base_brulee <-
   function(
-
+    dt_imputed,
+    r_subsample = 0.3,
+    yvar = "Arithmetic.Mean",
+    xvar,
+    cv_config,
+    ...
   ) {
+    base_form <-
+      reformulate(termlabels = xvar, response = yvar)
+    grid_hyper_tune <-
+      expand.grid(
+        hidden_units = list(c(16, 16, 16), c(32, 32, 32), c(8, 8, 8)),
+        dropout = 1 / seq(4, 2, -1),
+        activation = c("relu", "elu"),
+        learn_rate = c(0.05, 0.01, 0.005, 0.001)
+      )
+    dt_imputed <-
+      dt_imputed %>%
+      slice_sample(prop = r_subsample)
 
+    base_recipe <-
+      recipes::recipe(
+        data = dt_imputed
+      ) %>%
+      recipes::step_normalize(recipes::all_numeric_predictors()) %>%
+      recipes::update_role(everything()) %>%
+      recipes::update_role(all_of(yvar), new_role = "outcome")
+
+    # fix this part to implement SPT CV strategy
+    base_vfold <- rsample::vfold_cv(dt_imputed, v = 5)
+    base_model <-
+      parsnip::mlp(
+        hidden_units = tune(),
+        dropout = tune(),
+        epochs = 500L,
+        activation = tune(),
+        learn_rate = tune()
+      ) %>%
+      parsnip::set_engine("brulee", device = "cuda") %>%
+      parsnip::set_mode("regression")
+
+    wf_config <- control_resamples(save_pred = TRUE, save_workflow = TRUE)
+
+    base_wf <-
+      workflows::workflow() %>%
+      workflows::add_recipe(base_recipe) %>%
+      workflows::add_model(base_model) %>%
+      tune::tune_grid(resamples = base_vfold, grid = grid_hyper_tune, metrics = yardstick::metric_set(yardstick::rmse))
+    return(base_wf)
+    
   }
+
+dtfit <- fit_base_brulee(dtd, xvar = names(dtd)[6:100], r_subsample = 0.3)
+# reformulate(response = "Arithmetic.Mean", termlabels = names(dtd)[-1:-5])
+
+
+fit_base_xgb <-
+  function(
+    dt_imputed,
+    r_subsample = 0.3,
+    yvar = "Arithmetic.Mean",
+    xvar,
+    cv_config,
+    ...
+  ) {
+    base_form <-
+      reformulate(termlabels = xvar, response = yvar)
+    grid_hyper_tune <-
+      expand.grid(
+        mtry = floor(c(0.02, 0.1, 0.02) * ncol(dt_imputed)),
+        trees = seq(500, 3000, 500),
+        learn_rate = c(0.05, 0.01, 0.005, 0.001)
+      )
+    dt_imputed <-
+      dt_imputed %>%
+      slice_sample(prop = r_subsample)
+
+    base_recipe <-
+      recipes::recipe(
+        data = dt_imputed
+      ) %>%
+      recipes::step_normalize(recipes::all_numeric_predictors()) %>%
+      recipes::update_role(everything()) %>%
+      recipes::update_role(all_of(yvar), new_role = "outcome")
+    base_vfold <- rsample::vfold_cv(dt_imputed, v = 5)
+    base_model <-
+      parsnip::boost_tree(
+        mtry = tune(),
+        trees = tune(),
+        learn_rate = tune()
+      ) %>%
+      parsnip::set_engine("xgboost", device = "cuda") %>%
+      parsnip::set_mode("regression")
+
+    wf_config <- control_resamples(save_pred = TRUE, save_workflow = TRUE)
+
+    base_wf <-
+      workflows::workflow() %>%
+      workflows::add_recipe(base_recipe) %>%
+      workflows::add_model(base_model) %>%
+      tune::tune_grid(resamples = base_vfold, grid = grid_hyper_tune, metrics = yardstick::metric_set(yardstick::rmse))
+    return(base_wf)
+    
+  }
+
+dt <- qs::qread("output/dt_feat_design_imputed_061024.qs")
+dtd <- dplyr::as_tibble(dt)
+dtfitx <- fit_base_xgb(dtd, xvar = names(dtd)[6:105], r_subsample = 0.3)
 
 
 predict_base <-
@@ -2288,7 +2397,6 @@ predict_base <-
     fitted,
     targetdf
   ) {
-
   }
 
 

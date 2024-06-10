@@ -59,6 +59,7 @@ tar_option_set(
       #"crew", "crew.cluster", 
       "tigris", "dplyr",
       "future.batchtools", "qs", "collapse",
+      "tidymodels", "torch",
       "future", "future.apply", "future.callr", "callr",
       #"sftime",
       "stars", "rlang", "foreach", "parallelly"),
