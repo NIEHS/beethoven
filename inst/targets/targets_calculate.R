@@ -276,7 +276,35 @@ target_calculate_fit <-
 ## Targets for prediction grid features ####
 ## FIXME: align with the "_fit" targets
 ## TODO: chopin's gridset implementation
+## TODO: prospective or retrospective, or both?
 target_calculate_predict <-
   list(
+    tar_target(
+      char_pred_calc_base,
+      command =
+        terra::writeVector(
+          terra::vect(
+            data(prediction_grid, package = "chopin"),
+            geom = c("lon", "lat"),
+            crs = "EPSG:5070"
+          ),
+          filename = "input/prediction_grid.gpkg"
+        )
+    ),
+    tar_target(
+      sf_pred_calc_grid,
+      command = chopin::par_make_gridset(
+
+      )
+    ),
+    tar_target(
+      dt_pred_calc_base,
+      command = chopin::par_grid(
+
+      )
+    ),
+    tar_target(
+
+    )
 
   )

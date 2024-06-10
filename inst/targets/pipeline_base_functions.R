@@ -2253,6 +2253,24 @@ append_predecessors <-
       return(bound_large)
     }
   }
+
+
+# nested parallelization
+# IN PROGRESS
+# TODO: identify bottleneck
+par_nest <-
+  function(
+    path,
+    ...
+  ) {
+    par_grid(
+      path,
+      fun_dist = calculate,
+      ...
+    )
+  }
+
+
 ## base & meta learner fitting
 
 fit_base <-
