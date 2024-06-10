@@ -2289,8 +2289,7 @@ fit_base_brulee <-
     cv_config,
     ...
   ) {
-    base_form <-
-      reformulate(termlabels = xvar, response = yvar)
+    # 2^9=512, 2^15=32768 (#param is around 10% of selected rows)
     grid_hyper_tune <-
       expand.grid(
         hidden_units = list(c(16, 16, 16), c(32, 32, 32), c(8, 8, 8)),
@@ -2304,10 +2303,10 @@ fit_base_brulee <-
 
     base_recipe <-
       recipes::recipe(
-        data = dt_imputed
+        dt_imputed
       ) %>%
       recipes::step_normalize(recipes::all_numeric_predictors()) %>%
-      recipes::update_role(everything()) %>%
+      recipes::update_role(all_of(6:ncol(dt_imputed))) %>%
       recipes::update_role(all_of(yvar), new_role = "outcome")
 
     # fix this part to implement SPT CV strategy
@@ -2334,8 +2333,7 @@ fit_base_brulee <-
     
   }
 
-dtfit <- fit_base_brulee(dtd, xvar = names(dtd)[6:100], r_subsample = 0.3)
-# reformulate(response = "Arithmetic.Mean", termlabels = names(dtd)[-1:-5])
+# dtfit <- fit_base_brulee(dtd, xvar = names(dtd)[6:100], r_subsample = 0.3)
 
 
 fit_base_xgb <-
@@ -2347,8 +2345,6 @@ fit_base_xgb <-
     cv_config,
     ...
   ) {
-    base_form <-
-      reformulate(termlabels = xvar, response = yvar)
     grid_hyper_tune <-
       expand.grid(
         mtry = floor(c(0.02, 0.1, 0.02) * ncol(dt_imputed)),
@@ -2361,10 +2357,10 @@ fit_base_xgb <-
 
     base_recipe <-
       recipes::recipe(
-        data = dt_imputed
+        dt_imputed
       ) %>%
       recipes::step_normalize(recipes::all_numeric_predictors()) %>%
-      recipes::update_role(everything()) %>%
+      recipes::update_role(all_of(6:ncol(dt_imputed))) %>%
       recipes::update_role(all_of(yvar), new_role = "outcome")
     base_vfold <- rsample::vfold_cv(dt_imputed, v = 5)
     base_model <-
@@ -2387,9 +2383,58 @@ fit_base_xgb <-
     
   }
 
-dt <- qs::qread("output/dt_feat_design_imputed_061024.qs")
-dtd <- dplyr::as_tibble(dt)
-dtfitx <- fit_base_xgb(dtd, xvar = names(dtd)[6:105], r_subsample = 0.3)
+# dt <- qs::qread("output/dt_feat_design_imputed_061024.qs")
+# dtd <- dplyr::as_tibble(dt)
+# dtfitx <- fit_base_xgb(dtd, xvar = names(dtd)[6:105], r_subsample = 0.3)
+
+
+
+fit_base_elnet <-
+  function(
+    dt_imputed,
+    r_subsample = 0.3,
+    yvar = "Arithmetic.Mean",
+    xvar,
+    cv_config,
+    ...
+  ) {
+    grid_hyper_tune <-
+      expand.grid(
+        mixture = seq(0, 1, length.out = 21),
+        penalty = 10 ^ seq(-3, 5)
+      )
+    dt_imputed <-
+      dt_imputed %>%
+      slice_sample(prop = r_subsample)
+
+    base_recipe <-
+      recipes::recipe(
+        dt_imputed
+      ) %>%
+      recipes::step_normalize(recipes::all_numeric_predictors()) %>%
+      recipes::update_role(all_of(6:ncol(dt_imputed))) %>%
+      recipes::update_role(all_of(yvar), new_role = "outcome")
+    base_vfold <- rsample::vfold_cv(dt_imputed, v = 5)
+    base_model <-
+      parsnip::linear_reg(
+        mixture = tune(),
+        penalty = tune()
+      ) %>%
+      parsnip::set_engine("glmnet", device = "cuda") %>%
+      parsnip::set_mode("regression")
+
+    wf_config <- control_resamples(save_pred = TRUE, save_workflow = TRUE)
+
+    base_wf <-
+      workflows::workflow() %>%
+      workflows::add_recipe(base_recipe) %>%
+      workflows::add_model(base_model) %>%
+      tune::tune_grid(resamples = base_vfold, grid = grid_hyper_tune, metrics = yardstick::metric_set(yardstick::rmse))
+    return(base_wf)
+    
+  }
+
+dtfite <- fit_base_elnet(dtd, r_subsample = 0.3)
 
 
 predict_base <-
