@@ -2039,7 +2039,7 @@ impute_all <-
   DST3\tGEO_DUST3_0_00000
   DST4\tGEO_DUST4_0_00000
   EOH\tGEO_ETHOL_0_00000
-  H202\tGEO_HYPER_0_00000
+  H2O2\tGEO_HYPER_0_00000
   HCHO\tGEO_FORMA_0_00000
   HNO3\tGEO_NITAC_0_00000
   HNO4\tGEO_PERAC_0_00000
@@ -2053,7 +2053,7 @@ impute_all <-
   NIT\tGEO_INNIT_0_00000
   NO\tGEO_NIOXI_0_00000
   NO2\tGEO_NIDIO_0_00000
-  Noy\tGEO_NITRO_0_00000
+  NOy\tGEO_NITRO_0_00000
   OCPI\tGEO_HIORG_0_00000
   OCPO\tGEO_HOORG_0_00000
   PAN\tGEO_PERNI_0_00000
@@ -2086,12 +2086,14 @@ impute_all <-
   geoscn <- do.call(rbind, geoscn)
   geoscndf <- as.data.frame(geoscn, stringsAsFactors = FALSE)
   colnames(geoscndf) <- c("variable", "code")
+  geoscndf$variable <- trimws(geoscndf$variable)
+
   for (i in seq_len(nrow(geoscndf))) {
     dt <-
       setNames(
         dt,
         stringi::stri_replace_all_regex(
-          names(dt), sprintf("^%s$", geoscndf$variable[i]), geoscndf$code[i]
+          names(dt), sprintf("%s$", geoscndf$variable[i]), geoscndf$code[i]
         )
       )
   }
