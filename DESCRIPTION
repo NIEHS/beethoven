@@ -1,6 +1,6 @@
 Package: beethoven
 Title: Building an Extensible, rEproducible, Test-driven, Harmonized, Open-source, Versioned, ENsemble model for air quality
-Version: 0.2.0
+Version: 0.3.0
 Authors@R: c(
     person("Kyle", "Messier", , "kyle.messier@nih.gov", role = c("aut", "cre"), comment = c(ORCID = "0000-0001-9508-9623")),
     person("Insang", "Song", role = c("aut", "ctb"), comment = c(ORCID = "0000-0001-8732-3256")),
@@ -15,8 +15,8 @@ Authors@R: c(
   )
 Description: Near Real Time air pollution model results and code produced by the SET group. It is fully tested, versioned, and open source and open access.
 Depends: R (>= 4.1.0)
-Imports: dplyr, sf, stats, terra, methods, BART, data.table, httr, rvest, spData, exactextractr, utils, stringi, collapse, testthat (>= 3.0.0), doParallel, parallelly, stars, future, tidymodels, ranger, xgboost, torch
-Suggests: covr, withr, knitr, rmarkdown, sftime, lwgeom, FNN, ggplot2, scatterpie, doRNG, DT, quarto
+Imports: dplyr, sf, stats, terra, methods, BART, data.table, utils, stringi, collapse, testthat (>= 3.0.0), doParallel, parallelly, future, tidymodels, ranger, xgboost, torch, targets, tarchetypes, brulee, tune, glmnet
+Suggests: covr, withr, knitr, rmarkdown, stars, sftime, lwgeom, FNN, ggplot2, doRNG, DT, quarto
 Remotes: NIEHS/amadeus, NIEHS/chopin
 Encoding: UTF-8
 VignetteBuilder: knitr, rmarkdown
