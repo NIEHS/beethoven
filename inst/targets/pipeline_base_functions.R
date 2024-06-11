@@ -2357,7 +2357,12 @@ fit_base_brulee <-
       workflows::workflow() %>%
       workflows::add_recipe(base_recipe) %>%
       workflows::add_model(base_model) %>%
-      tune::tune_grid(resamples = base_vfold, grid = grid_hyper_tune, metrics = yardstick::metric_set(yardstick::rmse))
+      tune::tune_grid(
+        resamples = base_vfold,
+        grid = grid_hyper_tune,
+        metrics = yardstick::metric_set(yardstick::rmse, yardstick::mape),
+        control = wf_config
+      )
     return(base_wf)
     
   }
@@ -2434,7 +2439,12 @@ fit_base_xgb <-
       workflows::workflow() %>%
       workflows::add_recipe(base_recipe) %>%
       workflows::add_model(base_model) %>%
-      tune::tune_grid(resamples = base_vfold, grid = grid_hyper_tune, metrics = yardstick::metric_set(yardstick::rmse))
+      tune::tune_grid(
+        resamples = base_vfold,
+        grid = grid_hyper_tune,
+        metrics = yardstick::metric_set(yardstick::rmse, yardstick::mape),
+        control = wf_config
+      )
     return(base_wf)
     
   }
@@ -2511,7 +2521,13 @@ fit_base_elnet <-
       workflows::workflow() %>%
       workflows::add_recipe(base_recipe) %>%
       workflows::add_model(base_model) %>%
-      tune::tune_grid(resamples = base_vfold, grid = grid_hyper_tune, metrics = yardstick::metric_set(yardstick::rmse))
+      tune::tune_grid(
+        resamples = base_vfold,
+        grid = grid_hyper_tune,
+        metrics = yardstick::metric_set(yardstick::rmse, yardstick::mape),
+        control = wf_config,
+        parallel_over = "resamples"
+      )
     future::plan(future::sequential)
     return(base_wf)
     
