@@ -2287,6 +2287,7 @@ par_nest <-
 #' and tidymodels. With proper settings, users can utilize graphics
 #' processing units (GPU) to speed up the training process.
 #' @note Spatiotemporal cross-validation strategy is not yet implemented.
+#'   tune package should be 1.2.0 or higher.
 #' @param dt_imputed The input data table to be used for fitting.
 #' @param r_subsample The proportion of rows to be sampled.
 #' @param yvar The target variable.
@@ -2317,10 +2318,10 @@ fit_base_brulee <-
     # 2^9=512, 2^15=32768 (#param is around 10% of selected rows)
     grid_hyper_tune <-
       expand.grid(
-        hidden_units = list(c(16, 16, 16), c(32, 32, 32), c(8, 8, 8)),
+        hidden_units = list(c(64, 64), c(32, 32), c(32, 32, 32), c(16, 16, 16)),
         dropout = 1 / seq(4, 2, -1),
-        activation = c("relu", "elu", "sigmoid"),
-        learn_rate = c(0.05, 0.01, 0.005, 0.001)
+        activation = c("relu", "leaky_relu"),
+        learn_rate = c(0.1, 0.05, 0.01)
       )
     dt_imputed <-
       dt_imputed %>%
@@ -2333,8 +2334,9 @@ fit_base_brulee <-
       # do we want to normalize the predictors?
       # if so, an additional definition of truly continuous variables is needed
       # recipes::step_normalize(recipes::all_numeric_predictors()) %>%
-      recipes::update_role(all_of(xvar)) %>%
-      recipes::update_role(all_of(yvar), new_role = "outcome")
+      recipes::update_role(!!xvar) %>%
+      recipes::update_role(!!yvar, new_role = "outcome") #%>%
+      # recipes::step_normalize(!!yvar)
 
     # fix this part to implement SPT CV strategy
     base_vfold <- rsample::vfold_cv(dt_imputed, v = vfold)
@@ -2342,7 +2344,7 @@ fit_base_brulee <-
       parsnip::mlp(
         hidden_units = tune(),
         dropout = tune(),
-        epochs = 500L,
+        epochs = 1000L,
         activation = tune(),
         learn_rate = tune()
       ) %>%
@@ -2360,7 +2362,9 @@ fit_base_brulee <-
     
   }
 
-# dtfit <- fit_base_brulee(dtd, xvar = names(dtd)[6:100], r_subsample = 0.3)
+# dt <- qs::qread("output/dt_feat_design_imputed_061024.qs")
+# dtd <- dplyr::as_tibble(dt)
+# dtfit <- fit_base_brulee(dtd, r_subsample = 0.3)
 
 
 #' Base learner: Extreme gradient boosting (XGBoost)
@@ -2450,10 +2454,12 @@ fit_base_xgb <-
 #' @param yvar The target variable.
 #' @param xvar The predictor variables.
 #' @param vfold The number of folds for cross-validation.
+#' @param nthreads The number of threads to be used. Default is 16L.
 #' @param cv_config The cross-validation configuration. To be added.
 #' @param ... Additional arguments to be passed.
 #'
 #' @returns The fitted workflow.
+#' @importFrom future plan multicore multisession
 #' @importFrom recipes recipe update_role
 #' @importFrom parsnip linear_reg set_engine set_mode
 #' @importFrom workflows workflow add_recipe add_model
@@ -2469,6 +2475,7 @@ fit_base_elnet <-
     yvar = "Arithmetic.Mean",
     xvar = seq(6, ncol(dt_imputed)),
     vfold = 5L,
+    nthreads = 16L,
     cv_config,
     ...
   ) {
@@ -2499,11 +2506,13 @@ fit_base_elnet <-
 
     wf_config <- control_resamples(save_pred = TRUE, save_workflow = TRUE)
 
+    future::plan(future::multicore, workers = nthreads)
     base_wf <-
       workflows::workflow() %>%
       workflows::add_recipe(base_recipe) %>%
       workflows::add_model(base_model) %>%
       tune::tune_grid(resamples = base_vfold, grid = grid_hyper_tune, metrics = yardstick::metric_set(yardstick::rmse))
+    future::plan(future::sequential)
     return(base_wf)
     
   }
