@@ -16,3 +16,14 @@ Convert time column to character
 This function takes preprocessed data.table with
 a column named \code{"time"}.
 }
+\seealso{
+Other Post-calculation: 
+\code{\link{add_time_col}()},
+\code{\link{impute_all}()},
+\code{\link{post_calc_autojoin}()},
+\code{\link{post_calc_merge_all}()},
+\code{\link{post_calc_merge_features}()},
+\code{\link{post_calc_unify_timecols}()},
+\code{\link{reduce_merge}()}
+}
+\concept{Post-calculation}

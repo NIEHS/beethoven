@@ -47,7 +47,7 @@ loadargs <- function(argfile, dataset) {
 #'
 #' This function checks if a given query date falls within a time interval
 #' defined by a vector of two dates.
-#'
+#' @family Miscellaneous
 #' @param query_date The query date to check.
 #' @param tvec A vector of two dates defining the time interval.
 #'
@@ -69,7 +69,7 @@ loadargs <- function(argfile, dataset) {
 #'
 #' This function takes a path and an optional pattern as input and
 #'   returns a list of MODIS files found in the specified path.
-#'
+#' @family Pipeline utility
 #' @param path The path where the MODIS files are located.
 #' @param pattern An optional regular expression pattern to filter the files.
 #'   The default pattern is "hdf$".
@@ -81,7 +81,7 @@ loadargs <- function(argfile, dataset) {
 #' @examples
 #' # Load MODIS files from the current directory
 #' modis_files <- load_modis_files(".")
-#' 
+#'
 #' # Load MODIS files from a specific directory with a custom pattern
 #' modis_files <- load_modis_files("/path/to/files", pattern = "MOD.*hdf$")
 #'
@@ -108,10 +108,9 @@ load_modis_files <- function(path, pattern = "hdf$", date = character(2)) {
 #'
 #' This function injects the calculate function with the specified arguments,
 #' allowing for dynamic customization of the function's behavior.
+#' @family Calculation
 #' @param covariate character(1). The name of the covariate to be calculated.
 #' @param locs The locations to be used in the calculation.
-#' @param buffer The buffer size for the calculation. If not provided, the
-#'   default buffer size will be used.
 #' @param injection Additional arguments to be injected into
 #'   the calculate function.
 #'
@@ -137,6 +136,7 @@ inject_calculate <- function(covariate, locs, injection) {
 
 #' Injects arguments to parallelize MODIS/VIIRS data processing
 #'
+#' @family Calculation
 #' @param locs A data frame containing the locations for which MODIS
 #'   features need to be calculated.
 #' @param domain The domain in which the MODIS PAR data should be injected.
@@ -162,6 +162,7 @@ inject_modis_par <- function(locs, domain, injection) {
 #'   latitude and longitude coordinates based on the specified locations,
 #'   a location ID column, a window range, and a snapping option.
 #'
+#' @family Calculation
 #' @param locs A data frame containing the locations for which
 #'   geographic information needs to be injected.
 #' @param injection A list of additional arguments to be passed to
@@ -181,7 +182,29 @@ inject_geos <- function(locs, injection) {
 }
 
 
-
+#' Injects GMTED data into specified locations
+#'
+#' This function injects GMTED (Global Multi-resolution Terrain Elevation Data)
+#'  into specified locations. It calculates the GMTED values for each
+#'  location within different radii and returns the merged results.
+#'
+#' @family Calculation
+#' @param locs A data frame/sf/SpatVector containing the locations
+#'   where GMTED variables needs to be calculated
+#' @param variable The variable for which GMTED data needs to be calculated.
+#' @param radii A vector of radii for which GMTED data needs
+#'   to be calculated.
+#' @param injection A list of additional arguments to be passed to
+#'   the `calc_gmted_direct` function.
+#' @param nthreads The number of threads to be used for parallel processing.
+#'  Default is 4.
+#'
+#' @returns A data frame containing the merged results of GMTED data
+#'   for each location within different radii.
+#' @importFrom future plan
+#' @importFrom future.apply future_lapply
+#' @importFrom rlang inject
+#' @export
 inject_gmted <- function(locs, variable, radii, injection, nthreads = 4L) {
   future::plan(future::multicore, workers = nthreads)
 
@@ -216,8 +239,10 @@ inject_gmted <- function(locs, variable, radii, injection, nthreads = 4L) {
 #'
 #' @param list_in A list of data tables to be merged.
 #' @param by The columns to merge the data tables on.
-#' @return A merged data table.
-#'
+#' @param all.x logical(1). Keeping all rows from the first input.
+#' @param all.y logical(1). Keeping all rows from the second input.
+#' @returns A merged data table.
+#' @family Post-calculation
 #' @examples
 #' # Create example data tables
 #' dt1 <- data.table(a = 1:3, b = 4:6)
@@ -227,27 +252,47 @@ inject_gmted <- function(locs, variable, radii, injection, nthreads = 4L) {
 #' # Merge the data tables
 #' reduce_merge(list(dt1, dt2, dt3), by = "a")
 #'
-#' @import data.table
+#' @importFrom data.table as.data.table merge.data.table
 #' @export
-reduce_merge <- function(list_in, by = c("site_id", "time"), all.x = TRUE, all.y = FALSE) {
-  list_check <- sapply(list_in, nrow)
-  list_checkdiff <- diff(list_check)
-  if (any(list_checkdiff > 0)) all.y <- TRUE
-  for (i in seq_len(length(list_in))) {
-    list_in[[i]] <- data.table::as.data.table(list_in[[i]])
+reduce_merge <-
+  function(
+    list_in,
+    by = c("site_id", "time"),
+    all.x = TRUE, all.y = FALSE
+  ) {
+    list_check <- sapply(list_in, nrow)
+    list_checkdiff <- diff(list_check)
+    if (any(list_checkdiff > 0)) all.y <- TRUE
+    for (i in seq_len(length(list_in))) {
+      list_in[[i]] <- data.table::as.data.table(list_in[[i]])
+    }
+
+    Reduce(
+      function(x, y) {
+        if (is.null(by)) by <- intersect(names(x), names(y))
+        data.table::merge.data.table(
+          x, y, by = by, all.x = all.x, all.y = all.y
+        )
+      },
+      list_in
+    )
   }
 
-  Reduce(
-    function(x, y) {
-      if (is.null(by)) by <- intersect(names(x), names(y))
-      #post_calc_autojoin(x, y)
-      data.table::merge.data.table(x, y, by = by, all.x = all.x, all.y = all.y)
-    },
-    list_in
-  )
-}
 
-
+#' Parallelize NARR feature calculation
+#'
+#' This function parallelizes the processing and calculation of
+#'  NARR data for multiple domains.
+#' @family Calculation
+#' @param domain A character vector specifying the domains to process.
+#' @param date A character vector specifying the date of the NARR data to process.
+#' @param locs A data frame specifying the locations to calculate NARR data for.
+#' @param nthreads An integer specifying the number of threads to use for parallel processing. Default is 24.
+#'
+#' @returns A list of results from the parallel processing.
+#' @importFrom future plan multicore sequential
+#' @importFrom future.apply future_lapply
+#' @export
 par_narr <- function(domain, date, locs, nthreads = 24L) {
 
   future::plan(future::multicore, workers = nthreads)
@@ -277,11 +322,12 @@ par_narr <- function(domain, date, locs, nthreads = 24L) {
 #'
 #' This function adds a time column to a data frame.
 #'
+#' @family Post-calculation
 #' @param df The data frame to which the time column will be added.
 #' @param time_value The value to be assigned to the time column.
 #' @param time_id The name of the time column (default is "time").
 #'
-#' @return The data frame with the added time column.
+#' @returns The data frame with the added time column.
 #'
 #' @examples
 #' df <- data.frame(x = 1:5, y = letters[1:5])
@@ -358,7 +404,7 @@ post_calc_year_expand <-
 #' in the available years;#' if there is no past year in the available years,
 #' the first available year is rolled back to the start of the time period.
 #' @returns The expanded data frame with multiple rows for each year.
-#' @seealso [`process_year_expand()`]
+#' @seealso [`post_calc_year_expand()`]
 #' @examples
 #' df <- data.frame(year = c(2010, 2010, 2011, 2012),
 #'                  value = c(1, 2, 3, 4))
@@ -366,7 +412,7 @@ post_calc_year_expand <-
 #'                               time_start = 2011, time_end = 2012,
 #'                               time_unit = "year")
 #' print(df_expanded)
-#'
+#' @importFrom stats sd
 #' @export
 post_calc_df_year_expand <- function(
   df,
@@ -380,7 +426,7 @@ post_calc_df_year_expand <- function(
 ) {
   time_summary <- table(unlist(df[[time_field]]))
   if (length(time_summary) != 1) {
-    if (sd(time_summary) != 0) {
+    if (stats::sd(time_summary) != 0) {
       stop("df should be a data frame with the same number of rows per year")
     }
   }
@@ -417,6 +463,7 @@ post_calc_df_year_expand <- function(
 #' Depending on temporal resolution of raw datasets.
 #' Nullable; If `NULL`, it will be set to `c(1)`.
 #' @param domain_name character(1). Name of the domain. Default is `"year"`.
+#' @param nthreads integer(1). Number of threads to use.
 #' @param process_function Raw data processor. Default is
 #' [`amadeus::process_covariates`]
 #' @param calc_function Function to calculate covariates.
@@ -519,7 +566,8 @@ calculate <-
                 res <- data.table::as.data.table(res)
                 return(res)
               },
-              list_iteration)
+              list_iteration
+            )
           df_iteration_calc <-
             if (length(list_iteration_calc) == 1) {
               list_iteration_calc[[1]]
@@ -563,6 +611,7 @@ calculate <-
 
 
 #' Set resource management for SLURM
+#' @family Pipeline utility
 #' @param template_file SLURM job submission shell template path.
 #' @param partition character(1). Name of partition. Default is `"geo"`
 #' @param ncpus integer(1). Number of CPU cores assigned to each task.
@@ -597,7 +646,6 @@ set_slurm_resource <-
           resources =
             list(
               partition = partition,
-              # template = template_file,
               ntasks = ntasks,
               ncpus = ncpus,
               memory = memory,
@@ -611,6 +659,7 @@ set_slurm_resource <-
 
 
 #' Read AQS data
+#' @family Pipeline utility
 #' @param fun_aqs function to import AQS data.
 #' Default is `amadeus::process_aqs`
 #' @param export Export the file to qs. Default is FALSE.
@@ -630,86 +679,11 @@ read_locs <-
   }
 
 
-#' Filter monitors with the minimum POC value
-#' @param path data.frame/tibble/data.table
-#' @param site_spt Space-time site data.
-#' @param locs_id character(1). Name of site id (not monitor id)
-#' @param poc_name character(1). Name of column containing POC values.
-#' @param sampling character(1). Name of column with sampling duration.
-#' @param date_start character(1).
-#' @param date_end character(1).
-#' @author Insang Song
-#' @returns a data.table object
-#' @importFrom dplyr group_by
-#' @importFrom dplyr filter
-#' @importFrom dplyr ungroup
-#' @importFrom data.table as.data.table
-#' @importFrom data.table merge.data.table
-#' @importFrom data.table rbindlist
-#' @importFrom rlang sym
-#' @export
-get_aqs_data <-
-  function(
-    path = list.files(
-      path = "input/aqs",
-      pattern = "daily_88101_[0-9]{4}.csv",
-      full.names = TRUE
-    ),
-    site_spt = NULL,
-    locs_id = "site_id",
-    time_id = "time",
-    poc_name = "POC",
-    sampling = "Sample.Duration",
-    date_start = "2018-01-01",
-    date_end = "2022-12-31"
-  ) {
-    #nocov start
-    if (!is.character(locs_id)) {
-      stop("locs_id should be character.\n")
-    }
-    if (!is.character(poc_name)) {
-      stop("poc_name should be character.\n")
-    }
-    # aqs_prep <-
-    #   amadeus::process_aqs(
-    #     path = path,
-    #     date = NULL,
-    #     return_format = return_format
-    #   )
-    input_df <- lapply(path, data.table::fread) |> data.table::rbindlist()
-    input_df <- input_df[,
-      list(
-        pm25 = `Arithmetic Mean`,
-        site_id =
-          sprintf("%02d%03d%04d%05d",
-            `State Code`, `County Code`,
-            `Site Num`, `Parameter Code`
-          ),
-        time = as.character(`Date Local`),
-          POC = POC
-      )
-    ]
-
-    poc_filtered <- input_df |>
-      dplyr::group_by(!!rlang::sym(locs_id)) |>
-      dplyr::filter(startsWith(!!rlang::sym(sampling), "24")) |>
-      dplyr::filter(!!rlang::sym(poc_name) == min(!!rlang::sym(poc_name))) |>
-      dplyr::ungroup() |>
-      data.table::as.data.table()
-    return(poc_filtered)
-    poc_res <-
-      data.table::merge.data.table(poc_filtered,
-        data.table::as.data.table(site_spt),
-        by = c(locs_id, time_id)
-      )
-    return(poc_res)
-    #nocov end
-  }
-
 
 #' Check file status and download if necessary
+#' @family Pipeline utility
 #' @param path download path.
-#' @param dname Dataset name. See [`amadeus::download_data`] for details.
+#' @param dataset_name Dataset name. See [`amadeus::download_data`] for details.
 #' @param ... Arguments passed to `amadeus::download_data`
 #' @returns logical(1).
 feature_raw_download <-
@@ -730,6 +704,7 @@ feature_raw_download <-
   }
 
 #' Load county sf object
+#' @family Calculation
 #' @param year integer(1). Year of the county shapefile.
 #' @param exclude character. State FIPS codes to exclude.
 #' Default is c("02", "15", "60", "66", "68", "69", "72", "78").
@@ -757,6 +732,7 @@ process_counties <-
 #' Set this `TRUE` will supersede `by` value by appending time identifier.
 #' @param ... data.frame objects to merge
 #' @returns data.table
+#' @family Post-calculation
 #' @importFrom data.table as.data.table
 #' @importFrom data.table merge.data.table
 #' @export
@@ -801,6 +777,7 @@ post_calc_merge_features <-
 #' @param candidates character. Candidate column names.
 #' @param replace character. New column name.
 #' @returns data.frame
+#' @family Post-calculation
 #' @export
 post_calc_unify_timecols <-
   function(
@@ -817,6 +794,7 @@ post_calc_unify_timecols <-
 
 
 #' Convert time column to character
+#' @family Post-calculation
 #' @param df data.table
 #' @note This function takes preprocessed data.table with
 #'   a column named `"time"`.
@@ -843,6 +821,7 @@ post_calc_convert_time <-
 #' @param spid character(1). Name of the unique location identifier field.
 #' @importFrom methods is
 #' @importFrom data.table merge.data.table
+#' @importFrom data.table `:=`
 #' @returns data.frame
 post_calc_join_yeardate <-
   function(
@@ -873,6 +852,7 @@ post_calc_join_yeardate <-
 
 
 #' Merge spatial and spatiotemporal covariate data
+#' @family Post-calculation
 #' @param locs Location. e.g., AQS sites.
 #' @param locs_id character(1). Location identifier.
 #' @param time_id character(1). Location identifier.
@@ -917,6 +897,7 @@ post_calc_merge_all <-
 
 
 #' Remove columns from a data frame based on regular expression patterns.
+#' @family Post-calculation
 #'
 #' This function removes columns from a data frame that match
 #'  any of the specified
@@ -966,9 +947,12 @@ post_calc_drop_cols <-
 #' @param df_coarse The coarse-grained data frame.
 #' @param field_sp The name of the spatial field in the data frames.
 #' @param field_t The name of the time field in the data frames.
-#'
+#' @param year_start The starting year of the time period.
+#' @param year_end The ending year of the time period.
+#' @family Post-calculation
 #' @returns A merged data table.
 #' @examples
+# nolint start
 #' df_fine0 <- data.frame(site_id = c("A", "B", "B", "C"),
 #'                       time = as.Date(c("2022-01-01", "2022-01-02", "2021-12-31", "2021-01-03")),
 #'                       value = c(1, 2, 3, 5))
@@ -977,6 +961,7 @@ post_calc_drop_cols <-
 #'                         other_value = c(10, 20, 30))
 #' jdf <- post_calc_autojoin(df_fine0, df_coarse0)
 #' print(jdf)
+# nolint end
 #' @importFrom data.table merge.data.table
 #' @importFrom rlang as_name
 #' @importFrom rlang sym
@@ -1050,10 +1035,12 @@ post_calc_autojoin <-
 
 
 #' Read paths from a directory with a specific file extension
+#' @family Pipeline utility
 #' @param path The directory path from which to read the paths.
 #' @param extension The file extension to match. Defaults to ".hdf".
 #' @param target_dates A character vector of length 2 containing
 #'  the start and end dates.
+#' @param julian logical(1). If `TRUE`, the dates are in Julian format.
 #' @returns A character vector containing the full paths of the matching files.
 #'
 #' @examples
@@ -1093,6 +1080,7 @@ read_paths <-
 
 
 #' Search package functions
+#' @family Pipeline utility
 #' @param package character(1). Package name.
 #' @param search character(1). Search term.
 #' @returns A character vector containing the matching function names.
@@ -1106,6 +1094,7 @@ search_function <- function(package, search){
 }
 
 #' Get data.frame of function parameters
+#' @family Pipeline utility
 #' @param functions character. Vector of function names.
 #' @returns A data.frame containing the parameters of the functions.
 #' @importFrom dplyr as_tibble bind_rows
@@ -1125,6 +1114,7 @@ df_params <- function(functions) {
 
 
 #' Process atmospheric composition data by chunks (v2)
+#' @family Calculation
 #' @description
 #' Returning a single `SpatRasterDataset` object.
 #' @param date character(2). length of 10. Format "YYYY-MM-DD".
@@ -1135,6 +1125,7 @@ df_params <- function(functions) {
 #' Layer names of the returned `SpatRaster` object contain the variable,
 #' pressure level, date
 #' Reference duration: 1 day summary, all layers: 115 seconds
+#' Superseded by [`calc_geos_strict`].
 #' @author Mitchell Manware, Insang Song
 #' @return a `SpatRaster` object;
 #' @importFrom terra rast
@@ -1267,13 +1258,16 @@ process_geos_bulk <-
   }
 
 #' Process atmospheric composition data by chunks (v3)
+#' @family Calculation
 #' @description
 #' Returning a single `SpatRasterDataset` object.
 #' Removed `tapp` for performance; impose a strict assumption that
 #' there are no missing values
-#' @param date character(2). length of 10. Format "YYYY-MM-DD".
 #' @param path character(1). Directory with downloaded netCDF (.nc4) files. or
 #' netCDF file paths.
+#' @param date character(2). length of 10. Format "YYYY-MM-DD".
+#' @param locs Locations to extract.
+#' @param locs_id character(1). Location identifier.
 #' @param ... Arguments passed to [`terra::rast`].
 #' @note
 #' Layer names of the returned `SpatRaster` object contain the variable,
@@ -1474,6 +1468,7 @@ calc_geos_strict <-
 
 
 #' Reflown gmted processing
+#' @family Calculation
 #' @param variable character(2). Statistic and resolution.
 #' @param path character(1). Directory with downloaded GMTED files.
 #' @param locs data.frame/SpatVector/sf. Locations.
@@ -1614,6 +1609,7 @@ calc_gmted_direct <- function(
 #'
 #' This function processes NARR2 data based on the specified parameters.
 #'
+#' @family Calculation
 #' @param date A character vector specifying the start and end dates
 #'   in the format "YYYY-MM-DD".
 #' @param variable A character vector specifying the variable of interest.
@@ -1791,6 +1787,7 @@ process_narr2 <- function(
 #' This function calculates aggregated values for specified locations from
 #'  a raster dataset.
 #'
+#' @family Calculation
 #' @param from The raster dataset from which to extract values.
 #' @param locs A data frame containing the locations for which
 #'  to calculate aggregated values.
@@ -1808,12 +1805,8 @@ process_narr2 <- function(
 #' @param ... Additional arguments to be passed to
 #'  the aggregation function.
 #'
-#' @return A data frame containing the aggregated values for each
+#' @returns A data frame containing the aggregated values for each
 #'  location and time point.
-#'
-#' @examples
-#' # Calculate mean values for locations within a radius of 10 units
-#' calc_narr2(from = raster_data, locs = locations, radius = 10, fun = "mean")
 #' @export
 calc_narr2 <- function(
   from,
@@ -1909,6 +1902,7 @@ calc_narr2 <- function(
 }
 
 #' Impute missing values and attach lagged features
+#' @family Post-calculation
 #' @note under construction.
 #' This function performs imputation on a given data table
 #'   by replacing missing values with imputed values.
@@ -1934,11 +1928,6 @@ calc_narr2 <- function(
 #' @importFrom stats setNames
 #' @importFrom stringi stri_replace_all_regex
 #' @importFrom missRanger missRanger
-#'
-#' @examples
-#' dt <- data.table(a = c(1, 2, NA, 4), b = c(NA, 2, 3, 4))
-#' impute_all(dt, period = 1)
-#'
 #' @export
 impute_all <-
   function(
@@ -2033,7 +2022,7 @@ impute_all <-
           )
         )
     }
-
+    site_id <- NULL
     # NDVI 16-day
     # For each site_id, backward filling for 16-day NDVI
     # Last Observation Carried Forward is the method used;
@@ -2101,6 +2090,7 @@ impute_all <-
 #' This function appends predecessors to an existing object or
 #'  creates a new object if none exists.
 #'
+#' @family Integration
 #' @param path_qs The path where the predecessors will be stored.
 #' @param period_new The new period to be appended.
 #' @param input_new The new input object to be appended.
@@ -2110,23 +2100,6 @@ impute_all <-
 #'   the new input object and returns the name of the saved file.
 #'   If existing predecessors are found, the function appends
 #'   the new input object to the existing ones and returns the combined object.
-#'
-#' @examples
-#' \dontrun{
-#' # Append predecessors with a new input object
-#' append_predecessors(
-#'   path_qs = "output/qs",
-#'   period_new = c("2022-01-01", "2022-01-31"),
-#'   input_new = my_data
-#' )
-#'
-#' # Append predecessors with an existing input object
-#' append_predecessors(
-#'   path_qs = "output/qs",
-#'   period_new = c("2022-02-01", "2022-02-28"),
-#'   input_new = my_data
-#' )
-#' }
 #' @export
 append_predecessors <-
   function(
@@ -2223,6 +2196,7 @@ par_nest <-
 #' hidden units, dropout, activation, and learning rate using brulee
 #' and tidymodels. With proper settings, users can utilize graphics
 #' processing units (GPU) to speed up the training process.
+#' @family Base Learner
 #' @note Spatiotemporal cross-validation strategy is not yet implemented.
 #'   tune package should be 1.2.0 or higher.
 #' @param dt_imputed The input data table to be used for fitting.
@@ -2316,6 +2290,7 @@ fit_base_brulee <-
 #' the input dataset by grid search.
 #' With proper settings, users can utilize graphics
 #' processing units (GPU) to speed up the training process.
+#' @family Base Learner
 #' @note Spatiotemporal cross-validation strategy is not yet implemented.
 #' @param dt_imputed The input data table to be used for fitting.
 #' @param r_subsample The proportion of rows to be sampled.
@@ -2397,6 +2372,7 @@ fit_base_xgb <-
 #'
 #' Elastic net model is fitted at the defined rate (`r_subsample`) of
 #' the input dataset by grid search.
+#' @family Base Learner
 #' @note Spatiotemporal cross-validation strategy is not yet implemented.
 #' @param dt_imputed The input data table to be used for fitting.
 #' @param r_subsample The proportion of rows to be sampled.

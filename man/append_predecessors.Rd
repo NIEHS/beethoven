@@ -30,20 +30,4 @@ the new input object to the existing ones and returns the combined object.
 This function appends predecessors to an existing object or
 creates a new object if none exists.
 }
-\examples{
-\dontrun{
-# Append predecessors with a new input object
-append_predecessors(
-  path_qs = "output/qs",
-  period_new = c("2022-01-01", "2022-01-31"),
-  input_new = my_data
-)
-
-# Append predecessors with an existing input object
-append_predecessors(
-  path_qs = "output/qs",
-  period_new = c("2022-02-01", "2022-02-28"),
-  input_new = my_data
-)
-}
-}
+\concept{Integration}

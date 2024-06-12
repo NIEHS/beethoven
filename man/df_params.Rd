@@ -15,3 +15,13 @@ A data.frame containing the parameters of the functions.
 \description{
 Get data.frame of function parameters
 }
+\seealso{
+Other Pipeline utility: 
+\code{\link{feature_raw_download}()},
+\code{\link{load_modis_files}()},
+\code{\link{read_locs}()},
+\code{\link{read_paths}()},
+\code{\link{search_function}()},
+\code{\link{set_slurm_resource}()}
+}
+\concept{Pipeline utility}

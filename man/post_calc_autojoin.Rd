@@ -21,6 +21,10 @@ post_calc_autojoin(
 \item{field_sp}{The name of the spatial field in the data frames.}
 
 \item{field_t}{The name of the time field in the data frames.}
+
+\item{year_start}{The starting year of the time period.}
+
+\item{year_end}{The ending year of the time period.}
 }
 \value{
 A merged data table.
@@ -43,3 +47,14 @@ df_coarse0 <- data.frame(site_id = c("A", "B", "C"),
 jdf <- post_calc_autojoin(df_fine0, df_coarse0)
 print(jdf)
 }
+\seealso{
+Other Post-calculation: 
+\code{\link{add_time_col}()},
+\code{\link{impute_all}()},
+\code{\link{post_calc_convert_time}()},
+\code{\link{post_calc_merge_all}()},
+\code{\link{post_calc_merge_features}()},
+\code{\link{post_calc_unify_timecols}()},
+\code{\link{reduce_merge}()}
+}
+\concept{Post-calculation}

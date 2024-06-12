@@ -42,3 +42,9 @@ the input dataset by grid search.
 \note{
 Spatiotemporal cross-validation strategy is not yet implemented.
 }
+\seealso{
+Other Base Learner: 
+\code{\link{fit_base_brulee}()},
+\code{\link{fit_base_xgb}()}
+}
+\concept{Base Learner}

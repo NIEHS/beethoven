@@ -51,8 +51,7 @@ df_expanded <- df_year_expand(df, locs_id = "site_id", time_field = "year",
                               time_start = 2011, time_end = 2012,
                               time_unit = "year")
 print(df_expanded)
-
 }
 \seealso{
-\code{\link[=process_year_expand]{process_year_expand()}}
+\code{\link[=post_calc_year_expand]{post_calc_year_expand()}}
 }

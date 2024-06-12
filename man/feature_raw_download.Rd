@@ -9,9 +9,9 @@ feature_raw_download(path = NULL, dataset_name = NULL, ...)
 \arguments{
 \item{path}{download path.}
 
-\item{...}{Arguments passed to \code{amadeus::download_data}}
+\item{dataset_name}{Dataset name. See \code{\link[amadeus:download_data]{amadeus::download_data}} for details.}
 
-\item{dname}{Dataset name. See \code{\link[amadeus:download_data]{amadeus::download_data}} for details.}
+\item{...}{Arguments passed to \code{amadeus::download_data}}
 }
 \value{
 logical(1).
@@ -19,3 +19,13 @@ logical(1).
 \description{
 Check file status and download if necessary
 }
+\seealso{
+Other Pipeline utility: 
+\code{\link{df_params}()},
+\code{\link{load_modis_files}()},
+\code{\link{read_locs}()},
+\code{\link{read_paths}()},
+\code{\link{search_function}()},
+\code{\link{set_slurm_resource}()}
+}
+\concept{Pipeline utility}

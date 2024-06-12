@@ -25,10 +25,7 @@ only \code{c("site_id", "time")} will be kept.}
 The modified data frame with the specified columns removed.
 }
 \description{
-This function removes columns from a data frame that match
-any of the specified
-regular expression patterns. By default, it removes columns with names that
-match the patterns "^lon$|^lat$|geoid|year$|description".
+Remove columns from a data frame based on regular expression patterns.
 }
 \examples{
 df <- data.frame(lon = 1:5, lat = 6:10, geoid = 11:15, year = 2010:2014,
@@ -36,3 +33,9 @@ df <- data.frame(lon = 1:5, lat = 6:10, geoid = 11:15, year = 2010:2014,
 post_calc_drop_cols(df)
 
 }
+\concept{Post-calculation
+
+This function removes columns from a data frame that match
+any of the specified
+regular expression patterns. By default, it removes columns with names that
+match the patterns "^lon$|^lat$|geoid|year$|description".}

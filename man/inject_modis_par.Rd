@@ -21,3 +21,17 @@ The modified domain with the injected MODIS PAR data.
 \description{
 Injects arguments to parallelize MODIS/VIIRS data processing
 }
+\seealso{
+Other Calculation: 
+\code{\link{calc_geos_strict}()},
+\code{\link{calc_gmted_direct}()},
+\code{\link{calc_narr2}()},
+\code{\link{inject_calculate}()},
+\code{\link{inject_geos}()},
+\code{\link{inject_gmted}()},
+\code{\link{par_narr}()},
+\code{\link{process_counties}()},
+\code{\link{process_geos_bulk}()},
+\code{\link{process_narr2}()}
+}
+\concept{Calculation}

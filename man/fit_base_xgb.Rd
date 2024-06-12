@@ -41,3 +41,9 @@ processing units (GPU) to speed up the training process.
 \note{
 Spatiotemporal cross-validation strategy is not yet implemented.
 }
+\seealso{
+Other Base Learner: 
+\code{\link{fit_base_brulee}()},
+\code{\link{fit_base_elnet}()}
+}
+\concept{Base Learner}

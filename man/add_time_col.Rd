@@ -24,3 +24,14 @@ df <- data.frame(x = 1:5, y = letters[1:5])
 add_time_col(df, "2022-01-01")
 
 }
+\seealso{
+Other Post-calculation: 
+\code{\link{impute_all}()},
+\code{\link{post_calc_autojoin}()},
+\code{\link{post_calc_convert_time}()},
+\code{\link{post_calc_merge_all}()},
+\code{\link{post_calc_merge_features}()},
+\code{\link{post_calc_unify_timecols}()},
+\code{\link{reduce_merge}()}
+}
+\concept{Post-calculation}

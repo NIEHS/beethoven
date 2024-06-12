@@ -24,7 +24,22 @@ Returning a single \code{SpatRasterDataset} object.
 Layer names of the returned \code{SpatRaster} object contain the variable,
 pressure level, date
 Reference duration: 1 day summary, all layers: 115 seconds
+Superseded by \code{\link{calc_geos_strict}}.
+}
+\seealso{
+Other Calculation: 
+\code{\link{calc_geos_strict}()},
+\code{\link{calc_gmted_direct}()},
+\code{\link{calc_narr2}()},
+\code{\link{inject_calculate}()},
+\code{\link{inject_geos}()},
+\code{\link{inject_gmted}()},
+\code{\link{inject_modis_par}()},
+\code{\link{par_narr}()},
+\code{\link{process_counties}()},
+\code{\link{process_narr2}()}
 }
 \author{
 Mitchell Manware, Insang Song
 }
+\concept{Calculation}

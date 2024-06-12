@@ -18,6 +18,8 @@ read_paths(
 
 \item{target_dates}{A character vector of length 2 containing
 the start and end dates.}
+
+\item{julian}{logical(1). If \code{TRUE}, the dates are in Julian format.}
 }
 \value{
 A character vector containing the full paths of the matching files.
@@ -34,3 +36,13 @@ read_paths("/path/to/directory")
 read_paths("/path/to/directory", ".txt")
 }
 }
+\seealso{
+Other Pipeline utility: 
+\code{\link{df_params}()},
+\code{\link{feature_raw_download}()},
+\code{\link{load_modis_files}()},
+\code{\link{read_locs}()},
+\code{\link{search_function}()},
+\code{\link{set_slurm_resource}()}
+}
+\concept{Pipeline utility}

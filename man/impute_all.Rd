@@ -41,8 +41,14 @@ geoscf column renaming, NDVI 16-day backward filling,
 zero-variance exclusion, excessive "true zeros" exclusion,
 and imputation using missRanger.
 }
-\examples{
-dt <- data.table(a = c(1, 2, NA, 4), b = c(NA, 2, 3, 4))
-impute_all(dt, period = 1)
-
+\seealso{
+Other Post-calculation: 
+\code{\link{add_time_col}()},
+\code{\link{post_calc_autojoin}()},
+\code{\link{post_calc_convert_time}()},
+\code{\link{post_calc_merge_all}()},
+\code{\link{post_calc_merge_features}()},
+\code{\link{post_calc_unify_timecols}()},
+\code{\link{reduce_merge}()}
 }
+\concept{Post-calculation}

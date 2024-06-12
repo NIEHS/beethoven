@@ -18,6 +18,10 @@ netCDF file paths.}
 
 \item{date}{character(2). length of 10. Format "YYYY-MM-DD".}
 
+\item{locs}{Locations to extract.}
+
+\item{locs_id}{character(1). Location identifier.}
+
 \item{...}{Arguments passed to \code{\link[terra:rast]{terra::rast}}.}
 }
 \value{
@@ -34,6 +38,20 @@ pressure level, date
 Reference duration: 1 day summary, all layers: 106 seconds
 hard-coded subsets for subdataset selection
 }
+\seealso{
+Other Calculation: 
+\code{\link{calc_gmted_direct}()},
+\code{\link{calc_narr2}()},
+\code{\link{inject_calculate}()},
+\code{\link{inject_geos}()},
+\code{\link{inject_gmted}()},
+\code{\link{inject_modis_par}()},
+\code{\link{par_narr}()},
+\code{\link{process_counties}()},
+\code{\link{process_geos_bulk}()},
+\code{\link{process_narr2}()}
+}
 \author{
 Mitchell Manware, Insang Song
 }
+\concept{Calculation}

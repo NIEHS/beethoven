@@ -10,6 +10,10 @@ reduce_merge(list_in, by = c("site_id", "time"), all.x = TRUE, all.y = FALSE)
 \item{list_in}{A list of data tables to be merged.}
 
 \item{by}{The columns to merge the data tables on.}
+
+\item{all.x}{logical(1). Keeping all rows from the first input.}
+
+\item{all.y}{logical(1). Keeping all rows from the second input.}
 }
 \value{
 A merged data table.
@@ -29,3 +33,14 @@ dt3 <- data.table(a = 3:5, d = 10:12)
 reduce_merge(list(dt1, dt2, dt3), by = "a")
 
 }
+\seealso{
+Other Post-calculation: 
+\code{\link{add_time_col}()},
+\code{\link{impute_all}()},
+\code{\link{post_calc_autojoin}()},
+\code{\link{post_calc_convert_time}()},
+\code{\link{post_calc_merge_all}()},
+\code{\link{post_calc_merge_features}()},
+\code{\link{post_calc_unify_timecols}()}
+}
+\concept{Post-calculation}
