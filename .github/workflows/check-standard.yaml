@@ -23,7 +23,11 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::rcmdcheck
+          extra-packages: any::rcmdcheck, any::remotes, any::units, any::rmarkdown
           needs: check
+
+      - name: install remote packages
+        run: Rscript -e "remotes::install_github(sprintf(\"NIEHS/%s\", c(\"amadeus\", \"chopin\"), upgrade = FALSE)"
+        shell: bash
 
       - uses: r-lib/actions/check-r-package@v2
