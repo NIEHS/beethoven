@@ -473,17 +473,6 @@ post_calc_df_year_expand <- function(
 #' @importFrom data.table rbindlist
 #' @importFrom rlang inject
 #' @export
-#' @examples
-#' df_fine0 <- data.frame(site_id = c("A", "B", "B", "C"),
-#'                       lon = rep("barns", 4),
-#'                       time = as.Date(c("2022-01-01", "2022-01-02", "2021-12-31", "2021-01-03")),
-#'                       value = c(1, 2, 3, 5))
-#' df_coarse0 <- data.frame(site_id = c("A", "B", "C"),
-#'                        lon = rep("J", 3),
-#'                         time = c("2022", "2022", "2021"),
-#'                         other_value = c(10, 20, 30))
-#' jdf <- post_calc_autojoin(df_fine0, df_coarse0)
-#' print(jdf)
 # FIXME: this function works inefficiently in expense of
 # returning uniform list of length(|years|) output.
 # It could seriously affect the performance in scaled calculation
@@ -2447,35 +2436,5 @@ fit_base_elnet <-
       )
     future::plan(future::sequential)
     return(base_wf)
-
-  }
-
-
-predict_base <-
-  function(
-    fitted,
-    targetdf
-  ) {
-  }
-
-
-
-predict_meta <-
-  function(
-    metalearner = NULL,
-    targetdf = NULL,
-    threads = NULL
-  ) {
-    beethoven::meta_predict(
-      metalearner,
-      targetdf,
-      nthreads = threads
-    )
-  }
-
-export_res <-
-  function(
-
-  ) {
 
   }
