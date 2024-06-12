@@ -616,7 +616,6 @@ set_slurm_resource <-
 #' @param export Export the file to qs. Default is FALSE.
 #' @param ... Passed arguments to `fun_aqs`
 #' @returns Depending on `fun_aqs` specification.
-#' @importFrom amadeus process_aqs
 #' @importFrom qs qsave
 #' @export
 read_locs <-

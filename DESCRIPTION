@@ -44,14 +44,14 @@ Imports:
   parsnip,
   future.apply,
   future.batchtools,
+  qs,
+  stringi,
+  collapse,
   tigris
 Suggests:
   covr,
   withr,
-  qs,
   tarchetypes,
-  stringi,
-  collapse,
   knitr,
   rmarkdown,
   stars,
