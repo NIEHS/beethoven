@@ -24,30 +24,34 @@ Imports:
   BART,
   data.table,
   utils,
-  stringi,
-  collapse,
   testthat (>= 3.0.0),
   future,
   tidymodels,
   xgboost,
   torch,
   targets,
-  tarchetypes,
   brulee,
   tune (>= 1.2.1),
   glmnet,
   rlang,
   rsample,
   tidyr,
-  qs,
   tidyselect,
   yardstick,
   workflows,
   recipes,
-  missRanger
+  missRanger,
+  parsnip,
+  future.apply,
+  future.batchtools,
+  tigris
 Suggests:
   covr,
   withr,
+  qs,
+  tarchetypes,
+  stringi,
+  collapse,
   knitr,
   rmarkdown,
   stars,
@@ -57,8 +61,7 @@ Suggests:
   ggplot2,
   doRNG,
   DT,
-  quarto,
-  tigris
+  quarto
 Remotes: NIEHS/amadeus, NIEHS/chopin
 Encoding: UTF-8
 VignetteBuilder: knitr, rmarkdown

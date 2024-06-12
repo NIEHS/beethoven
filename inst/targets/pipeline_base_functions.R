@@ -212,7 +212,7 @@ inject_gmted <- function(locs, variable, radii, injection, nthreads = 4L) {
 #' # Merge the data tables
 #' reduce_merge(list(dt1, dt2, dt3), by = "a")
 #'
-#' @import data.table
+#' @importFrom data.table merge.data.table
 #' @export
 reduce_merge <- function(list_in, by = c("site_id", "time"), all.x = TRUE, all.y = FALSE) {
   list_check <- sapply(list_in, nrow)
@@ -659,7 +659,6 @@ set_slurm_resource <-
 #' @param export Export the file to qs. Default is FALSE.
 #' @param ... Passed arguments to `fun_aqs`
 #' @returns Depending on `fun_aqs` specification.
-#' @import amadeus process_aqs
 #' @export
 read_locs <-
   function(
@@ -1059,7 +1058,6 @@ post_calc_join_yeardate <-
 #' @param df_spt data.frame. Spatiotemporal covariates.
 #' @note This version assumes the time_id contains Date-like strings.
 #' @returns data.frame
-#' @importFrom amadeus calc_temporal_dummies
 #' @export
 post_calc_merge_all <-
   function(
@@ -1994,8 +1992,6 @@ calc_narr2 <- function(
 #' @importFrom stats setNames
 #' @importFrom stringi stri_replace_all_regex
 #' @importFrom missRanger missRanger
-#' @importFrom amadeus calc_lagged
-#'
 #' @examples
 #' dt <- data.table(a = c(1, 2, NA, 4), b = c(NA, 2, 3, 4))
 #' impute_all(dt, period = 1)
