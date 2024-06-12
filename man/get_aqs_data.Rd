@@ -5,11 +5,11 @@
 \title{Filter monitors with the minimum POC value}
 \usage{
 get_aqs_data(
-  path = list.files(path = meta_run("dir_input_aqs"), pattern =
-    "daily_88101_[0-9]{4}.csv", full.names = TRUE),
+  path = list.files(path = "input/aqs", pattern = "daily_88101_[0-9]{4}.csv", full.names
+    = TRUE),
   site_spt = NULL,
-  locs_id = meta_run("char_siteid"),
-  time_id = meta_run("char_timeid"),
+  locs_id = "site_id",
+  time_id = "time",
   poc_name = "POC",
   sampling = "Sample.Duration",
   date_start = "2018-01-01",

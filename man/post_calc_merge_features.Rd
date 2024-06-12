@@ -4,7 +4,7 @@
 \alias{post_calc_merge_features}
 \title{Merge input data.frame objects}
 \usage{
-post_calc_merge_features(by = c(meta_run("char_siteid")), time = FALSE, ...)
+post_calc_merge_features(by = c("site_id"), time = FALSE, ...)
 }
 \arguments{
 \item{by}{character. Joining keys. See \code{\link{merge}} for details.}

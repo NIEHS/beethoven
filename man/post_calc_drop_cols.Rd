@@ -18,13 +18,15 @@ to match against column names. Columns that match any of the patterns
 will be removed. The default value is
 "^lon$|^lat$|geoid|year$|description".}
 
-\item{strict}{logical(1). If \code{TRUE}, only \code{c("site_id", "time")} will be kept.}
+\item{strict}{logical(1). If \code{TRUE},
+only \code{c("site_id", "time")} will be kept.}
 }
 \value{
 The modified data frame with the specified columns removed.
 }
 \description{
-This function removes columns from a data frame that match any of the specified
+This function removes columns from a data frame that match
+any of the specified
 regular expression patterns. By default, it removes columns with names that
 match the patterns "^lon$|^lat$|geoid|year$|description".
 }

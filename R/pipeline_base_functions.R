@@ -617,7 +617,8 @@ set_slurm_resource <-
 #' @param export Export the file to qs. Default is FALSE.
 #' @param ... Passed arguments to `fun_aqs`
 #' @returns Depending on `fun_aqs` specification.
-#' @import amadeus process_aqs
+#' @importFrom amadeus process_aqs
+#' @importFrom qs qsave
 #' @export
 read_locs <-
   function(
@@ -682,11 +683,14 @@ get_aqs_data <-
       list(
         pm25 = `Arithmetic Mean`,
         site_id =
-        sprintf("%02d%03d%04d%05d",
-          `State Code`, `County Code`, `Site Num`, `Parameter Code`),
+          sprintf("%02d%03d%04d%05d",
+            `State Code`, `County Code`,
+            `Site Num`, `Parameter Code`
+          ),
         time = as.character(`Date Local`),
-        POC = POC
-      )]
+          POC = POC
+      )
+    ]
 
     poc_filtered <- input_df |>
       dplyr::group_by(!!rlang::sym(locs_id)) |>
@@ -756,6 +760,7 @@ process_counties <-
 #' @param ... data.frame objects to merge
 #' @returns data.table
 #' @importFrom data.table as.data.table
+#' @importFrom data.table merge.data.table
 #' @export
 post_calc_merge_features <-
   function(
@@ -767,7 +772,8 @@ post_calc_merge_features <-
     if (time) {
       by <- c("site_id", "time")
       ellipsis_clean <-
-        lapply(ellipsis,
+        lapply(
+          ellipsis,
           function(x) {
             x <- data.table::as.data.table(x)
             col_coords <- grep("(lon|lat)", names(x))
@@ -776,13 +782,17 @@ post_calc_merge_features <-
             }
             x$time <- as.character(x$time)
             return(x)
-          })
+          }
+        )
     } else {
       ellipsis_clean <- ellipsis
     }
     joined <-
       Reduce(function(x, y) {
-        data.table::merge.data.table(x, y, by = by, all.x = TRUE, suffixes = c("_Ma", "_Mb"))
+        data.table::merge.data.table(
+          x, y,
+          by = by, all.x = TRUE, suffixes = c("_Ma", "_Mb")
+        )
       }, ellipsis_clean)
     return(joined)
   }
@@ -812,7 +822,7 @@ post_calc_unify_timecols <-
 #' @param df data.table
 #' @note This function takes preprocessed data.table with
 #'   a column named `"time"`.
-#' @importFrom data.table as.data.table
+#' @importFrom data.table as.data.table copy
 #' @export
 post_calc_convert_time <-
   function(
@@ -823,7 +833,8 @@ post_calc_convert_time <-
     return(df)
   }
 
-#' Join a data.frame with a year-only date column to that with a full date column
+#' Join a data.frame with a year-only date column to
+#'  that with a full date column
 #' @description The full date column will be converted to a year column
 #' as a new column, then the data.frame with the year-only column will
 #' be joined.
@@ -873,6 +884,7 @@ post_calc_join_yeardate <-
 #' @note This version assumes the time_id contains Date-like strings.
 #' @returns data.frame
 #' @importFrom amadeus calc_temporal_dummies
+#' @importFrom data.table merge.data.table
 #' @export
 post_calc_merge_all <-
   function(
@@ -909,7 +921,8 @@ post_calc_merge_all <-
 
 #' Remove columns from a data frame based on regular expression patterns.
 #'
-#' This function removes columns from a data frame that match any of the specified
+#' This function removes columns from a data frame that match
+#'  any of the specified
 #' regular expression patterns. By default, it removes columns with names that
 #' match the patterns "^lon$|^lat$|geoid|year$|description".
 #'
@@ -918,7 +931,8 @@ post_calc_merge_all <-
 #'   to match against column names. Columns that match any of the patterns
 #'   will be removed. The default value is
 #'   "^lon$|^lat$|geoid|year$|description".
-#' @param strict logical(1). If `TRUE`, only `c("site_id", "time")` will be kept.
+#' @param strict logical(1). If `TRUE`,
+#'   only `c("site_id", "time")` will be kept.
 #' @returns The modified data frame with the specified columns removed.
 #'
 #' @examples
@@ -1061,23 +1075,23 @@ read_paths <-
     target_dates = c("2020-01-01", "2020-01-15"),
     julian = FALSE
   ) {
-  flist <-
-    list.files(
-      path = path,
-      pattern = sprintf("%s$", extension),
-      full.names = TRUE,
-      recursive = TRUE
-    )
-  if (!missing(target_dates)) {
-    dateseq <-
-      seq(as.Date(target_dates[1]), as.Date(target_dates[2]), by = "day")
-    dateseq <-
-      if (julian) format(dateseq, "%Y%j") else format(dateseq, "%Y%m%d")
-    dateseq <- sprintf("A(%s)", paste(dateseq, collapse = "|"))
-    flist <- grep(dateseq, flist, value = TRUE)
+    flist <-
+      list.files(
+        path = path,
+        pattern = sprintf("%s$", extension),
+        full.names = TRUE,
+        recursive = TRUE
+      )
+    if (!missing(target_dates)) {
+      dateseq <-
+        seq(as.Date(target_dates[1]), as.Date(target_dates[2]), by = "day")
+      dateseq <-
+        if (julian) format(dateseq, "%Y%j") else format(dateseq, "%Y%m%d")
+      dateseq <- sprintf("A(%s)", paste(dateseq, collapse = "|"))
+      flist <- grep(dateseq, flist, value = TRUE)
+    }
+    return(flist)
   }
-  return(flist)
-}
 
 
 
@@ -1097,6 +1111,7 @@ search_function <- function(package, search){
 #' Get data.frame of function parameters
 #' @param functions character. Vector of function names.
 #' @returns A data.frame containing the parameters of the functions.
+#' @importFrom dplyr as_tibble bind_rows
 #' @export
 df_params <- function(functions) {
   params <- lapply(functions, function(x) {
@@ -1110,15 +1125,6 @@ df_params <- function(functions) {
   paramsdf <- Reduce(dplyr::bind_rows, params)
   return(paramsdf)
 }
-
-# schedo <- search_function("amadeus", "download_")
-# sched <- search_function("amadeus", "process_")
-# schec <- search_function("amadeus", "calc_")
-# df_params(sched[-c(1, 2, 3, 4, 5, 6, 8, 11, 14, 15, 17, 18, 19, 20, 21, 25)])
-# df_params(schec[-c(1, 16)]) |> colnames()
-# df_params(schedo) |> colnames()
-
-
 
 
 #' Process atmospheric composition data by chunks (v2)
@@ -1148,17 +1154,17 @@ process_geos_bulk <-
     if (length(path) == 1) {
 
       if (dir.exists(path)) {
-      path <- amadeus::download_sanitize_path(path)
-      paths <- list.files(
-        path,
-        pattern = "GEOS-CF.v01.rpl",
-        full.names = TRUE
-      )
-      paths <- paths[grep(
-        ".nc4",
-        paths
-      )]
-    }
+        path <- amadeus::download_sanitize_path(path)
+        paths <- list.files(
+          path,
+          pattern = "GEOS-CF.v01.rpl",
+          full.names = TRUE
+        )
+        paths <- paths[grep(
+          ".nc4",
+          paths
+        )]
+      }
     } else {
       paths <- path
     }
@@ -1284,6 +1290,9 @@ process_geos_bulk <-
 #' @importFrom terra varnames
 #' @importFrom terra crs
 #' @importFrom terra subset
+#' @importFrom sf st_as_sf
+#' @importFrom future.apply future_lapply
+#' @importFrom data.table rbindlist
 #' @export
 calc_geos_strict <-
   function(path = NULL,
@@ -1340,6 +1349,7 @@ calc_geos_strict <-
       # the pattern accommodates 3-4 characters for the variable name,
       # 3-4 alphanumerics for the temporal resolution,
       # 8-9 alphanumerics for the output dimensions
+      # nolint start
       regexpr(
         "GEOS-CF.v01.rpl.(aqc|chm)_[[:alpha:]]{3,4}_[[:alnum:]]{3,4}_[[:alnum:]]{8,9}_v[1-9]",
         data_paths[1]
@@ -1370,7 +1380,7 @@ calc_geos_strict <-
         "Some dates include less than 24 hours. Check the downloaded files."
       )
     }
-
+    # nolint end
     # to export locs (pointers are not exportable)
     locs <- sf::st_as_sf(locs)
 
@@ -1467,6 +1477,19 @@ calc_geos_strict <-
 
 
 #' Reflown gmted processing
+#' @param variable character(2). Statistic and resolution.
+#' @param path character(1). Directory with downloaded GMTED files.
+#' @param locs data.frame/SpatVector/sf. Locations.
+#' @param locs_id character(1). Location identifier.
+#' @param win numeric(4). Window for the raster.
+#' @param radius numeric(1). Radius for the extraction.
+#' @param fun character(1). Function to apply.
+#' @param ... Additional parameters to be passed to other functions.
+#' @returns A data.frame containing the extracted GMTED data.
+#' @importFrom terra rast
+#' @importFrom terra varnames
+#' @importFrom terra extract
+#' @export
 calc_gmted_direct <- function(
     variable = NULL,
     path = NULL,
@@ -1770,18 +1793,28 @@ process_narr2 <- function(
 
 #' Calculate aggregated values for specified locations
 #'
-#' This function calculates aggregated values for specified locations from a raster dataset.
+#' This function calculates aggregated values for specified locations from
+#'  a raster dataset.
 #'
 #' @param from The raster dataset from which to extract values.
-#' @param locs A data frame containing the locations for which to calculate aggregated values.
-#'             It should have a column named "site_id" that contains unique identifiers for each location.
-#' @param locs_id An optional column name in the \code{locs} data frame that contains additional location identifiers.
-#' @param radius The radius within which to include neighboring locations for aggregation. Default is 0.
-#' @param fun The aggregation function to use. It can be a character string specifying a function name (e.g., "mean", "sum"),
-#'            or it can be a custom function. Default is "mean".
-#' @param ... Additional arguments to be passed to the aggregation function.
+#' @param locs A data frame containing the locations for which
+#'  to calculate aggregated values.
+#'  It should have a column in `locs_id` value
+#'  that contains unique identifiers for each location.
+#' @param locs_id An optional column name
+#'  in the \code{locs} data frame that contains additional location
+#'  identifiers.
+#' @param radius The radius within which to include neighboring locations
+#'  for aggregation. Default is 0.
+#' @param fun The aggregation function to use.
+#'  It can be a character string specifying a function name 
+#' (e.g., "mean", "sum"),
+#' or it can be a custom function. Default is "mean".
+#' @param ... Additional arguments to be passed to
+#'  the aggregation function.
 #'
-#' @return A data frame containing the aggregated values for each location and time point.
+#' @return A data frame containing the aggregated values for each
+#'  location and time point.
 #'
 #' @examples
 #' # Calculate mean values for locations within a radius of 10 units
@@ -1926,164 +1959,152 @@ impute_all <-
     nthreads_collapse = 32L,
     nthreads_imputation = 32L
   ) {
-  data.table::setDTthreads(nthreads_dt)
-  if (is.character(dt)) {
-    dt <- file.path("output/qs", dt)
-    dt <- qs::qread(dt)
-  }
-  # name cleaning
-  allcns <- names(dt)
-  dt <- stats::setNames(dt, sub("light_1", "OTH_HMSWL_0_00000", names(dt)))
-  dt <- stats::setNames(dt, sub("medium_1", "OTH_HMSWM_0_00000", names(dt)))
-  dt <- stats::setNames(dt, sub("heavy_1", "OTH_HMSWH_0_00000", names(dt)))
-  dt <- stats::setNames(dt, sub("population_", "POP_SEDAC_0_", names(dt)))
+    data.table::setDTthreads(nthreads_dt)
+    if (is.character(dt)) {
+      dt <- file.path("output/qs", dt)
+      dt <- qs::qread(dt)
+    }
+    # name cleaning
+    dt <- stats::setNames(dt, sub("light_1", "OTH_HMSWL_0_00000", names(dt)))
+    dt <- stats::setNames(dt, sub("medium_1", "OTH_HMSWM_0_00000", names(dt)))
+    dt <- stats::setNames(dt, sub("heavy_1", "OTH_HMSWH_0_00000", names(dt)))
+    dt <- stats::setNames(dt, sub("population_", "POP_SEDAC_0_", names(dt)))
 
-  # Copilot-generated
-  geoscn <-
-    "ACET\tGEO_ACETO_0_00000
-  ALD2\tGEO_ACETA_0_00000
-  ALK4\tGEO_CALKA_0_00000
-  BCPI\tGEO_HIBCA_0_00000
-  BCPO\tGEO_HOBCA_0_00000
-  BENZ\tGEO_BENZE_0_00000
-  C2H6\tGEO_ETHTE_0_00000
-  C3H8\tGEO_PROPA_0_00000
-  CH4\tGEO_METHA_0_00000
-  CO\tGEO_CMONO_0_00000
-  DST1\tGEO_DUST1_0_00000
-  DST2\tGEO_DUST2_0_00000
-  DST3\tGEO_DUST3_0_00000
-  DST4\tGEO_DUST4_0_00000
-  EOH\tGEO_ETHOL_0_00000
-  H2O2\tGEO_HYPER_0_00000
-  HCHO\tGEO_FORMA_0_00000
-  HNO3\tGEO_NITAC_0_00000
-  HNO4\tGEO_PERAC_0_00000
-  ISOP\tGEO_ISOPR_0_00000
-  MACR\tGEO_METHC_0_00000
-  MEK\tGEO_MEKET_0_00000
-  MVK\tGEO_MVKET_0_00000
-  N2O5\tGEO_DIPEN_0_00000
-  NH3\tGEO_AMNIA_0_00000
-  NH4\tGEO_AMNUM_0_00000
-  NIT\tGEO_INNIT_0_00000
-  NO\tGEO_NIOXI_0_00000
-  NO2\tGEO_NIDIO_0_00000
-  NOy\tGEO_NITRO_0_00000
-  OCPI\tGEO_HIORG_0_00000
-  OCPO\tGEO_HOORG_0_00000
-  PAN\tGEO_PERNI_0_00000
-  PM25_RH35_GCC\tGEO_PM25X_0_00000
-  PM25_RH35_GOCART\tGEO_PM25R_0_00000
-  PM25bc_RH35_GCC\tGEO_BLCPM_0_00000
-  PM25du_RH35_GCC\tGEO_DUSPM_0_00000
-  PM25ni_RH35_GCC\tGEO_NITPM_0_00000
-  PM25oc_RH35_GCC\tGEO_ORCPM_0_00000
-  PM25soa_RH35_GCC\tGEO_SORPM_0_00000
-  PM25ss_RH35_GCC\tGEO_SEAPM_0_00000
-  PM25su_RH35_GCC\tGEO_SULPM_0_00000
-  PRPE\tGEO_CALKE_0_00000
-  RCHO\tGEO_CALDH_0_00000
-  SALA\tGEO_FSEAS_0_00000
-  SALC\tGEO_CSEAS_0_00000
-  SO2\tGEO_SULDI_0_00000
-  SOAP\tGEO_SOAPR_0_00000
-  SOAS\tGEO_SOASI_0_00000
-  TOLU\tGEO_TOLUE_0_00000
-  XYLE\tGEO_XYLEN_0_00000
-  CO_y\tGEO_COVMR_0_00000
-  NO2_y\tGEO_NOVMR_0_00000
-  O3\tGEO_OZVMR_0_00000
-  SO2_y\tGEO_SOVMR_0_00000"
+    geoscn <-
+      "ACET\tGEO_ACETO_0_00000
+    ALD2\tGEO_ACETA_0_00000
+    ALK4\tGEO_CALKA_0_00000
+    BCPI\tGEO_HIBCA_0_00000
+    BCPO\tGEO_HOBCA_0_00000
+    BENZ\tGEO_BENZE_0_00000
+    C2H6\tGEO_ETHTE_0_00000
+    C3H8\tGEO_PROPA_0_00000
+    CH4\tGEO_METHA_0_00000
+    CO\tGEO_CMONO_0_00000
+    DST1\tGEO_DUST1_0_00000
+    DST2\tGEO_DUST2_0_00000
+    DST3\tGEO_DUST3_0_00000
+    DST4\tGEO_DUST4_0_00000
+    EOH\tGEO_ETHOL_0_00000
+    H2O2\tGEO_HYPER_0_00000
+    HCHO\tGEO_FORMA_0_00000
+    HNO3\tGEO_NITAC_0_00000
+    HNO4\tGEO_PERAC_0_00000
+    ISOP\tGEO_ISOPR_0_00000
+    MACR\tGEO_METHC_0_00000
+    MEK\tGEO_MEKET_0_00000
+    MVK\tGEO_MVKET_0_00000
+    N2O5\tGEO_DIPEN_0_00000
+    NH3\tGEO_AMNIA_0_00000
+    NH4\tGEO_AMNUM_0_00000
+    NIT\tGEO_INNIT_0_00000
+    NO\tGEO_NIOXI_0_00000
+    NO2\tGEO_NIDIO_0_00000
+    NOy\tGEO_NITRO_0_00000
+    OCPI\tGEO_HIORG_0_00000
+    OCPO\tGEO_HOORG_0_00000
+    PAN\tGEO_PERNI_0_00000
+    PM25_RH35_GCC\tGEO_PM25X_0_00000
+    PM25_RH35_GOCART\tGEO_PM25R_0_00000
+    PM25bc_RH35_GCC\tGEO_BLCPM_0_00000
+    PM25du_RH35_GCC\tGEO_DUSPM_0_00000
+    PM25ni_RH35_GCC\tGEO_NITPM_0_00000
+    PM25oc_RH35_GCC\tGEO_ORCPM_0_00000
+    PM25soa_RH35_GCC\tGEO_SORPM_0_00000
+    PM25ss_RH35_GCC\tGEO_SEAPM_0_00000
+    PM25su_RH35_GCC\tGEO_SULPM_0_00000
+    PRPE\tGEO_CALKE_0_00000
+    RCHO\tGEO_CALDH_0_00000
+    SALA\tGEO_FSEAS_0_00000
+    SALC\tGEO_CSEAS_0_00000
+    SO2\tGEO_SULDI_0_00000
+    SOAP\tGEO_SOAPR_0_00000
+    SOAS\tGEO_SOASI_0_00000
+    TOLU\tGEO_TOLUE_0_00000
+    XYLE\tGEO_XYLEN_0_00000
+    CO_y\tGEO_COVMR_0_00000
+    NO2_y\tGEO_NOVMR_0_00000
+    O3\tGEO_OZVMR_0_00000
+    SO2_y\tGEO_SOVMR_0_00000"
 
-  geoscn <- strsplit(geoscn, "\n")
-  geoscn <- unlist(geoscn)
-  geoscn <- strsplit(geoscn, "\t")
-  geoscn <- do.call(rbind, geoscn)
-  geoscndf <- as.data.frame(geoscn, stringsAsFactors = FALSE)
-  colnames(geoscndf) <- c("variable", "code")
-  geoscndf$variable <- trimws(geoscndf$variable)
+    geoscn <- strsplit(geoscn, "\n")
+    geoscn <- unlist(geoscn)
+    geoscn <- strsplit(geoscn, "\t")
+    geoscn <- do.call(rbind, geoscn)
+    geoscndf <- as.data.frame(geoscn, stringsAsFactors = FALSE)
+    colnames(geoscndf) <- c("variable", "code")
+    geoscndf$variable <- trimws(geoscndf$variable)
 
-  for (i in seq_len(nrow(geoscndf))) {
-    dt <-
-      setNames(
-        dt,
-        stringi::stri_replace_all_regex(
-          names(dt), sprintf("%s$", geoscndf$variable[i]), geoscndf$code[i]
+    for (i in seq_len(nrow(geoscndf))) {
+      dt <-
+        setNames(
+          dt,
+          stringi::stri_replace_all_regex(
+            names(dt), sprintf("%s$", geoscndf$variable[i]), geoscndf$code[i]
+          )
         )
+    }
+
+    # NDVI 16-day
+    # For each site_id, backward filling for 16-day NDVI
+    # Last Observation Carried Forward is the method used;
+    # it assumes that the rows are ordered by date
+    dt <- dt[order(site_id, time), ]
+    col_ndviv <- grep("MOD_NDVIV_", names(dt))
+    dtndviv <-
+      data.table::setnafill(
+        dt, type = "nocb", nan = NA,
+        cols = col_ndviv
       )
+
+    collapse::set_collapse(mask = "manip", nthreads = nthreads_collapse)
+
+    target_replace <- grep("^MOD_", names(dt), invert = TRUE)
+    dt <- collapse::replace_inf(dtndviv, value = NA, replace.nan = TRUE)
+    dt <- collapse::replace_na(dt, value = 0, cols = target_replace)
+
+    # zero-variance exclusion
+    dt_colvars <- collapse::fvar(dt[, 5:ncol(dt), with = FALSE])
+    zero_var_fields <- names(dt_colvars[dt_colvars == 0])
+
+    # Exclude fields with zero variance using data.table
+    dt <- dt[, (zero_var_fields) := NULL]
+
+    # Store the name of zero variance fields as an attribute of the input object
+    attr(dt, "zero_var_fields") <- zero_var_fields
+
+    # excluding columns with excessive "true zeros"
+    # we should have a threshold for the zero rate
+    # exc_zero <- collapse::fnth(dt[, 5:ncol(dt), with = FALSE], n = 0.9)
+    # exc_zero <- unname(which(exc_zero == 0)) + 5L
+    # dt <- dt[, (exc_zero) := NULL]
+
+    # Q: Do we use all other features to impute? -- Yes.
+    # 32-thread, 10% for tree building, 200 trees, 4 rounds: 11 hours
+    imputed <-
+      missRanger::missRanger(
+        data = dt,
+        maxiter = 30L,
+        num.trees = 300L,
+        num.threads = nthreads_imputation,
+        mtry = 50L,
+        sample.fraction = 0.1
+      )
+
+    imputed <- amadeus::calc_temporal_dummies(imputed, "time")
+    return(imputed)
+    # lagged features: changing period (period[1] + 1 day)
+    # period <- as.Date(period)
+    # period[1] <- period[1] + as.difftime(1, units = "days")
+    # period <- as.character(period)
+    # index_lag <-
+    #   sprintf("MET_%s", c("ATSFC", "ACPRC", "PRSFC", "SPHUM", "WNDSP"))
+    # index_lag <- grep(paste(index_lag, collapse = "|"), names(dt))
+    # target_lag <- imputed[, index_lag, with = FALSE]
+
+    # output <- amadeus::calc_lagged(target_lag, period, 1, "site_id")
+    # return(output)
   }
-
-  # NDVI 16-day
-  # For each site_id, backward filling for 16-day NDVI
-  # Last Observation Carried Forward is the method used;
-  # it assumes that the rows are ordered by date
-  dt <- dt[order(site_id, time), ]
-  col_ndviv <- grep("MOD_NDVIV_", names(dt))
-  dtndviv <- data.table::setnafill(dt, type = "nocb", nan = NA, cols = col_ndviv)
-
-  collapse::set_collapse(mask = "manip", nthreads = nthreads_collapse)
-
-  target_replace <- grep("^MOD_", names(dt), invert = TRUE)
-  dt <- collapse::replace_inf(dtndviv, value = NA, replace.nan = TRUE)
-  dt <- collapse::replace_na(dt, value = 0, cols = target_replace)
-
-  # zero-variance exclusion
-  dt_colvars <- collapse::fvar(dt[, 5:ncol(dt), with = FALSE])
-  zero_var_fields <- names(dt_colvars[dt_colvars == 0])
-
-  # Exclude fields with zero variance using data.table
-  dt <- dt[, (zero_var_fields) := NULL]
-
-  # Store the name of zero variance fields as an attribute of the input object
-  attr(dt, "zero_var_fields") <- zero_var_fields
-
-  # excluding columns with excessive "true zeros"
-  # we should have a threshold for the zero rate
-  # exc_zero <- collapse::fnth(dt[, 5:ncol(dt), with = FALSE], n = 0.9)
-  # exc_zero <- unname(which(exc_zero == 0)) + 5L
-  # dt <- dt[, (exc_zero) := NULL]
-
-  # Q: Do we use all other features to impute? -- Yes.
-  # 32-thread, 10% for tree building, 200 trees, 4 rounds: 11 hours
-  imputed <-
-    missRanger::missRanger(
-      data = dt,
-      maxiter = 30L,
-      num.trees = 300L,
-      num.threads = nthreads_imputation,
-      mtry = 50L,
-      sample.fraction = 0.1
-    )
-
-  imputed <- amadeus::calc_temporal_dummies(imputed, "time")
-  return(imputed)
-  # lagged features: changing period (period[1] + 1 day)
-  # period <- as.Date(period)
-  # period[1] <- period[1] + as.difftime(1, units = "days")
-  # period <- as.character(period)
-  # index_lag <-
-  #   sprintf("MET_%s", c("ATSFC", "ACPRC", "PRSFC", "SPHUM", "WNDSP"))
-  # index_lag <- grep(paste(index_lag, collapse = "|"), names(dt))
-  # target_lag <- imputed[, index_lag, with = FALSE]
-
-  # output <- amadeus::calc_lagged(target_lag, period, 1, "site_id")
-  # return(output)
-}
-
-# test
-# qssf<-impute_all(qss)
-# aqi <- impute_all(aq)
-# aqi <- aqi |> tidytable::select(1:2, tidytable::starts_with("MOD_NDVIV"))
-
-# system.time(
-#   cgeo <- calc_geos_strict(path = "input/geos/chm_tavg_1hr_g1440x721_v1",
-#             date = c("2018-05-17", "2018-05-17"),
-#             locs = terra::vect(data.frame(site_id = 1, lon = -90, lat = 40)),
-#             locs_id = "site_id",
-#             win = c(-126, -62, 22, 52),
-#             snap = "out")
-# )
 
 
 #' Append Predecessors
@@ -2253,7 +2274,7 @@ fit_base_brulee <-
       )
     dt_imputed <-
       dt_imputed %>%
-      slice_sample(prop = r_subsample)
+      dplyr::slice_sample(prop = r_subsample)
 
     base_recipe <-
       recipes::recipe(
@@ -2270,16 +2291,16 @@ fit_base_brulee <-
     base_vfold <- rsample::vfold_cv(dt_imputed, v = vfold)
     base_model <-
       parsnip::mlp(
-        hidden_units = tune(),
-        dropout = tune(),
+        hidden_units = parsnip::tune(),
+        dropout = parsnip::tune(),
         epochs = 1000L,
-        activation = tune(),
-        learn_rate = tune()
+        activation = parsnip::tune(),
+        learn_rate = parsnip::tune()
       ) %>%
       parsnip::set_engine("brulee", device = "cuda") %>%
       parsnip::set_mode("regression")
 
-    wf_config <- control_resamples(save_pred = TRUE, save_workflow = TRUE)
+    wf_config <- tune::control_resamples(save_pred = TRUE, save_workflow = TRUE)
 
     base_wf <-
       workflows::workflow() %>%
@@ -2343,26 +2364,26 @@ fit_base_xgb <-
       )
     dt_imputed <-
       dt_imputed %>%
-      slice_sample(prop = r_subsample)
+      dplyr::slice_sample(prop = r_subsample)
 
     base_recipe <-
       recipes::recipe(
         dt_imputed
       ) %>%
       # recipes::step_normalize(recipes::all_numeric_predictors()) %>%
-      recipes::update_role(all_of(xvar)) %>%
-      recipes::update_role(all_of(yvar), new_role = "outcome")
+      recipes::update_role(tidyselect::all_of(xvar)) %>%
+      recipes::update_role(tidyselect::all_of(yvar), new_role = "outcome")
     base_vfold <- rsample::vfold_cv(dt_imputed, v = 5)
     base_model <-
       parsnip::boost_tree(
-        mtry = tune(),
-        trees = tune(),
-        learn_rate = tune()
+        mtry = parsnip::tune(),
+        trees = parsnip::tune(),
+        learn_rate = parsnip::tune()
       ) %>%
       parsnip::set_engine("xgboost", device = "cuda") %>%
       parsnip::set_mode("regression")
 
-    wf_config <- control_resamples(save_pred = TRUE, save_workflow = TRUE)
+    wf_config <- tune::control_resamples(save_pred = TRUE, save_workflow = TRUE)
 
     base_wf <-
       workflows::workflow() %>%
@@ -2426,25 +2447,26 @@ fit_base_elnet <-
       )
     dt_imputed <-
       dt_imputed %>%
-      slice_sample(prop = r_subsample)
+      dplyr::slice_sample(prop = r_subsample)
 
     base_recipe <-
       recipes::recipe(
         dt_imputed
       ) %>%
       # recipes::step_normalize(recipes::all_numeric_predictors()) %>%
-      recipes::update_role(all_of(xvar)) %>%
-      recipes::update_role(all_of(yvar), new_role = "outcome")
+      recipes::update_role(tidyselect::all_of(xvar)) %>%
+      recipes::update_role(tidyselect::all_of(yvar), new_role = "outcome")
     base_vfold <- rsample::vfold_cv(dt_imputed, v = 5)
     base_model <-
       parsnip::linear_reg(
-        mixture = tune(),
-        penalty = tune()
+        mixture = parsnip::tune(),
+        penalty = parsnip::tune()
       ) %>%
       parsnip::set_engine("glmnet") %>%
       parsnip::set_mode("regression")
 
-    wf_config <- control_resamples(save_pred = TRUE, save_workflow = TRUE)
+    wf_config <-
+      tune::control_resamples(save_pred = TRUE, save_workflow = TRUE)
 
     future::plan(future::multicore, workers = nthreads)
     base_wf <-
@@ -2460,13 +2482,8 @@ fit_base_elnet <-
       )
     future::plan(future::sequential)
     return(base_wf)
-    
+
   }
-
-# dtfite <- fit_base_elnet(dtd, r_subsample = 0.3)
-
-### TODO: retrieve predictions, quick prediction checking (spatial/temporal)
-
 
 
 predict_base <-

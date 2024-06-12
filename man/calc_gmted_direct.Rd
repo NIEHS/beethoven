@@ -15,6 +15,26 @@ calc_gmted_direct(
   ...
 )
 }
+\arguments{
+\item{variable}{character(2). Statistic and resolution.}
+
+\item{path}{character(1). Directory with downloaded GMTED files.}
+
+\item{locs}{data.frame/SpatVector/sf. Locations.}
+
+\item{locs_id}{character(1). Location identifier.}
+
+\item{win}{numeric(4). Window for the raster.}
+
+\item{radius}{numeric(1). Radius for the extraction.}
+
+\item{fun}{character(1). Function to apply.}
+
+\item{...}{Additional parameters to be passed to other functions.}
+}
+\value{
+A data.frame containing the extracted GMTED data.
+}
 \description{
 Reflown gmted processing
 }

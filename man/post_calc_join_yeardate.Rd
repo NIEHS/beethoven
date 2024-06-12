@@ -2,7 +2,8 @@
 % Please edit documentation in R/pipeline_base_functions.R
 \name{post_calc_join_yeardate}
 \alias{post_calc_join_yeardate}
-\title{Join a data.frame with a year-only date column to that with a full date column}
+\title{Join a data.frame with a year-only date column to
+that with a full date column}
 \usage{
 post_calc_join_yeardate(
   df_year,

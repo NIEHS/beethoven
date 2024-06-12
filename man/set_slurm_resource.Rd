@@ -10,7 +10,7 @@ set_slurm_resource(
   ncpus = 2L,
   ntasks = 2L,
   memory = 8,
-  user_email = meta_run("slurm_user_email"),
+  user_email,
   error_log = "slurm_error.log"
 )
 }
