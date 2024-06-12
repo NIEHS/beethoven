@@ -27,7 +27,7 @@ jobs:
           needs: check
 
       - name: install remote packages
-        run: Rscript -e "remotes::install_github(sprintf(\"NIEHS/%s\", c(\"amadeus\", \"chopin\"), upgrade = FALSE)"
+        run: Rscript -e "remotes::install_github(sprintf(\"NIEHS/%s\", c(\"amadeus\", \"chopin\")), upgrade = FALSE)"
         shell: bash
 
       - uses: r-lib/actions/check-r-package@v2
