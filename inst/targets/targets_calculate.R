@@ -302,9 +302,5 @@ target_calculate_predict <-
       command = chopin::par_grid(
 
       )
-    ),
-    tar_target(
-
     )
-
   )

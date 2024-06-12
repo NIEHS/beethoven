@@ -66,7 +66,6 @@ tar_option_set(
   library = c("/ddn/gs1/biotools/R/lib64/R/custompkg", "/ddn/gs1/home/songi2/r-libs"),
   repository = "local",
   error = "stop",
-  store = "/ddn/gs1/group/set/Projects/beethoven_shared_test",
   # controller = 
   #   crew.cluster::crew_controller_slurm(
   #     slurm_log_output = "output/slurm_pipeline_log.out",

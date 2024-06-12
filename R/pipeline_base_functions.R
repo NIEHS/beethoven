@@ -587,7 +587,7 @@ set_slurm_resource <-
     ncpus = 2L,
     ntasks = 2L,
     memory = 8,
-    user_email = meta_run("slurm_user_email"),
+    user_email,
     error_log = "slurm_error.log"
   ) {
     targets::tar_resources(
@@ -652,13 +652,13 @@ read_locs <-
 get_aqs_data <-
   function(
     path = list.files(
-      path = meta_run("dir_input_aqs"),
+      path = "input/aqs",
       pattern = "daily_88101_[0-9]{4}.csv",
       full.names = TRUE
     ),
     site_spt = NULL,
-    locs_id = meta_run("char_siteid"),
-    time_id = meta_run("char_timeid"),
+    locs_id = "site_id",
+    time_id = "time",
     poc_name = "POC",
     sampling = "Sample.Duration",
     date_start = "2018-01-01",
@@ -759,13 +759,13 @@ process_counties <-
 #' @export
 post_calc_merge_features <-
   function(
-    by = c(meta_run("char_siteid")),
+    by = c("site_id"),
     time = FALSE,
     ...
   ) {
     ellipsis <- list(...)
     if (time) {
-      by <- c(meta_run("char_siteid"), meta_run("char_timeid"))
+      by <- c("site_id", "time")
       ellipsis_clean <-
         lapply(ellipsis,
           function(x) {
