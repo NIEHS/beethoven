@@ -34,7 +34,7 @@ library(amadeus)
 #' @param argfile character(1). Path to the argument file. RDS format.
 #' @param dataset character(1). Dataset name.
 #' @returns A list of arguments.
-#' @importFrom base readRDS
+#' @importFrom qs qread
 #' @export
 loadargs <- function(argfile, dataset) {
   if (endsWith(argfile, ".rds")) {

@@ -52,4 +52,5 @@ data <-
     path = "/path/to/data"
   )
 }
+
 }

@@ -29,7 +29,6 @@ library(amadeus)
 #' @param argfile character(1). Path to the argument file. RDS format.
 #' @param dataset character(1). Dataset name.
 #' @returns A list of arguments.
-#' @importFrom base readRDS
 #' @importFrom qs qread
 #' @export
 loadargs <- function(argfile, dataset) {
@@ -883,7 +882,6 @@ post_calc_join_yeardate <-
 #' @param df_spt data.frame. Spatiotemporal covariates.
 #' @note This version assumes the time_id contains Date-like strings.
 #' @returns data.frame
-#' @importFrom amadeus calc_temporal_dummies
 #' @importFrom data.table merge.data.table
 #' @export
 post_calc_merge_all <-
@@ -1647,8 +1645,6 @@ calc_gmted_direct <- function(
 #'     path = "/path/to/data"
 #'   )
 #' }
-#' @import amadeus
-#' @import terra
 #'
 #' @export
 process_narr2 <- function(
@@ -1819,12 +1815,7 @@ process_narr2 <- function(
 #' @examples
 #' # Calculate mean values for locations within a radius of 10 units
 #' calc_narr2(from = raster_data, locs = locations, radius = 10, fun = "mean")
-#'
-#' @import amadeus
-#' @import terra
-#' @import dplyr
-#' @import tidyr
-#' @import data.table
+#' @export
 calc_narr2 <- function(
   from,
   locs,
@@ -1944,7 +1935,6 @@ calc_narr2 <- function(
 #' @importFrom stats setNames
 #' @importFrom stringi stri_replace_all_regex
 #' @importFrom missRanger missRanger
-#' @importFrom amadeus calc_lagged
 #'
 #' @examples
 #' dt <- data.table(a = c(1, 2, NA, 4), b = c(NA, 2, 3, 4))

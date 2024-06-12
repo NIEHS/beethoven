@@ -18,8 +18,8 @@ input/*
 inst/targets-wide
 ^.future/
 ^_targets/
-*.out$
-*.err$
-*.sif$
-*.log$
-.vscode
+\.out$
+\.err$
+\.sif$
+\.log$
+\.vscode

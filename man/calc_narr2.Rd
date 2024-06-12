@@ -40,5 +40,4 @@ a raster dataset.
 \examples{
 # Calculate mean values for locations within a radius of 10 units
 calc_narr2(from = raster_data, locs = locations, radius = 10, fun = "mean")
-
 }
