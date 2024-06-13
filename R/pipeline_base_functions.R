@@ -2502,7 +2502,7 @@ convert_cv_index_rset <-
     modename <- sprintf("cvfold_%s_%03d", cv_mode, len_cvi)
     rset_stcv <- rsample::manual_rset(list_split_dfs, modename)
     return(rset_stcv)
-}
+  }
 
 
 #' Attach XY coordinates to a data frame
@@ -2572,11 +2572,19 @@ attach_xy <-
 #' @param target_cols character(3). Names of columns for X, Y, and time.
 #'   Default is c("lon", "lat", "time").
 #'   Order insensitive.
+#' @param preprocessing character(1). Preprocessing method.
+#'   * "none": no preprocessing.
+#'   * "normalize": normalize the data.
+#'   * "standardize": standardize the data.
 #' @param cv_fold integer(1). Number of folds for cross-validation.
 #'   default is 5L.
 #' @param cv_pairs integer(1). Number of pairs for cross-validation.
 #'   This value will be used to generate a rank-based pairs
 #'   based on `target_cols` values.
+#' @param pairing character(1) Pair selection method.
+#'   * "1": search the nearest for each cluster then others
+#'    are selected based on the rank.
+#'   * "2": rank the pairwise distances directly
 #' @param cv_mode character(1). Spatiotemporal cross-validation indexing
 #' @note nrow(data) %% cv_fold should be 0.
 #' @returns rsample::manual_rset() object.
@@ -2589,8 +2597,10 @@ generate_cv_index <-
   function(
     data,
     target_cols = c("lon", "lat", "time"),
+    preprocessing = c("none", "normalize", "standardize"),
     cv_fold = 5L,
     cv_pairs = NULL,
+    pairing = c("1", "2"),
     cv_mode = "spt"
   ) {
     if (length(target_cols) != 3) {
@@ -2598,11 +2608,20 @@ generate_cv_index <-
     }
     data <- data[, target_cols, with = FALSE]
     data$time <- as.numeric(data$time)
-    index_cv <- anticlust::balanced_clustering(data, cv_fold)
+    data_proc <-
+      switch(
+        preprocessing,
+        none = data,
+        normalize = (data + abs(apply(data, 2, min))) /
+          (apply(data, 2, max) + abs(apply(data, 2, min))),
+        standardize = collapse::fscale(data)
+      )
+    index_cv <- anticlust::balanced_clustering(data_proc, cv_fold)
     cv_index <- NULL
     ref_list <- NULL
     if (!is.null(cv_pairs)) {
-      data_ex <- data
+      pairing <- match.arg(pairing)
+      data_ex <- data_proc
       data_ex$cv_index <- index_cv
       data_exs <- data_ex |>
         dplyr::group_by(cv_index) |>
@@ -2612,11 +2631,47 @@ generate_cv_index <-
         dplyr::ungroup()
 
       data_exs$cv_index <- NULL
-      data_exd <- as.vector(dist(data_exs))
+      data_exm <- dist(data_exs)
+      data_exd <- as.vector(data_exm)
+      data_exmfull <- as.matrix(data_exm)
+      # index searching in dist matrix out of dist
       data_exd_colid <-
-        rep(seq_len(max(index_cv) - 1), seq(max(index_cv) - 1, 1, -1))
+        unlist(Map(seq_len, seq_len(max(index_cv) - 1)))
+      # rep(seq_len(max(index_cv) - 1), seq(max(index_cv) - 1, 1, -1))
       data_exd_rowid <- rep(seq(2, max(index_cv)), seq_len(max(index_cv) - 1))
-      search_idx <- which(rank(-data_exd) <= cv_pairs)
+      if (pairing == "2") {
+        search_idx <- which(rank(-data_exd) <= cv_pairs)
+      } else {
+        # min rank element index per each cluster centroid
+        search_each1 <-
+          apply(data_exmfull, 1, \(x) which.min(replace(x, which.min(x), Inf)))
+        # sort the index
+        search_each1sort <-
+          Map(c, seq_along(search_each1), search_each1)
+        # keep the distinct pairs
+        search_each1sort <-
+          unique(Map(sort, search_each1sort))
+        # return(list(data_exd_colid, data_exd_rowid, search_each1sort))
+        search_idx_each1 <-
+          which(
+            Reduce(
+              `|`,
+              Map(
+                \(x) data_exd_colid %in% x[1] & data_exd_rowid %in% x[2],
+                search_each1sort
+              )
+            )
+          )
+
+        # replace the nearest pairs' distance to Inf
+        search_idx_others <-
+          which(rank(-replace(data_exd, search_idx_each1, Inf)) <= cv_pairs)
+        # remove the nearest pairs
+        # sort the distance of the remaining pairs
+        search_idx_others <-
+          search_idx_others[1:(cv_pairs - length(search_idx_each1))]
+        search_idx <- c(search_idx_each1, search_idx_others)
+      }
       ref_list <-
         Map(c, data_exd_rowid[search_idx], data_exd_colid[search_idx])
     }
@@ -2628,10 +2683,36 @@ generate_cv_index <-
     return(rset_cv)
   }
 
+#' Visualize the spatio-temporal cross-validation index
+#' @family Base learner
+#' @param rsplit rsample::manual_rset() object.
+#' @returns None. A plot will be generated.
+#' @seealso [`generate_cv_index`]
+#' @export
+vis_rset <-
+  function(rsplit) {
+    nsplit <- nrow(rsplit)
+    par(mfrow = c(ceiling(nsplit / 3), 3))
+    for (i in seq_len(nsplit)) {
+      cleared <- rsplit[i, 1][[1]][[1]]$data
+      cleared$indx <- 0
+      cleared$indx[rsplit[i, 1][[1]][[1]]$in_id] <- "In"
+      cleared$indx[rsplit[i, 1][[1]][[1]]$out_id] <- "Out"
+      cleared$indx <- factor(cleared$indx)
+      cleared$time <- as.POSIXct(cleared$time)
+      scatterplot3d::scatterplot3d(
+        cleared$lon, cleared$lat, cleared$time,
+        color = rev(as.integer(cleared$indx) + 1),
+        cex.symbols = 0.02, pch = 19
+      )
+    }
+  }
+
 #' Get Divisors
 #' @family Miscellaneous
 #' @param x integer(1). A positive integer.
 #' @returns A vector of divisors of x.
+#' @noRd
 #' @export
 divisor <-
   function(x) {

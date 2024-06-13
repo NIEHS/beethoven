@@ -7,8 +7,10 @@
 generate_cv_index(
   data,
   target_cols = c("lon", "lat", "time"),
+  preprocessing = c("none", "normalize", "standardize"),
   cv_fold = 5L,
   cv_pairs = NULL,
+  pairing = c("1", "2"),
   cv_mode = "spt"
 )
 }
@@ -19,12 +21,26 @@ generate_cv_index(
 Default is c("lon", "lat", "time").
 Order insensitive.}
 
+\item{preprocessing}{character(1). Preprocessing method.
+\itemize{
+\item "none": no preprocessing.
+\item "normalize": normalize the data.
+\item "standardize": standardize the data.
+}}
+
 \item{cv_fold}{integer(1). Number of folds for cross-validation.
 default is 5L.}
 
 \item{cv_pairs}{integer(1). Number of pairs for cross-validation.
 This value will be used to generate a rank-based pairs
 based on \code{target_cols} values.}
+
+\item{pairing}{character(1) Pair selection method.
+\itemize{
+\item "1": search the nearest for each cluster then others
+are selected based on the rank.
+\item "2": rank the pairwise distances directly
+}}
 
 \item{cv_mode}{character(1). Spatiotemporal cross-validation indexing}
 }

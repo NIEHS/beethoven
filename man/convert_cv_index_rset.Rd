@@ -24,6 +24,10 @@ training-test data.frames and a column of labels.
 \description{
 Generate manual rset object from spatiotemporal cross-validation indices
 }
+\seealso{
+Other Base learner: 
+\code{\link{vis_rset}()}
+}
 \author{
 Insang Song
 }

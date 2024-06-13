@@ -60,6 +60,7 @@ Suggests:
   ggplot2,
   doRNG,
   DT,
+  scatterplot3d,
   furrr,
   quarto
 Remotes: NIEHS/amadeus, NIEHS/chopin
