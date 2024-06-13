@@ -417,7 +417,7 @@ post_calc_year_expand <-
 #' \dontrun{
 #' df <- data.frame(year = c(2010, 2010, 2011, 2012),
 #'                  value = c(1, 2, 3, 4))
-#' df_expanded <- 
+#' df_expanded <-
 #'   post_calc_df_year_expand(df, locs_id = "site_id", time_field = "year",
 #'                            time_start = 2011, time_end = 2012,
 #'                            time_unit = "year")
