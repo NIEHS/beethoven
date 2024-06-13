@@ -1,135 +1,165 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>/404.html</loc>
+    <loc>https://niehs.github.io/beethoven/404.html</loc>
   </url>
   <url>
-    <loc>/LICENSE-text.html</loc>
+    <loc>https://niehs.github.io/beethoven/LICENSE-text.html</loc>
   </url>
   <url>
-    <loc>/LICENSE.html</loc>
+    <loc>https://niehs.github.io/beethoven/LICENSE.html</loc>
   </url>
   <url>
-    <loc>/articles/epa_download.html</loc>
+    <loc>https://niehs.github.io/beethoven/articles/epa_download.html</loc>
   </url>
   <url>
-    <loc>/articles/index.html</loc>
+    <loc>https://niehs.github.io/beethoven/articles/index.html</loc>
   </url>
   <url>
-    <loc>/articles/prediction_points.html</loc>
+    <loc>https://niehs.github.io/beethoven/articles/list_features.html</loc>
   </url>
   <url>
-    <loc>/authors.html</loc>
+    <loc>https://niehs.github.io/beethoven/articles/prediction_points.html</loc>
   </url>
   <url>
-    <loc>/index.html</loc>
+    <loc>https://niehs.github.io/beethoven/authors.html</loc>
   </url>
   <url>
-    <loc>/reference/build_pipeline.html</loc>
+    <loc>https://niehs.github.io/beethoven/index.html</loc>
   </url>
   <url>
-    <loc>/reference/calc_covariates.html</loc>
+    <loc>https://niehs.github.io/beethoven/reference/add_time_col.html</loc>
   </url>
   <url>
-    <loc>/reference/calc_ecoregion.html</loc>
+    <loc>https://niehs.github.io/beethoven/reference/append_predecessors.html</loc>
   </url>
   <url>
-    <loc>/reference/calc_koppen_geiger.html</loc>
+    <loc>https://niehs.github.io/beethoven/reference/attach_xy.html</loc>
   </url>
   <url>
-    <loc>/reference/calc_modis.html</loc>
+    <loc>https://niehs.github.io/beethoven/reference/calc_geos_strict.html</loc>
   </url>
   <url>
-    <loc>/reference/calc_nei.html</loc>
+    <loc>https://niehs.github.io/beethoven/reference/calc_gmted_direct.html</loc>
   </url>
   <url>
-    <loc>/reference/calc_nlcd_ratio.html</loc>
+    <loc>https://niehs.github.io/beethoven/reference/calc_narr2.html</loc>
   </url>
   <url>
-    <loc>/reference/calc_temporal_dummies.html</loc>
+    <loc>https://niehs.github.io/beethoven/reference/calculate.html</loc>
   </url>
   <url>
-    <loc>/reference/calc_tri.html</loc>
+    <loc>https://niehs.github.io/beethoven/reference/convert_cv_index_rset.html</loc>
   </url>
   <url>
-    <loc>/reference/check_crs_is_valid.html</loc>
+    <loc>https://niehs.github.io/beethoven/reference/df_params.html</loc>
   </url>
   <url>
-    <loc>/reference/check_data_completeness.html</loc>
+    <loc>https://niehs.github.io/beethoven/reference/divisor.html</loc>
   </url>
   <url>
-    <loc>/reference/check_input_raster_in_extent.html</loc>
+    <loc>https://niehs.github.io/beethoven/reference/feature_raw_download.html</loc>
   </url>
   <url>
-    <loc>/reference/check_means_are_valid.html</loc>
+    <loc>https://niehs.github.io/beethoven/reference/fit_base_brulee.html</loc>
   </url>
   <url>
-    <loc>/reference/check_output_locs_are_valid.html</loc>
+    <loc>https://niehs.github.io/beethoven/reference/fit_base_elnet.html</loc>
   </url>
   <url>
-    <loc>/reference/check_variances_are_valid.html</loc>
+    <loc>https://niehs.github.io/beethoven/reference/fit_base_xgb.html</loc>
   </url>
   <url>
-    <loc>/reference/convert_stdt.html</loc>
+    <loc>https://niehs.github.io/beethoven/reference/generate_cv_index.html</loc>
   </url>
   <url>
-    <loc>/reference/convert_stdt_sftime.html</loc>
+    <loc>https://niehs.github.io/beethoven/reference/grapes-tin-grapes.html</loc>
   </url>
   <url>
-    <loc>/reference/convert_stdt_spatrastdataset.html</loc>
+    <loc>https://niehs.github.io/beethoven/reference/impute_all.html</loc>
   </url>
   <url>
-    <loc>/reference/convert_stdt_spatvect.html</loc>
+    <loc>https://niehs.github.io/beethoven/reference/index.html</loc>
   </url>
   <url>
-    <loc>/reference/convert_stobj_to_stdt.html</loc>
+    <loc>https://niehs.github.io/beethoven/reference/inject_calculate.html</loc>
   </url>
   <url>
-    <loc>/reference/dt_to_sf.html</loc>
+    <loc>https://niehs.github.io/beethoven/reference/inject_geos.html</loc>
   </url>
   <url>
-    <loc>/reference/dt_to_sftime.html</loc>
+    <loc>https://niehs.github.io/beethoven/reference/inject_gmted.html</loc>
   </url>
   <url>
-    <loc>/reference/generic_base_learner.html</loc>
+    <loc>https://niehs.github.io/beethoven/reference/inject_modis_par.html</loc>
   </url>
   <url>
-    <loc>/reference/generic_meta_learner.html</loc>
+    <loc>https://niehs.github.io/beethoven/reference/load_modis_files.html</loc>
   </url>
   <url>
-    <loc>/reference/index.html</loc>
+    <loc>https://niehs.github.io/beethoven/reference/loadargs.html</loc>
   </url>
   <url>
-    <loc>/reference/is_stdt.html</loc>
+    <loc>https://niehs.github.io/beethoven/reference/meta_learner_fit.html</loc>
   </url>
   <url>
-    <loc>/reference/meta_learner_fit.html</loc>
+    <loc>https://niehs.github.io/beethoven/reference/meta_learner_predict.html</loc>
   </url>
   <url>
-    <loc>/reference/meta_learner_predict.html</loc>
+    <loc>https://niehs.github.io/beethoven/reference/par_narr.html</loc>
   </url>
   <url>
-    <loc>/reference/modis_aggregate_sds.html</loc>
+    <loc>https://niehs.github.io/beethoven/reference/post_calc_autojoin.html</loc>
   </url>
   <url>
-    <loc>/reference/modis_get_vrt.html</loc>
+    <loc>https://niehs.github.io/beethoven/reference/post_calc_convert_time.html</loc>
   </url>
   <url>
-    <loc>/reference/modis_mosaic_mod06.html</loc>
+    <loc>https://niehs.github.io/beethoven/reference/post_calc_df_year_expand.html</loc>
   </url>
   <url>
-    <loc>/reference/modis_prefilter_sds.html</loc>
+    <loc>https://niehs.github.io/beethoven/reference/post_calc_drop_cols.html</loc>
   </url>
   <url>
-    <loc>/reference/modis_preprocess_vnp46.html</loc>
+    <loc>https://niehs.github.io/beethoven/reference/post_calc_join_yeardate.html</loc>
   </url>
   <url>
-    <loc>/reference/modis_warp_stars.html</loc>
+    <loc>https://niehs.github.io/beethoven/reference/post_calc_merge_all.html</loc>
   </url>
   <url>
-    <loc>/reference/modis_worker.html</loc>
+    <loc>https://niehs.github.io/beethoven/reference/post_calc_merge_features.html</loc>
   </url>
   <url>
-    <loc>/reference/project_dt.html</loc>
+    <loc>https://niehs.github.io/beethoven/reference/post_calc_unify_timecols.html</loc>
+  </url>
+  <url>
+    <loc>https://niehs.github.io/beethoven/reference/post_calc_year_expand.html</loc>
+  </url>
+  <url>
+    <loc>https://niehs.github.io/beethoven/reference/process_counties.html</loc>
+  </url>
+  <url>
+    <loc>https://niehs.github.io/beethoven/reference/process_geos_bulk.html</loc>
+  </url>
+  <url>
+    <loc>https://niehs.github.io/beethoven/reference/process_narr2.html</loc>
+  </url>
+  <url>
+    <loc>https://niehs.github.io/beethoven/reference/read_locs.html</loc>
+  </url>
+  <url>
+    <loc>https://niehs.github.io/beethoven/reference/read_paths.html</loc>
+  </url>
+  <url>
+    <loc>https://niehs.github.io/beethoven/reference/reduce_merge.html</loc>
+  </url>
+  <url>
+    <loc>https://niehs.github.io/beethoven/reference/search_function.html</loc>
+  </url>
+  <url>
+    <loc>https://niehs.github.io/beethoven/reference/set_slurm_resource.html</loc>
+  </url>
+  <url>
+    <loc>https://niehs.github.io/beethoven/reference/vis_rset.html</loc>
   </url>
 </urlset>
