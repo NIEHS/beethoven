@@ -19,7 +19,7 @@ meta_learner_fit <- function(base_predictor_list,
     stop("base_predictor_list should be a named list.\n")
   }
 
-  # check lengths of each base predictor #add a test for names
+  # check lengths of each base predictor add a test for names
   if (sapply(base_predictor_list, length, simplify = TRUE) |>
         stats::var() != 0) {
     stop("Error in meta_learner_fit:

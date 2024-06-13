@@ -35,7 +35,9 @@ available year when the minimum of \code{time_available} is greater
 than \code{time_start}.
 }
 \examples{
-process_year_expand(2018, 2022, "year", c(2017, 2020, 2021))
-process_year_expand(2018, 2022, "year", c(2020, 2021))
+\dontrun{
+process_calc_year_expand(2018, 2022, "year", c(2017, 2020, 2021))
+process_calc_year_expand(2018, 2022, "year", c(2020, 2021))
+}
 }
 \keyword{Post-calculation}

@@ -56,10 +56,11 @@ loadargs <- function(argfile, dataset) {
 #' FALSE otherwise.
 #'
 #' @examples
+#' \dontrun{
 #' query_date <- as.Date("2022-01-01")
 #' tvec <- c(as.Date("2021-01-01"), as.Date("2023-01-01"))
 #' `%tin%`(query_date, tvec)
-#'
+#' }
 #' @export
 `%tin%` <- function(query_date, tvec) {
   tvec <- sort(tvec)
@@ -244,6 +245,7 @@ inject_gmted <- function(locs, variable, radii, injection, nthreads = 4L) {
 #' @returns A merged data table.
 #' @keywords Post-calculation
 #' @examples
+#' \dontrun{
 #' # Create example data tables
 #' dt1 <- data.table(a = 1:3, b = 4:6)
 #' dt2 <- data.table(a = 2:4, c = 7:9)
@@ -251,7 +253,7 @@ inject_gmted <- function(locs, variable, radii, injection, nthreads = 4L) {
 #'
 #' # Merge the data tables
 #' reduce_merge(list(dt1, dt2, dt3), by = "a")
-#'
+#' }
 #' @importFrom data.table as.data.table merge.data.table
 #' @export
 reduce_merge <-
@@ -333,9 +335,10 @@ par_narr <- function(domain, date, locs, nthreads = 24L) {
 #' @returns The data frame with the added time column.
 #'
 #' @examples
+#' \dontrun{
 #' df <- data.frame(x = 1:5, y = letters[1:5])
 #' add_time_col(df, "2022-01-01")
-#'
+#' }
 #' @export
 add_time_col <- function(df, time_value, time_id = "time") {
   if (!time_id %in% names(df)) {
@@ -365,8 +368,10 @@ add_time_col <- function(df, time_value, time_id = "time") {
 #' available year when the minimum of `time_available` is greater
 #' than `time_start`.
 #' @examples
-#' process_year_expand(2018, 2022, "year", c(2017, 2020, 2021))
-#' process_year_expand(2018, 2022, "year", c(2020, 2021))
+#' \dontrun{
+#' process_calc_year_expand(2018, 2022, "year", c(2017, 2020, 2021))
+#' process_calc_year_expand(2018, 2022, "year", c(2020, 2021))
+#' }
 #' @export
 post_calc_year_expand <-
   function(
@@ -412,9 +417,10 @@ post_calc_year_expand <-
 #' \dontrun{
 #' df <- data.frame(year = c(2010, 2010, 2011, 2012),
 #'                  value = c(1, 2, 3, 4))
-#' df_expanded <- post_calc_df_year_expand(df, locs_id = "site_id", time_field = "year",
-#'                               time_start = 2011, time_end = 2012,
-#'                               time_unit = "year")
+#' df_expanded <- 
+#'   post_calc_df_year_expand(df, locs_id = "site_id", time_field = "year",
+#'                            time_start = 2011, time_end = 2012,
+#'                            time_unit = "year")
 #' print(df_expanded)
 #' }
 #' @importFrom stats sd

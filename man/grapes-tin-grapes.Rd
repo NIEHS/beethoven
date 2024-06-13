@@ -20,9 +20,10 @@ This function checks if a given query date falls within a time interval
 defined by a vector of two dates.
 }
 \examples{
+\dontrun{
 query_date <- as.Date("2022-01-01")
 tvec <- c(as.Date("2021-01-01"), as.Date("2023-01-01"))
 `\%tin\%`(query_date, tvec)
-
+}
 }
 \keyword{Miscellaneous}

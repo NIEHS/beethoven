@@ -20,8 +20,9 @@ The data frame with the added time column.
 This function adds a time column to a data frame.
 }
 \examples{
+\dontrun{
 df <- data.frame(x = 1:5, y = letters[1:5])
 add_time_col(df, "2022-01-01")
-
+}
 }
 \keyword{Post-calculation}

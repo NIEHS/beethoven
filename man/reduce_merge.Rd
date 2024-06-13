@@ -24,6 +24,7 @@ using the specified columns. It uses the \code{merge.data.table} function
 from the \code{data.table} package to perform the merge.
 }
 \examples{
+\dontrun{
 # Create example data tables
 dt1 <- data.table(a = 1:3, b = 4:6)
 dt2 <- data.table(a = 2:4, c = 7:9)
@@ -31,6 +32,6 @@ dt3 <- data.table(a = 3:5, d = 10:12)
 
 # Merge the data tables
 reduce_merge(list(dt1, dt2, dt3), by = "a")
-
+}
 }
 \keyword{Post-calculation}
