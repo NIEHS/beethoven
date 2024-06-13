@@ -2686,11 +2686,12 @@ generate_cv_index <-
 #' Visualize the spatio-temporal cross-validation index
 #' @family Base learner
 #' @param rsplit rsample::manual_rset() object.
+#' @param angle numeric(1). Viewing angle of 3D plot.
 #' @returns None. A plot will be generated.
 #' @seealso [`generate_cv_index`]
 #' @export
 vis_rset <-
-  function(rsplit) {
+  function(rsplit, angle = 60) {
     nsplit <- nrow(rsplit)
     par(mfrow = c(ceiling(nsplit / 3), 3))
     for (i in seq_len(nsplit)) {
@@ -2703,7 +2704,8 @@ vis_rset <-
       scatterplot3d::scatterplot3d(
         cleared$lon, cleared$lat, cleared$time,
         color = rev(as.integer(cleared$indx) + 1),
-        cex.symbols = 0.02, pch = 19
+        cex.symbols = 0.02, pch = 19,
+        angle = angle
       )
     }
   }

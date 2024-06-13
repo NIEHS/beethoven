@@ -38,6 +38,7 @@ Imports:
   parsnip,
   future.apply,
   future.batchtools,
+  anticlust,
   qs,
   stringi,
   collapse,

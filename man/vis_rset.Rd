@@ -4,10 +4,12 @@
 \alias{vis_rset}
 \title{Visualize the spatio-temporal cross-validation index}
 \usage{
-vis_rset(rsplit)
+vis_rset(rsplit, angle = 60)
 }
 \arguments{
 \item{rsplit}{rsample::manual_rset() object.}
+
+\item{angle}{numeric(1). Viewing angle of 3D plot.}
 }
 \value{
 None. A plot will be generated.
