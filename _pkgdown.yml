@@ -29,7 +29,7 @@ reference:
 - subtitle: Base learner
   desc: Fitting base learner and helper functions
   contents:
-  - has_keyword("Base learner")
+  - has_keyword("Baselearner")
 
 - subtitle: Meta learner
   desc: Fitting meta learner

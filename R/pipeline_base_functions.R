@@ -1,4 +1,5 @@
 ## pipeline base functions
+# nocov start
 
 ## file check: chunking
 ## if using tarchetypes::tar_files,
@@ -2717,3 +2718,5 @@ divisor <-
     xv <- seq_len(x)
     xv[which(x %% xv == 0)]
   }
+
+# nocov end
