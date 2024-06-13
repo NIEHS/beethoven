@@ -10,16 +10,36 @@ navbar:
     right: [github]
 
 reference:
-- subtitle: Output validation
-  desc: Validating pipeline outputs
+- subtitle: Pipeline utility
+  desc: Cleaning and adjusting data structure for succinct pipeline
   contents:
-  - contains("check_")
+  - with_family("Pipeline utility")
 
+- subtitle: Calculation
+  desc: Main calculation functions for branching, parallel processing, and parameter injection
+  contents:
+  - with_family("Calculation")
+
+- subtitle: Post-calculation
+  desc: Merging calculation results
+  contents:
+  - with_family("Post-calculation")
+
+
+- subtitle: Base learner
+  desc: Fitting base learner and helper functions
+  contents:
+  - with_family("Base learner")
 
 - subtitle: Meta learner
   desc: Fitting meta learner
   contents:
   - contains("meta_learner")
+
+- subtitle: Miscellaneous
+  desc: Miscellaneous functions for general use
+  contents:
+  - with_family("Miscellaneous")
 
 
 articles:

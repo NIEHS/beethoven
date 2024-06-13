@@ -20,6 +20,7 @@ Other Pipeline utility:
 \code{\link{attach_xy}()},
 \code{\link{feature_raw_download}()},
 \code{\link{load_modis_files}()},
+\code{\link{loadargs}()},
 \code{\link{read_locs}()},
 \code{\link{read_paths}()},
 \code{\link{search_function}()},

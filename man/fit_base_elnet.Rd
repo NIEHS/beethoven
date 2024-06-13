@@ -6,6 +6,7 @@
 \usage{
 fit_base_elnet(
   dt_imputed,
+  folds = NULL,
   r_subsample = 0.3,
   yvar = "Arithmetic.Mean",
   xvar = seq(6, ncol(dt_imputed)),
@@ -16,6 +17,9 @@ fit_base_elnet(
 }
 \arguments{
 \item{dt_imputed}{The input data table to be used for fitting.}
+
+\item{folds}{pre-generated rset object. If NULL, it should be
+numeric to be used in \link[rsample:vfold_cv]{rsample::vfold_cv}.}
 
 \item{r_subsample}{The proportion of rows to be sampled.}
 
@@ -28,9 +32,6 @@ fit_base_elnet(
 \item{nthreads}{The number of threads to be used. Default is 16L.}
 
 \item{...}{Additional arguments to be passed.}
-
-\item{folds}{pre-generated rset object. If NULL, it should be
-numeric to be used in \link[rsample:vfold_cv]{rsample::vfold_cv}.}
 }
 \value{
 The fitted workflow.
@@ -43,9 +44,11 @@ the input dataset by grid search.
 Spatiotemporal cross-validation strategy is not yet implemented.
 }
 \seealso{
-Other Base Learner: 
+Other Base learner: 
+\code{\link{convert_cv_index_rset}()},
 \code{\link{fit_base_brulee}()},
 \code{\link{fit_base_xgb}()},
-\code{\link{generate_cv_index}()}
+\code{\link{generate_cv_index}()},
+\code{\link{vis_rset}()}
 }
-\concept{Base Learner}
+\concept{Base learner}

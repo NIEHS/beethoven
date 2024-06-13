@@ -59,12 +59,14 @@ cluster centroids.
 nrow(data) \%\% cv_fold should be 0.
 }
 \seealso{
-Other Base Learner: 
+Other Base learner: 
+\code{\link{convert_cv_index_rset}()},
 \code{\link{fit_base_brulee}()},
 \code{\link{fit_base_elnet}()},
-\code{\link{fit_base_xgb}()}
+\code{\link{fit_base_xgb}()},
+\code{\link{vis_rset}()}
 }
 \author{
 Insang Song
 }
-\concept{Base Learner}
+\concept{Base learner}

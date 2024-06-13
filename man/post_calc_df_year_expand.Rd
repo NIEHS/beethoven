@@ -54,4 +54,18 @@ print(df_expanded)
 }
 \seealso{
 \code{\link[=post_calc_year_expand]{post_calc_year_expand()}}
+
+Other Post-calculation: 
+\code{\link{add_time_col}()},
+\code{\link{append_predecessors}()},
+\code{\link{impute_all}()},
+\code{\link{post_calc_autojoin}()},
+\code{\link{post_calc_convert_time}()},
+\code{\link{post_calc_join_yeardate}()},
+\code{\link{post_calc_merge_all}()},
+\code{\link{post_calc_merge_features}()},
+\code{\link{post_calc_unify_timecols}()},
+\code{\link{post_calc_year_expand}()},
+\code{\link{reduce_merge}()}
 }
+\concept{Post-calculation}

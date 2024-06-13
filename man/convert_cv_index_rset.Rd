@@ -26,6 +26,10 @@ Generate manual rset object from spatiotemporal cross-validation indices
 }
 \seealso{
 Other Base learner: 
+\code{\link{fit_base_brulee}()},
+\code{\link{fit_base_elnet}()},
+\code{\link{fit_base_xgb}()},
+\code{\link{generate_cv_index}()},
 \code{\link{vis_rset}()}
 }
 \author{

@@ -6,6 +6,7 @@
 \usage{
 fit_base_xgb(
   dt_imputed,
+  folds = NULL,
   r_subsample = 0.3,
   yvar = "Arithmetic.Mean",
   xvar = seq(6, ncol(dt_imputed)),
@@ -16,6 +17,9 @@ fit_base_xgb(
 \arguments{
 \item{dt_imputed}{The input data table to be used for fitting.}
 
+\item{folds}{pre-generated rset object. If NULL, it should be
+numeric to be used in \link[rsample:vfold_cv]{rsample::vfold_cv}.}
+
 \item{r_subsample}{The proportion of rows to be sampled.}
 
 \item{yvar}{The target variable.}
@@ -25,9 +29,6 @@ fit_base_xgb(
 \item{vfold}{The number of folds for cross-validation.}
 
 \item{...}{Additional arguments to be passed.}
-
-\item{folds}{pre-generated rset object. If NULL, it should be
-numeric to be used in \link[rsample:vfold_cv]{rsample::vfold_cv}.}
 }
 \value{
 The fitted workflow.
@@ -42,9 +43,11 @@ processing units (GPU) to speed up the training process.
 Spatiotemporal cross-validation strategy is not yet implemented.
 }
 \seealso{
-Other Base Learner: 
+Other Base learner: 
+\code{\link{convert_cv_index_rset}()},
 \code{\link{fit_base_brulee}()},
 \code{\link{fit_base_elnet}()},
-\code{\link{generate_cv_index}()}
+\code{\link{generate_cv_index}()},
+\code{\link{vis_rset}()}
 }
-\concept{Base Learner}
+\concept{Base learner}

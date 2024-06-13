@@ -36,6 +36,7 @@ Other Pipeline utility:
 \code{\link{attach_xy}()},
 \code{\link{df_params}()},
 \code{\link{feature_raw_download}()},
+\code{\link{loadargs}()},
 \code{\link{read_locs}()},
 \code{\link{read_paths}()},
 \code{\link{search_function}()},

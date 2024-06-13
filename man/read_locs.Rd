@@ -26,6 +26,7 @@ Other Pipeline utility:
 \code{\link{df_params}()},
 \code{\link{feature_raw_download}()},
 \code{\link{load_modis_files}()},
+\code{\link{loadargs}()},
 \code{\link{read_paths}()},
 \code{\link{search_function}()},
 \code{\link{set_slurm_resource}()}

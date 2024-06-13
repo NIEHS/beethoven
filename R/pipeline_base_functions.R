@@ -25,6 +25,7 @@
 ## (as-is)   ...   (as-is)    --- unless modified or manually invalidated
 
 #' Load arguments from the formatted argument list file
+#' @family Pipeline utility
 #' @param argfile character(1). Path to the argument file. RDS format.
 #' @param dataset character(1). Dataset name.
 #' @returns A list of arguments.
@@ -284,9 +285,11 @@ reduce_merge <-
 #'  NARR data for multiple domains.
 #' @family Calculation
 #' @param domain A character vector specifying the domains to process.
-#' @param date A character vector specifying the date of the NARR data to process.
+#' @param date A character vector specifying the date of the
+#'  NARR data to process.
 #' @param locs A data frame specifying the locations to calculate NARR data for.
-#' @param nthreads An integer specifying the number of threads to use for parallel processing. Default is 24.
+#' @param nthreads An integer specifying the number of threads
+#'  to use for parallel processing. Default is 24.
 #'
 #' @returns A list of results from the parallel processing.
 #' @importFrom future plan multicore sequential
@@ -311,7 +314,8 @@ par_narr <- function(domain, date, locs, nthreads = 24L) {
           locs_id = "site_id"
         )
       },
-      future.seed = TRUE)
+      future.seed = TRUE
+    )
   future::plan(future::sequential)
   return(res)
 
@@ -341,15 +345,15 @@ add_time_col <- function(df, time_value, time_id = "time") {
 }
 
 
-
 # 2018~2022, 2017, 2020
 # 2017 ... 2020 ...
-# 2017 
+# 2017
 #' Map the available raw data years over the given period
 #' @description
 #' Many raw datasets are periodically updated and the period could
 #' be longer than a year. This function maps the available years
 #' over the given period.
+#' @family Post-calculation
 #' @param time_start integer(1). Starting year.
 #' @param time_end integer(1). Ending year.
 #' @param time_unit character(1). Time unit. Default is `"year"`.
@@ -390,7 +394,7 @@ post_calc_year_expand <-
 #'
 #' This function expands a data frame by year, creating multiple rows
 #'  for each year based on the time period specified.
-#'
+#' @family Post-calculation
 #' @param df The input data frame.
 #' @param locs_id The column name of the location identifier in the data frame.
 #' @param time_field The column name of the time field in the data frame.
@@ -803,6 +807,7 @@ post_calc_convert_time <-
 #' @description The full date column will be converted to a year column
 #' as a new column, then the data.frame with the year-only column will
 #' be joined.
+#' @family Post-calculation
 #' @param df_year data.frame with a year-only date column
 #' @param df_date data.frame with a full date column
 #' @param field_year character(1). Year column in `df_year`
@@ -1077,7 +1082,7 @@ read_paths <-
 #' # Search for functions in the `amadeus` package
 #' search_function("amadeus", "process_")
 #' @export
-search_function <- function(package, search){
+search_function <- function(package, search) {
   library(package, character.only = TRUE)
   grep(search, ls(sprintf("package:%s", package)), value = TRUE)
 }
@@ -1209,9 +1214,8 @@ process_geos_bulk <-
     future_inserted <- split(data_paths, filename_date_cl)
     other_args <- list(...)
     data_variables <- names(terra::rast(data_paths[1]))
-
+    # nolint start
     summary_byvar <- function(x = data_variables, fs) {
-      #do.call(c, 
       rast_in <- rlang::inject(terra::rast(fs, !!!other_args))
       terra::sds(lapply(
         x,
@@ -1229,6 +1233,7 @@ process_geos_bulk <-
         }
       ))
     }
+    # nolint end
 
     # summary by 10 days
     # TODO: dropping furrr?
@@ -1719,9 +1724,9 @@ process_narr2 <- function(
     if (length(lvinfo) == 0) {
       cat("Detected monolevel data...\n")
       names(data_year) <- paste0(
-          search_to, "_",
-          gsub("-", "", data_year_tinfo)
-        )
+        search_to, "_",
+        gsub("-", "", data_year_tinfo)
+      )
     } else {
       cat("Detected pressure levels data...\n")
       lvinfo <- sub("level=", "", lvinfo)
@@ -1788,7 +1793,7 @@ process_narr2 <- function(
 #' @param radius The radius within which to include neighboring locations
 #'  for aggregation. Default is 0.
 #' @param fun The aggregation function to use.
-#'  It can be a character string specifying a function name 
+#'  It can be a character string specifying a function name
 #' (e.g., "mean", "sum"),
 #' or it can be a custom function. Default is "mean".
 #' @param ... Additional arguments to be passed to
@@ -1822,7 +1827,7 @@ calc_narr2 <- function(
   if (!all(timetab == 1)) {
     time_split <-
       split(time_from,
-            #ceiling(seq_along(time_from) / 29L)) 
+            #ceiling(seq_along(time_from) / 29L))
             ceiling(as.integer(as.factor(time_from)) / 14L))
     sites_extracted <- Map(
       function(day) {
@@ -2079,7 +2084,7 @@ impute_all <-
 #' This function appends predecessors to an existing object or
 #'  creates a new object if none exists.
 #'
-#' @family Integration
+#' @family Post-calculation
 #' @param path_qs The path where the predecessors will be stored.
 #' @param period_new The new period to be appended.
 #' @param input_new The new input object to be appended.
@@ -2161,6 +2166,7 @@ append_predecessors <-
 # nested parallelization
 # IN PROGRESS
 # TODO: identify bottleneck
+#' @noRd
 par_nest <-
   function(
     path,
@@ -2185,7 +2191,7 @@ par_nest <-
 #' hidden units, dropout, activation, and learning rate using brulee
 #' and tidymodels. With proper settings, users can utilize graphics
 #' processing units (GPU) to speed up the training process.
-#' @family Base Learner
+#' @family Base learner
 #' @note Spatiotemporal cross-validation strategy is not yet implemented.
 #'   tune package should be 1.2.0 or higher.
 #' @param dt_imputed The input data table to be used for fitting.
@@ -2283,7 +2289,7 @@ fit_base_brulee <-
 #' the input dataset by grid search.
 #' With proper settings, users can utilize graphics
 #' processing units (GPU) to speed up the training process.
-#' @family Base Learner
+#' @family Base learner
 #' @note Spatiotemporal cross-validation strategy is not yet implemented.
 #' @param dt_imputed The input data table to be used for fitting.
 #' @param folds pre-generated rset object. If NULL, it should be
@@ -2307,6 +2313,7 @@ fit_base_brulee <-
 fit_base_xgb <-
   function(
     dt_imputed,
+    folds = NULL,
     r_subsample = 0.3,
     yvar = "Arithmetic.Mean",
     xvar = seq(6, ncol(dt_imputed)),
@@ -2369,7 +2376,7 @@ fit_base_xgb <-
 #'
 #' Elastic net model is fitted at the defined rate (`r_subsample`) of
 #' the input dataset by grid search.
-#' @family Base Learner
+#' @family Base learner
 #' @note Spatiotemporal cross-validation strategy is not yet implemented.
 #' @param dt_imputed The input data table to be used for fitting.
 #' @param folds pre-generated rset object. If NULL, it should be
@@ -2395,6 +2402,7 @@ fit_base_xgb <-
 fit_base_elnet <-
   function(
     dt_imputed,
+    folds = NULL,
     r_subsample = 0.3,
     yvar = "Arithmetic.Mean",
     xvar = seq(6, ncol(dt_imputed)),
@@ -2567,7 +2575,7 @@ attach_xy <-
 #' default, and if `cv_pairs` is provided,
 #' it generates rank-based pairs based on the proximity between
 #' cluster centroids.
-#' @family Base Learner
+#' @family Base learner
 #' @param data data.table with X, Y, and time information.
 #' @param target_cols character(3). Names of columns for X, Y, and time.
 #'   Default is c("lon", "lat", "time").

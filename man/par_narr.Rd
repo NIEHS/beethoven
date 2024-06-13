@@ -9,11 +9,13 @@ par_narr(domain, date, locs, nthreads = 24L)
 \arguments{
 \item{domain}{A character vector specifying the domains to process.}
 
-\item{date}{A character vector specifying the date of the NARR data to process.}
+\item{date}{A character vector specifying the date of the
+NARR data to process.}
 
 \item{locs}{A data frame specifying the locations to calculate NARR data for.}
 
-\item{nthreads}{An integer specifying the number of threads to use for parallel processing. Default is 24.}
+\item{nthreads}{An integer specifying the number of threads
+to use for parallel processing. Default is 24.}
 }
 \value{
 A list of results from the parallel processing.

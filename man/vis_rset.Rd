@@ -21,6 +21,10 @@ Visualize the spatio-temporal cross-validation index
 \code{\link{generate_cv_index}}
 
 Other Base learner: 
-\code{\link{convert_cv_index_rset}()}
+\code{\link{convert_cv_index_rset}()},
+\code{\link{fit_base_brulee}()},
+\code{\link{fit_base_elnet}()},
+\code{\link{fit_base_xgb}()},
+\code{\link{generate_cv_index}()}
 }
 \concept{Base learner}
