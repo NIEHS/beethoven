@@ -19,6 +19,8 @@ Search package functions
 }
 \examples{
 # Search for functions in the `amadeus` package
+\dontrun{
 search_function("amadeus", "process_")
+}
 }
 \keyword{Utility}

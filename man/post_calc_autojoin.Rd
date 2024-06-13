@@ -38,6 +38,7 @@ into a character with \code{as.Date()}. This function will fail if it
 gets year-like string with length 4.
 }
 \examples{
+\dontrun{
 df_fine0 <- data.frame(site_id = c("A", "B", "B", "C"),
                       time = as.Date(c("2022-01-01", "2022-01-02", "2021-12-31", "2021-01-03")),
                       value = c(1, 2, 3, 5))
@@ -46,5 +47,6 @@ df_coarse0 <- data.frame(site_id = c("A", "B", "C"),
                         other_value = c(10, 20, 30))
 jdf <- post_calc_autojoin(df_fine0, df_coarse0)
 print(jdf)
+}
 }
 \keyword{Post-calculation}

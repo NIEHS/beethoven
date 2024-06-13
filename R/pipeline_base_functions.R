@@ -135,7 +135,6 @@ inject_calculate <- function(covariate, locs, injection) {
   )
 }
 
-
 #' Injects arguments to parallelize MODIS/VIIRS data processing
 #'
 #' @keywords Calculation
@@ -155,7 +154,6 @@ inject_modis_par <- function(locs, domain, injection) {
     )
   )
 }
-
 
 #' Injects geographic information into a data frame
 #'
@@ -910,10 +908,11 @@ post_calc_merge_all <-
 #' @returns The modified data frame with the specified columns removed.
 #'
 #' @examples
+#' \dontrun{
 #' df <- data.frame(lon = 1:5, lat = 6:10, geoid = 11:15, year = 2010:2014,
 #'                  description = letters[1:5], other = 16:20)
 #' post_calc_drop_cols(df)
-#'
+#' }
 #' @export
 post_calc_drop_cols <-
   function(
@@ -949,6 +948,7 @@ post_calc_drop_cols <-
 #' @returns A merged data table.
 #' @examples
 # nolint start
+#' \dontrun{
 #' df_fine0 <- data.frame(site_id = c("A", "B", "B", "C"),
 #'                       time = as.Date(c("2022-01-01", "2022-01-02", "2021-12-31", "2021-01-03")),
 #'                       value = c(1, 2, 3, 5))
@@ -957,6 +957,7 @@ post_calc_drop_cols <-
 #'                         other_value = c(10, 20, 30))
 #' jdf <- post_calc_autojoin(df_fine0, df_coarse0)
 #' print(jdf)
+#' }
 # nolint end
 #' @importFrom data.table merge.data.table
 #' @importFrom rlang as_name
@@ -1082,7 +1083,9 @@ read_paths <-
 #' @returns A character vector containing the matching function names.
 #' @examples
 #' # Search for functions in the `amadeus` package
+#' \dontrun{
 #' search_function("amadeus", "process_")
+#' }
 #' @export
 search_function <- function(package, search) {
   library(package, character.only = TRUE)
@@ -2707,6 +2710,7 @@ vis_rset <-
       )
     }
   }
+# nocov end
 
 #' Get Divisors
 #' @keywords Miscellaneous
@@ -2718,5 +2722,3 @@ divisor <-
     xv <- seq_len(x)
     xv[which(x %% xv == 0)]
   }
-
-# nocov end

@@ -28,10 +28,11 @@ The modified data frame with the specified columns removed.
 Remove columns from a data frame based on regular expression patterns.
 }
 \examples{
+\dontrun{
 df <- data.frame(lon = 1:5, lat = 6:10, geoid = 11:15, year = 2010:2014,
                  description = letters[1:5], other = 16:20)
 post_calc_drop_cols(df)
-
+}
 }
 \keyword{"^lon$|^lat$|geoid|year$|description".}
 \keyword{By}

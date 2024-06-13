@@ -23,7 +23,6 @@ Imports:
   methods,
   BART,
   data.table,
-  testthat (>= 3.0.0),
   future,
   targets,
   tune (>= 1.2.1),
@@ -45,6 +44,7 @@ Imports:
   tigris,
   graphics
 Suggests:
+  testthat (>= 3.0.0),
   covr,
   withr,
   tarchetypes,
