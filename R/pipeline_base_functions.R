@@ -409,12 +409,14 @@ post_calc_year_expand <-
 #' @returns The expanded data frame with multiple rows for each year.
 #' @seealso [`post_calc_year_expand()`]
 #' @examples
+#' \dontrun{
 #' df <- data.frame(year = c(2010, 2010, 2011, 2012),
 #'                  value = c(1, 2, 3, 4))
-#' df_expanded <- df_year_expand(df, locs_id = "site_id", time_field = "year",
+#' df_expanded <- post_calc_df_year_expand(df, locs_id = "site_id", time_field = "year",
 #'                               time_start = 2011, time_end = 2012,
 #'                               time_unit = "year")
 #' print(df_expanded)
+#' }
 #' @importFrom stats sd
 #' @export
 post_calc_df_year_expand <- function(
