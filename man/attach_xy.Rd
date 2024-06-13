@@ -26,5 +26,4 @@ This function attaches XY coordinates to a data frame based on a spatial
 object containing the coordinates. It performs a left join operation to
 match the coordinates with the corresponding locations in the data frame.
 }
-\keyword{Pipeline}
-\keyword{utility}
+\keyword{Utility}

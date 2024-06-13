@@ -25,7 +25,7 @@
 ## (as-is)   ...   (as-is)    --- unless modified or manually invalidated
 
 #' Load arguments from the formatted argument list file
-#' @keywords Pipeline utility
+#' @keywords Utility
 #' @param argfile character(1). Path to the argument file. RDS format.
 #' @param dataset character(1). Dataset name.
 #' @returns A list of arguments.
@@ -69,7 +69,7 @@ loadargs <- function(argfile, dataset) {
 #'
 #' This function takes a path and an optional pattern as input and
 #'   returns a list of MODIS files found in the specified path.
-#' @keywords Pipeline utility
+#' @keywords Utility
 #' @param path The path where the MODIS files are located.
 #' @param pattern An optional regular expression pattern to filter the files.
 #'   The default pattern is "hdf$".
@@ -79,12 +79,13 @@ loadargs <- function(argfile, dataset) {
 #'   in the specified path.
 #'
 #' @examples
+#' \dontrun{
 #' # Load MODIS files from the current directory
 #' modis_files <- load_modis_files(".")
 #'
 #' # Load MODIS files from a specific directory with a custom pattern
 #' modis_files <- load_modis_files("/path/to/files", pattern = "MOD.*hdf$")
-#'
+#' }
 #' @export
 load_modis_files <- function(path, pattern = "hdf$", date = character(2)) {
   modis_files <-
@@ -604,7 +605,7 @@ calculate <-
 
 
 #' Set resource management for SLURM
-#' @keywords Pipeline utility
+#' @keywords Utility
 #' @param template_file SLURM job submission shell template path.
 #' @param partition character(1). Name of partition. Default is `"geo"`
 #' @param ncpus integer(1). Number of CPU cores assigned to each task.
@@ -652,7 +653,7 @@ set_slurm_resource <-
 
 
 #' Read AQS data
-#' @keywords Pipeline utility
+#' @keywords Utility
 #' @param fun_aqs function to import AQS data.
 #' Default is `amadeus::process_aqs`
 #' @param export Export the file to qs. Default is FALSE.
@@ -674,7 +675,7 @@ read_locs <-
 
 
 #' Check file status and download if necessary
-#' @keywords Pipeline utility
+#' @keywords Utility
 #' @param path download path.
 #' @param dataset_name Dataset name. See [`amadeus::download_data`] for details.
 #' @param ... Arguments passed to `amadeus::download_data`
@@ -1029,7 +1030,7 @@ post_calc_autojoin <-
 
 
 #' Read paths from a directory with a specific file extension
-#' @keywords Pipeline utility
+#' @keywords Utility
 #' @param path The directory path from which to read the paths.
 #' @param extension The file extension to match. Defaults to ".hdf".
 #' @param target_dates A character vector of length 2 containing
@@ -1074,7 +1075,7 @@ read_paths <-
 
 
 #' Search package functions
-#' @keywords Pipeline utility
+#' @keywords Utility
 #' @param package character(1). Package name.
 #' @param search character(1). Search term.
 #' @returns A character vector containing the matching function names.
@@ -1088,7 +1089,7 @@ search_function <- function(package, search) {
 }
 
 #' Get data.frame of function parameters
-#' @keywords Pipeline utility
+#' @keywords Utility
 #' @param functions character. Vector of function names.
 #' @returns A data.frame containing the parameters of the functions.
 #' @importFrom dplyr as_tibble bind_rows
@@ -2191,7 +2192,7 @@ par_nest <-
 #' hidden units, dropout, activation, and learning rate using brulee
 #' and tidymodels. With proper settings, users can utilize graphics
 #' processing units (GPU) to speed up the training process.
-#' @keywords Base learner
+#' @keywords Baselearner
 #' @note Spatiotemporal cross-validation strategy is not yet implemented.
 #'   tune package should be 1.2.0 or higher.
 #' @param dt_imputed The input data table to be used for fitting.
@@ -2289,7 +2290,7 @@ fit_base_brulee <-
 #' the input dataset by grid search.
 #' With proper settings, users can utilize graphics
 #' processing units (GPU) to speed up the training process.
-#' @keywords Base learner
+#' @keywords Baselearner
 #' @note Spatiotemporal cross-validation strategy is not yet implemented.
 #' @param dt_imputed The input data table to be used for fitting.
 #' @param folds pre-generated rset object. If NULL, it should be
@@ -2376,7 +2377,7 @@ fit_base_xgb <-
 #'
 #' Elastic net model is fitted at the defined rate (`r_subsample`) of
 #' the input dataset by grid search.
-#' @keywords Base learner
+#' @keywords Baselearner
 #' @note Spatiotemporal cross-validation strategy is not yet implemented.
 #' @param dt_imputed The input data table to be used for fitting.
 #' @param folds pre-generated rset object. If NULL, it should be
@@ -2460,7 +2461,7 @@ fit_base_elnet <-
   }
 
 #' Generate manual rset object from spatiotemporal cross-validation indices
-#' @keywords Base learner
+#' @keywords Baselearner
 #' @param cvindex integer length of nrow(data).
 #' @param data data.frame.
 #' @param ref_list List of custom reference indices. Default is NULL.
@@ -2518,7 +2519,7 @@ convert_cv_index_rset <-
 #' This function attaches XY coordinates to a data frame based on a spatial
 #' object containing the coordinates. It performs a left join operation to
 #' match the coordinates with the corresponding locations in the data frame.
-#' @keywords Pipeline utility
+#' @keywords Utility
 #' @param data_full The full data frame to which XY coordinates will
 #'   be attached.
 #' @param data_sf The spatial object containing the XY coordinates.
@@ -2563,7 +2564,7 @@ attach_xy <-
 #' default, and if `cv_pairs` is provided,
 #' it generates rank-based pairs based on the proximity between
 #' cluster centroids.
-#' @keywords Base learner
+#' @keywords Baselearner
 #' @param data data.table with X, Y, and time information.
 #' @param target_cols character(3). Names of columns for X, Y, and time.
 #'   Default is c("lon", "lat", "time").
@@ -2680,7 +2681,7 @@ generate_cv_index <-
   }
 
 #' Visualize the spatio-temporal cross-validation index
-#' @keywords Base learner
+#' @keywords Baselearner
 #' @param rsplit rsample::manual_rset() object.
 #' @param angle numeric(1). Viewing angle of 3D plot.
 #' @returns None. A plot will be generated.

@@ -42,5 +42,4 @@ processing units (GPU) to speed up the training process.
 \note{
 Spatiotemporal cross-validation strategy is not yet implemented.
 }
-\keyword{Base}
-\keyword{learner}
+\keyword{Baselearner}

@@ -61,5 +61,4 @@ nrow(data) \%\% cv_fold should be 0.
 \author{
 Insang Song
 }
-\keyword{Base}
-\keyword{learner}
+\keyword{Baselearner}

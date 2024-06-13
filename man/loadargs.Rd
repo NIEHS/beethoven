@@ -17,5 +17,4 @@ A list of arguments.
 \description{
 Load arguments from the formatted argument list file
 }
-\keyword{Pipeline}
-\keyword{utility}
+\keyword{Utility}

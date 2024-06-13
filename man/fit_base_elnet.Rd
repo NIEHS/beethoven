@@ -43,5 +43,4 @@ the input dataset by grid search.
 \note{
 Spatiotemporal cross-validation strategy is not yet implemented.
 }
-\keyword{Base}
-\keyword{learner}
+\keyword{Baselearner}

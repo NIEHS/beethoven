@@ -15,5 +15,4 @@ A data.frame containing the parameters of the functions.
 \description{
 Get data.frame of function parameters
 }
-\keyword{Pipeline}
-\keyword{utility}
+\keyword{Utility}

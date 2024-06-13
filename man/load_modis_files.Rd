@@ -24,12 +24,12 @@ This function takes a path and an optional pattern as input and
 returns a list of MODIS files found in the specified path.
 }
 \examples{
+\dontrun{
 # Load MODIS files from the current directory
 modis_files <- load_modis_files(".")
 
 # Load MODIS files from a specific directory with a custom pattern
 modis_files <- load_modis_files("/path/to/files", pattern = "MOD.*hdf$")
-
 }
-\keyword{Pipeline}
-\keyword{utility}
+}
+\keyword{Utility}

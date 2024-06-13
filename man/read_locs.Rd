@@ -20,5 +20,4 @@ Depending on \code{fun_aqs} specification.
 \description{
 Read AQS data
 }
-\keyword{Pipeline}
-\keyword{utility}
+\keyword{Utility}

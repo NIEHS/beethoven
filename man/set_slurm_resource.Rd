@@ -42,5 +42,4 @@ Suggested number of \code{ncpus} is more than 1 for typical multicore R tasks.
 \author{
 Insang Song
 }
-\keyword{Pipeline}
-\keyword{utility}
+\keyword{Utility}

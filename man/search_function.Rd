@@ -21,5 +21,4 @@ Search package functions
 # Search for functions in the `amadeus` package
 search_function("amadeus", "process_")
 }
-\keyword{Pipeline}
-\keyword{utility}
+\keyword{Utility}

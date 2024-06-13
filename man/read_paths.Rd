@@ -36,5 +36,4 @@ read_paths("/path/to/directory")
 read_paths("/path/to/directory", ".txt")
 }
 }
-\keyword{Pipeline}
-\keyword{utility}
+\keyword{Utility}

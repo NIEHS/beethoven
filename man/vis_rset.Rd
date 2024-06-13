@@ -20,5 +20,4 @@ Visualize the spatio-temporal cross-validation index
 \seealso{
 \code{\link{generate_cv_index}}
 }
-\keyword{Base}
-\keyword{learner}
+\keyword{Baselearner}

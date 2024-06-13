@@ -27,5 +27,4 @@ Generate manual rset object from spatiotemporal cross-validation indices
 \author{
 Insang Song
 }
-\keyword{Base}
-\keyword{learner}
+\keyword{Baselearner}

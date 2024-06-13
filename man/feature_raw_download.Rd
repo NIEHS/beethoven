@@ -19,5 +19,4 @@ logical(1).
 \description{
 Check file status and download if necessary
 }
-\keyword{Pipeline}
-\keyword{utility}
+\keyword{Utility}

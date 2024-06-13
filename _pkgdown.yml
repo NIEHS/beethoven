@@ -10,10 +10,10 @@ navbar:
     right: [github]
 
 reference:
-- subtitle: Pipeline utility
+- subtitle: Utility
   desc: Cleaning and adjusting data structure for succinct pipeline
   contents:
-  - has_keyword("Pipeline utility")
+  - has_keyword("Utility")
 
 - subtitle: Calculation
   desc: Main calculation functions for branching, parallel processing, and parameter injection
