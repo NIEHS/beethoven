@@ -33,9 +33,28 @@ df <- data.frame(lon = 1:5, lat = 6:10, geoid = 11:15, year = 2010:2014,
 post_calc_drop_cols(df)
 
 }
-\concept{Post-calculation
-
-This function removes columns from a data frame that match
-any of the specified
-regular expression patterns. By default, it removes columns with names that
-match the patterns "^lon$|^lat$|geoid|year$|description".}
+\keyword{"^lon$|^lat$|geoid|year$|description".}
+\keyword{By}
+\keyword{Post-calculation}
+\keyword{This}
+\keyword{a}
+\keyword{any}
+\keyword{columns}
+\keyword{data}
+\keyword{default,}
+\keyword{expression}
+\keyword{frame}
+\keyword{from}
+\keyword{function}
+\keyword{it}
+\keyword{match}
+\keyword{names}
+\keyword{of}
+\keyword{patterns}
+\keyword{patterns.}
+\keyword{regular}
+\keyword{removes}
+\keyword{specified}
+\keyword{that}
+\keyword{the}
+\keyword{with}

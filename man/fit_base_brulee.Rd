@@ -43,12 +43,5 @@ processing units (GPU) to speed up the training process.
 Spatiotemporal cross-validation strategy is not yet implemented.
 tune package should be 1.2.0 or higher.
 }
-\seealso{
-Other Base learner: 
-\code{\link{convert_cv_index_rset}()},
-\code{\link{fit_base_elnet}()},
-\code{\link{fit_base_xgb}()},
-\code{\link{generate_cv_index}()},
-\code{\link{vis_rset}()}
-}
-\concept{Base learner}
+\keyword{Base}
+\keyword{learner}

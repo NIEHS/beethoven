@@ -38,21 +38,7 @@ pressure level, date
 Reference duration: 1 day summary, all layers: 106 seconds
 hard-coded subsets for subdataset selection
 }
-\seealso{
-Other Calculation: 
-\code{\link{calc_gmted_direct}()},
-\code{\link{calc_narr2}()},
-\code{\link{calculate}()},
-\code{\link{inject_calculate}()},
-\code{\link{inject_geos}()},
-\code{\link{inject_gmted}()},
-\code{\link{inject_modis_par}()},
-\code{\link{par_narr}()},
-\code{\link{process_counties}()},
-\code{\link{process_geos_bulk}()},
-\code{\link{process_narr2}()}
-}
 \author{
 Mitchell Manware, Insang Song
 }
-\concept{Calculation}
+\keyword{Calculation}

@@ -42,7 +42,8 @@ Imports:
   qs,
   stringi,
   collapse,
-  tigris
+  tigris,
+  graphics
 Suggests:
   covr,
   withr,

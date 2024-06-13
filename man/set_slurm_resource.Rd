@@ -39,18 +39,8 @@ Set resource management for SLURM
 This function is designed to be used with \code{tar_resources}.
 Suggested number of \code{ncpus} is more than 1 for typical multicore R tasks.
 }
-\seealso{
-Other Pipeline utility: 
-\code{\link{attach_xy}()},
-\code{\link{df_params}()},
-\code{\link{feature_raw_download}()},
-\code{\link{load_modis_files}()},
-\code{\link{loadargs}()},
-\code{\link{read_locs}()},
-\code{\link{read_paths}()},
-\code{\link{search_function}()}
-}
 \author{
 Insang Song
 }
-\concept{Pipeline utility}
+\keyword{Pipeline}
+\keyword{utility}

@@ -24,18 +24,4 @@ A list of results from the parallel processing.
 This function parallelizes the processing and calculation of
 NARR data for multiple domains.
 }
-\seealso{
-Other Calculation: 
-\code{\link{calc_geos_strict}()},
-\code{\link{calc_gmted_direct}()},
-\code{\link{calc_narr2}()},
-\code{\link{calculate}()},
-\code{\link{inject_calculate}()},
-\code{\link{inject_geos}()},
-\code{\link{inject_gmted}()},
-\code{\link{inject_modis_par}()},
-\code{\link{process_counties}()},
-\code{\link{process_geos_bulk}()},
-\code{\link{process_narr2}()}
-}
-\concept{Calculation}
+\keyword{Calculation}

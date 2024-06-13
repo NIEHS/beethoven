@@ -38,18 +38,4 @@ than \code{time_start}.
 process_year_expand(2018, 2022, "year", c(2017, 2020, 2021))
 process_year_expand(2018, 2022, "year", c(2020, 2021))
 }
-\seealso{
-Other Post-calculation: 
-\code{\link{add_time_col}()},
-\code{\link{append_predecessors}()},
-\code{\link{impute_all}()},
-\code{\link{post_calc_autojoin}()},
-\code{\link{post_calc_convert_time}()},
-\code{\link{post_calc_df_year_expand}()},
-\code{\link{post_calc_join_yeardate}()},
-\code{\link{post_calc_merge_all}()},
-\code{\link{post_calc_merge_features}()},
-\code{\link{post_calc_unify_timecols}()},
-\code{\link{reduce_merge}()}
-}
-\concept{Post-calculation}
+\keyword{Post-calculation}

@@ -26,28 +26,5 @@ This function attaches XY coordinates to a data frame based on a spatial
 object containing the coordinates. It performs a left join operation to
 match the coordinates with the corresponding locations in the data frame.
 }
-\examples{
-# Create a data frame
-data_full <- data.frame(site_id = c("A", "B", "C"),
-                        time = c("2022-01-01", "2022-01-02", "2022-01-03"))
-
-# Create a spatial object with XY coordinates
-data_sf <- sf::st_as_sf(data.frame(site_id = c("A", "B", "C"),
-                                   lon = c(1, 2, 3),
-                                   lat = c(10, 20, 30)))
-
-# Attach XY coordinates to the data frame
-attach_xy(data_full, data_sf, locs_id = "site_id", time_id = "time")
-}
-\seealso{
-Other Pipeline utility: 
-\code{\link{df_params}()},
-\code{\link{feature_raw_download}()},
-\code{\link{load_modis_files}()},
-\code{\link{loadargs}()},
-\code{\link{read_locs}()},
-\code{\link{read_paths}()},
-\code{\link{search_function}()},
-\code{\link{set_slurm_resource}()}
-}
-\concept{Pipeline utility}
+\keyword{Pipeline}
+\keyword{utility}

@@ -23,3 +23,5 @@ inst/targets-wide
 \.sif$
 \.log$
 \.vscode
+\.qmd$
+\.sh$

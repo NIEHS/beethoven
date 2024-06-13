@@ -37,18 +37,4 @@ location and time point.
 This function calculates aggregated values for specified locations from
 a raster dataset.
 }
-\seealso{
-Other Calculation: 
-\code{\link{calc_geos_strict}()},
-\code{\link{calc_gmted_direct}()},
-\code{\link{calculate}()},
-\code{\link{inject_calculate}()},
-\code{\link{inject_geos}()},
-\code{\link{inject_gmted}()},
-\code{\link{inject_modis_par}()},
-\code{\link{par_narr}()},
-\code{\link{process_counties}()},
-\code{\link{process_geos_bulk}()},
-\code{\link{process_narr2}()}
-}
-\concept{Calculation}
+\keyword{Calculation}

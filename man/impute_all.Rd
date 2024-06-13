@@ -41,18 +41,4 @@ geoscf column renaming, NDVI 16-day backward filling,
 zero-variance exclusion, excessive "true zeros" exclusion,
 and imputation using missRanger.
 }
-\seealso{
-Other Post-calculation: 
-\code{\link{add_time_col}()},
-\code{\link{append_predecessors}()},
-\code{\link{post_calc_autojoin}()},
-\code{\link{post_calc_convert_time}()},
-\code{\link{post_calc_df_year_expand}()},
-\code{\link{post_calc_join_yeardate}()},
-\code{\link{post_calc_merge_all}()},
-\code{\link{post_calc_merge_features}()},
-\code{\link{post_calc_unify_timecols}()},
-\code{\link{post_calc_year_expand}()},
-\code{\link{reduce_merge}()}
-}
-\concept{Post-calculation}
+\keyword{Post-calculation}

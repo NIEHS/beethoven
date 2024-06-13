@@ -22,18 +22,4 @@ the \code{calc_geos_strict} function. The injected information includes
 latitude and longitude coordinates based on the specified locations,
 a location ID column, a window range, and a snapping option.
 }
-\seealso{
-Other Calculation: 
-\code{\link{calc_geos_strict}()},
-\code{\link{calc_gmted_direct}()},
-\code{\link{calc_narr2}()},
-\code{\link{calculate}()},
-\code{\link{inject_calculate}()},
-\code{\link{inject_gmted}()},
-\code{\link{inject_modis_par}()},
-\code{\link{par_narr}()},
-\code{\link{process_counties}()},
-\code{\link{process_geos_bulk}()},
-\code{\link{process_narr2}()}
-}
-\concept{Calculation}
+\keyword{Calculation}

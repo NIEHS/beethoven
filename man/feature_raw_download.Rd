@@ -19,15 +19,5 @@ logical(1).
 \description{
 Check file status and download if necessary
 }
-\seealso{
-Other Pipeline utility: 
-\code{\link{attach_xy}()},
-\code{\link{df_params}()},
-\code{\link{load_modis_files}()},
-\code{\link{loadargs}()},
-\code{\link{read_locs}()},
-\code{\link{read_paths}()},
-\code{\link{search_function}()},
-\code{\link{set_slurm_resource}()}
-}
-\concept{Pipeline utility}
+\keyword{Pipeline}
+\keyword{utility}

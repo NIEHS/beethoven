@@ -25,7 +25,7 @@
 ## (as-is)   ...   (as-is)    --- unless modified or manually invalidated
 
 #' Load arguments from the formatted argument list file
-#' @family Pipeline utility
+#' @keywords Pipeline utility
 #' @param argfile character(1). Path to the argument file. RDS format.
 #' @param dataset character(1). Dataset name.
 #' @returns A list of arguments.
@@ -47,7 +47,7 @@ loadargs <- function(argfile, dataset) {
 #'
 #' This function checks if a given query date falls within a time interval
 #' defined by a vector of two dates.
-#' @family Miscellaneous
+#' @keywords Miscellaneous
 #' @param query_date The query date to check.
 #' @param tvec A vector of two dates defining the time interval.
 #'
@@ -69,7 +69,7 @@ loadargs <- function(argfile, dataset) {
 #'
 #' This function takes a path and an optional pattern as input and
 #'   returns a list of MODIS files found in the specified path.
-#' @family Pipeline utility
+#' @keywords Pipeline utility
 #' @param path The path where the MODIS files are located.
 #' @param pattern An optional regular expression pattern to filter the files.
 #'   The default pattern is "hdf$".
@@ -108,7 +108,7 @@ load_modis_files <- function(path, pattern = "hdf$", date = character(2)) {
 #'
 #' This function injects the calculate function with the specified arguments,
 #' allowing for dynamic customization of the function's behavior.
-#' @family Calculation
+#' @keywords Calculation
 #' @param covariate character(1). The name of the covariate to be calculated.
 #' @param locs The locations to be used in the calculation.
 #' @param injection Additional arguments to be injected into
@@ -136,7 +136,7 @@ inject_calculate <- function(covariate, locs, injection) {
 
 #' Injects arguments to parallelize MODIS/VIIRS data processing
 #'
-#' @family Calculation
+#' @keywords Calculation
 #' @param locs A data frame containing the locations for which MODIS
 #'   features need to be calculated.
 #' @param domain The domain in which the MODIS PAR data should be injected.
@@ -162,7 +162,7 @@ inject_modis_par <- function(locs, domain, injection) {
 #'   latitude and longitude coordinates based on the specified locations,
 #'   a location ID column, a window range, and a snapping option.
 #'
-#' @family Calculation
+#' @keywords Calculation
 #' @param locs A data frame containing the locations for which
 #'   geographic information needs to be injected.
 #' @param injection A list of additional arguments to be passed to
@@ -188,7 +188,7 @@ inject_geos <- function(locs, injection) {
 #'  into specified locations. It calculates the GMTED values for each
 #'  location within different radii and returns the merged results.
 #'
-#' @family Calculation
+#' @keywords Calculation
 #' @param locs A data frame/sf/SpatVector containing the locations
 #'   where GMTED variables needs to be calculated
 #' @param variable The variable for which GMTED data needs to be calculated.
@@ -242,7 +242,7 @@ inject_gmted <- function(locs, variable, radii, injection, nthreads = 4L) {
 #' @param all.x logical(1). Keeping all rows from the first input.
 #' @param all.y logical(1). Keeping all rows from the second input.
 #' @returns A merged data table.
-#' @family Post-calculation
+#' @keywords Post-calculation
 #' @examples
 #' # Create example data tables
 #' dt1 <- data.table(a = 1:3, b = 4:6)
@@ -283,7 +283,7 @@ reduce_merge <-
 #'
 #' This function parallelizes the processing and calculation of
 #'  NARR data for multiple domains.
-#' @family Calculation
+#' @keywords Calculation
 #' @param domain A character vector specifying the domains to process.
 #' @param date A character vector specifying the date of the
 #'  NARR data to process.
@@ -325,7 +325,7 @@ par_narr <- function(domain, date, locs, nthreads = 24L) {
 #'
 #' This function adds a time column to a data frame.
 #'
-#' @family Post-calculation
+#' @keywords Post-calculation
 #' @param df The data frame to which the time column will be added.
 #' @param time_value The value to be assigned to the time column.
 #' @param time_id The name of the time column (default is "time").
@@ -353,7 +353,7 @@ add_time_col <- function(df, time_value, time_id = "time") {
 #' Many raw datasets are periodically updated and the period could
 #' be longer than a year. This function maps the available years
 #' over the given period.
-#' @family Post-calculation
+#' @keywords Post-calculation
 #' @param time_start integer(1). Starting year.
 #' @param time_end integer(1). Ending year.
 #' @param time_unit character(1). Time unit. Default is `"year"`.
@@ -394,7 +394,7 @@ post_calc_year_expand <-
 #'
 #' This function expands a data frame by year, creating multiple rows
 #'  for each year based on the time period specified.
-#' @family Post-calculation
+#' @keywords Post-calculation
 #' @param df The input data frame.
 #' @param locs_id The column name of the location identifier in the data frame.
 #' @param time_field The column name of the time field in the data frame.
@@ -462,7 +462,7 @@ post_calc_df_year_expand <- function(
 
 # calculate over a list
 #' Spatiotemporal covariate calculation
-#' @family Calculation
+#' @keywords Calculation
 #' @param domain vector of integer/character/Date.
 #' Depending on temporal resolution of raw datasets.
 #' Nullable; If `NULL`, it will be set to `c(1)`.
@@ -604,7 +604,7 @@ calculate <-
 
 
 #' Set resource management for SLURM
-#' @family Pipeline utility
+#' @keywords Pipeline utility
 #' @param template_file SLURM job submission shell template path.
 #' @param partition character(1). Name of partition. Default is `"geo"`
 #' @param ncpus integer(1). Number of CPU cores assigned to each task.
@@ -652,7 +652,7 @@ set_slurm_resource <-
 
 
 #' Read AQS data
-#' @family Pipeline utility
+#' @keywords Pipeline utility
 #' @param fun_aqs function to import AQS data.
 #' Default is `amadeus::process_aqs`
 #' @param export Export the file to qs. Default is FALSE.
@@ -674,7 +674,7 @@ read_locs <-
 
 
 #' Check file status and download if necessary
-#' @family Pipeline utility
+#' @keywords Pipeline utility
 #' @param path download path.
 #' @param dataset_name Dataset name. See [`amadeus::download_data`] for details.
 #' @param ... Arguments passed to `amadeus::download_data`
@@ -697,7 +697,7 @@ feature_raw_download <-
   }
 
 #' Load county sf object
-#' @family Calculation
+#' @keywords Calculation
 #' @param year integer(1). Year of the county shapefile.
 #' @param exclude character. State FIPS codes to exclude.
 #' Default is c("02", "15", "60", "66", "68", "69", "72", "78").
@@ -725,7 +725,7 @@ process_counties <-
 #' Set this `TRUE` will supersede `by` value by appending time identifier.
 #' @param ... data.frame objects to merge
 #' @returns data.table
-#' @family Post-calculation
+#' @keywords Post-calculation
 #' @importFrom data.table as.data.table
 #' @importFrom data.table merge.data.table
 #' @export
@@ -770,7 +770,7 @@ post_calc_merge_features <-
 #' @param candidates character. Candidate column names.
 #' @param replace character. New column name.
 #' @returns data.frame
-#' @family Post-calculation
+#' @keywords Post-calculation
 #' @export
 post_calc_unify_timecols <-
   function(
@@ -787,7 +787,7 @@ post_calc_unify_timecols <-
 
 
 #' Convert time column to character
-#' @family Post-calculation
+#' @keywords Post-calculation
 #' @param df data.table
 #' @note This function takes preprocessed data.table with
 #'   a column named `"time"`.
@@ -807,7 +807,7 @@ post_calc_convert_time <-
 #' @description The full date column will be converted to a year column
 #' as a new column, then the data.frame with the year-only column will
 #' be joined.
-#' @family Post-calculation
+#' @keywords Post-calculation
 #' @param df_year data.frame with a year-only date column
 #' @param df_date data.frame with a full date column
 #' @param field_year character(1). Year column in `df_year`
@@ -846,7 +846,7 @@ post_calc_join_yeardate <-
 
 
 #' Merge spatial and spatiotemporal covariate data
-#' @family Post-calculation
+#' @keywords Post-calculation
 #' @param locs Location. e.g., AQS sites.
 #' @param locs_id character(1). Location identifier.
 #' @param time_id character(1). Location identifier.
@@ -891,7 +891,7 @@ post_calc_merge_all <-
 
 
 #' Remove columns from a data frame based on regular expression patterns.
-#' @family Post-calculation
+#' @keywords Post-calculation
 #'
 #' This function removes columns from a data frame that match
 #'  any of the specified
@@ -943,7 +943,7 @@ post_calc_drop_cols <-
 #' @param field_t The name of the time field in the data frames.
 #' @param year_start The starting year of the time period.
 #' @param year_end The ending year of the time period.
-#' @family Post-calculation
+#' @keywords Post-calculation
 #' @returns A merged data table.
 #' @examples
 # nolint start
@@ -1029,7 +1029,7 @@ post_calc_autojoin <-
 
 
 #' Read paths from a directory with a specific file extension
-#' @family Pipeline utility
+#' @keywords Pipeline utility
 #' @param path The directory path from which to read the paths.
 #' @param extension The file extension to match. Defaults to ".hdf".
 #' @param target_dates A character vector of length 2 containing
@@ -1074,7 +1074,7 @@ read_paths <-
 
 
 #' Search package functions
-#' @family Pipeline utility
+#' @keywords Pipeline utility
 #' @param package character(1). Package name.
 #' @param search character(1). Search term.
 #' @returns A character vector containing the matching function names.
@@ -1088,7 +1088,7 @@ search_function <- function(package, search) {
 }
 
 #' Get data.frame of function parameters
-#' @family Pipeline utility
+#' @keywords Pipeline utility
 #' @param functions character. Vector of function names.
 #' @returns A data.frame containing the parameters of the functions.
 #' @importFrom dplyr as_tibble bind_rows
@@ -1108,7 +1108,7 @@ df_params <- function(functions) {
 
 
 #' Process atmospheric composition data by chunks (v2)
-#' @family Calculation
+#' @keywords Calculation
 #' @description
 #' Returning a single `SpatRasterDataset` object.
 #' @param date character(2). length of 10. Format "YYYY-MM-DD".
@@ -1252,7 +1252,7 @@ process_geos_bulk <-
   }
 
 #' Process atmospheric composition data by chunks (v3)
-#' @family Calculation
+#' @keywords Calculation
 #' @description
 #' Returning a single `SpatRasterDataset` object.
 #' Removed `tapp` for performance; impose a strict assumption that
@@ -1462,7 +1462,7 @@ calc_geos_strict <-
 
 
 #' Reflown gmted processing
-#' @family Calculation
+#' @keywords Calculation
 #' @param variable character(2). Statistic and resolution.
 #' @param path character(1). Directory with downloaded GMTED files.
 #' @param locs data.frame/SpatVector/sf. Locations.
@@ -1603,7 +1603,7 @@ calc_gmted_direct <- function(
 #'
 #' This function processes NARR2 data based on the specified parameters.
 #'
-#' @family Calculation
+#' @keywords Calculation
 #' @param date A character vector specifying the start and end dates
 #'   in the format "YYYY-MM-DD".
 #' @param variable A character vector specifying the variable of interest.
@@ -1781,7 +1781,7 @@ process_narr2 <- function(
 #' This function calculates aggregated values for specified locations from
 #'  a raster dataset.
 #'
-#' @family Calculation
+#' @keywords Calculation
 #' @param from The raster dataset from which to extract values.
 #' @param locs A data frame containing the locations for which
 #'  to calculate aggregated values.
@@ -1896,7 +1896,7 @@ calc_narr2 <- function(
 }
 
 #' Impute missing values and attach lagged features
-#' @family Post-calculation
+#' @keywords Post-calculation
 #' @note under construction.
 #' This function performs imputation on a given data table
 #'   by replacing missing values with imputed values.
@@ -2084,7 +2084,7 @@ impute_all <-
 #' This function appends predecessors to an existing object or
 #'  creates a new object if none exists.
 #'
-#' @family Post-calculation
+#' @keywords Post-calculation
 #' @param path_qs The path where the predecessors will be stored.
 #' @param period_new The new period to be appended.
 #' @param input_new The new input object to be appended.
@@ -2191,7 +2191,7 @@ par_nest <-
 #' hidden units, dropout, activation, and learning rate using brulee
 #' and tidymodels. With proper settings, users can utilize graphics
 #' processing units (GPU) to speed up the training process.
-#' @family Base learner
+#' @keywords Base learner
 #' @note Spatiotemporal cross-validation strategy is not yet implemented.
 #'   tune package should be 1.2.0 or higher.
 #' @param dt_imputed The input data table to be used for fitting.
@@ -2289,7 +2289,7 @@ fit_base_brulee <-
 #' the input dataset by grid search.
 #' With proper settings, users can utilize graphics
 #' processing units (GPU) to speed up the training process.
-#' @family Base learner
+#' @keywords Base learner
 #' @note Spatiotemporal cross-validation strategy is not yet implemented.
 #' @param dt_imputed The input data table to be used for fitting.
 #' @param folds pre-generated rset object. If NULL, it should be
@@ -2376,7 +2376,7 @@ fit_base_xgb <-
 #'
 #' Elastic net model is fitted at the defined rate (`r_subsample`) of
 #' the input dataset by grid search.
-#' @family Base learner
+#' @keywords Base learner
 #' @note Spatiotemporal cross-validation strategy is not yet implemented.
 #' @param dt_imputed The input data table to be used for fitting.
 #' @param folds pre-generated rset object. If NULL, it should be
@@ -2460,7 +2460,7 @@ fit_base_elnet <-
   }
 
 #' Generate manual rset object from spatiotemporal cross-validation indices
-#' @family Base learner
+#' @keywords Base learner
 #' @param cvindex integer length of nrow(data).
 #' @param data data.frame.
 #' @param ref_list List of custom reference indices. Default is NULL.
@@ -2518,7 +2518,7 @@ convert_cv_index_rset <-
 #' This function attaches XY coordinates to a data frame based on a spatial
 #' object containing the coordinates. It performs a left join operation to
 #' match the coordinates with the corresponding locations in the data frame.
-#' @family Pipeline utility
+#' @keywords Pipeline utility
 #' @param data_full The full data frame to which XY coordinates will
 #'   be attached.
 #' @param data_sf The spatial object containing the XY coordinates.
@@ -2529,18 +2529,6 @@ convert_cv_index_rset <-
 #'
 #' @returns A data frame with the XY coordinates attached.
 #'
-#' @examples
-#' # Create a data frame
-#' data_full <- data.frame(site_id = c("A", "B", "C"),
-#'                         time = c("2022-01-01", "2022-01-02", "2022-01-03"))
-#'
-#' # Create a spatial object with XY coordinates
-#' data_sf <- sf::st_as_sf(data.frame(site_id = c("A", "B", "C"),
-#'                                    lon = c(1, 2, 3),
-#'                                    lat = c(10, 20, 30)))
-#'
-#' # Attach XY coordinates to the data frame
-#' attach_xy(data_full, data_sf, locs_id = "site_id", time_id = "time")
 #' @importFrom sf st_coordinates
 #' @importFrom stats setNames
 #' @importFrom collapse join
@@ -2575,7 +2563,7 @@ attach_xy <-
 #' default, and if `cv_pairs` is provided,
 #' it generates rank-based pairs based on the proximity between
 #' cluster centroids.
-#' @family Base learner
+#' @keywords Base learner
 #' @param data data.table with X, Y, and time information.
 #' @param target_cols character(3). Names of columns for X, Y, and time.
 #'   Default is c("lon", "lat", "time").
@@ -2639,7 +2627,7 @@ generate_cv_index <-
         dplyr::ungroup()
 
       data_exs$cv_index <- NULL
-      data_exm <- dist(data_exs)
+      data_exm <- stats::dist(data_exs)
       data_exd <- as.vector(data_exm)
       data_exmfull <- as.matrix(data_exm)
       # index searching in dist matrix out of dist
@@ -2692,7 +2680,7 @@ generate_cv_index <-
   }
 
 #' Visualize the spatio-temporal cross-validation index
-#' @family Base learner
+#' @keywords Base learner
 #' @param rsplit rsample::manual_rset() object.
 #' @param angle numeric(1). Viewing angle of 3D plot.
 #' @returns None. A plot will be generated.
@@ -2701,7 +2689,7 @@ generate_cv_index <-
 vis_rset <-
   function(rsplit, angle = 60) {
     nsplit <- nrow(rsplit)
-    par(mfrow = c(ceiling(nsplit / 3), 3))
+    graphics::par(mfrow = c(ceiling(nsplit / 3), 3))
     for (i in seq_len(nsplit)) {
       cleared <- rsplit[i, 1][[1]][[1]]$data
       cleared$indx <- 0
@@ -2719,10 +2707,9 @@ vis_rset <-
   }
 
 #' Get Divisors
-#' @family Miscellaneous
+#' @keywords Miscellaneous
 #' @param x integer(1). A positive integer.
 #' @returns A vector of divisors of x.
-#' @noRd
 #' @export
 divisor <-
   function(x) {

@@ -25,4 +25,4 @@ tvec <- c(as.Date("2021-01-01"), as.Date("2023-01-01"))
 `\%tin\%`(query_date, tvec)
 
 }
-\concept{Miscellaneous}
+\keyword{Miscellaneous}
