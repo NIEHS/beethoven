@@ -38,6 +38,7 @@ read_paths("/path/to/directory", ".txt")
 }
 \seealso{
 Other Pipeline utility: 
+\code{\link{attach_xy}()},
 \code{\link{df_params}()},
 \code{\link{feature_raw_download}()},
 \code{\link{load_modis_files}()},

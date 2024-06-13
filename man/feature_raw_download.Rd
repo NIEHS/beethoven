@@ -21,6 +21,7 @@ Check file status and download if necessary
 }
 \seealso{
 Other Pipeline utility: 
+\code{\link{attach_xy}()},
 \code{\link{df_params}()},
 \code{\link{load_modis_files}()},
 \code{\link{read_locs}()},

@@ -33,6 +33,7 @@ modis_files <- load_modis_files("/path/to/files", pattern = "MOD.*hdf$")
 }
 \seealso{
 Other Pipeline utility: 
+\code{\link{attach_xy}()},
 \code{\link{df_params}()},
 \code{\link{feature_raw_download}()},
 \code{\link{read_locs}()},

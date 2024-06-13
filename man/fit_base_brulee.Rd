@@ -6,16 +6,19 @@
 \usage{
 fit_base_brulee(
   dt_imputed,
+  folds = NULL,
   r_subsample = 0.3,
   yvar = "Arithmetic.Mean",
   xvar = seq(6, ncol(dt_imputed)),
   vfold = 5L,
-  cv_config,
   ...
 )
 }
 \arguments{
 \item{dt_imputed}{The input data table to be used for fitting.}
+
+\item{folds}{pre-generated rset object. If NULL, it should be
+numeric to be used in \link[rsample:vfold_cv]{rsample::vfold_cv}.}
 
 \item{r_subsample}{The proportion of rows to be sampled.}
 
@@ -24,8 +27,6 @@ fit_base_brulee(
 \item{xvar}{The predictor variables.}
 
 \item{vfold}{The number of folds for cross-validation.}
-
-\item{cv_config}{The cross-validation configuration. To be added.}
 
 \item{...}{Additional arguments to be passed.}
 }
@@ -45,6 +46,7 @@ tune package should be 1.2.0 or higher.
 \seealso{
 Other Base Learner: 
 \code{\link{fit_base_elnet}()},
-\code{\link{fit_base_xgb}()}
+\code{\link{fit_base_xgb}()},
+\code{\link{generate_cv_index}()}
 }
 \concept{Base Learner}

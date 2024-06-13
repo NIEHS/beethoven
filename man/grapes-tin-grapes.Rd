@@ -25,4 +25,8 @@ tvec <- c(as.Date("2021-01-01"), as.Date("2023-01-01"))
 `\%tin\%`(query_date, tvec)
 
 }
+\seealso{
+Other Miscellaneous: 
+\code{\link{divisor}()}
+}
 \concept{Miscellaneous}

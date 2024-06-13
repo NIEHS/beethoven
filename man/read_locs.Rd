@@ -22,6 +22,7 @@ Read AQS data
 }
 \seealso{
 Other Pipeline utility: 
+\code{\link{attach_xy}()},
 \code{\link{df_params}()},
 \code{\link{feature_raw_download}()},
 \code{\link{load_modis_files}()},

@@ -23,7 +23,6 @@
 ## (pass)    ...   (run)
 ## ...       ...   (downstream process + calculation)
 ## (as-is)   ...   (as-is)    --- unless modified or manually invalidated
-library(amadeus)
 
 #' Load arguments from the formatted argument list file
 #' @param argfile character(1). Path to the argument file. RDS format.
@@ -459,6 +458,7 @@ post_calc_df_year_expand <- function(
 
 # calculate over a list
 #' Spatiotemporal covariate calculation
+#' @family Calculation
 #' @param domain vector of integer/character/Date.
 #' Depending on temporal resolution of raw datasets.
 #' Nullable; If `NULL`, it will be set to `c(1)`.
@@ -513,7 +513,7 @@ calculate <-
           args_process <- c(arg = domain_each, list(...))
           names(args_process)[1] <- domain_name
           if (!is.null(args_process$covariate) &&
-            any(names(args_process) %in% c("covariate"))
+              any(names(args_process) %in% c("covariate"))
           ) {
             if (args_process$covariate == "nei") {
               args_process$county <- process_counties()
@@ -2189,11 +2189,12 @@ par_nest <-
 #' @note Spatiotemporal cross-validation strategy is not yet implemented.
 #'   tune package should be 1.2.0 or higher.
 #' @param dt_imputed The input data table to be used for fitting.
+#' @param folds pre-generated rset object. If NULL, it should be
+#'   numeric to be used in [rsample::vfold_cv].
 #' @param r_subsample The proportion of rows to be sampled.
 #' @param yvar The target variable.
 #' @param xvar The predictor variables.
 #' @param vfold The number of folds for cross-validation.
-#' @param cv_config The cross-validation configuration. To be added.
 #' @param ... Additional arguments to be passed.
 #'
 #' @returns The fitted workflow.
@@ -2209,11 +2210,11 @@ par_nest <-
 fit_base_brulee <-
   function(
     dt_imputed,
+    folds = NULL,
     r_subsample = 0.3,
     yvar = "Arithmetic.Mean",
     xvar = seq(6, ncol(dt_imputed)),
     vfold = 5L,
-    cv_config,
     ...
   ) {
     # 2^9=512, 2^15=32768 (#param is around 10% of selected rows)
@@ -2239,8 +2240,11 @@ fit_base_brulee <-
       recipes::update_role(!!yvar, new_role = "outcome") #%>%
     # recipes::step_normalize(!!yvar)
 
-    # fix this part to implement SPT CV strategy
-    base_vfold <- rsample::vfold_cv(dt_imputed, v = vfold)
+    if (is.null(folds)) {
+      base_vfold <- rsample::vfold_cv(dt_imputed, v = vfold)
+    } else {
+      base_vfold <- folds
+    }
     base_model <-
       parsnip::mlp(
         hidden_units = parsnip::tune(),
@@ -2282,11 +2286,12 @@ fit_base_brulee <-
 #' @family Base Learner
 #' @note Spatiotemporal cross-validation strategy is not yet implemented.
 #' @param dt_imputed The input data table to be used for fitting.
+#' @param folds pre-generated rset object. If NULL, it should be
+#'   numeric to be used in [rsample::vfold_cv].
 #' @param r_subsample The proportion of rows to be sampled.
 #' @param yvar The target variable.
 #' @param xvar The predictor variables.
 #' @param vfold The number of folds for cross-validation.
-#' @param cv_config The cross-validation configuration. To be added.
 #' @param ... Additional arguments to be passed.
 #'
 #' @returns The fitted workflow.
@@ -2306,7 +2311,6 @@ fit_base_xgb <-
     yvar = "Arithmetic.Mean",
     xvar = seq(6, ncol(dt_imputed)),
     vfold = 5L,
-    cv_config,
     ...
   ) {
     grid_hyper_tune <-
@@ -2326,7 +2330,11 @@ fit_base_xgb <-
       # recipes::step_normalize(recipes::all_numeric_predictors()) %>%
       recipes::update_role(tidyselect::all_of(xvar)) %>%
       recipes::update_role(tidyselect::all_of(yvar), new_role = "outcome")
-    base_vfold <- rsample::vfold_cv(dt_imputed, v = 5)
+    if (is.null(folds)) {
+      base_vfold <- rsample::vfold_cv(dt_imputed, v = vfold)
+    } else {
+      base_vfold <- folds
+    }
     base_model <-
       parsnip::boost_tree(
         mtry = parsnip::tune(),
@@ -2364,12 +2372,13 @@ fit_base_xgb <-
 #' @family Base Learner
 #' @note Spatiotemporal cross-validation strategy is not yet implemented.
 #' @param dt_imputed The input data table to be used for fitting.
+#' @param folds pre-generated rset object. If NULL, it should be
+#'   numeric to be used in [rsample::vfold_cv].
 #' @param r_subsample The proportion of rows to be sampled.
 #' @param yvar The target variable.
 #' @param xvar The predictor variables.
 #' @param vfold The number of folds for cross-validation.
 #' @param nthreads The number of threads to be used. Default is 16L.
-#' @param cv_config The cross-validation configuration. To be added.
 #' @param ... Additional arguments to be passed.
 #'
 #' @returns The fitted workflow.
@@ -2391,7 +2400,6 @@ fit_base_elnet <-
     xvar = seq(6, ncol(dt_imputed)),
     vfold = 5L,
     nthreads = 16L,
-    cv_config,
     ...
   ) {
     grid_hyper_tune <-
@@ -2410,7 +2418,11 @@ fit_base_elnet <-
       # recipes::step_normalize(recipes::all_numeric_predictors()) %>%
       recipes::update_role(tidyselect::all_of(xvar)) %>%
       recipes::update_role(tidyselect::all_of(yvar), new_role = "outcome")
-    base_vfold <- rsample::vfold_cv(dt_imputed, v = 5)
+    if (is.null(folds)) {
+      base_vfold <- rsample::vfold_cv(dt_imputed, v = vfold)
+    } else {
+      base_vfold <- folds
+    }
     base_model <-
       parsnip::linear_reg(
         mixture = parsnip::tune(),
@@ -2437,4 +2449,192 @@ fit_base_elnet <-
     future::plan(future::sequential)
     return(base_wf)
 
+  }
+
+#' Generate manual rset object from spatiotemporal cross-validation indices
+#' @family Base learner
+#' @param cvindex integer length of nrow(data).
+#' @param data data.frame.
+#' @param ref_list List of custom reference indices. Default is NULL.
+#'   if not NULL, it will be used as a reference instead of max(cvindex).
+#' @param cv_mode character(1). Spatiotemporal cross-validation indexing
+#'   method label.
+#' @returns rset object of `rsample` package. A tibble with a list column of
+#' training-test data.frames and a column of labels.
+#' @author Insang Song
+#' @importFrom rsample make_splits
+#' @importFrom rsample manual_rset
+#' @export
+convert_cv_index_rset <-
+  function(
+    cvindex,
+    data,
+    ref_list = NULL,
+    cv_mode = "spt"
+  ) {
+    if (length(cvindex) != nrow(data)) {
+      stop("cvindex length should be equal to nrow(data).")
+    }
+
+    if (!is.null(ref_list)) {
+      list_cvi <- ref_list
+      len_cvi <- seq_along(list_cvi)
+    } else {
+      maxcvi <- max(cvindex)
+      len_cvi <- seq_len(maxcvi)
+      list_cvi <- split(len_cvi, len_cvi)
+    }
+    list_cvi_rows <-
+      lapply(
+        list_cvi,
+        function(x) {
+          list(analysis = which(!cvindex %in% x),
+               assessment = which(cvindex %in% x))
+        }
+      )
+    list_split_dfs <-
+      lapply(
+        list_cvi_rows,
+        function(x) {
+          rsample::make_splits(x = x, data = data)
+        }
+      )
+    modename <- sprintf("cvfold_%s_%03d", cv_mode, len_cvi)
+    rset_stcv <- rsample::manual_rset(list_split_dfs, modename)
+    return(rset_stcv)
+}
+
+
+#' Attach XY coordinates to a data frame
+#'
+#' This function attaches XY coordinates to a data frame based on a spatial
+#' object containing the coordinates. It performs a left join operation to
+#' match the coordinates with the corresponding locations in the data frame.
+#' @family Pipeline utility
+#' @param data_full The full data frame to which XY coordinates will
+#'   be attached.
+#' @param data_sf The spatial object containing the XY coordinates.
+#' @param locs_id The column name in the spatial object that represents the
+#'   location identifier.
+#' @param time_id The column name in the data frame that represents the time
+#'   identifier.
+#'
+#' @returns A data frame with the XY coordinates attached.
+#'
+#' @examples
+#' # Create a data frame
+#' data_full <- data.frame(site_id = c("A", "B", "C"),
+#'                         time = c("2022-01-01", "2022-01-02", "2022-01-03"))
+#'
+#' # Create a spatial object with XY coordinates
+#' data_sf <- sf::st_as_sf(data.frame(site_id = c("A", "B", "C"),
+#'                                    lon = c(1, 2, 3),
+#'                                    lat = c(10, 20, 30)))
+#'
+#' # Attach XY coordinates to the data frame
+#' attach_xy(data_full, data_sf, locs_id = "site_id", time_id = "time")
+#' @importFrom sf st_coordinates
+#' @importFrom stats setNames
+#' @importFrom collapse join
+#' @export
+attach_xy <-
+  function(
+    data_full,
+    data_sf,
+    locs_id = "site_id",
+    time_id = "time"
+  ) {
+    data_sfd <- sf::st_coordinates(data_sf)
+    data_sf <- data_sf[[locs_id]]
+    data_sfd <- data.frame(site_id = data_sf, data.frame(data_sfd))
+    data_sfd <- stats::setNames(data_sfd, c(locs_id, "lon", "lat"))
+
+    data_full_lean <- data_full[, c(locs_id, time_id), with = FALSE]
+    data_full_lean <-
+      collapse::join(
+        data_full_lean, data_sfd, on = locs_id, how = "left"
+      )
+    return(data_full_lean)
+  }
+
+
+
+#' Generate spatio-temporal cross-validation index with anticlust
+#'
+#' This function generates a spatio-temporal cross-validation index
+#' based on the anticlust package. The function first calculates the
+#' spatial clustering index using the balanced_clustering function as
+#' default, and if `cv_pairs` is provided,
+#' it generates rank-based pairs based on the proximity between
+#' cluster centroids.
+#' @family Base Learner
+#' @param data data.table with X, Y, and time information.
+#' @param target_cols character(3). Names of columns for X, Y, and time.
+#'   Default is c("lon", "lat", "time").
+#'   Order insensitive.
+#' @param cv_fold integer(1). Number of folds for cross-validation.
+#'   default is 5L.
+#' @param cv_pairs integer(1). Number of pairs for cross-validation.
+#'   This value will be used to generate a rank-based pairs
+#'   based on `target_cols` values.
+#' @param cv_mode character(1). Spatiotemporal cross-validation indexing
+#' @note nrow(data) %% cv_fold should be 0.
+#' @returns rsample::manual_rset() object.
+#' @author Insang Song
+#' @importFrom rsample manual_rset
+#' @importFrom anticlust balanced_clustering
+#' @importFrom dplyr group_by summarize across ungroup all_of
+#' @export
+generate_cv_index <-
+  function(
+    data,
+    target_cols = c("lon", "lat", "time"),
+    cv_fold = 5L,
+    cv_pairs = NULL,
+    cv_mode = "spt"
+  ) {
+    if (length(target_cols) != 3) {
+      stop("Please provide three target columns.")
+    }
+    data <- data[, target_cols, with = FALSE]
+    data$time <- as.numeric(data$time)
+    index_cv <- anticlust::balanced_clustering(data, cv_fold)
+    cv_index <- NULL
+    ref_list <- NULL
+    if (!is.null(cv_pairs)) {
+      data_ex <- data
+      data_ex$cv_index <- index_cv
+      data_exs <- data_ex |>
+        dplyr::group_by(cv_index) |>
+        dplyr::summarize(
+          dplyr::across(dplyr::all_of(target_cols), ~mean(as.numeric(.x)))
+        ) |>
+        dplyr::ungroup()
+
+      data_exs$cv_index <- NULL
+      data_exd <- as.vector(dist(data_exs))
+      data_exd_colid <-
+        rep(seq_len(max(index_cv) - 1), seq(max(index_cv) - 1, 1, -1))
+      data_exd_rowid <- rep(seq(2, max(index_cv)), seq_len(max(index_cv) - 1))
+      search_idx <- which(rank(-data_exd) <= cv_pairs)
+      ref_list <-
+        Map(c, data_exd_rowid[search_idx], data_exd_colid[search_idx])
+    }
+
+    rset_cv <-
+      convert_cv_index_rset(
+        index_cv, data, ref_list = ref_list, cv_mode = cv_mode
+      )
+    return(rset_cv)
+  }
+
+#' Get Divisors
+#' @family Miscellaneous
+#' @param x integer(1). A positive integer.
+#' @returns A vector of divisors of x.
+#' @export
+divisor <-
+  function(x) {
+    xv <- seq_len(x)
+    xv[which(x %% xv == 0)]
   }

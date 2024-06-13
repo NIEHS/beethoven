@@ -11,7 +11,6 @@ fit_base_elnet(
   xvar = seq(6, ncol(dt_imputed)),
   vfold = 5L,
   nthreads = 16L,
-  cv_config,
   ...
 )
 }
@@ -28,9 +27,10 @@ fit_base_elnet(
 
 \item{nthreads}{The number of threads to be used. Default is 16L.}
 
-\item{cv_config}{The cross-validation configuration. To be added.}
-
 \item{...}{Additional arguments to be passed.}
+
+\item{folds}{pre-generated rset object. If NULL, it should be
+numeric to be used in \link[rsample:vfold_cv]{rsample::vfold_cv}.}
 }
 \value{
 The fitted workflow.
@@ -45,6 +45,7 @@ Spatiotemporal cross-validation strategy is not yet implemented.
 \seealso{
 Other Base Learner: 
 \code{\link{fit_base_brulee}()},
-\code{\link{fit_base_xgb}()}
+\code{\link{fit_base_xgb}()},
+\code{\link{generate_cv_index}()}
 }
 \concept{Base Learner}

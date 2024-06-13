@@ -1,73 +1,43 @@
 
 target_baselearner <-
   list(
-		targets::tar_target(
-			cv_config,
-			configure_cv(
-				covars = covariates_final
-			)
-		)
-		,
-		targets::tar_target(
-			base_prep_rf,
-			base_learner_prep(
-				learner = "randomforest",
-				data = data_full,
-				dependent_name = mr("name_dep"),
-				independent_name = file.path(mr("dir_output"), mr("file_name_indep"))
-			)
-		)
-		,
-		targets::tar_target(
-			base_prep_xgboost,
-			base_learner_prep(
-				learner = "xgboost",
-				data = data_full,
-				dependent_name = mr("name_dep"),
-				independent_name = file.path(mr("dir_output"), mr("file_name_indep"))
-			)
-		)
-		,
-		targets::tar_target(
-			base_prep_cnn,
-			base_learner_prep(
-				learner = "cnn",
-				data = data_full,
-				dependent_name = mr("name_dep"),
-				independent_name = file.path(mr("dir_output"), mr("file_name_indep"))
-			)
-		)
-		,
-		targets::tar_target(
-			base_fit_rf,
-			base_learner_cv_fit(
-				"randomforest",
-				ymat = base_prep_rf$ymat,
-				xmat = base_prep_rf$xmat,
-				cv_index = cv_config$lblto,
-				fun = base_learner_fit_ranger
-			)
-		)
-		,
-		targets::tar_target(
-			base_fit_xgboost,
-			base_learner_cv_fit(
-				"xgboost",
-				ymat = base_prep_xgboost$ymat,
-				xmat = base_prep_xgboost$xmat,
-				cv_index = cv_config$lblto,
-				fun = base_learner_fit_xgboost
-			)
-		)
-		,
-		targets::tar_target(
-			base_fit_cnn,
-			base_learner_cv_fit(
-				"cnn",
-				ymat = base_prep_cnn$ymat,
-				xmat = base_prep_cnn$xmat,
-				cv_index = cv_config$lblto,
-				fun = base_learner_fit_cnn
-			)
-		)
+    targets::tar_target(
+      name = dt_feat_calc_xyt,
+      attach_xy(dt_feat_calc_imputed, sf_feat_proc_aqs_sites)
+    )
+    ,
+    targets::tar_target(
+      name = cv_config,
+      command = generate_cv_index(
+        data = dt_feat_calc_xyt,
+        cv_fold = 7L,
+        cv_pairs = 10L
+      )
+    )
+    ,
+    targets::tar_target(
+      wf_feat_fit_xgb,
+      fit_base_xgb(
+        dt_feat_calc_imputed,
+        folds = cv_config
+      )
+    )
+    ,
+    targets::tar_target(
+      wf_feat_fit_mlp,
+      fit_base_brulee(
+        dt_feat_calc_imputed,
+        folds = cv_config
+      )
+    )
+    ,
+    targets::tar_target(
+      wf_feat_fit_elnet,
+      fit_base_elnet(
+        dt_feat_calc_imputed,
+        folds = cv_config,
+        nthreads = 32L
+      ),
+      resources = set_slurm_resource(ncpus = 32L, memory = 8L)
+    )
   )

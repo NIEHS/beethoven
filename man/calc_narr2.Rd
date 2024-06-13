@@ -41,6 +41,7 @@ a raster dataset.
 Other Calculation: 
 \code{\link{calc_geos_strict}()},
 \code{\link{calc_gmted_direct}()},
+\code{\link{calculate}()},
 \code{\link{inject_calculate}()},
 \code{\link{inject_geos}()},
 \code{\link{inject_gmted}()},

@@ -41,6 +41,7 @@ Suggested number of \code{ncpus} is more than 1 for typical multicore R tasks.
 }
 \seealso{
 Other Pipeline utility: 
+\code{\link{attach_xy}()},
 \code{\link{df_params}()},
 \code{\link{feature_raw_download}()},
 \code{\link{load_modis_files}()},

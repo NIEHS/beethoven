@@ -17,6 +17,7 @@ Get data.frame of function parameters
 }
 \seealso{
 Other Pipeline utility: 
+\code{\link{attach_xy}()},
 \code{\link{feature_raw_download}()},
 \code{\link{load_modis_files}()},
 \code{\link{read_locs}()},
