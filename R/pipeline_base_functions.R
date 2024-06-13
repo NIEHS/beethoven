@@ -2193,11 +2193,6 @@ par_nest <-
   }
 
 
-## base & meta learner fitting
-# strategy:
-# random subsample (~30%) ; row based
-# P times...
-
 #' Base learner: Multilayer perceptron with brulee
 #'
 #' Multilayer perceptron model with different configurations of
