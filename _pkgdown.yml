@@ -1,0 +1,59 @@
+# _pkgdown.yml
+url: https://niehs.github.io/beethoven/
+template:
+  bootstrap: 5
+  bootswatch: minty
+
+navbar:
+  structure:
+    left:  [reference, articles, search]
+    right: [github]
+
+reference:
+- subtitle: Utility
+  desc: Cleaning and adjusting data structure for succinct pipeline
+  contents:
+  - has_keyword("Utility")
+
+- subtitle: Calculation
+  desc: Main calculation functions for branching, parallel processing, and parameter injection
+  contents:
+  - has_keyword("Calculation")
+
+- subtitle: Post-calculation
+  desc: Merging calculation results
+  contents:
+  - has_keyword("Post-calculation")
+
+
+- subtitle: Base learner
+  desc: Fitting base learner and helper functions
+  contents:
+  - has_keyword("Baselearner")
+
+- subtitle: Meta learner
+  desc: Fitting meta learner
+  contents:
+  - contains("meta_learner")
+
+- subtitle: Miscellaneous
+  desc: Miscellaneous functions for general use
+  contents:
+  - has_keyword("Miscellaneous")
+
+
+articles:
+- title: List of features
+  desc: Features (covariates) used in beethoven
+  contents:
+  - list_features
+
+- title: Downloading EPA Daily Data
+  desc: Download AQS data from EPA
+  contents:
+  - epa_download
+
+- title: Generate prediction points
+  desc: Generate 8 millions of prediction points
+  contents:
+  - prediction_points

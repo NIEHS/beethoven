@@ -1,6 +1,6 @@
 Package: beethoven
 Title: Building an Extensible, rEproducible, Test-driven, Harmonized, Open-source, Versioned, ENsemble model for air quality
-Version: 0.1.1
+Version: 0.3.0
 Authors@R: c(
     person("Kyle", "Messier", , "kyle.messier@nih.gov", role = c("aut", "cre"), comment = c(ORCID = "0000-0001-9508-9623")),
     person("Insang", "Song", role = c("aut", "ctb"), comment = c(ORCID = "0000-0001-8732-3256")),
@@ -15,8 +15,57 @@ Authors@R: c(
   )
 Description: Near Real Time air pollution model results and code produced by the SET group. It is fully tested, versioned, and open source and open access.
 Depends: R (>= 4.1.0)
-Imports: dplyr, sf, stats, terra, methods, BART, data.table, httr, rvest, spData, exactextractr, utils, stringr, testthat (>= 3.0.0), doParallel, parallelly, stars, foreach, future, ranger, xgboost, torch
-Suggests: covr, withr, knitr, rmarkdown, sftime, lwgeom, FNN, ggplot2, scatterpie, doRNG
+Imports:
+  dplyr,
+  sf,
+  stats,
+  terra,
+  methods,
+  BART,
+  data.table,
+  future,
+  targets,
+  tune (>= 1.2.1),
+  rlang,
+  rsample,
+  tidyr,
+  tidyselect,
+  yardstick,
+  workflows,
+  recipes,
+  missRanger,
+  parsnip,
+  future.apply,
+  future.batchtools,
+  anticlust,
+  qs,
+  stringi,
+  collapse,
+  tigris,
+  graphics
+Suggests:
+  testthat (>= 3.0.0),
+  covr,
+  withr,
+  tarchetypes,
+  tidymodels,
+  xgboost,
+  torch,
+  brulee,
+  glmnet,
+  knitr,
+  rmarkdown,
+  stars,
+  sftime,
+  lwgeom,
+  FNN,
+  ggplot2,
+  doRNG,
+  DT,
+  scatterplot3d,
+  furrr,
+  quarto
+Remotes: NIEHS/amadeus, NIEHS/chopin
 Encoding: UTF-8
 VignetteBuilder: knitr, rmarkdown
 Roxygen: list(markdown = TRUE)
@@ -24,5 +73,5 @@ RoxygenNote: 7.3.1
 Config/Needs/website: tidyverse/tidytemplate
 Config/testhat/edition: 3
 License: MIT + file LICENSE
-URL: https://github.com/Spatiotemporal-Exposures-and-Toxicology/beethoven, 
-https: //spatiotemporal-exposures-and-toxicology.github.io/beethoven/
+URL: https://github.com/NIEHS/beethoven, 
+https: //NIEHS.github.io/beethoven/
