@@ -40,7 +40,6 @@ and tidymodels. With proper settings, users can utilize graphics
 processing units (GPU) to speed up the training process.
 }
 \note{
-Spatiotemporal cross-validation strategy is not yet implemented.
 tune package should be 1.2.0 or higher.
 }
 \keyword{Baselearner}

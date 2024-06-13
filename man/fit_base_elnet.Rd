@@ -41,6 +41,6 @@ Elastic net model is fitted at the defined rate (\code{r_subsample}) of
 the input dataset by grid search.
 }
 \note{
-Spatiotemporal cross-validation strategy is not yet implemented.
+tune package should be 1.2.0 or higher.
 }
 \keyword{Baselearner}
