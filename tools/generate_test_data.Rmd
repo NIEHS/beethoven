@@ -19,17 +19,15 @@ knitr::opts_chunk$set(
   fig.height = 6,
   res = "retina"
 )
-if (!require(NRTAPmodel)) {
-  pak::pak("Spatiotemporal-Exposures-and-Toxicology/NRTAPmodel@isong-calc-covars")
-  require(NRTAPmodel)
+if (!require(amadeus)) {
+  remotes::install_github("NIEHS/amadeus")
+  require(amadeus)
 }
 
-pkgs <- c("data.table", "sf", "terra", "sftime", "dplyr", "stars", "NRTAPmodel")
-invisible(sapply(pkgs, library, character.only = TRUE, quietly = TRUE))
+pkgs <- c("data.table", "sf", "terra", "sftime", "dplyr", "stars", "amadeus")
+invisible(vapply(pkgs, require, logical(1), character.only = TRUE, quietly = TRUE))
 options(sf_use_s2 = FALSE)
 
-# source("../R/manipulate_spacetime_data.R")
-# source("../R/calculate_covariates.R")
 ```
 
 
@@ -127,7 +125,7 @@ subset_modis <-
 
 
 allfiles_hvgrid <- do.call(c, moddirs)
-allfiles_hvgrid_to <- paste0("/ddn/gs1/home/songi2/projects/NRTAPModel/tests/testdata/modis/", substr(allfiles_hvgrid, 78, 122))
+allfiles_hvgrid_to <- paste0("tests/testdata/modis/", substr(allfiles_hvgrid, 78, 122))
 
 file.copy(allfiles_hvgrid, allfiles_hvgrid_to)
 
@@ -149,7 +147,7 @@ describe(mod09files[1], sds = TRUE)
 subset_modis(moddirs[[2]][1], 2:8, testdatadir, "MOD09GA_A2018241_h10v05.cdf")
 subset_modis(moddirs[[2]][2], 2:8, testdatadir, "MOD09GA_A2018241_h11v05.nc")
 
-rast("/ddn/gs1/home/songi2/projects/NRTAPModel/tests/testdata/modis/MOD09GA_A2018241_h10v05.nc")
+rast("tests/testdata/modis/MOD09GA_A2018241_h10v05.nc")
 
 subset_modis(mod09files[17], 2:8, tempdir(), "mod09test.nc", extent = ext(rast(mod09files[17])))
 m09r <- rast(mod09files[1], lyrs = 2:7)
@@ -185,7 +183,7 @@ run_template <- ""
 
 
 ```{r mod06}
-dirheader <- "/ddn/gs1/home/songi2/projects/NRTAPModel/input/modis/raw/61/MOD06_L2/2018/241/"
+dirheader <- "input/modis/raw/61/MOD06_L2/2018/241/"
 kax <-
   c("MOD06_L2.A2018241.0250.061.2018241235711.hdf",
     "MOD06_L2.A2018241.1630.061.2018242015515.hdf")
@@ -219,29 +217,5 @@ luna::getNASA(
   server="LAADS",
   limit=100000, overwrite=TRUE
 )
-
-```
-
-
-```{r}
-# dodo <- modis_preprocess_vnp46(path_vnp46, "2018-08-13", 3L,           read.csv("tests/testthat/../../inst/extdata/modis_vnp46_tiles.csv"))
-# modis_worker(dodo, "2018-08-13", sf::st_as_sf(site_faux), name_extracted = "MOD_NILTL_0_00000", product = "VNP46A2")
-# doxa <- modis_mosaic_mod06(path_mod06, "2021-08-15")
-# modis_worker(doxa, "2018-08-13", sf::st_as_sf(site_faux), name_extracted = c("MOD_NIDTL_0_01000", "MOD_NILTL_0_01000"), product = "MOD06_L2", radius = 1000L)
-# dols <- modis_get_vrt(path_mod11, "MOD11A1", "2021-08-15")
-# modis_worker(dols, "2021-08-15", sf::st_as_sf(site_faux), name_extracted = c("MOD_NIDTL_0_01000", "MOD_NILTL_0_01000"), product = "MOD11A1", radius = 1000L)
-# modis_worker(dols, "2021-08-15", sf::st_as_sf(site_faux), name_extracted = c("MOD_NIDTL_0_00000", "MOD_NILTL_0_00000"), product = "MOD11A1", radius = 0L)
-# modis_worker(dols, "2021-08-15", sf::st_as_sf(site_faux), name_extracted = c("MOD_NIDTL_0_10000", "MOD_NILTL_0_10000"), product = "MOD11A1", radius = 10000L)
-# modis_worker(dols, "2021-08-15", sf::st_as_sf(site_faux), name_extracted = c("MOD_NIDTL_0_50000", "MOD_NILTL_0_50000"), product = "MOD11A1", radius = 50000L)
-
-# dols <- modis_get_vrt(path_mod11, "MOD11A1", "2021-08-15")
-# dolsnan <- dols
-# dolsnan[is.nan(dolsnan)] <- 0L
-# modis_worker(dols, "2021-08-15", sf::st_as_sf(site_faux), name_extracted = c("MOD_NIDTL_0_01000", "MOD_NILTL_0_01000"), product = "MOD11A1", radius = 1000L)
-# plot(dols)
-# site_fbuf <- terra::buffer(site_faux, 30000)
-# site_fbuf <- terra::project(site_fbuf, crs(dols))
-# plot(site_fbuf, add = T)
-
 
 ```

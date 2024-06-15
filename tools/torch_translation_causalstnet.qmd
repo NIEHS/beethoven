@@ -1,0 +1,865 @@
+---
+title: STConvNet Workbench
+author: Insang Song
+date: today
+output:
+    quarto::html_document
+---
+
+
+
+```{python}
+import numpy as np
+import matplotlib.pyplot as plt
+# import torch
+import geopandas as gpd
+import geoplot
+import polars as pl
+
+aq = pl.read_csv("./data/microsoft_urban_air_data/airquality.csv", \
+                 null_values = "NULL", try_parse_dates = True, infer_schema_length = 100_000)
+city = pl.read_csv("./data/microsoft_urban_air_data/city.csv", \
+                 null_values = "NULL", try_parse_dates = True, infer_schema_length = 100_000)
+distr = pl.read_csv("./data/microsoft_urban_air_data/district.csv", \
+                 null_values = "NULL", try_parse_dates = True, infer_schema_length = 100_000)
+met = pl.read_csv("./data/microsoft_urban_air_data/meteorology.csv", \
+                 null_values = "NULL", try_parse_dates = True, infer_schema_length = 100_000)
+station = pl.read_csv("./data/microsoft_urban_air_data/station.csv", \
+                 null_values = "NULL", try_parse_dates = True, infer_schema_length = 100_000)
+fore = pl.read_csv("./data/microsoft_urban_air_data/weatherforecast.csv", \
+                 null_values = "NULL", try_parse_dates = True, infer_schema_length = 1_000_000)
+```
+
+```{python}
+import shapely as sply
+city_gdf = gpd.GeoDataFrame(city, \
+    geometry = sply.points(coords = city[["longitude", "latitude"]]), \
+        crs = "EPSG:4326")
+city_gdf
+
+
+fig, ax = plt.subplots(figsize = (8, 8))
+geoplot.pointplot(city_gdf, figsize = (5, 5), ax = ax)
+fig.show()
+
+station_gdf = gpd.GeoDataFrame(station, \
+    geometry = sply.points(coords = station[["longitude", "latitude"]]), \
+    crs = "EPSG:4326")
+
+fig, ax = plt.subplots(figsize = (8, 8))
+geoplot.pointplot(station_gdf, ax = ax)
+fig.show()
+
+
+```
+
+
+```{r}
+library(sf)
+library(dplyr)
+library(tidyr)
+sf_use_s2(F)
+
+library(torch)
+library(coro)
+library(luz)
+library(zeallot)
+
+
+SimpleRNN <- nn_module(
+  classname = "SimpleRNN",
+  
+  initialize = function(input_size = config$input_size, hidden_size = config$hidden_size, output_size = 1, num_layers = 1, dropout = 0.25) {
+    self$hidden_size <- hidden_size
+    self$rnn <- nn_rnn(
+        input_size = input_size,
+        hidden_size = hidden_size,
+        num_layers = num_layers,
+        nonlinearity = "relu",
+        dropout = dropout,
+        batch_first = TRUE
+    )
+    self$linear <- nn_linear(hidden_size, output_size)
+  },
+  
+  forward = function(x) {
+    output <- self$rnn(x)[[1]]
+    pred <- self$linear(output[ , nrow(output), , drop = TRUE])
+    return(nn_flatten(pred))
+  },
+  
+  init_hidden = function() {
+    return(torch::torch_randn(1, 24, self$hidden_size))
+  }
+)
+
+SimpleRNN(24, 32, 1, 1, 0.25)
+
+
+SimpleGRU <- nn_module(
+  classname = "SimpleGRU",
+  
+  initialize = function(input_size, hidden_size = config$hidden_size, output_size = 1, num_layers = 1, dropout = 0.25) {
+    self$hidden_size <- hidden_size
+    self$gru <- nn_gru(
+        input_size = input_size,
+        hidden_size = hidden_size,
+        num_layers = num_layers,
+        dropout = dropout,
+        batch_first = TRUE
+    )
+    self$linear <- nn_linear(hidden_size, output_size)
+  },
+  
+  forward = function(x, hidden = NULL) {
+    
+    output <- torch::nn_gru(x, hidden)$output
+    hidden <- torch::nn_gru(x, hidden)$h_n
+    pred <- torch::nn_linear(output[, -1, ])
+    return(list(output = pred, h_n = hidden))
+  },
+
+  init_hidden = function() {
+    return(torch::torch_randn(1, 24, self$hidden_size))
+  }
+)
+
+SimpleGRU(24, 32, 1, 1, 0.25)
+
+
+SimpleLSTM <- nn_module(
+  classname = "SimpleLSTM",
+  
+  initialize = function(input_size, hidden_size, output_size = 1, num_layers = 1, dropout = 0.25) {
+    self$hidden_size <- hidden_size
+    self$lstm <- nn_lstm(
+        input_size = input_size,
+        hidden_size = hidden_size,
+        num_layers = num_layers,
+        #dropout = dropout,
+        batch_first = TRUE
+    )
+    self$linear <- nn_linear(hidden_size, output_size)
+  },
+  
+  forward = function(x) {
+    # h <- torch::torch_zeros(x$size()[[1]], self$lstm$hidden_size)
+    # c <- torch::torch_zeros(x$size()[[1]], self$lstm$hidden_size)
+    out <- list()
+    # for (i in seq_len(x$size()[[2]])) {
+    #   out[[i]] <- self$lstm$forward(x[, i, ]) %>%
+    #     as.array %>%
+    #     torch_tensor(., dtype = torch_float32())
+    # }
+    out <- self$lstm(x)[[1]]
+    ## check above
+    # return(pred)
+    # out <- torch::torch_stack(out, dim = 1)
+    self$linear(out[, x$size(2), ])
+    
+  },
+
+  init_hidden = function() {
+    return(torch::torch_randn(1, 24, self$hidden_size))
+  }
+)
+
+SimpleLSTM(24, 12, 1, 1, 0.25)$forward(torch_randn(24, 12))
+
+TCN <- nn_module(
+  classname = "TCN",
+  
+  initialize = function(input_size, output_size, num_channels, kernel_size, dropout = 0.2) {
+    
+    self$tcn <- TemporalConvNet(input_size, num_channels, kernel_size, dropout = dropout)
+    self$linear <- nn_linear(num_channels[length(num_channels)], output_size)
+  },
+  
+  forward = function(x) {
+    output <- torch::torch_transpose(self$tcn(torch::torch_transpose(x, 1, 2)), 1, 2)
+    self$linear(output[ , output$size(1), ])
+    
+  }
+)
+
+TCN(32, 16, c(16, 48, 64, 256, 128, 32, 4), 2, 0.25)
+
+
+# remove the remnants of convolutional layers
+Chomp1d <- nn_module(
+    classname = "Chomp1d",
+
+    initialize = function(chomp_size) {
+        self$chomp_size <- chomp_size
+    },
+
+    forward = function(x) {
+        x[, , 1:(x$size(3) - self$chomp_size)]
+    }
+)
+
+
+TemporalBlock <- nn_module(
+  classname = "TemporalBlock",
+  
+  initialize = function(n_inputs, n_outputs, kernel_size, stride, dilation, padding, dropout = 0.2) {
+    wn1 <- torch::nn_utils_weight_norm$new(name = "weight1", dim = 1)
+    wn2 <- torch::nn_utils_weight_norm$new(name = "weight2", dim = 1)
+    self$conv1 <- wn1$apply(nn_conv1d(n_inputs, n_outputs, kernel_size, stride = stride, padding = padding, dilation = dilation))
+    self$chomp1 <- Chomp1d(padding)
+    self$relu1 <- nn_relu()
+    self$dropout1 <- nn_dropout(dropout)
+    
+    self$conv2 <- wn2$apply(nn_conv1d(n_outputs, n_outputs, kernel_size, stride = stride, padding = padding, dilation = dilation))
+    self$chomp2 <- Chomp1d(padding)
+    self$relu2 <- nn_relu()
+    self$dropout2 <- nn_dropout(dropout)
+    
+    self$net <- nn_sequential(
+        
+            self$conv1, self$chomp1, self$relu1, self$dropout1,
+            self$conv2, self$chomp2, self$relu2, self$dropout2)
+    
+
+    if (n_inputs != n_outputs) {
+      self$downsample <- nn_conv1d(n_inputs, n_outputs, 1)
+    } else {
+      self$downsample <- NULL
+    }
+    
+    self$relu <- nn_relu()
+    self$init_weights()
+  },
+  
+  init_weights = function() {
+    # self$conv1$weight <- 
+    torch::nn_init_normal_(self$conv1$weight, 0, 0.01)
+    # self$conv2$weight <- 
+    torch::nn_init_normal_(self$conv2$weight, 0, 0.01)
+    if (!is.null(self$downsample)) {
+      # self$downsample$weight <- 
+      torch::nn_init_normal_(self$downsample$weight, 0, 0.01)
+    }
+  },
+  
+  forward = function(x) {
+    out <- self$net(x)
+    res <- if (is.null(self$downsample)) x else self$downsample(x)
+    self$relu(out + res)
+  }
+)
+
+ktb <- TemporalBlock(12, 12, 4, 3, 2, 3, 0.1)
+ktb(torch_randn(12, 12, 4))
+
+TemporalConvNet <- nn_module(
+  classname = "TemporalConvNet",
+  
+  initialize = function(num_inputs, num_channels, kernel_size = 2, dropout = 0.2) {
+    
+    layers <- list()
+    num_levels <- length(num_channels)
+    for (i in seq_len(num_levels)) {
+      dilation_size <- 2 ** (i - 1)
+      in_channels <- if (i == 1) num_inputs else num_channels[[i - 1]]
+      out_channels <- num_channels[[i]]
+      layers <- c(layers, TemporalBlock(in_channels, out_channels, kernel_size, stride = 1, dilation = dilation_size,
+                                            padding = (kernel_size - 1) * dilation_size, dropout = dropout))
+    }
+    
+    # unlist(layers)?
+    self$network <- nn_module_list(layers)
+  },
+  
+  forward = function(x) {
+    self$network(x)
+  }
+)
+
+TemporalBlock(64, 256, 5, 3, 2, 1, 0.25) %>%
+torch::optim_adam(.$parameters, lr = 0.001)
+TemporalConvNet(64, c(64, 128, 256, 512), 5, 0.25)
+
+
+
+STCN <- torch::nn_module(
+    initialize = function(input_size, in_channels, output_size, num_channels, kernel_size, dropout) {
+        self$conv <- torch::nn_sequential(
+            torch::nn_conv2d(in_channels=in_channels, out_channels=64, kernel_size=1, stride=1, padding=0),
+            torch::nn_batch_norm2d(64),
+            torch::nn_relu(),
+            torch::nn_conv2d(in_channels=64, out_channels=1, kernel_size=1, stride=1, padding=0),
+            torch::nn_batch_norm2d(1),
+            torch::nn_relu()
+        )
+        self$tcn <- TemporalConvNet(input_size, num_channels, kernel_size, dropout = dropout)
+        self$linear <- torch::nn_linear(num_channels[length(num_channels)], output_size)
+    },
+
+    forward = function(x) {
+        #conv_out <- 
+        self$conv(x)$squeeze(1) %>%
+          self$tcn() %>%
+          self$linear()
+        # output <- torch::torch_transpose(self$tcn(torch::torch_transpose(conv_out, 1, 2)), 1, 2)
+        # output <- self$tcn(conv_out)
+        # x <- self$linear(output[, output$size(1), ])
+        # x
+    }
+)
+
+kk <- STCN(12, 18, 32, c(50, 50, 50, 50), 4, 0.25)
+
+```
+
+```{python}
+#| eval: FALSE
+exvec = [1, 3, 4, 5]
+# the first last
+exvec[-1]
+
+```
+
+```{r torch-config}
+
+config <- list(
+  rand_seed = 2024,
+  model_name = 'STCN',  # ['RNN', 'GRU', 'LSTM', 'TCN', 'STCN']
+  device = 'cpu',  # 'cpu' or 'cuda'
+  input_size = 12,
+  hidden_size = 32,
+  output_size = 1,
+  num_layers = 4,
+  nlevels = 4,
+  kernel_size = 4,
+  dropout = 0.25,
+  in_channels = 18,
+
+  batch_size = 1,
+  learning_rate = 1e-3,
+  n_epochs = 50
+)
+
+```
+
+
+```{r data_process_port}
+pkgs <- c("data.table")
+invisible(sapply(pkgs, library, character.only = TRUE, quietly = TRUE))
+DATA_DIR <- "../../github/ST-CausalConvNet"
+
+# extract station id list in Beijing
+df_airq <- fread(file.path(DATA_DIR, "data/microsoft_urban_air_data/airquality.csv"))
+station_id_list <- unique(df_airq$station_id)[1:36]     # first 36 stations are in Beijing -- Why 36?
+print(station_id_list)
+    
+# Calculate the influence degree (defined as the Pearson correlation coefficient) between the center station and other stations
+r_thred <- 0.85
+center_station_id <- 1013
+
+
+
+#' This function generates tensors for training a spatio-temporal causal convolutional neural network.
+#' @param center_station_id The ID of the center station.
+#' @param station_id_list A list of station IDs.
+#' @param r_thred The correlation threshold.
+#' @note Assume that the data is stored in the `./data/stations_data` directory.
+#' @returns A list containing the input tensor (x) and the target tensor (y).
+make_tensors <- function(
+    center_station = center_station_id,
+    station_list = station_id_list,
+    r_thre = r_thred
+) {
+    station_id_related_list <- c()
+    df_one_station <-
+      fread(file.path(DATA_DIR, paste0("data/stations_data/df_station_", center_station, ".csv")))
+    v_list_1 <- df_one_station$PM25_Concentration
+    for (station_id_other in station_list) {
+        df_one_station_other <-
+          fread(file.path(DATA_DIR, paste0("data/stations_data/df_station_", station_id_other, ".csv")))
+        v_list_2 <- df_one_station_other$PM25_Concentration
+        r <- cor(v_list_1, v_list_2)
+        if (r > r_thre) {
+            station_id_related_list <- c(station_id_related_list, station_id_other)
+        }
+        print(paste(center_station, station_id_other, round(r, 3)))
+    }
+    print(sprintf("%d %s", length(station_id_related_list), station_id_related_list))
+    
+    # generate x and y
+    # x_shape: [example_count, num_releated, seq_step, feat_size]
+    # y_shape: [example_count,]
+    print(paste('Center station:', center_station))
+    print(paste('Related stations:', station_id_related_list))
+    feat_names <- c('PM25_Concentration', 'PM10_Concentration', 'NO2_Concentration', 'CO_Concentration', 'O3_Concentration', 'SO2_Concentration',
+                  'weather', 'temperature', 'pressure', 'humidity', 'wind_speed', 'wind_direction')
+    x_length <- 24
+    y_length <- 1
+    y_step <- 1
+    x <- list()
+    y <- list()
+    for (station_id in station_id_related_list) {
+        df_one_station <-
+          fread(file.path(DATA_DIR, paste0("data/stations_data/df_station_", station_id, ".csv")))
+        x_one <- list()
+        for (start_id in seq(1, nrow(df_one_station) - x_length - y_length + 1 - y_step + 1, y_length)) {
+            x_data <- as.matrix(df_one_station[start_id:(start_id + x_length - 1), feat_names, with = FALSE])
+            y_list <- df_one_station[(start_id + x_length + y_step - 1):(start_id + x_length + y_length + y_step - 2), PM25_Concentration, with = TRUE]
+            if (any(is.na(x_data)) || any(is.na(y_list)) || is.null(x_data)) {
+                next
+            }
+            x_one <- c(x_one, torch_tensor(x_data))
+            if (station_id == center_station_id) {
+                y <- c(y, mean(y_list))
+            }
+        }
+        if (length(x_one) <= 0) {
+            next
+        }
+        x_one <- torch_stack(x_one)
+        x <- c(x, x_one)
+        print(paste('station_id: ', station_id, ' x_shape: (', paste(dim(x_one), collapse = ", "), ")", sep = ""))
+    }
+
+    xx <- torch::torch_stack(x, dim = 1)
+    xx <- torch::torch_transpose(xx, 1, 2)
+    y <- torch::torch_tensor(unlist(y))
+    
+    print(paste('x_shape:', paste(dim(x), sep = ", "), 'y_shape:', dim(y)))
+    return(list(xtensor = xx, ytensor = y))
+}
+
+```
+
+
+```{r utils}
+get_ids_for_tvt <- function() {
+    train_ids <- c()
+    valid_ids <- c()
+    test_ids <- c()
+    days_in_months <- c(31, 30, 31, 31, 30, 31, 30, 31, 31, 28, 31, 30-1)  # May to April
+    start_id <- 1
+    for (i in seq_along(days_in_months)) {
+        days <- days_in_months[i]
+        split_id_0 <- start_id
+        split_id_1 <- start_id + as.integer(days * 24 * 0.6)
+        split_id_2 <- start_id + as.integer(days * 24 * 0.8)
+        split_id_3 <- start_id + as.integer(days * 24)  - 1
+        train_ids <- c(train_ids, seq(split_id_0, split_id_1, 1))
+        valid_ids <- c(valid_ids, seq(split_id_1 + 1, split_id_2, 1))
+        test_ids <- c(test_ids, seq(split_id_2 + 1, split_id_3, 1))
+        start_id <- start_id + as.integer(days * 24)
+    }
+    return(list(train_ids = train_ids, valid_ids = valid_ids, test_ids = test_ids))
+}
+
+
+#' @param x A tensor of shape [example_count, num_releated, seq_step, feat_size].
+#' @param y A tensor of shape [example_count,].
+load_data <- function(x, y) {
+
+    #y <- array(y, dim = c(length(y), 1))
+    if (length(dim(x)) == 3) {
+        #ss <- preprocessing.StandardScaler()
+        for (i in seq(dim(x)[3])) {
+            x[, , i] <- scale(x[, , i])
+        }
+    }
+    ids <- get_ids_for_tvt()
+    x_train <- x[ids$train_ids, , ,]
+    y_train <- y[ids$train_ids]
+    x_valid <- x[ids$valid_ids, , ,]
+    y_valid <- y[ids$valid_ids]
+    x_test <- x[ids$test_ids, , ,]
+    y_test <- y[ids$test_ids]
+
+    print(paste("x_shape:", dim(x), "y_shape:", dim(y)))
+    print(paste("x_train_shape:", dim(x_train), "y_train_shape:", dim(y_train), "x_valid_shape:", dim(x_valid), "y_valid_shape:", dim(y_valid), "x_test_shape:", dim(x_test), "y_test_shape:", dim(y_test)))
+    return(list(x_train = x_train, y_train = y_train, x_valid = x_valid, y_valid = y_valid, x_test = x_test, y_test = y_test))
+}
+
+
+get_param_number <- function(net) {
+    total_num <- sum(sapply(net$parameters, function(p) length(p)))
+    trainable_num <- sum(sapply(net$parameters, function(p) length(p[p$requires_grad])))
+    return(list(total_num = total_num, trainable_num = trainable_num))
+}
+
+
+```
+
+
+
+```{r}
+
+train <- function(
+    net,
+    x_train,
+    y_train,
+    x_valid,
+    y_valid,
+    x_test,
+    y_test,
+    model_name = config$model_name,
+    learning_rate = config$learning_rate,
+    hidden_size = config$hidden_size,
+    epochs = config$n_epochs,
+    batch_size = config$batch_size,
+    plot = FALSE
+) {
+    rmse_train_list <- vector()
+    rmse_valid_list <- vector()
+    mae_valid_list <- vector()
+    y_valid_pred_final <- vector()
+    optimizer <- torch::optim_adam(net$parameters, lr = learning_rate)
+    criterion <- torch::nn_mse_loss()
+    h_state <- NULL
+
+    for (epoch in 1:epochs) {
+        rmse_train <- 0.0
+        cnt <- 0
+        for (start in 1:(length(x_train) - batch_size + 1)) {
+            net$train()
+            progress <- start / (length(x_train) - batch_size + 1)
+
+            # x_input <- torch::torch_tensor(x_train[start:(start + batch_size)], dtype=torch::torch_float32())
+            # y_true <- torch::torch_tensor(y_train[start:(start + batch_size)], dtype=torch::torch_float32())
+            x_input <- x_train[start:(start + batch_size - 1),,,]
+            y_true <- y_train[start:(start + batch_size - 1)]
+
+            if (model_name == 'RNN' || model_name == 'GRU') {
+                y_pred <- net(x_input, h_state)
+                h_state <- y_pred$h_state$data
+            } else {
+                y_pred <- net(x_input)
+            }
+
+            loss <- criterion(y_pred, y_true)
+            optimizer$zero_grad()
+            loss$backward()
+            optimizer$step()
+
+            mse_train_batch <- loss$item
+            rmse_train_batch <- sqrt(mse_train_batch)
+            rmse_train <- rmse_train + mse_train_batch
+            if (start %% ((length(x_train) - batch_size) / 5) == 0) {
+                print(paste('epoch:', epoch, ' progress:', progress * 100, '%  loss:', loss, '  rmse:', rmse_train_batch))
+            }
+            cnt <- cnt + 1
+        }
+        rmse_train <- sqrt(rmse_train / cnt)
+
+        # validation
+        net$eval()
+        y_valid_pred_final <- vector()
+        rmse_valid <- 0.0
+        cnt <- 0
+        for (start in 1:(length(x_valid) - batch_size + 1)) {
+            # x_input_valid <- torch::torch_tensor(x_valid[start:(start + batch_size)], dtype = torch::torch_float32())
+            # y_true_valid <- torch::torch_tensor(y_valid[start:(start + batch_size)], dtype = torch::torch_float32())
+            x_input_valid <- x_valid[start:(start + batch_size - 1),,,]
+            y_true_valid <- y_valid[start:(start + batch_size - 1)]
+
+            if (model_name == 'RNN' || model_name == 'GRU') {
+                y_valid_pred <- net(x_input_valid, h_state)
+            } else {
+                y_valid_pred <- net(x_input_valid)
+            }
+            y_valid_pred_final <- c(y_valid_pred_final, as.vector(y_valid_pred$data))
+            loss_valid <- criterion(y_valid_pred, y_true_valid)$data
+            mse_valid_batch <- as.vector(loss_valid)
+            rmse_valid_batch <- sqrt(mse_valid_batch)
+            rmse_valid <- rmse_valid + mse_valid_batch
+            cnt <- cnt + 1
+        }
+        y_valid_pred_final <- array(y_valid_pred_final, dim = c(-1, 1))
+        rmse_valid <- sqrt(rmse_valid / cnt)
+        mae_valid <- mean(abs(y_valid - y_valid_pred_final))
+
+        rmse_train_list <- c(rmse_train_list, rmse_train)
+        rmse_valid_list <- c(rmse_valid_list, rmse_valid)
+        mae_valid_list <- c(mae_valid_list, mae_valid)
+        
+        # save the best model
+        # if (rmse_valid == min(rmse_valid_list)) {
+        #     saveRDS(net$state_dict, model_save_pth)
+        # }
+
+        print(paste('\n>>> epoch:', epoch, '  RMSE_train:', rmse_train, '  RMSE_valid:', rmse_valid, ' MAE_valid:', mae_valid,
+                    '\n    RMSE_valid_min:', min(rmse_valid_list), '  MAE_valid_min:', min(mae_valid_list), '\n'))
+    }
+}
+
+train_main <- function(
+    model_name = "STCN",
+    fulldata = NULL,
+    dinput = config$input_size,
+    doutput = config$output_size,
+    dhidden = config$hidden_size,
+    nlayers = config$num_layers,
+    nchannels = config$in_channels,
+    nlvs = config$nlevels,
+    dkernel = config$kernel_size,
+    p_dropout = config$dropout,
+    seed = config$rand_seed
+) {
+    # Hyper Parameters
+    set.seed(seed)
+    torch::local_torch_manual_seed(seed)
+
+    # Load data
+    # print('\nLoading data...\n')
+    # x_train, y_train, x_valid, y_valid, x_test, y_test <- utils::load_data(f_x=f_x, f_y=f_y)
+
+    # Generate model
+    #net <- NULL
+    if (model_name == 'RNN') {
+        net <- SimpleRNN(input_size=dinput, hidden_size=dhidden, output_size=doutput, num_layers=nlayers)
+    } else if (model_name == 'GRU') {
+        net <- SimpleGRU(input_size=dinput, hidden_size=dhidden, output_size=doutput, num_layers=nlayers)
+    } else if (model_name == 'LSTM') {
+        net <- SimpleLSTM(input_size=dinput, hidden_size=dhidden, output_size=doutput, num_layers=nlayers)
+    } else if (model_name == 'TCN') {
+        net <- TCN(input_size=dinput, output_size=doutput, num_channels=rep(dhidden, nlvs), kernel_size=dkernel, dropout=p_dropout)
+    } else if (model_name == 'STCN') {
+        net <- STCN(input_size=dinput, in_channels=nchannels, output_size=doutput,
+                            num_channels=rep(dhidden, nlvs), kernel_size=dkernel, dropout=p_dropout)
+    }
+    cat(paste('\n------------ Model structure ------------\nmodel name:', model_name, '\n', #net,
+     '\n-----------------------------------------\n'))
+
+    # Training
+    print('\nStart training...\n')
+    train(
+        net,
+        fulldata$x_train, fulldata$y_train, fulldata$x_valid, fulldata$y_valid, fulldata$x_test, fulldata$y_test)
+}
+
+
+```
+
+```{r}
+prep_tensor <- make_tensors()
+xtss <- load_data(prep_tensor$xtensor, prep_tensor$ytensor)
+
+
+torch::torch_device(config$device)
+xtsstr <-
+  train_main(
+    model_name = "STCN",
+    fulldata = xtss,
+    dinput = config$input_size,
+    doutput = config$output_size,
+    dhidden = config$hidden_size,
+    nlayers = config$num_layers,
+    nchannels = config$in_channels,
+    nlvs = config$nlevels,
+    dkernel = config$kernel_size,
+    p_dropout = config$dropout
+  )
+
+
+stcntest <- STCN(12, 18, 32, c(50, 50, 50, 50), 4, 0.25)
+tcntest <- TCN(12, 32, c(50, 50, 50, 50), 4, 0.25)
+train_main(STCN(12, 18, 32, c(50, 50, 50, 50), 4, 0.25), xtss$x_train, xtss$y_train, xtss$x_valid, xtss$y_valid, xtss$x_test, xtss$y_test)
+train_main("STCN", xtss)
+train_main("TCN", xtss)
+
+```
+
+
+```{r}
+
+net0 <- nn_lstm(12, 32, 2, batch_first = TRUE)
+net0(torch_randn(1, 24, 12))
+
+stcntest(torch_randn(1, 18, 24, 12))
+
+reticulate::py_install("torch")
+
+
+```
+
+
+
+```{r mlp}
+# to use CUDA on the location elsewhere:
+# add export PATH and LD_LIBRARY_PATH to .bashrc or .profile
+# ...cuda11.8
+# Sys.setenv(CUDA="11.8")
+# install_torch()
+# before open R interactive, open . ~/.bashrc or . ~/.profile
+simplenn <-
+nn_module(
+  initialize = function(input_size, hidden_sizes, output_size) {
+    self$input_size <- input_size
+    self$hidden_sizes <- hidden_sizes
+    self$output_size <- output_size
+
+    self$mlp <- nn_sequential(
+      nn_linear(input_size, hidden_sizes[1]),
+      nn_relu(),
+      nn_linear(hidden_sizes[1], hidden_sizes[2]),
+      nn_relu(),
+      nn_linear(hidden_sizes[2], hidden_sizes[3]),
+      nn_relu(),
+      nn_linear(hidden_sizes[3], hidden_sizes[4]),
+      nn_relu(),
+      nn_linear(hidden_sizes[4], output_size)
+    )
+
+
+  },
+  forward = function(x) {
+    self$mlp(x)
+  }
+)
+
+
+simplecnn <-
+nn_module(
+  initialize = function(input_size, output_size) {
+    self$input_size <- input_size
+    self$output_size <- output_size
+
+    self$cnn <- nn_sequential(
+      nn_conv2d(input_size, 32, 3, padding = 1),
+      nn_relu(),
+      nn_max_pool2d(2),
+      nn_conv2d(32, 64, 3, padding = 1),
+      nn_relu(),
+      nn_max_pool2d(2),
+      nn_flatten(),
+      nn_linear(24 * (input_size %/% 4), output_size)
+    )
+  },
+  forward = function(x) {
+    self$cnn(x)
+  }
+)
+
+
+simplernn <-
+nn_module(
+  initialize = function(input_size, hidden_size, output_size) {
+    self$input_size <- input_size
+    self$hidden_size <- hidden_size
+    self$output_size <- output_size
+
+    self$rnn <- nn_rnn(
+      input_size = input_size,
+      hidden_size = hidden_size,
+      num_layers = 1,
+      nonlinearity = "relu",
+      dropout = 0.25,
+      batch_first = TRUE
+    )
+    self$linear <- nn_linear(hidden_size, output_size)
+  },
+  forward = function(x) {
+    output <- self$rnn(x)[[1]]
+    self$linear(output[ , output$size(1), , drop = TRUE])
+    #nn_flatten(pred)
+  }
+
+)
+
+
+spnn <- simplenn(1, c(32, 64, 24, 4), 1)$to(device = "cuda:0")
+spcnn <- simplecnn(32, 1)$to(device = "cuda:0")
+sprnn <- simplernn(16, 48, 1)$to(device = "cuda:0")
+spnn$parameters
+
+
+ttn <- torch_tensor(array(rpois(4800, 15), dim = c(4800, 1)), dtype = torch_float32())$to(device = "cuda:0")
+ttcn <- torch_tensor(array(rpois(1024 * 24, 42), dim = c(16, 64, 24)), dtype = torch_float32())$to(device = "cuda:0")
+tttn <- torch_tensor(array(rpois(1024, 40), dim = c(16, 64)), dtype = torch_float32())$to(device = "cuda:0")
+spnn(ttn)
+spcnn(ttcn)
+sprnn(tttn)
+spnn(torch_randn(4800, 1))
+
+```
+
+
+```{r}
+mydataset <- dataset(
+  name = "my_dataset",
+  
+  initialize = function(x, batch_size) {
+
+    self$batch_size <- batch_size
+    self$x <- x
+    
+
+  },
+  
+  .getitem = function(i) {
+    
+    self$x[((i - 1) * self$batch_size + 1):((i * self$batch_size) + self$batch_size), ,]
+
+  },
+  
+  .length = function() {
+    length(self$x$size(1)) 
+  }
+)
+
+tensor0 <- torch_randn(16384, 32, 32, dtype = torch_float32())$to(device = "cuda:0")
+mydata <- mydataset(tensor0, 64)
+
+
+coro::loop(for (de in mydata) spnn(de))
+```
+
+
+```{r}
+loadx <- readRDS("../../../../group/set/Projects/NRT-AP-Model/output/")
+
+```
+
+```{r}
+library(data.table)
+library(torch)
+
+# FIXME: remove self from the selected
+create_tensor <- function(dt, num_rows, covariates) {
+  tensor_list <- list()
+  
+  for (i in 1:nrow(dt)) {
+    # Select fixed number of rows based on coordinate columns
+    selected_rows <- dt[order(sqrt((longitude - dt[i, longitude])^2 + (latitude - dt[i, latitude])^2))][1:num_rows]
+    
+    # Remove PM2.5 column
+    selected_rows[, PM2.5 := NULL]
+    
+    # Convert to torch_tensor
+    tensor <- torch_tensor(as.matrix(selected_rows[, ..covariates]), dtype = torch_float32())
+    
+    tensor_list[[i]] <- tensor
+  }
+  
+  tensor <- torch_stack(tensor_list, dim = 1)
+  
+  return(tensor)
+}
+
+dtex <- fread("input/unique_sites.csv")
+dtex2 <- dtex[, `:=`(PM2.5 = rgamma(1058, 1, 0.2), cov1 = rnorm(1058), cov2 = rnorm(1058))]
+names(dtex2)[2:3] <- c("longitude", "latitude")
+
+system.time(
+  result_tensor <- create_tensor(dtex2, 25, c("cov1", "cov2"))
+)
+
+# The last two dimensions are supposed to be a 5 by 5 grid
+# To avoid confusions, organize tensors in this order:
+# nsites * time * x * y
+# nsites * time * (reorganized 25 sites [number can vary])
+# sites are disjunct and not ordered by any means at first;
+# we could consider some criteria to order them, but for now, we'll just use the order they are in the data into 5 by 5
+result_tensor2 <- result_tensor$reshape(list(1058, 5, 5, 2))
+result_tensor3 <- result_tensor2$transpose(2, 4)
+result_tensor3[1, 1, , ]
+
+```

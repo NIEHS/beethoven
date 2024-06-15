@@ -1,0 +1,29 @@
+---
+title: "List of features"
+date: "2024-04-02"
+author: "The SET team"
+pkgdown:
+  as_is: true
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message = FALSE)
+library(DT)
+
+tab_feature <-
+  read.csv(
+    system.file(
+      "extdata",
+      "beethoven_covariate_list.csv",
+      package = "beethoven"
+    )
+  )
+```
+
+```{r}
+DT::datatable(
+  tab_feature,
+  filter = "top"
+)
+```

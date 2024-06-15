@@ -88,5 +88,17 @@ tools/shiny_explore_pm/missingness_exploration_pm_quarto_shiny_data/
 
 # raw data
 input
-.future
+
+# pipeline
 _targets
+
+# future batchtools outputs
+.future
+slurm_error.log
+
+# SLURM messages and logs
+**/*.err
+**/*.out
+
+# Apptainer images
+**/*.sif

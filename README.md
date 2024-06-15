@@ -174,15 +174,16 @@ We have adopted naming conventions in functions in this package as well as `amad
 
 
  
-### Punchcard 
+### Configuration file
+Configuration file (`inst/targets/targets_configuration.csv`) is designed to centralize the pipeline settings without needs of editing pipeline scripts manually. It stores a command to run, an associated value for the command, and naming conventions. A helper function `meta_run()` in `inst/targets/pipeline_base_functions.R` reads a function name and its first argument to pass other helper functions to control each target in the pipeline. For example, an entry in the configuration file look like
 
-The punchard is a single list of paths, variables, and functions that are used throughout the pipeline. 
+```r
+"index","last_updated","command","name_targets_short","value","class","name_targets_long","rclass","role_suffix","stage","source","spacetime","remarks"
+95,"2024/3/15","strsplit","extent","-126|-62|22|52","domain","character_feature_calcextent","character","feature","calc","","extent",""
+```
 
-If a path is used in multiple places, it is only listed once. Then updates only require changing the path in one place.
-
-`tools/pipeline/punchcard.csv`
-
-
-
+`meta_run()` will call a command using a key value stored in `name_targets_short` fields. It will load two character values, each of which is stored in `command` and `value` field, respectively, from the row of `name_targets_short == key`. In the example above, `meta_run("extent")` will call `strsplit("-126|-62|22|52", ...)`. Of course, users should furnish this call with a mandatory argument `split` (`split = "|"`, specifically). This is one of the most complex example to use `meta_run()` with the configuration file; most of values in the file require no additional arguments. A good practice is to take care of `value` field's values before running the pipeline without modifying `command` and `name_targets_short` fields.
 
 
+### High-performance computing
+`beethoven` pipeline is configured for SLURM. For other high-performance computing platforms, consult with the documentation of your platform and edit the `_targets.R` and `inst/targets/targets_calculate.R` accordingly.

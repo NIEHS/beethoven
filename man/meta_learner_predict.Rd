@@ -9,7 +9,7 @@ meta_learner_predict(meta_fit, base_outputs_stdt, nthreads = 2)
 \arguments{
 \item{meta_fit}{list of BART objects from meta_learner_fit}
 
-\item{base_outputs_stdt}{stdt object. See \link{convert_stobj_to_stdt}
+\item{base_outputs_stdt}{stdt object.
 list with datatable containing lat, lon, time and the covariates
 (outputs of each base learner) at prediction locations and crs.}
 
