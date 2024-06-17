@@ -2761,8 +2761,8 @@ divisor <-
 #'   Default is 5L.
 #' @param nthreads_geoscf integer(1). Number of threads for GEOSCF data.
 #'   Default is 10L.
-#' @param nthreads_nlcd integer(1). Number of threads for NLCD data.
-#'   Default is 2L.
+#' @param nthreads_gmted integer(1). Number of threads for GMTED data.
+#'   Default is 4L.
 #' @param nthreads_narr integer(1). Number of threads for NARR data.
 #'   Default is 24L.
 #' @param nthreads_groads integer(1). Number of threads for GROADS data.
@@ -2781,6 +2781,7 @@ divisor <-
 #' - modis/raw/61/MOD13A2
 #' - modis/raw/5000/VNP46A2
 #' - aqs
+#' - nlcd
 #' - geos/aqc_tavg_1hr_g1440x721_v1
 #' - geos/chm_tavg_1hr_g1440x721_v1
 #' - HMS_Smoke/data
@@ -2805,7 +2806,7 @@ divisor <-
 #' * nthreads_hms: Number of threads for HMS data.
 #' * nthreads_tri: Number of threads for TRI data.
 #' * nthreads_geoscf: Number of threads for GEOS-CF data.
-#' * nthreads_nlcd: Number of threads for NLCD data.
+#' * nthreads_gmted: Number of threads for GMTED data.
 #' * nthreads_narr: Number of threads for NARR data.
 #' * nthreads_groads: Number of threads for SEDAC Groads data.
 #' * nthreads_population: Number of threads for population data.
@@ -2827,7 +2828,7 @@ set_args_calc <-
     nthreads_hms = 3L,
     nthreads_tri = 5L,
     nthreads_geoscf = 10L,
-    nthreads_nlcd = 2L,
+    nthreads_gmted = 4L,
     nthreads_narr = 24L,
     nthreads_groads = 3L,
     nthreads_population = 3L

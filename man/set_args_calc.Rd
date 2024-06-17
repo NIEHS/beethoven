@@ -17,7 +17,7 @@ set_args_calc(
   nthreads_hms = 3L,
   nthreads_tri = 5L,
   nthreads_geoscf = 10L,
-  nthreads_nlcd = 2L,
+  nthreads_gmted = 4L,
   nthreads_narr = 24L,
   nthreads_groads = 3L,
   nthreads_population = 3L
@@ -62,8 +62,8 @@ Default is 5L.}
 \item{nthreads_geoscf}{integer(1). Number of threads for GEOSCF data.
 Default is 10L.}
 
-\item{nthreads_nlcd}{integer(1). Number of threads for NLCD data.
-Default is 2L.}
+\item{nthreads_gmted}{integer(1). Number of threads for GMTED data.
+Default is 4L.}
 
 \item{nthreads_narr}{integer(1). Number of threads for NARR data.
 Default is 24L.}
@@ -88,7 +88,7 @@ in the calculation process.
 \item nthreads_hms: Number of threads for HMS data.
 \item nthreads_tri: Number of threads for TRI data.
 \item nthreads_geoscf: Number of threads for GEOS-CF data.
-\item nthreads_nlcd: Number of threads for NLCD data.
+\item nthreads_gmted: Number of threads for GMTED data.
 \item nthreads_narr: Number of threads for NARR data.
 \item nthreads_groads: Number of threads for SEDAC Groads data.
 \item nthreads_population: Number of threads for population data.
@@ -111,6 +111,7 @@ path_input should contain the following subdirectories:
 \item modis/raw/61/MOD13A2
 \item modis/raw/5000/VNP46A2
 \item aqs
+\item nlcd
 \item geos/aqc_tavg_1hr_g1440x721_v1
 \item geos/chm_tavg_1hr_g1440x721_v1
 \item HMS_Smoke/data
