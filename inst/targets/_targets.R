@@ -2,15 +2,16 @@ library(targets)
 library(tarchetypes)
 library(future)
 library(future.batchtools)
+library(beethoven)
 
-tar_source("inst/targets/pipeline_base_functions.R")
+set_args_calc()
+
 tar_source("inst/targets/targets_initialize.R")
 tar_source("inst/targets/targets_download.R")
 tar_source("inst/targets/targets_calculate.R")
 tar_source("inst/targets/targets_baselearner.R")
 tar_source("inst/targets/targets_metalearner.R")
 tar_source("inst/targets/targets_predict.R")
-tar_source("inst/targets/targets_arglist.R")
 
 # bypass option
 Sys.setenv("BTV_DOWNLOAD_PASS" = "TRUE")
@@ -56,11 +57,13 @@ if (Sys.getenv("BTV_DOWNLOAD_PASS") == "TRUE") {
 # targets options
 # For GPU support, users should be aware of setting environment
 # variables and GPU versions of the packages.
-# TODO: check if the controller and resources setting are required
+# Sys.setenv("BTV_LIBRARY_PATH") will supersede
+# the NIEHS default library path.
 tar_option_set(
   packages =
     c("amadeus", "chopin", "targets", "tarchetypes",
       "data.table", "sf", "terra", "exactextractr",
+      "beethoven",
       #"crew", "crew.cluster", 
       "tigris", "dplyr",
       "future.batchtools", "qs", "collapse",
@@ -69,39 +72,14 @@ tar_option_set(
       "future", "future.apply", "future.callr", "callr",
       #"sftime",
       "stars", "rlang", "parallelly"),
-  library = c("/ddn/gs1/biotools/R/lib64/R/custompkg", "/ddn/gs1/home/songi2/r-libs"),
+  library = if (Sys.getenv("BTV_LIBRARY_PATH") == "") {
+    c("/ddn/gs1/biotools/R/lib64/R/custompkg", "/ddn/gs1/home/songi2/r-libs")
+  } else {
+    c(Sys.getenv("BTV_LIBRARY_PATH"), .libPaths())
+  }
+  ,
   repository = "local",
   error = "stop",
-  # controller = 
-  #   crew.cluster::crew_controller_slurm(
-  #     slurm_log_output = "output/slurm_pipeline_log.out",
-  #     slurm_log_error = "output/slurm_pipeline_error.err",
-  #     script_directory = "output/slurm_scripts",
-  #     workers = 50L,
-  #     tasks_max = 50L,
-  #     slurm_memory_gigabytes_per_cpu = 12,
-  #     slurm_cpus_per_task = 8L,
-  #     slurm_time_minutes = NULL,
-  #     slurm_partition = "geo"
-  #   ),
-  # resources = tar_resources(
-  #   future = tar_resources_future(
-  #     plan =
-  #       tweak(
-  #         future.batchtools::batchtools_slurm,
-  #         template = "inst/targets/template_slurm.tmpl",
-  #         resources =
-  #           list(
-  #             memory = 10,
-  #             log.file = "slurm_run.log",
-  #             ncpus = 1, partition = "geo", ntasks = 1,
-  #             email = arglist_common$user_email,
-  #             error.file = "slurm_error.log"
-  #           )
-  #       ),
-  #       multicore
-  #   )
-  # ),
   memory = "transient",
   format = "qs",
   storage = "worker",
@@ -114,14 +92,10 @@ tar_option_set(
 
 list(
   target_init,
-  # targets::tar_target(
-  #   int_feat_calc_radii,
-  #   command = c(1e3, 1e4, 5e4),
-  #   iteration = "vector"
-  # ),
   target_download,
-  target_calculate_fit#,
-  # target_baselearner,
+  target_calculate_fit,
+  target_baselearner
+  #,
   # target_metalearner,
   # target_calculate_predict,
   # target_predict,

@@ -9,7 +9,7 @@ pkgdown:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(message = FALSE)
-library(DT)
+library(knitr)
 
 tab_feature <-
   read.csv(
@@ -22,8 +22,7 @@ tab_feature <-
 ```
 
 ```{r}
-DT::datatable(
-  tab_feature,
-  filter = "top"
+knitr::kable(
+  tab_feature
 )
 ```

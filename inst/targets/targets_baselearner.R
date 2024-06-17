@@ -20,7 +20,8 @@ target_baselearner <-
       fit_base_xgb(
         dt_feat_calc_imputed,
         folds = cv_config
-      )
+      ),
+      resources = set_slurm_resource(ncpus = 8L, memory = 16L)
     )
     ,
     targets::tar_target(
@@ -28,7 +29,8 @@ target_baselearner <-
       fit_base_brulee(
         dt_feat_calc_imputed,
         folds = cv_config
-      )
+      ),
+      resources = set_slurm_resource(ncpus = 8L, memory = 16L)
     )
     ,
     targets::tar_target(
