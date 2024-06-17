@@ -63,8 +63,17 @@ extent, user email, export path, and input path.</p>
 <span>  char_period <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2018-01-01"</span>, <span class="st">"2022-10-31"</span><span class="op">)</span>,</span>
 <span>  num_extent <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">126</span>, <span class="op">-</span><span class="fl">62</span>, <span class="fl">22</span>, <span class="fl">52</span><span class="op">)</span>,</span>
 <span>  char_user_email <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"USER"</span><span class="op">)</span>, <span class="st">"@nih.gov"</span><span class="op">)</span>,</span>
+<span>  export <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  path_export <span class="op">=</span> <span class="st">"inst/targets/punchcard_calc.qs"</span>,</span>
-<span>  path_input <span class="op">=</span> <span class="st">"input"</span></span>
+<span>  char_input_dir <span class="op">=</span> <span class="st">"input"</span>,</span>
+<span>  nthreads_nasa <span class="op">=</span> <span class="fl">14L</span>,</span>
+<span>  nthreads_hms <span class="op">=</span> <span class="fl">3L</span>,</span>
+<span>  nthreads_tri <span class="op">=</span> <span class="fl">5L</span>,</span>
+<span>  nthreads_geoscf <span class="op">=</span> <span class="fl">10L</span>,</span>
+<span>  nthreads_gmted <span class="op">=</span> <span class="fl">4L</span>,</span>
+<span>  nthreads_narr <span class="op">=</span> <span class="fl">24L</span>,</span>
+<span>  nthreads_groads <span class="op">=</span> <span class="fl">3L</span>,</span>
+<span>  nthreads_population <span class="op">=</span> <span class="fl">3L</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -85,6 +94,21 @@ Default is "time".</p></dd>
 Default is c("2018-01-01", "2022-10-31").</p></dd>
 
 
+<dt>num_extent</dt>
+<dd><p>Numeric vector specifying the extent.
+Default is c(-126, -62, 22, 52).</p></dd>
+
+
+<dt>char_user_email</dt>
+<dd><p>Character string specifying the user email.
+Default is the current user's email with nih.gov domain.</p></dd>
+
+
+<dt>export</dt>
+<dd><p>logical(1). If TRUE, the list for the calculation process
+is exported to <code>path_export</code>. Default is FALSE.</p></dd>
+
+
 <dt>path_export</dt>
 <dd><p>Character string specifying the export path.
 Default is "inst/targets/punchcard_calc.qs".
@@ -92,36 +116,83 @@ If <code>NULL</code>, a list object "arglist_common" is exported to the global
 environment and returns a list of arguments for the calculation process.</p></dd>
 
 
-<dt>path_input</dt>
+<dt>char_input_dir</dt>
 <dd><p>Character string specifying the input path.
 Default is "input".</p></dd>
 
 
-<dt>extent</dt>
-<dd><p>Numeric vector specifying the extent.
-Default is c(-126, -62, 22, 52).</p></dd>
+<dt>nthreads_nasa</dt>
+<dd><p>integer(1). Number of threads for NASA data.
+Default is 14L.</p></dd>
 
 
-<dt>user_email</dt>
-<dd><p>Character string specifying the user email.
-Default is the current user's email.</p></dd>
+<dt>nthreads_hms</dt>
+<dd><p>integer(1). Number of threads for HMS data.
+Default is 3L.</p></dd>
+
+
+<dt>nthreads_tri</dt>
+<dd><p>integer(1). Number of threads for TRI data.
+Default is 5L.</p></dd>
+
+
+<dt>nthreads_geoscf</dt>
+<dd><p>integer(1). Number of threads for GEOSCF data.
+Default is 10L.</p></dd>
+
+
+<dt>nthreads_gmted</dt>
+<dd><p>integer(1). Number of threads for GMTED data.
+Default is 4L.</p></dd>
+
+
+<dt>nthreads_narr</dt>
+<dd><p>integer(1). Number of threads for NARR data.
+Default is 24L.</p></dd>
+
+
+<dt>nthreads_groads</dt>
+<dd><p>integer(1). Number of threads for GROADS data.
+Default is 3L.</p></dd>
+
+
+<dt>nthreads_population</dt>
+<dd><p>integer(1). Number of threads for population data.
+Default is 3L.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>A list of arguments for the calculation process.</p>
-    </div>
+<p>A list of arguments for common use
+in the calculation process.</p><ul><li><p>char_siteid: Character string specifying the site ID.</p></li>
+<li><p>char_timeid: Character string specifying the time ID.</p></li>
+<li><p>char_period: Character vector specifying the time period.</p></li>
+<li><p>num_extent: Numeric vector specifying the extent.</p></li>
+<li><p>char_user_email: Character string specifying the user email.</p></li>
+<li><p>char_input_dir: Character string specifying the input path.</p></li>
+<li><p>nthreads_nasa: Number of threads for NASA data.</p></li>
+<li><p>nthreads_hms: Number of threads for HMS data.</p></li>
+<li><p>nthreads_tri: Number of threads for TRI data.</p></li>
+<li><p>nthreads_geoscf: Number of threads for GEOS-CF data.</p></li>
+<li><p>nthreads_gmted: Number of threads for GMTED data.</p></li>
+<li><p>nthreads_narr: Number of threads for NARR data.</p></li>
+<li><p>nthreads_groads: Number of threads for SEDAC Groads data.</p></li>
+<li><p>nthreads_population: Number of threads for population data.</p></li>
+</ul></div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
-    <p>path_input should contain the following subdirectories:</p><ul><li><p>modis/raw/61/MOD11A1</p></li>
+    <p>The number of threads used is fixed as 1L
+otherwise specified in <code>nthreads_*</code> arguments.
+path_input should contain the following subdirectories:</p><ul><li><p>modis/raw/61/MOD11A1</p></li>
 <li><p>modis/raw/61/MOD06_L2</p></li>
 <li><p>modis/raw/61/MOD09GA</p></li>
 <li><p>modis/raw/61/MCD19A2</p></li>
 <li><p>modis/raw/61/MOD13A2</p></li>
 <li><p>modis/raw/5000/VNP46A2</p></li>
 <li><p>aqs</p></li>
+<li><p>nlcd</p></li>
 <li><p>geos/aqc_tavg_1hr_g1440x721_v1</p></li>
 <li><p>geos/chm_tavg_1hr_g1440x721_v1</p></li>
 <li><p>HMS_Smoke/data</p></li>
@@ -134,6 +205,10 @@ Default is the current user's email.</p></dd>
 <li><p>sedac_groads</p></li>
 <li><p>sedac_population</p></li>
 </ul></div>
+    <div class="section level2">
+    <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a></h2>
+    <p>Insang Song</p>
+    </div>
 
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>

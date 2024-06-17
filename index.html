@@ -259,17 +259,63 @@
 </ul>
 </div>
 <div class="section level3">
-<h3 id="configuration-file">Configuration file<a class="anchor" aria-label="anchor" href="#configuration-file"></a>
+<h3 id="to-run-the-pipeline">To run the pipeline<a class="anchor" aria-label="anchor" href="#to-run-the-pipeline"></a>
 </h3>
-<p>Configuration file (<code>inst/targets/targets_configuration.csv</code>) is designed to centralize the pipeline settings without needs of editing pipeline scripts manually. It stores a command to run, an associated value for the command, and naming conventions. A helper function <code>meta_run()</code> in <code>inst/targets/pipeline_base_functions.R</code> reads a function name and its first argument to pass other helper functions to control each target in the pipeline. For example, an entry in the configuration file look like</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="st">"index"</span>,<span class="st">"last_updated"</span>,<span class="st">"command"</span>,<span class="st">"name_targets_short"</span>,<span class="st">"value"</span>,<span class="st">"class"</span>,<span class="st">"name_targets_long"</span>,<span class="st">"rclass"</span>,<span class="st">"role_suffix"</span>,<span class="st">"stage"</span>,<span class="st">"source"</span>,<span class="st">"spacetime"</span>,<span class="st">"remarks"</span></span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="dv">95</span>,<span class="st">"2024/3/15"</span>,<span class="st">"strsplit"</span>,<span class="st">"extent"</span>,<span class="st">"-126|-62|22|52"</span>,<span class="st">"domain"</span>,<span class="st">"character_feature_calcextent"</span>,<span class="st">"character"</span>,<span class="st">"feature"</span>,<span class="st">"calc"</span>,<span class="st">""</span>,<span class="st">"extent"</span>,<span class="st">""</span></span></code></pre></div>
-<p><code>meta_run()</code> will call a command using a key value stored in <code>name_targets_short</code> fields. It will load two character values, each of which is stored in <code>command</code> and <code>value</code> field, respectively, from the row of <code>name_targets_short == key</code>. In the example above, <code>meta_run("extent")</code> will call <code>strsplit("-126|-62|22|52", ...)</code>. Of course, users should furnish this call with a mandatory argument <code>split</code> (<code>split = "|"</code>, specifically). This is one of the most complex example to use <code>meta_run()</code> with the configuration file; most of values in the file require no additional arguments. A good practice is to take care of <code>value</code> field’s values before running the pipeline without modifying <code>command</code> and <code>name_targets_short</code> fields.</p>
+<div class="section level4">
+<h4 id="user-settings">User settings<a class="anchor" aria-label="anchor" href="#user-settings"></a>
+</h4>
+<p><code>beethoven</code> pipeline is configured for SLURM and is configured with defaults for NIEHS HPC settings. For adapting the settings to users’ environment, consult with the documentation of your platform and edit the <code>_targets.R</code> and <code>inst/targets/targets_calculate.R</code> (i.e., resource management) accordingly.</p>
 </div>
-<div class="section level3">
-<h3 id="high-performance-computing">High-performance computing<a class="anchor" aria-label="anchor" href="#high-performance-computing"></a>
-</h3>
-<p><code>beethoven</code> pipeline is configured for SLURM. For other high-performance computing platforms, consult with the documentation of your platform and edit the <code>_targets.R</code> and <code>inst/targets/targets_calculate.R</code> accordingly.</p>
+<div class="section level4">
+<h4 id="setting-_targetsr">Setting <code>_targets.R</code>
+<a class="anchor" aria-label="anchor" href="#setting-_targetsr"></a>
+</h4>
+<p>For general users, all <code>targets</code> objects and <code>meta</code> information can be saved in a directory other than the pipeline default by changing <code>store</code> value in <code>tar_config_set()</code> at <code>_targets.R</code> in project root.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># replacing yaml file.</span></span>
+<span><span class="fu">tar_config_set</span><span class="op">(</span></span>
+<span>  store <span class="op">=</span> <span class="st">"__your_directory__"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>Users could comment out the three lines to keep targets in <code>_targets</code> directory under the project root. Common arguments are generated in the earlier lines in <code>_targets.R</code> file. Details of the function generating the arguments, <code>set_args_calc</code>, are described in the following.</p>
+</div>
+<div class="section level4">
+<h4 id="using-set_args_calc">Using <code>set_args_calc</code>
+<a class="anchor" aria-label="anchor" href="#using-set_args_calc"></a>
+</h4>
+<p><code>set_args_calc</code> function exports or returns common parameters that are used repeatedly throughout the calculation process. The default commands are as below:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/set_args_calc.html">set_args_calc</a></span><span class="op">(</span></span>
+<span>  char_siteid <span class="op">=</span> <span class="st">"site_id"</span>,</span>
+<span>  char_timeid <span class="op">=</span> <span class="st">"time"</span>,</span>
+<span>  char_period <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2018-01-01"</span>, <span class="st">"2022-10-31"</span><span class="op">)</span>,</span>
+<span>  num_extent <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">126</span>, <span class="op">-</span><span class="fl">62</span>, <span class="fl">22</span>, <span class="fl">52</span><span class="op">)</span>,</span>
+<span>  char_user_email <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"USER"</span><span class="op">)</span>, <span class="st">"@nih.gov"</span><span class="op">)</span>,</span>
+<span>  export <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  path_export <span class="op">=</span> <span class="st">"inst/targets/punchcard_calc.qs"</span>,</span>
+<span>  path_input <span class="op">=</span> <span class="st">"input"</span>,</span>
+<span>  nthreads_nasa <span class="op">=</span> <span class="fl">14L</span>,</span>
+<span>  nthreads_hms <span class="op">=</span> <span class="fl">3L</span>,</span>
+<span>  nthreads_tri <span class="op">=</span> <span class="fl">5L</span>,</span>
+<span>  nthreads_geoscf <span class="op">=</span> <span class="fl">10L</span>,</span>
+<span>  nthreads_nlcd <span class="op">=</span> <span class="fl">2L</span>,</span>
+<span>  nthreads_narr <span class="op">=</span> <span class="fl">24L</span>,</span>
+<span>  nthreads_groads <span class="op">=</span> <span class="fl">3L</span>,</span>
+<span>  nthreads_population <span class="op">=</span> <span class="fl">3L</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>All arguments except for <code>char_siteid</code> and <code>char_timeid</code> should be carefully set to match users’ environment. <code>export = TRUE</code> is recommended if there is no pre-generated qs file for calculation parameters. For more details, consult <code><a href="reference/set_args_calc.html">?set_args_calc</a></code> after loading <code>beethoven</code> in your R interactive session.</p>
+</div>
+<div class="section level4">
+<h4 id="running-the-pipeline">Running the pipeline<a class="anchor" aria-label="anchor" href="#running-the-pipeline"></a>
+</h4>
+<p>After switching to the project root directory (in terminal, <code>cd [project_root]</code>, replace <code>[project_root]</code> with the proper path), users can run the pipeline.</p>
+<blockquote>
+<p>[!NOTE] With <code>export = TRUE</code>, it will take some time to proceed to the next because it will recursively search hdf file paths. The time is affected by the number of files to search or the length of the period (<code>char_period</code>).</p>
+</blockquote>
+<pre class="shell"><code>Rscript inst/targets/targets_start.R &amp;</code></pre>
+<blockquote>
+<p>[!WARNING] <code>set_args_*</code> family for downloading and summarizing prediction outcomes will be added in the future version.</p>
+</blockquote>
+</div>
 </div>
 </div>
 </div>
