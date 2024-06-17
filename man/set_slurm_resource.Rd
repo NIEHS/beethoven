@@ -10,7 +10,7 @@ set_slurm_resource(
   ncpus = 2L,
   ntasks = 2L,
   memory = 8,
-  user_email,
+  user_email = paste0(Sys.getenv("USER"), "@nih.gov"),
   error_log = "slurm_error.log"
 )
 }

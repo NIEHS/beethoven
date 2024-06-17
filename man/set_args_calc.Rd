@@ -10,8 +10,17 @@ set_args_calc(
   char_period = c("2018-01-01", "2022-10-31"),
   num_extent = c(-126, -62, 22, 52),
   char_user_email = paste0(Sys.getenv("USER"), "@nih.gov"),
+  export = FALSE,
   path_export = "inst/targets/punchcard_calc.qs",
-  path_input = "input"
+  char_input_dir = "input",
+  nthreads_nasa = 14L,
+  nthreads_hms = 3L,
+  nthreads_tri = 5L,
+  nthreads_geoscf = 10L,
+  nthreads_nlcd = 2L,
+  nthreads_narr = 24L,
+  nthreads_groads = 3L,
+  nthreads_population = 3L
 )
 }
 \arguments{
@@ -24,22 +33,66 @@ Default is "time".}
 \item{char_period}{Character vector specifying the time period.
 Default is c("2018-01-01", "2022-10-31").}
 
+\item{num_extent}{Numeric vector specifying the extent.
+Default is c(-126, -62, 22, 52).}
+
+\item{char_user_email}{Character string specifying the user email.
+Default is the current user's email with nih.gov domain.}
+
+\item{export}{logical(1). If TRUE, the list for the calculation process
+is exported to \code{path_export}. Default is FALSE.}
+
 \item{path_export}{Character string specifying the export path.
 Default is "inst/targets/punchcard_calc.qs".
 If \code{NULL}, a list object "arglist_common" is exported to the global
 environment and returns a list of arguments for the calculation process.}
 
-\item{path_input}{Character string specifying the input path.
+\item{char_input_dir}{Character string specifying the input path.
 Default is "input".}
 
-\item{extent}{Numeric vector specifying the extent.
-Default is c(-126, -62, 22, 52).}
+\item{nthreads_nasa}{integer(1). Number of threads for NASA data.
+Default is 14L.}
 
-\item{user_email}{Character string specifying the user email.
-Default is the current user's email.}
+\item{nthreads_hms}{integer(1). Number of threads for HMS data.
+Default is 3L.}
+
+\item{nthreads_tri}{integer(1). Number of threads for TRI data.
+Default is 5L.}
+
+\item{nthreads_geoscf}{integer(1). Number of threads for GEOSCF data.
+Default is 10L.}
+
+\item{nthreads_nlcd}{integer(1). Number of threads for NLCD data.
+Default is 2L.}
+
+\item{nthreads_narr}{integer(1). Number of threads for NARR data.
+Default is 24L.}
+
+\item{nthreads_groads}{integer(1). Number of threads for GROADS data.
+Default is 3L.}
+
+\item{nthreads_population}{integer(1). Number of threads for population data.
+Default is 3L.}
 }
 \value{
-A list of arguments for the calculation process.
+A list of arguments for common use
+in the calculation process.
+\itemize{
+\item char_siteid: Character string specifying the site ID.
+\item char_timeid: Character string specifying the time ID.
+\item char_period: Character vector specifying the time period.
+\item num_extent: Numeric vector specifying the extent.
+\item char_user_email: Character string specifying the user email.
+\item char_input_dir: Character string specifying the input path.
+\item nthreads_nasa: Number of threads for NASA data.
+\item nthreads_hms: Number of threads for HMS data.
+\item nthreads_tri: Number of threads for TRI data.
+\item nthreads_geoscf: Number of threads for GEOS-CF data.
+\item nthreads_nlcd: Number of threads for NLCD data.
+\item nthreads_narr: Number of threads for NARR data.
+\item nthreads_groads: Number of threads for SEDAC Groads data.
+\item nthreads_population: Number of threads for population data.
+}
 }
 \description{
 This function sets the arguments for the calculation process.
@@ -47,6 +100,8 @@ It takes several parameters including site ID, time ID, time period,
 extent, user email, export path, and input path.
 }
 \note{
+The number of threads used is fixed as 1L
+otherwise specified in \verb{nthreads_*} arguments.
 path_input should contain the following subdirectories:
 \itemize{
 \item modis/raw/61/MOD11A1
@@ -68,5 +123,8 @@ path_input should contain the following subdirectories:
 \item sedac_groads
 \item sedac_population
 }
+}
+\author{
+Insang Song
 }
 \keyword{Utility}

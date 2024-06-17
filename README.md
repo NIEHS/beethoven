@@ -174,16 +174,59 @@ We have adopted naming conventions in functions in this package as well as `amad
 
 
  
-### Configuration file
-Configuration file (`inst/targets/targets_configuration.csv`) is designed to centralize the pipeline settings without needs of editing pipeline scripts manually. It stores a command to run, an associated value for the command, and naming conventions. A helper function `meta_run()` in `inst/targets/pipeline_base_functions.R` reads a function name and its first argument to pass other helper functions to control each target in the pipeline. For example, an entry in the configuration file look like
+### To run the pipeline
+#### User settings
+`beethoven` pipeline is configured for SLURM and is configured with defaults for NIEHS HPC settings. For adapting the settings to users' environment, consult with the documentation of your platform and edit the `_targets.R` and `inst/targets/targets_calculate.R` (i.e., resource management) accordingly.
+
+#### Setting `_targets.R`
+For general users, all `targets` objects and `meta` information can be saved in a directory other than the pipeline default by changing `store` value in `tar_config_set()` at `_targets.R` in project root.
 
 ```r
-"index","last_updated","command","name_targets_short","value","class","name_targets_long","rclass","role_suffix","stage","source","spacetime","remarks"
-95,"2024/3/15","strsplit","extent","-126|-62|22|52","domain","character_feature_calcextent","character","feature","calc","","extent",""
+# replacing yaml file.
+tar_config_set(
+  store = "__your_directory__"
+)
 ```
 
-`meta_run()` will call a command using a key value stored in `name_targets_short` fields. It will load two character values, each of which is stored in `command` and `value` field, respectively, from the row of `name_targets_short == key`. In the example above, `meta_run("extent")` will call `strsplit("-126|-62|22|52", ...)`. Of course, users should furnish this call with a mandatory argument `split` (`split = "|"`, specifically). This is one of the most complex example to use `meta_run()` with the configuration file; most of values in the file require no additional arguments. A good practice is to take care of `value` field's values before running the pipeline without modifying `command` and `name_targets_short` fields.
+Users could comment out the three lines to keep targets in `_targets` directory under the project root. Common arguments are generated in the earlier lines in `_targets.R` file. Details of the function generating the arguments, `set_args_calc`, are described in the following.
 
 
-### High-performance computing
-`beethoven` pipeline is configured for SLURM. For other high-performance computing platforms, consult with the documentation of your platform and edit the `_targets.R` and `inst/targets/targets_calculate.R` accordingly.
+#### Using `set_args_calc`
+`set_args_calc` function exports or returns common parameters that are used repeatedly throughout the calculation process. The default commands are as below:
+
+```r
+set_args_calc(
+  char_siteid = "site_id",
+  char_timeid = "time",
+  char_period = c("2018-01-01", "2022-10-31"),
+  num_extent = c(-126, -62, 22, 52),
+  char_user_email = paste0(Sys.getenv("USER"), "@nih.gov"),
+  export = FALSE,
+  path_export = "inst/targets/punchcard_calc.qs",
+  path_input = "input",
+  nthreads_nasa = 14L,
+  nthreads_hms = 3L,
+  nthreads_tri = 5L,
+  nthreads_geoscf = 10L,
+  nthreads_nlcd = 2L,
+  nthreads_narr = 24L,
+  nthreads_groads = 3L,
+  nthreads_population = 3L
+)
+```
+
+All arguments except for `char_siteid` and `char_timeid` should be carefully set to match users' environment. `export = TRUE` is recommended if there is no pre-generated qs file for calculation parameters. For more details, consult `?set_args_calc` after loading `beethoven` in your R interactive session.
+
+#### Running the pipeline
+After switching to the project root directory (in terminal, `cd [project_root]`, replace `[project_root]` with the proper path), users can run the pipeline.
+
+> [!NOTE]
+> With `export = TRUE`, it will take some time to proceed to the next because it will recursively search hdf file paths. The time is affected by the number of files to search or the length of the period (`char_period`).
+
+```shell
+Rscript inst/targets/targets_start.R &
+```
+
+> [!WARNING]
+> `set_args_*` family for downloading and summarizing prediction outcomes will be added in the future version.
+

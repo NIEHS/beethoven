@@ -8,7 +8,7 @@ target_calculate_fit <-
     tarchetypes::tar_files_input(
       name = file_prep_calc_args,
       files = list.files("inst/targets", pattern = "*.*.qs$", full.names = TRUE),
-      cue = tar_invalidate(any_of(tar_older(Sys.time() - as.difftime(4, units = "weeks")))),
+      # cue = tar_invalidate(tar_older(Sys.time() - as.difftime(4, units = "weeks"))),
       format = "file",
       iteration = "vector",
       description = "Calculation arguments in QS file"
@@ -97,7 +97,7 @@ target_calculate_fit <-
           injection = loadargs(file_prep_calc_args, chr_iter_calc_nasa)),
       pattern = cross(file_prep_calc_args, chr_iter_calc_nasa),
       resources = set_slurm_resource(
-            ntasks = 1, ncpus = 20, memory = 8
+            ntasks = 1, ncpus = arglist_common$nthreads_nasa, memory = 8
           ),
       iteration = "list",
       description = "MODIS/VIIRS feature list"
@@ -114,7 +114,6 @@ target_calculate_fit <-
       resources = set_slurm_resource(
             ntasks = 1, ncpus = 10, memory = 4
           ),
-
       description = "GEOS-CF feature list"
     )
     ,

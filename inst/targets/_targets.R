@@ -4,7 +4,25 @@ library(future)
 library(future.batchtools)
 library(beethoven)
 
-set_args_calc()
+# replacing yaml file.
+tar_config_set(
+  store = "/ddn/gs1/group/set/pipeline/beethoven"
+)
+
+
+generate_list <- FALSE
+
+arglist_common <-
+  set_args_calc(
+    char_siteid = "site_id",
+    char_timeid = "time",
+    char_period = c("2022-09-01", "2022-10-31"),
+    num_extent = c(-126, -62, 22, 52),
+    char_user_email = paste0(Sys.getenv("USER"), "@nih.gov"),
+    export = generate_list,
+    path_export = "inst/targets/punchcard_calc.qs",
+    char_input_dir = "/ddn/gs1/group/set/Projects/NRT-AP-Model/input"
+  )
 
 tar_source("inst/targets/targets_initialize.R")
 tar_source("inst/targets/targets_download.R")
@@ -16,6 +34,7 @@ tar_source("inst/targets/targets_predict.R")
 # bypass option
 Sys.setenv("BTV_DOWNLOAD_PASS" = "TRUE")
 
+#
 # bind custom built GDAL
 # Users should export the right path to the GDAL library
 # by export LD_LIBRARY_PATH=.... command.
@@ -37,7 +56,7 @@ plan(
           memory = 8,
           log.file = "slurm_run.log",
           ncpus = 1, partition = "geo", ntasks = 1,
-          email = arglist_common$user_email,
+          email = arglist_common$char_user_email,
           error.file = "slurm_error.log"
         )
     ),
@@ -57,27 +76,19 @@ if (Sys.getenv("BTV_DOWNLOAD_PASS") == "TRUE") {
 # targets options
 # For GPU support, users should be aware of setting environment
 # variables and GPU versions of the packages.
-# Sys.setenv("BTV_LIBRARY_PATH") will supersede
-# the NIEHS default library path.
+# TODO: check if the controller and resources setting are required
 tar_option_set(
   packages =
-    c("amadeus", "chopin", "targets", "tarchetypes",
+    c("beethoven", "amadeus", "chopin", "targets", "tarchetypes",
       "data.table", "sf", "terra", "exactextractr",
-      "beethoven",
       #"crew", "crew.cluster", 
       "tigris", "dplyr",
       "future.batchtools", "qs", "collapse",
       "tidymodels", "tune", "rsample", "torch", "brulee",
       "glmnet", "xgboost",
       "future", "future.apply", "future.callr", "callr",
-      #"sftime",
       "stars", "rlang", "parallelly"),
-  library = if (Sys.getenv("BTV_LIBRARY_PATH") == "") {
-    c("/ddn/gs1/biotools/R/lib64/R/custompkg", "/ddn/gs1/home/songi2/r-libs")
-  } else {
-    c(Sys.getenv("BTV_LIBRARY_PATH"), .libPaths())
-  }
-  ,
+  library = c("/ddn/gs1/biotools/R/lib64/R/custompkg", "/ddn/gs1/home/songi2/r-libs"),
   repository = "local",
   error = "stop",
   memory = "transient",
@@ -88,8 +99,8 @@ tar_option_set(
   seed = 202401L
 )
 
-# should run tar_make_future()
 
+# should run tar_make_future()
 list(
   target_init,
   target_download,
