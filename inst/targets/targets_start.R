@@ -1,6 +1,6 @@
 # load targets
+library(beethoven)
 library(targets)
-
 # assume that the working directory is beethoven git repository directory
 # only runs after package deployment
 # file.copy(
@@ -17,10 +17,9 @@ library(targets)
 
 
 tar_make_future(
-  dt_feat_calc_imputed,
-  workers = 1 #24
+  sf_feat_proc_aqs_sites,
+  workers = 24
 )
-
 # TODO: should find a way of auto-invalidate feat_calc_(modis|viirs|geoscf)
 #     when the date range changes in the configuration.
 # manual example includes:

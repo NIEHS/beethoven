@@ -8,7 +8,7 @@ target_calculate_fit <-
     tarchetypes::tar_files_input(
       name = file_prep_calc_args,
       files = list.files("inst/targets", pattern = "*.*.qs$", full.names = TRUE),
-      cue = tar_invalidate(any_of(tar_older(Sys.time() - as.difftime(4, units = "weeks")))),
+      # cue = tar_invalidate(tar_older(Sys.time() - as.difftime(4, units = "weeks"))),
       format = "file",
       iteration = "vector",
       description = "Calculation arguments in QS file"
@@ -97,7 +97,7 @@ target_calculate_fit <-
           injection = loadargs(file_prep_calc_args, chr_iter_calc_nasa)),
       pattern = cross(file_prep_calc_args, chr_iter_calc_nasa),
       resources = set_slurm_resource(
-            ntasks = 1, ncpus = 20, memory = 8
+            ntasks = 1, ncpus = arglist_common$nthreads_nasa, memory = 8
           ),
       iteration = "list",
       description = "MODIS/VIIRS feature list"
@@ -112,9 +112,8 @@ target_calculate_fit <-
       pattern = cross(file_prep_calc_args, chr_iter_calc_geoscf),
       iteration = "list",
       resources = set_slurm_resource(
-            ntasks = 1, ncpus = 10, memory = 4
+            ntasks = 1, ncpus = arglist_common$nthreads_geoscf, memory = 4
           ),
-
       description = "GEOS-CF feature list"
     )
     ,
@@ -129,7 +128,7 @@ target_calculate_fit <-
       iteration = "list",
       pattern = cross(file_prep_calc_args, chr_iter_calc_gmted_vars),
       resources = set_slurm_resource(
-            ntasks = 1, ncpus = 4, memory = 8
+            ntasks = 1, ncpus = arglist_common$nthreads_gmted, memory = 8
           ),
       description = "GMTED feature list"
     )
@@ -141,13 +140,13 @@ target_calculate_fit <-
           domain = loadargs(file_prep_calc_args, "narr")$domain,
           date = arglist_common$char_period,
           locs = sf_feat_proc_aqs_sites,
-          nthreads = 12L
+          nthreads = arglist_common$nthreads_narr
         )
       ,
       pattern = map(file_prep_calc_args),
       iteration = "list",
       resources = set_slurm_resource(
-            ntasks = 1, ncpus = 12, memory = 30 
+            ntasks = 1, ncpus = arglist_common$nthreads_narr, memory = 20 
           )
     )
     ,
