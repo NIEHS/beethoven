@@ -2734,7 +2734,7 @@ divisor <-
 #' This function sets the arguments for the calculation process.
 #' It takes several parameters including site ID, time ID, time period,
 #' extent, user email, export path, and input path.
-#'
+#' @keywords Utility
 #' @param char_siteid Character string specifying the site ID.
 #'   Default is "site_id".
 #' @param char_timeid Character string specifying the time ID.
@@ -2781,8 +2781,8 @@ set_args_calc <-
     char_siteid = "site_id",
     char_timeid = "time",
     char_period = c("2018-01-01", "2022-10-31"),
-    extent = c(-126, -62, 22, 52),
-    user_email = paste0(Sys.getenv("USER"), "@nih.gov"),
+    num_extent = c(-126, -62, 22, 52),
+    char_user_email = paste0(Sys.getenv("USER"), "@nih.gov"),
     path_export = "inst/targets/punchcard_calc.qs",
     path_input = "input"
   ) {
@@ -2797,12 +2797,12 @@ set_args_calc <-
     ain <- function(x) file.path(path_input, x)
     list_paths <-
       list(
-        mod11 = load_modis_files(ain("modis/raw/61/MOD11A1"), date = arglist_common$char_period),
-        mod06 = load_modis_files(ain("modis/raw/61/MOD06_L2"), date = arglist_common$char_period),
-        mod09 = load_modis_files(ain("modis/raw/61/MOD09GA"), date = arglist_common$char_period),
-        mcd19 = load_modis_files(ain("modis/raw/61/MCD19A2"), date = arglist_common$char_period),
-        mod13 = load_modis_files(ain("modis/raw/61/MOD13A2"), date = arglist_common$char_period),
-        viirs = load_modis_files(ain("modis/raw/5000/VNP46A2"), "h5$", date = arglist_common$char_period)
+        mod11 = load_modis_files(ain("modis/raw/61/MOD11A1"), date = list_common$char_period),
+        mod06 = load_modis_files(ain("modis/raw/61/MOD06_L2"), date = list_common$char_period),
+        mod09 = load_modis_files(ain("modis/raw/61/MOD09GA"), date = list_common$char_period),
+        mcd19 = load_modis_files(ain("modis/raw/61/MCD19A2"), date = list_common$char_period),
+        mod13 = load_modis_files(ain("modis/raw/61/MOD13A2"), date = list_common$char_period),
+        viirs = load_modis_files(ain("modis/raw/5000/VNP46A2"), "h5$", date = list_common$char_period)
       )
 
     list_proccalc <-

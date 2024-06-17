@@ -8,8 +8,8 @@ set_args_calc(
   char_siteid = "site_id",
   char_timeid = "time",
   char_period = c("2018-01-01", "2022-10-31"),
-  extent = c(-126, -62, 22, 52),
-  user_email = paste0(Sys.getenv("USER"), "@nih.gov"),
+  num_extent = c(-126, -62, 22, 52),
+  char_user_email = paste0(Sys.getenv("USER"), "@nih.gov"),
   path_export = "inst/targets/punchcard_calc.qs",
   path_input = "input"
 )
@@ -24,12 +24,6 @@ Default is "time".}
 \item{char_period}{Character vector specifying the time period.
 Default is c("2018-01-01", "2022-10-31").}
 
-\item{extent}{Numeric vector specifying the extent.
-Default is c(-126, -62, 22, 52).}
-
-\item{user_email}{Character string specifying the user email.
-Default is the current user's email.}
-
 \item{path_export}{Character string specifying the export path.
 Default is "inst/targets/punchcard_calc.qs".
 If \code{NULL}, a list object "arglist_common" is exported to the global
@@ -37,6 +31,12 @@ environment and returns a list of arguments for the calculation process.}
 
 \item{path_input}{Character string specifying the input path.
 Default is "input".}
+
+\item{extent}{Numeric vector specifying the extent.
+Default is c(-126, -62, 22, 52).}
+
+\item{user_email}{Character string specifying the user email.
+Default is the current user's email.}
 }
 \value{
 A list of arguments for the calculation process.
@@ -69,3 +69,4 @@ path_input should contain the following subdirectories:
 \item sedac_population
 }
 }
+\keyword{Utility}
