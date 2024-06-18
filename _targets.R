@@ -6,10 +6,13 @@ library(beethoven)
 
 # replacing yaml file.
 tar_config_set(
-  store = "/ddn/gs1/group/set/pipeline/beethoven"
+  store = "/ddn/gs1/group/set/pipeline/beethoven_targets"
 )
 
-generate_list <- FALSE
+generate_list_download <- FALSE
+
+
+generate_list_calc <- FALSE
 
 arglist_common <-
   set_args_calc(
@@ -18,7 +21,7 @@ arglist_common <-
     char_period = c("2022-09-01", "2022-10-31"),
     num_extent = c(-126, -62, 22, 52),
     char_user_email = paste0(Sys.getenv("USER"), "@nih.gov"),
-    export = generate_list,
+    export = generate_list_calc,
     path_export = "inst/targets/punchcard_calc.qs",
     char_input_dir = "/ddn/gs1/group/set/Projects/NRT-AP-Model/input"
   )

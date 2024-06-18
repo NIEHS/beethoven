@@ -1,7 +1,16 @@
 target_download <-
   list(
+    tarchetypes::tar_files_input(
+      name = file_prep_calc_args,
+      files = list.files("inst/targets", pattern = "*.*.qs$", full.names = TRUE),
+      # cue = tar_invalidate(tar_older(Sys.time() - as.difftime(4, units = "weeks"))),
+      format = "file",
+      iteration = "vector",
+      description = "Download arguments in QS file"
+    )
+    ,
     targets::tar_target(
-      dirs,
+      char_rawdir_download,
       command =
         sprintf("dir_input_%s",
           c("aqs", "nei", "narr",
@@ -18,10 +27,10 @@ target_download <-
     ,
     # each dataset is branched
     targets::tar_target(
-      download_raw,
-      command = feature_raw_download(meta_run(dirs)),
-      pattern = map(dirs),
-      iteration = "vector"
+      lgl_rawdir_download,
+      command = feature_raw_download(char_rawdir_download),
+      pattern = map(char_rawdir_download),
+      iteration = "list"
     )
   )
 ## Status up to here is stored in meta as hash and rds/qs files

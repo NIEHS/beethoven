@@ -248,11 +248,11 @@ target_calculate_fit <-
         path_qs = "output/qs",
         period_new = arglist_common$char_period,
         input_new = dt_feat_calc_design,
-        nthreads = 8L
+        nthreads = arglist_common$nthreads_append
       ),
       description = "Cumulative feature calculation",
       resources = set_slurm_resource(
-            ntasks = 1, ncpus = 8, memory = 16
+            ntasks = 1, ncpus = arglist_common$nthreads_append, memory = 16
           )
     ),
     tar_target(
@@ -260,10 +260,13 @@ target_calculate_fit <-
       command =
       impute_all(
         dt_feat_calc_cumulative,
-        period = arglist_common$char_period, 64L, 64L, 64L),
+        period = arglist_common$char_period,
+        nthreads_dt = arglist_common$nthreads_impute,
+        nthreads_collapse = arglist_common$nthreads_impute,
+        nthreads_imputation = arglist_common$nthreads_impute),
       description = "Imputed features + lags",
       resources = set_slurm_resource(
-            ntasks = 1, ncpus = 64, memory = 8
+            ntasks = 1, ncpus = arglist_common$nthreads_impute, memory = 8
           )
     )
   # TODO: compute lagged variables

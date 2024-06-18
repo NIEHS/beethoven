@@ -223,7 +223,8 @@ inject_gmted <- function(locs, variable, radii, injection, nthreads = 4L) {
             !!!injection
           )
         )
-      }
+      },
+      future.seed = TRUE
     )
   radii_rep <- lapply(radii_rep, function(x) as.data.frame(x))
   radii_join <- reduce_merge(radii_rep, "site_id")
@@ -697,6 +698,7 @@ feature_raw_download <-
     tryCatch(
       {
         amadeus::download_data(dataset_name = dataset_name, ...)
+        return(TRUE)
       },
       error = function(e) {
         stop(e)
@@ -2749,8 +2751,6 @@ divisor <-
 #'   is exported to `path_export`. Default is FALSE.
 #' @param path_export Character string specifying the export path.
 #'   Default is "inst/targets/punchcard_calc.qs".
-#'   If `NULL`, a list object "arglist_common" is exported to the global
-#'   environment and returns a list of arguments for the calculation process.
 #' @param char_input_dir Character string specifying the input path.
 #'    Default is "input".
 #' @param nthreads_nasa integer(1). Number of threads for NASA data.
@@ -2769,6 +2769,10 @@ divisor <-
 #'   Default is 3L.
 #' @param nthreads_population integer(1). Number of threads for population data.
 #'   Default is 3L.
+#' @param nthreads_append integer(1). Number of threads for appending data.
+#'   Default is 8L.
+#' @param nthreads_impute integer(1). Number of threads for imputing data.
+#'   Default is 64L.
 #'
 #' @note
 #' The number of threads used is fixed as 1L
@@ -2810,6 +2814,8 @@ divisor <-
 #' * nthreads_narr: Number of threads for NARR data.
 #' * nthreads_groads: Number of threads for SEDAC Groads data.
 #' * nthreads_population: Number of threads for population data.
+#' * nthreads_append: Number of threads for appending data.
+#' * nthreads_impute: Number of threads for imputing data.
 #' @author Insang Song
 #' @importFrom qs qsave
 #' @export
@@ -2831,7 +2837,9 @@ set_args_calc <-
     nthreads_gmted = 4L,
     nthreads_narr = 24L,
     nthreads_groads = 3L,
-    nthreads_population = 3L
+    nthreads_population = 3L,
+    nthreads_append = 8L,
+    nthreads_impute = 64L
   ) {
     list_common <-
       list(
@@ -2845,12 +2853,13 @@ set_args_calc <-
         nthreads_hms = nthreads_hms,
         nthreads_tri = nthreads_tri,
         nthreads_geoscf = nthreads_geoscf,
-        nthreads_nlcd = nthreads_nlcd,
         nthreads_narr = nthreads_narr,
         nthreads_groads = nthreads_groads,
-        nthreads_population = nthreads_population
+        nthreads_population = nthreads_population,
+        nthreads_append = nthreads_append,
+        nthreads_impute = nthreads_impute
       )
-    ain <- function(x) file.path(path_input, x)
+    ain <- function(x) file.path(char_input_dir, x)
     if (export) {
       list_paths <-
         list(
@@ -3015,5 +3024,44 @@ set_args_calc <-
     }
     return(list_common)
   }
+
+#' Generate argument list for raw data download
+#' @keywords Utility
+#'
+set_args_download <-
+  function(
+    char_period = c("2018-01-01", "2022-10-31"),
+    char_input_dir = "input",
+    path_export = "inst/targets/punchcard_download.qs"
+  ) {
+    ain <- function(x) file.path(char_input_dir, x)
+    list_download_config <-
+      list(
+        aqs = list(dataset_name = "aqs", path = ain("aqs")),
+        mod11 = list(dataset_name = "modis", path = ain("modis/raw")),
+        mod06 = list(dataset_name = "modis", path = ain("modis/raw")),
+        mod09 = list(dataset_name = "modis", path = ain("modis/raw")),
+        mcd19 = list(dataset_name = "modis", path = ain("modis/raw")),
+        mod13 = list(dataset_name = "modis", path = ain("modis/raw")),
+        viirs = list(dataset_name = "modis", path = ain("modis/raw")),
+        geoscf = list(dataset_name = "geos", path = ain("geos")),
+        hms = list(dataset_name = "smoke", path = ain("HMS_Smoke")),
+        gmted = list(dataset_name = "gmted", path = ain("gmted")),
+        nei = list(dataset_name = "nei", path = ain("nei")),
+        tri = list(dataset_name = "tri", path = ain("tri")),
+        nlcd = list(dataset_name = "nlcd", path = ain("nlcd/raw")),
+        koppen = list(dataset_name = "koppen", path = ain("koppen_geiger/raw")),
+        ecoregions = list(dataset_name = "koppen", path = ain("ecoregions/raw")),
+        narr_monolevel = list(dataset_name = "narr_monolevel", path = ain("narr")),
+        narr_p_levels = list(dataset_name = "narr_p_levels", path = ain("narr")),
+        groads = list(dataset_name = "sedac_groads", path = ain("sedac_groads")),
+        population = list(dataset_name = "sedac_population", path = ain("sedac_population"))
+      )
+    return(list_download_config)
+    qs::qsave(list_download_config, path_export)
+    message("Download configuration is saved to ", path_export)
+  }
+
 # nolint end
+
 # nocov end
