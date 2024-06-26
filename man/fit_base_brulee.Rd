@@ -17,7 +17,7 @@ fit_base_brulee(
 \arguments{
 \item{dt_imputed}{The input data table to be used for fitting.}
 
-\item{folds}{pre-generated rset object. If NULL, it should be
+\item{folds}{pre-generated rset object. If NULL, \code{vfold} should be
 numeric to be used in \link[rsample:vfold_cv]{rsample::vfold_cv}.}
 
 \item{r_subsample}{The proportion of rows to be sampled.}

@@ -209,7 +209,6 @@ set_args_calc(
   nthreads_tri = 5L,
   nthreads_geoscf = 10L,
   nthreads_gmted = 4L,
-  nthreads_nlcd = 2L,
   nthreads_narr = 24L,
   nthreads_groads = 3L,
   nthreads_population = 3L

@@ -12,13 +12,13 @@ tar_config_set(
 generate_list_download <- FALSE
 
 
-generate_list_calc <- FALSE
+generate_list_calc <- TRUE
 
 arglist_common <-
   set_args_calc(
     char_siteid = "site_id",
     char_timeid = "time",
-    char_period = c("2022-09-01", "2022-10-31"),
+    char_period = c("2018-01-01", "2022-12-31"),
     num_extent = c(-126, -62, 22, 52),
     char_user_email = paste0(Sys.getenv("USER"), "@nih.gov"),
     export = generate_list_calc,

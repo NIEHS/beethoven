@@ -11,7 +11,9 @@ target_baselearner <-
       command = generate_cv_index(
         data = dt_feat_calc_xyt,
         cv_fold = 7L,
-        cv_pairs = 10L
+        cv_pairs = 10L,
+        preprocessing = "normalize",
+        pairing = "1"
       )
     )
     ,

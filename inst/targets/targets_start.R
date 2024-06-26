@@ -17,7 +17,6 @@ library(targets)
 
 
 tar_make_future(
-  sf_feat_proc_aqs_sites,
   workers = 24
 )
 # TODO: should find a way of auto-invalidate feat_calc_(modis|viirs|geoscf)

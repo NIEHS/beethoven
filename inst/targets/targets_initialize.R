@@ -9,7 +9,7 @@ target_init <-
           pattern = "daily_88101_[0-9]{4}.csv",
           full.names = TRUE
         ),
-        date = NULL,
+        date = arglist_common$char_period,
         mode = "location",
         return_format = "sf"
       ),

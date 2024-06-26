@@ -2204,7 +2204,7 @@ par_nest <-
 #' @keywords Baselearner
 #' @note tune package should be 1.2.0 or higher.
 #' @param dt_imputed The input data table to be used for fitting.
-#' @param folds pre-generated rset object. If NULL, it should be
+#' @param folds pre-generated rset object. If NULL, `vfold` should be
 #'   numeric to be used in [rsample::vfold_cv].
 #' @param r_subsample The proportion of rows to be sampled.
 #' @param yvar The target variable.
@@ -2611,6 +2611,7 @@ generate_cv_index <-
     if (length(target_cols) != 3) {
       stop("Please provide three target columns.")
     }
+    data_orig <- data
     data <- data[, target_cols, with = FALSE]
     data$time <- as.numeric(data$time)
     data_proc <-
@@ -2683,7 +2684,7 @@ generate_cv_index <-
 
     rset_cv <-
       convert_cv_index_rset(
-        index_cv, data, ref_list = ref_list, cv_mode = cv_mode
+        index_cv, data_orig, ref_list = ref_list, cv_mode = cv_mode
       )
     return(rset_cv)
   }
@@ -2947,8 +2948,9 @@ set_args_calc <-
             domain_name = "year",
             path = ain("nlcd/raw"),
             covariate = "nlcd",
+            mode = "exact",
+            extent = NULL,
             radius = c(1e3, 1e4, 5e4),
-            nthreads = nthreads_nlcd,
             max_cells = 1e8
           ),
           koppen = list(path = ain("koppen_geiger/raw/Beck_KG_V1_present_0p0083.tif"), 
