@@ -12,7 +12,7 @@ tar_config_set(
 generate_list_download <- FALSE
 
 
-generate_list_calc <- TRUE
+generate_list_calc <- FALSE
 
 arglist_common <-
   set_args_calc(
@@ -93,7 +93,7 @@ tar_option_set(
       "stars", "rlang", "parallelly"),
   library = c("/ddn/gs1/biotools/R/lib64/R/custompkg", "/ddn/gs1/home/songi2/r-libs"),
   repository = "local",
-  error = "stop",
+  error = "abridge",
   memory = "transient",
   format = "qs",
   storage = "worker",

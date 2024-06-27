@@ -2861,7 +2861,11 @@ set_args_calc <-
         nthreads_impute = nthreads_impute
       )
     ain <- function(x, append = FALSE) {
-      file.path(char_input_dir, x, ifelse(append, "data_files", ""))
+      if (append) {
+        file.path(char_input_dir, x, "data_files")
+      } else {
+        file.path(char_input_dir, x)
+      }
     }
     if (export) {
       list_paths <-
@@ -3038,8 +3042,8 @@ set_args_download <-
     char_input_dir = "input",
     path_export = "inst/targets/punchcard_download.qs"
   ) {
-    ain <- function(x, append = FALSE) {
-      file.path(char_input_dir, x, ifelse(append, "data_files", ""))
+    ain <- function(x) {
+      file.path(char_input_dir, x)
     }
 
     list_download_config <-
