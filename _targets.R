@@ -58,7 +58,7 @@ plan(
         list(
           memory = 8,
           log.file = "slurm_run.log",
-          ncpus = 1, partition = "geo", ntasks = 1,
+          ncpus = 1, partition = "geo,highmem", ntasks = 1,
           email = arglist_common$char_user_email,
           error.file = "slurm_error.log"
         )

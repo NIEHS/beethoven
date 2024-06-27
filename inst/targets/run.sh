@@ -7,7 +7,7 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=2
 #SBATCH --mem-per-cpu=32g
-#SBATCH --partition=geo,highmem
+#SBATCH --partition=geo
 #SBATCH --mail-user=songi2@nih.gov
 
 source /ddn/gs1/home/songi2/.profile

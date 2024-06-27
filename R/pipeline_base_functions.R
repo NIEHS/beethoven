@@ -61,7 +61,6 @@ loadargs <- function(argfile, dataset) {
 #' tvec <- c(as.Date("2021-01-01"), as.Date("2023-01-01"))
 #' `%tin%`(query_date, tvec)
 #' }
-#' @export
 `%tin%` <- function(query_date, tvec) {
   tvec <- sort(tvec)
   query_date <= tvec[1] & query_date >= tvec[2]
@@ -168,9 +167,10 @@ inject_modis_par <- function(locs, domain, injection) {
 #'   geographic information needs to be injected.
 #' @param injection A list of additional arguments to be passed to
 #'   the `calc_geos_strict` function.
+#' @param ... Placeholders
 #' @returns A modified data frame with injected geographic information.
 #' @export
-inject_geos <- function(locs, injection) {
+inject_geos <- function(locs, injection, ...) {
   rlang::inject(
     calc_geos_strict(
       locs = locs,
@@ -1107,7 +1107,6 @@ search_function <- function(package, search) {
 #' @param functions character. Vector of function names.
 #' @returns A data.frame containing the parameters of the functions.
 #' @importFrom dplyr as_tibble bind_rows
-#' @export
 df_params <- function(functions) {
   params <- lapply(functions, function(x) {
     args <-
@@ -1391,6 +1390,7 @@ calc_geos_strict <-
 
     future_inserted <- split(data_paths, filename_date_cl)
     other_args <- list(...)
+    other_args$nthreads <- NULL
     data_variables <- terra::describe(data_paths[1], sds = TRUE)$var
 
     search_variables <-
@@ -2721,7 +2721,6 @@ vis_rset <-
 #' @keywords Miscellaneous
 #' @param x integer(1). A positive integer.
 #' @returns A vector of divisors of x.
-#' @export
 divisor <-
   function(x) {
     xv <- seq_len(x)
@@ -2854,6 +2853,7 @@ set_args_calc <-
         nthreads_hms = nthreads_hms,
         nthreads_tri = nthreads_tri,
         nthreads_geoscf = nthreads_geoscf,
+        nthreads_gmted = nthreads_gmted,
         nthreads_narr = nthreads_narr,
         nthreads_groads = nthreads_groads,
         nthreads_population = nthreads_population,

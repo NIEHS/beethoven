@@ -23,7 +23,7 @@ target_baselearner <-
         dt_feat_calc_imputed,
         folds = cv_config
       ),
-      resources = set_slurm_resource(ncpus = 8L, memory = 16L)
+      resources = set_slurm_resource(ncpus = 8L, memory = 16L, partition = "geo,gpu")
     )
     ,
     targets::tar_target(
@@ -32,7 +32,7 @@ target_baselearner <-
         dt_feat_calc_imputed,
         folds = cv_config
       ),
-      resources = set_slurm_resource(ncpus = 8L, memory = 16L)
+      resources = set_slurm_resource(ncpus = 8L, memory = 16L, partition = "geo,gpu")
     )
     ,
     targets::tar_target(
@@ -42,6 +42,6 @@ target_baselearner <-
         folds = cv_config,
         nthreads = 32L
       ),
-      resources = set_slurm_resource(ncpus = 32L, memory = 8L)
+      resources = set_slurm_resource(ncpus = 32L, memory = 8L, partition = "geo,highmem")
     )
   )
