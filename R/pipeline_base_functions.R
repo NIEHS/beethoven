@@ -2860,7 +2860,9 @@ set_args_calc <-
         nthreads_append = nthreads_append,
         nthreads_impute = nthreads_impute
       )
-    ain <- function(x) file.path(char_input_dir, x)
+    ain <- function(x, append = FALSE) {
+      file.path(char_input_dir, x, ifelse(append, "data_files", ""))
+    }
     if (export) {
       list_paths <-
         list(
@@ -2874,7 +2876,7 @@ set_args_calc <-
 
       list_proccalc <-
         list(
-          aqs = list(path = ain("aqs")),
+          aqs = list(path = ain("aqs", TRUE)),
           mod11 = list(from = list_paths$mod11,
                       name_covariates = sprintf("MOD_SFCT%s_0_", c("D", "N")),
                       subdataset = "^LST_",
@@ -2910,7 +2912,7 @@ set_args_calc <-
                       name_covariates = "MOD_LGHTN_0_",
                       subdataset = 3,
                       nthreads = nthreads_nasa,
-                      preprocess = amadeus::process_bluemarble,
+                      preprocess = amadeus::process_blackmarble,
                       radius = c(1e3, 1e4, 5e4)),
           geoscf_aqc = list(date = list_common$char_period,
                             path = ain("geos/aqc_tavg_1hr_g1440x721_v1"),
@@ -2919,20 +2921,20 @@ set_args_calc <-
                             path = ain("geos/chm_tavg_1hr_g1440x721_v1"),
                             nthreads = nthreads_geoscf),
           # base class covariates start here
-          hms = list(path = ain("HMS_Smoke/data"),
+          hms = list(path = ain("HMS_Smoke", TRUE),
                     date = list_common$char_period,
                     covariate = "hms", 
                     domain = c("Light", "Medium", "Heavy"),
                     nthreads = nthreads_hms,
                     domain_name = "variable"),
           gmted = list(
-            path = ain("gmted"),
+            path = ain("gmted", TRUE),
             covariate = "gmted"
           ),
           nei = list(
             domain = c(2017, 2020),
             domain_name = "year",
-            path = ain("nei"),
+            path = ain("nei", TRUE),
             covariate = "nei"
           ),
           tri = list(
@@ -2946,17 +2948,17 @@ set_args_calc <-
           nlcd = list(
             domain = c(2019, 2021),
             domain_name = "year",
-            path = ain("nlcd/raw"),
+            path = ain("nlcd", TRUE),
             covariate = "nlcd",
             mode = "exact",
             extent = NULL,
             radius = c(1e3, 1e4, 5e4),
             max_cells = 1e8
           ),
-          koppen = list(path = ain("koppen_geiger/raw/Beck_KG_V1_present_0p0083.tif"), 
+          koppen = list(path = ain("koppen_geiger/data_files/Beck_KG_V1_present_0p0083.tif"), 
                         covariate = "koppen",
                         nthreads = 1L),
-          ecoregions = list(path = ain("ecoregions/raw/us_eco_l3_state_boundaries.shp"),
+          ecoregions = list(path = ain("ecoregions/data_files/us_eco_l3_state_boundaries.shp"),
                             covariate = "ecoregions",
                             nthreads = 1L),
           narr = list(
@@ -2978,12 +2980,12 @@ set_args_calc <-
             nthreads = nthreads_narr
           ),
           groads = list(
-                        path = ain("sedac_groads/groads-v1-americas-gdb/gROADS-v1-americas.gdb"),
+                        path = ain("sedac_groads/data_files/gROADS-v1-americas.gdb"),
                         covariate = "groads",
                         radius = c(1e3, 1e4, 5e4),
                         nthreads = nthreads_groads),
           population = list(
-            path = ain("sedac_population/gpw_v4_population_density_adjusted_to_2015_unwpp_country_totals_rev11_2020_30_sec.tif"),
+            path = ain("sedac_population/data_files/gpw_v4_population_density_adjusted_to_2015_unwpp_country_totals_rev11_2020_30_sec.tif"),
             covariate = "population", fun = "mean",
             radius = c(1e3, 1e4, 5e4),
             nthreads = nthreads_population
@@ -3036,10 +3038,13 @@ set_args_download <-
     char_input_dir = "input",
     path_export = "inst/targets/punchcard_download.qs"
   ) {
-    ain <- function(x) file.path(char_input_dir, x)
+    ain <- function(x, append = FALSE) {
+      file.path(char_input_dir, x, ifelse(append, "data_files", ""))
+    }
+
     list_download_config <-
       list(
-        aqs = list(dataset_name = "aqs", path = ain("aqs")),
+        aqs = list(dataset_name = "aqs", path = ain("aqs", TRUE)),
         mod11 = list(dataset_name = "modis", path = ain("modis/raw")),
         mod06 = list(dataset_name = "modis", path = ain("modis/raw")),
         mod09 = list(dataset_name = "modis", path = ain("modis/raw")),
@@ -3048,16 +3053,16 @@ set_args_download <-
         viirs = list(dataset_name = "modis", path = ain("modis/raw")),
         geoscf = list(dataset_name = "geos", path = ain("geos")),
         hms = list(dataset_name = "smoke", path = ain("HMS_Smoke")),
-        gmted = list(dataset_name = "gmted", path = ain("gmted")),
-        nei = list(dataset_name = "nei", path = ain("nei")),
+        gmted = list(dataset_name = "gmted", path = ain("gmted", TRUE)),
+        nei = list(dataset_name = "nei", path = ain("nei", TRUE)),
         tri = list(dataset_name = "tri", path = ain("tri")),
-        nlcd = list(dataset_name = "nlcd", path = ain("nlcd/raw")),
-        koppen = list(dataset_name = "koppen", path = ain("koppen_geiger/raw")),
-        ecoregions = list(dataset_name = "koppen", path = ain("ecoregions/raw")),
+        nlcd = list(dataset_name = "nlcd", path = ain("nlcd", TRUE)),
+        koppen = list(dataset_name = "koppen", path = ain("koppen_geiger", TRUE)),
+        ecoregions = list(dataset_name = "koppen", path = ain("ecoregions", TRUE)),
         narr_monolevel = list(dataset_name = "narr_monolevel", path = ain("narr")),
         narr_p_levels = list(dataset_name = "narr_p_levels", path = ain("narr")),
-        groads = list(dataset_name = "sedac_groads", path = ain("sedac_groads")),
-        population = list(dataset_name = "sedac_population", path = ain("sedac_population"))
+        groads = list(dataset_name = "sedac_groads", path = ain("sedac_groads", TRUE)),
+        population = list(dataset_name = "sedac_population", path = ain("sedac_population", TRUE))
       )
     return(list_download_config)
     qs::qsave(list_download_config, path_export)
