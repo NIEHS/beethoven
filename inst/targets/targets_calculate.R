@@ -199,7 +199,7 @@ target_calculate_fit <-
       Reduce(
         post_calc_autojoin,
         list(
-          reduce_merge(dt_feat_calc_narr, by = NULL),
+          dt_feat_calc_narr,
           dt_feat_calc_geoscf,
           dt_feat_calc_nasa
         )
@@ -269,7 +269,6 @@ target_calculate_fit <-
             ntasks = 1, ncpus = arglist_common$nthreads_impute, memory = 8
           )
     )
-  # TODO: compute lagged variables
   )
 
 

@@ -1951,6 +1951,11 @@ impute_all <-
       dt <- file.path("output/qs", dt)
       dt <- qs::qread(dt)
     }
+
+    # remove unnecessary columns
+    query <- "^(site_id|time)\\.[0-9]+"
+    dt <- dt[, !grepl(query, names(dt)), with = FALSE]
+
     # name cleaning
     dt <- stats::setNames(dt, sub("light_1", "OTH_HMSWL_0_00000", names(dt)))
     dt <- stats::setNames(dt, sub("medium_1", "OTH_HMSWM_0_00000", names(dt)))

@@ -648,3 +648,23 @@ fld <- Reduce(post_calc_autojoin, fl[1:7])
 post_calc_autojoin(fl[[1]], fl[[7]])
 fl[[7]]
 post_calc_autojoin(dtt, fl)
+
+
+library(beethoven)
+qt <- qs::qread("inst/targets/punchcard_calc.qs")
+ld <- loadargs("inst/targets/punchcard_calc.qs", "nlcd")
+sts <- targets::tar_read(sf_feat_proc_aqs_sites)
+
+rr <- rlang::inject(calculate(locs = sts, !!!ld))
+
+
+
+nlcd21 <- "/ddn/gs1/group/set/Projects/NRT-AP-Model/input/nlcd/data_files/nlcd_2021_land_cover_l48_20230630.img"
+nlcd21 <- terra::rast(nlcd21)
+terra::vect(cbind(-88, 36), crs = "EPSG:4326") |> terra::project(terra::crs(nlcd21)) |> terra::buffer(50000) -> buf
+bufs <- sf::st_as_sf(buf)
+bufs$id <- 1
+terra::extract(nlcd21, buf, fun = table, exact = TRUE)
+
+xx <- exactextractr::exact_extract(nlcd21, bufs, fun = "frac", force_df = TRUE, append_cols = "id")
+Sys.time()
