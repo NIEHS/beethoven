@@ -21,7 +21,7 @@ target_baselearner <-
     targets::tar_target(
       name = num_learner_base_hyper_learn,
       command = c(0.1, 0.05, 0.01, 0.001),
-      description = "learning rate"
+      description = "learning rate",
       iteration = "vector"
     )
     ,
