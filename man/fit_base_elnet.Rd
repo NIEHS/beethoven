@@ -9,7 +9,7 @@ fit_base_elnet(
   folds = NULL,
   r_subsample = 0.3,
   yvar = "Arithmetic.Mean",
-  xvar = seq(6, ncol(dt_imputed)),
+  xvar = seq(5, ncol(dt_imputed)),
   vfold = 5L,
   nthreads = 16L,
   ...

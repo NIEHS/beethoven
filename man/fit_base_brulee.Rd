@@ -8,8 +8,10 @@ fit_base_brulee(
   dt_imputed,
   folds = NULL,
   r_subsample = 0.3,
+  tune_mode = "grid",
+  learn_rate = 0.1,
   yvar = "Arithmetic.Mean",
-  xvar = seq(6, ncol(dt_imputed)),
+  xvar = seq(5, ncol(dt_imputed)),
   vfold = 5L,
   device = "cuda:0",
   ...
@@ -22,6 +24,12 @@ fit_base_brulee(
 numeric to be used in \link[rsample:vfold_cv]{rsample::vfold_cv}.}
 
 \item{r_subsample}{The proportion of rows to be sampled.}
+
+\item{tune_mode}{character(1). Hyperparameter tuning mode.
+Default is "grid", "bayes" is acceptable.}
+
+\item{learn_rate}{The learning rate for the model. For branching purpose.
+Default is 0.1.}
 
 \item{yvar}{The target variable.}
 
@@ -43,6 +51,12 @@ Multilayer perceptron model with different configurations of
 hidden units, dropout, activation, and learning rate using brulee
 and tidymodels. With proper settings, users can utilize graphics
 processing units (GPU) to speed up the training process.
+}
+\details{
+Hyperparameters \code{hidden_units}, \code{dropout}, \code{activation},
+and \code{learn_rate} are tuned. \verb{With tune_mode = "grid"},
+users can modify \code{learn_rate} explicitly, and other hyperparameters
+will be predefined (56 combinations per \code{learn_rate}).
 }
 \note{
 tune package should be 1.2.0 or higher.

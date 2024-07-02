@@ -2205,10 +2205,18 @@ par_nest <-
 #' @keywords Baselearner
 #' @note tune package should be 1.2.0 or higher.
 #' brulee should be installed with GPU support.
+#' @details Hyperparameters `hidden_units`, `dropout`, `activation`,
+#'   and `learn_rate` are tuned. `With tune_mode = "grid"`,
+#'   users can modify `learn_rate` explicitly, and other hyperparameters
+#'   will be predefined (56 combinations per `learn_rate`).
 #' @param dt_imputed The input data table to be used for fitting.
 #' @param folds pre-generated rset object. If NULL, `vfold` should be
 #'   numeric to be used in [rsample::vfold_cv].
 #' @param r_subsample The proportion of rows to be sampled.
+#' @param tune_mode character(1). Hyperparameter tuning mode.
+#'   Default is "grid", "bayes" is acceptable.
+#' @param learn_rate The learning rate for the model. For branching purpose.
+#'   Default is 0.1.
 #' @param yvar The target variable.
 #' @param xvar The predictor variables.
 #' @param vfold The number of folds for cross-validation.
@@ -2232,19 +2240,23 @@ fit_base_brulee <-
     dt_imputed,
     folds = NULL,
     r_subsample = 0.3,
+    tune_mode = "grid",
+    learn_rate = 0.1,
     yvar = "Arithmetic.Mean",
-    xvar = seq(6, ncol(dt_imputed)),
+    xvar = seq(5, ncol(dt_imputed)),
     vfold = 5L,
     device = "cuda:0",
     ...
   ) {
+    tune_mode <- match.arg(tune_mode, c("grid", "bayes"))
+
     # 2^9=512, 2^15=32768 (#param is around 10% of selected rows)
     grid_hyper_tune <-
       expand.grid(
         hidden_units = list(c(1024), c(64, 64), c(32, 32, 32), c(16, 16, 16)),
         dropout = 1 / seq(4, 2, -1),
         activation = c("relu", "leaky_relu"),
-        learn_rate = c(0.1, 0.05, 0.01)
+        learn_rate = learn_rate
       )
     dt_imputed <-
       dt_imputed %>%
@@ -2282,13 +2294,27 @@ fit_base_brulee <-
     base_wf <-
       workflows::workflow() %>%
       workflows::add_recipe(base_recipe) %>%
-      workflows::add_model(base_model) %>%
-      tune::tune_grid(
-        resamples = base_vfold,
-        grid = grid_hyper_tune,
-        metrics = yardstick::metric_set(yardstick::rmse, yardstick::mape),
-        control = wf_config
-      )
+      workflows::add_model(base_model)
+
+    if (tune_mode == "grid") {
+      base_wf <-
+        base_wf %>%
+        tune::tune_grid(
+          resamples = base_vfold,
+          grid = grid_hyper_tune,
+          metrics = yardstick::metric_set(yardstick::rmse, yardstick::mape),
+          control = wf_config
+        )
+    } else {
+      base_wf <-
+        base_wf %>%
+        tune::tune_bayes(
+          resamples = base_vfold,
+          iter = 50L,
+          metrics = yardstick::metric_set(yardstick::rmse, yardstick::mape),
+          control = wf_config
+        )
+    }
     return(base_wf)
   }
 
@@ -2307,10 +2333,18 @@ fit_base_brulee <-
 #' @keywords Baselearner
 #' @note tune package should be 1.2.0 or higher.
 #' xgboost should be installed with GPU support.
+#' @details Hyperparameters `mtry`, `ntrees`, and `learn_rate` are
+#'   tuned. With `tune_mode = "grid"`,
+#'   users can modify `learn_rate` explicitly, and other hyperparameters
+#'   will be predefined (30 combinations per `learn_rate`).
 #' @param dt_imputed The input data table to be used for fitting.
 #' @param folds pre-generated rset object. If NULL, it should be
 #'   numeric to be used in [rsample::vfold_cv].
 #' @param r_subsample The proportion of rows to be sampled.
+#' @param tune_mode character(1). Hyperparameter tuning mode.
+#'   Default is "grid", "bayes" is acceptable.
+#' @param learn_rate The learning rate for the model. For branching purpose.
+#'   Default is 0.1.
 #' @param yvar The target variable.
 #' @param xvar The predictor variables.
 #' @param vfold The number of folds for cross-validation.
@@ -2334,17 +2368,20 @@ fit_base_xgb <-
     dt_imputed,
     folds = NULL,
     r_subsample = 0.3,
+    tune_mode = "grid",
+    learn_rate = 0.1,
     yvar = "Arithmetic.Mean",
-    xvar = seq(6, ncol(dt_imputed)),
+    xvar = seq(5, ncol(dt_imputed)),
     vfold = 5L,
     device = "cuda:0",
     ...
   ) {
+    tune_mode <- match.arg(tune_mode, c("grid", "bayes"))
     grid_hyper_tune <-
       expand.grid(
         mtry = floor(c(0.02, 0.1, 0.02) * ncol(dt_imputed)),
         trees = seq(1000, 3000, 500),
-        learn_rate = c(0.1, 0.05, 0.01, 0.001)
+        learn_rate = learn_rate
       )
     dt_imputed <-
       dt_imputed %>%
@@ -2376,13 +2413,27 @@ fit_base_xgb <-
     base_wf <-
       workflows::workflow() %>%
       workflows::add_recipe(base_recipe) %>%
-      workflows::add_model(base_model) %>%
-      tune::tune_grid(
-        resamples = base_vfold,
-        grid = grid_hyper_tune,
-        metrics = yardstick::metric_set(yardstick::rmse, yardstick::mape),
-        control = wf_config
-      )
+      workflows::add_model(base_model)
+
+    if (tune_mode == "grid") {
+      base_wf <-
+        base_wf %>%
+        tune::tune_grid(
+          resamples = base_vfold,
+          grid = grid_hyper_tune,
+          metrics = yardstick::metric_set(yardstick::rmse, yardstick::mape),
+          control = wf_config
+        )
+    } else {
+      base_wf <-
+        base_wf %>%
+        tune::tune_bayes(
+          resamples = base_vfold,
+          iter = 50L,
+          metrics = yardstick::metric_set(yardstick::rmse, yardstick::mape),
+          control = wf_config
+        )
+    }
     return(base_wf)
 
   }
@@ -2425,7 +2476,7 @@ fit_base_elnet <-
     folds = NULL,
     r_subsample = 0.3,
     yvar = "Arithmetic.Mean",
-    xvar = seq(6, ncol(dt_imputed)),
+    xvar = seq(5, ncol(dt_imputed)),
     vfold = 5L,
     nthreads = 16L,
     ...
