@@ -11,6 +11,7 @@ fit_base_brulee(
   yvar = "Arithmetic.Mean",
   xvar = seq(6, ncol(dt_imputed)),
   vfold = 5L,
+  device = "cuda:0",
   ...
 )
 }
@@ -28,6 +29,10 @@ numeric to be used in \link[rsample:vfold_cv]{rsample::vfold_cv}.}
 
 \item{vfold}{The number of folds for cross-validation.}
 
+\item{device}{The device to be used for training.
+Default is "cuda:0". Make sure that your system is equipped
+with CUDA-enabled graphical processing units.}
+
 \item{...}{Additional arguments to be passed.}
 }
 \value{
@@ -41,5 +46,6 @@ processing units (GPU) to speed up the training process.
 }
 \note{
 tune package should be 1.2.0 or higher.
+brulee should be installed with GPU support.
 }
 \keyword{Baselearner}

@@ -713,7 +713,6 @@ feature_raw_download <-
 #' Default is c("02", "15", "60", "66", "68", "69", "72", "78").
 #' @returns sf object
 #' @importFrom tigris counties
-#' @export
 process_counties <-
   function(
     year = 2020,
@@ -802,7 +801,6 @@ post_calc_unify_timecols <-
 #' @note This function takes preprocessed data.table with
 #'   a column named `"time"`.
 #' @importFrom data.table as.data.table copy
-#' @export
 post_calc_convert_time <-
   function(
     df
@@ -923,7 +921,6 @@ post_calc_merge_all <-
 #'                  description = letters[1:5], other = 16:20)
 #' post_calc_drop_cols(df)
 #' }
-#' @export
 post_calc_drop_cols <-
   function(
     df,
@@ -1096,7 +1093,6 @@ read_paths <-
 #' \dontrun{
 #' search_function("amadeus", "process_")
 #' }
-#' @export
 search_function <- function(package, search) {
   library(package, character.only = TRUE)
   grep(search, ls(sprintf("package:%s", package)), value = TRUE)
@@ -1951,7 +1947,7 @@ impute_all <-
       dt <- file.path("output/qs", dt)
       dt <- qs::qread(dt)
     }
-
+    dt$time <- as.POSIXct(dt$time)
     # remove unnecessary columns
     query <- "^(site_id|time)\\.[0-9]+"
     dt <- dt[, !grepl(query, names(dt)), with = FALSE]
@@ -2208,6 +2204,7 @@ par_nest <-
 #' processing units (GPU) to speed up the training process.
 #' @keywords Baselearner
 #' @note tune package should be 1.2.0 or higher.
+#' brulee should be installed with GPU support.
 #' @param dt_imputed The input data table to be used for fitting.
 #' @param folds pre-generated rset object. If NULL, `vfold` should be
 #'   numeric to be used in [rsample::vfold_cv].
@@ -2215,6 +2212,9 @@ par_nest <-
 #' @param yvar The target variable.
 #' @param xvar The predictor variables.
 #' @param vfold The number of folds for cross-validation.
+#' @param device The device to be used for training.
+#'   Default is "cuda:0". Make sure that your system is equipped
+#'   with CUDA-enabled graphical processing units.
 #' @param ... Additional arguments to be passed.
 #'
 #' @returns The fitted workflow.
@@ -2235,12 +2235,13 @@ fit_base_brulee <-
     yvar = "Arithmetic.Mean",
     xvar = seq(6, ncol(dt_imputed)),
     vfold = 5L,
+    device = "cuda:0",
     ...
   ) {
     # 2^9=512, 2^15=32768 (#param is around 10% of selected rows)
     grid_hyper_tune <-
       expand.grid(
-        hidden_units = list(c(64, 64), c(32, 32), c(32, 32, 32), c(16, 16, 16)),
+        hidden_units = list(c(1024), c(64, 64), c(32, 32, 32), c(16, 16, 16)),
         dropout = 1 / seq(4, 2, -1),
         activation = c("relu", "leaky_relu"),
         learn_rate = c(0.1, 0.05, 0.01)
@@ -2273,7 +2274,7 @@ fit_base_brulee <-
         activation = parsnip::tune(),
         learn_rate = parsnip::tune()
       ) %>%
-      parsnip::set_engine("brulee", device = "cuda") %>%
+      parsnip::set_engine("brulee", device = device) %>%
       parsnip::set_mode("regression")
 
     wf_config <- tune::control_resamples(save_pred = TRUE, save_workflow = TRUE)
@@ -2305,6 +2306,7 @@ fit_base_brulee <-
 #' processing units (GPU) to speed up the training process.
 #' @keywords Baselearner
 #' @note tune package should be 1.2.0 or higher.
+#' xgboost should be installed with GPU support.
 #' @param dt_imputed The input data table to be used for fitting.
 #' @param folds pre-generated rset object. If NULL, it should be
 #'   numeric to be used in [rsample::vfold_cv].
@@ -2312,6 +2314,9 @@ fit_base_brulee <-
 #' @param yvar The target variable.
 #' @param xvar The predictor variables.
 #' @param vfold The number of folds for cross-validation.
+#' @param device The device to be used for training.
+#'   Default is "cuda:0". Make sure that your system is equipped
+#'   with CUDA-enabled graphical processing units.
 #' @param ... Additional arguments to be passed.
 #'
 #' @returns The fitted workflow.
@@ -2332,13 +2337,14 @@ fit_base_xgb <-
     yvar = "Arithmetic.Mean",
     xvar = seq(6, ncol(dt_imputed)),
     vfold = 5L,
+    device = "cuda:0",
     ...
   ) {
     grid_hyper_tune <-
       expand.grid(
         mtry = floor(c(0.02, 0.1, 0.02) * ncol(dt_imputed)),
-        trees = seq(500, 3000, 500),
-        learn_rate = c(0.05, 0.01, 0.005, 0.001)
+        trees = seq(1000, 3000, 500),
+        learn_rate = c(0.1, 0.05, 0.01, 0.001)
       )
     dt_imputed <-
       dt_imputed %>%
@@ -2362,7 +2368,7 @@ fit_base_xgb <-
         trees = parsnip::tune(),
         learn_rate = parsnip::tune()
       ) %>%
-      parsnip::set_engine("xgboost", device = "cuda") %>%
+      parsnip::set_engine("xgboost", device = device) %>%
       parsnip::set_mode("regression")
 
     wf_config <- tune::control_resamples(save_pred = TRUE, save_workflow = TRUE)
@@ -2559,12 +2565,12 @@ attach_xy <-
     data_sfd <- data.frame(site_id = data_sf, data.frame(data_sfd))
     data_sfd <- stats::setNames(data_sfd, c(locs_id, "lon", "lat"))
 
-    data_full_lean <- data_full[, c(locs_id, time_id), with = FALSE]
-    data_full_lean <-
+    # data_full_lean <- data_full[, c(locs_id, time_id), with = FALSE]
+    data_full_attach <-
       collapse::join(
-        data_full_lean, data_sfd, on = locs_id, how = "left"
+        data_full, data_sfd, on = locs_id, how = "left"
       )
-    return(data_full_lean)
+    return(data_full_attach)
   }
 
 

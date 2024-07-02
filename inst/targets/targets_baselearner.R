@@ -17,8 +17,10 @@ target_baselearner <-
       )
     )
     ,
+    # wf: workflow
+    # feat? base?
     targets::tar_target(
-      wf_feat_fit_xgb,
+      workflow_learner_base_xgb,
       fit_base_xgb(
         dt_feat_calc_imputed,
         folds = cv_config
@@ -27,7 +29,7 @@ target_baselearner <-
     )
     ,
     targets::tar_target(
-      wf_feat_fit_mlp,
+      workflow_learner_base_mlp,
       fit_base_brulee(
         dt_feat_calc_imputed,
         folds = cv_config
@@ -36,7 +38,7 @@ target_baselearner <-
     )
     ,
     targets::tar_target(
-      wf_feat_fit_elnet,
+      workflow_learner_base_elnet,
       fit_base_elnet(
         dt_feat_calc_imputed,
         folds = cv_config,
