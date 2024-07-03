@@ -2616,10 +2616,10 @@ attach_xy <-
     data_sfd <- data.frame(site_id = data_sf, data.frame(data_sfd))
     data_sfd <- stats::setNames(data_sfd, c(locs_id, "lon", "lat"))
 
-    # data_full_lean <- data_full[, c(locs_id, time_id), with = FALSE]
+    data_full_lean <- data_full[, c(locs_id, time_id), with = FALSE]
     data_full_attach <-
       collapse::join(
-        data_full, data_sfd, on = locs_id, how = "left"
+        data_full_lean, data_sfd, on = locs_id, how = "left"
       )
     return(data_full_attach)
   }
@@ -2653,6 +2653,7 @@ attach_xy <-
 #'    are selected based on the rank.
 #'   * "2": rank the pairwise distances directly
 #' @param cv_mode character(1). Spatiotemporal cross-validation indexing
+#' @param ... Additional arguments to be passed.
 #' @note nrow(data) %% cv_fold should be 0.
 #' @returns rsample::manual_rset() object.
 #' @author Insang Song
@@ -2668,7 +2669,8 @@ generate_cv_index <-
     cv_fold = 5L,
     cv_pairs = NULL,
     pairing = c("1", "2"),
-    cv_mode = "spt"
+    cv_mode = "spt",
+    ...
   ) {
     if (length(target_cols) != 3) {
       stop("Please provide three target columns.")
@@ -3136,5 +3138,54 @@ set_args_download <-
   }
 
 # nolint end
+
+#' Prepare spatial and spatiotemporal cross validation sets
+#' @keywords Baselearner
+#' @param data data.table with X, Y, and time information.
+#' @param target_cols character(3). Names of columns for X, Y.
+#'   Default is `c("lon", "lat")`. It is passed to sf::st_as_sf to
+#'   subsequently generate spatial cross-validation indices using
+#'   `spatialsample::spatial_block_cv` and
+#'   `spatialsample::spatial_clustering_cv`.
+#' @param cv_make_fun function(1). Function to generate spatial
+#'   cross-validation indices. Default is `spatialsample::spatial_block_cv`.
+#' @seealso [`generate_cv_index`] [`spatialsample::spatial_block_cv`]
+#'   [`spatialsample::spatial_clustering_cv`]
+#' @returns rsample::manual_rset() object.
+#' @importFrom rlang inject
+#' @importFrom sf st_as_sf
+#' @export
+prepare_cvindex <-
+  function(
+    data,
+    target_cols = c("lon", "lat"),
+    cv_make_fun = spatialsample::spatial_block_cv,
+    ...
+  ) {
+    if (getNamespaceName(environment(cv_make_fun)) == "beethoven") {
+      cv_index <-
+        rlang::inject(
+          cv_make_fun(
+            data = data,
+            target_cols = target_cols,
+            !!!list(...)
+          )
+        )
+    } else {
+      data_sf <- sf::st_as_sf(data, coords = target_cols)
+      cv_index <-
+        rlang::inject(
+          cv_make_fun(
+            data_sf,
+            !!!list(...)
+          )
+        )
+      return(cv_index)
+
+    }
+  }
+
+
+
 
 # nocov end
