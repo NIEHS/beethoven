@@ -20,6 +20,7 @@ target_baselearner <-
       iteration = "list"
     )
     ,
+    # length of 30
     targets::tar_target(
       name = list_learner_base_cv_spt,
       command =
@@ -36,6 +37,7 @@ target_baselearner <-
       iteration = "list"
     )
     ,
+    # length of 30
     targets::tar_target(
       name = list_learner_base_cv_spblock,
       command =
@@ -50,6 +52,7 @@ target_baselearner <-
       iteration = "list"
     )
     ,
+    # length of 30
     targets::tar_target(
       name = list_learner_base_cv_spcluster,
       command =
@@ -61,7 +64,8 @@ target_baselearner <-
         cluster_function = "kmeans"
       ),
       pattern = map(list_feat_calc_xyt),
-      iteration = "list"
+      iteration = "list",
+      resources = set_slurm_resource(ncpus = 1L, memory = 32L, partition = "geo")
     )
     ,
     # learn_rate branching
@@ -79,12 +83,12 @@ target_baselearner <-
     )
     ,
     # wf: workflow
-    # feat? base?
+    # xgb-spt-cv
     targets::tar_target(
-      workflow_learner_base_xgb,
+      workflow_learner_base_xgb_spt,
       fit_base_xgb(
         dt_feat_calc_imputed,
-        folds = cv_config,
+        folds = list_learner_base_cv_spt,
         tune_mode = "grid",
         learn_rate = num_learner_base_learn_device$rate,
         device = num_learner_base_learn_device$device
@@ -94,10 +98,36 @@ target_baselearner <-
     )
     ,
     targets::tar_target(
-      workflow_learner_base_mlp,
+      workflow_learner_base_xgb_spblock,
+      fit_base_xgb(
+        dt_feat_calc_imputed,
+        folds = list_learner_base_cv_spblock,
+        tune_mode = "grid",
+        learn_rate = num_learner_base_learn_device$rate,
+        device = num_learner_base_learn_device$device
+      ),
+      pattern = map(num_learner_base_learn_device),
+      resources = set_slurm_resource(ncpus = 6L, memory = 20L, partition = "geo")
+    )
+    ,
+    targets::tar_target(
+      workflow_learner_base_xgb_spcluster,
+      fit_base_xgb(
+        dt_feat_calc_imputed,
+        folds = list_learner_base_cv_spcluster,
+        tune_mode = "grid",
+        learn_rate = num_learner_base_learn_device$rate,
+        device = num_learner_base_learn_device$device
+      ),
+      pattern = map(num_learner_base_learn_device),
+      resources = set_slurm_resource(ncpus = 6L, memory = 20L, partition = "geo")
+    )
+    ,
+    targets::tar_target(
+      workflow_learner_base_mlp_spt,
       fit_base_brulee(
         dt_feat_calc_imputed,
-        folds = cv_config,
+        folds = list_learner_base_cv_spt,
         tune_mode = "grid",
         learn_rate = num_learner_base_learn_device$rate,
         device = num_learner_base_learn_device$device
@@ -107,12 +137,63 @@ target_baselearner <-
     )
     ,
     targets::tar_target(
-      workflow_learner_base_elnet,
+      workflow_learner_base_mlp_spblock,
+      fit_base_brulee(
+        dt_feat_calc_imputed,
+        folds = list_learner_base_cv_spblock,
+        tune_mode = "grid",
+        learn_rate = num_learner_base_learn_device$rate,
+        device = num_learner_base_learn_device$device
+      ),
+      pattern = map(num_learner_base_learn_device),
+      resources = set_slurm_resource(ncpus = 6L, memory = 20L, partition = "geo,gpu")
+    )
+    ,
+    targets::tar_target(
+      workflow_learner_base_mlp_spcluster,
+      fit_base_brulee(
+        dt_feat_calc_imputed,
+        folds = list_learner_base_cv_spcluster,
+        tune_mode = "grid",
+        learn_rate = num_learner_base_learn_device$rate,
+        device = num_learner_base_learn_device$device
+      ),
+      pattern = map(num_learner_base_learn_device),
+      resources = set_slurm_resource(ncpus = 6L, memory = 20L, partition = "geo,gpu")
+    )
+    ,
+    targets::tar_target(
+      workflow_learner_base_elnet_spt,
       fit_base_elnet(
         dt_feat_calc_imputed,
-        folds = cv_config,
+        folds = list_learner_base_cv_spt,
         nthreads = 32L
       ),
       resources = set_slurm_resource(ncpus = 32L, memory = 8L, partition = "geo,highmem")
     )
+    ,
+    targets::tar_target(
+      workflow_learner_base_elnet_spblock,
+      fit_base_elnet(
+        dt_feat_calc_imputed,
+        folds = list_learner_base_cv_spblock,
+        nthreads = 32L
+      ),
+      resources = set_slurm_resource(ncpus = 32L, memory = 8L, partition = "geo,highmem")
+    )
+    ,
+    targets::tar_target(
+      workflow_learner_base_elnet_spcluster,
+      fit_base_elnet(
+        dt_feat_calc_imputed,
+        folds = list_learner_base_cv_spcluster,
+        nthreads = 32L
+      ),
+      resources = set_slurm_resource(ncpus = 32L, memory = 8L, partition = "geo,highmem")
+    )
+    # collecting workflow will result in 30 * 0.3 * 10 * 20GB * 56 * 3 = 302400GB
+    # (Resamples) * (Proportion) * (VCVFOLD) * (Data size) * (Grid) * 
+    # (CV strategies)
+    # per learner
+
   )

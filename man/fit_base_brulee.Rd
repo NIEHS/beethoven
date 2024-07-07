@@ -7,13 +7,14 @@
 fit_base_brulee(
   dt_imputed,
   folds = NULL,
-  r_subsample = 0.3,
   tune_mode = "grid",
+  tune_bayes_iter = 50L,
   learn_rate = 0.1,
   yvar = "Arithmetic.Mean",
   xvar = seq(5, ncol(dt_imputed)),
   vfold = 5L,
   device = "cuda:0",
+  return_best = TRUE,
   ...
 )
 }
@@ -23,10 +24,11 @@ fit_base_brulee(
 \item{folds}{pre-generated rset object. If NULL, \code{vfold} should be
 numeric to be used in \link[rsample:vfold_cv]{rsample::vfold_cv}.}
 
-\item{r_subsample}{The proportion of rows to be sampled.}
-
 \item{tune_mode}{character(1). Hyperparameter tuning mode.
 Default is "grid", "bayes" is acceptable.}
+
+\item{tune_bayes_iter}{integer(1). The number of iterations for
+Bayesian optimization. Default is 50. Only used when \code{tune_mode = "bayes"}.}
 
 \item{learn_rate}{The learning rate for the model. For branching purpose.
 Default is 0.1.}
@@ -40,6 +42,8 @@ Default is 0.1.}
 \item{device}{The device to be used for training.
 Default is "cuda:0". Make sure that your system is equipped
 with CUDA-enabled graphical processing units.}
+
+\item{return_best}{logical(1). If TRUE, the best tuned model is returned.}
 
 \item{...}{Additional arguments to be passed.}
 }

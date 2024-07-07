@@ -668,3 +668,59 @@ terra::extract(nlcd21, buf, fun = table, exact = TRUE)
 
 xx <- exactextractr::exact_extract(nlcd21, bufs, fun = "frac", force_df = TRUE, append_cols = "id")
 Sys.time()
+
+
+library(targets)
+library(beethoven)
+library(dplyr)
+
+tar_read(dt_feat_calc_imputed) -> dff
+dffs <- dff[, c("site_id", "time"), with = F]
+dffss <- dffs[1:1e4,]
+rsample::vfold_cv(dffss, v = 5) -> cv
+
+cvrestore <-
+  beethoven:::restore_rset_full(
+    cv, dff
+  )
+
+# define a simple tidymodels workflow to use cvrestore object
+xgb_mod <-
+  parsnip::boost_tree(learn_rate = tune::tune(), trees = 300L) |>
+  parsnip::set_engine("lightgbm") |>
+  parsnip::set_mode("regression")
+
+pm25mod <- workflows::workflow() |>
+  workflows::add_model(xgb_mod) |>
+  workflows::add_formula(
+    reformulate(
+      response = "Arithmetic.Mean",
+      termlabels = c("time", grep("LDU", names(dff), value = TRUE))
+    )
+  ) |>
+  tune::tune_bayes(
+    resamples = cvrestore,
+    iter = 2,
+    metrics = yardstick::metric_set(yardstick::rmse, yardstick::mae, yardstick::mape),
+    control = control_bayes(save_workflow = F, save_pred = FALSE)) #|>
+  # tune::fit_resamples(metrics = yardstick::metric_set(rmse, mae))
+
+pm25mod[pm25mod$.iter == 1, ".metrics"][[1]]
+
+pm25modbdf <- tune::select_best(pm25mod, metric = "rmse")
+pm25modbest <- finalize_workflow(pm25mod, pm25modbdf)
+pm25modb <- tune::fit_best(pm25mod)
+pm25pred <- predict(pm25modb, dff[seq_len(1e4L), ])
+yardstick::rmse_vec(unlist(dff[seq_len(1e4L), "Arithmetic.Mean"]), pm25pred$.pred)
+
+dffsu <- unique(dffs)
+dffx <- collapse::join(dffsu, dff, on = c("site_id", "time"), how = "anti")
+dffx
+
+# subset dff with duplicate site_id and time
+dffd <- dff[duplicated(dffs) | duplicated(dffs, fromLast = TRUE),]
+
+
+
+
+dim(dff)

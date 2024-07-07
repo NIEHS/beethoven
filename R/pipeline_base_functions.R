@@ -2196,6 +2196,47 @@ par_nest <-
   }
 
 
+#' Wrapper for base learners
+#' @keywords Baselearner
+#' @param learner character(1). One of "mlp", "xgboost", "elasticnet"
+#' @param rset pre-generated rset object.
+#' @param full_data data.frame. The imputed full data that will be used to
+#'   restore full rset object for model fitting.
+#' @param ... Additional arguments to be passed.
+#' @returns The fitted workflow.
+#' @export
+fit_base <-
+  function(
+    learner,
+    rset,
+    full_data,
+    ...
+  ) {
+    learner <- match.arg(learner, c("mlp", "xgboost", "elasticnet"))
+    restored <- restore_rset_full(rset = rset, data_full = full_data)
+
+    if (learner == "mlp") {
+      fit_base_brulee(
+        dt_imputed = full_data,
+        folds = restored,
+        ...
+      )
+    } else if (learner == "xgboost") {
+      fit_base_xgb(
+        dt_imputed = full_data,
+        folds = restored,
+        ...
+      )
+    } else if (learner == "elasticnet") {
+      fit_base_elnet(
+        dt_imputed = full_data,
+        folds = restored,
+        ...
+      )
+    }
+  }
+
+
 #' Base learner: Multilayer perceptron with brulee
 #'
 #' Multilayer perceptron model with different configurations of
@@ -2212,9 +2253,10 @@ par_nest <-
 #' @param dt_imputed The input data table to be used for fitting.
 #' @param folds pre-generated rset object. If NULL, `vfold` should be
 #'   numeric to be used in [rsample::vfold_cv].
-#' @param r_subsample The proportion of rows to be sampled.
 #' @param tune_mode character(1). Hyperparameter tuning mode.
 #'   Default is "grid", "bayes" is acceptable.
+#' @param tune_bayes_iter integer(1). The number of iterations for
+#'  Bayesian optimization. Default is 50. Only used when `tune_mode = "bayes"`.
 #' @param learn_rate The learning rate for the model. For branching purpose.
 #'   Default is 0.1.
 #' @param yvar The target variable.
@@ -2223,6 +2265,7 @@ par_nest <-
 #' @param device The device to be used for training.
 #'   Default is "cuda:0". Make sure that your system is equipped
 #'   with CUDA-enabled graphical processing units.
+#' @param return_best logical(1). If TRUE, the best tuned model is returned.
 #' @param ... Additional arguments to be passed.
 #'
 #' @returns The fitted workflow.
@@ -2230,7 +2273,7 @@ par_nest <-
 #' @importFrom dplyr `%>%`
 #' @importFrom parsnip mlp set_engine set_mode
 #' @importFrom workflows workflow add_recipe add_model
-#' @importFrom tune tune_grid
+#' @importFrom tune tune_grid fit_best
 #' @importFrom tidyselect all_of
 #' @importFrom yardstick metric_set rmse
 #' @importFrom rsample vfold_cv
@@ -2239,13 +2282,15 @@ fit_base_brulee <-
   function(
     dt_imputed,
     folds = NULL,
-    r_subsample = 0.3,
+    # r_subsample = 0.3,
     tune_mode = "grid",
+    tune_bayes_iter = 50L,
     learn_rate = 0.1,
     yvar = "Arithmetic.Mean",
     xvar = seq(5, ncol(dt_imputed)),
     vfold = 5L,
     device = "cuda:0",
+    return_best = TRUE,
     ...
   ) {
     tune_mode <- match.arg(tune_mode, c("grid", "bayes"))
@@ -2258,9 +2303,9 @@ fit_base_brulee <-
         activation = c("relu", "leaky_relu"),
         learn_rate = learn_rate
       )
-    dt_imputed <-
-      dt_imputed %>%
-      dplyr::slice_sample(prop = r_subsample)
+    # dt_imputed <-
+    #   dt_imputed %>%
+    #   dplyr::slice_sample(prop = r_subsample)
 
     base_recipe <-
       recipes::recipe(
@@ -2310,10 +2355,13 @@ fit_base_brulee <-
         base_wf %>%
         tune::tune_bayes(
           resamples = base_vfold,
-          iter = 50L,
+          iter = tune_bayes_iter,
           metrics = yardstick::metric_set(yardstick::rmse, yardstick::mape),
           control = wf_config
         )
+    }
+    if (return_best) {
+      base_wf <- tune::fit_best(base_wf)
     }
     return(base_wf)
   }
@@ -2340,9 +2388,10 @@ fit_base_brulee <-
 #' @param dt_imputed The input data table to be used for fitting.
 #' @param folds pre-generated rset object. If NULL, it should be
 #'   numeric to be used in [rsample::vfold_cv].
-#' @param r_subsample The proportion of rows to be sampled.
 #' @param tune_mode character(1). Hyperparameter tuning mode.
 #'   Default is "grid", "bayes" is acceptable.
+#' @param tune_bayes_iter integer(1). The number of iterations for
+#' Bayesian optimization. Default is 50. Only used when `tune_mode = "bayes"`.
 #' @param learn_rate The learning rate for the model. For branching purpose.
 #'   Default is 0.1.
 #' @param yvar The target variable.
@@ -2351,6 +2400,7 @@ fit_base_brulee <-
 #' @param device The device to be used for training.
 #'   Default is "cuda:0". Make sure that your system is equipped
 #'   with CUDA-enabled graphical processing units.
+#' @param return_best logical(1). If TRUE, the best tuned model is returned.
 #' @param ... Additional arguments to be passed.
 #'
 #' @returns The fitted workflow.
@@ -2358,7 +2408,7 @@ fit_base_brulee <-
 #' @importFrom dplyr `%>%`
 #' @importFrom parsnip boost_tree set_engine set_mode
 #' @importFrom workflows workflow add_recipe add_model
-#' @importFrom tune tune_grid
+#' @importFrom tune tune_grid fit_best
 #' @importFrom tidyselect all_of
 #' @importFrom yardstick metric_set rmse
 #' @importFrom rsample vfold_cv
@@ -2367,13 +2417,15 @@ fit_base_xgb <-
   function(
     dt_imputed,
     folds = NULL,
-    r_subsample = 0.3,
+    # r_subsample = 0.3,
     tune_mode = "grid",
+    tune_bayes_iter = 50L,
     learn_rate = 0.1,
     yvar = "Arithmetic.Mean",
     xvar = seq(5, ncol(dt_imputed)),
     vfold = 5L,
     device = "cuda:0",
+    return_best = TRUE,
     ...
   ) {
     tune_mode <- match.arg(tune_mode, c("grid", "bayes"))
@@ -2383,9 +2435,9 @@ fit_base_xgb <-
         trees = seq(1000, 3000, 500),
         learn_rate = learn_rate
       )
-    dt_imputed <-
-      dt_imputed %>%
-      dplyr::slice_sample(prop = r_subsample)
+    # dt_imputed <-
+    #   dt_imputed %>%
+    #   dplyr::slice_sample(prop = r_subsample)
 
     base_recipe <-
       recipes::recipe(
@@ -2429,10 +2481,13 @@ fit_base_xgb <-
         base_wf %>%
         tune::tune_bayes(
           resamples = base_vfold,
-          iter = 50L,
+          iter = tune_bayes_iter,
           metrics = yardstick::metric_set(yardstick::rmse, yardstick::mape),
           control = wf_config
         )
+    }
+    if (return_best) {
+      base_wf <- tune::fit_best(base_wf)
     }
     return(base_wf)
 
@@ -2452,11 +2507,15 @@ fit_base_xgb <-
 #' @param dt_imputed The input data table to be used for fitting.
 #' @param folds pre-generated rset object. If NULL, it should be
 #'   numeric to be used in [rsample::vfold_cv].
-#' @param r_subsample The proportion of rows to be sampled.
 #' @param yvar The target variable.
 #' @param xvar The predictor variables.
 #' @param vfold The number of folds for cross-validation.
+#' @param tune_mode character(1). Hyperparameter tuning mode.
+#'   Default is "grid", "bayes" is acceptable.
+#' @param tune_bayes_iter integer(1). The number of iterations for
+#' Bayesian optimization. Default is 50. Only used when `tune_mode = "bayes"`.
 #' @param nthreads The number of threads to be used. Default is 16L.
+#' @param return_best logical(1). If TRUE, the best tuned model is returned.
 #' @param ... Additional arguments to be passed.
 #'
 #' @returns The fitted workflow.
@@ -2465,7 +2524,7 @@ fit_base_xgb <-
 #' @importFrom recipes recipe update_role
 #' @importFrom parsnip linear_reg set_engine set_mode
 #' @importFrom workflows workflow add_recipe add_model
-#' @importFrom tune tune_grid
+#' @importFrom tune tune_grid fit_best
 #' @importFrom tidyselect all_of
 #' @importFrom yardstick metric_set rmse
 #' @importFrom rsample vfold_cv
@@ -2474,11 +2533,14 @@ fit_base_elnet <-
   function(
     dt_imputed,
     folds = NULL,
-    r_subsample = 0.3,
+    # r_subsample = 0.3,
     yvar = "Arithmetic.Mean",
     xvar = seq(5, ncol(dt_imputed)),
+    tune_mode = "grid",
+    tune_bayes_iter = 50L,
     vfold = 5L,
     nthreads = 16L,
+    return_best = TRUE,
     ...
   ) {
     grid_hyper_tune <-
@@ -2486,9 +2548,9 @@ fit_base_elnet <-
         mixture = seq(0, 1, length.out = 21),
         penalty = 10 ^ seq(-3, 5)
       )
-    dt_imputed <-
-      dt_imputed %>%
-      dplyr::slice_sample(prop = r_subsample)
+    # dt_imputed <-
+    #   dt_imputed %>%
+    #   dplyr::slice_sample(prop = r_subsample)
 
     base_recipe <-
       recipes::recipe(
@@ -2517,14 +2579,32 @@ fit_base_elnet <-
     base_wf <-
       workflows::workflow() %>%
       workflows::add_recipe(base_recipe) %>%
-      workflows::add_model(base_model) %>%
-      tune::tune_grid(
-        resamples = base_vfold,
-        grid = grid_hyper_tune,
-        metrics = yardstick::metric_set(yardstick::rmse, yardstick::mape),
-        control = wf_config,
-        parallel_over = "resamples"
-      )
+      workflows::add_model(base_model)
+
+    if (tune_mode == "grid") {
+      base_wf <-
+        base_wf %>%
+        tune::tune_grid(
+          resamples = base_vfold,
+          grid = grid_hyper_tune,
+          metrics = yardstick::metric_set(yardstick::rmse, yardstick::mape),
+          control = wf_config,
+          parallel_over = "resamples"
+        )
+    } else {
+      base_wf <-
+        base_wf %>%
+        tune::tune_bayes(
+          resamples = base_vfold,
+          iter = tune_bayes_iter,
+          metrics = yardstick::metric_set(yardstick::rmse, yardstick::mape),
+          control = wf_config,
+          parallel_over = "resamples"
+        )
+    }
+    if (return_best) {
+      base_wf <- tune::fit_best(base_wf)
+    }
     future::plan(future::sequential)
     return(base_wf)
 
@@ -3142,6 +3222,7 @@ set_args_download <-
 #' Prepare spatial and spatiotemporal cross validation sets
 #' @keywords Baselearner
 #' @param data data.table with X, Y, and time information.
+#' @param r_subsample The proportion of rows to be sampled.
 #' @param target_cols character(3). Names of columns for X, Y.
 #'   Default is `c("lon", "lat")`. It is passed to sf::st_as_sf to
 #'   subsequently generate spatial cross-validation indices using
@@ -3158,11 +3239,15 @@ set_args_download <-
 prepare_cvindex <-
   function(
     data,
+    r_subsample = 0.3,
     target_cols = c("lon", "lat"),
     cv_make_fun = spatialsample::spatial_block_cv,
     ...
   ) {
-    if (getNamespaceName(environment(cv_make_fun)) == "beethoven") {
+    data <- data %>%
+      dplyr::slice_sample(prop = r_subsample)
+
+    if (methods::getPackageName(environment(cv_make_fun)) == "beethoven") {
       cv_index <-
         rlang::inject(
           cv_make_fun(
@@ -3172,7 +3257,7 @@ prepare_cvindex <-
           )
         )
     } else {
-      data_sf <- sf::st_as_sf(data, coords = target_cols)
+      data_sf <- sf::st_as_sf(data, coords = target_cols, remove = FALSE)
       cv_index <-
         rlang::inject(
           cv_make_fun(
@@ -3180,12 +3265,38 @@ prepare_cvindex <-
             !!!list(...)
           )
         )
-      return(cv_index)
-
+      # assign id with function name
+      fun_name <- as.character(substitute(cv_make_fun))
+      fun_name <- fun_name[length(fun_name)]
+      cv_index$id <- sprintf("%s_%02d", fun_name, seq_len(nrow(cv_index)))
     }
+    return(cv_index)
   }
 
 
-
+#' Restore the full data set from the rset object
+#' @keywords Baselearner
+#' @param rset rsample::manual_rset() object's `splits` column
+#' @param data_full data.table with all features
+#' @returns A list of data.table objects.
+#' @note $splits should be present in rset.
+restore_rset_full <-
+  function(rset, data_full) {
+    rset$splits <-
+      lapply(
+        rset$splits,
+        function(x) {
+          x$data <-
+            collapse::join(
+              x$data,
+              data_full,
+              on = c("site_id", "time"),
+              how = "left"
+            )
+          return(x)
+        }
+      )
+    return(rset)
+  }
 
 # nocov end

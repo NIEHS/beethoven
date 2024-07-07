@@ -6,6 +6,7 @@
 \usage{
 prepare_cvindex(
   data,
+  r_subsample = 0.3,
   target_cols = c("lon", "lat"),
   cv_make_fun = spatialsample::spatial_block_cv,
   ...
@@ -13,6 +14,8 @@ prepare_cvindex(
 }
 \arguments{
 \item{data}{data.table with X, Y, and time information.}
+
+\item{r_subsample}{The proportion of rows to be sampled.}
 
 \item{target_cols}{character(3). Names of columns for X, Y.
 Default is \code{c("lon", "lat")}. It is passed to sf::st_as_sf to
