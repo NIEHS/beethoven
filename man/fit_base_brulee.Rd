@@ -14,15 +14,16 @@ fit_base_brulee(
   xvar = seq(5, ncol(dt_imputed)),
   vfold = 5L,
   device = "cuda:0",
-  return_best = TRUE,
+  trim_resamples = TRUE,
+  return_best = FALSE,
   ...
 )
 }
 \arguments{
 \item{dt_imputed}{The input data table to be used for fitting.}
 
-\item{folds}{pre-generated rset object. If NULL, \code{vfold} should be
-numeric to be used in \link[rsample:vfold_cv]{rsample::vfold_cv}.}
+\item{folds}{pre-generated rset object with minimal number of columns.
+If NULL, \code{vfold} should be numeric to be used in \link[rsample:vfold_cv]{rsample::vfold_cv}.}
 
 \item{tune_mode}{character(1). Hyperparameter tuning mode.
 Default is "grid", "bayes" is acceptable.}
@@ -42,6 +43,9 @@ Default is 0.1.}
 \item{device}{The device to be used for training.
 Default is "cuda:0". Make sure that your system is equipped
 with CUDA-enabled graphical processing units.}
+
+\item{trim_resamples}{logical(1). Default is TRUE, which replaces the actual
+data.frames in splits column of \code{tune_results} object with NA.}
 
 \item{return_best}{logical(1). If TRUE, the best tuned model is returned.}
 

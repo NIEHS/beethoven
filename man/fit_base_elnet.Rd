@@ -13,15 +13,16 @@ fit_base_elnet(
   tune_bayes_iter = 50L,
   vfold = 5L,
   nthreads = 16L,
-  return_best = TRUE,
+  trim_resamples = TRUE,
+  return_best = FALSE,
   ...
 )
 }
 \arguments{
 \item{dt_imputed}{The input data table to be used for fitting.}
 
-\item{folds}{pre-generated rset object. If NULL, it should be
-numeric to be used in \link[rsample:vfold_cv]{rsample::vfold_cv}.}
+\item{folds}{pre-generated rset object with minimal number of columns.
+If NULL, \code{vfold} should be numeric to be used in \link[rsample:vfold_cv]{rsample::vfold_cv}.}
 
 \item{yvar}{The target variable.}
 

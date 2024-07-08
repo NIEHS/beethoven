@@ -2196,44 +2196,38 @@ par_nest <-
   }
 
 
-#' Wrapper for base learners
-#' @keywords Baselearner
-#' @param learner character(1). One of "mlp", "xgboost", "elasticnet"
-#' @param rset pre-generated rset object.
-#' @param full_data data.frame. The imputed full data that will be used to
-#'   restore full rset object for model fitting.
-#' @param ... Additional arguments to be passed.
-#' @returns The fitted workflow.
-#' @export
-fit_base <-
-  function(
-    learner,
-    rset,
-    full_data,
-    ...
-  ) {
-    learner <- match.arg(learner, c("mlp", "xgboost", "elasticnet"))
-    restored <- restore_rset_full(rset = rset, data_full = full_data)
 
-    if (learner == "mlp") {
-      fit_base_brulee(
-        dt_imputed = full_data,
-        folds = restored,
-        ...
-      )
-    } else if (learner == "xgboost") {
-      fit_base_xgb(
-        dt_imputed = full_data,
-        folds = restored,
-        ...
-      )
-    } else if (learner == "elasticnet") {
-      fit_base_elnet(
-        dt_imputed = full_data,
-        folds = restored,
-        ...
-      )
+#' Make sampled subdataframes for base learners
+#'
+#' Per beethoven resampling strategy, this function selects
+#' the predefined number of rows from the input data table and
+#' saves the row index in .rowindex field.
+#'
+#' @keywords Baselearner
+#' @param data An object that inherits data.frame.
+#' @param n The number of rows to be sampled.
+#' @param p The proportion of rows to be used. Default is 0.3.
+#' @returns The sampled data table with row index saved in .rowindex field.
+make_subdata <-
+  function(
+    data,
+    n = NULL,
+    p = 0.3
+  ) {
+    if (is.null(n) && is.null(p)) {
+      stop("Please provide either n or p.")
     }
+    nr <- seq_len(nrow(data))
+    if (!is.null(n)) {
+      nsample <- sample(nr, n)
+    } else {
+      nsample <- sample(nr, ceiling(nrow(data) * p))
+    }
+    data <- data[nsample, ]
+    data$.rowindex <- nsample
+    data_name <- as.character(substitute(data))
+    attr(data, "object_origin") <- data_name[length(data_name)]
+    return(data)
   }
 
 
@@ -2251,8 +2245,8 @@ fit_base <-
 #'   users can modify `learn_rate` explicitly, and other hyperparameters
 #'   will be predefined (56 combinations per `learn_rate`).
 #' @param dt_imputed The input data table to be used for fitting.
-#' @param folds pre-generated rset object. If NULL, `vfold` should be
-#'   numeric to be used in [rsample::vfold_cv].
+#' @param folds pre-generated rset object with minimal number of columns.
+#'   If NULL, `vfold` should be numeric to be used in [rsample::vfold_cv].
 #' @param tune_mode character(1). Hyperparameter tuning mode.
 #'   Default is "grid", "bayes" is acceptable.
 #' @param tune_bayes_iter integer(1). The number of iterations for
@@ -2265,6 +2259,8 @@ fit_base <-
 #' @param device The device to be used for training.
 #'   Default is "cuda:0". Make sure that your system is equipped
 #'   with CUDA-enabled graphical processing units.
+#' @param trim_resamples logical(1). Default is TRUE, which replaces the actual
+#'   data.frames in splits column of `tune_results` object with NA.
 #' @param return_best logical(1). If TRUE, the best tuned model is returned.
 #' @param ... Additional arguments to be passed.
 #'
@@ -2282,7 +2278,6 @@ fit_base_brulee <-
   function(
     dt_imputed,
     folds = NULL,
-    # r_subsample = 0.3,
     tune_mode = "grid",
     tune_bayes_iter = 50L,
     learn_rate = 0.1,
@@ -2290,7 +2285,8 @@ fit_base_brulee <-
     xvar = seq(5, ncol(dt_imputed)),
     vfold = 5L,
     device = "cuda:0",
-    return_best = TRUE,
+    trim_resamples = TRUE,
+    return_best = FALSE,
     ...
   ) {
     tune_mode <- match.arg(tune_mode, c("grid", "bayes"))
@@ -2309,7 +2305,7 @@ fit_base_brulee <-
 
     base_recipe <-
       recipes::recipe(
-        dt_imputed
+        dt_imputed[1, ]
       ) %>%
       # do we want to normalize the predictors?
       # if so, an additional definition of truly continuous variables is needed
@@ -2323,6 +2319,9 @@ fit_base_brulee <-
     } else {
       base_vfold <- folds
     }
+    base_vfold <-
+      restore_rset_full(rset = base_vfold, data_full = dt_imputed)
+
     base_model <-
       parsnip::mlp(
         hidden_units = parsnip::tune(),
@@ -2347,7 +2346,13 @@ fit_base_brulee <-
         tune::tune_grid(
           resamples = base_vfold,
           grid = grid_hyper_tune,
-          metrics = yardstick::metric_set(yardstick::rmse, yardstick::mape),
+          metrics =
+          yardstick::metric_set(
+            yardstick::rmse,
+            yardstick::mape,
+            yardstick::rsq,
+            yardstick::mae
+          ),
           control = wf_config
         )
     } else {
@@ -2360,8 +2365,11 @@ fit_base_brulee <-
           control = wf_config
         )
     }
+    if (trim_resamples) {
+      base_wf$splits <- NA
+    }
     if (return_best) {
-      base_wf <- tune::fit_best(base_wf)
+      base_wf <- tune::show_best(base_wf, n = 1)
     }
     return(base_wf)
   }
@@ -2386,8 +2394,8 @@ fit_base_brulee <-
 #'   users can modify `learn_rate` explicitly, and other hyperparameters
 #'   will be predefined (30 combinations per `learn_rate`).
 #' @param dt_imputed The input data table to be used for fitting.
-#' @param folds pre-generated rset object. If NULL, it should be
-#'   numeric to be used in [rsample::vfold_cv].
+#' @param folds pre-generated rset object with minimal number of columns.
+#'   If NULL, `vfold` should be numeric to be used in [rsample::vfold_cv].
 #' @param tune_mode character(1). Hyperparameter tuning mode.
 #'   Default is "grid", "bayes" is acceptable.
 #' @param tune_bayes_iter integer(1). The number of iterations for
@@ -2400,6 +2408,8 @@ fit_base_brulee <-
 #' @param device The device to be used for training.
 #'   Default is "cuda:0". Make sure that your system is equipped
 #'   with CUDA-enabled graphical processing units.
+#' @param trim_resamples logical(1). Default is TRUE, which replaces the actual
+#'   data.frames in splits column of `tune_results` object with NA.
 #' @param return_best logical(1). If TRUE, the best tuned model is returned.
 #' @param ... Additional arguments to be passed.
 #'
@@ -2417,7 +2427,6 @@ fit_base_xgb <-
   function(
     dt_imputed,
     folds = NULL,
-    # r_subsample = 0.3,
     tune_mode = "grid",
     tune_bayes_iter = 50L,
     learn_rate = 0.1,
@@ -2425,7 +2434,8 @@ fit_base_xgb <-
     xvar = seq(5, ncol(dt_imputed)),
     vfold = 5L,
     device = "cuda:0",
-    return_best = TRUE,
+    trim_resamples = TRUE,
+    return_best = FALSE,
     ...
   ) {
     tune_mode <- match.arg(tune_mode, c("grid", "bayes"))
@@ -2441,7 +2451,7 @@ fit_base_xgb <-
 
     base_recipe <-
       recipes::recipe(
-        dt_imputed
+        dt_imputed[1, ]
       ) %>%
       # recipes::step_normalize(recipes::all_numeric_predictors()) %>%
       recipes::update_role(tidyselect::all_of(xvar)) %>%
@@ -2451,6 +2461,9 @@ fit_base_xgb <-
     } else {
       base_vfold <- folds
     }
+    base_vfold <-
+      restore_rset_full(rset = base_vfold, data_full = dt_imputed)
+
     base_model <-
       parsnip::boost_tree(
         mtry = parsnip::tune(),
@@ -2473,7 +2486,13 @@ fit_base_xgb <-
         tune::tune_grid(
           resamples = base_vfold,
           grid = grid_hyper_tune,
-          metrics = yardstick::metric_set(yardstick::rmse, yardstick::mape),
+          metrics =
+          yardstick::metric_set(
+            yardstick::rmse,
+            yardstick::mape,
+            yardstick::rsq,
+            yardstick::mae
+          ),
           control = wf_config
         )
     } else {
@@ -2486,9 +2505,13 @@ fit_base_xgb <-
           control = wf_config
         )
     }
-    if (return_best) {
-      base_wf <- tune::fit_best(base_wf)
+    if (trim_resamples) {
+      base_wf$splits <- NA
     }
+    if (return_best) {
+      base_wf <- tune::show_best(base_wf, n = 1)
+    }
+
     return(base_wf)
 
   }
@@ -2505,8 +2528,8 @@ fit_base_xgb <-
 #' @keywords Baselearner
 #' @note tune package should be 1.2.0 or higher.
 #' @param dt_imputed The input data table to be used for fitting.
-#' @param folds pre-generated rset object. If NULL, it should be
-#'   numeric to be used in [rsample::vfold_cv].
+#' @param folds pre-generated rset object with minimal number of columns.
+#'   If NULL, `vfold` should be numeric to be used in [rsample::vfold_cv].
 #' @param yvar The target variable.
 #' @param xvar The predictor variables.
 #' @param vfold The number of folds for cross-validation.
@@ -2540,7 +2563,8 @@ fit_base_elnet <-
     tune_bayes_iter = 50L,
     vfold = 5L,
     nthreads = 16L,
-    return_best = TRUE,
+    trim_resamples = TRUE,
+    return_best = FALSE,
     ...
   ) {
     grid_hyper_tune <-
@@ -2554,7 +2578,7 @@ fit_base_elnet <-
 
     base_recipe <-
       recipes::recipe(
-        dt_imputed
+        dt_imputed[1, ]
       ) %>%
       # recipes::step_normalize(recipes::all_numeric_predictors()) %>%
       recipes::update_role(tidyselect::all_of(xvar)) %>%
@@ -2564,6 +2588,9 @@ fit_base_elnet <-
     } else {
       base_vfold <- folds
     }
+    base_vfold <-
+      restore_rset_full(rset = base_vfold, data_full = dt_imputed)
+
     base_model <-
       parsnip::linear_reg(
         mixture = parsnip::tune(),
@@ -2587,7 +2614,13 @@ fit_base_elnet <-
         tune::tune_grid(
           resamples = base_vfold,
           grid = grid_hyper_tune,
-          metrics = yardstick::metric_set(yardstick::rmse, yardstick::mape),
+          metrics =
+          yardstick::metric_set(
+            yardstick::rmse,
+            yardstick::mape,
+            yardstick::rsq,
+            yardstick::mae
+          ),
           control = wf_config,
           parallel_over = "resamples"
         )
@@ -2602,13 +2635,18 @@ fit_base_elnet <-
           parallel_over = "resamples"
         )
     }
+    if (trim_resamples) {
+      base_wf$splits <- NA
+    }
     if (return_best) {
-      base_wf <- tune::fit_best(base_wf)
+      base_wf <- tune::show_best(base_wf, n = 1)
     }
     future::plan(future::sequential)
     return(base_wf)
 
   }
+
+
 
 #' Generate manual rset object from spatiotemporal cross-validation indices
 #' @keywords Baselearner
@@ -3298,5 +3336,73 @@ restore_rset_full <-
       )
     return(rset)
   }
+
+
+#' Restore the full data set from two rset objects then fit the best model
+#' @keywords Baselearner
+#' @param rset_trimmed rset object without data in splits column.
+#' @param rset_full rset object with full data.
+#' @param df_full data.table with full data.
+#' @param nested logical(1). If TRUE, the rset object is nested.
+#' @param nest_length integer(1). Length of the nested list.
+#'   i.e., Number of resamples.
+#' @returns rset object with full data in splits column.
+#' @export
+restore_fit_best <-
+  function(
+    rset_trimmed,
+    rset_full,
+    df_full,
+    by = c("site_id", "time"),
+    nested = TRUE,
+    nest_length = 30L
+  ) {
+    parsnip_spec <-
+      workflows::extract_spec_parsnip(rset_trimmed[[1]])
+    # Do I need to restore full data in rset_trimmed?
+
+    # reassemble the branched rsets
+    if (nested) {
+      rset_trimmed <-
+        as.list(seq_len(nest_length)) %>%
+        lapply(
+          function(x) {
+            # here we have list length of 4, each has .metric column,
+            # which we want to bind_rows at
+            # [[1]] $.metric
+            # [[2]] $.metric ...
+            template <- x[[1]]
+            combined_lr <- x[seq(x, length(rset_trimmed), nest_length)]
+            # length of 4;
+            # combine rows of each element in four lists
+            combined_lr <-
+              mapply(
+                function(df1, df2, df3, df4) {
+                  dplyr::bind_rows(df1, df2, df3, df4)
+                },
+                combined_lr[[1]], combined_lr[[2]],
+                combined_lr[[3]], combined_lr[[4]],
+                SIMPLIFY = FALSE
+              )
+            template$.metric <- combined_lr
+            return(template)
+          }
+        )
+    }
+
+    tuned_best <- tune::show_best(rset_trimmed, n = 1)
+    model_best <-
+      rlang::inject(
+        parsnip::update(parsnip_spec, parameters = !!!as.list(tuned_best))
+      )
+
+    # fit the entire data
+    model_fit <- fit(model_best, data = df_full)
+    pred <- predict(model_fit, data = df_full)
+    return(pred)
+
+  }
+
+
 
 # nocov end

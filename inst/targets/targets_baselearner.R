@@ -11,16 +11,15 @@ target_baselearner <-
       name = list_feat_calc_xyt,
       command =
       lapply(
-        rep(0.3, 30),
+        rep(1, 30),
         function(x) {
-          nxyt <- nrow(dt_feat_calc_xyt)
-          dt_feat_calc_xyt[sample(seq_len(nxyt), ceiling(nxyt * x)), ]
+          make_subdata(dt_feat_calc_xyt, p = 0.3)
         }
       ),
       iteration = "list"
     )
     ,
-    # length of 30
+    # length of 30 rsets
     targets::tar_target(
       name = list_learner_base_cv_spt,
       command =
@@ -84,6 +83,7 @@ target_baselearner <-
     ,
     # wf: workflow
     # xgb-spt-cv
+    # length of 120 (4 * 30)
     targets::tar_target(
       workflow_learner_base_xgb_spt,
       fit_base_xgb(
@@ -93,10 +93,11 @@ target_baselearner <-
         learn_rate = num_learner_base_learn_device$rate,
         device = num_learner_base_learn_device$device
       ),
-      pattern = map(num_learner_base_learn_device),
+      pattern = cross(num_learner_base_learn_device, list_learner_base_cv_spt),
       resources = set_slurm_resource(ncpus = 6L, memory = 20L, partition = "geo")
     )
     ,
+    # length of 120
     targets::tar_target(
       workflow_learner_base_xgb_spblock,
       fit_base_xgb(
@@ -106,10 +107,11 @@ target_baselearner <-
         learn_rate = num_learner_base_learn_device$rate,
         device = num_learner_base_learn_device$device
       ),
-      pattern = map(num_learner_base_learn_device),
+      pattern = cross(num_learner_base_learn_device, list_learner_base_cv_spblock),
       resources = set_slurm_resource(ncpus = 6L, memory = 20L, partition = "geo")
     )
     ,
+    # length of 120
     targets::tar_target(
       workflow_learner_base_xgb_spcluster,
       fit_base_xgb(
@@ -119,10 +121,12 @@ target_baselearner <-
         learn_rate = num_learner_base_learn_device$rate,
         device = num_learner_base_learn_device$device
       ),
-      pattern = map(num_learner_base_learn_device),
+      pattern = cross(num_learner_base_learn_device, list_learner_base_cv_spcluster),
       resources = set_slurm_resource(ncpus = 6L, memory = 20L, partition = "geo")
     )
     ,
+    # mlp-cv: iterate by combination of rate+device and cv strategy
+    # length of 120
     targets::tar_target(
       workflow_learner_base_mlp_spt,
       fit_base_brulee(
@@ -132,10 +136,11 @@ target_baselearner <-
         learn_rate = num_learner_base_learn_device$rate,
         device = num_learner_base_learn_device$device
       ),
-      pattern = map(num_learner_base_learn_device),
+      pattern = cross(num_learner_base_learn_device, list_learner_base_cv_spt),
       resources = set_slurm_resource(ncpus = 6L, memory = 20L, partition = "geo,gpu")
     )
     ,
+    # length of 120
     targets::tar_target(
       workflow_learner_base_mlp_spblock,
       fit_base_brulee(
@@ -145,10 +150,11 @@ target_baselearner <-
         learn_rate = num_learner_base_learn_device$rate,
         device = num_learner_base_learn_device$device
       ),
-      pattern = map(num_learner_base_learn_device),
+      pattern = cross(num_learner_base_learn_device, list_learner_base_cv_spblock),
       resources = set_slurm_resource(ncpus = 6L, memory = 20L, partition = "geo,gpu")
     )
     ,
+    # length of 120
     targets::tar_target(
       workflow_learner_base_mlp_spcluster,
       fit_base_brulee(
@@ -158,10 +164,12 @@ target_baselearner <-
         learn_rate = num_learner_base_learn_device$rate,
         device = num_learner_base_learn_device$device
       ),
-      pattern = map(num_learner_base_learn_device),
+      pattern = cross(num_learner_base_learn_device, list_learner_base_cv_spcluster),
       resources = set_slurm_resource(ncpus = 6L, memory = 20L, partition = "geo,gpu")
     )
     ,
+    # elnet-cv is branched out only by subsamples.
+    # length of 30
     targets::tar_target(
       workflow_learner_base_elnet_spt,
       fit_base_elnet(
@@ -169,9 +177,12 @@ target_baselearner <-
         folds = list_learner_base_cv_spt,
         nthreads = 32L
       ),
-      resources = set_slurm_resource(ncpus = 32L, memory = 8L, partition = "geo,highmem")
+      pattern = map(list_learner_base_cv_spt),
+      iteration = "list",
+      resources = set_slurm_resource(ncpus = 32L, memory = 8L, partition = "geo")
     )
     ,
+    # length of 30
     targets::tar_target(
       workflow_learner_base_elnet_spblock,
       fit_base_elnet(
@@ -179,9 +190,12 @@ target_baselearner <-
         folds = list_learner_base_cv_spblock,
         nthreads = 32L
       ),
-      resources = set_slurm_resource(ncpus = 32L, memory = 8L, partition = "geo,highmem")
+      pattern = map(list_learner_base_cv_spblock),
+      iteration = "list",
+      resources = set_slurm_resource(ncpus = 32L, memory = 8L, partition = "geo")
     )
     ,
+    # length of 30
     targets::tar_target(
       workflow_learner_base_elnet_spcluster,
       fit_base_elnet(
@@ -189,11 +203,104 @@ target_baselearner <-
         folds = list_learner_base_cv_spcluster,
         nthreads = 32L
       ),
-      resources = set_slurm_resource(ncpus = 32L, memory = 8L, partition = "geo,highmem")
+      pattern = map(list_learner_base_cv_spcluster),
+      iteration = "list",
+      resources = set_slurm_resource(ncpus = 32L, memory = 8L, partition = "geo")
     )
-    # collecting workflow will result in 30 * 0.3 * 10 * 20GB * 56 * 3 = 302400GB
-    # (Resamples) * (Proportion) * (VCVFOLD) * (Data size) * (Grid) * 
-    # (CV strategies)
-    # per learner
-
+    ,
+    # combine tuning results to find the best model
+    # xgb and mlp were branched out by learn_rate;
+    # learn_rate comes first, thus subsamples are organized
+    # in a manner of 1 2 3 4 5 ... 30 1 2 3 4 5 ... 30 ...
+    # combine the results with indices of 1 31 61 91 / 2 32 62 92 / ... / 30 60 90 120. Could be changed per #subsamples.
+    # elnet is length of 30 (or #subsamples)
+    targets::tar_target(
+      list_learner_base_xgb_best_spt,
+      restore_fit_best(
+        workflow_learner_base_xgb_spt,
+        rset_full = list_learner_base_cv_spt,
+        df_full = dt_feat_calc_imputed,
+        nested = TRUE
+      )
+    )
+    ,
+    targets::tar_target(
+      list_learner_base_xgb_best_spblock,
+      restore_fit_best(
+        workflow_learner_base_xgb_spblock,
+        rset_full = list_learner_base_cv_spblock,
+        df_full = dt_feat_calc_imputed,
+        nested = TRUE
+      )
+    )
+    ,
+    targets::tar_target(
+      list_learner_base_xgb_best_spcluster,
+      restore_fit_best(
+        workflow_learner_base_xgb_spcluster,
+        rset_full = list_learner_base_cv_spcluster,
+        df_full = dt_feat_calc_imputed,
+        nested = TRUE
+      )
+    )
+    ,
+    targets::tar_target(
+      list_learner_base_mlp_best_spt,
+      restore_fit_best(
+        workflow_learner_base_mlp_spt,
+        rset_full = list_learner_base_cv_spt,
+        df_full = dt_feat_calc_imputed,
+        nested = TRUE
+      )
+    )
+    ,
+    targets::tar_target(
+      list_learner_base_mlp_best_spblock,
+      restore_fit_best(
+        workflow_learner_base_mlp_spblock,
+        rset_full = list_learner_base_cv_spblock,
+        df_full = dt_feat_calc_imputed,
+        nested = TRUE
+      )
+    )
+    ,
+    targets::tar_target(
+      list_learner_base_mlp_best_spcluster,
+      restore_fit_best(
+        workflow_learner_base_mlp_spcluster,
+        rset_full = list_learner_base_cv_spcluster,
+        df_full = dt_feat_calc_imputed,
+        nested = TRUE
+      )
+    )
+    ,
+    targets::tar_target(
+      list_learner_base_elnet_best_spt,
+      restore_fit_best(
+        workflow_learner_base_elnet_spt,
+        rset_full = list_learner_base_cv_spt,
+        df_full = dt_feat_calc_imputed,
+        nested = TRUE
+      )
+    )
+    ,
+    targets::tar_target(
+      list_learner_base_elnet_best_spblock,
+      restore_fit_best(
+        workflow_learner_base_elnet_spblock,
+        rset_full = list_learner_base_cv_spblock,
+        df_full = dt_feat_calc_imputed,
+        nested = TRUE
+      )
+    )
+    ,
+    targets::tar_target(
+      list_learner_base_elnet_best_spcluster,
+      restore_fit_best(
+        workflow_learner_base_elnet_spcluster,
+        rset_full = list_learner_base_cv_spcluster,
+        df_full = dt_feat_calc_imputed,
+        nested = TRUE
+      )
+    )
   )
