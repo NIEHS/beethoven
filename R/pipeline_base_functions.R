@@ -684,8 +684,9 @@ read_locs <-
 
 #' Check file status and download if necessary
 #' @keywords Utility
-#' @param path download path.
-#' @param dataset_name Dataset name. See [`amadeus::download_data`] for details.
+#' @param path Path to qs file with all download specifications per
+#'   dataset.
+#' @param dataset_name character(1). Dataset name.
 #' @param ... Arguments passed to `amadeus::download_data`
 #' @returns logical(1).
 feature_raw_download <-
@@ -694,10 +695,38 @@ feature_raw_download <-
     dataset_name = NULL,
     ...
   ) {
+    if (!file.exists(path)) {
+      stop("The path does not exist.")
+    }
+    if (!endsWith(path, ".qs")) {
+      stop("The file should be in QS format.")
+    }
+    args_check <- loadargs(path, dataset = dataset_name)
+
     # run amadeus::download_data
     tryCatch(
       {
-        amadeus::download_data(dataset_name = dataset_name, ...)
+        if (is.list(args_check[[1]])) {
+          for (i in seq_along(args_check)) {
+            rlang::inject(
+              amadeus::download_data(
+                dataset_name = dataset_name,
+                acknowledgement = TRUE,
+                download = TRUE,
+                !!!args_check[[i]]
+              )
+            )
+          }
+        } else {
+          rlang::inject(
+            amadeus::download_data(
+              dataset_name = dataset_name,
+              acknowledgement = TRUE,
+              download = TRUE,
+              !!!args_check
+            )
+          )
+        }
         return(TRUE)
       },
       error = function(e) {
@@ -2439,6 +2468,7 @@ fit_base_xgb <-
     ...
   ) {
     tune_mode <- match.arg(tune_mode, c("grid", "bayes"))
+    # P --> ++ / fix as many hyperparams as possible
     grid_hyper_tune <-
       expand.grid(
         mtry = floor(c(0.02, 0.1, 0.02) * ncol(dt_imputed)),
@@ -3215,6 +3245,7 @@ set_args_calc <-
     return(list_common)
   }
 
+
 #' Generate argument list for raw data download
 #' @keywords Utility
 #'
@@ -3222,37 +3253,106 @@ set_args_download <-
   function(
     char_period = c("2018-01-01", "2022-10-31"),
     char_input_dir = "input",
-    path_export = "inst/targets/punchcard_download.qs"
+    nasa_earth_data_token = NULL,
+    path_export = "inst/targets/download_spec.qs"
   ) {
     ain <- function(x) {
       file.path(char_input_dir, x)
     }
 
+    time_periods <- as.numeric(substr(char_period, 1, 4))
+    year_nei <- seq(2017, time_periods[2], 3)
+    gmted_vars <-
+      c("Breakline Emphasis", "Systematic Subsample", "Median Statistic",
+        "Minimum Statistic", "Mean Statistic", "Maximum Statistic",
+        "Standard Deviation Statistic"
+      )
+    narr_variables_mono <-
+      c("air.sfc", "albedo", "apcp", "dswrf", "evap", "hcdc",
+        "hpbl", "lcdc", "lhtfl", "mcdc", "pr_wtr",
+        "prate", "pres.sfc", "shtfl", "snowc", "soilm",    
+        "tcdc", "ulwrf.sfc", "uwnd.10m", "vis", "vwnd.10m", "weasd")
+    narr_variables_plevels <-
+      c("omega", "shum")
+
     list_download_config <-
       list(
-        aqs = list(dataset_name = "aqs", path = ain("aqs", TRUE)),
-        mod11 = list(dataset_name = "modis", path = ain("modis/raw")),
-        mod06 = list(dataset_name = "modis", path = ain("modis/raw")),
-        mod09 = list(dataset_name = "modis", path = ain("modis/raw")),
-        mcd19 = list(dataset_name = "modis", path = ain("modis/raw")),
-        mod13 = list(dataset_name = "modis", path = ain("modis/raw")),
-        viirs = list(dataset_name = "modis", path = ain("modis/raw")),
-        geoscf = list(dataset_name = "geos", path = ain("geos")),
-        hms = list(dataset_name = "smoke", path = ain("HMS_Smoke")),
-        gmted = list(dataset_name = "gmted", path = ain("gmted", TRUE)),
-        nei = list(dataset_name = "nei", path = ain("nei", TRUE)),
-        tri = list(dataset_name = "tri", path = ain("tri")),
-        nlcd = list(dataset_name = "nlcd", path = ain("nlcd", TRUE)),
-        koppen = list(dataset_name = "koppen", path = ain("koppen_geiger", TRUE)),
-        ecoregions = list(dataset_name = "koppen", path = ain("ecoregions", TRUE)),
-        narr_monolevel = list(dataset_name = "narr_monolevel", path = ain("narr")),
-        narr_p_levels = list(dataset_name = "narr_p_levels", path = ain("narr")),
-        groads = list(dataset_name = "sedac_groads", path = ain("sedac_groads", TRUE)),
-        population = list(dataset_name = "sedac_population", path = ain("sedac_population", TRUE))
+        aqs = list(dataset_name = "aqs", directory_to_save = ain("aqs", TRUE),
+                   year_start = time_periods[1], year_end = time_periods[2],
+                   unzip = TRUE, remove_zip = TRUE),
+        mod11 = list(dataset_name = "modis", directory_to_save = ain("modis/raw"),
+                     product = "MOD11A1", date_start = char_period[1], date_end = char_period[2],
+                     nasa_earth_data_token = nasa_earth_data_token),
+        mod06 = list(dataset_name = "modis", directory_to_save = ain("modis/raw"),
+                     product = "MOD06_L2", date_start = char_period[1], date_end = char_period[2],
+                     nasa_earth_data_token = nasa_earth_data_token),
+        mod09 = list(dataset_name = "modis", directory_to_save = ain("modis/raw"),
+                     product = "MOD09GA", date_start = char_period[1], date_end = char_period[2],
+                     nasa_earth_data_token = nasa_earth_data_token),
+        mcd19 = list(dataset_name = "modis", directory_to_save = ain("modis/raw"),
+                     product = "MCD19A2", date_start = char_period[1], date_end = char_period[2],
+                     nasa_earth_data_token = nasa_earth_data_token),
+        mod13 = list(dataset_name = "modis", directory_to_save = ain("modis/raw"),
+                     product = "MOD13A2", date_start = char_period[1], date_end = char_period[2],
+                     nasa_earth_data_token = nasa_earth_data_token),
+        viirs = list(dataset_name = "modis", directory_to_save = ain("modis/raw"),
+                     product = "VNP46A2", date_start = char_period[1], date_end = char_period[2],
+                     version = "5000",
+                     nasa_earth_data_token = nasa_earth_data_token),
+        geoscf_aqc = list(dataset_name = "geos", directory_to_save = ain("geos"),
+                          collection = "aqc_tavg_1hr_g1440x721_v1",
+                          date_start = char_period[1], date_end = char_period[2]),
+        geoscf_chm = list(dataset_name = "geos", directory_to_save = ain("geos"),
+                          collection = "chm_tavg_1hr_g1440x721_v1",
+                          date_start = char_period[1], date_end = char_period[2]),
+        hms = list(dataset_name = "smoke", directory_to_save = ain("HMS_Smoke"),
+                   data_format = "Shapefile",
+                   date_start = char_period[1], date_end = char_period[2],
+                   unzip = TRUE, remove_zip = TRUE),
+        gmted = lapply(gmted_vars,
+          function(v) {
+            list(dataset_name = "gmted", directory_to_save = ain("gmted", TRUE),
+                 static = v, resolution = "7.5 arc-seconds",
+                 unzip = TRUE, remove_zip = TRUE)
+          }),
+        nei = lapply(year_nei,
+          function(y) {
+          list(dataset_name = "nei", directory_to_save = ain("nei", TRUE),
+                   year_target = y, unzip = TRUE)
+          }),
+        tri = list(dataset_name = "tri", directory_to_save = ain("tri"),
+                   year_start = time_periods[1], year_end = time_periods[2]),
+        nlcd = lapply(year_nlcd,
+          function(y) {
+            list(dataset_name = "nlcd", directory_to_save = ain("nlcd", TRUE),
+                    year = y,
+                    unzip = TRUE, remove_zip = TRUE)
+          }),
+        koppen = list(dataset_name = "koppen", directory_to_save = ain("koppen_geiger", TRUE),
+                      data_resolution = "0.0083", time_period = "Present", unzip = TRUE, remove_zip = TRUE),
+        ecoregions = list(dataset_name = "koppen", directory_to_save = ain("ecoregions", TRUE),
+                          unzip = TRUE, remove_zip = TRUE),
+        narr_monolevel = lapply(narr_variables_mono,
+          function(v) {
+            list(dataset_name = "narr_monolevel", directory_to_save = ain("narr"),
+                 variables = v, year_start = char_period[1], year_end = char_period[2])
+          }),
+        narr_p_levels = lapply(narr_variables_plevels,
+          function(v) {
+            list(dataset_name = "narr_p_levels", directory_to_save = ain("narr"),
+                 variables = v, year_start = char_period[1], year_end = char_period[2])
+          })
+        ,
+        groads = list(dataset_name = "sedac_groads", directory_to_save = ain("sedac_groads", TRUE),
+                      data_region = "Americas", data_format = "Geodatabase",
+                      unzip = TRUE, remove_zip = TRUE),
+        population = list(dataset_name = "sedac_population", directory_to_save = ain("sedac_population", TRUE),
+                          data_resolution = "30 second", data_format = "GeoTIFF", year = "2020", unzip = TRUE, remove_zip = TRUE)
       )
-    return(list_download_config)
+
     qs::qsave(list_download_config, path_export)
     message("Download configuration is saved to ", path_export)
+    return(list_download_config)
   }
 
 # nolint end

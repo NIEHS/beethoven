@@ -7,7 +7,8 @@
 set_args_download(
   char_period = c("2018-01-01", "2022-10-31"),
   char_input_dir = "input",
-  path_export = "inst/targets/punchcard_download.qs"
+  nasa_earth_data_token = NULL,
+  path_export = "inst/targets/download_spec.qs"
 )
 }
 \description{

@@ -720,7 +720,34 @@ dffx
 # subset dff with duplicate site_id and time
 dffd <- dff[duplicated(dffs) | duplicated(dffs, fromLast = TRUE),]
 
+dfbs <- dfb[, c("site_id", "time"), with = F]
+dfbd <- dfb[duplicated(dfbs) | duplicated(dfbs, fromLast = TRUE),]
 
 
 
 dim(dff)
+dtt <- tar_read(dt_feat_proc_aqs_sites_time)
+dtt
+
+dtb <- tar_read(dt_feat_calc_base)
+dtbt <- dtb[, c("site_id", "time"), with = F]
+dtbd <- dtb[duplicated(dtbt) | duplicated(dtbt, fromLast = TRUE),]
+dim(dtbd)
+
+
+lfn <- tar_read(list_feat_calc_nasa)
+
+library(data.table)
+lapply(lfn, function(x) {
+  xx <- as.data.table(x)[, c("site_id", "time"), with = F]
+  xxd <- x[duplicated(xx) | duplicated(xx, fromLast = TRUE),]
+  dim(xxd)
+})
+
+lfg <- tar_read(list_feat_calc_gmted)
+lfna <- tar_read(list_feat_calc_narr)
+lapply(lfna, function(x) {
+  xx <- as.data.table(x)[, c("site_id", "time"), with = F]
+  xxd <- x[duplicated(xx) | duplicated(xx, fromLast = TRUE),]
+  dim(xxd)
+})

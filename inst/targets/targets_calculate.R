@@ -80,10 +80,13 @@ target_calculate_fit <-
                     dta <- dta[, time := as.character(time)]
                     return(dta)
                   })
-            xrr <- reduce_merge(xr)
+            xrr <- Reduce(
+              function(x, y) {
+                collapse::join(x, y, on = c("site_id", "time"), how = "full") },
+              xr)
             return(xrr)
           } else {
-            data.table::rbindlist(x, use.names = TRUE, fill = TRUE)
+            collapse::rowbind(x, use.names = TRUE, fill = TRUE)
           }
           }),
       description = "Base feature list (all dt)"

@@ -7,9 +7,10 @@
 feature_raw_download(path = NULL, dataset_name = NULL, ...)
 }
 \arguments{
-\item{path}{download path.}
+\item{path}{Path to qs file with all download specifications per
+dataset.}
 
-\item{dataset_name}{Dataset name. See \code{\link[amadeus:download_data]{amadeus::download_data}} for details.}
+\item{dataset_name}{character(1). Dataset name.}
 
 \item{...}{Arguments passed to \code{amadeus::download_data}}
 }
