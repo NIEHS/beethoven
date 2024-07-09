@@ -2362,7 +2362,6 @@ fit_base_brulee <-
       parsnip::set_engine("brulee", device = device) %>%
       parsnip::set_mode("regression")
 
-    wf_config <- tune::control_resamples(save_pred = TRUE, save_workflow = TRUE)
 
     base_wf <-
       workflows::workflow() %>%
@@ -2370,6 +2369,12 @@ fit_base_brulee <-
       workflows::add_model(base_model)
 
     if (tune_mode == "grid") {
+      wf_config <-
+        tune::control_grid(
+          verbose = TRUE,
+          save_pred = TRUE,
+          save_workflow = TRUE
+        )
       base_wf <-
         base_wf %>%
         tune::tune_grid(
@@ -2385,6 +2390,12 @@ fit_base_brulee <-
           control = wf_config
         )
     } else {
+      wf_config <-
+        tune::control_bayes(
+          verbose = TRUE,
+          save_pred = TRUE,
+          save_workflow = TRUE
+        )
       base_wf <-
         base_wf %>%
         tune::tune_bayes(
@@ -2503,14 +2514,19 @@ fit_base_xgb <-
       parsnip::set_engine("xgboost", device = device) %>%
       parsnip::set_mode("regression")
 
-    wf_config <- tune::control_resamples(save_pred = TRUE, save_workflow = TRUE)
-
     base_wf <-
       workflows::workflow() %>%
       workflows::add_recipe(base_recipe) %>%
       workflows::add_model(base_model)
 
     if (tune_mode == "grid") {
+      wf_config <-
+        tune::control_grid(
+          verbose = TRUE,
+          save_pred = TRUE,
+          save_workflow = TRUE
+        )
+
       base_wf <-
         base_wf %>%
         tune::tune_grid(
@@ -2526,6 +2542,12 @@ fit_base_xgb <-
           control = wf_config
         )
     } else {
+      wf_config <-
+        tune::control_bayes(
+          verbose = TRUE,
+          save_pred = TRUE,
+          save_workflow = TRUE
+        )
       base_wf <-
         base_wf %>%
         tune::tune_bayes(
@@ -2549,6 +2571,155 @@ fit_base_xgb <-
 # dt <- qs::qread("output/dt_feat_design_imputed_061024.qs")
 # dtd <- dplyr::as_tibble(dt)
 # dtfitx <- fit_base_xgb(dtd, xvar = names(dtd)[6:105], r_subsample = 0.3)
+
+
+' Base learner: Light Gradient Boosting Machine (LightGBM)
+#'
+#' LightGBM model is fitted at the defined rate (`r_subsample`) of
+#' the input dataset by grid or Bayesian optimization search.
+#' With proper settings, users can utilize graphics
+#' processing units (GPU) to speed up the training process.
+#' @keywords Baselearner
+#' @note tune package should be 1.2.0 or higher.
+#' xgboost should be installed with GPU support.
+#' @details Hyperparameters `mtry`, `ntrees`, and `learn_rate` are
+#'   tuned. With `tune_mode = "grid"`,
+#'   users can modify `learn_rate` explicitly, and other hyperparameters
+#'   will be predefined (30 combinations per `learn_rate`).
+#' @param dt_imputed The input data table to be used for fitting.
+#' @param folds pre-generated rset object with minimal number of columns.
+#'   If NULL, `vfold` should be numeric to be used in [rsample::vfold_cv].
+#' @param tune_mode character(1). Hyperparameter tuning mode.
+#'   Default is "grid", "bayes" is acceptable.
+#' @param tune_bayes_iter integer(1). The number of iterations for
+#' Bayesian optimization. Default is 50. Only used when `tune_mode = "bayes"`.
+#' @param learn_rate The learning rate for the model. For branching purpose.
+#'   Default is 0.1.
+#' @param yvar The target variable.
+#' @param xvar The predictor variables.
+#' @param vfold The number of folds for cross-validation.
+#' @param device The device to be used for training.
+#'   Default is `"gpu"`. Make sure that your system is equipped
+#'   with OpenCL-capable graphical processing units.
+#'   A GPU-enabled version of LightGBM should be installed.
+#' @param trim_resamples logical(1). Default is TRUE, which replaces the actual
+#'   data.frames in splits column of `tune_results` object with NA.
+#' @param return_best logical(1). If TRUE, the best tuned model is returned.
+#' @param ... Additional arguments to be passed.
+#'
+#' @returns The fitted workflow.
+#' @importFrom recipes recipe update_role
+#' @importFrom dplyr `%>%`
+#' @importFrom parsnip boost_tree set_engine set_mode
+#' @importFrom workflows workflow add_recipe add_model
+#' @importFrom tune tune_grid fit_best
+#' @importFrom tidyselect all_of
+#' @importFrom yardstick metric_set rmse
+#' @importFrom rsample vfold_cv
+#' @export
+fit_base_lightgbm <-
+  function(
+    dt_imputed,
+    folds = NULL,
+    tune_mode = "grid",
+    tune_bayes_iter = 50L,
+    learn_rate = 0.1,
+    yvar = "Arithmetic.Mean",
+    xvar = seq(5, ncol(dt_imputed)),
+    vfold = 5L,
+    device = "gpu",
+    trim_resamples = TRUE,
+    return_best = FALSE,
+    ...
+  ) {
+    tune_mode <- match.arg(tune_mode, c("grid", "bayes"))
+    # P --> ++ / fix as many hyperparams as possible
+    grid_hyper_tune <-
+      expand.grid(
+        mtry = floor(c(0.02, 0.1, 0.02) * ncol(dt_imputed)),
+        trees = seq(1000, 3000, 500),
+        learn_rate = learn_rate
+      )
+    # dt_imputed <-
+    #   dt_imputed %>%
+    #   dplyr::slice_sample(prop = r_subsample)
+
+    base_recipe <-
+      recipes::recipe(
+        dt_imputed[1, ]
+      ) %>%
+      # recipes::step_normalize(recipes::all_numeric_predictors()) %>%
+      recipes::update_role(tidyselect::all_of(xvar)) %>%
+      recipes::update_role(tidyselect::all_of(yvar), new_role = "outcome")
+    if (is.null(folds)) {
+      base_vfold <- rsample::vfold_cv(dt_imputed, v = vfold)
+    } else {
+      base_vfold <- folds
+    }
+    base_vfold <-
+      restore_rset_full(rset = base_vfold, data_full = dt_imputed)
+
+    base_model <-
+      parsnip::boost_tree(
+        mtry = parsnip::tune(),
+        trees = parsnip::tune(),
+        learn_rate = parsnip::tune()
+      ) %>%
+      parsnip::set_engine("xgboost", device_type = device) %>%
+      parsnip::set_mode("regression")
+
+    base_wf <-
+      workflows::workflow() %>%
+      workflows::add_recipe(base_recipe) %>%
+      workflows::add_model(base_model)
+
+    if (tune_mode == "grid") {
+      wf_config <-
+        tune::control_grid(
+          verbose = TRUE,
+          save_pred = TRUE,
+          save_workflow = TRUE
+        )
+      base_wf <-
+        base_wf %>%
+        tune::tune_grid(
+          resamples = base_vfold,
+          grid = grid_hyper_tune,
+          metrics =
+          yardstick::metric_set(
+            yardstick::rmse,
+            yardstick::mape,
+            yardstick::rsq,
+            yardstick::mae
+          ),
+          control = wf_config
+        )
+    } else {
+      wf_config <-
+        tune::control_bayes(
+          verbose = TRUE,
+          save_pred = TRUE,
+          save_workflow = TRUE
+        )
+      base_wf <-
+        base_wf %>%
+        tune::tune_bayes(
+          resamples = base_vfold,
+          iter = tune_bayes_iter,
+          metrics = yardstick::metric_set(yardstick::rmse, yardstick::mape),
+          control = wf_config
+        )
+    }
+    if (trim_resamples) {
+      base_wf$splits <- NA
+    }
+    if (return_best) {
+      base_wf <- tune::show_best(base_wf, n = 1)
+    }
+
+    return(base_wf)
+
+  }
 
 
 #' Base learner: Elastic net
@@ -2629,9 +2800,6 @@ fit_base_elnet <-
       parsnip::set_engine("glmnet") %>%
       parsnip::set_mode("regression")
 
-    wf_config <-
-      tune::control_resamples(save_pred = TRUE, save_workflow = TRUE)
-
     future::plan(future::multicore, workers = nthreads)
     base_wf <-
       workflows::workflow() %>%
@@ -2639,6 +2807,13 @@ fit_base_elnet <-
       workflows::add_model(base_model)
 
     if (tune_mode == "grid") {
+      wf_config <-
+        tune::control_grid(
+          verbose = TRUE,
+          save_pred = TRUE,
+          save_workflow = TRUE
+        )
+
       base_wf <-
         base_wf %>%
         tune::tune_grid(
@@ -2655,6 +2830,12 @@ fit_base_elnet <-
           parallel_over = "resamples"
         )
     } else {
+      wf_config <-
+        tune::control_bayes(
+          verbose = TRUE,
+          save_pred = TRUE,
+          save_workflow = TRUE
+        )
       base_wf <-
         base_wf %>%
         tune::tune_bayes(

@@ -1,6 +1,6 @@
 Package: beethoven
 Title: Building an Extensible, rEproducible, Test-driven, Harmonized, Open-source, Versioned, ENsemble model for air quality
-Version: 0.3.4
+Version: 0.3.5
 Authors@R: c(
     person("Kyle", "Messier", , "kyle.messier@nih.gov", role = c("aut", "cre"), comment = c(ORCID = "0000-0001-9508-9623")),
     person("Insang", "Song", role = c("aut", "ctb"), comment = c(ORCID = "0000-0001-8732-3256")),
@@ -31,6 +31,8 @@ Imports:
   tidyr,
   tidyselect,
   yardstick,
+  bonsai,
+  lightgbm,
   vetiver,
   workflows,
   recipes,
