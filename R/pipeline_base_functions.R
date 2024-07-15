@@ -3435,6 +3435,9 @@ set_args_calc <-
 #' Default is "input".
 #' @param nasa_earth_data_token Character string specifying the NASA Earth Data token.
 #' @param year_nlcd numeric(2). Numeric vector specifying the NLCD years.
+#' Default is c(2019, 2021).
+#' @param export logical(1). If TRUE, the list is saved to `path_export`.
+#' Default is `TRUE`.
 #' @param path_export Character string specifying the export path.
 #' Default is "inst/targets/download_spec.qs".
 #' @export
@@ -3444,6 +3447,7 @@ set_args_download <-
     char_input_dir = "input",
     nasa_earth_data_token = NULL,
     year_nlcd = c(2019, 2021),
+    export = FALSE,
     path_export = "inst/targets/download_spec.qs"
   ) {
     ain <- function(x, append = FALSE) {
@@ -3544,8 +3548,10 @@ set_args_download <-
                           data_resolution = "30 second", data_format = "GeoTIFF", year = "2020", unzip = TRUE, remove_zip = TRUE)
       )
 
-    qs::qsave(list_download_config, path_export)
-    message("Download configuration is saved to ", path_export)
+    if (export) {
+      qs::qsave(list_download_config, path_export)
+      message("Download configuration is saved to ", path_export)
+    }
     return(list_download_config)
   }
 

@@ -9,6 +9,7 @@ set_args_download(
   char_input_dir = "input",
   nasa_earth_data_token = NULL,
   year_nlcd = c(2019, 2021),
+  export = FALSE,
   path_export = "inst/targets/download_spec.qs"
 )
 }
@@ -21,7 +22,11 @@ Default is "input".}
 
 \item{nasa_earth_data_token}{Character string specifying the NASA Earth Data token.}
 
-\item{year_nlcd}{numeric(2). Numeric vector specifying the NLCD years.}
+\item{year_nlcd}{numeric(2). Numeric vector specifying the NLCD years.
+Default is c(2019, 2021).}
+
+\item{export}{logical(1). If TRUE, the list is saved to \code{path_export}.
+Default is \code{TRUE}.}
 
 \item{path_export}{Character string specifying the export path.
 Default is "inst/targets/download_spec.qs".}
