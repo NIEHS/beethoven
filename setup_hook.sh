@@ -2,7 +2,6 @@
 
 HOOKS_DIR=$(git rev-parse --show-toplevel)/.git/hooks
 cat > $HOOKS_DIR/post-checkout << EOF
-chmod 740 _targets.R
 #!/bin/bash
 # Define the users who should have write privileges
 WRITE_USERS=("messierkp")
@@ -25,12 +24,27 @@ set_permissions() {
  
 # Check if the current user is in the list of write users
 if [[ " \${WRITE_USERS[@]} " =~ " \${CURRENT_USER} " ]]; then
-    set_permissions \$WRITE_PERMISSIONS LICENSE
+    set_permissions \$WRITE_PERMISSIONS _targets.R
 else
-    set_permissions \$DEFAULT_PERMISSIONS LICENSE
+    set_permissions \$DEFAULT_PERMISSIONS _targets.R
 fi
 EOF
 
 chmod +x $HOOKS_DIR/post-checkout
 
  
+WRITE_USERS=("messierkp" "songi2")
+# Get the current username
+CURRENT_USER=\$(whoami)
+ 
+# Set default permissions (read and execute)
+DEFAULT_PERMISSIONS=554
+# Set write permissions (read, write, and execute)
+WRITE_PERMISSIONS=754
+
+# Check if the current user is in the list of write users
+if [[ " ${WRITE_USERS[@]} " =~ " ${CURRENT_USER} " ]]; then
+    chmod $WRITE_PERMISSIONS _targets.R
+else
+    chmod $DEFAULT_PERMISSIONS _targets.R
+fi
