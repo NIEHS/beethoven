@@ -11,6 +11,13 @@ tar_config_set(
 
 generate_list_download <- FALSE
 
+arglist_download <-
+  set_args_download(
+    char_period = c("2018-01-01", "2022-12-31"),
+    char_input_dir = "input",
+    nasa_earth_data_token = NULL,#Sys.getenv("NASA_EARTHDATA_TOKEN"),
+    path_export = "inst/targets/download_spec.qs"
+  )
 
 generate_list_calc <- FALSE
 

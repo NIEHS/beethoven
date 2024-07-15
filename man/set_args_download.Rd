@@ -8,8 +8,23 @@ set_args_download(
   char_period = c("2018-01-01", "2022-10-31"),
   char_input_dir = "input",
   nasa_earth_data_token = NULL,
+  year_nlcd = c(2019, 2021),
   path_export = "inst/targets/download_spec.qs"
 )
+}
+\arguments{
+\item{char_period}{Character(2) vector specifying the time period.
+Default is c("2018-01-01", "2022-10-31").}
+
+\item{char_input_dir}{Character string specifying the input path.
+Default is "input".}
+
+\item{nasa_earth_data_token}{Character string specifying the NASA Earth Data token.}
+
+\item{year_nlcd}{numeric(2). Numeric vector specifying the NLCD years.}
+
+\item{path_export}{Character string specifying the export path.
+Default is "inst/targets/download_spec.qs".}
 }
 \description{
 Generate argument list for raw data download
