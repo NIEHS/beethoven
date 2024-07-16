@@ -2,10 +2,7 @@
 % Please edit documentation in R/pipeline_base_functions.R
 \name{fit_base_lightgbm}
 \alias{fit_base_lightgbm}
-\title{LightGBM model is fitted at the defined rate (\code{r_subsample}) of
-the input dataset by grid or Bayesian optimization search.
-With proper settings, users can utilize graphics
-processing units (GPU) to speed up the training process.}
+\title{Base learner: Light Gradient Boosting Machine (LightGBM)}
 \usage{
 fit_base_lightgbm(
   dt_imputed,

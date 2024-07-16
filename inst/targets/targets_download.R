@@ -1,7 +1,7 @@
 target_download <-
   list(
     tarchetypes::tar_files_input(
-      name = file_prep_calc_args,
+      name = file_prep_download_args,
       files = list.files("inst/targets", pattern = "download_spec.qs$", full.names = TRUE),
       # cue = tar_invalidate(tar_older(Sys.time() - as.difftime(4, units = "weeks"))),
       format = "file",
@@ -30,9 +30,9 @@ target_download <-
       lgl_rawdir_download,
       command =
       feature_raw_download(
-        path = file_prep_calc_args,
+        path = file_prep_download_args,
         dataset_name = char_rawdir_download),
-      pattern = map(file_prep_calc_args, char_rawdir_download),
+      pattern = map(file_prep_download_args, char_rawdir_download),
       iteration = "list"
     )
   )

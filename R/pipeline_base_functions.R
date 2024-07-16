@@ -2573,7 +2573,7 @@ fit_base_xgb <-
 # dtfitx <- fit_base_xgb(dtd, xvar = names(dtd)[6:105], r_subsample = 0.3)
 
 
-' Base learner: Light Gradient Boosting Machine (LightGBM)
+#' Base learner: Light Gradient Boosting Machine (LightGBM)
 #'
 #' LightGBM model is fitted at the defined rate (`r_subsample`) of
 #' the input dataset by grid or Bayesian optimization search.
@@ -3697,7 +3697,7 @@ restore_fit_best <-
       )
 
     # fit the entire data
-    model_fit <- fit(model_best, data = df_full)
+    model_fit <- parsnip::fit(model_best, data = df_full)
     pred <- predict(model_fit, data = df_full)
     return(pred)
 
