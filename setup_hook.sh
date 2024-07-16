@@ -4,7 +4,7 @@ HOOKS_DIR=$(git rev-parse --show-toplevel)/.git/hooks
 cat > $HOOKS_DIR/post-checkout << EOF
 #!/bin/bash
 # Define the users who should have write privileges
-WRITE_USERS=("messierkp")
+WRITE_USERS=("messierkp" "songi2")
  
 # Get the current username
 CURRENT_USER=\$(whoami)
