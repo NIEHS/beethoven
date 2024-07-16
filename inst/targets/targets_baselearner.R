@@ -85,8 +85,8 @@ target_baselearner <-
     # xgb-spt-cv
     # length of 120 (4 * 30)
     targets::tar_target(
-      workflow_learner_base_xgb_spt,
-      fit_base_xgb(
+      workflow_learner_base_lgb_spt,
+      fit_base_lightgbm(
         dt_feat_calc_imputed,
         folds = list_learner_base_cv_spt,
         tune_mode = "grid",
@@ -99,8 +99,8 @@ target_baselearner <-
     ,
     # length of 120
     targets::tar_target(
-      workflow_learner_base_xgb_spblock,
-      fit_base_xgb(
+      workflow_learner_base_lgb_spblock,
+      fit_base_lightgbm(
         dt_feat_calc_imputed,
         folds = list_learner_base_cv_spblock,
         tune_mode = "grid",
@@ -114,7 +114,7 @@ target_baselearner <-
     # length of 120
     targets::tar_target(
       workflow_learner_base_xgb_spcluster,
-      fit_base_xgb(
+      fit_base_lightgbm(
         dt_feat_calc_imputed,
         folds = list_learner_base_cv_spcluster,
         tune_mode = "grid",
@@ -215,9 +215,9 @@ target_baselearner <-
     # combine the results with indices of 1 31 61 91 / 2 32 62 92 / ... / 30 60 90 120. Could be changed per #subsamples.
     # elnet is length of 30 (or #subsamples)
     targets::tar_target(
-      list_learner_base_xgb_best_spt,
+      list_learner_base_lgb_best_spt,
       restore_fit_best(
-        workflow_learner_base_xgb_spt,
+        workflow_learner_base_lgb_spt,
         rset_full = list_learner_base_cv_spt,
         df_full = dt_feat_calc_imputed,
         nested = TRUE
@@ -225,9 +225,9 @@ target_baselearner <-
     )
     ,
     targets::tar_target(
-      list_learner_base_xgb_best_spblock,
+      list_learner_base_lgb_best_spblock,
       restore_fit_best(
-        workflow_learner_base_xgb_spblock,
+        workflow_learner_base_lgb_spblock,
         rset_full = list_learner_base_cv_spblock,
         df_full = dt_feat_calc_imputed,
         nested = TRUE
@@ -235,9 +235,9 @@ target_baselearner <-
     )
     ,
     targets::tar_target(
-      list_learner_base_xgb_best_spcluster,
+      list_learner_base_lgb_best_spcluster,
       restore_fit_best(
-        workflow_learner_base_xgb_spcluster,
+        workflow_learner_base_lgb_spcluster,
         rset_full = list_learner_base_cv_spcluster,
         df_full = dt_feat_calc_imputed,
         nested = TRUE
