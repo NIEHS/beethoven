@@ -80,10 +80,13 @@ target_calculate_fit <-
                     dta <- dta[, time := as.character(time)]
                     return(dta)
                   })
-            xrr <- reduce_merge(xr)
+            xrr <- Reduce(
+              function(x, y) {
+                collapse::join(x, y, on = c("site_id", "time"), how = "full") },
+              xr)
             return(xrr)
           } else {
-            data.table::rbindlist(x, use.names = TRUE, fill = TRUE)
+            collapse::rowbind(x, use.names = TRUE, fill = TRUE)
           }
           }),
       description = "Base feature list (all dt)"
@@ -199,7 +202,7 @@ target_calculate_fit <-
       Reduce(
         post_calc_autojoin,
         list(
-          reduce_merge(dt_feat_calc_narr, by = NULL),
+          dt_feat_calc_narr,
           dt_feat_calc_geoscf,
           dt_feat_calc_nasa
         )
@@ -248,11 +251,11 @@ target_calculate_fit <-
         path_qs = "output/qs",
         period_new = arglist_common$char_period,
         input_new = dt_feat_calc_design,
-        nthreads = 8L
+        nthreads = arglist_common$nthreads_append
       ),
       description = "Cumulative feature calculation",
       resources = set_slurm_resource(
-            ntasks = 1, ncpus = 8, memory = 16
+            ntasks = 1, ncpus = arglist_common$nthreads_append, memory = 16
           )
     ),
     tar_target(
@@ -260,13 +263,15 @@ target_calculate_fit <-
       command =
       impute_all(
         dt_feat_calc_cumulative,
-        period = arglist_common$char_period, 64L, 64L, 64L),
+        period = arglist_common$char_period,
+        nthreads_dt = arglist_common$nthreads_impute,
+        nthreads_collapse = arglist_common$nthreads_impute,
+        nthreads_imputation = arglist_common$nthreads_impute),
       description = "Imputed features + lags",
       resources = set_slurm_resource(
-            ntasks = 1, ncpus = 64, memory = 8
+            ntasks = 1, ncpus = arglist_common$nthreads_impute, memory = 8
           )
     )
-  # TODO: compute lagged variables
   )
 
 

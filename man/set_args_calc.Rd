@@ -20,7 +20,9 @@ set_args_calc(
   nthreads_gmted = 4L,
   nthreads_narr = 24L,
   nthreads_groads = 3L,
-  nthreads_population = 3L
+  nthreads_population = 3L,
+  nthreads_append = 8L,
+  nthreads_impute = 64L
 )
 }
 \arguments{
@@ -43,9 +45,7 @@ Default is the current user's email with nih.gov domain.}
 is exported to \code{path_export}. Default is FALSE.}
 
 \item{path_export}{Character string specifying the export path.
-Default is "inst/targets/punchcard_calc.qs".
-If \code{NULL}, a list object "arglist_common" is exported to the global
-environment and returns a list of arguments for the calculation process.}
+Default is "inst/targets/punchcard_calc.qs".}
 
 \item{char_input_dir}{Character string specifying the input path.
 Default is "input".}
@@ -73,6 +73,12 @@ Default is 3L.}
 
 \item{nthreads_population}{integer(1). Number of threads for population data.
 Default is 3L.}
+
+\item{nthreads_append}{integer(1). Number of threads for appending data.
+Default is 8L.}
+
+\item{nthreads_impute}{integer(1). Number of threads for imputing data.
+Default is 64L.}
 }
 \value{
 A list of arguments for common use
@@ -92,6 +98,8 @@ in the calculation process.
 \item nthreads_narr: Number of threads for NARR data.
 \item nthreads_groads: Number of threads for SEDAC Groads data.
 \item nthreads_population: Number of threads for population data.
+\item nthreads_append: Number of threads for appending data.
+\item nthreads_impute: Number of threads for imputing data.
 }
 }
 \description{

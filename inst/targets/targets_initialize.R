@@ -5,11 +5,11 @@ target_init <-
       read_locs(
         export = FALSE,
         path = list.files(
-          path = file.path(arglist_common$char_input_dir, "aqs"),
+          path = file.path(arglist_common$char_input_dir, "aqs", "data_files"),
           pattern = "daily_88101_[0-9]{4}.csv",
           full.names = TRUE
         ),
-        date = NULL,
+        date = arglist_common$char_period,
         mode = "location",
         return_format = "sf"
       ),
@@ -20,7 +20,7 @@ target_init <-
       dt_feat_proc_aqs_sites_time,
       read_locs(
         path = list.files(
-          path = file.path(arglist_common$char_input_dir, "aqs"),
+          path = file.path(arglist_common$char_input_dir, "aqs", "data_files"),
           pattern = "daily_88101_[0-9]{4}.csv",
           full.names = TRUE
         ),

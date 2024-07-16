@@ -4,7 +4,7 @@
 \alias{inject_geos}
 \title{Injects geographic information into a data frame}
 \usage{
-inject_geos(locs, injection)
+inject_geos(locs, injection, ...)
 }
 \arguments{
 \item{locs}{A data frame containing the locations for which
@@ -12,6 +12,8 @@ geographic information needs to be injected.}
 
 \item{injection}{A list of additional arguments to be passed to
 the \code{calc_geos_strict} function.}
+
+\item{...}{Placeholders}
 }
 \value{
 A modified data frame with injected geographic information.

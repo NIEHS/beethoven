@@ -11,7 +11,8 @@ generate_cv_index(
   cv_fold = 5L,
   cv_pairs = NULL,
   pairing = c("1", "2"),
-  cv_mode = "spt"
+  cv_mode = "spt",
+  ...
 )
 }
 \arguments{
@@ -43,6 +44,8 @@ are selected based on the rank.
 }}
 
 \item{cv_mode}{character(1). Spatiotemporal cross-validation indexing}
+
+\item{...}{Additional arguments to be passed.}
 }
 \value{
 rsample::manual_rset() object.

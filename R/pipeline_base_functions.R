@@ -61,7 +61,6 @@ loadargs <- function(argfile, dataset) {
 #' tvec <- c(as.Date("2021-01-01"), as.Date("2023-01-01"))
 #' `%tin%`(query_date, tvec)
 #' }
-#' @export
 `%tin%` <- function(query_date, tvec) {
   tvec <- sort(tvec)
   query_date <= tvec[1] & query_date >= tvec[2]
@@ -168,9 +167,10 @@ inject_modis_par <- function(locs, domain, injection) {
 #'   geographic information needs to be injected.
 #' @param injection A list of additional arguments to be passed to
 #'   the `calc_geos_strict` function.
+#' @param ... Placeholders
 #' @returns A modified data frame with injected geographic information.
 #' @export
-inject_geos <- function(locs, injection) {
+inject_geos <- function(locs, injection, ...) {
   rlang::inject(
     calc_geos_strict(
       locs = locs,
@@ -223,7 +223,8 @@ inject_gmted <- function(locs, variable, radii, injection, nthreads = 4L) {
             !!!injection
           )
         )
-      }
+      },
+      future.seed = TRUE
     )
   radii_rep <- lapply(radii_rep, function(x) as.data.frame(x))
   radii_join <- reduce_merge(radii_rep, "site_id")
@@ -683,8 +684,9 @@ read_locs <-
 
 #' Check file status and download if necessary
 #' @keywords Utility
-#' @param path download path.
-#' @param dataset_name Dataset name. See [`amadeus::download_data`] for details.
+#' @param path Path to qs file with all download specifications per
+#'   dataset.
+#' @param dataset_name character(1). Dataset name.
 #' @param ... Arguments passed to `amadeus::download_data`
 #' @returns logical(1).
 feature_raw_download <-
@@ -693,10 +695,39 @@ feature_raw_download <-
     dataset_name = NULL,
     ...
   ) {
+    if (!file.exists(path)) {
+      stop("The path does not exist.")
+    }
+    if (!endsWith(path, ".qs")) {
+      stop("The file should be in QS format.")
+    }
+    args_check <- loadargs(path, dataset = dataset_name)
+
     # run amadeus::download_data
     tryCatch(
       {
-        amadeus::download_data(dataset_name = dataset_name, ...)
+        if (is.list(args_check[[1]])) {
+          for (i in seq_along(args_check)) {
+            rlang::inject(
+              amadeus::download_data(
+                dataset_name = dataset_name,
+                acknowledgement = TRUE,
+                download = TRUE,
+                !!!args_check[[i]]
+              )
+            )
+          }
+        } else {
+          rlang::inject(
+            amadeus::download_data(
+              dataset_name = dataset_name,
+              acknowledgement = TRUE,
+              download = TRUE,
+              !!!args_check
+            )
+          )
+        }
+        return(TRUE)
       },
       error = function(e) {
         stop(e)
@@ -711,7 +742,6 @@ feature_raw_download <-
 #' Default is c("02", "15", "60", "66", "68", "69", "72", "78").
 #' @returns sf object
 #' @importFrom tigris counties
-#' @export
 process_counties <-
   function(
     year = 2020,
@@ -800,7 +830,6 @@ post_calc_unify_timecols <-
 #' @note This function takes preprocessed data.table with
 #'   a column named `"time"`.
 #' @importFrom data.table as.data.table copy
-#' @export
 post_calc_convert_time <-
   function(
     df
@@ -921,7 +950,6 @@ post_calc_merge_all <-
 #'                  description = letters[1:5], other = 16:20)
 #' post_calc_drop_cols(df)
 #' }
-#' @export
 post_calc_drop_cols <-
   function(
     df,
@@ -1094,7 +1122,6 @@ read_paths <-
 #' \dontrun{
 #' search_function("amadeus", "process_")
 #' }
-#' @export
 search_function <- function(package, search) {
   library(package, character.only = TRUE)
   grep(search, ls(sprintf("package:%s", package)), value = TRUE)
@@ -1105,7 +1132,6 @@ search_function <- function(package, search) {
 #' @param functions character. Vector of function names.
 #' @returns A data.frame containing the parameters of the functions.
 #' @importFrom dplyr as_tibble bind_rows
-#' @export
 df_params <- function(functions) {
   params <- lapply(functions, function(x) {
     args <-
@@ -1389,6 +1415,7 @@ calc_geos_strict <-
 
     future_inserted <- split(data_paths, filename_date_cl)
     other_args <- list(...)
+    other_args$nthreads <- NULL
     data_variables <- terra::describe(data_paths[1], sds = TRUE)$var
 
     search_variables <-
@@ -1949,6 +1976,11 @@ impute_all <-
       dt <- file.path("output/qs", dt)
       dt <- qs::qread(dt)
     }
+    dt$time <- as.POSIXct(dt$time)
+    # remove unnecessary columns
+    query <- "^(site_id|time)\\.[0-9]+"
+    dt <- dt[, !grepl(query, names(dt)), with = FALSE]
+
     # name cleaning
     dt <- stats::setNames(dt, sub("light_1", "OTH_HMSWL_0_00000", names(dt)))
     dt <- stats::setNames(dt, sub("medium_1", "OTH_HMSWM_0_00000", names(dt)))
@@ -2193,6 +2225,41 @@ par_nest <-
   }
 
 
+
+#' Make sampled subdataframes for base learners
+#'
+#' Per beethoven resampling strategy, this function selects
+#' the predefined number of rows from the input data table and
+#' saves the row index in .rowindex field.
+#'
+#' @keywords Baselearner
+#' @param data An object that inherits data.frame.
+#' @param n The number of rows to be sampled.
+#' @param p The proportion of rows to be used. Default is 0.3.
+#' @returns The sampled data table with row index saved in .rowindex field.
+make_subdata <-
+  function(
+    data,
+    n = NULL,
+    p = 0.3
+  ) {
+    if (is.null(n) && is.null(p)) {
+      stop("Please provide either n or p.")
+    }
+    nr <- seq_len(nrow(data))
+    if (!is.null(n)) {
+      nsample <- sample(nr, n)
+    } else {
+      nsample <- sample(nr, ceiling(nrow(data) * p))
+    }
+    data <- data[nsample, ]
+    data$.rowindex <- nsample
+    data_name <- as.character(substitute(data))
+    attr(data, "object_origin") <- data_name[length(data_name)]
+    return(data)
+  }
+
+
 #' Base learner: Multilayer perceptron with brulee
 #'
 #' Multilayer perceptron model with different configurations of
@@ -2201,13 +2268,29 @@ par_nest <-
 #' processing units (GPU) to speed up the training process.
 #' @keywords Baselearner
 #' @note tune package should be 1.2.0 or higher.
+#' brulee should be installed with GPU support.
+#' @details Hyperparameters `hidden_units`, `dropout`, `activation`,
+#'   and `learn_rate` are tuned. `With tune_mode = "grid"`,
+#'   users can modify `learn_rate` explicitly, and other hyperparameters
+#'   will be predefined (56 combinations per `learn_rate`).
 #' @param dt_imputed The input data table to be used for fitting.
-#' @param folds pre-generated rset object. If NULL, it should be
-#'   numeric to be used in [rsample::vfold_cv].
-#' @param r_subsample The proportion of rows to be sampled.
+#' @param folds pre-generated rset object with minimal number of columns.
+#'   If NULL, `vfold` should be numeric to be used in [rsample::vfold_cv].
+#' @param tune_mode character(1). Hyperparameter tuning mode.
+#'   Default is "grid", "bayes" is acceptable.
+#' @param tune_bayes_iter integer(1). The number of iterations for
+#'  Bayesian optimization. Default is 50. Only used when `tune_mode = "bayes"`.
+#' @param learn_rate The learning rate for the model. For branching purpose.
+#'   Default is 0.1.
 #' @param yvar The target variable.
 #' @param xvar The predictor variables.
 #' @param vfold The number of folds for cross-validation.
+#' @param device The device to be used for training.
+#'   Default is "cuda:0". Make sure that your system is equipped
+#'   with CUDA-enabled graphical processing units.
+#' @param trim_resamples logical(1). Default is TRUE, which replaces the actual
+#'   data.frames in splits column of `tune_results` object with NA.
+#' @param return_best logical(1). If TRUE, the best tuned model is returned.
 #' @param ... Additional arguments to be passed.
 #'
 #' @returns The fitted workflow.
@@ -2215,7 +2298,7 @@ par_nest <-
 #' @importFrom dplyr `%>%`
 #' @importFrom parsnip mlp set_engine set_mode
 #' @importFrom workflows workflow add_recipe add_model
-#' @importFrom tune tune_grid
+#' @importFrom tune tune_grid fit_best
 #' @importFrom tidyselect all_of
 #' @importFrom yardstick metric_set rmse
 #' @importFrom rsample vfold_cv
@@ -2224,27 +2307,34 @@ fit_base_brulee <-
   function(
     dt_imputed,
     folds = NULL,
-    r_subsample = 0.3,
+    tune_mode = "grid",
+    tune_bayes_iter = 50L,
+    learn_rate = 0.1,
     yvar = "Arithmetic.Mean",
-    xvar = seq(6, ncol(dt_imputed)),
+    xvar = seq(5, ncol(dt_imputed)),
     vfold = 5L,
+    device = "cuda:0",
+    trim_resamples = TRUE,
+    return_best = FALSE,
     ...
   ) {
+    tune_mode <- match.arg(tune_mode, c("grid", "bayes"))
+
     # 2^9=512, 2^15=32768 (#param is around 10% of selected rows)
     grid_hyper_tune <-
       expand.grid(
-        hidden_units = list(c(64, 64), c(32, 32), c(32, 32, 32), c(16, 16, 16)),
+        hidden_units = list(c(1024), c(64, 64), c(32, 32, 32), c(16, 16, 16)),
         dropout = 1 / seq(4, 2, -1),
         activation = c("relu", "leaky_relu"),
-        learn_rate = c(0.1, 0.05, 0.01)
+        learn_rate = learn_rate
       )
-    dt_imputed <-
-      dt_imputed %>%
-      dplyr::slice_sample(prop = r_subsample)
+    # dt_imputed <-
+    #   dt_imputed %>%
+    #   dplyr::slice_sample(prop = r_subsample)
 
     base_recipe <-
       recipes::recipe(
-        dt_imputed
+        dt_imputed[1, ]
       ) %>%
       # do we want to normalize the predictors?
       # if so, an additional definition of truly continuous variables is needed
@@ -2258,6 +2348,9 @@ fit_base_brulee <-
     } else {
       base_vfold <- folds
     }
+    base_vfold <-
+      restore_rset_full(rset = base_vfold, data_full = dt_imputed)
+
     base_model <-
       parsnip::mlp(
         hidden_units = parsnip::tune(),
@@ -2266,21 +2359,58 @@ fit_base_brulee <-
         activation = parsnip::tune(),
         learn_rate = parsnip::tune()
       ) %>%
-      parsnip::set_engine("brulee", device = "cuda") %>%
+      parsnip::set_engine("brulee", device = device) %>%
       parsnip::set_mode("regression")
 
-    wf_config <- tune::control_resamples(save_pred = TRUE, save_workflow = TRUE)
 
     base_wf <-
       workflows::workflow() %>%
       workflows::add_recipe(base_recipe) %>%
-      workflows::add_model(base_model) %>%
-      tune::tune_grid(
-        resamples = base_vfold,
-        grid = grid_hyper_tune,
-        metrics = yardstick::metric_set(yardstick::rmse, yardstick::mape),
-        control = wf_config
-      )
+      workflows::add_model(base_model)
+
+    if (tune_mode == "grid") {
+      wf_config <-
+        tune::control_grid(
+          verbose = TRUE,
+          save_pred = TRUE,
+          save_workflow = TRUE
+        )
+      base_wf <-
+        base_wf %>%
+        tune::tune_grid(
+          resamples = base_vfold,
+          grid = grid_hyper_tune,
+          metrics =
+          yardstick::metric_set(
+            yardstick::rmse,
+            yardstick::mape,
+            yardstick::rsq,
+            yardstick::mae
+          ),
+          control = wf_config
+        )
+    } else {
+      wf_config <-
+        tune::control_bayes(
+          verbose = TRUE,
+          save_pred = TRUE,
+          save_workflow = TRUE
+        )
+      base_wf <-
+        base_wf %>%
+        tune::tune_bayes(
+          resamples = base_vfold,
+          iter = tune_bayes_iter,
+          metrics = yardstick::metric_set(yardstick::rmse, yardstick::mape),
+          control = wf_config
+        )
+    }
+    if (trim_resamples) {
+      base_wf$splits <- NA
+    }
+    if (return_best) {
+      base_wf <- tune::show_best(base_wf, n = 1)
+    }
     return(base_wf)
   }
 
@@ -2298,13 +2428,29 @@ fit_base_brulee <-
 #' processing units (GPU) to speed up the training process.
 #' @keywords Baselearner
 #' @note tune package should be 1.2.0 or higher.
+#' xgboost should be installed with GPU support.
+#' @details Hyperparameters `mtry`, `ntrees`, and `learn_rate` are
+#'   tuned. With `tune_mode = "grid"`,
+#'   users can modify `learn_rate` explicitly, and other hyperparameters
+#'   will be predefined (30 combinations per `learn_rate`).
 #' @param dt_imputed The input data table to be used for fitting.
-#' @param folds pre-generated rset object. If NULL, it should be
-#'   numeric to be used in [rsample::vfold_cv].
-#' @param r_subsample The proportion of rows to be sampled.
+#' @param folds pre-generated rset object with minimal number of columns.
+#'   If NULL, `vfold` should be numeric to be used in [rsample::vfold_cv].
+#' @param tune_mode character(1). Hyperparameter tuning mode.
+#'   Default is "grid", "bayes" is acceptable.
+#' @param tune_bayes_iter integer(1). The number of iterations for
+#' Bayesian optimization. Default is 50. Only used when `tune_mode = "bayes"`.
+#' @param learn_rate The learning rate for the model. For branching purpose.
+#'   Default is 0.1.
 #' @param yvar The target variable.
 #' @param xvar The predictor variables.
 #' @param vfold The number of folds for cross-validation.
+#' @param device The device to be used for training.
+#'   Default is "cuda:0". Make sure that your system is equipped
+#'   with CUDA-enabled graphical processing units.
+#' @param trim_resamples logical(1). Default is TRUE, which replaces the actual
+#'   data.frames in splits column of `tune_results` object with NA.
+#' @param return_best logical(1). If TRUE, the best tuned model is returned.
 #' @param ... Additional arguments to be passed.
 #'
 #' @returns The fitted workflow.
@@ -2312,7 +2458,7 @@ fit_base_brulee <-
 #' @importFrom dplyr `%>%`
 #' @importFrom parsnip boost_tree set_engine set_mode
 #' @importFrom workflows workflow add_recipe add_model
-#' @importFrom tune tune_grid
+#' @importFrom tune tune_grid fit_best
 #' @importFrom tidyselect all_of
 #' @importFrom yardstick metric_set rmse
 #' @importFrom rsample vfold_cv
@@ -2321,25 +2467,32 @@ fit_base_xgb <-
   function(
     dt_imputed,
     folds = NULL,
-    r_subsample = 0.3,
+    tune_mode = "grid",
+    tune_bayes_iter = 50L,
+    learn_rate = 0.1,
     yvar = "Arithmetic.Mean",
-    xvar = seq(6, ncol(dt_imputed)),
+    xvar = seq(5, ncol(dt_imputed)),
     vfold = 5L,
+    device = "cuda:0",
+    trim_resamples = TRUE,
+    return_best = FALSE,
     ...
   ) {
+    tune_mode <- match.arg(tune_mode, c("grid", "bayes"))
+    # P --> ++ / fix as many hyperparams as possible
     grid_hyper_tune <-
       expand.grid(
         mtry = floor(c(0.02, 0.1, 0.02) * ncol(dt_imputed)),
-        trees = seq(500, 3000, 500),
-        learn_rate = c(0.05, 0.01, 0.005, 0.001)
+        trees = seq(1000, 3000, 500),
+        learn_rate = learn_rate
       )
-    dt_imputed <-
-      dt_imputed %>%
-      dplyr::slice_sample(prop = r_subsample)
+    # dt_imputed <-
+    #   dt_imputed %>%
+    #   dplyr::slice_sample(prop = r_subsample)
 
     base_recipe <-
       recipes::recipe(
-        dt_imputed
+        dt_imputed[1, ]
       ) %>%
       # recipes::step_normalize(recipes::all_numeric_predictors()) %>%
       recipes::update_role(tidyselect::all_of(xvar)) %>%
@@ -2349,27 +2502,68 @@ fit_base_xgb <-
     } else {
       base_vfold <- folds
     }
+    base_vfold <-
+      restore_rset_full(rset = base_vfold, data_full = dt_imputed)
+
     base_model <-
       parsnip::boost_tree(
         mtry = parsnip::tune(),
         trees = parsnip::tune(),
         learn_rate = parsnip::tune()
       ) %>%
-      parsnip::set_engine("xgboost", device = "cuda") %>%
+      parsnip::set_engine("xgboost", device = device) %>%
       parsnip::set_mode("regression")
-
-    wf_config <- tune::control_resamples(save_pred = TRUE, save_workflow = TRUE)
 
     base_wf <-
       workflows::workflow() %>%
       workflows::add_recipe(base_recipe) %>%
-      workflows::add_model(base_model) %>%
-      tune::tune_grid(
-        resamples = base_vfold,
-        grid = grid_hyper_tune,
-        metrics = yardstick::metric_set(yardstick::rmse, yardstick::mape),
-        control = wf_config
-      )
+      workflows::add_model(base_model)
+
+    if (tune_mode == "grid") {
+      wf_config <-
+        tune::control_grid(
+          verbose = TRUE,
+          save_pred = TRUE,
+          save_workflow = TRUE
+        )
+
+      base_wf <-
+        base_wf %>%
+        tune::tune_grid(
+          resamples = base_vfold,
+          grid = grid_hyper_tune,
+          metrics =
+          yardstick::metric_set(
+            yardstick::rmse,
+            yardstick::mape,
+            yardstick::rsq,
+            yardstick::mae
+          ),
+          control = wf_config
+        )
+    } else {
+      wf_config <-
+        tune::control_bayes(
+          verbose = TRUE,
+          save_pred = TRUE,
+          save_workflow = TRUE
+        )
+      base_wf <-
+        base_wf %>%
+        tune::tune_bayes(
+          resamples = base_vfold,
+          iter = tune_bayes_iter,
+          metrics = yardstick::metric_set(yardstick::rmse, yardstick::mape),
+          control = wf_config
+        )
+    }
+    if (trim_resamples) {
+      base_wf$splits <- NA
+    }
+    if (return_best) {
+      base_wf <- tune::show_best(base_wf, n = 1)
+    }
+
     return(base_wf)
 
   }
@@ -2379,56 +2573,80 @@ fit_base_xgb <-
 # dtfitx <- fit_base_xgb(dtd, xvar = names(dtd)[6:105], r_subsample = 0.3)
 
 
-#' Base learner: Elastic net
+#' Base learner: Light Gradient Boosting Machine (LightGBM)
 #'
-#' Elastic net model is fitted at the defined rate (`r_subsample`) of
-#' the input dataset by grid search.
+#' LightGBM model is fitted at the defined rate (`r_subsample`) of
+#' the input dataset by grid or Bayesian optimization search.
+#' With proper settings, users can utilize graphics
+#' processing units (GPU) to speed up the training process.
 #' @keywords Baselearner
 #' @note tune package should be 1.2.0 or higher.
+#' xgboost should be installed with GPU support.
+#' @details Hyperparameters `mtry`, `ntrees`, and `learn_rate` are
+#'   tuned. With `tune_mode = "grid"`,
+#'   users can modify `learn_rate` explicitly, and other hyperparameters
+#'   will be predefined (30 combinations per `learn_rate`).
 #' @param dt_imputed The input data table to be used for fitting.
-#' @param folds pre-generated rset object. If NULL, it should be
-#'   numeric to be used in [rsample::vfold_cv].
-#' @param r_subsample The proportion of rows to be sampled.
+#' @param folds pre-generated rset object with minimal number of columns.
+#'   If NULL, `vfold` should be numeric to be used in [rsample::vfold_cv].
+#' @param tune_mode character(1). Hyperparameter tuning mode.
+#'   Default is "grid", "bayes" is acceptable.
+#' @param tune_bayes_iter integer(1). The number of iterations for
+#' Bayesian optimization. Default is 50. Only used when `tune_mode = "bayes"`.
+#' @param learn_rate The learning rate for the model. For branching purpose.
+#'   Default is 0.1.
 #' @param yvar The target variable.
 #' @param xvar The predictor variables.
 #' @param vfold The number of folds for cross-validation.
-#' @param nthreads The number of threads to be used. Default is 16L.
+#' @param device The device to be used for training.
+#'   Default is `"gpu"`. Make sure that your system is equipped
+#'   with OpenCL-capable graphical processing units.
+#'   A GPU-enabled version of LightGBM should be installed.
+#' @param trim_resamples logical(1). Default is TRUE, which replaces the actual
+#'   data.frames in splits column of `tune_results` object with NA.
+#' @param return_best logical(1). If TRUE, the best tuned model is returned.
 #' @param ... Additional arguments to be passed.
 #'
 #' @returns The fitted workflow.
-#' @importFrom future plan multicore multisession
-#' @importFrom dplyr `%>%`
 #' @importFrom recipes recipe update_role
-#' @importFrom parsnip linear_reg set_engine set_mode
+#' @importFrom dplyr `%>%`
+#' @importFrom parsnip boost_tree set_engine set_mode
 #' @importFrom workflows workflow add_recipe add_model
-#' @importFrom tune tune_grid
+#' @importFrom tune tune_grid fit_best
 #' @importFrom tidyselect all_of
 #' @importFrom yardstick metric_set rmse
 #' @importFrom rsample vfold_cv
 #' @export
-fit_base_elnet <-
+fit_base_lightgbm <-
   function(
     dt_imputed,
     folds = NULL,
-    r_subsample = 0.3,
+    tune_mode = "grid",
+    tune_bayes_iter = 50L,
+    learn_rate = 0.1,
     yvar = "Arithmetic.Mean",
-    xvar = seq(6, ncol(dt_imputed)),
+    xvar = seq(5, ncol(dt_imputed)),
     vfold = 5L,
-    nthreads = 16L,
+    device = "gpu",
+    trim_resamples = TRUE,
+    return_best = FALSE,
     ...
   ) {
+    tune_mode <- match.arg(tune_mode, c("grid", "bayes"))
+    # P --> ++ / fix as many hyperparams as possible
     grid_hyper_tune <-
       expand.grid(
-        mixture = seq(0, 1, length.out = 21),
-        penalty = 10 ^ seq(-3, 5)
+        mtry = floor(c(0.02, 0.1, 0.02) * ncol(dt_imputed)),
+        trees = seq(1000, 3000, 500),
+        learn_rate = learn_rate
       )
-    dt_imputed <-
-      dt_imputed %>%
-      dplyr::slice_sample(prop = r_subsample)
+    # dt_imputed <-
+    #   dt_imputed %>%
+    #   dplyr::slice_sample(prop = r_subsample)
 
     base_recipe <-
       recipes::recipe(
-        dt_imputed
+        dt_imputed[1, ]
       ) %>%
       # recipes::step_normalize(recipes::all_numeric_predictors()) %>%
       recipes::update_role(tidyselect::all_of(xvar)) %>%
@@ -2438,6 +2656,142 @@ fit_base_elnet <-
     } else {
       base_vfold <- folds
     }
+    base_vfold <-
+      restore_rset_full(rset = base_vfold, data_full = dt_imputed)
+
+    base_model <-
+      parsnip::boost_tree(
+        mtry = parsnip::tune(),
+        trees = parsnip::tune(),
+        learn_rate = parsnip::tune()
+      ) %>%
+      parsnip::set_engine("xgboost", device_type = device) %>%
+      parsnip::set_mode("regression")
+
+    base_wf <-
+      workflows::workflow() %>%
+      workflows::add_recipe(base_recipe) %>%
+      workflows::add_model(base_model)
+
+    if (tune_mode == "grid") {
+      wf_config <-
+        tune::control_grid(
+          verbose = TRUE,
+          save_pred = TRUE,
+          save_workflow = TRUE
+        )
+      base_wf <-
+        base_wf %>%
+        tune::tune_grid(
+          resamples = base_vfold,
+          grid = grid_hyper_tune,
+          metrics =
+          yardstick::metric_set(
+            yardstick::rmse,
+            yardstick::mape,
+            yardstick::rsq,
+            yardstick::mae
+          ),
+          control = wf_config
+        )
+    } else {
+      wf_config <-
+        tune::control_bayes(
+          verbose = TRUE,
+          save_pred = TRUE,
+          save_workflow = TRUE
+        )
+      base_wf <-
+        base_wf %>%
+        tune::tune_bayes(
+          resamples = base_vfold,
+          iter = tune_bayes_iter,
+          metrics = yardstick::metric_set(yardstick::rmse, yardstick::mape),
+          control = wf_config
+        )
+    }
+    if (trim_resamples) {
+      base_wf$splits <- NA
+    }
+    if (return_best) {
+      base_wf <- tune::show_best(base_wf, n = 1)
+    }
+
+    return(base_wf)
+
+  }
+
+
+#' Base learner: Elastic net
+#'
+#' Elastic net model is fitted at the defined rate (`r_subsample`) of
+#' the input dataset by grid search.
+#' @keywords Baselearner
+#' @note tune package should be 1.2.0 or higher.
+#' @param dt_imputed The input data table to be used for fitting.
+#' @param folds pre-generated rset object with minimal number of columns.
+#'   If NULL, `vfold` should be numeric to be used in [rsample::vfold_cv].
+#' @param yvar The target variable.
+#' @param xvar The predictor variables.
+#' @param vfold The number of folds for cross-validation.
+#' @param tune_mode character(1). Hyperparameter tuning mode.
+#'   Default is "grid", "bayes" is acceptable.
+#' @param tune_bayes_iter integer(1). The number of iterations for
+#' Bayesian optimization. Default is 50. Only used when `tune_mode = "bayes"`.
+#' @param nthreads The number of threads to be used. Default is 16L.
+#' @param return_best logical(1). If TRUE, the best tuned model is returned.
+#' @param ... Additional arguments to be passed.
+#'
+#' @returns The fitted workflow.
+#' @importFrom future plan multicore multisession
+#' @importFrom dplyr `%>%`
+#' @importFrom recipes recipe update_role
+#' @importFrom parsnip linear_reg set_engine set_mode
+#' @importFrom workflows workflow add_recipe add_model
+#' @importFrom tune tune_grid fit_best
+#' @importFrom tidyselect all_of
+#' @importFrom yardstick metric_set rmse
+#' @importFrom rsample vfold_cv
+#' @export
+fit_base_elnet <-
+  function(
+    dt_imputed,
+    folds = NULL,
+    # r_subsample = 0.3,
+    yvar = "Arithmetic.Mean",
+    xvar = seq(5, ncol(dt_imputed)),
+    tune_mode = "grid",
+    tune_bayes_iter = 50L,
+    vfold = 5L,
+    nthreads = 16L,
+    trim_resamples = TRUE,
+    return_best = FALSE,
+    ...
+  ) {
+    grid_hyper_tune <-
+      expand.grid(
+        mixture = seq(0, 1, length.out = 21),
+        penalty = 10 ^ seq(-3, 5)
+      )
+    # dt_imputed <-
+    #   dt_imputed %>%
+    #   dplyr::slice_sample(prop = r_subsample)
+
+    base_recipe <-
+      recipes::recipe(
+        dt_imputed[1, ]
+      ) %>%
+      # recipes::step_normalize(recipes::all_numeric_predictors()) %>%
+      recipes::update_role(tidyselect::all_of(xvar)) %>%
+      recipes::update_role(tidyselect::all_of(yvar), new_role = "outcome")
+    if (is.null(folds)) {
+      base_vfold <- rsample::vfold_cv(dt_imputed, v = vfold)
+    } else {
+      base_vfold <- folds
+    }
+    base_vfold <-
+      restore_rset_full(rset = base_vfold, data_full = dt_imputed)
+
     base_model <-
       parsnip::linear_reg(
         mixture = parsnip::tune(),
@@ -2446,25 +2800,64 @@ fit_base_elnet <-
       parsnip::set_engine("glmnet") %>%
       parsnip::set_mode("regression")
 
-    wf_config <-
-      tune::control_resamples(save_pred = TRUE, save_workflow = TRUE)
-
     future::plan(future::multicore, workers = nthreads)
     base_wf <-
       workflows::workflow() %>%
       workflows::add_recipe(base_recipe) %>%
-      workflows::add_model(base_model) %>%
-      tune::tune_grid(
-        resamples = base_vfold,
-        grid = grid_hyper_tune,
-        metrics = yardstick::metric_set(yardstick::rmse, yardstick::mape),
-        control = wf_config,
-        parallel_over = "resamples"
-      )
+      workflows::add_model(base_model)
+
+    if (tune_mode == "grid") {
+      wf_config <-
+        tune::control_grid(
+          verbose = TRUE,
+          save_pred = TRUE,
+          save_workflow = TRUE
+        )
+
+      base_wf <-
+        base_wf %>%
+        tune::tune_grid(
+          resamples = base_vfold,
+          grid = grid_hyper_tune,
+          metrics =
+          yardstick::metric_set(
+            yardstick::rmse,
+            yardstick::mape,
+            yardstick::rsq,
+            yardstick::mae
+          ),
+          control = wf_config,
+          parallel_over = "resamples"
+        )
+    } else {
+      wf_config <-
+        tune::control_bayes(
+          verbose = TRUE,
+          save_pred = TRUE,
+          save_workflow = TRUE
+        )
+      base_wf <-
+        base_wf %>%
+        tune::tune_bayes(
+          resamples = base_vfold,
+          iter = tune_bayes_iter,
+          metrics = yardstick::metric_set(yardstick::rmse, yardstick::mape),
+          control = wf_config,
+          parallel_over = "resamples"
+        )
+    }
+    if (trim_resamples) {
+      base_wf$splits <- NA
+    }
+    if (return_best) {
+      base_wf <- tune::show_best(base_wf, n = 1)
+    }
     future::plan(future::sequential)
     return(base_wf)
 
   }
+
+
 
 #' Generate manual rset object from spatiotemporal cross-validation indices
 #' @keywords Baselearner
@@ -2553,11 +2946,11 @@ attach_xy <-
     data_sfd <- stats::setNames(data_sfd, c(locs_id, "lon", "lat"))
 
     data_full_lean <- data_full[, c(locs_id, time_id), with = FALSE]
-    data_full_lean <-
+    data_full_attach <-
       collapse::join(
         data_full_lean, data_sfd, on = locs_id, how = "left"
       )
-    return(data_full_lean)
+    return(data_full_attach)
   }
 
 
@@ -2589,6 +2982,7 @@ attach_xy <-
 #'    are selected based on the rank.
 #'   * "2": rank the pairwise distances directly
 #' @param cv_mode character(1). Spatiotemporal cross-validation indexing
+#' @param ... Additional arguments to be passed.
 #' @note nrow(data) %% cv_fold should be 0.
 #' @returns rsample::manual_rset() object.
 #' @author Insang Song
@@ -2604,11 +2998,13 @@ generate_cv_index <-
     cv_fold = 5L,
     cv_pairs = NULL,
     pairing = c("1", "2"),
-    cv_mode = "spt"
+    cv_mode = "spt",
+    ...
   ) {
     if (length(target_cols) != 3) {
       stop("Please provide three target columns.")
     }
+    data_orig <- data
     data <- data[, target_cols, with = FALSE]
     data$time <- as.numeric(data$time)
     data_proc <-
@@ -2681,7 +3077,7 @@ generate_cv_index <-
 
     rset_cv <-
       convert_cv_index_rset(
-        index_cv, data, ref_list = ref_list, cv_mode = cv_mode
+        index_cv, data_orig, ref_list = ref_list, cv_mode = cv_mode
       )
     return(rset_cv)
   }
@@ -2718,7 +3114,6 @@ vis_rset <-
 #' @keywords Miscellaneous
 #' @param x integer(1). A positive integer.
 #' @returns A vector of divisors of x.
-#' @export
 divisor <-
   function(x) {
     xv <- seq_len(x)
@@ -2749,8 +3144,6 @@ divisor <-
 #'   is exported to `path_export`. Default is FALSE.
 #' @param path_export Character string specifying the export path.
 #'   Default is "inst/targets/punchcard_calc.qs".
-#'   If `NULL`, a list object "arglist_common" is exported to the global
-#'   environment and returns a list of arguments for the calculation process.
 #' @param char_input_dir Character string specifying the input path.
 #'    Default is "input".
 #' @param nthreads_nasa integer(1). Number of threads for NASA data.
@@ -2769,6 +3162,10 @@ divisor <-
 #'   Default is 3L.
 #' @param nthreads_population integer(1). Number of threads for population data.
 #'   Default is 3L.
+#' @param nthreads_append integer(1). Number of threads for appending data.
+#'   Default is 8L.
+#' @param nthreads_impute integer(1). Number of threads for imputing data.
+#'   Default is 64L.
 #'
 #' @note
 #' The number of threads used is fixed as 1L
@@ -2810,6 +3207,8 @@ divisor <-
 #' * nthreads_narr: Number of threads for NARR data.
 #' * nthreads_groads: Number of threads for SEDAC Groads data.
 #' * nthreads_population: Number of threads for population data.
+#' * nthreads_append: Number of threads for appending data.
+#' * nthreads_impute: Number of threads for imputing data.
 #' @author Insang Song
 #' @importFrom qs qsave
 #' @export
@@ -2831,7 +3230,9 @@ set_args_calc <-
     nthreads_gmted = 4L,
     nthreads_narr = 24L,
     nthreads_groads = 3L,
-    nthreads_population = 3L
+    nthreads_population = 3L,
+    nthreads_append = 8L,
+    nthreads_impute = 64L
   ) {
     list_common <-
       list(
@@ -2845,12 +3246,20 @@ set_args_calc <-
         nthreads_hms = nthreads_hms,
         nthreads_tri = nthreads_tri,
         nthreads_geoscf = nthreads_geoscf,
-        nthreads_nlcd = nthreads_nlcd,
+        nthreads_gmted = nthreads_gmted,
         nthreads_narr = nthreads_narr,
         nthreads_groads = nthreads_groads,
-        nthreads_population = nthreads_population
+        nthreads_population = nthreads_population,
+        nthreads_append = nthreads_append,
+        nthreads_impute = nthreads_impute
       )
-    ain <- function(x) file.path(path_input, x)
+    ain <- function(x, append = FALSE) {
+      if (append) {
+        file.path(char_input_dir, x, "data_files")
+      } else {
+        file.path(char_input_dir, x)
+      }
+    }
     if (export) {
       list_paths <-
         list(
@@ -2864,7 +3273,7 @@ set_args_calc <-
 
       list_proccalc <-
         list(
-          aqs = list(path = ain("aqs")),
+          aqs = list(path = ain("aqs", TRUE)),
           mod11 = list(from = list_paths$mod11,
                       name_covariates = sprintf("MOD_SFCT%s_0_", c("D", "N")),
                       subdataset = "^LST_",
@@ -2900,7 +3309,7 @@ set_args_calc <-
                       name_covariates = "MOD_LGHTN_0_",
                       subdataset = 3,
                       nthreads = nthreads_nasa,
-                      preprocess = amadeus::process_bluemarble,
+                      preprocess = amadeus::process_blackmarble,
                       radius = c(1e3, 1e4, 5e4)),
           geoscf_aqc = list(date = list_common$char_period,
                             path = ain("geos/aqc_tavg_1hr_g1440x721_v1"),
@@ -2909,20 +3318,20 @@ set_args_calc <-
                             path = ain("geos/chm_tavg_1hr_g1440x721_v1"),
                             nthreads = nthreads_geoscf),
           # base class covariates start here
-          hms = list(path = ain("HMS_Smoke/data"),
+          hms = list(path = ain("HMS_Smoke", TRUE),
                     date = list_common$char_period,
                     covariate = "hms", 
                     domain = c("Light", "Medium", "Heavy"),
                     nthreads = nthreads_hms,
                     domain_name = "variable"),
           gmted = list(
-            path = ain("gmted"),
+            path = ain("gmted", TRUE),
             covariate = "gmted"
           ),
           nei = list(
             domain = c(2017, 2020),
             domain_name = "year",
-            path = ain("nei"),
+            path = ain("nei", TRUE),
             covariate = "nei"
           ),
           tri = list(
@@ -2936,16 +3345,17 @@ set_args_calc <-
           nlcd = list(
             domain = c(2019, 2021),
             domain_name = "year",
-            path = ain("nlcd/raw"),
+            path = ain("nlcd", TRUE),
             covariate = "nlcd",
+            mode = "exact",
+            extent = NULL,
             radius = c(1e3, 1e4, 5e4),
-            nthreads = nthreads_nlcd,
             max_cells = 1e8
           ),
-          koppen = list(path = ain("koppen_geiger/raw/Beck_KG_V1_present_0p0083.tif"), 
+          koppen = list(path = ain("koppen_geiger/data_files/Beck_KG_V1_present_0p0083.tif"), 
                         covariate = "koppen",
                         nthreads = 1L),
-          ecoregions = list(path = ain("ecoregions/raw/us_eco_l3_state_boundaries.shp"),
+          ecoregions = list(path = ain("ecoregions/data_files/us_eco_l3_state_boundaries.shp"),
                             covariate = "ecoregions",
                             nthreads = 1L),
           narr = list(
@@ -2967,12 +3377,12 @@ set_args_calc <-
             nthreads = nthreads_narr
           ),
           groads = list(
-                        path = ain("sedac_groads/groads-v1-americas-gdb/gROADS-v1-americas.gdb"),
+                        path = ain("sedac_groads/data_files/gROADS-v1-americas.gdb"),
                         covariate = "groads",
                         radius = c(1e3, 1e4, 5e4),
                         nthreads = nthreads_groads),
           population = list(
-            path = ain("sedac_population/gpw_v4_population_density_adjusted_to_2015_unwpp_country_totals_rev11_2020_30_sec.tif"),
+            path = ain("sedac_population/data_files/gpw_v4_population_density_adjusted_to_2015_unwpp_country_totals_rev11_2020_30_sec.tif"),
             covariate = "population", fun = "mean",
             radius = c(1e3, 1e4, 5e4),
             nthreads = nthreads_population
@@ -3015,5 +3425,284 @@ set_args_calc <-
     }
     return(list_common)
   }
+
+
+#' Generate argument list for raw data download
+#' @keywords Utility
+#' @param char_period Character(2) vector specifying the time period.
+#'  Default is c("2018-01-01", "2022-10-31").
+#' @param char_input_dir Character string specifying the input path.
+#' Default is "input".
+#' @param nasa_earth_data_token Character string specifying the NASA Earth Data token.
+#' @param year_nlcd numeric(2). Numeric vector specifying the NLCD years.
+#' Default is c(2019, 2021).
+#' @param export logical(1). If TRUE, the list is saved to `path_export`.
+#' Default is `TRUE`.
+#' @param path_export Character string specifying the export path.
+#' Default is "inst/targets/download_spec.qs".
+#' @export
+set_args_download <-
+  function(
+    char_period = c("2018-01-01", "2022-10-31"),
+    char_input_dir = "input",
+    nasa_earth_data_token = NULL,
+    year_nlcd = c(2019, 2021),
+    export = FALSE,
+    path_export = "inst/targets/download_spec.qs"
+  ) {
+    ain <- function(x, append = FALSE) {
+      if (append) {
+        file.path(char_input_dir, x, "data_files")
+      } else {
+        file.path(char_input_dir, x)
+      }
+    }
+
+    time_periods <- as.numeric(substr(char_period, 1, 4))
+    year_nei <- seq(2017, time_periods[2], 3)
+    gmted_vars <-
+      c("Breakline Emphasis", "Systematic Subsample", "Median Statistic",
+        "Minimum Statistic", "Mean Statistic", "Maximum Statistic",
+        "Standard Deviation Statistic"
+      )
+    narr_variables_mono <-
+      c("air.sfc", "albedo", "apcp", "dswrf", "evap", "hcdc",
+        "hpbl", "lcdc", "lhtfl", "mcdc", "pr_wtr",
+        "prate", "pres.sfc", "shtfl", "snowc", "soilm",    
+        "tcdc", "ulwrf.sfc", "uwnd.10m", "vis", "vwnd.10m", "weasd")
+    narr_variables_plevels <-
+      c("omega", "shum")
+
+    list_download_config <-
+      list(
+        aqs = list(dataset_name = "aqs", directory_to_save = ain("aqs", TRUE),
+                   year_start = time_periods[1], year_end = time_periods[2],
+                   unzip = TRUE, remove_zip = TRUE),
+        mod11 = list(dataset_name = "modis", directory_to_save = ain("modis/raw"),
+                     product = "MOD11A1", date_start = char_period[1], date_end = char_period[2],
+                     nasa_earth_data_token = nasa_earth_data_token),
+        mod06 = list(dataset_name = "modis", directory_to_save = ain("modis/raw"),
+                     product = "MOD06_L2", date_start = char_period[1], date_end = char_period[2],
+                     nasa_earth_data_token = nasa_earth_data_token),
+        mod09 = list(dataset_name = "modis", directory_to_save = ain("modis/raw"),
+                     product = "MOD09GA", date_start = char_period[1], date_end = char_period[2],
+                     nasa_earth_data_token = nasa_earth_data_token),
+        mcd19 = list(dataset_name = "modis", directory_to_save = ain("modis/raw"),
+                     product = "MCD19A2", date_start = char_period[1], date_end = char_period[2],
+                     nasa_earth_data_token = nasa_earth_data_token),
+        mod13 = list(dataset_name = "modis", directory_to_save = ain("modis/raw"),
+                     product = "MOD13A2", date_start = char_period[1], date_end = char_period[2],
+                     nasa_earth_data_token = nasa_earth_data_token),
+        viirs = list(dataset_name = "modis", directory_to_save = ain("modis/raw"),
+                     product = "VNP46A2", date_start = char_period[1], date_end = char_period[2],
+                     version = "5000",
+                     nasa_earth_data_token = nasa_earth_data_token),
+        geoscf_aqc = list(dataset_name = "geos", directory_to_save = ain("geos"),
+                          collection = "aqc_tavg_1hr_g1440x721_v1",
+                          date_start = char_period[1], date_end = char_period[2]),
+        geoscf_chm = list(dataset_name = "geos", directory_to_save = ain("geos"),
+                          collection = "chm_tavg_1hr_g1440x721_v1",
+                          date_start = char_period[1], date_end = char_period[2]),
+        hms = list(dataset_name = "smoke", directory_to_save = ain("HMS_Smoke"),
+                   data_format = "Shapefile",
+                   date_start = char_period[1], date_end = char_period[2],
+                   unzip = TRUE, remove_zip = TRUE),
+        gmted = lapply(gmted_vars,
+          function(v) {
+            list(dataset_name = "gmted", directory_to_save = ain("gmted", TRUE),
+                 static = v, resolution = "7.5 arc-seconds",
+                 unzip = TRUE, remove_zip = TRUE)
+          }),
+        nei = lapply(year_nei,
+          function(y) {
+          list(dataset_name = "nei", directory_to_save = ain("nei", TRUE),
+                   year_target = y, unzip = TRUE)
+          }),
+        tri = list(dataset_name = "tri", directory_to_save = ain("tri"),
+                   year_start = time_periods[1], year_end = time_periods[2]),
+        nlcd = lapply(year_nlcd,
+          function(y) {
+            list(dataset_name = "nlcd", directory_to_save = ain("nlcd", TRUE),
+                    year = y,
+                    unzip = TRUE, remove_zip = TRUE)
+          }),
+        koppen = list(dataset_name = "koppen", directory_to_save = ain("koppen_geiger", TRUE),
+                      data_resolution = "0.0083", time_period = "Present", unzip = TRUE, remove_zip = TRUE),
+        ecoregions = list(dataset_name = "koppen", directory_to_save = ain("ecoregions", TRUE),
+                          unzip = TRUE, remove_zip = TRUE),
+        narr_monolevel = lapply(narr_variables_mono,
+          function(v) {
+            list(dataset_name = "narr_monolevel", directory_to_save = ain("narr"),
+                 variables = v, year_start = char_period[1], year_end = char_period[2])
+          }),
+        narr_p_levels = lapply(narr_variables_plevels,
+          function(v) {
+            list(dataset_name = "narr_p_levels", directory_to_save = ain("narr"),
+                 variables = v, year_start = char_period[1], year_end = char_period[2])
+          })
+        ,
+        groads = list(dataset_name = "sedac_groads", directory_to_save = ain("sedac_groads", TRUE),
+                      data_region = "Americas", data_format = "Geodatabase",
+                      unzip = TRUE, remove_zip = TRUE),
+        population = list(dataset_name = "sedac_population", directory_to_save = ain("sedac_population", TRUE),
+                          data_resolution = "30 second", data_format = "GeoTIFF", year = "2020", unzip = TRUE, remove_zip = TRUE)
+      )
+
+    if (export) {
+      qs::qsave(list_download_config, path_export)
+      message("Download configuration is saved to ", path_export)
+    }
+    return(list_download_config)
+  }
+
 # nolint end
+
+#' Prepare spatial and spatiotemporal cross validation sets
+#' @keywords Baselearner
+#' @param data data.table with X, Y, and time information.
+#' @param r_subsample The proportion of rows to be sampled.
+#' @param target_cols character(3). Names of columns for X, Y.
+#'   Default is `c("lon", "lat")`. It is passed to sf::st_as_sf to
+#'   subsequently generate spatial cross-validation indices using
+#'   `spatialsample::spatial_block_cv` and
+#'   `spatialsample::spatial_clustering_cv`.
+#' @param cv_make_fun function(1). Function to generate spatial
+#'   cross-validation indices. Default is `spatialsample::spatial_block_cv`.
+#' @seealso [`generate_cv_index`] [`spatialsample::spatial_block_cv`]
+#'   [`spatialsample::spatial_clustering_cv`]
+#' @returns rsample::manual_rset() object.
+#' @importFrom rlang inject
+#' @importFrom sf st_as_sf
+#' @export
+prepare_cvindex <-
+  function(
+    data,
+    r_subsample = 0.3,
+    target_cols = c("lon", "lat"),
+    cv_make_fun = spatialsample::spatial_block_cv,
+    ...
+  ) {
+    data <- data %>%
+      dplyr::slice_sample(prop = r_subsample)
+
+    if (methods::getPackageName(environment(cv_make_fun)) == "beethoven") {
+      cv_index <-
+        rlang::inject(
+          cv_make_fun(
+            data = data,
+            target_cols = target_cols,
+            !!!list(...)
+          )
+        )
+    } else {
+      data_sf <- sf::st_as_sf(data, coords = target_cols, remove = FALSE)
+      cv_index <-
+        rlang::inject(
+          cv_make_fun(
+            data_sf,
+            !!!list(...)
+          )
+        )
+      # assign id with function name
+      fun_name <- as.character(substitute(cv_make_fun))
+      fun_name <- fun_name[length(fun_name)]
+      cv_index$id <- sprintf("%s_%02d", fun_name, seq_len(nrow(cv_index)))
+    }
+    return(cv_index)
+  }
+
+
+#' Restore the full data set from the rset object
+#' @keywords Baselearner
+#' @param rset rsample::manual_rset() object's `splits` column
+#' @param data_full data.table with all features
+#' @returns A list of data.table objects.
+#' @note $splits should be present in rset.
+restore_rset_full <-
+  function(rset, data_full) {
+    rset$splits <-
+      lapply(
+        rset$splits,
+        function(x) {
+          x$data <-
+            collapse::join(
+              x$data,
+              data_full,
+              on = c("site_id", "time"),
+              how = "left"
+            )
+          return(x)
+        }
+      )
+    return(rset)
+  }
+
+
+#' Restore the full data set from two rset objects then fit the best model
+#' @keywords Baselearner
+#' @param rset_trimmed rset object without data in splits column.
+#' @param rset_full rset object with full data.
+#' @param df_full data.table with full data.
+#' @param nested logical(1). If TRUE, the rset object is nested.
+#' @param nest_length integer(1). Length of the nested list.
+#'   i.e., Number of resamples.
+#' @returns rset object with full data in splits column.
+#' @export
+restore_fit_best <-
+  function(
+    rset_trimmed,
+    rset_full,
+    df_full,
+    by = c("site_id", "time"),
+    nested = TRUE,
+    nest_length = 30L
+  ) {
+    parsnip_spec <-
+      workflows::extract_spec_parsnip(rset_trimmed[[1]])
+    # Do I need to restore full data in rset_trimmed?
+
+    # reassemble the branched rsets
+    if (nested) {
+      rset_trimmed <-
+        as.list(seq_len(nest_length)) %>%
+        lapply(
+          function(x) {
+            # here we have list length of 4, each has .metric column,
+            # which we want to bind_rows at
+            # [[1]] $.metric
+            # [[2]] $.metric ...
+            template <- x[[1]]
+            combined_lr <- x[seq(x, length(rset_trimmed), nest_length)]
+            # length of 4;
+            # combine rows of each element in four lists
+            combined_lr <-
+              mapply(
+                function(df1, df2, df3, df4) {
+                  dplyr::bind_rows(df1, df2, df3, df4)
+                },
+                combined_lr[[1]], combined_lr[[2]],
+                combined_lr[[3]], combined_lr[[4]],
+                SIMPLIFY = FALSE
+              )
+            template$.metric <- combined_lr
+            return(template)
+          }
+        )
+    }
+
+    tuned_best <- tune::show_best(rset_trimmed, n = 1)
+    model_best <-
+      rlang::inject(
+        parsnip::update(parsnip_spec, parameters = !!!as.list(tuned_best))
+      )
+
+    # fit the entire data
+    model_fit <- parsnip::fit(model_best, data = df_full)
+    pred <- predict(model_fit, data = df_full)
+    return(pred)
+
+  }
+
+
+
 # nocov end

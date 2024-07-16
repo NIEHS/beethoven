@@ -7,29 +7,38 @@
 fit_base_elnet(
   dt_imputed,
   folds = NULL,
-  r_subsample = 0.3,
   yvar = "Arithmetic.Mean",
-  xvar = seq(6, ncol(dt_imputed)),
+  xvar = seq(5, ncol(dt_imputed)),
+  tune_mode = "grid",
+  tune_bayes_iter = 50L,
   vfold = 5L,
   nthreads = 16L,
+  trim_resamples = TRUE,
+  return_best = FALSE,
   ...
 )
 }
 \arguments{
 \item{dt_imputed}{The input data table to be used for fitting.}
 
-\item{folds}{pre-generated rset object. If NULL, it should be
-numeric to be used in \link[rsample:vfold_cv]{rsample::vfold_cv}.}
-
-\item{r_subsample}{The proportion of rows to be sampled.}
+\item{folds}{pre-generated rset object with minimal number of columns.
+If NULL, \code{vfold} should be numeric to be used in \link[rsample:vfold_cv]{rsample::vfold_cv}.}
 
 \item{yvar}{The target variable.}
 
 \item{xvar}{The predictor variables.}
 
+\item{tune_mode}{character(1). Hyperparameter tuning mode.
+Default is "grid", "bayes" is acceptable.}
+
+\item{tune_bayes_iter}{integer(1). The number of iterations for
+Bayesian optimization. Default is 50. Only used when \code{tune_mode = "bayes"}.}
+
 \item{vfold}{The number of folds for cross-validation.}
 
 \item{nthreads}{The number of threads to be used. Default is 16L.}
+
+\item{return_best}{logical(1). If TRUE, the best tuned model is returned.}
 
 \item{...}{Additional arguments to be passed.}
 }

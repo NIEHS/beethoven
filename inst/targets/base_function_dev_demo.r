@@ -648,3 +648,106 @@ fld <- Reduce(post_calc_autojoin, fl[1:7])
 post_calc_autojoin(fl[[1]], fl[[7]])
 fl[[7]]
 post_calc_autojoin(dtt, fl)
+
+
+library(beethoven)
+qt <- qs::qread("inst/targets/punchcard_calc.qs")
+ld <- loadargs("inst/targets/punchcard_calc.qs", "nlcd")
+sts <- targets::tar_read(sf_feat_proc_aqs_sites)
+
+rr <- rlang::inject(calculate(locs = sts, !!!ld))
+
+
+
+nlcd21 <- "/ddn/gs1/group/set/Projects/NRT-AP-Model/input/nlcd/data_files/nlcd_2021_land_cover_l48_20230630.img"
+nlcd21 <- terra::rast(nlcd21)
+terra::vect(cbind(-88, 36), crs = "EPSG:4326") |> terra::project(terra::crs(nlcd21)) |> terra::buffer(50000) -> buf
+bufs <- sf::st_as_sf(buf)
+bufs$id <- 1
+terra::extract(nlcd21, buf, fun = table, exact = TRUE)
+
+xx <- exactextractr::exact_extract(nlcd21, bufs, fun = "frac", force_df = TRUE, append_cols = "id")
+Sys.time()
+
+
+library(targets)
+library(beethoven)
+library(dplyr)
+
+tar_read(dt_feat_calc_imputed) -> dff
+dffs <- dff[, c("site_id", "time"), with = F]
+dffss <- dffs[1:1e4,]
+rsample::vfold_cv(dffss, v = 5) -> cv
+
+cvrestore <-
+  beethoven:::restore_rset_full(
+    cv, dff
+  )
+
+# define a simple tidymodels workflow to use cvrestore object
+xgb_mod <-
+  parsnip::boost_tree(learn_rate = tune::tune(), trees = 300L) |>
+  parsnip::set_engine("lightgbm") |>
+  parsnip::set_mode("regression")
+
+pm25mod <- workflows::workflow() |>
+  workflows::add_model(xgb_mod) |>
+  workflows::add_formula(
+    reformulate(
+      response = "Arithmetic.Mean",
+      termlabels = c("time", grep("LDU", names(dff), value = TRUE))
+    )
+  ) |>
+  tune::tune_bayes(
+    resamples = cvrestore,
+    iter = 2,
+    metrics = yardstick::metric_set(yardstick::rmse, yardstick::mae, yardstick::mape),
+    control = control_bayes(save_workflow = F, save_pred = FALSE)) #|>
+  # tune::fit_resamples(metrics = yardstick::metric_set(rmse, mae))
+
+pm25mod[pm25mod$.iter == 1, ".metrics"][[1]]
+
+pm25modbdf <- tune::select_best(pm25mod, metric = "rmse")
+pm25modbest <- finalize_workflow(pm25mod, pm25modbdf)
+pm25modb <- tune::fit_best(pm25mod)
+pm25pred <- predict(pm25modb, dff[seq_len(1e4L), ])
+yardstick::rmse_vec(unlist(dff[seq_len(1e4L), "Arithmetic.Mean"]), pm25pred$.pred)
+
+dffsu <- unique(dffs)
+dffx <- collapse::join(dffsu, dff, on = c("site_id", "time"), how = "anti")
+dffx
+
+# subset dff with duplicate site_id and time
+dffd <- dff[duplicated(dffs) | duplicated(dffs, fromLast = TRUE),]
+
+dfbs <- dfb[, c("site_id", "time"), with = F]
+dfbd <- dfb[duplicated(dfbs) | duplicated(dfbs, fromLast = TRUE),]
+
+
+
+dim(dff)
+dtt <- tar_read(dt_feat_proc_aqs_sites_time)
+dtt
+
+dtb <- tar_read(dt_feat_calc_base)
+dtbt <- dtb[, c("site_id", "time"), with = F]
+dtbd <- dtb[duplicated(dtbt) | duplicated(dtbt, fromLast = TRUE),]
+dim(dtbd)
+
+
+lfn <- tar_read(list_feat_calc_nasa)
+
+library(data.table)
+lapply(lfn, function(x) {
+  xx <- as.data.table(x)[, c("site_id", "time"), with = F]
+  xxd <- x[duplicated(xx) | duplicated(xx, fromLast = TRUE),]
+  dim(xxd)
+})
+
+lfg <- tar_read(list_feat_calc_gmted)
+lfna <- tar_read(list_feat_calc_narr)
+lapply(lfna, function(x) {
+  xx <- as.data.table(x)[, c("site_id", "time"), with = F]
+  xxd <- x[duplicated(xx) | duplicated(xx, fromLast = TRUE),]
+  dim(xxd)
+})

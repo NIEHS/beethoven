@@ -149,11 +149,6 @@ are also articulated here. Allowable keywords:
     - annual  [optional YYYY]
 
 
-
-Short Verion: 
-
-A shortened version for filenames is available on the punchcard at `tools/pipeline/punchcard.csv`
-
 ### Function Naming Convenctions 
 
 We have adopted naming conventions in functions in this package as well as `amadeus` which is a key input package. 
@@ -168,15 +163,24 @@ We have adopted naming conventions in functions in this package as well as `amad
 - **source:** the original data source. Same as source section for tar objects
 
 - **Object** An object that the function may be acting on
-     - base_model
-     - meta_model
-     - feature 
+     - base_model (base)
+     - meta_model (meta)
+     - feature (feat) 
 
 
  
 ### To run the pipeline
+#### Post-checkout hook setting
+As safeguard measures, we limit the write permission of `_targets.R` to authorized users. To activate post-checkout hook, run `setup_hook.sh` at the project root.
+
+```shell
+. setup_hook.sh
+```
+
+The write privilege lock is applied immediately. Users will be able to run the pipeline with the static `_targets.R` file to (re-)generate outputs from the pipeline.
+
 #### User settings
-`beethoven` pipeline is configured for SLURM and is configured with defaults for NIEHS HPC settings. For adapting the settings to users' environment, consult with the documentation of your platform and edit the `_targets.R` and `inst/targets/targets_calculate.R` (i.e., resource management) accordingly.
+`beethoven` pipeline is configured for SLURM with defaults for NIEHS HPC settings. For adapting the settings to users' environment, consult with the documentation of your platform and edit the `_targets.R` and `inst/targets/targets_calculate.R` (i.e., resource management) accordingly.
 
 #### Setting `_targets.R`
 For general users, all `targets` objects and `meta` information can be saved in a directory other than the pipeline default by changing `store` value in `tar_config_set()` at `_targets.R` in project root.
@@ -208,7 +212,7 @@ set_args_calc(
   nthreads_hms = 3L,
   nthreads_tri = 5L,
   nthreads_geoscf = 10L,
-  nthreads_nlcd = 2L,
+  nthreads_gmted = 4L,
   nthreads_narr = 24L,
   nthreads_groads = 3L,
   nthreads_population = 3L

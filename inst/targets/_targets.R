@@ -6,7 +6,7 @@ library(beethoven)
 
 # replacing yaml file.
 tar_config_set(
-  store = "/ddn/gs1/group/set/pipeline/beethoven"
+  store = "/ddn/gs1/group/set/pipeline/beethoven_targets"
 )
 
 

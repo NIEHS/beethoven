@@ -7,26 +7,47 @@
 fit_base_xgb(
   dt_imputed,
   folds = NULL,
-  r_subsample = 0.3,
+  tune_mode = "grid",
+  tune_bayes_iter = 50L,
+  learn_rate = 0.1,
   yvar = "Arithmetic.Mean",
-  xvar = seq(6, ncol(dt_imputed)),
+  xvar = seq(5, ncol(dt_imputed)),
   vfold = 5L,
+  device = "cuda:0",
+  trim_resamples = TRUE,
+  return_best = FALSE,
   ...
 )
 }
 \arguments{
 \item{dt_imputed}{The input data table to be used for fitting.}
 
-\item{folds}{pre-generated rset object. If NULL, it should be
-numeric to be used in \link[rsample:vfold_cv]{rsample::vfold_cv}.}
+\item{folds}{pre-generated rset object with minimal number of columns.
+If NULL, \code{vfold} should be numeric to be used in \link[rsample:vfold_cv]{rsample::vfold_cv}.}
 
-\item{r_subsample}{The proportion of rows to be sampled.}
+\item{tune_mode}{character(1). Hyperparameter tuning mode.
+Default is "grid", "bayes" is acceptable.}
+
+\item{tune_bayes_iter}{integer(1). The number of iterations for
+Bayesian optimization. Default is 50. Only used when \code{tune_mode = "bayes"}.}
+
+\item{learn_rate}{The learning rate for the model. For branching purpose.
+Default is 0.1.}
 
 \item{yvar}{The target variable.}
 
 \item{xvar}{The predictor variables.}
 
 \item{vfold}{The number of folds for cross-validation.}
+
+\item{device}{The device to be used for training.
+Default is "cuda:0". Make sure that your system is equipped
+with CUDA-enabled graphical processing units.}
+
+\item{trim_resamples}{logical(1). Default is TRUE, which replaces the actual
+data.frames in splits column of \code{tune_results} object with NA.}
+
+\item{return_best}{logical(1). If TRUE, the best tuned model is returned.}
 
 \item{...}{Additional arguments to be passed.}
 }
@@ -39,7 +60,14 @@ the input dataset by grid search.
 With proper settings, users can utilize graphics
 processing units (GPU) to speed up the training process.
 }
+\details{
+Hyperparameters \code{mtry}, \code{ntrees}, and \code{learn_rate} are
+tuned. With \code{tune_mode = "grid"},
+users can modify \code{learn_rate} explicitly, and other hyperparameters
+will be predefined (30 combinations per \code{learn_rate}).
+}
 \note{
 tune package should be 1.2.0 or higher.
+xgboost should be installed with GPU support.
 }
 \keyword{Baselearner}

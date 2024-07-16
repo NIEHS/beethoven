@@ -4,21 +4,34 @@ library(future)
 library(future.batchtools)
 library(beethoven)
 
+Sys.setenv("LD_LIBRARY_PATH" = paste("/ddn/gs1/biotools/R/lib64/R/customlib", Sys.getenv("LD_LIBRARY_PATH"), sep = ":"))
+
 # replacing yaml file.
 tar_config_set(
-  store = "/ddn/gs1/group/set/pipeline/beethoven"
+  store = "/ddn/gs1/group/set/pipeline/beethoven_targets"
 )
 
-generate_list <- FALSE
+generate_list_download <- FALSE
+
+arglist_download <-
+  set_args_download(
+    char_period = c("2018-01-01", "2022-12-31"),
+    char_input_dir = "input",
+    nasa_earth_data_token = NULL,#Sys.getenv("NASA_EARTHDATA_TOKEN"),
+    export = generate_list_download,
+    path_export = "inst/targets/download_spec.qs"
+  )
+
+generate_list_calc <- FALSE
 
 arglist_common <-
   set_args_calc(
     char_siteid = "site_id",
     char_timeid = "time",
-    char_period = c("2022-09-01", "2022-10-31"),
+    char_period = c("2018-01-01", "2022-12-31"),
     num_extent = c(-126, -62, 22, 52),
     char_user_email = paste0(Sys.getenv("USER"), "@nih.gov"),
-    export = generate_list,
+    export = generate_list_calc,
     path_export = "inst/targets/punchcard_calc.qs",
     char_input_dir = "/ddn/gs1/group/set/Projects/NRT-AP-Model/input"
   )
@@ -38,12 +51,6 @@ Sys.setenv("BTV_DOWNLOAD_PASS" = "TRUE")
 # bind custom built GDAL
 # Users should export the right path to the GDAL library
 # by export LD_LIBRARY_PATH=.... command.
-.libPaths(
-  c(
-    "/ddn/gs1/biotools/R/lib64/R/custompkg",
-    .libPaths()
-  )
-)
 
 # arglist_common is generated above
 plan(
@@ -55,7 +62,7 @@ plan(
         list(
           memory = 8,
           log.file = "slurm_run.log",
-          ncpus = 1, partition = "geo", ntasks = 1,
+          ncpus = 1, partition = "geo,highmem", ntasks = 1,
           email = arglist_common$char_user_email,
           error.file = "slurm_error.log"
         )
@@ -88,9 +95,9 @@ tar_option_set(
       "glmnet", "xgboost",
       "future", "future.apply", "future.callr", "callr",
       "stars", "rlang", "parallelly"),
-  library = c("/ddn/gs1/biotools/R/lib64/R/custompkg", "/ddn/gs1/home/songi2/r-libs"),
+  library = c("/ddn/gs1/home/songi2/r-libs"),
   repository = "local",
-  error = "stop",
+  error = "abridge",
   memory = "transient",
   format = "qs",
   storage = "worker",
