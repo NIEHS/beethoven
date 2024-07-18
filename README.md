@@ -84,7 +84,7 @@ graph TD
 
     subgraph Meta-Learner Phase
         D1 --> E1[Perform 50% column-wise subsampling K times]
-        E1 --> E1b[CV with 1 of 3 categories with equal probability, Spatial, Temporal, or Space/Time]
+        E1 --> E1b[Proper Scoring CRPS CV with 1 of 3 categories with equal probability, Spatial, Temporal, or Space/Time]
         E1b --> M1[Elastic-Net Model 1]
         E1b --> M2[Elastic-Net Model 2]
         E1b --> M3[Elastic-Net Model 3]
