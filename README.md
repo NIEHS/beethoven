@@ -13,12 +13,6 @@ Group Project for the Spatiotemporal Exposures and Toxicology group with help fr
 remotes::install_github("NIEHS/beethoven")
 ```
 
-## Getting Started
-
-```r
-TODO 
-```
-
 ## Overall Project Workflow
 
 Targets: Make-like Reproducible Analysis Pipeline
@@ -28,6 +22,111 @@ Targets: Make-like Reproducible Analysis Pipeline
  4) Fit Meta Learners
  5) Predictions
  6) Summary Stats
+
+```mermaid
+graph TD
+
+    subgraph AQS data with `amadeus`
+        AQS[PM2.5 download]-->AQS2[PM2.5 Process]
+    end
+
+    AQS2 --> Cov1
+    AQS2 --> Cov2
+    AQS2 --> Cov3
+    AQS2 --> Cov4
+    subgraph Covariate Calculation with `amadeus`
+        Cov1[Meterology]
+        Cov2[NLCD]
+        Cov3[...]
+        Cov4[MERRA2]
+    end
+
+    subgraph Processed Covariates
+        PC[Baselearner Input]
+    end
+
+    Cov1 --> PC
+    Cov2 --> PC
+    Cov3 --> PC
+    Cov4 --> PC
+
+    PC --> A1
+    PC --> A2
+    PC --> A3
+    subgraph MLP Baselearner   
+        A1[ M_i is a 30% random sample of N] --> B1A[Spatial CV]
+        A1[ M_i is a 30% random sample of N] --> B1B[Temporal CV]
+        A1[ M_i is a 30% random sample of N] --> B1C[Space/Time CV]
+        B1A --> C1[3. M_i is fit with a MLP model]
+        B1B --> C1
+        B1C --> C1
+    end
+
+    subgraph LightGBM Baselearner
+        A2[ M_i is a 30% random sample of N] --> B2A[Spatial CV]
+        A2[ M_i is a 30% random sample of N] --> B2B[Temporal CV]
+        A2[ M_i is a 30% random sample of N] --> B2C[Space/Time CV]
+        B2A --> C2[3. M_i is fit with a LightGBM model]
+        B2B --> C2
+        B2C --> C2
+    end
+    subgraph Elastic-Net Baselearner
+        A3[ M_i is a 30% random sample of N] --> B3A[Spatial CV]
+        A3[ M_i is a 30% random sample of N] --> B3B[Temporal CV]
+        A3[ M_i is a 30% random sample of N] --> B3C[Space/Time CV]
+        B3A --> C3[3. M_i is fit with a glmnet model]
+        B3B --> C3
+        B3C --> C3
+    end
+    C1 --> D1[Elastic-Net Meta-Learner]
+    C2 --> D1[Elastic-Net Meta-Learner]
+    C3 --> D1[Elastic-Net Meta-Learner]
+
+    subgraph Meta-Learner Phase
+        D1 --> E1[Perform 50% column-wise subsampling K times]
+        E1 --> E1b[CV with 1 of 3 categories with equal probability, Spatial, Temporal, or Space/Time]
+        E1b --> M1[Elastic-Net Model 1]
+        E1b --> M2[Elastic-Net Model 2]
+        E1b --> M3[Elastic-Net Model 3]
+        E1b --> M4[Elastic-Net Model K-1]
+        E1b --> M5[Elastic-Net Model K]
+    end
+
+
+    subgraph Posterior Summary
+        M1 --> P1[Complete Posterior Summary at daily, 1-km]
+        M2 --> P1
+        M3 --> P1
+        M4 --> P1
+        M5 --> P1
+        P1 --> P5[Version and Deploy with Vetiver]
+        P1 --> P2[Spatial and Temporal Average Summaries]
+        P2 --> P5
+    end
+
+   style A1 fill:#d3d3d3,stroke:#000,stroke-width:2px
+    style B1A fill:#d3d3d3,stroke:#000,stroke-width:2px
+    style B1B fill:#d3d3d3,stroke:#000,stroke-width:2px
+    style B1C fill:#d3d3d3,stroke:#000,stroke-width:2px
+    style C1 fill:#d3d3d3,stroke:#000,stroke-width:2px     
+
+    style A2 fill:#62C6F2,stroke:#000,stroke-width:2px
+    style B2A fill:#62C6F2,stroke:#000,stroke-width:2px
+    style B2B fill:#62C6F2,stroke:#000,stroke-width:2px
+    style B2C fill:#62C6F2,stroke:#000,stroke-width:2px
+    style C2 fill:#62C6F2,stroke:#000,stroke-width:2px     
+
+    style A3 fill:#ffb09c,stroke:#000,stroke-width:2px
+    style B3A fill:#ffb09c,stroke:#000,stroke-width:2px
+    style B3B fill:#ffb09c,stroke:#000,stroke-width:2px
+    style B3C fill:#ffb09c,stroke:#000,stroke-width:2px
+    style C3 fill:#ffb09c,stroke:#000,stroke-width:2px     
+
+    style P1 fill:#abf7b1,stroke:#000,stroke-width:2px
+    style P2 fill:#abf7b1,stroke:#000,stroke-width:2px
+    style P5 fill:#abf7b1,stroke:#000,stroke-width:2px      
+
+```
  
 **Placeholder for up-to-date rendering of targets**
 
