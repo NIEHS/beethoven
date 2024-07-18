@@ -25,7 +25,7 @@ target_init <-
           full.names = TRUE
         ),
         date = arglist_common$char_period,
-        mode = "sparse",
+        mode = "date-location",
         data_field = c("Arithmetic.Mean", "Event.Type"),
         return_format = "data.table"
       ),

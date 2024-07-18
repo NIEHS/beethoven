@@ -40,7 +40,14 @@ loadargs <- function(argfile, dataset) {
   } else {
     stop("Invalid format.")
   }
-  arglist[[dataset]]
+  check_args <- arglist[[dataset]]
+  namecheck <- grep("preprocess|_function", names(check_args))
+  if (length(namecheck) > 0) {
+    for (i in namecheck) {
+      check_args[i] <- unmarshal_function(check_args[i])
+    }
+  }
+  return(namecheck)
 }
 
 
@@ -3270,7 +3277,8 @@ set_args_calc <-
 
       list_proccalc <-
         list(
-          aqs = list(path = ain("aqs", TRUE)),
+          aqs = list(path = ain("aqs", TRUE),
+                     date = list_common$char_period),
           mod11 = list(from = list_paths$mod11,
                       name_covariates = sprintf("MOD_SFCT%s_0_", c("D", "N")),
                       subdataset = "^LST_",
@@ -3280,7 +3288,7 @@ set_args_calc <-
                       name_covariates = sprintf("MOD_CLCV%s_0_", c("D", "N")),
                       subdataset = c("Cloud_Fraction_Day", "Cloud_Fraction_Night"),
                       nthreads = nthreads_nasa,
-                      preprocess = amadeus::process_modis_swath,
+                      preprocess = "amadeus::process_modis_swath",
                       radius = c(1e3, 1e4, 5e4)),
           mod09 = list(from = list_paths$mod09,
                       name_covariates = sprintf("MOD_SFCRF_%d_", seq(1, 7)),
@@ -3306,7 +3314,7 @@ set_args_calc <-
                       name_covariates = "MOD_LGHTN_0_",
                       subdataset = 3,
                       nthreads = nthreads_nasa,
-                      preprocess = amadeus::process_blackmarble,
+                      preprocess = "amadeus::process_blackmarble",
                       radius = c(1e3, 1e4, 5e4)),
           geoscf_aqc = list(date = list_common$char_period,
                             path = ain("geos/aqc_tavg_1hr_g1440x721_v1"),
@@ -3367,8 +3375,8 @@ set_args_calc <-
                           "tcdc", "ulwrf.sfc", "uwnd.10m", "vis", "vwnd.10m", "weasd"),
             domain_name = "variable",
             date = list_common$char_period,
-            process_function = process_narr2,
-            calc_function = calc_narr2,
+            process_function = "beethoven::process_narr2",
+            calc_function = "beethoven::calc_narr2",
             nthreads = nthreads_narr
           ),
           groads = list(
@@ -3414,9 +3422,7 @@ set_args_calc <-
       } else {
         qs::qsave(
           list_proccalc,
-          path_export,
-          preset = "balanced",
-          nthreads = 8L
+          path_export
         )
         return(list_common)
       }
@@ -3703,4 +3709,18 @@ restore_fit_best <-
 
 
 
-# nocov end
+#' Unmarshal functions
+#' @keywords Utility
+#' @param pkg_func_str Character string specifying the package and function.
+#' @returns Function object.
+#' @export
+#' @examples
+#' unmarshal_function("amadeus::process_aqs")
+unmarshal_function <-
+  function(pkg_func_str) {
+    stopifnot(grepl("::", pkg_func_str))
+    pkg_func_split <- strsplit(pkg_func_str, "::")[[1]]
+    pkg_name <- pkg_func_split[1]
+    func_name <- pkg_func_split[2]
+    get(func_name, envir = asNamespace(pkg_name))
+  }
