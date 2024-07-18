@@ -55,18 +55,114 @@
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"NIEHS/beethoven"</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="getting-started">Getting Started<a class="anchor" aria-label="anchor" href="#getting-started"></a>
-</h2>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">TODO</span> </span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"NIEHS/beethoven"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="overall-project-workflow">Overall Project Workflow<a class="anchor" aria-label="anchor" href="#overall-project-workflow"></a>
 </h2>
 <p>Targets: Make-like Reproducible Analysis Pipeline 1) AQS Data 2) Generate Covariates 3) Fit Base Learners 4) Fit Meta Learners 5) Predictions 6) Summary Stats</p>
+<pre class="mermaid"><code>graph TD
+
+    subgraph AQS data with `amadeus`
+        AQS[PM2.5 download]--&gt;AQS2[PM2.5 Process]
+    end
+
+    AQS2 --&gt; Cov1
+    AQS2 --&gt; Cov2
+    AQS2 --&gt; Cov3
+    AQS2 --&gt; Cov4
+    subgraph Covariate Calculation with `amadeus`
+        Cov1[Meterology]
+        Cov2[NLCD]
+        Cov3[...]
+        Cov4[MERRA2]
+    end
+
+    subgraph Processed Covariates
+        PC[Baselearner Input]
+    end
+
+    Cov1 --&gt; PC
+    Cov2 --&gt; PC
+    Cov3 --&gt; PC
+    Cov4 --&gt; PC
+
+    PC --&gt; A1
+    PC --&gt; A2
+    PC --&gt; A3
+    subgraph MLP Baselearner
+        A1[ M_i is a 30% random sample of N] --&gt; B1A[Spatial CV]
+        A1[ M_i is a 30% random sample of N] --&gt; B1B[Temporal CV]
+        A1[ M_i is a 30% random sample of N] --&gt; B1C[Space/Time CV]
+        B1A --&gt; C1[3. M_i is fit with a MLP model]
+        B1B --&gt; C1
+        B1C --&gt; C1
+    end
+
+    subgraph LightGBM Baselearner
+        A2[ M_i is a 30% random sample of N] --&gt; B2A[Spatial CV]
+        A2[ M_i is a 30% random sample of N] --&gt; B2B[Temporal CV]
+        A2[ M_i is a 30% random sample of N] --&gt; B2C[Space/Time CV]
+        B2A --&gt; C2[3. M_i is fit with a LightGBM model]
+        B2B --&gt; C2
+        B2C --&gt; C2
+    end
+    subgraph Elastic-Net Baselearner
+        A3[ M_i is a 30% random sample of N] --&gt; B3A[Spatial CV]
+        A3[ M_i is a 30% random sample of N] --&gt; B3B[Temporal CV]
+        A3[ M_i is a 30% random sample of N] --&gt; B3C[Space/Time CV]
+        B3A --&gt; C3[3. M_i is fit with a glmnet model]
+        B3B --&gt; C3
+        B3C --&gt; C3
+    end
+    C1 --&gt; D1[Elastic-Net Meta-Learner]
+    C2 --&gt; D1[Elastic-Net Meta-Learner]
+    C3 --&gt; D1[Elastic-Net Meta-Learner]
+
+    subgraph Meta-Learner Phase
+        D1 --&gt; E1[Perform 50% column-wise subsampling K times]
+        E1 --&gt; E1b[Proper Scoring CRPS CV with 1 of 3 categories with equal probability, Spatial, Temporal, or Space/Time]
+        E1b --&gt; M1[Elastic-Net Model 1]
+        E1b --&gt; M2[Elastic-Net Model 2]
+        E1b --&gt; M3[Elastic-Net Model 3]
+        E1b --&gt; M4[Elastic-Net Model K-1]
+        E1b --&gt; M5[Elastic-Net Model K]
+    end
+
+
+    subgraph Posterior Summary
+        M1 --&gt; P1[Complete Posterior Summary at daily, 1-km]
+        M2 --&gt; P1
+        M3 --&gt; P1
+        M4 --&gt; P1
+        M5 --&gt; P1
+        P1 --&gt; P5[Version and Deploy with Vetiver]
+        P1 --&gt; P2[Spatial and Temporal Average Summaries]
+        P2 --&gt; P5
+    end
+
+   style A1 fill:#d3d3d3,stroke:#000,stroke-width:2px
+    style B1A fill:#d3d3d3,stroke:#000,stroke-width:2px
+    style B1B fill:#d3d3d3,stroke:#000,stroke-width:2px
+    style B1C fill:#d3d3d3,stroke:#000,stroke-width:2px
+    style C1 fill:#d3d3d3,stroke:#000,stroke-width:2px
+
+    style A2 fill:#62C6F2,stroke:#000,stroke-width:2px
+    style B2A fill:#62C6F2,stroke:#000,stroke-width:2px
+    style B2B fill:#62C6F2,stroke:#000,stroke-width:2px
+    style B2C fill:#62C6F2,stroke:#000,stroke-width:2px
+    style C2 fill:#62C6F2,stroke:#000,stroke-width:2px
+
+    style A3 fill:#ffb09c,stroke:#000,stroke-width:2px
+    style B3A fill:#ffb09c,stroke:#000,stroke-width:2px
+    style B3B fill:#ffb09c,stroke:#000,stroke-width:2px
+    style B3C fill:#ffb09c,stroke:#000,stroke-width:2px
+    style C3 fill:#ffb09c,stroke:#000,stroke-width:2px
+
+    style P1 fill:#abf7b1,stroke:#000,stroke-width:2px
+    style P2 fill:#abf7b1,stroke:#000,stroke-width:2px
+    style P5 fill:#abf7b1,stroke:#000,stroke-width:2px
+</code></pre>
 <p><strong>Placeholder for up-to-date rendering of targets</strong></p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">tar_visnetwork</span><span class="op">(</span><span class="va">targets</span><span class="op">)</span></span></code></pre></div>
