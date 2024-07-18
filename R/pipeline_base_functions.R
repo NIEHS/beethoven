@@ -66,6 +66,7 @@ loadargs <- function(argfile, dataset) {
   query_date <= tvec[1] & query_date >= tvec[2]
 }
 
+# nolint start
 #' Load MODIS files from a specified path.
 #'
 #' This function takes a path and an optional pattern as input and
@@ -82,12 +83,13 @@ loadargs <- function(argfile, dataset) {
 #' @examples
 #' \dontrun{
 #' # Load MODIS files from the current directory
-#' modis_files <- load_modis_files(".")
+#' modis_files <- load_modis_files(".", date = c("2018-01-01", "2018-01-31"))
 #'
 #' # Load MODIS files from a specific directory with a custom pattern
-#' modis_files <- load_modis_files("/path/to/files", pattern = "MOD.*hdf$")
+#' modis_files <- load_modis_files("/path/to/files", pattern = "MOD.*hdf$", date = c("2018-01-01", "2018-01-31")
 #' }
 #' @export
+# nolint end
 load_modis_files <- function(path, pattern = "hdf$", date = character(2)) {
   modis_files <-
     list.files(
@@ -1982,9 +1984,9 @@ impute_all <-
     dt <- dt[, !grepl(query, names(dt)), with = FALSE]
 
     # name cleaning
-    dt <- stats::setNames(dt, sub("light_1", "OTH_HMSWL_0_00000", names(dt)))
-    dt <- stats::setNames(dt, sub("medium_1", "OTH_HMSWM_0_00000", names(dt)))
-    dt <- stats::setNames(dt, sub("heavy_1", "OTH_HMSWH_0_00000", names(dt)))
+    dt <- stats::setNames(dt, sub("light_00000", "OTH_HMSWL_0_00000", names(dt)))
+    dt <- stats::setNames(dt, sub("medium_00000", "OTH_HMSWM_0_00000", names(dt)))
+    dt <- stats::setNames(dt, sub("heavy_00000", "OTH_HMSWH_0_00000", names(dt)))
     dt <- stats::setNames(dt, sub("population_", "POP_SEDAC_0_", names(dt)))
 
     geoscn <-
@@ -3148,8 +3150,6 @@ divisor <-
 #'    Default is "input".
 #' @param nthreads_nasa integer(1). Number of threads for NASA data.
 #'    Default is 14L.
-#' @param nthreads_hms integer(1). Number of threads for HMS data.
-#'   Default is 3L.
 #' @param nthreads_tri integer(1). Number of threads for TRI data.
 #'   Default is 5L.
 #' @param nthreads_geoscf integer(1). Number of threads for GEOSCF data.
@@ -3200,7 +3200,6 @@ divisor <-
 #' * char_user_email: Character string specifying the user email.
 #' * char_input_dir: Character string specifying the input path.
 #' * nthreads_nasa: Number of threads for NASA data.
-#' * nthreads_hms: Number of threads for HMS data.
 #' * nthreads_tri: Number of threads for TRI data.
 #' * nthreads_geoscf: Number of threads for GEOS-CF data.
 #' * nthreads_gmted: Number of threads for GMTED data.
@@ -3224,7 +3223,6 @@ set_args_calc <-
     path_export = "inst/targets/punchcard_calc.qs",
     char_input_dir = "input",
     nthreads_nasa = 14L,
-    nthreads_hms = 3L,
     nthreads_tri = 5L,
     nthreads_geoscf = 10L,
     nthreads_gmted = 4L,
@@ -3243,7 +3241,6 @@ set_args_calc <-
         char_user_email = char_user_email,
         char_input_dir = char_input_dir,
         nthreads_nasa = nthreads_nasa,
-        nthreads_hms = nthreads_hms,
         nthreads_tri = nthreads_tri,
         nthreads_geoscf = nthreads_geoscf,
         nthreads_gmted = nthreads_gmted,
@@ -3320,10 +3317,8 @@ set_args_calc <-
           # base class covariates start here
           hms = list(path = ain("HMS_Smoke", TRUE),
                     date = list_common$char_period,
-                    covariate = "hms", 
-                    domain = c("Light", "Medium", "Heavy"),
-                    nthreads = nthreads_hms,
-                    domain_name = "variable"),
+                    covariate = "hms"
+          ),
           gmted = list(
             path = ain("gmted", TRUE),
             covariate = "gmted"
@@ -3412,13 +3407,16 @@ set_args_calc <-
           "groads", "SEDAC Global Roads",
           "population", "SEDAC Population Density"
         )
+      return(list_proccalc)
       if (is.null(path_export)) {
         assign("arglist_proccalc", list_proccalc, envir = .GlobalEnv)
         return(list_common)
       } else {
         qs::qsave(
-          list_proccalc, 
-          path_export
+          list_proccalc,
+          path_export,
+          preset = "balanced",
+          nthreads = 8L
         )
         return(list_common)
       }

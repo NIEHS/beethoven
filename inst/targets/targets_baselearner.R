@@ -113,7 +113,7 @@ target_baselearner <-
     ,
     # length of 120
     targets::tar_target(
-      workflow_learner_base_xgb_spcluster,
+      workflow_learner_base_lgb_spcluster,
       fit_base_lightgbm(
         dt_feat_calc_imputed,
         folds = list_learner_base_cv_spcluster,

@@ -14,7 +14,6 @@ set_args_calc(
   path_export = "inst/targets/punchcard_calc.qs",
   char_input_dir = "input",
   nthreads_nasa = 14L,
-  nthreads_hms = 3L,
   nthreads_tri = 5L,
   nthreads_geoscf = 10L,
   nthreads_gmted = 4L,
@@ -53,9 +52,6 @@ Default is "input".}
 \item{nthreads_nasa}{integer(1). Number of threads for NASA data.
 Default is 14L.}
 
-\item{nthreads_hms}{integer(1). Number of threads for HMS data.
-Default is 3L.}
-
 \item{nthreads_tri}{integer(1). Number of threads for TRI data.
 Default is 5L.}
 
@@ -91,7 +87,6 @@ in the calculation process.
 \item char_user_email: Character string specifying the user email.
 \item char_input_dir: Character string specifying the input path.
 \item nthreads_nasa: Number of threads for NASA data.
-\item nthreads_hms: Number of threads for HMS data.
 \item nthreads_tri: Number of threads for TRI data.
 \item nthreads_geoscf: Number of threads for GEOS-CF data.
 \item nthreads_gmted: Number of threads for GMTED data.

@@ -22,7 +22,7 @@ arglist_download <-
     path_export = "inst/targets/download_spec.qs"
   )
 
-generate_list_calc <- FALSE
+generate_list_calc <- TRUE
 
 arglist_common <-
   set_args_calc(

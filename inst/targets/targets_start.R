@@ -8,15 +8,8 @@ library(targets)
 #   to = "_targets.R"
 # )
 
-.libPaths(
-  c(
-    "/ddn/gs1/biotools/R/lib64/R/custompkg",
-    .libPaths()
-  )
-)
-
-
 tar_make_future(
+  list_feat_calc_base,
   workers = 24
 )
 # TODO: should find a way of auto-invalidate feat_calc_(modis|viirs|geoscf)
