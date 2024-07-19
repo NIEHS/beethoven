@@ -1,12 +1,21 @@
+# Building an Extensible, rEproducible, Test-driven, Harmonized, Open-source, Versioned, ENsemble model for air quality <a href="https://niehs.github.io/beethoven"><img align="right" src="man/figures/beethoven-logo.png" width="168px" alt="two hexagon badges placed diagonally from top left to bottom right" /><a>
+
+
+<p>
+ 
 [![R-CMD-check](https://github.com/NIEHS/beethoven/actions/workflows/check-standard.yaml/badge.svg)](https://github.com/NIEHS/beethoven/actions/workflows/check-standard.yaml)
 [![cov](https://NIEHS.github.io/beethoven/badges/coverage.svg)](https://github.com/NIEHS/beethoven/actions)
 [![lint](https://github.com/NIEHS/beethoven/actions/workflows/lint.yaml/badge.svg)](https://github.com/NIEHS/beethoven/actions/workflows/lint.yaml)
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 
-# Building an Extensible, rEproducible, Test-driven, Harmonized, Open-source, Versioned, ENsemble model for air quality
-Group Project for the Spatiotemporal Exposures and Toxicology group with help from friends :smiley: :cowboy_hat_face: :earth_americas: <img src="man/figures/beethoven-logo.png" align="right" width="240" alt="two hexagon badges placed diagonally from top left to bottom right" />
 
+Group Project for the Spatiotemporal Exposures and Toxicology group with help from friends :smiley: :cowboy_hat_face: :earth_americas: 
+
+
+</p>
+    
+    
 ## Installation
 
 ```r
@@ -53,7 +62,6 @@ Here, we describe the structure of the project and the naming conventions used. 
 - `vignettes/` Rmd (and potentially Qmd) narrative text and code files. These are rendered into the **Articles** for the package website created by [pkgdown](https://pkgdown.r-lib.org/) 
 - `inst/` Is a sub-directory for arbitrary files outside of the main `R/` directory
      - `targets` which include the important pipeline file `_targets.R`
-     - `lookup` Is a subdirectory for text file lookup table used in the pipeline to synchronize paths, names, abbreviations, etc.
 - `.github/workflows/` This hidden directory is where the GitHub CI/CD yaml files reside
 
 ##### The following sub-directories are not including the package build and included only in the source code here
@@ -62,9 +70,6 @@ Here, we describe the structure of the project and the naming conventions used. 
 - `output/` ***warning: soon to be deprecated*** This sub-directory contains data used during the analysis. It is going to be superceded by the use of `targets`
 Currently, as of 3/29/24, the output folder contains .rds files for each
 of the covariates/features for model development. e.g.:
-
-- NRTAP_Covars_NLCD.rds
-- NRTAP_Covars_TRI.rds 
   
 #### Relevant files 
 
@@ -80,7 +85,7 @@ Here, we provide the `beethoven` naming conventions for objects as used in `targ
 For `tar_target` functions, we use the following naming conventions:
 
 
-Naming conventions for `tar` objects. We are motivated by the [Compositional Forecast](https://cfconventions.org/Data/cf-standard-names/docs/guidelines.html) (CF) model naming conventions:
+Naming conventions for `targets` objects. We are motivated by the [Compositional Forecast](https://cfconventions.org/Data/cf-standard-names/docs/guidelines.html) (CF) model naming conventions:
 
 e.g. [surface] [component] standard_name [at surface] [in medium] [due to process] [assuming condition]
 In CF, the entire process can be known from the required and optional naming pieces. 
@@ -131,8 +136,8 @@ are also articulated here. Allowable keywords:
   - NARR
   - GEOSCF
   - TRI
+  - NEI
   - KOPPENGEIGER
-  - MERRA2
   - HMS
   - gROADS
   - POPULATION
@@ -209,7 +214,6 @@ set_args_calc(
   path_export = "inst/targets/punchcard_calc.qs",
   path_input = "input",
   nthreads_nasa = 14L,
-  nthreads_hms = 3L,
   nthreads_tri = 5L,
   nthreads_geoscf = 10L,
   nthreads_gmted = 4L,
