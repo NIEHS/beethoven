@@ -7,11 +7,11 @@ target_calculate_fit <-
   list(
     tarchetypes::tar_files_input(
       name = file_prep_calc_args,
-      files = list.files("inst/targets", pattern = "*.*.qs$", full.names = TRUE),
+      files = list.files("inst/targets", pattern = "*.*.rds$", full.names = TRUE),
       # cue = tar_invalidate(tar_older(Sys.time() - as.difftime(4, units = "weeks"))),
       format = "file",
       iteration = "vector",
-      description = "Calculation arguments in QS file"
+      description = "Calculation arguments in RDS file"
     )
     ,
     tar_target(

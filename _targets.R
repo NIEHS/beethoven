@@ -22,7 +22,7 @@ arglist_download <-
     path_export = "inst/targets/download_spec.qs"
   )
 
-generate_list_calc <- TRUE
+generate_list_calc <- FALSE
 
 arglist_common <-
   set_args_calc(
@@ -32,7 +32,7 @@ arglist_common <-
     num_extent = c(-126, -62, 22, 52),
     char_user_email = paste0(Sys.getenv("USER"), "@nih.gov"),
     export = generate_list_calc,
-    path_export = "inst/targets/punchcard_calc.qs",
+    path_export = "inst/targets/punchcard_calc.rds",
     char_input_dir = "/ddn/gs1/group/set/Projects/NRT-AP-Model/input"
   )
 
@@ -45,7 +45,7 @@ tar_source("inst/targets/targets_predict.R")
 
 
 # bypass option
-Sys.setenv("BTV_DOWNLOAD_PASS" = "TRUE")
+Sys.setenv("BTV_DOWNLOAD_PASS" = "FALSE")
 
 #
 # bind custom built GDAL
