@@ -125,10 +125,13 @@ set_args_calc <-
         nthreads_append = nthreads_append,
         nthreads_impute = nthreads_impute
       )
-    # append subdirectory to the input path
-    ain <- function(x) {
+    ain <- function(x, append = FALSE) {
+      if (append) {
+        file.path(char_input_dir, x, "data_files")
+      } else {
         file.path(char_input_dir, x)
       }
+    }
     if (export) {
       list_paths <-
         list(
@@ -142,7 +145,7 @@ set_args_calc <-
 
       list_proccalc <-
         list(
-          aqs = list(path = ain("aqs"),
+          aqs = list(path = ain("aqs", TRUE),
                      date = list_common$char_period),
           mod11 = list(from = list_paths$mod11,
                       name_covariates = sprintf("MOD_SFCT%s_0_", c("D", "N")),
@@ -188,18 +191,18 @@ set_args_calc <-
                             path = ain("geos/chm_tavg_1hr_g1440x721_v1"),
                             nthreads = nthreads_geoscf),
           # base class covariates start here
-          hms = list(path = ain("HMS_Smoke"),
+          hms = list(path = ain("HMS_Smoke", TRUE),
                     date = list_common$char_period,
                     covariate = "hms"
           ),
           gmted = list(
-            path = ain("gmted"),
+            path = ain("gmted", TRUE),
             covariate = "gmted"
           ),
           nei = list(
             domain = c(2017, 2020),
             domain_name = "year",
-            path = ain("nei"),
+            path = ain("nei", TRUE),
             covariate = "nei"
           ),
           tri = list(
@@ -213,7 +216,7 @@ set_args_calc <-
           nlcd = list(
             domain = c(2019, 2021),
             domain_name = "year",
-            path = ain("nlcd"),
+            path = ain("nlcd", TRUE),
             covariate = "nlcd",
             mode = "exact",
             extent = NULL,
@@ -322,12 +325,9 @@ set_args_download <-
     export = FALSE,
     path_export = "inst/targets/download_spec.qs"
   ) {
-    ain <- function(x, append = FALSE) {
-      if (append) {
-        file.path(char_input_dir, x, "data_files")
-      } else {
-        file.path(char_input_dir, x)
-      }
+    # append input path
+    ain <- function(x) {
+      file.path(char_input_dir, x)
     }
 
     time_periods <- as.numeric(substr(char_period, 1, 4))
@@ -347,7 +347,7 @@ set_args_download <-
 
     list_download_config <-
       list(
-        aqs = list(dataset_name = "aqs", directory_to_save = ain("aqs", TRUE),
+        aqs = list(dataset_name = "aqs", directory_to_save = ain("aqs"),
                    year_start = time_periods[1], year_end = time_periods[2],
                    unzip = TRUE, remove_zip = TRUE),
         mod11 = list(dataset_name = "modis", directory_to_save = ain("modis/raw"),
@@ -381,26 +381,26 @@ set_args_download <-
                    unzip = TRUE, remove_zip = TRUE),
         gmted = lapply(gmted_vars,
           function(v) {
-            list(dataset_name = "gmted", directory_to_save = ain("gmted", TRUE),
+            list(dataset_name = "gmted", directory_to_save = ain("gmted"),
                  static = v, resolution = "7.5 arc-seconds",
                  unzip = TRUE, remove_zip = TRUE)
           }),
         nei = lapply(year_nei,
           function(y) {
-          list(dataset_name = "nei", directory_to_save = ain("nei", TRUE),
+          list(dataset_name = "nei", directory_to_save = ain("nei"),
                    year_target = y, unzip = TRUE)
           }),
         tri = list(dataset_name = "tri", directory_to_save = ain("tri"),
                    year_start = time_periods[1], year_end = time_periods[2]),
         nlcd = lapply(year_nlcd,
           function(y) {
-            list(dataset_name = "nlcd", directory_to_save = ain("nlcd", TRUE),
+            list(dataset_name = "nlcd", directory_to_save = ain("nlcd"),
                     year = y,
                     unzip = TRUE, remove_zip = TRUE)
           }),
-        koppen = list(dataset_name = "koppen", directory_to_save = ain("koppen_geiger", TRUE),
+        koppen = list(dataset_name = "koppen", directory_to_save = ain("koppen_geiger"),
                       data_resolution = "0.0083", time_period = "Present", unzip = TRUE, remove_zip = TRUE),
-        ecoregions = list(dataset_name = "koppen", directory_to_save = ain("ecoregions", TRUE),
+        ecoregions = list(dataset_name = "koppen", directory_to_save = ain("ecoregions"),
                           unzip = TRUE, remove_zip = TRUE),
         narr_monolevel = lapply(narr_variables_mono,
           function(v) {
@@ -413,10 +413,10 @@ set_args_download <-
                  variables = v, year_start = char_period[1], year_end = char_period[2])
           })
         ,
-        groads = list(dataset_name = "sedac_groads", directory_to_save = ain("sedac_groads", TRUE),
+        groads = list(dataset_name = "sedac_groads", directory_to_save = ain("sedac_groads"),
                       data_region = "Americas", data_format = "Geodatabase",
                       unzip = TRUE, remove_zip = TRUE),
-        population = list(dataset_name = "sedac_population", directory_to_save = ain("sedac_population", TRUE),
+        population = list(dataset_name = "sedac_population", directory_to_save = ain("sedac_population"),
                           data_resolution = "30 second", data_format = "GeoTIFF", year = "2020", unzip = TRUE, remove_zip = TRUE)
       )
 
