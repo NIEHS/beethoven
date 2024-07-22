@@ -207,11 +207,11 @@ Users could comment out the three lines to keep targets in `_targets` directory 
 set_args_calc(
   char_siteid = "site_id",
   char_timeid = "time",
-  char_period = c("2018-01-01", "2022-10-31"),
+  char_period = c("2018-01-01", "2022-12-31"),
   num_extent = c(-126, -62, 22, 52),
   char_user_email = paste0(Sys.getenv("USER"), "@nih.gov"),
   export = FALSE,
-  path_export = "inst/targets/punchcard_calc.qs",
+  path_export = "inst/targets/calc_spec.qs",
   path_input = "input",
   nthreads_nasa = 14L,
   nthreads_tri = 5L,
@@ -231,9 +231,20 @@ After switching to the project root directory (in terminal, `cd [project_root]`,
 > [!NOTE]
 > With `export = TRUE`, it will take some time to proceed to the next because it will recursively search hdf file paths. The time is affected by the number of files to search or the length of the period (`char_period`).
 
+> [!WARNING]
+> Please make sure that you are at the project root before proceeding to the following.
+
 ```shell
 Rscript inst/targets/targets_start.R &
 ```
+
+Or in NIEHS HPC,
+
+```shell
+sbatch inst/targets/run.sh
+```
+
+`inst/targets/run.sh` includes several lines exporting environment variables to bind GDAL/GEOS/PROJ versions newer than system default, geospatial packages built upon these libraries, and the user library location where required packages are installed.
 
 > [!WARNING]
 > `set_args_*` family for downloading and summarizing prediction outcomes will be added in the future version.
