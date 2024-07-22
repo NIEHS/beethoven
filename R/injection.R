@@ -29,7 +29,6 @@ feature_raw_download <-
           for (i in seq_along(args_check)) {
             rlang::inject(
               amadeus::download_data(
-                dataset_name = dataset_name,
                 acknowledgement = TRUE,
                 download = TRUE,
                 !!!args_check[[i]]
@@ -39,7 +38,6 @@ feature_raw_download <-
         } else {
           rlang::inject(
             amadeus::download_data(
-              dataset_name = dataset_name,
               acknowledgement = TRUE,
               download = TRUE,
               !!!args_check

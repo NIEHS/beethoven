@@ -125,13 +125,10 @@ set_args_calc <-
         nthreads_append = nthreads_append,
         nthreads_impute = nthreads_impute
       )
-    ain <- function(x, append = FALSE) {
-      if (append) {
-        file.path(char_input_dir, x, "data_files")
-      } else {
+    # append subdirectory to the input path
+    ain <- function(x) {
         file.path(char_input_dir, x)
       }
-    }
     if (export) {
       list_paths <-
         list(
@@ -145,7 +142,7 @@ set_args_calc <-
 
       list_proccalc <-
         list(
-          aqs = list(path = ain("aqs", TRUE),
+          aqs = list(path = ain("aqs"),
                      date = list_common$char_period),
           mod11 = list(from = list_paths$mod11,
                       name_covariates = sprintf("MOD_SFCT%s_0_", c("D", "N")),
@@ -191,18 +188,18 @@ set_args_calc <-
                             path = ain("geos/chm_tavg_1hr_g1440x721_v1"),
                             nthreads = nthreads_geoscf),
           # base class covariates start here
-          hms = list(path = ain("HMS_Smoke", TRUE),
+          hms = list(path = ain("HMS_Smoke"),
                     date = list_common$char_period,
                     covariate = "hms"
           ),
           gmted = list(
-            path = ain("gmted", TRUE),
+            path = ain("gmted"),
             covariate = "gmted"
           ),
           nei = list(
             domain = c(2017, 2020),
             domain_name = "year",
-            path = ain("nei", TRUE),
+            path = ain("nei"),
             covariate = "nei"
           ),
           tri = list(
@@ -216,7 +213,7 @@ set_args_calc <-
           nlcd = list(
             domain = c(2019, 2021),
             domain_name = "year",
-            path = ain("nlcd", TRUE),
+            path = ain("nlcd"),
             covariate = "nlcd",
             mode = "exact",
             extent = NULL,
