@@ -7,6 +7,7 @@
 #' @param dataset_name character(1). Dataset name.
 #' @param ... Arguments passed to `amadeus::download_data`
 #' @returns logical(1).
+#' @export
 feature_raw_download <-
   function(
     path = NULL,

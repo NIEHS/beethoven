@@ -156,7 +156,7 @@ set_args_calc <-
                       name_covariates = sprintf("MOD_CLCV%s_0_", c("D", "N")),
                       subdataset = c("Cloud_Fraction_Day", "Cloud_Fraction_Night"),
                       nthreads = nthreads_nasa,
-                      preprocess = amadeus::process_modis_swath,
+                      preprocess = "amadeus::process_modis_swath",
                       radius = c(1e3, 1e4, 5e4)),
           mod09 = list(from = list_paths$mod09,
                       name_covariates = sprintf("MOD_SFCRF_%d_", seq(1, 7)),
@@ -182,7 +182,7 @@ set_args_calc <-
                       name_covariates = "MOD_LGHTN_0_",
                       subdataset = 3,
                       nthreads = nthreads_nasa,
-                      preprocess = amadeus::process_blackmarble,
+                      preprocess = "amadeus::process_blackmarble",
                       radius = c(1e3, 1e4, 5e4)),
           geoscf_aqc = list(date = list_common$char_period,
                             path = ain("geos/aqc_tavg_1hr_g1440x721_v1"),
@@ -243,8 +243,8 @@ set_args_calc <-
                           "tcdc", "ulwrf.sfc", "uwnd.10m", "vis", "vwnd.10m", "weasd"),
             domain_name = "variable",
             date = list_common$char_period,
-            process_function = beethoven::process_narr2,
-            calc_function = beethoven::calc_narr2,
+            process_function = "beethoven::process_narr2",
+            calc_function = "beethoven::calc_narr2",
             nthreads = nthreads_narr
           ),
           groads = list(
@@ -425,10 +425,10 @@ set_args_download <-
 
     if (export) {
         if (endsWith(path_export, "qs")) {
-          qs::qsave(list_proccalc, path_export)
+          qs::qsave(list_download_config, path_export)
           message("Download configuration is saved to ", path_export)
         } else if (endsWith(path_export, "rds")) {
-          saveRDS(list_proccalc, path_export)
+          saveRDS(list_download_config, path_export)
           message("Download configuration is saved to ", path_export)
         } else {
           stop("Please provide a valid file extension: qs or rds.")
