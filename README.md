@@ -232,19 +232,35 @@ After switching to the project root directory (in terminal, `cd [project_root]`,
 > With `export = TRUE`, it will take some time to proceed to the next because it will recursively search hdf file paths. The time is affected by the number of files to search or the length of the period (`char_period`).
 
 > [!WARNING]
-> Please make sure that you are at the project root before proceeding to the following.
+> Please make sure that you are at the project root before proceeding to the following. The HPC example requires additional edits related to SBATCH directives and project root directory.
 
 ```shell
 Rscript inst/targets/targets_start.R &
 ```
 
-Or in NIEHS HPC,
+Or in NIEHS HPC, modify several lines to match your user environment:
+
+```shell
+# ...
+#SBATCH --output=YOUR_PATH/pipeline_out.out
+#SBATCH --error=YOUR_PATH/pipeline_err.err
+# ...
+# The --mail-user flag is optional
+#SBATCH --mail-user=MYACCOUNT@nih.gov
+# ...
+USER_PROJDIR=/YOUR/PROJECT/ROOT
+nohup nice -4 Rscript $USER_PROJDIR/inst/targets/targets_start.R
+```
+
+`YOUR_PATH`, `MYACCOUNT` and `/YOUR_PROJECT_ROOT` should be changed. In the end, you can run the following command:
 
 ```shell
 sbatch inst/targets/run.sh
 ```
 
-`inst/targets/run.sh` includes several lines exporting environment variables to bind GDAL/GEOS/PROJ versions newer than system default, geospatial packages built upon these libraries, and the user library location where required packages are installed.
+The script will submit a job with effective commands with SLURM level directives defined by lines starting `#SBATCH`, which allocate CPU threads and memory from the specified partition.
+
+`inst/targets/run.sh` includes several lines exporting environment variables to bind GDAL/GEOS/PROJ versions newer than system default, geospatial packages built upon these libraries, and the user library location where required packages are installed. The environment variables need to be changed following NIEHS HPC system changes in the future.
 
 > [!WARNING]
 > `set_args_*` family for downloading and summarizing prediction outcomes will be added in the future version.

@@ -18,7 +18,8 @@ else
     export R_LIBS_USER=/ddn/gs1/home/songi2/r-libs:$R_LIBS_USER:/ddn/gs1/biotools/R/lib64/R/library
 fi
 
-# modify it to the proper directory path.
+# modify it into the proper directory path. and output/error paths in the
+# # SBATCH directives
 USER_PROJDIR=/ddn/gs1/home/$USER/projects
 
 nohup nice -4 Rscript $USER_PROJDIR/beethoven/inst/targets/targets_start.R
