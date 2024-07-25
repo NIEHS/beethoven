@@ -164,11 +164,7 @@ Here, we describe the structure of the project and the naming conventions used. 
 - `.github/workflows/` This hidden directory is where the GitHub CI/CD yaml files reside
 
 ##### The following sub-directories are not including the package build and included only in the source code here
-- `tools/` This sub-directory is dedicated to educational or demonstration material (e.g. Rshiny). 
-- `input/` ***warning soon to be deprecated*** This sub-directory contains data used during the analysis. It is going to be superceded by the use of `targets`
-- `output/` ***warning: soon to be deprecated*** This sub-directory contains data used during the analysis. It is going to be superceded by the use of `targets`
-Currently, as of 3/29/24, the output folder contains .rds files for each
-of the covariates/features for model development. e.g.:
+- `tools/` This sub-directory is dedicated to educational or demonstration material (e.g. Rshiny).
   
 #### Relevant files 
 
@@ -201,14 +197,14 @@ Examples: 1) `sf_PM25_log10-fit_AQS_siteid` is an `sf` object for `PM25` data th
 
 #### Naming section definitions:
 
-- **R object type**: sf, datatable, tibble, SpatRaster, SpatVector
+- **R object type**: chr (character), list, sf, dt (datatable), tibble, SpatRaster, SpatVector
 
 - **role:** Detailed description of the role of the object in the pipeline. Allowable keywords:
 
   - PM25
-  - feature (i.e. geographic covariate) 
+  - feat (feature) (i.e. geographic covariate) 
   - base_model
-    - base_model suffix types: linear, random_forest, xgboost, neural_net etc.
+    - base_model suffix types: linear, random_forest, lgb (lightGBM), xgb (xgboost), mlp (neural network, multilayer perceptron) etc.
   - meta_model 
   - prediction
   - plot
@@ -218,15 +214,13 @@ Examples: 1) `sf_PM25_log10-fit_AQS_siteid` is an `sf` object for `PM25` data th
 are also articulated here. Allowable keywords: 
 
   - raw
-  - process
-  - calc
+  - calc: results from processing-calculation chains
   - fit: Ready for base/meta learner fitting
   - result: Final result
   - log
   - log10 
 
 - **source:** the original data source
-
 
   - AQS
   - MODIS
