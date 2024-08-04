@@ -431,13 +431,13 @@ nasa_earth_data_token = nasa_earth_data_token)
                           unzip = TRUE, remove_zip = TRUE),
         narr_monolevel = lapply(narr_variables_mono,
           function(v) {
-            list(dataset_name = "narr_monolevel",
+            list(dataset_name = "narr",
                  directory_to_save = ain("narr"),
                  variables = v, year = time_periods)
           }),
         narr_p_levels = lapply(narr_variables_plevels,
           function(v) {
-            list(dataset_name = "narr_p_levels",
+            list(dataset_name = "narr",
                  directory_to_save = ain("narr"),
                  variables = v, year = time_periods)
           })

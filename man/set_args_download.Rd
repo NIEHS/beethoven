@@ -8,6 +8,7 @@ set_args_download(
   char_period = c("2018-01-01", "2022-10-31"),
   char_input_dir = "input",
   nasa_earth_data_token = NULL,
+  mod06_filelist = NULL,
   year_nlcd = c(2019, 2021),
   export = FALSE,
   path_export = "inst/targets/download_spec.qs"
