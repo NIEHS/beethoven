@@ -321,6 +321,7 @@ set_args_download <-
     char_period = c("2018-01-01", "2022-10-31"),
     char_input_dir = "input",
     nasa_earth_data_token = NULL,
+    mod06_filelist = NULL,
     year_nlcd = c(2019, 2021),
     export = FALSE,
     path_export = "inst/targets/download_spec.qs"
@@ -330,7 +331,9 @@ set_args_download <-
       file.path(char_input_dir, x)
     }
 
+    char_date_temp <- c("%s-01-01", "%s-12-31")
     time_periods <- as.numeric(substr(char_period, 1, 4))
+    time_sequence <- seq(time_periods[1], time_periods[2])
     year_nei <- seq(2017, time_periods[2], 3)
     gmted_vars <-
       c("Breakline Emphasis", "Systematic Subsample", "Median Statistic",
@@ -348,41 +351,63 @@ set_args_download <-
     list_download_config <-
       list(
         aqs = list(dataset_name = "aqs", directory_to_save = ain("aqs"),
-                   year_start = time_periods[1], year_end = time_periods[2],
+                   year = time_periods,
                    unzip = TRUE, remove_zip = TRUE),
-        mod11 = list(dataset_name = "modis", directory_to_save = ain("modis/raw"),
-                     product = "MOD11A1", date_start = char_period[1], date_end = char_period[2],
-                     nasa_earth_data_token = nasa_earth_data_token),
-        mod06 = list(dataset_name = "modis", directory_to_save = ain("modis/raw"),
-                     product = "MOD06_L2", date_start = char_period[1], date_end = char_period[2],
-                     nasa_earth_data_token = nasa_earth_data_token),
-        mod09 = list(dataset_name = "modis", directory_to_save = ain("modis/raw"),
-                     product = "MOD09GA", date_start = char_period[1], date_end = char_period[2],
-                     nasa_earth_data_token = nasa_earth_data_token),
-        mcd19 = list(dataset_name = "modis", directory_to_save = ain("modis/raw"),
-                     product = "MCD19A2", date_start = char_period[1], date_end = char_period[2],
-                     nasa_earth_data_token = nasa_earth_data_token),
-        mod13 = list(dataset_name = "modis", directory_to_save = ain("modis/raw"),
-                     product = "MOD13A2", date_start = char_period[1], date_end = char_period[2],
-                     nasa_earth_data_token = nasa_earth_data_token),
-        viirs = list(dataset_name = "modis", directory_to_save = ain("modis/raw"),
-                     product = "VNP46A2", date_start = char_period[1], date_end = char_period[2],
+        mod11 = lapply(time_sequence,
+          function(t) {
+            list(dataset_name = "modis", directory_to_save = ain("modis/raw"),
+                     product = "MOD11A1",
+                     date = sprintf(char_date_temp, as.character(t)),
+                     nasa_earth_data_token = nasa_earth_data_token)
+          }),
+        mod06 = lapply(time_sequence,
+          function(t) {
+            list(dataset_name = "modis", directory_to_save = ain("modis/raw"),
+                     product = "MOD06_L2",
+                     date = sprintf(char_date_temp, as.character(t)),
+nasa_earth_data_token = nasa_earth_data_token,
+                     mod06_links = mod06_filelist)
+          }),
+        mod09 = lapply(time_sequence,
+          function(t) {
+            list(dataset_name = "modis", directory_to_save = ain("modis/raw"),
+                     product = "MOD09GA",
+                     date = sprintf(char_date_temp, as.character(t)),
+nasa_earth_data_token = nasa_earth_data_token)
+          }),
+        mcd19 = lapply(time_sequence,
+          function(t) {
+            list(dataset_name = "modis", directory_to_save = ain("modis/raw"),
+                     product = "MCD19A2", date = sprintf(char_date_temp, as.character(t)),
+                     nasa_earth_data_token = nasa_earth_data_token)
+          }),
+        mod13 = lapply(time_sequence,
+          function(t) {
+            list(dataset_name = "modis", directory_to_save = ain("modis/raw"),
+                     product = "MOD13A2", date = sprintf(char_date_temp, as.character(t)),
+                     nasa_earth_data_token = nasa_earth_data_token)
+          }),
+        viirs = lapply(time_sequence,
+          function(t) {
+            list(dataset_name = "modis", directory_to_save = ain("modis/raw"),
+                     product = "VNP46A2", date = sprintf(char_date_temp, as.character(t)),
                      version = "5000",
-                     nasa_earth_data_token = nasa_earth_data_token),
+                     nasa_earth_data_token = nasa_earth_data_token)
+          }),
         geoscf_aqc = list(dataset_name = "geos", directory_to_save = ain("geos"),
                           collection = "aqc_tavg_1hr_g1440x721_v1",
-                          date_start = char_period[1], date_end = char_period[2]),
+                          date = char_period),
         geoscf_chm = list(dataset_name = "geos", directory_to_save = ain("geos"),
                           collection = "chm_tavg_1hr_g1440x721_v1",
-                          date_start = char_period[1], date_end = char_period[2]),
+                          date = char_period),
         hms = list(dataset_name = "smoke", directory_to_save = ain("HMS_Smoke"),
                    data_format = "Shapefile",
-                   date_start = char_period[1], date_end = char_period[2],
+                   date = char_period,
                    unzip = TRUE, remove_zip = TRUE),
         gmted = lapply(gmted_vars,
           function(v) {
             list(dataset_name = "gmted", directory_to_save = ain("gmted"),
-                 static = v, resolution = "7.5 arc-seconds",
+                 statistic = v, resolution = "7.5 arc-seconds",
                  unzip = TRUE, remove_zip = TRUE)
           }),
         nei = lapply(year_nei,
@@ -390,8 +415,9 @@ set_args_download <-
           list(dataset_name = "nei", directory_to_save = ain("nei"),
                    year_target = y, unzip = TRUE)
           }),
-        tri = list(dataset_name = "tri", directory_to_save = ain("tri"),
-                   year_start = time_periods[1], year_end = time_periods[2]),
+        tri = list(dataset_name = "tri",
+                   directory_to_save = ain("tri"),
+                   year = time_periods),
         nlcd = lapply(year_nlcd,
           function(y) {
             list(dataset_name = "nlcd", directory_to_save = ain("nlcd"),
@@ -400,17 +426,20 @@ set_args_download <-
           }),
         koppen = list(dataset_name = "koppen", directory_to_save = ain("koppen_geiger"),
                       data_resolution = "0.0083", time_period = "Present", unzip = TRUE, remove_zip = TRUE),
-        ecoregions = list(dataset_name = "koppen", directory_to_save = ain("ecoregions"),
+        ecoregions = list(dataset_name = "koppen",
+                          directory_to_save = ain("ecoregions"),
                           unzip = TRUE, remove_zip = TRUE),
         narr_monolevel = lapply(narr_variables_mono,
           function(v) {
-            list(dataset_name = "narr_monolevel", directory_to_save = ain("narr"),
-                 variables = v, year_start = char_period[1], year_end = char_period[2])
+            list(dataset_name = "narr",
+                 directory_to_save = ain("narr"),
+                 variables = v, year = time_periods)
           }),
         narr_p_levels = lapply(narr_variables_plevels,
           function(v) {
-            list(dataset_name = "narr_p_levels", directory_to_save = ain("narr"),
-                 variables = v, year_start = char_period[1], year_end = char_period[2])
+            list(dataset_name = "narr",
+                 directory_to_save = ain("narr"),
+                 variables = v, year = time_periods)
           })
         ,
         groads = list(dataset_name = "sedac_groads", directory_to_save = ain("sedac_groads"),

@@ -45,7 +45,8 @@ Imports:
   stringi,
   collapse,
   tigris,
-  graphics
+  graphics,
+  scoringRules
 Suggests:
   testthat (>= 3.0.0),
   covr,
