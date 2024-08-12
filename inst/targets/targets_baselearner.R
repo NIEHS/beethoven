@@ -6,6 +6,15 @@ target_baselearner <-
       attach_xy(dt_feat_calc_imputed, sf_feat_proc_aqs_sites)
     )
     ,
+    # random component
+    targets::tar_target(
+      name = char_learner_cv_rep,
+      command = rep(c("spatial", "temporal", "spatiotemporal"), each = 300L)
+    ),
+    target::tar_target(
+      name = char_learner_cv_shuffle,
+      command = char_learner_cv_rep[sample(length(char_learner_cv_rep), length(char_learner_cv_rep))]
+    ),
     # P
     targets::tar_target(
       name = list_feat_calc_xyt,

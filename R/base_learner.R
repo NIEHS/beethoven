@@ -55,9 +55,9 @@ make_subdata <-
 #' @param folds pre-generated rset object with minimal number of columns.
 #'   If NULL, `vfold` should be numeric to be used in [rsample::vfold_cv].
 #' @param tune_mode character(1). Hyperparameter tuning mode.
-#'   Default is "grid", "bayes" is acceptable.
+#'   Default is "bayes", "grid" is acceptable.
 #' @param tune_bayes_iter integer(1). The number of iterations for
-#'  Bayesian optimization. Default is 50. Only used when `tune_mode = "bayes"`.
+#'  Bayesian optimization. Default is 10. Only used when `tune_mode = "bayes"`.
 #' @param learn_rate The learning rate for the model. For branching purpose.
 #'   Default is 0.1.
 #' @param yvar The target variable.
@@ -85,8 +85,8 @@ fit_base_brulee <-
   function(
     dt_imputed,
     folds = NULL,
-    tune_mode = "grid",
-    tune_bayes_iter = 50L,
+    tune_mode = "bayes",
+    tune_bayes_iter = 10L,
     learn_rate = 0.1,
     yvar = "Arithmetic.Mean",
     xvar = seq(5, ncol(dt_imputed)),
@@ -215,9 +215,9 @@ fit_base_brulee <-
 #' @param folds pre-generated rset object with minimal number of columns.
 #'   If NULL, `vfold` should be numeric to be used in [rsample::vfold_cv].
 #' @param tune_mode character(1). Hyperparameter tuning mode.
-#'   Default is "grid", "bayes" is acceptable.
+#'   Default is "bayes", "grid" is acceptable.
 #' @param tune_bayes_iter integer(1). The number of iterations for
-#' Bayesian optimization. Default is 50. Only used when `tune_mode = "bayes"`.
+#' Bayesian optimization. Default is 10. Only used when `tune_mode = "bayes"`.
 #' @param learn_rate The learning rate for the model. For branching purpose.
 #'   Default is 0.1.
 #' @param yvar The target variable.
@@ -245,8 +245,8 @@ fit_base_xgb <-
   function(
     dt_imputed,
     folds = NULL,
-    tune_mode = "grid",
-    tune_bayes_iter = 50L,
+    tune_mode = "bayes",
+    tune_bayes_iter = 10L,
     learn_rate = 0.1,
     yvar = "Arithmetic.Mean",
     xvar = seq(5, ncol(dt_imputed)),
@@ -368,9 +368,9 @@ fit_base_xgb <-
 #' @param folds pre-generated rset object with minimal number of columns.
 #'   If NULL, `vfold` should be numeric to be used in [rsample::vfold_cv].
 #' @param tune_mode character(1). Hyperparameter tuning mode.
-#'   Default is "grid", "bayes" is acceptable.
+#'   Default is "bayes", "grid" is acceptable.
 #' @param tune_bayes_iter integer(1). The number of iterations for
-#' Bayesian optimization. Default is 50. Only used when `tune_mode = "bayes"`.
+#' Bayesian optimization. Default is 10. Only used when `tune_mode = "bayes"`.
 #' @param learn_rate The learning rate for the model. For branching purpose.
 #'   Default is 0.1.
 #' @param yvar The target variable.
@@ -399,8 +399,8 @@ fit_base_lightgbm <-
   function(
     dt_imputed,
     folds = NULL,
-    tune_mode = "grid",
-    tune_bayes_iter = 50L,
+    tune_mode = "bayes",
+    tune_bayes_iter = 10L,
     learn_rate = 0.1,
     yvar = "Arithmetic.Mean",
     xvar = seq(5, ncol(dt_imputed)),
@@ -1035,5 +1035,85 @@ restore_fit_best <-
 
   }
 
+
+
+#' Choose cross-validation strategy for the base learner
+#' @keywords Baselearner
+#' @param learner character(1). Learner type.
+#'  * "spatial": spatial cross-validation.
+#'  * "temporal": temporal cross-validation.
+#'  * "spatiotemporal": spatiotemporal cross-validation.
+#' @param ... Additional arguments to be passed.
+#' @note This function's returned value is used as an input for
+#' `fit_base_brulee`, `fit_base_lightgbm`, and `fit_base_elnet`.
+#' Learner values can be used as a branching point for the cross-validation
+#' strategy.
+#' @returns rsample::manual_rset() object.
+#' @export
+fit_base_cv_switcher <-
+  function(
+    learner = c("spatial", "temporal", "spatiotemporal"),
+    ...
+  ) {
+    target_fun <-
+      switch(
+        learner,
+        spatial = prepare_cvindex,
+        temporal = generate_cv_ts,
+        spatiotemporal = generate_cv_index
+      )
+    cvindex <- rlang::inject(target_fun(!!!list(...)))
+    return(cvindex)
+  }
+
+
+# non site-wise; just using temporal information
+#' Generate temporal cross-validation index
+#' @keywords Baselearner development
+#' @param data data.table with X, Y, and time information.
+#' @param time_col character(1). Field name with time information.
+#' @param cv_fold integer(1). Number of cross-validation folds.
+#' @param window integer(1). Window size for each fold. Unit is
+#'   the base unit of temporal values stored in `time_col`.
+#' @details `window` is used to determine the padding or skipping
+#'   intervals for temporal cross-validation. Skipping intervals are
+#'   needed not to training and testing data to overlap.
+#' @returns rsample::manual_rset() object.
+#' @export
+generate_cv_ts <-
+  function(
+    data,
+    time_col = "time",
+    cv_fold = 10L,
+    window = 90
+  ) {
+    time_vec <- sort(unique(dat[[time_col]]))
+    time_vec_date <- as.Date(time_vec)
+    # time_range interpretation
+    time_vec_end <- max(time_vec_date)
+    time_vec_endpts <- c()
+    # end points (skipped)
+    time_vec_endpts_a <- c()
+    for (i in seq_len(cv_fold)) {
+      time_vec_endpts[cv_fold - i + 1] <-
+        time_vec_end - as.difftime(i * window, units = "days")
+      time_vec_endpts_a[cv_fold - i + 1] <-
+        time_vec_end - as.difftime(i * window + (window / 2), units = "days")
+    }
+    # start points
+    time_vec_endpts_b <- lag(time_vec_endpts_a, 1)
+    time_vec_endpts_b[1] <- min(time_vec_date)
+
+    # filter data (under construction)
+    cv_index <- list()
+    for (i in seq_len(cv_fold)) {
+      cv_index[[i]] <-
+        data %>%
+        dplyr::filter(time >= time_vec_endpts_b[i] & time < time_vec_endpts_a[i])
+    }
+    # convert to rset
+
+    return(cv_index)
+  }
 
 # nocov end

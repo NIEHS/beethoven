@@ -7,8 +7,8 @@
 fit_base_lightgbm(
   dt_imputed,
   folds = NULL,
-  tune_mode = "grid",
-  tune_bayes_iter = 50L,
+  tune_mode = "bayes",
+  tune_bayes_iter = 10L,
   learn_rate = 0.1,
   yvar = "Arithmetic.Mean",
   xvar = seq(5, ncol(dt_imputed)),
@@ -26,10 +26,10 @@ fit_base_lightgbm(
 If NULL, \code{vfold} should be numeric to be used in \link[rsample:vfold_cv]{rsample::vfold_cv}.}
 
 \item{tune_mode}{character(1). Hyperparameter tuning mode.
-Default is "grid", "bayes" is acceptable.}
+Default is "bayes", "grid" is acceptable.}
 
 \item{tune_bayes_iter}{integer(1). The number of iterations for
-Bayesian optimization. Default is 50. Only used when \code{tune_mode = "bayes"}.}
+Bayesian optimization. Default is 10. Only used when \code{tune_mode = "bayes"}.}
 
 \item{learn_rate}{The learning rate for the model. For branching purpose.
 Default is 0.1.}
