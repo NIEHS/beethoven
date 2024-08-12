@@ -14,7 +14,8 @@ make_subdata(data, n = NULL, p = 0.3)
 \item{p}{The proportion of rows to be used. Default is 0.3.}
 }
 \value{
-The sampled data table with row index saved in .rowindex field.
+The row index of the original data. The name of the original
+data object is stored in attribute "object_origin".
 }
 \description{
 Per beethoven resampling strategy, this function selects

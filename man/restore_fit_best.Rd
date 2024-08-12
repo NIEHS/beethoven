@@ -31,4 +31,9 @@ rset object with full data in splits column.
 \description{
 Restore the full data set from two rset objects then fit the best model
 }
+\note{
+Per introduction of fit_base_tune,
+the utility of this function might be limited.
+}
 \keyword{Baselearner}
+\keyword{soft-deprecated}

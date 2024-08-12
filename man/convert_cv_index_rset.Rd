@@ -4,12 +4,18 @@
 \alias{convert_cv_index_rset}
 \title{Generate manual rset object from spatiotemporal cross-validation indices}
 \usage{
-convert_cv_index_rset(cvindex, data, ref_list = NULL, cv_mode = "spt")
+convert_cv_index_rset(
+  cvindex,
+  data,
+  ref_list = NULL,
+  cv_mode = c("spatiotemporal", "spatial", "temporal")
+)
 }
 \arguments{
-\item{cvindex}{integer length of nrow(data).}
+\item{cvindex}{integer row indices for \code{id_in} in a \code{rset} object.}
 
-\item{data}{data.frame.}
+\item{data}{data.frame object from which the \code{cvindex} is used
+to create \code{rset} object}
 
 \item{ref_list}{List of custom reference indices. Default is NULL.
 if not NULL, it will be used as a reference instead of max(cvindex).}

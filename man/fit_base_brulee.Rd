@@ -7,6 +7,7 @@
 fit_base_brulee(
   dt_imputed,
   folds = NULL,
+  cv_mode = c("spatiotemporal", "spatial", "temporal"),
   tune_mode = "bayes",
   tune_bayes_iter = 10L,
   learn_rate = 0.1,
@@ -14,8 +15,8 @@ fit_base_brulee(
   xvar = seq(5, ncol(dt_imputed)),
   vfold = 5L,
   device = "cuda:0",
-  trim_resamples = TRUE,
-  return_best = FALSE,
+  trim_resamples = FALSE,
+  return_best = TRUE,
   ...
 )
 }

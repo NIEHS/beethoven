@@ -13,7 +13,8 @@
 #' @param data An object that inherits data.frame.
 #' @param n The number of rows to be sampled.
 #' @param p The proportion of rows to be used. Default is 0.3.
-#' @returns The sampled data table with row index saved in .rowindex field.
+#' @returns The row index of the original data. The name of the original
+#'   data object is stored in attribute "object_origin".
 make_subdata <-
   function(
     data,
@@ -29,11 +30,11 @@ make_subdata <-
     } else {
       nsample <- sample(nr, ceiling(nrow(data) * p))
     }
-    data <- data[nsample, ]
-    data$.rowindex <- nsample
+    # data <- data[nsample, ]
+    rowindex <- nsample
     data_name <- as.character(substitute(data))
-    attr(data, "object_origin") <- data_name[length(data_name)]
-    return(data)
+    attr(rowindex, "object_origin") <- data_name[length(data_name)]
+    return(rowindex)
   }
 
 
@@ -85,6 +86,7 @@ fit_base_brulee <-
   function(
     dt_imputed,
     folds = NULL,
+    cv_mode  = c("spatiotemporal", "spatial", "temporal"),
     tune_mode = "bayes",
     tune_bayes_iter = 10L,
     learn_rate = 0.1,
@@ -92,11 +94,12 @@ fit_base_brulee <-
     xvar = seq(5, ncol(dt_imputed)),
     vfold = 5L,
     device = "cuda:0",
-    trim_resamples = TRUE,
-    return_best = FALSE,
+    trim_resamples = FALSE,
+    return_best = TRUE,
     ...
   ) {
     tune_mode <- match.arg(tune_mode, c("grid", "bayes"))
+    cv_mode <- match.arg(cv_mode)
 
     # 2^9=512, 2^15=32768 (#param is around 10% of selected rows)
     grid_hyper_tune <-
@@ -106,9 +109,20 @@ fit_base_brulee <-
         activation = c("relu", "leaky_relu"),
         learn_rate = learn_rate
       )
-    # dt_imputed <-
-    #   dt_imputed %>%
-    #   dplyr::slice_sample(prop = r_subsample)
+
+    # generate row index for restoring rset
+    cv_index <- switch_generate_cv_rset(
+      data = dt_imputed,
+      cv_mode = cv_mode
+    )
+    # using cv_index, restore rset
+    # NOTE 08122024: not modified -- should be recoded
+    rset_cv <-
+      convert_cv_index_rset(
+        index_cv, data_orig, ref_list = ref_list, cv_mode = cv_mode
+      )
+
+
 
     base_recipe <-
       recipes::recipe(
@@ -140,11 +154,55 @@ fit_base_brulee <-
       parsnip::set_engine("brulee", device = device) %>%
       parsnip::set_mode("regression")
 
+    base_wftune <-
+      fit_base_tune(
+        recipe = base_recipe,
+        model = base_model,
+        resample = base_vfold,
+        tune_mode = tune_mode,
+        grid = grid_hyper_tune,
+        iter_bayes = tune_bayes_iter,
+        trim_resamples = trim_resamples,
+        return_best = return_best
+      )
 
+    return(base_wftune)
+  }
+
+
+#' Tune base learner
+#' @keywords Baselearner internal
+#' @param recipe The recipe object.
+#' @param model The model object.
+#' @param resample The resample object.
+#' @param tune_mode character(1). Hyperparameter tuning mode.
+#'  Default is "bayes", "grid" is acceptable.
+#' @param grid The grid object for hyperparameter tuning.
+#' @param trim_resamples logical(1). Default is TRUE, which replaces the actual
+#'  data.frames in splits column of `tune_results` object with NA.
+#' @param return_best logical(1). If TRUE, the best tuned model is returned.
+#' @returns List of 2:
+#'   * `base_prediction`: `data.frame` of the best model prediction.
+#'   * `base_parameter`: `tune_results` object of the best model.
+#' @importFrom workflows workflow add_recipe add_model
+#' @importFrom tune tune_grid tune_bayes control_grid control_bayes
+#' @importFrom yardstick metric_set rmse mape rsq mae
+fit_base_tune <-
+  function(
+    recipe,
+    model,
+    resample,
+    tune_mode = c("bayes", "grid"),
+    grid = NULL,
+    iter_bayes = 10L,
+    trim_resamples = TRUE,
+    return_best = TRUE
+  ) {
+    tune_mode <- match.arg(tune_mode)
     base_wf <-
       workflows::workflow() %>%
-      workflows::add_recipe(base_recipe) %>%
-      workflows::add_model(base_model)
+      workflows::add_recipe(recipe) %>%
+      workflows::add_model(model)
 
     if (tune_mode == "grid") {
       wf_config <-
@@ -153,11 +211,11 @@ fit_base_brulee <-
           save_pred = TRUE,
           save_workflow = TRUE
         )
-      base_wf <-
+      base_wftune <-
         base_wf %>%
         tune::tune_grid(
-          resamples = base_vfold,
-          grid = grid_hyper_tune,
+          resamples = resample,
+          grid = grid,
           metrics =
           yardstick::metric_set(
             yardstick::rmse,
@@ -174,22 +232,34 @@ fit_base_brulee <-
           save_pred = TRUE,
           save_workflow = TRUE
         )
-      base_wf <-
+      base_wftune <-
         base_wf %>%
         tune::tune_bayes(
-          resamples = base_vfold,
-          iter = tune_bayes_iter,
+          resamples = resample,
+          iter = iter_bayes,
           metrics = yardstick::metric_set(yardstick::rmse, yardstick::mape),
           control = wf_config
         )
     }
     if (trim_resamples) {
-      base_wf$splits <- NA
+      base_wftune$splits <- NA
     }
     if (return_best) {
-      base_wf <- tune::show_best(base_wf, n = 1)
+      base_wfparam <- tune::select_best(base_wftune)
+      # finalize workflow with the best tuned hyperparameters
+      base_wftune <- tune::finalize_workflow(base_wf, base_wfparam)
+      # Best-fit model
+      base_wf_fit_best <- parsnip::fit(base_wftune, data = dt_imputed)
+      # Prediction with the best model
+      base_wf_pred_best <- predict(base_wf_fit_best, new_data = dt_imputed)
+
+      base_wftune <-
+        list(
+          base_prediction = base_wf_pred_best,
+          base_parameter = base_wfparam
+        )
     }
-    return(base_wf)
+    return(base_wftune)
   }
 
 
@@ -268,6 +338,20 @@ fit_base_xgb <-
     #   dt_imputed %>%
     #   dplyr::slice_sample(prop = r_subsample)
 
+    # generate row index for restoring rset
+    cv_index <- switch_generate_cv_rset(
+      data = dt_imputed,
+      cv_mode = cv_mode
+    )
+    # using cv_index, restore rset
+    # NOTE 08122024: not modified -- should be recoded
+    rset_cv <-
+      convert_cv_index_rset(
+        index_cv, data_orig, ref_list = ref_list, cv_mode = cv_mode
+      )
+
+
+
     base_recipe <-
       recipes::recipe(
         dt_imputed[1, ]
@@ -292,57 +376,19 @@ fit_base_xgb <-
       parsnip::set_engine("xgboost", device = device) %>%
       parsnip::set_mode("regression")
 
-    base_wf <-
-      workflows::workflow() %>%
-      workflows::add_recipe(base_recipe) %>%
-      workflows::add_model(base_model)
+    base_wftune <-
+      fit_base_tune(
+        recipe = base_recipe,
+        model = base_model,
+        resample = base_vfold,
+        tune_mode = tune_mode,
+        grid = grid_hyper_tune,
+        iter_bayes = tune_bayes_iter,
+        trim_resamples = trim_resamples,
+        return_best = return_best
+      )
 
-    if (tune_mode == "grid") {
-      wf_config <-
-        tune::control_grid(
-          verbose = TRUE,
-          save_pred = TRUE,
-          save_workflow = TRUE
-        )
-
-      base_wf <-
-        base_wf %>%
-        tune::tune_grid(
-          resamples = base_vfold,
-          grid = grid_hyper_tune,
-          metrics =
-          yardstick::metric_set(
-            yardstick::rmse,
-            yardstick::mape,
-            yardstick::rsq,
-            yardstick::mae
-          ),
-          control = wf_config
-        )
-    } else {
-      wf_config <-
-        tune::control_bayes(
-          verbose = TRUE,
-          save_pred = TRUE,
-          save_workflow = TRUE
-        )
-      base_wf <-
-        base_wf %>%
-        tune::tune_bayes(
-          resamples = base_vfold,
-          iter = tune_bayes_iter,
-          metrics = yardstick::metric_set(yardstick::rmse, yardstick::mape),
-          control = wf_config
-        )
-    }
-    if (trim_resamples) {
-      base_wf$splits <- NA
-    }
-    if (return_best) {
-      base_wf <- tune::show_best(base_wf, n = 1)
-    }
-
-    return(base_wf)
+    return(base_wftune)
 
   }
 
@@ -418,9 +464,19 @@ fit_base_lightgbm <-
         trees = seq(1000, 3000, 500),
         learn_rate = learn_rate
       )
-    # dt_imputed <-
-    #   dt_imputed %>%
-    #   dplyr::slice_sample(prop = r_subsample)
+
+    # generate row index for restoring rset
+    cv_index <- switch_generate_cv_rset(
+      data = dt_imputed,
+      cv_mode = cv_mode
+    )
+    # using cv_index, restore rset
+    # NOTE 08122024: not modified -- should be recoded
+    rset_cv <-
+      convert_cv_index_rset(
+        index_cv, data_orig, ref_list = ref_list, cv_mode = cv_mode
+      )
+
 
     base_recipe <-
       recipes::recipe(
@@ -446,56 +502,19 @@ fit_base_lightgbm <-
       parsnip::set_engine("xgboost", device_type = device) %>%
       parsnip::set_mode("regression")
 
-    base_wf <-
-      workflows::workflow() %>%
-      workflows::add_recipe(base_recipe) %>%
-      workflows::add_model(base_model)
+    base_wftune <-
+      fit_base_tune(
+        recipe = base_recipe,
+        model = base_model,
+        resample = base_vfold,
+        tune_mode = tune_mode,
+        grid = grid_hyper_tune,
+        iter_bayes = tune_bayes_iter,
+        trim_resamples = trim_resamples,
+        return_best = return_best
+      )
 
-    if (tune_mode == "grid") {
-      wf_config <-
-        tune::control_grid(
-          verbose = TRUE,
-          save_pred = TRUE,
-          save_workflow = TRUE
-        )
-      base_wf <-
-        base_wf %>%
-        tune::tune_grid(
-          resamples = base_vfold,
-          grid = grid_hyper_tune,
-          metrics =
-          yardstick::metric_set(
-            yardstick::rmse,
-            yardstick::mape,
-            yardstick::rsq,
-            yardstick::mae
-          ),
-          control = wf_config
-        )
-    } else {
-      wf_config <-
-        tune::control_bayes(
-          verbose = TRUE,
-          save_pred = TRUE,
-          save_workflow = TRUE
-        )
-      base_wf <-
-        base_wf %>%
-        tune::tune_bayes(
-          resamples = base_vfold,
-          iter = tune_bayes_iter,
-          metrics = yardstick::metric_set(yardstick::rmse, yardstick::mape),
-          control = wf_config
-        )
-    }
-    if (trim_resamples) {
-      base_wf$splits <- NA
-    }
-    if (return_best) {
-      base_wf <- tune::show_best(base_wf, n = 1)
-    }
-
-    return(base_wf)
+    return(base_wftune)
 
   }
 
@@ -551,9 +570,20 @@ fit_base_elnet <-
         mixture = seq(0, 1, length.out = 21),
         penalty = 10 ^ seq(-3, 5)
       )
-    # dt_imputed <-
-    #   dt_imputed %>%
-    #   dplyr::slice_sample(prop = r_subsample)
+
+    # generate row index for restoring rset
+    cv_index <- switch_generate_cv_rset(
+      data = dt_imputed,
+      cv_mode = cv_mode
+    )
+    # using cv_index, restore rset
+    # NOTE 08122024: not modified -- should be recoded
+    rset_cv <-
+      convert_cv_index_rset(
+        index_cv, data_orig, ref_list = ref_list, cv_mode = cv_mode
+      )
+
+
 
     base_recipe <-
       recipes::recipe(
@@ -579,59 +609,19 @@ fit_base_elnet <-
       parsnip::set_mode("regression")
 
     future::plan(future::multicore, workers = nthreads)
-    base_wf <-
-      workflows::workflow() %>%
-      workflows::add_recipe(base_recipe) %>%
-      workflows::add_model(base_model)
-
-    if (tune_mode == "grid") {
-      wf_config <-
-        tune::control_grid(
-          verbose = TRUE,
-          save_pred = TRUE,
-          save_workflow = TRUE
-        )
-
-      base_wf <-
-        base_wf %>%
-        tune::tune_grid(
-          resamples = base_vfold,
-          grid = grid_hyper_tune,
-          metrics =
-          yardstick::metric_set(
-            yardstick::rmse,
-            yardstick::mape,
-            yardstick::rsq,
-            yardstick::mae
-          ),
-          control = wf_config,
-          parallel_over = "resamples"
-        )
-    } else {
-      wf_config <-
-        tune::control_bayes(
-          verbose = TRUE,
-          save_pred = TRUE,
-          save_workflow = TRUE
-        )
-      base_wf <-
-        base_wf %>%
-        tune::tune_bayes(
-          resamples = base_vfold,
-          iter = tune_bayes_iter,
-          metrics = yardstick::metric_set(yardstick::rmse, yardstick::mape),
-          control = wf_config,
-          parallel_over = "resamples"
-        )
-    }
-    if (trim_resamples) {
-      base_wf$splits <- NA
-    }
-    if (return_best) {
-      base_wf <- tune::show_best(base_wf, n = 1)
-    }
+    base_wftune <-
+      fit_base_tune(
+        recipe = base_recipe,
+        model = base_model,
+        resample = base_vfold,
+        tune_mode = tune_mode,
+        grid = grid_hyper_tune,
+        iter_bayes = tune_bayes_iter,
+        trim_resamples = trim_resamples,
+        return_best = return_best
+      )
     future::plan(future::sequential)
-    return(base_wf)
+    return(base_wftune)
 
   }
 
@@ -639,8 +629,9 @@ fit_base_elnet <-
 
 #' Generate manual rset object from spatiotemporal cross-validation indices
 #' @keywords Baselearner
-#' @param cvindex integer length of nrow(data).
-#' @param data data.frame.
+#' @param cvindex integer row indices for `id_in` in a `rset` object.
+#' @param data data.frame object from which the `cvindex` is used
+#'   to create `rset` object
 #' @param ref_list List of custom reference indices. Default is NULL.
 #'   if not NULL, it will be used as a reference instead of max(cvindex).
 #' @param cv_mode character(1). Spatiotemporal cross-validation indexing
@@ -656,11 +647,12 @@ convert_cv_index_rset <-
     cvindex,
     data,
     ref_list = NULL,
-    cv_mode = "spt"
+    cv_mode = c("spatiotemporal", "spatial", "temporal")
   ) {
-    if (length(cvindex) != nrow(data)) {
-      stop("cvindex length should be equal to nrow(data).")
-    }
+    cv_mode <- match.arg(cv_mode)
+    # if (length(cvindex) != nrow(data)) {
+    #   stop("cvindex length should be equal to nrow(data).")
+    # }
 
     if (!is.null(ref_list)) {
       list_cvi <- ref_list
@@ -768,7 +760,7 @@ attach_xy <-
 #' @importFrom anticlust balanced_clustering
 #' @importFrom dplyr group_by summarize across ungroup all_of
 #' @export
-generate_cv_index <-
+generate_cv_rset_spt <-
   function(
     data,
     target_cols = c("lon", "lat", "time"),
@@ -853,40 +845,86 @@ generate_cv_index <-
         Map(c, data_exd_rowid[search_idx], data_exd_colid[search_idx])
     }
 
-    rset_cv <-
-      convert_cv_index_rset(
-        index_cv, data_orig, ref_list = ref_list, cv_mode = cv_mode
-      )
+    rset_cv <- index_cv
     return(rset_cv)
   }
 
-#' Visualize the spatio-temporal cross-validation index
-#' @keywords Baselearner
-#' @param rsplit rsample::manual_rset() object.
-#' @param angle numeric(1). Viewing angle of 3D plot.
-#' @returns None. A plot will be generated.
-#' @seealso [`generate_cv_index`]
-#' @export
-vis_rset <-
-  function(rsplit, angle = 60) {
-    nsplit <- nrow(rsplit)
-    graphics::par(mfrow = c(ceiling(nsplit / 3), 3))
-    for (i in seq_len(nsplit)) {
-      cleared <- rsplit[i, 1][[1]][[1]]$data
-      cleared$indx <- 0
-      cleared$indx[rsplit[i, 1][[1]][[1]]$in_id] <- "In"
-      cleared$indx[rsplit[i, 1][[1]][[1]]$out_id] <- "Out"
-      cleared$indx <- factor(cleared$indx)
-      cleared$time <- as.POSIXct(cleared$time)
-      scatterplot3d::scatterplot3d(
-        cleared$lon, cleared$lat, cleared$time,
-        color = rev(as.integer(cleared$indx) + 1),
-        cex.symbols = 0.02, pch = 19,
-        angle = angle
-      )
-    }
-  }
 
+
+# non site-wise; just using temporal information
+#' Generate temporal cross-validation index
+#' @keywords Baselearner
+#' @param data data.table with X, Y, and time information.
+#' @param time_col character(1). Field name with time information.
+#' @param cv_fold integer(1). Number of cross-validation folds.
+#' @param window integer(1). Window size for each fold.
+#'   Simply meaning overlaps between folds. Unit is
+#'   the base unit of temporal values stored in `time_col`.
+#'   Window size is put into `as.difftime` function, then the half of it
+#'   (if odd, rounded number + 1 is applied) is used for overlaps
+#'   in the middle folds.
+#' @returns rsample::manual_rset() object.
+#' @examples
+#' data <- data.table(
+#'  time = seq.Date(from = as.Date("2021-01-01"), by = "day", length.out = 100),
+#'  value = rnorm(100)
+#' )
+#' rset_ts <- generate_cv_ts(data, time_col = "time", cv_fold = 10, window = 14)
+#' @export
+generate_cv_rset_ts <-
+  function(
+    data,
+    time_col = "time",
+    cv_fold = 10L,
+    window = 14L
+  ) {
+    tcol <- unlist(data[[time_col]])
+    time_vec <- as.POSIXct(sort(unique(tcol)))
+    # time_range interpretation
+    time_vec_quantile <- quantile(time_vec, probs = seq(0, 1, 0.1))
+    time_vec_quantile <- as.Date(time_vec_quantile)
+    # define overlaps (half of window size)
+    tdiff <- as.difftime(window / 2, units = "days")
+    tdiff_h <- round(tdiff / 2) + 1
+
+    cv_index <-
+      lapply(
+        seq_len(cv_fold),
+        function(x) {
+          if (x == 1) {
+            # don't be confused! in_id is the training set
+            in_id <- which(tcol > time_vec_quantile[x + 1] - tdiff)
+            out_id <- which(tcol <= time_vec_quantile[x + 1] + tdiff)
+          } else if (x == cv_fold) {
+            # last fold
+            in_id <- which(tcol <= time_vec_quantile[x] + tdiff)
+            out_id <- which(tcol > time_vec_quantile[x] - tdiff)
+          } else {
+            in_id <-
+              which(
+                tcol < time_vec_quantile[x] + tdiff_h |
+                  tcol >= time_vec_quantile[x + 1] - tdiff_h
+              )
+            out_id <-
+              which(
+                tcol >= time_vec_quantile[x] - tdiff_h &
+                  tcol <= time_vec_quantile[x + 1] + tdiff_h
+              )
+          }
+          return(list(analysis = in_id, assessment = out_id))
+        }
+      )
+    cv_index <- Map(function(x) {
+      rsample::make_splits(x, data)
+    }, cv_index)
+    rset_ts <-
+      rsample::manual_rset(
+        splits = cv_index,
+        ids = sprintf("cvfold_ts_%02d", seq_len(cv_fold))
+      )
+
+    return(rset_ts)
+  }
 
 
 #' Prepare spatial and spatiotemporal cross validation sets
@@ -900,13 +938,16 @@ vis_rset <-
 #'   `spatialsample::spatial_clustering_cv`.
 #' @param cv_make_fun function(1). Function to generate spatial
 #'   cross-validation indices. Default is `spatialsample::spatial_block_cv`.
-#' @seealso [`generate_cv_index`] [`spatialsample::spatial_block_cv`]
+#' @seealso [`generate_cvset`] [`spatialsample::spatial_block_cv`]
 #'   [`spatialsample::spatial_clustering_cv`]
 #' @returns rsample::manual_rset() object.
 #' @importFrom rlang inject
 #' @importFrom sf st_as_sf
+#' @importFrom spatialsample spatial_block_cv
+#' @importFrom rsample manual_rset
+#' @importFrom dplyr %>% slice_sample
 #' @export
-prepare_cvindex <-
+prepare_cv_index_rset <-
   function(
     data,
     r_subsample = 0.3,
@@ -944,6 +985,68 @@ prepare_cvindex <-
   }
 
 
+
+#' Visualize the spatio-temporal cross-validation index
+#' @keywords Baselearner
+#' @param rsplit rsample::manual_rset() object.
+#' @param angle numeric(1). Viewing angle of 3D plot.
+#' @returns None. A plot will be generated.
+#' @seealso [`generate_cv_index`]
+#' @export
+vis_spt_rset <-
+  function(rsplit, angle = 60) {
+    nsplit <- nrow(rsplit)
+    graphics::par(mfrow = c(ceiling(nsplit / 3), 3))
+    for (i in seq_len(nsplit)) {
+      cleared <- rsplit[i, 1][[1]][[1]]$data
+      cleared$indx <- 0
+      cleared$indx[rsplit[i, 1][[1]][[1]]$in_id] <- "In"
+      cleared$indx[rsplit[i, 1][[1]][[1]]$out_id] <- "Out"
+      cleared$indx <- factor(cleared$indx)
+      cleared$time <- as.POSIXct(cleared$time)
+      scatterplot3d::scatterplot3d(
+        cleared$lon, cleared$lat, cleared$time,
+        color = rev(as.integer(cleared$indx) + 1),
+        cex.symbols = 0.02, pch = 19,
+        angle = angle
+      )
+    }
+  }
+
+
+
+#' Choose cross-validation strategy for the base learner
+#' @keywords Baselearner
+#' @param learner character(1). Learner type. Should be one of:
+#'  * "spatial": spatial cross-validation.
+#'  * "temporal": temporal cross-validation.
+#'  * "spatiotemporal": spatiotemporal cross-validation.
+#' @param ... Additional arguments to be passed.
+#' @note This function's returned value is used as an input for
+#' `fit_base_brulee`, `fit_base_lightgbm`, and `fit_base_elnet`.
+#' Learner values can be used as a branching point for the cross-validation
+#' strategy.
+#' @returns rsample::manual_rset() object.
+#' @export
+switch_generate_cv_rset <-
+  function(
+    learner = c("spatial", "temporal", "spatiotemporal"),
+    ...
+  ) {
+    learner <- match.arg(learner)
+    target_fun <-
+      switch(
+        learner,
+        spatial = prepare_cv_index_rset,
+        temporal = generate_cv_rset_ts,
+        spatiotemporal = generate_cv_rset_spt
+      )
+    cvindex <- rlang::inject(target_fun(!!!list(...)))
+    return(cvindex)
+  }
+
+
+
 #' Restore the full data set from the rset object
 #' @keywords Baselearner
 #' @param rset rsample::manual_rset() object's `splits` column
@@ -971,13 +1074,15 @@ restore_rset_full <-
 
 
 #' Restore the full data set from two rset objects then fit the best model
-#' @keywords Baselearner
+#' @keywords Baselearner soft-deprecated
 #' @param rset_trimmed rset object without data in splits column.
 #' @param rset_full rset object with full data.
 #' @param df_full data.table with full data.
 #' @param nested logical(1). If TRUE, the rset object is nested.
 #' @param nest_length integer(1). Length of the nested list.
 #'   i.e., Number of resamples.
+#' @note Per introduction of fit_base_tune,
+#'  the utility of this function might be limited.
 #' @returns rset object with full data in splits column.
 #' @export
 restore_fit_best <-
@@ -1037,83 +1142,6 @@ restore_fit_best <-
 
 
 
-#' Choose cross-validation strategy for the base learner
-#' @keywords Baselearner
-#' @param learner character(1). Learner type.
-#'  * "spatial": spatial cross-validation.
-#'  * "temporal": temporal cross-validation.
-#'  * "spatiotemporal": spatiotemporal cross-validation.
-#' @param ... Additional arguments to be passed.
-#' @note This function's returned value is used as an input for
-#' `fit_base_brulee`, `fit_base_lightgbm`, and `fit_base_elnet`.
-#' Learner values can be used as a branching point for the cross-validation
-#' strategy.
-#' @returns rsample::manual_rset() object.
-#' @export
-fit_base_cv_switcher <-
-  function(
-    learner = c("spatial", "temporal", "spatiotemporal"),
-    ...
-  ) {
-    target_fun <-
-      switch(
-        learner,
-        spatial = prepare_cvindex,
-        temporal = generate_cv_ts,
-        spatiotemporal = generate_cv_index
-      )
-    cvindex <- rlang::inject(target_fun(!!!list(...)))
-    return(cvindex)
-  }
 
-
-# non site-wise; just using temporal information
-#' Generate temporal cross-validation index
-#' @keywords Baselearner development
-#' @param data data.table with X, Y, and time information.
-#' @param time_col character(1). Field name with time information.
-#' @param cv_fold integer(1). Number of cross-validation folds.
-#' @param window integer(1). Window size for each fold. Unit is
-#'   the base unit of temporal values stored in `time_col`.
-#' @details `window` is used to determine the padding or skipping
-#'   intervals for temporal cross-validation. Skipping intervals are
-#'   needed not to training and testing data to overlap.
-#' @returns rsample::manual_rset() object.
-#' @export
-generate_cv_ts <-
-  function(
-    data,
-    time_col = "time",
-    cv_fold = 10L,
-    window = 90
-  ) {
-    time_vec <- sort(unique(dat[[time_col]]))
-    time_vec_date <- as.Date(time_vec)
-    # time_range interpretation
-    time_vec_end <- max(time_vec_date)
-    time_vec_endpts <- c()
-    # end points (skipped)
-    time_vec_endpts_a <- c()
-    for (i in seq_len(cv_fold)) {
-      time_vec_endpts[cv_fold - i + 1] <-
-        time_vec_end - as.difftime(i * window, units = "days")
-      time_vec_endpts_a[cv_fold - i + 1] <-
-        time_vec_end - as.difftime(i * window + (window / 2), units = "days")
-    }
-    # start points
-    time_vec_endpts_b <- lag(time_vec_endpts_a, 1)
-    time_vec_endpts_b[1] <- min(time_vec_date)
-
-    # filter data (under construction)
-    cv_index <- list()
-    for (i in seq_len(cv_fold)) {
-      cv_index[[i]] <-
-        data %>%
-        dplyr::filter(time >= time_vec_endpts_b[i] & time < time_vec_endpts_a[i])
-    }
-    # convert to rset
-
-    return(cv_index)
-  }
 
 # nocov end
