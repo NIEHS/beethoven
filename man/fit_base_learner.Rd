@@ -6,8 +6,8 @@
 \usage{
 fit_base_learner(
   learner = c("mlp", "xgb", "lightgbm", "elnet"),
-  dt_sample,
   dt_full,
+  r_subsample = 0.3,
   model = NULL,
   folds = NULL,
   cv_mode = c("spatiotemporal", "spatial", "temporal"),
@@ -17,7 +17,6 @@ fit_base_learner(
   yvar = "Arithmetic.Mean",
   xvar = seq(5, ncol(dt_sample)),
   vfold = 5L,
-  device = "cuda:0",
   trim_resamples = FALSE,
   return_best = TRUE,
   args_generate_cv = NULL,
@@ -29,6 +28,8 @@ fit_base_learner(
 Default is "mlp". Available options are "mlp", "xgb", "lightgbm", "elnet".}
 
 \item{dt_full}{The full data table to be used for prediction.}
+
+\item{r_subsample}{numeric(1). The proportion of rows to be used.}
 
 \item{model}{The parsnip model object. Preferably generated from
 \code{switch_model}.}
@@ -51,18 +52,12 @@ Default is 0.1.}
 
 \item{vfold}{The number of folds for cross-validation.}
 
-\item{device}{The device to be used for training.
-Default is "cuda:0". Make sure that your system is equipped
-with CUDA-enabled graphical processing units.}
-
 \item{trim_resamples}{logical(1). Default is TRUE, which replaces the actual
 data.frames in splits column of \code{tune_results} object with NA.}
 
 \item{return_best}{logical(1). If TRUE, the best tuned model is returned.}
 
 \item{...}{Additional arguments to be passed.}
-
-\item{dt_imputed}{The input data table to be used for fitting.}
 }
 \value{
 The fitted workflow.

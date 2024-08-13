@@ -2,6 +2,7 @@
 
 export(add_time_col)
 export(append_predecessors)
+export(assign_learner_cv)
 export(attach_xy)
 export(calc_geos_strict)
 export(calc_gmted_direct)

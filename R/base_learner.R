@@ -41,7 +41,7 @@ make_subdata <-
 #' Define a base learner model based on parsnip and tune
 #' @keywords Baselearner
 #' @param model_type character(1). Model type to be used.
-#'  Default is "mlp". Available options are "mlp", "xgb", "lightgbm", "elnet".
+#'  Default is "mlp". Available options are "mlp", "xgb", "lgb", "elnet".
 #' @param learn_rate numeric(1). The learning rate for the model.
 #' Default is 0.1.
 #' @param device character(1). The device to be used for training.
@@ -49,10 +49,11 @@ make_subdata <-
 #' with CUDA-enabled graphical processing units.
 #' @returns A parsnip model object.
 #' @importFrom parsnip mlp set_engine set_mode boost_tree linear_reg
+#' @importFrom dplyr %>%
 #' @export
 switch_model <-
   function(
-    model_type = c("mlp", "xgb", "lightgbm", "elnet"),
+    model_type = c("mlp", "xgb", "lgb", "elnet"),
     learn_rate = 0.1,
     device = "cuda:0"
   ) {
@@ -64,12 +65,12 @@ switch_model <-
           hidden_units = parsnip::tune(),
           dropout = parsnip::tune(),
           epochs = 1000L,
-          activation = parsnip::tune(),
+          activation = "relu",
           learn_rate = parsnip::tune()
         ) %>%
         parsnip::set_engine("brulee", device = device) %>%
         parsnip::set_mode("regression"),
-      lightgbm =
+      lgb =
         parsnip::boost_tree(
           mtry = parsnip::tune(),
           trees = parsnip::tune(),
@@ -139,8 +140,8 @@ switch_model <-
 #'  * Elastic net: Hyperparameters `mixture` and `penalty` are tuned.
 #' @param learner character(1). The base learner to be used.
 #'   Default is "mlp". Available options are "mlp", "xgb", "lightgbm", "elnet".
-#' @param dt_imputed The input data table to be used for fitting.
 #' @param dt_full The full data table to be used for prediction.
+#' @param r_subsample numeric(1). The proportion of rows to be used.
 #' @param model The parsnip model object. Preferably generated from
 #'   `switch_model`.
 #' @param folds pre-generated rset object with minimal number of columns.
@@ -154,9 +155,6 @@ switch_model <-
 #' @param yvar The target variable.
 #' @param xvar The predictor variables.
 #' @param vfold The number of folds for cross-validation.
-#' @param device The device to be used for training.
-#'   Default is "cuda:0". Make sure that your system is equipped
-#'   with CUDA-enabled graphical processing units.
 #' @param trim_resamples logical(1). Default is TRUE, which replaces the actual
 #'   data.frames in splits column of `tune_results` object with NA.
 #' @param return_best logical(1). If TRUE, the best tuned model is returned.
@@ -175,8 +173,8 @@ switch_model <-
 fit_base_learner <-
   function(
     learner = c("mlp", "xgb", "lightgbm", "elnet"),
-    dt_sample,
     dt_full,
+    r_subsample = 0.3,
     model = NULL,
     folds = NULL,
     cv_mode  = c("spatiotemporal", "spatial", "temporal"),
@@ -186,7 +184,6 @@ fit_base_learner <-
     yvar = "Arithmetic.Mean",
     xvar = seq(5, ncol(dt_sample)),
     vfold = 5L,
-    device = "cuda:0",
     trim_resamples = FALSE,
     return_best = TRUE,
     args_generate_cv = NULL,
@@ -197,9 +194,8 @@ fit_base_learner <-
     cv_mode <- match.arg(cv_mode)
     stopifnot("parsnip model must be defined." = !is.null(model))
 
-    if (ncol(dt_sample) != ncol(dt_full)) {
-      warning("Please make sure dt_sample and dt_full have the same columns.")
-    }
+    dt_sample_rowidx <- make_subdata(dt_full, p = r_subsample)
+    dt_sample <- dt_full[dt_sample_rowidx, ]
 
     base_recipe <-
       recipes::recipe(
@@ -244,6 +240,58 @@ fit_base_learner <-
       )
 
     return(base_wftune)
+  }
+
+
+
+#' Shuffle cross-validation mode for each learner type
+#' @keywords Baselearner
+#' @param learner character(1). The base learner to be used.
+#'  Default is "mlp". Available options are "mlp", "lgb", "elnet".
+#' @param cv_mode character(1). The cross-validation mode to be used.
+#'  Default is "spatiotemporal". Available options are "spatiotemporal",
+#'  "spatial", "temporal".
+#' @param cv_rep integer(1). The number of repetitions for each `cv_mode`.
+#' @param num_device integer(1). The number of CUDA devices to be used.
+#'   Each device will be assigned to each eligible learner (i.e., lgb, mlp).
+#' @returns A data frame with three columns: learner, cv_mode, and device.
+#' @export
+assign_learner_cv <-
+  function(
+    learner = c("lgb", "mlp", "elnet"),
+    cv_mode = c("spatiotemporal", "spatial", "temporal"),
+    cv_rep = 100L,
+    num_device = ifelse(torch::cuda_device_count() > 1, 2, 1)
+  ) {
+    learner_eligible <- c("lgb", "mlp")
+    learner <- sort(learner)
+    learner_eligible_flag <- learner %in% learner_eligible
+    cuda_devices <- seq_len(sum(learner_eligible_flag)) - 1
+    cuda_devices <- sprintf("cuda:%d", cuda_devices)
+    cuda_devices <-
+      rep(cuda_devices, ceiling(length(learner) / length(cuda_devices)))
+    cuda_devices <- cuda_devices[seq_len(sum(learner_eligible_flag))]
+    cuda_get <- learner_eligible_flag
+    cuda_get[learner_eligible_flag] <- cuda_devices
+    cuda_get[!learner_eligible_flag] <- "null"
+
+    learner_l <- split(learner, learner)
+    learner_l <- mapply(
+      function(x, y) {
+        cv_mode_rep <- rep(cv_mode, each = cv_rep)
+        df <-
+          data.frame(
+            learner = rep(x, cv_rep * length(cv_mode)),
+            cv_mode =
+            cv_mode_rep[sample(length(cv_mode_rep), length(cv_mode_rep))],
+            device = y
+          )
+        return(df)
+      },
+      learner_l, cuda_get, SIMPLIFY = FALSE
+    )
+    learner_v <- do.call(rbind, learner_l)
+    return(learner_v)
   }
 
 

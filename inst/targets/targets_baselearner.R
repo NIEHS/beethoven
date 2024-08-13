@@ -7,21 +7,16 @@ target_baselearner <-
     )
     ,
     targets::tar_target(
-      name = char_learner_type,
-      command = c("lgb", "mlp", "elnet"),
-      iteration = "list"
+      name = df_learner_type,
+      command = assign_learner_cv(
+        learner = c("lgb", "mlp", "elnet"),
+        cv_mode = c("spatial", "temporal", "spatiotemporal"),
+        cv_rep = 100L,
+        num_device = 2L
+      ),
+      iteration = "vector"
     )
     ,
-    # random component
-    targets::tar_target(
-      name = char_learner_cv_rep,
-      command = rep(c("spatial", "temporal", "spatiotemporal"), each = 300L),
-      iteration = "list"
-    ),
-    target::tar_target(
-      name = char_learner_cv_shuffle,
-      command = char_learner_cv_rep[sample(length(char_learner_cv_rep), length(char_learner_cv_rep))]
-    ),
     targets::tar_target(
       name = list_base_args_cv,
       command = list(
@@ -47,95 +42,40 @@ target_baselearner <-
       )
     )
     ,
-    # XYT-added data.frame row indices, 30% resampled
     targets::tar_target(
-      name = list_feat_calc_xyt,
+      name = workflow_learner_base_best,
       command =
-      lapply(
-        rep(1, 900L),
-        function(x) {
-          make_subdata(dt_feat_calc_xyt, p = 0.3)
-        }
-      ),
-      iteration = "list"
-    )
-    ,
-    targets::tar_target(
-      name = list_learner_base_cv_rsets,
-      command =
-        rlang::inject(
-          prepare_cv_index_rset(
-            data = dt_feat_calc_xyt[as.integer(list_feat_calc_xyt), ],
-            !!!list_base_args_cv[char_learner_cv_shuffle]
-          )
-        )
-      ,
-      pattern = map(list_feat_calc_xyt, char_learner_cv_shuffle),
-      iteration = "list"
-    )
-    ,
-    # # length of 30
-    # targets::tar_target(
-    #   name = list_learner_base_cv_spblock,
-    #   command =
-    #   prepare_cv_index_rset(
-    #     data = list_feat_calc_xyt,
-    #     target_cols = c("lon", "lat"),
-    #     cv_make_fun = spatialsample::spatial_block_cv,
-    #     v = 10L,
-    #     method = "snake"
-    #   ),
-    #   pattern = map(list_feat_calc_xyt),
-    #   iteration = "list"
-    # )
-    # ,
-    # # length of 30
-    # targets::tar_target(
-    #   name = list_learner_base_cv_spcluster,
-    #   command =
-    #   prepare_cvindex(
-    #     data = list_feat_calc_xyt,
-    #     target_cols = c("lon", "lat"),
-    #     cv_make_fun = spatialsample::spatial_clustering_cv,
-    #     v = 10L,
-    #     cluster_function = "kmeans"
-    #   ),
-    #   pattern = map(list_feat_calc_xyt),
-    #   iteration = "list",
-    #   resources = set_slurm_resource(ncpus = 1L, memory = 32L, partition = "geo")
-    # )
-    # ,
-    # learn_rate branching
-    targets::tar_target(
-      name = num_learner_base_learn_device,
-      command =
-        split(
-          data.frame(
-            device = sprintf("cuda:%d", c(0, 1, 2, 3)),
-            rate = c(0.1, 0.05, 0.01, 0.001)
-          ), seq(1, 4)
+        fit_base_learner(
+          learner = df_learner_type$learner,
+          dt_full = dt_feat_calc_xyt,
+          r_subsample = 0.3,
+          model =
+            switch_model(model_type = df_learner_type$learner,
+                         device = df_learner_type$device),
+          cv_mode = df_learner_type$cv_mode,
+          args_generate_cv = list_base_args_cv(df_learner_type$cv_mode)
         ),
-      description = "device and learning rate",
-      iteration = "list"
+      pattern = map(df_learner_type),
+      iteration = "list",
+      resources = set_slurm_resource(ncpus = 12L, memory = 20L, partition = "geo")
     )
-    ,
     # wf: workflow
     # lgb-spt-cv
     # length of 3600 (4 * 900)
-    targets::tar_target(
-      workflow_learner_base_lgb,
-      fit_base_lightgbm(
-        dt_feat_calc_imputed,
-        folds = list_learner_base_cv_spt,
-        tune_mode = "bayes",
-        tune_bayes_iter = 10L,
-        learn_rate = num_learner_base_learn_device$rate,
-        device = num_learner_base_learn_device$device
-      ),
-      pattern = cross(num_learner_base_learn_device, list_learner_base_cv_rset),
-      resources = set_slurm_resource(ncpus = 6L, memory = 20L, partition = "geo")
-    )
-    ,
+    # targets::tar_target(
+    #   workflow_learner_base_lgb,
+    #   fit_base_lightgbm(
+    #     dt_feat_calc_imputed,
+    #     folds = list_learner_base_cv_spt,
+    #     tune_mode = "bayes",
+    #     tune_bayes_iter = 10L,
+    #     learn_rate = num_learner_base_learn_device$rate,
+    #     device = num_learner_base_learn_device$device
+    #   ),
+    #   pattern = cross(num_learner_base_learn_device, list_learner_base_cv_rset),
+    #   resources = set_slurm_resource(ncpus = 6L, memory = 20L, partition = "geo")
+    # )
+    # ,
     # # length of 120
     # targets::tar_target(
     #   workflow_learner_base_lgb_spblock,
@@ -166,18 +106,18 @@ target_baselearner <-
     ,
     # mlp-cv: iterate by combination of rate+device and cv strategy
     # length of 3600
-    targets::tar_target(
-      workflow_learner_base_mlp_spt,
-      fit_base_brulee(
-        dt_feat_calc_imputed,
-        folds = list_learner_base_cv_spt,
-        tune_mode = "grid",
-        learn_rate = num_learner_base_learn_device$rate,
-        device = num_learner_base_learn_device$device
-      ),
-      pattern = cross(num_learner_base_learn_device, list_learner_base_cv_spt),
-      resources = set_slurm_resource(ncpus = 6L, memory = 20L, partition = "geo")
-    )
+    # targets::tar_target(
+    #   workflow_learner_base_mlp_spt,
+    #   fit_base_brulee(
+    #     dt_feat_calc_imputed,
+    #     folds = list_learner_base_cv_spt,
+    #     tune_mode = "grid",
+    #     learn_rate = num_learner_base_learn_device$rate,
+    #     device = num_learner_base_learn_device$device
+    #   ),
+    #   pattern = cross(num_learner_base_learn_device, list_learner_base_cv_spt),
+    #   resources = set_slurm_resource(ncpus = 6L, memory = 20L, partition = "geo")
+    # )
     ,
     # # length of 120
     # targets::tar_target(
@@ -209,18 +149,18 @@ target_baselearner <-
     # ,
     # elnet-cv is branched out only by subsamples.
     # length of 900
-    targets::tar_target(
-      workflow_learner_base_elnet_spt,
-      fit_base_elnet(
-        dt_feat_calc_imputed,
-        folds = list_learner_base_cv_rsets,
-        nthreads = 32L
-      ),
-      pattern = map(list_learner_base_cv_rsets),
-      iteration = "list",
-      resources = set_slurm_resource(ncpus = 32L, memory = 8L, partition = "geo")
-    )
-    ,
+    # targets::tar_target(
+    #   workflow_learner_base_elnet_spt,
+    #   fit_base_elnet(
+    #     dt_feat_calc_imputed,
+    #     folds = list_learner_base_cv_rsets,
+    #     nthreads = 32L
+    #   ),
+    #   pattern = map(list_learner_base_cv_rsets),
+    #   iteration = "list",
+    #   resources = set_slurm_resource(ncpus = 32L, memory = 8L, partition = "geo")
+    # )
+    # ,
     # # length of 30
     # targets::tar_target(
     #   workflow_learner_base_elnet_spblock,
@@ -253,16 +193,16 @@ target_baselearner <-
     # in a manner of 1 2 3 4 5 ... 30 1 2 3 4 5 ... 30 ...
     # combine the results with indices of 1 31 61 91 / 2 32 62 92 / ... / 30 60 90 120. Could be changed per #subsamples.
     # elnet is length of 30 (or #subsamples)
-    targets::tar_target(
-      list_learner_base_lgb_best_spt,
-      restore_fit_best(
-        workflow_learner_base_lgb_spt,
-        rset_full = list_learner_base_cv_spt,
-        df_full = dt_feat_calc_imputed,
-        nested = TRUE
-      )
-    )
-    ,
+    # targets::tar_target(
+    #   list_learner_base_lgb_best_spt,
+    #   restore_fit_best(
+    #     workflow_learner_base_lgb_spt,
+    #     rset_full = list_learner_base_cv_spt,
+    #     df_full = dt_feat_calc_imputed,
+    #     nested = TRUE
+    #   )
+    # )
+    # ,
     # targets::tar_target(
     #   list_learner_base_lgb_best_spblock,
     #   restore_fit_best(
@@ -283,16 +223,16 @@ target_baselearner <-
     #   )
     # )
     # ,
-    targets::tar_target(
-      list_learner_base_mlp_best_spt,
-      restore_fit_best(
-        workflow_learner_base_mlp_spt,
-        rset_full = list_learner_base_cv_spt,
-        df_full = dt_feat_calc_imputed,
-        nested = TRUE
-      )
-    )
-    ,
+    # targets::tar_target(
+    #   list_learner_base_mlp_best_spt,
+    #   restore_fit_best(
+    #     workflow_learner_base_mlp_spt,
+    #     rset_full = list_learner_base_cv_spt,
+    #     df_full = dt_feat_calc_imputed,
+    #     nested = TRUE
+    #   )
+    # )
+    # ,
     # targets::tar_target(
     #   list_learner_base_mlp_best_spblock,
     #   restore_fit_best(
@@ -313,16 +253,16 @@ target_baselearner <-
     #   )
     # )
     # ,
-    targets::tar_target(
-      list_learner_base_elnet_best_spt,
-      restore_fit_best(
-        workflow_learner_base_elnet_spt,
-        rset_full = list_learner_base_cv_spt,
-        df_full = dt_feat_calc_imputed,
-        nested = TRUE
-      )
-    )
-    ,
+    # targets::tar_target(
+    #   list_learner_base_elnet_best_spt,
+    #   restore_fit_best(
+    #     workflow_learner_base_elnet_spt,
+    #     rset_full = list_learner_base_cv_spt,
+    #     df_full = dt_feat_calc_imputed,
+    #     nested = TRUE
+    #   )
+    # )
+    # ,
     # targets::tar_target(
     #   list_learner_base_elnet_best_spblock,
     #   restore_fit_best(

@@ -5,14 +5,14 @@
 \title{Define a base learner model based on parsnip and tune}
 \usage{
 switch_model(
-  model_type = c("mlp", "xgb", "lightgbm", "elnet"),
+  model_type = c("mlp", "xgb", "lgb", "elnet"),
   learn_rate = 0.1,
   device = "cuda:0"
 )
 }
 \arguments{
 \item{model_type}{character(1). Model type to be used.
-Default is "mlp". Available options are "mlp", "xgb", "lightgbm", "elnet".}
+Default is "mlp". Available options are "mlp", "xgb", "lgb", "elnet".}
 
 \item{learn_rate}{numeric(1). The learning rate for the model.
 Default is 0.1.}
