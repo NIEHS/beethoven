@@ -1029,13 +1029,14 @@ attach_xy <-
 #' @param cv_mode character(1). Spatiotemporal cross-validation indexing
 #' @param ... Additional arguments to be passed.
 #' @note `nrow(data) %% ngroup_init` should be 0.
-#' @returns [rsample::manual_rset()] object.
+#' @returns List of numeric vectors with balanced cluster numbers and
+#'   reference lists of analysis and assessment set numbers in attributes.
 #' @author Insang Song
 #' @importFrom rsample manual_rset
 #' @importFrom anticlust balanced_clustering
 #' @importFrom dplyr group_by summarize across ungroup all_of
 #' @export
-generate_cv_rset_spt <-
+generate_cv_index_spt <-
   function(
     data,
     target_cols = c("lon", "lat", "time"),
@@ -1069,7 +1070,7 @@ generate_cv_rset_spt <-
     # !!! ngroup_init should be a divisor of nrow(data_proc) !!!
     index_cv <- anticlust::balanced_clustering(data_proc, ngroup_init)
     cv_index <- NULL
-    ref_list <- NULL
+    # ref_list <- NULL
     if (!is.null(cv_pairs)) {
       pairing <- match.arg(pairing)
       data_ex <- data_proc
@@ -1152,7 +1153,7 @@ generate_cv_rset_spt <-
 #'   Window size is put into `as.difftime` function, then the half of it
 #'   (if odd, rounded number + 1 is applied) is used for overlaps
 #'   in the middle folds.
-#' @returns Numeric vector with out-of-sample indices.
+#' @returns List of numeric vector with out-of-sample indices.
 #' @examples
 #' data <- data.frame(
 #'  time = seq.Date(from = as.Date("2021-01-01"), by = "day", length.out = 100),
@@ -1160,7 +1161,7 @@ generate_cv_rset_spt <-
 #' )
 #' rset_ts <- generate_cv_ts(data, time_col = "time", cv_fold = 10, window = 14)
 #' @export
-generate_cv_rset_ts <-
+generate_cv_index_ts <-
   function(
     data,
     time_col = "time",
@@ -1218,10 +1219,13 @@ generate_cv_rset_ts <-
 #'   `spatialsample::spatial_block_cv` and
 #'   `spatialsample::spatial_clustering_cv`.
 #' @param cv_make_fun function(1). Function to generate spatial
-#'   cross-validation indices. Default is `spatialsample::spatial_block_cv`.
-#' @seealso [`generate_cvset`] [`spatialsample::spatial_block_cv`]
-#'   [`spatialsample::spatial_clustering_cv`]
-#' @returns `rsample::manual_rset()` output object.
+#'   cross-validation indices.
+#'   Default is `spatialsample::spatial_block_cv`.
+#' @seealso [`spatialsample::spatial_block_cv`],
+#'   [`spatialsample::spatial_clustering_cv`],
+#'   [`spatialsample::spatial_buffer_vfold_cv`]
+#' @return A list of numeric vectors with in- and out-of-sample row indices or
+#'   a numeric vector with out-of-sample indices.
 #' @importFrom rlang inject
 #' @importFrom sf st_as_sf
 #' @importFrom spatialsample spatial_block_cv
@@ -1229,42 +1233,43 @@ generate_cv_rset_ts <-
 #' @importFrom dplyr %>% slice_sample
 #' @importFrom methods getPackageName
 #' @export
-prepare_cv_index_rset <-
+generate_cv_index_sp <-
   function(
     data,
-    r_subsample = 0.3,
     target_cols = c("lon", "lat"),
     cv_make_fun = spatialsample::spatial_block_cv,
     ...
   ) {
-    data <- data %>%
-      dplyr::slice_sample(prop = r_subsample)
 
-    if (methods::getPackageName(environment(cv_make_fun)) == "beethoven") {
-      cv_index <-
-        rlang::inject(
-          cv_make_fun(
-            data = data,
-            target_cols = target_cols,
-            !!!list(...)
-          )
-        )
-    } else {
-      data_sf <- sf::st_as_sf(data, coords = target_cols, remove = FALSE)
-      cv_index <-
-        rlang::inject(
-          cv_make_fun(
-            data_sf,
-            !!!list(...)
-          )
-        )
-      # assign id with function name
-      fun_name <- as.character(substitute(cv_make_fun))
-      fun_name <- fun_name[length(fun_name)]
-      cv_index$id <- sprintf("%s_%02d", fun_name, seq_len(nrow(cv_index)))
+  data_sf <- sf::st_as_sf(data, coords = target_cols, remove = FALSE)
+  cv_index <-
+    rlang::inject(
+      cv_make_fun(
+        data_sf,
+        !!!list(...)
+      )
+    )
+
+  # retrieve in_id
+  data_rowid <- seq_len(nrow(data))
+  newcv <- data_rowid
+  if (
+    !all(!is.na(Reduce(c, Map(function(x) is.na(x$out_id), cv_index$splits))))
+  ) {
+    newcv <-
+      lapply(
+        cv_index$splits,
+        function(x) list(analysis = x$in_id, assessment = x$out_id)
+      )
+  } else {
+    cv_index <- lapply(cv_index$splits, function(x) x$in_id)
+    for (i in seq_along(cv_index)) {
+      newcv[setdiff(data_rowid, cv_index[[i]])] <- i
     }
-    return(cv_index)
   }
+
+  return(newcv)
+}
 
 
 
@@ -1312,7 +1317,6 @@ vis_spt_rset <-
 #' Learner values can be used as a branching point for the cross-validation
 #' strategy.
 #' @returns [rsample::manual_rset()] output object.
-#' @importFrom rlang inject
 #' @export
 switch_generate_cv_rset <-
   function(
@@ -1323,11 +1327,11 @@ switch_generate_cv_rset <-
     target_fun <-
       switch(
         learner,
-        spatial = prepare_cv_index_rset,
-        temporal = generate_cv_rset_ts,
-        spatiotemporal = generate_cv_rset_spt
+        spatial = generate_cv_index_sp,
+        temporal = generate_cv_index_ts,
+        spatiotemporal = generate_cv_index_spt
       )
-    cvindex <- rlang::inject(target_fun(!!!list(...)))
+    cvindex <- inject_match(target_fun, list(...))
     return(cvindex)
   }
 

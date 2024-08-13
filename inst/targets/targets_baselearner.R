@@ -22,7 +22,7 @@ target_baselearner <-
       command = list(
         spatial = list(
           target_cols = c("lon", "lat"),
-          cv_make_fun = spatialsample::spatial_block_cv,
+          cv_make_fun = generate_cv_index_sp,
           v = 10L,
           method = "snake"
         ),
@@ -33,7 +33,7 @@ target_baselearner <-
         ),
         spatiotemporal = list(
           target_cols = c("lon", "lat", "time"),
-          cv_make_fun = generate_cv_rset_spt,
+          cv_make_fun = generate_cv_index_spt,
           ngroup_init = 8L,
           cv_pairs = 10L,
           preprocessing = "normalize",
@@ -53,7 +53,7 @@ target_baselearner <-
             switch_model(model_type = df_learner_type$learner,
                          device = df_learner_type$device),
           cv_mode = df_learner_type$cv_mode,
-          args_generate_cv = list_base_args_cv(df_learner_type$cv_mode)
+          args_generate_cv = list_base_args_cv[[df_learner_type$cv_mode]]
         ),
       pattern = map(df_learner_type),
       iteration = "list",
@@ -103,7 +103,7 @@ target_baselearner <-
     #   pattern = cross(num_learner_base_learn_device, list_learner_base_cv_spcluster),
     #   resources = set_slurm_resource(ncpus = 6L, memory = 20L, partition = "geo")
     # )
-    ,
+    # ,
     # mlp-cv: iterate by combination of rate+device and cv strategy
     # length of 3600
     # targets::tar_target(
@@ -118,7 +118,7 @@ target_baselearner <-
     #   pattern = cross(num_learner_base_learn_device, list_learner_base_cv_spt),
     #   resources = set_slurm_resource(ncpus = 6L, memory = 20L, partition = "geo")
     # )
-    ,
+    # ,
     # # length of 120
     # targets::tar_target(
     #   workflow_learner_base_mlp_spblock,
