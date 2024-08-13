@@ -20,7 +20,7 @@ switch_generate_cv_rset(
 \item{...}{Additional arguments to be passed.}
 }
 \value{
-rsample::manual_rset() object.
+\code{\link[rsample:manual_rset]{rsample::manual_rset()}} output object.
 }
 \description{
 Choose cross-validation strategy for the base learner

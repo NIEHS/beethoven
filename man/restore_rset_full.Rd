@@ -7,7 +7,7 @@
 restore_rset_full(rset, data_full)
 }
 \arguments{
-\item{rset}{rsample::manual_rset() object's \code{splits} column}
+\item{rset}{\code{\link[rsample:manual_rset]{rsample::manual_rset()}} object's \code{splits} column}
 
 \item{data_full}{data.table with all features}
 }

@@ -72,3 +72,4 @@ tune package should be 1.2.0 or higher.
 xgboost should be installed with GPU support.
 }
 \keyword{Baselearner}
+\keyword{soft-deprecated}

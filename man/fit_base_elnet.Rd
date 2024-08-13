@@ -53,3 +53,4 @@ the input dataset by grid search.
 tune package should be 1.2.0 or higher.
 }
 \keyword{Baselearner}
+\keyword{soft-deprecated}

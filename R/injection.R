@@ -389,4 +389,22 @@ reduce_merge <-
   }
 
 
+#' Injects the calculate function with matched arguments.
+#' @keywords Calculation
+#' @param f function.
+#' @param args List of arguments that are attempted to be injected into `f`.
+#' @return Injected function evaluation.
+#' @export
+#' @importFrom rlang inject
+inject_match <- function(f, args) {
+  f_args <- formals(f)
+
+  # Find the matching arguments
+  matching_args <- intersect(names(args), names(f_args))
+
+  # Inject the matching arguments
+  rlang::inject(f(!!!args[matching_args]))
+
+}
+
 # nocov end

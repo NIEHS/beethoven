@@ -8,10 +8,10 @@ generate_cv_rset_spt(
   data,
   target_cols = c("lon", "lat", "time"),
   preprocessing = c("none", "normalize", "standardize"),
-  cv_fold = 5L,
+  ngroup_init = 5L,
   cv_pairs = NULL,
   pairing = c("1", "2"),
-  cv_mode = "spt",
+  cv_mode = c("spatiotemporal", "spatial", "temporal"),
   ...
 )
 }
@@ -19,18 +19,19 @@ generate_cv_rset_spt(
 \item{data}{data.table with X, Y, and time information.}
 
 \item{target_cols}{character(3). Names of columns for X, Y, and time.
-Default is c("lon", "lat", "time").
-Order insensitive.}
+Default is c("lon", "lat", "time"). Order insensitive.}
 
-\item{preprocessing}{character(1). Preprocessing method.
+\item{preprocessing}{character(1). Preprocessing method for the fields
+defined in \code{target_cols}. This serves to homogenize the scale of
+the data. Default is "none".
 \itemize{
 \item "none": no preprocessing.
 \item "normalize": normalize the data.
 \item "standardize": standardize the data.
 }}
 
-\item{cv_fold}{integer(1). Number of folds for cross-validation.
-default is 5L.}
+\item{ngroup_init}{integer(1). Initial number of splits for
+pairing groups. Default is 5L.}
 
 \item{cv_pairs}{integer(1). Number of pairs for cross-validation.
 This value will be used to generate a rank-based pairs
@@ -48,18 +49,17 @@ are selected based on the rank.
 \item{...}{Additional arguments to be passed.}
 }
 \value{
-rsample::manual_rset() object.
+\code{\link[rsample:manual_rset]{rsample::manual_rset()}} object.
 }
 \description{
 This function generates a spatio-temporal cross-validation index
 based on the anticlust package. The function first calculates the
-spatial clustering index using the balanced_clustering function as
-default, and if \code{cv_pairs} is provided,
-it generates rank-based pairs based on the proximity between
-cluster centroids.
+spatial clustering index using the \code{\link[anticlust:balanced_clustering]{anticlust::balanced_clustering()}}
+function as default, and if \code{cv_pairs} is provided, it generates rank-based
+pairs based on the proximity between cluster centroids.
 }
 \note{
-nrow(data) \%\% cv_fold should be 0.
+\code{nrow(data) \%\% ngroup_init} should be 0.
 }
 \author{
 Insang Song

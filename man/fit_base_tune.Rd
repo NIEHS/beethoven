@@ -12,7 +12,8 @@ fit_base_tune(
   grid = NULL,
   iter_bayes = 10L,
   trim_resamples = TRUE,
-  return_best = TRUE
+  return_best = TRUE,
+  data_full = NULL
 )
 }
 \arguments{
@@ -20,7 +21,8 @@ fit_base_tune(
 
 \item{model}{The model object.}
 
-\item{resample}{The resample object.}
+\item{resample}{The resample object. It is expected to be generated from the
+subsamples.}
 
 \item{tune_mode}{character(1). Hyperparameter tuning mode.
 Default is "bayes", "grid" is acceptable.}
@@ -31,6 +33,8 @@ Default is "bayes", "grid" is acceptable.}
 data.frames in splits column of \code{tune_results} object with NA.}
 
 \item{return_best}{logical(1). If TRUE, the best tuned model is returned.}
+
+\item{data_full}{The full data frame to be used for prediction.}
 }
 \value{
 List of 2:

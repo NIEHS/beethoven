@@ -27,7 +27,7 @@ subsequently generate spatial cross-validation indices using
 cross-validation indices. Default is \code{spatialsample::spatial_block_cv}.}
 }
 \value{
-rsample::manual_rset() object.
+\code{rsample::manual_rset()} output object.
 }
 \description{
 Prepare spatial and spatiotemporal cross validation sets

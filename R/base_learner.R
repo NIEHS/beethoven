@@ -38,6 +38,65 @@ make_subdata <-
   }
 
 
+#' Define a base learner model based on parsnip and tune
+#' @keywords Baselearner
+#' @param model_type character(1). Model type to be used.
+#'  Default is "mlp". Available options are "mlp", "xgb", "lightgbm", "elnet".
+#' @param learn_rate numeric(1). The learning rate for the model.
+#' Default is 0.1.
+#' @param device character(1). The device to be used for training.
+#' Default is "cuda:0". Make sure that your system is equipped
+#' with CUDA-enabled graphical processing units.
+#' @returns A parsnip model object.
+#' @importFrom parsnip mlp set_engine set_mode boost_tree linear_reg
+#' @export
+switch_model <-
+  function(
+    model_type = c("mlp", "xgb", "lightgbm", "elnet"),
+    learn_rate = 0.1,
+    device = "cuda:0"
+  ) {
+
+    switch(
+      model_type,
+      mlp =
+        parsnip::mlp(
+          hidden_units = parsnip::tune(),
+          dropout = parsnip::tune(),
+          epochs = 1000L,
+          activation = parsnip::tune(),
+          learn_rate = parsnip::tune()
+        ) %>%
+        parsnip::set_engine("brulee", device = device) %>%
+        parsnip::set_mode("regression"),
+      lightgbm =
+        parsnip::boost_tree(
+          mtry = parsnip::tune(),
+          trees = parsnip::tune(),
+          learn_rate = parsnip::tune()
+        ) %>%
+        parsnip::set_engine("lightgbm", device_type = device) %>%
+        parsnip::set_mode("regression"),
+      xgb =
+        parsnip::boost_tree(
+          mtry = parsnip::tune(),
+          trees = parsnip::tune(),
+          learn_rate = parsnip::tune()
+        ) %>%
+        parsnip::set_engine("xgboost", device = device) %>%
+        parsnip::set_mode("regression"),
+      elnet =
+        parsnip::linear_reg(
+          mixture = parsnip::tune(),
+          penalty = parsnip::tune()
+        ) %>%
+        parsnip::set_engine("glmnet") %>%
+        parsnip::set_mode("regression")
+    )
+
+  }
+
+
 
 #' Base learner: Multilayer perceptron with brulee
 #'
@@ -45,7 +104,157 @@ make_subdata <-
 #' hidden units, dropout, activation, and learning rate using brulee
 #' and tidymodels. With proper settings, users can utilize graphics
 #' processing units (GPU) to speed up the training process.
+#'
+#' LightGBM model is fitted at the defined rate (`r_subsample`) of
+#' the input dataset by grid or Bayesian optimization search.
+#' With proper settings, users can utilize graphics
+#' processing units (GPU) to speed up the training process.
+#'
+#' XGBoost model is fitted at the defined rate (`r_subsample`) of
+#' the input dataset by grid or Bayesian optimization search.
+#' With proper settings, users can utilize graphics
+#' processing units (GPU) to speed up the training process.
+#'
+#' Elastic net model is fitted at the defined rate (`r_subsample`) of
+#' the input dataset by grid search or Bayesian optimization.
+#'
 #' @keywords Baselearner
+#' @note tune package should be 1.2.0 or higher.
+#' brulee, xgboost, and lightgbm should be installed with GPU support.
+#' Grid search is not activated in this function, regardless of other parts'
+#' description.
+#' @details
+#'  * MLP: Hyperparameters `hidden_units`, `dropout`, `activation`,
+#'    and `learn_rate` are tuned. `With tune_mode = "grid"`,
+#'    users can modify `learn_rate` explicitly, and other hyperparameters
+#'    will be predefined (56 combinations per `learn_rate` for mlp).
+#'  * XGBoost: Hyperparameters `mtry`, `ntrees`, and `learn_rate` are
+#'    tuned. With `tune_mode = "grid"`,
+#'    users can modify `learn_rate` explicitly, and other hyperparameters
+#'    will be predefined (30 combinations per `learn_rate`).
+#'  * LightGBM: Hyperparameters `mtry`, `ntrees`, and `learn_rate` are
+#'    tuned. With `tune_mode = "grid"`,
+#'    users can modify `learn_rate` explicitly, and other hyperparameters
+#'    will be predefined (30 combinations per `learn_rate`).
+#'  * Elastic net: Hyperparameters `mixture` and `penalty` are tuned.
+#' @param learner character(1). The base learner to be used.
+#'   Default is "mlp". Available options are "mlp", "xgb", "lightgbm", "elnet".
+#' @param dt_imputed The input data table to be used for fitting.
+#' @param dt_full The full data table to be used for prediction.
+#' @param model The parsnip model object. Preferably generated from
+#'   `switch_model`.
+#' @param folds pre-generated rset object with minimal number of columns.
+#'   If NULL, `vfold` should be numeric to be used in [rsample::vfold_cv].
+#' @param tune_mode character(1). Hyperparameter tuning mode.
+#'   Default is "bayes", "grid" is acceptable.
+#' @param tune_bayes_iter integer(1). The number of iterations for
+#'  Bayesian optimization. Default is 10. Only used when `tune_mode = "bayes"`.
+#' @param learn_rate The learning rate for the model. For branching purpose.
+#'   Default is 0.1.
+#' @param yvar The target variable.
+#' @param xvar The predictor variables.
+#' @param vfold The number of folds for cross-validation.
+#' @param device The device to be used for training.
+#'   Default is "cuda:0". Make sure that your system is equipped
+#'   with CUDA-enabled graphical processing units.
+#' @param trim_resamples logical(1). Default is TRUE, which replaces the actual
+#'   data.frames in splits column of `tune_results` object with NA.
+#' @param return_best logical(1). If TRUE, the best tuned model is returned.
+#' @param ... Additional arguments to be passed.
+#'
+#' @returns The fitted workflow.
+#' @importFrom recipes recipe update_role
+#' @importFrom dplyr `%>%`
+#' @importFrom parsnip mlp set_engine set_mode
+#' @importFrom workflows workflow add_recipe add_model
+#' @importFrom tune tune_grid fit_best
+#' @importFrom tidyselect all_of
+#' @importFrom yardstick metric_set rmse
+#' @importFrom rsample vfold_cv
+#' @export
+fit_base_learner <-
+  function(
+    learner = c("mlp", "xgb", "lightgbm", "elnet"),
+    dt_sample,
+    dt_full,
+    model = NULL,
+    folds = NULL,
+    cv_mode  = c("spatiotemporal", "spatial", "temporal"),
+    tune_mode = "bayes",
+    tune_bayes_iter = 10L,
+    learn_rate = 0.1,
+    yvar = "Arithmetic.Mean",
+    xvar = seq(5, ncol(dt_sample)),
+    vfold = 5L,
+    device = "cuda:0",
+    trim_resamples = FALSE,
+    return_best = TRUE,
+    args_generate_cv = NULL,
+    ...
+  ) {
+    learner <- match.arg(learner)
+    tune_mode <- match.arg(tune_mode, c("grid", "bayes"))
+    cv_mode <- match.arg(cv_mode)
+    stopifnot("parsnip model must be defined." = !is.null(model))
+
+    if (ncol(dt_sample) != ncol(dt_full)) {
+      warning("Please make sure dt_sample and dt_full have the same columns.")
+    }
+
+    base_recipe <-
+      recipes::recipe(
+        dt_sample[1, ]
+      ) %>%
+      # do we want to normalize the predictors?
+      # if so, an additional definition of truly continuous variables is needed
+      # recipes::step_normalize(recipes::all_numeric_predictors()) %>%
+      recipes::update_role(!!xvar) %>%
+      recipes::update_role(!!yvar, new_role = "outcome") #%>%
+    # recipes::step_normalize(!!yvar)
+
+    if (is.null(folds)) {
+      base_vfold <- rsample::vfold_cv(dt_sample, v = vfold)
+    } else {
+      args_generate_cv <-
+        c(
+          list(data = dt_sample, cv_mode = cv_mode),
+          args_generate_cv
+        )
+      # generate row index
+      cv_index <- inject_match(switch_generate_cv_rset, args_generate_cv)
+
+      # using cv_index, restore rset
+      # NOTE 08122024: not modified -- should be recoded
+      base_vfold <-
+        convert_cv_index_rset(
+          cv_index, dt_sample, cv_mode = cv_mode
+        )
+    }
+
+    base_wftune <-
+      fit_base_tune(
+        recipe = base_recipe,
+        model = model,
+        resample = base_vfold,
+        tune_mode = tune_mode,
+        grid = NULL,
+        iter_bayes = tune_bayes_iter,
+        trim_resamples = trim_resamples,
+        return_best = return_best
+      )
+
+    return(base_wftune)
+  }
+
+
+
+#' Base learner: Multilayer perceptron with brulee
+#'
+#' Multilayer perceptron model with different configurations of
+#' hidden units, dropout, activation, and learning rate using brulee
+#' and tidymodels. With proper settings, users can utilize graphics
+#' processing units (GPU) to speed up the training process.
+#' @keywords Baselearner soft-deprecated
 #' @note tune package should be 1.2.0 or higher.
 #' brulee should be installed with GPU support.
 #' @details Hyperparameters `hidden_units`, `dropout`, `activation`,
@@ -84,18 +293,20 @@ make_subdata <-
 #' @export
 fit_base_brulee <-
   function(
-    dt_imputed,
+    dt_sample,
+    dt_full,
     folds = NULL,
     cv_mode  = c("spatiotemporal", "spatial", "temporal"),
     tune_mode = "bayes",
     tune_bayes_iter = 10L,
     learn_rate = 0.1,
     yvar = "Arithmetic.Mean",
-    xvar = seq(5, ncol(dt_imputed)),
+    xvar = seq(5, ncol(dt_sample)),
     vfold = 5L,
     device = "cuda:0",
     trim_resamples = FALSE,
     return_best = TRUE,
+    args_generate_cv = NULL,
     ...
   ) {
     tune_mode <- match.arg(tune_mode, c("grid", "bayes"))
@@ -110,23 +321,9 @@ fit_base_brulee <-
         learn_rate = learn_rate
       )
 
-    # generate row index for restoring rset
-    cv_index <- switch_generate_cv_rset(
-      data = dt_imputed,
-      cv_mode = cv_mode
-    )
-    # using cv_index, restore rset
-    # NOTE 08122024: not modified -- should be recoded
-    rset_cv <-
-      convert_cv_index_rset(
-        index_cv, data_orig, ref_list = ref_list, cv_mode = cv_mode
-      )
-
-
-
     base_recipe <-
       recipes::recipe(
-        dt_imputed[1, ]
+        dt_sample[1, ]
       ) %>%
       # do we want to normalize the predictors?
       # if so, an additional definition of truly continuous variables is needed
@@ -136,12 +333,25 @@ fit_base_brulee <-
     # recipes::step_normalize(!!yvar)
 
     if (is.null(folds)) {
-      base_vfold <- rsample::vfold_cv(dt_imputed, v = vfold)
+      base_vfold <- rsample::vfold_cv(dt_sample, v = vfold)
     } else {
-      base_vfold <- folds
+      args_generate_cv <-
+        c(
+          list(data = dt_sample, cv_mode = cv_mode),
+          args_generate_cv
+        )
+      # generate row index
+      cv_index <- inject_match(switch_generate_cv_rset, args_generate_cv)
+
+      # using cv_index, restore rset
+      # NOTE 08122024: not modified -- should be recoded
+      base_vfold <-
+        convert_cv_index_rset(
+          cv_index, dt_sample, cv_mode = cv_mode
+        )
     }
-    base_vfold <-
-      restore_rset_full(rset = base_vfold, data_full = dt_imputed)
+    # base_vfold <-
+    #   restore_rset_full(rset = base_vfold, data_full = dt_sample)
 
     base_model <-
       parsnip::mlp(
@@ -174,13 +384,15 @@ fit_base_brulee <-
 #' @keywords Baselearner internal
 #' @param recipe The recipe object.
 #' @param model The model object.
-#' @param resample The resample object.
+#' @param resample The resample object. It is expected to be generated from the
+#'   subsamples.
 #' @param tune_mode character(1). Hyperparameter tuning mode.
 #'  Default is "bayes", "grid" is acceptable.
 #' @param grid The grid object for hyperparameter tuning.
 #' @param trim_resamples logical(1). Default is TRUE, which replaces the actual
 #'  data.frames in splits column of `tune_results` object with NA.
 #' @param return_best logical(1). If TRUE, the best tuned model is returned.
+#' @param data_full The full data frame to be used for prediction.
 #' @returns List of 2:
 #'   * `base_prediction`: `data.frame` of the best model prediction.
 #'   * `base_parameter`: `tune_results` object of the best model.
@@ -196,8 +408,10 @@ fit_base_tune <-
     grid = NULL,
     iter_bayes = 10L,
     trim_resamples = TRUE,
-    return_best = TRUE
+    return_best = TRUE,
+    data_full = NULL
   ) {
+    stopifnot("data_full must be entered." = !is.null(data_full))
     tune_mode <- match.arg(tune_mode)
     base_wf <-
       workflows::workflow() %>%
@@ -249,9 +463,9 @@ fit_base_tune <-
       # finalize workflow with the best tuned hyperparameters
       base_wftune <- tune::finalize_workflow(base_wf, base_wfparam)
       # Best-fit model
-      base_wf_fit_best <- parsnip::fit(base_wftune, data = dt_imputed)
+      base_wf_fit_best <- parsnip::fit(base_wftune, data = data_full)
       # Prediction with the best model
-      base_wf_pred_best <- predict(base_wf_fit_best, new_data = dt_imputed)
+      base_wf_pred_best <- predict(base_wf_fit_best, new_data = data_full)
 
       base_wftune <-
         list(
@@ -274,7 +488,7 @@ fit_base_tune <-
 #' the input dataset by grid search.
 #' With proper settings, users can utilize graphics
 #' processing units (GPU) to speed up the training process.
-#' @keywords Baselearner
+#' @keywords Baselearner soft-deprecated
 #' @note tune package should be 1.2.0 or higher.
 #' xgboost should be installed with GPU support.
 #' @details Hyperparameters `mtry`, `ntrees`, and `learn_rate` are
@@ -403,7 +617,7 @@ fit_base_xgb <-
 #' the input dataset by grid or Bayesian optimization search.
 #' With proper settings, users can utilize graphics
 #' processing units (GPU) to speed up the training process.
-#' @keywords Baselearner
+#' @keywords Baselearner soft-deprecated
 #' @note tune package should be 1.2.0 or higher.
 #' xgboost should be installed with GPU support.
 #' @details Hyperparameters `mtry`, `ntrees`, and `learn_rate` are
@@ -499,7 +713,7 @@ fit_base_lightgbm <-
         trees = parsnip::tune(),
         learn_rate = parsnip::tune()
       ) %>%
-      parsnip::set_engine("xgboost", device_type = device) %>%
+      parsnip::set_engine("lightgbm", device_type = device) %>%
       parsnip::set_mode("regression")
 
     base_wftune <-
@@ -523,7 +737,7 @@ fit_base_lightgbm <-
 #'
 #' Elastic net model is fitted at the defined rate (`r_subsample`) of
 #' the input dataset by grid search.
-#' @keywords Baselearner
+#' @keywords Baselearner soft-deprecated
 #' @note tune package should be 1.2.0 or higher.
 #' @param dt_imputed The input data table to be used for fitting.
 #' @param folds pre-generated rset object with minimal number of columns.
@@ -592,6 +806,7 @@ fit_base_elnet <-
       # recipes::step_normalize(recipes::all_numeric_predictors()) %>%
       recipes::update_role(tidyselect::all_of(xvar)) %>%
       recipes::update_role(tidyselect::all_of(yvar), new_role = "outcome")
+
     if (is.null(folds)) {
       base_vfold <- rsample::vfold_cv(dt_imputed, v = vfold)
     } else {
@@ -629,24 +844,27 @@ fit_base_elnet <-
 
 #' Generate manual rset object from spatiotemporal cross-validation indices
 #' @keywords Baselearner
-#' @param cvindex integer row indices for `id_in` in a `rset` object.
+#' @param cvindex One of:
+#'   * integer row indices for `id_out` in a `rset` object.
+#'   * List of integer row indices stored in elements named `analysis` and
+#'    `assessment`.
 #' @param data data.frame object from which the `cvindex` is used
 #'   to create `rset` object
-#' @param ref_list List of custom reference indices. Default is NULL.
+#' @param ref_list List of custom reference group indices.
+#'   Default is `attr(cvindex, "ref_list")`, where it is assumed that `cvindex`
+#'   contains an `list` attribute named "ref_list".
 #'   if not NULL, it will be used as a reference instead of max(cvindex).
 #' @param cv_mode character(1). Spatiotemporal cross-validation indexing
 #'   method label.
 #' @returns rset object of `rsample` package. A tibble with a list column of
 #' training-test data.frames and a column of labels.
 #' @author Insang Song
-#' @importFrom rsample make_splits
-#' @importFrom rsample manual_rset
-#' @export
+#' @importFrom rsample make_splits manual_rset
 convert_cv_index_rset <-
   function(
     cvindex,
     data,
-    ref_list = NULL,
+    ref_list = attr(cvindex, "ref_list"),
     cv_mode = c("spatiotemporal", "spatial", "temporal")
   ) {
     cv_mode <- match.arg(cv_mode)
@@ -654,29 +872,38 @@ convert_cv_index_rset <-
     #   stop("cvindex length should be equal to nrow(data).")
     # }
 
-    if (!is.null(ref_list)) {
-      list_cvi <- ref_list
-      len_cvi <- seq_along(list_cvi)
+    len_cvi <- seq_along(cvindex)
+
+    if (is.list(cvindex)) {
+      list_split_dfs <- Map(function(x) {
+        rsample::make_splits(x = x, data = data)
+      }, cvindex)
     } else {
-      maxcvi <- max(cvindex)
-      len_cvi <- seq_len(maxcvi)
-      list_cvi <- split(len_cvi, len_cvi)
+      if (!is.null(ref_list)) {
+        list_cvi <- ref_list
+        len_cvi <- seq_along(list_cvi)
+      } else {
+        maxcvi <- max(cvindex)
+        len_cvi <- seq_len(maxcvi)
+        list_cvi <- split(len_cvi, len_cvi)
+      }
+      list_cvi_rows <-
+        lapply(
+          list_cvi,
+          function(x) {
+            list(analysis = which(!cvindex %in% x),
+                 assessment = which(cvindex %in% x))
+          }
+        )
+      list_split_dfs <-
+        lapply(
+          list_cvi_rows,
+          function(x) {
+            rsample::make_splits(x = x, data = data)
+          }
+        )
     }
-    list_cvi_rows <-
-      lapply(
-        list_cvi,
-        function(x) {
-          list(analysis = which(!cvindex %in% x),
-               assessment = which(cvindex %in% x))
-        }
-      )
-    list_split_dfs <-
-      lapply(
-        list_cvi_rows,
-        function(x) {
-          rsample::make_splits(x = x, data = data)
-        }
-      )
+
     modename <- sprintf("cvfold_%s_%03d", cv_mode, len_cvi)
     rset_stcv <- rsample::manual_rset(list_split_dfs, modename)
     return(rset_stcv)
@@ -729,21 +956,21 @@ attach_xy <-
 #'
 #' This function generates a spatio-temporal cross-validation index
 #' based on the anticlust package. The function first calculates the
-#' spatial clustering index using the balanced_clustering function as
-#' default, and if `cv_pairs` is provided,
-#' it generates rank-based pairs based on the proximity between
-#' cluster centroids.
+#' spatial clustering index using the [anticlust::balanced_clustering()]
+#' function as default, and if `cv_pairs` is provided, it generates rank-based
+#' pairs based on the proximity between cluster centroids.
 #' @keywords Baselearner
 #' @param data data.table with X, Y, and time information.
 #' @param target_cols character(3). Names of columns for X, Y, and time.
-#'   Default is c("lon", "lat", "time").
-#'   Order insensitive.
-#' @param preprocessing character(1). Preprocessing method.
+#'   Default is c("lon", "lat", "time"). Order insensitive.
+#' @param preprocessing character(1). Preprocessing method for the fields
+#'   defined in `target_cols`. This serves to homogenize the scale of
+#'   the data. Default is "none".
 #'   * "none": no preprocessing.
 #'   * "normalize": normalize the data.
 #'   * "standardize": standardize the data.
-#' @param cv_fold integer(1). Number of folds for cross-validation.
-#'   default is 5L.
+#' @param ngroup_init integer(1). Initial number of splits for
+#'  pairing groups. Default is 5L.
 #' @param cv_pairs integer(1). Number of pairs for cross-validation.
 #'   This value will be used to generate a rank-based pairs
 #'   based on `target_cols` values.
@@ -753,8 +980,8 @@ attach_xy <-
 #'   * "2": rank the pairwise distances directly
 #' @param cv_mode character(1). Spatiotemporal cross-validation indexing
 #' @param ... Additional arguments to be passed.
-#' @note nrow(data) %% cv_fold should be 0.
-#' @returns rsample::manual_rset() object.
+#' @note `nrow(data) %% ngroup_init` should be 0.
+#' @returns [rsample::manual_rset()] object.
 #' @author Insang Song
 #' @importFrom rsample manual_rset
 #' @importFrom anticlust balanced_clustering
@@ -765,18 +992,23 @@ generate_cv_rset_spt <-
     data,
     target_cols = c("lon", "lat", "time"),
     preprocessing = c("none", "normalize", "standardize"),
-    cv_fold = 5L,
+    ngroup_init = 5L,
     cv_pairs = NULL,
     pairing = c("1", "2"),
-    cv_mode = "spt",
+    cv_mode = c("spatiotemporal", "spatial", "temporal"),
     ...
   ) {
     if (length(target_cols) != 3) {
       stop("Please provide three target columns.")
     }
-    data_orig <- data
+    # data_orig <- data
     data <- data[, target_cols, with = FALSE]
     data$time <- as.numeric(data$time)
+
+    # select preprocessing plan
+    # Yes, normalize/standardize spatiotemporal coordinates
+    # may make little sense, but it would homogenize the scale of drastically
+    # different value ranges of the coordinates (i.e., seconds in POSIXct)
     data_proc <-
       switch(
         preprocessing,
@@ -785,13 +1017,16 @@ generate_cv_rset_spt <-
           (apply(data, 2, max) + abs(apply(data, 2, min))),
         standardize = collapse::fscale(data)
       )
-    index_cv <- anticlust::balanced_clustering(data_proc, cv_fold)
+
+    # !!! ngroup_init should be a divisor of nrow(data_proc) !!!
+    index_cv <- anticlust::balanced_clustering(data_proc, ngroup_init)
     cv_index <- NULL
     ref_list <- NULL
     if (!is.null(cv_pairs)) {
       pairing <- match.arg(pairing)
       data_ex <- data_proc
       data_ex$cv_index <- index_cv
+
       data_exs <- data_ex |>
         dplyr::group_by(cv_index) |>
         dplyr::summarize(
@@ -808,8 +1043,10 @@ generate_cv_rset_spt <-
         unlist(Map(seq_len, seq_len(max(index_cv) - 1)))
       # rep(seq_len(max(index_cv) - 1), seq(max(index_cv) - 1, 1, -1))
       data_exd_rowid <- rep(seq(2, max(index_cv)), seq_len(max(index_cv) - 1))
+
       if (pairing == "2") {
         search_idx <- which(rank(-data_exd) <= cv_pairs)
+        ref_list <- NULL
       } else {
         # min rank element index per each cluster centroid
         search_each1 <-
@@ -841,12 +1078,16 @@ generate_cv_rset_spt <-
           search_idx_others[1:(cv_pairs - length(search_idx_each1))]
         search_idx <- c(search_idx_each1, search_idx_others)
       }
+
+      # ref_list contains the index of the group pairs
       ref_list <-
         Map(c, data_exd_rowid[search_idx], data_exd_colid[search_idx])
     }
+    attr(index_cv, "ref_list") <- ref_list
+    # generate row index for restoring rset
+    # 0.3.9: ref_list is added to an attribute of index_cv
 
-    rset_cv <- index_cv
-    return(rset_cv)
+    return(index_cv)
   }
 
 
@@ -863,9 +1104,9 @@ generate_cv_rset_spt <-
 #'   Window size is put into `as.difftime` function, then the half of it
 #'   (if odd, rounded number + 1 is applied) is used for overlaps
 #'   in the middle folds.
-#' @returns rsample::manual_rset() object.
+#' @returns Numeric vector with out-of-sample indices.
 #' @examples
-#' data <- data.table(
+#' data <- data.frame(
 #'  time = seq.Date(from = as.Date("2021-01-01"), by = "day", length.out = 100),
 #'  value = rnorm(100)
 #' )
@@ -914,16 +1155,8 @@ generate_cv_rset_ts <-
           return(list(analysis = in_id, assessment = out_id))
         }
       )
-    cv_index <- Map(function(x) {
-      rsample::make_splits(x, data)
-    }, cv_index)
-    rset_ts <-
-      rsample::manual_rset(
-        splits = cv_index,
-        ids = sprintf("cvfold_ts_%02d", seq_len(cv_fold))
-      )
 
-    return(rset_ts)
+    return(cv_index)
   }
 
 
@@ -940,12 +1173,13 @@ generate_cv_rset_ts <-
 #'   cross-validation indices. Default is `spatialsample::spatial_block_cv`.
 #' @seealso [`generate_cvset`] [`spatialsample::spatial_block_cv`]
 #'   [`spatialsample::spatial_clustering_cv`]
-#' @returns rsample::manual_rset() object.
+#' @returns `rsample::manual_rset()` output object.
 #' @importFrom rlang inject
 #' @importFrom sf st_as_sf
 #' @importFrom spatialsample spatial_block_cv
 #' @importFrom rsample manual_rset
 #' @importFrom dplyr %>% slice_sample
+#' @importFrom methods getPackageName
 #' @export
 prepare_cv_index_rset <-
   function(
@@ -989,12 +1223,15 @@ prepare_cv_index_rset <-
 #' Visualize the spatio-temporal cross-validation index
 #' @keywords Baselearner
 #' @param rsplit rsample::manual_rset() object.
+#' @param cex numeric(1). Size of the points in the plot.
 #' @param angle numeric(1). Viewing angle of 3D plot.
 #' @returns None. A plot will be generated.
+#' @importFrom scatterplot3d scatterplot3d
+#' @importFrom graphics par
 #' @seealso [`generate_cv_index`]
 #' @export
 vis_spt_rset <-
-  function(rsplit, angle = 60) {
+  function(rsplit, cex = 0.02, angle = 60) {
     nsplit <- nrow(rsplit)
     graphics::par(mfrow = c(ceiling(nsplit / 3), 3))
     for (i in seq_len(nsplit)) {
@@ -1007,7 +1244,7 @@ vis_spt_rset <-
       scatterplot3d::scatterplot3d(
         cleared$lon, cleared$lat, cleared$time,
         color = rev(as.integer(cleared$indx) + 1),
-        cex.symbols = 0.02, pch = 19,
+        cex.symbols = cex, pch = 19,
         angle = angle
       )
     }
@@ -1026,7 +1263,8 @@ vis_spt_rset <-
 #' `fit_base_brulee`, `fit_base_lightgbm`, and `fit_base_elnet`.
 #' Learner values can be used as a branching point for the cross-validation
 #' strategy.
-#' @returns rsample::manual_rset() object.
+#' @returns [rsample::manual_rset()] output object.
+#' @importFrom rlang inject
 #' @export
 switch_generate_cv_rset <-
   function(
@@ -1049,9 +1287,10 @@ switch_generate_cv_rset <-
 
 #' Restore the full data set from the rset object
 #' @keywords Baselearner
-#' @param rset rsample::manual_rset() object's `splits` column
+#' @param rset [rsample::manual_rset()] object's `splits` column
 #' @param data_full data.table with all features
 #' @returns A list of data.table objects.
+#' @importFrom collapse join
 #' @note $splits should be present in rset.
 restore_rset_full <-
   function(rset, data_full) {
@@ -1084,6 +1323,7 @@ restore_rset_full <-
 #' @note Per introduction of fit_base_tune,
 #'  the utility of this function might be limited.
 #' @returns rset object with full data in splits column.
+#' @importFrom dplyr %>%
 #' @export
 restore_fit_best <-
   function(

@@ -7,17 +7,24 @@
 convert_cv_index_rset(
   cvindex,
   data,
-  ref_list = NULL,
+  ref_list = attr(cvindex, "ref_list"),
   cv_mode = c("spatiotemporal", "spatial", "temporal")
 )
 }
 \arguments{
-\item{cvindex}{integer row indices for \code{id_in} in a \code{rset} object.}
+\item{cvindex}{One of:
+\itemize{
+\item integer row indices for \code{id_out} in a \code{rset} object.
+\item List of integer row indices stored in elements named \code{analysis} and
+\code{assessment}.
+}}
 
 \item{data}{data.frame object from which the \code{cvindex} is used
 to create \code{rset} object}
 
-\item{ref_list}{List of custom reference indices. Default is NULL.
+\item{ref_list}{List of custom reference group indices.
+Default is \code{attr(cvindex, "ref_list")}, where it is assumed that \code{cvindex}
+contains an \code{list} attribute named "ref_list".
 if not NULL, it will be used as a reference instead of max(cvindex).}
 
 \item{cv_mode}{character(1). Spatiotemporal cross-validation indexing

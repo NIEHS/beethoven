@@ -6,10 +6,17 @@ target_baselearner <-
       attach_xy(dt_feat_calc_imputed, sf_feat_proc_aqs_sites)
     )
     ,
+    targets::tar_target(
+      name = char_learner_type,
+      command = c("lgb", "mlp", "elnet"),
+      iteration = "list"
+    )
+    ,
     # random component
     targets::tar_target(
       name = char_learner_cv_rep,
-      command = rep(c("spatial", "temporal", "spatiotemporal"), each = 300L)
+      command = rep(c("spatial", "temporal", "spatiotemporal"), each = 300L),
+      iteration = "list"
     ),
     target::tar_target(
       name = char_learner_cv_shuffle,
@@ -32,7 +39,7 @@ target_baselearner <-
         spatiotemporal = list(
           target_cols = c("lon", "lat", "time"),
           cv_make_fun = generate_cv_rset_spt,
-          cv_fold = 8L,
+          ngroup_init = 8L,
           cv_pairs = 10L,
           preprocessing = "normalize",
           pairing = "1"
@@ -40,7 +47,7 @@ target_baselearner <-
       )
     )
     ,
-    # XYT-added data.frame, 30% resampled
+    # XYT-added data.frame row indices, 30% resampled
     targets::tar_target(
       name = list_feat_calc_xyt,
       command =
@@ -53,7 +60,6 @@ target_baselearner <-
       iteration = "list"
     )
     ,
-    # length of 30 rsets
     targets::tar_target(
       name = list_learner_base_cv_rsets,
       command =

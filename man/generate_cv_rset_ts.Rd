@@ -21,13 +21,13 @@ Window size is put into \code{as.difftime} function, then the half of it
 in the middle folds.}
 }
 \value{
-rsample::manual_rset() object.
+Numeric vector with out-of-sample indices.
 }
 \description{
 Generate temporal cross-validation index
 }
 \examples{
-data <- data.table(
+data <- data.frame(
  time = seq.Date(from = as.Date("2021-01-01"), by = "day", length.out = 100),
  value = rnorm(100)
 )

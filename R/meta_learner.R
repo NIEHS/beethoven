@@ -25,13 +25,13 @@ fit_meta_learner <-
     tune_iter = 50L
   ) {
 
-    main_glmnet <- 
+    main_glmnet <-
       parsnip::linear_reg(
         engine = "glmnet",
         mode = "regression",
         penalty = tune::tune(),
         mixture = tune::tune()
-      ) %>%
+      )
 
     # define
     wf_glmnet <-
@@ -50,10 +50,10 @@ fit_meta_learner <-
       ) %>%
       tune::select_best()
 
-    # 
+    #
     metrics <-
       yardstick::metric_set(
-
+        yardstick::rmse, yardstick::mae
       )
 
   }
