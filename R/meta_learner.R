@@ -1,5 +1,3 @@
-
-
 #' Fit meta learner
 #'
 #' This function subsets the full data by column subsamples (rate=50%)
@@ -82,6 +80,8 @@ crps_yardstick <- yardstick::new_numeric_metric(
   direction = "maximize"
 )
 
+
+#' @export
 crps.data.frame <- function(data, truth, estimate, ...) {
   truth <- rlang::eval_tidy(rlang::enquo(truth), data)
   estimate <- rlang::eval_tidy(rlang::enquo(estimate), data)
