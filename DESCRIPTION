@@ -40,6 +40,7 @@ Imports:
   parsnip,
   future.apply,
   future.batchtools,
+  future.mirai,
   anticlust,
   qs,
   stringi,

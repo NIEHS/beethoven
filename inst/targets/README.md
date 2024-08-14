@@ -5,6 +5,19 @@ The objective of this document is to provide developers with the current impleme
 
 We assume the potential users have basic knowledge of `targets` and `tarchetypes` packages as well as functional programming and metaprogramming. It is recommended to read Advanced R (by Hadley Wickham)'s chapters for these topics.
 
+## Before running the pipeline
+For the future release and tests on various environments, one should check several lines across R and shell script files:
+
+- Shell script
+  - `/tar_run.sh`: all system variables including `PATH` and `LD_LIBRARY_PATH` to align with the current system environment. The lines in the provided file are set for NIEHS HPC.
+  - `inst/targets/run.sh`: project directory path
+  - `inst/targets/run_impute.sh` (if necessary when the imputation target is dispatched separately): project directory path
+- R script
+  - `/targets.R`: Lines 10-12, `tar_config_set(store = ...)` should be reviewed if it is set properly not to overwrite successfully run targets.
+  - `/targets.R`: `set_args_download` and `set_args_calc` functions, i.e., `char_input_dir` argument and `char_period`.
+  - `/targets.R`: `library` argument value in `tar_option_set` to match the current system environment
+
+
 
 ## Basic structure of branches
 We will call "grand target" as a set of branches if any branching technique is applied at a target.
