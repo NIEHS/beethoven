@@ -478,6 +478,7 @@ calc_narr2 <- function(
 #'  NARR data for multiple domains.
 #' @keywords Calculation
 #' @param domain A character vector specifying the domains to process.
+#' @param path A character vector specifying the path to the NARR data.
 #' @param date A character vector specifying the date of the
 #'  NARR data to process.
 #' @param locs A data frame specifying the locations to calculate NARR data for.
@@ -488,8 +489,11 @@ calc_narr2 <- function(
 #' @importFrom future plan multicore sequential
 #' @importFrom future.apply future_lapply
 #' @export
-par_narr <- function(domain, date, locs, nthreads = 24L) {
+par_narr <- function(domain, path, date, locs, nthreads = 24L) {
 
+  if (!dir.exists(path)) {
+    stop("The specified path does not exist.")
+  }
   future::plan(future::multicore, workers = nthreads)
 
   res <-
@@ -497,7 +501,7 @@ par_narr <- function(domain, date, locs, nthreads = 24L) {
       domain,
       function(x) {
         from <- process_narr2(
-          path = "input/narr",
+          path = path,
           variable = x,
           date = date
         )

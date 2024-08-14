@@ -141,6 +141,7 @@ target_calculate_fit <-
       command = #rlang::inject(
         par_narr(
           domain = loadargs(file_prep_calc_args, "narr")$domain,
+          path = loadargs(file_prep_calc_args, "narr")$path,
           date = arglist_common$char_period,
           locs = sf_feat_proc_aqs_sites,
           nthreads = arglist_common$nthreads_narr
