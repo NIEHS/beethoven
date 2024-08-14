@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="157.1407mm"
+   height="79.691208mm"
+   viewBox="0 0 157.1407 79.691208"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1">
+    <rect
+       x="356.8855"
+       y="730.08026"
+       width="74.830826"
+       height="24.943609"
+       id="rect19" />
+    <marker
+       style="overflow:visible"
+       id="ArrowWide"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       preserveAspectRatio="xMidYMid">
+      <path
+         style="fill:none;stroke:context-stroke;stroke-width:1;stroke-linecap:butt"
+         d="M 3,-3 0,0 3,3"
+         transform="rotate(180,0.125,0)"
+         id="path1" />
+    </marker>
+    <rect
+       x="342.49493"
+       y="886.45752"
+       width="101.69318"
+       height="30.699827"
+       id="rect16" />
+    <marker
+       style="overflow:visible"
+       id="marker16"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="scale(0.7)"
+         d="M -2,-4 9,0 -2,4 c 2,-2.33 2,-5.66 0,-8 z"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:none"
+         id="path16" />
+    </marker>
+    <rect
+       x="179.40211"
+       y="796.27673"
+       width="292.60773"
+       height="23.98424"
+       id="rect13" />
+    <rect
+       x="16.309282"
+       y="821.2204"
+       width="158.29597"
+       height="51.805958"
+       id="rect12" />
+    <marker
+       style="overflow:visible"
+       id="marker8"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="scale(0.7)"
+         d="M -2,-4 9,0 -2,4 c 2,-2.33 2,-5.66 0,-8 z"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:none"
+         id="path8" />
+    </marker>
+    <rect
+       x="381.24774"
+       y="173.66444"
+       width="112.61053"
+       height="97.686249"
+       id="rect3" />
+    <rect
+       x="44.772865"
+       y="82.761963"
+       width="268.63718"
+       height="88.188972"
+       id="rect1-4" />
+    <rect
+       x="381.24774"
+       y="173.66444"
+       width="104.47001"
+       height="33.918835"
+       id="rect3-7" />
+    <rect
+       x="381.24774"
+       y="173.66444"
+       width="142.45911"
+       height="33.918835"
+       id="rect3-7-1" />
+    <rect
+       x="18.994549"
+       y="401.59903"
+       width="290.34525"
+       height="109.89703"
+       id="rect4-0" />
+  </defs>
+  <g
+     id="layer1"
+     transform="translate(-5.2807058,-163.52249)">
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,0,0.26458333,-6.1395633,154.33278)"
+       id="text1-0"
+       style="font-size:21.3333px;font-family:'Intel One Mono';-inkscape-font-specification:'Intel One Mono';letter-spacing:0px;white-space:pre;shape-inside:url(#rect1-4);fill:none;stroke:#b6b6b6;stroke-width:1.24724"><tspan
+         x="44.773438"
+         y="102.44787"
+         id="tspan4"><tspan
+           style="font-weight:bold"
+           id="tspan1">Pipeline configuration</tspan><tspan
+           style="font-family:Pretendard;-inkscape-font-specification:Pretendard;fill:#000000;stroke:none"
+           id="tspan2">
+</tspan></tspan><tspan
+         x="44.773438"
+         y="129.28376"
+         id="tspan9"><tspan
+           style="font-family:Pretendard;-inkscape-font-specification:Pretendard;fill:#000000;stroke:none"
+           id="tspan8">- inst/targets/download*.qs
+</tspan></tspan><tspan
+         x="44.773438"
+         y="156.11965"
+         id="tspan11"><tspan
+           style="font-family:Pretendard;-inkscape-font-specification:Pretendard;fill:#000000;stroke:none"
+           id="tspan10">- inst/targets/calc*.qs</tspan></tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,0,0.26458333,29.794872,130.30769)"
+       id="text3"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:21.3333px;font-family:Pretendard;-inkscape-font-specification:Pretendard;letter-spacing:0px;white-space:pre;shape-inside:url(#rect3);fill:#000000;stroke:none;stroke-width:1.24724"><tspan
+         x="381.24805"
+         y="193.35021"
+         id="tspan17"><tspan
+   style="font-size:20px;font-family:'Intel One Mono';-inkscape-font-specification:'Intel One Mono'"
+   id="tspan15">beethoven</tspan>
+</tspan><tspan
+         x="381.24805"
+         y="220.01684"
+         id="tspan18">package
+</tspan><tspan
+         x="381.24805"
+         y="246.68346"
+         id="tspan21">functions</tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,0,0.26458333,-8.3968993,137.86881)"
+       id="text3-0"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:21.3333px;font-family:Pretendard;-inkscape-font-specification:Pretendard;letter-spacing:0px;white-space:pre;shape-inside:url(#rect3-7);fill:#000000;stroke:none;stroke-width:1.24724"><tspan
+         x="381.24805"
+         y="193.35021"
+         id="tspan23"><tspan
+   style="font-weight:bold"
+   id="tspan22">list</tspan> object</tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,0,0.26458333,30.368617,174.59527)"
+       id="text3-0-2"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:21.3333px;font-family:Pretendard;-inkscape-font-specification:Pretendard;letter-spacing:0px;white-space:pre;shape-inside:url(#rect3-7-1);fill:#000000;stroke:none;stroke-width:1.24724"><tspan
+         x="381.24805"
+         y="193.35021"
+         id="tspan25"><tspan
+           style="fill:#ff0000"
+           id="tspan24">Built targets</tspan></tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(0.11781335,0,0,0.11781335,126.42395,115.76705)"
+       id="text4-3"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:21.3333px;font-family:Pretendard;-inkscape-font-specification:Pretendard;letter-spacing:0px;white-space:pre;shape-inside:url(#rect4-0);fill:#000000;stroke:none;stroke-width:1.24724"><tspan
+         x="18.994141"
+         y="421.28576"
+         id="tspan28"><tspan
+   style="font-weight:bold"
+   id="tspan27">Pipeline targets</tspan>
+</tspan><tspan
+         x="18.994141"
+         y="447.95238"
+         id="tspan29">- inst/targets/targets_*.R </tspan><tspan
+         x="18.994141"
+         y="474.61901"
+         id="tspan30">(except for targets_start.R)</tspan></text>
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.292722;stroke-opacity:1"
+       id="rect6"
+       width="37.729588"
+       height="26.242407"
+       x="124.54545"
+       y="173.72496" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.329999;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker8)"
+       d="M 76.657628,187.58274 H 89.856952"
+       id="path10" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.329999;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker8)"
+       d="m 117.27094,187.07507 h 6.8535"
+       id="path11" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.329999;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker8)"
+       d="m 142.40043,199.5129 v 19.79898"
+       id="path12" />
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,0,0.26458333,1.0153328,2.2844988)"
+       id="text12"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:21.3333px;font-family:Pretendard;-inkscape-font-specification:Pretendard;letter-spacing:0px;white-space:pre;shape-inside:url(#rect12);fill:none;stroke:#000000;stroke-width:1.24724;stroke-dasharray:none;stroke-opacity:1"><tspan
+         x="16.308594"
+         y="840.90685"
+         id="tspan32"><tspan
+           style="fill:#000000;stroke:none"
+           id="tspan31">_targets.R</tspan></tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,0,0.26458333,-2.7921652,9.6456617)"
+       id="text13"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Pretendard;-inkscape-font-specification:Pretendard;letter-spacing:0px;white-space:pre;shape-inside:url(#rect13);fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.24724;stroke-dasharray:none;stroke-opacity:1"><tspan
+         x="179.40234"
+         y="813.50278"
+         id="tspan36"><tspan
+           style="font-family:'Intel One Mono';-inkscape-font-specification:'Intel One Mono'"
+           id="tspan33">tar_config_set(store=</tspan><tspan
+           style="fill:#ff0000"
+           id="tspan34">...</tspan><tspan
+           style="font-family:'Intel One Mono';-inkscape-font-specification:'Intel One Mono'"
+           id="tspan35">)</tspan></tspan></text>
+    <path
+       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.33;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker16)"
+       d="m 141.89276,228.95755 c 0,0 -13.70699,22.08348 -21.32199,10.40716 -7.61499,-11.67633 -7.61499,-11.67633 -7.61499,-11.67633"
+       id="path15" />
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,0,0.26458333,14.722326,4.0613313)"
+       id="text16"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:'Intel One Mono';-inkscape-font-specification:'Intel One Mono';letter-spacing:0px;white-space:pre;shape-inside:url(#rect16);fill:none;fill-opacity:1;stroke:#000000;stroke-width:1.24724;stroke-dasharray:none;stroke-opacity:1"><tspan
+         x="342.49414"
+         y="903.68247"
+         id="tspan38"><tspan
+           style="font-family:Pretendard;-inkscape-font-specification:Pretendard;fill:#000000;stroke:none"
+           id="tspan37">stored</tspan></tspan></text>
+    <path
+       style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.33;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker8)"
+       d="M 30.967651,222.61172 H 42.643977"
+       id="path17" />
+    <path
+       style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.3;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker8)"
+       d="M 31.72915,223.11938 H 41.882478"
+       id="path18" />
+    <path
+       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.3;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#ArrowWide)"
+       d="m 114.22494,196.21306 c 0,0 4.06133,2.2845 7.615,-8.37649"
+       id="path19" />
+    <text
+       xml:space="preserve"
+       transform="scale(0.26458333)"
+       id="text19"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Pretendard;-inkscape-font-specification:Pretendard;letter-spacing:0px;white-space:pre;shape-inside:url(#rect19);fill:none;fill-opacity:1;stroke:#000000;stroke-width:1.13386;stroke-dasharray:none;stroke-opacity:1"><tspan
+         x="356.88477"
+         y="747.30552"
+         id="tspan40"><tspan
+           style="fill:#000000;stroke:none"
+           id="tspan39">injection</tspan></tspan></text>
+  </g>
+</svg>

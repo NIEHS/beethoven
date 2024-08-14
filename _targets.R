@@ -32,7 +32,7 @@ arglist_common <-
     num_extent = c(-126, -62, 22, 52),
     char_user_email = paste0(Sys.getenv("USER"), "@nih.gov"),
     export = generate_list_calc,
-    path_export = "inst/targets/punchcard_calc.qs",
+    path_export = "inst/targets/calc_spec.qs",
     char_input_dir = "/ddn/gs1/group/set/Projects/NRT-AP-Model/input"
   )
 

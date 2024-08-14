@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="146.12373mm"
+   height="74.188255mm"
+   viewBox="0 0 146.12373 74.188255"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1">
+    <rect
+       x="44.772865"
+       y="82.761963"
+       width="268.63718"
+       height="88.188972"
+       id="rect1-8" />
+    <rect
+       x="23.06481"
+       y="120.75106"
+       width="282.20471"
+       height="135.67535"
+       id="rect2-7" />
+    <rect
+       x="18.994549"
+       y="401.59903"
+       width="290.34525"
+       height="109.89703"
+       id="rect4-3" />
+    <marker
+       style="overflow:visible"
+       id="marker8-8"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="scale(0.7)"
+         d="M -2,-4 9,0 -2,4 c 2,-2.33 2,-5.66 0,-8 z"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:none"
+         id="path8-8" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="ConcaveTriangle-9"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="scale(0.7)"
+         d="M -2,-4 9,0 -2,4 c 2,-2.33 2,-5.66 0,-8 z"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:none"
+         id="path7-6" />
+    </marker>
+  </defs>
+  <g
+     id="layer1"
+     transform="translate(-9.025215,-88.192902)">
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,0,0.26458333,-3.1573304,66.021428)"
+       id="text1-6"
+       style="font-size:21.3333px;font-family:'Intel One Mono';-inkscape-font-specification:'Intel One Mono';letter-spacing:0px;white-space:pre;shape-inside:url(#rect1-8);fill:none;stroke:#b6b6b6;stroke-width:1.24724"><tspan
+         x="44.773438"
+         y="102.44787"
+         id="tspan3"><tspan
+           style="font-weight:bold;font-family:Pretendard;-inkscape-font-specification:'Pretendard Bold';fill:#000000;stroke:none"
+           id="tspan1">Pipeline configuration</tspan><tspan
+           style="font-family:Pretendard;-inkscape-font-specification:Pretendard;fill:#000000;stroke:none"
+           id="tspan2">
+</tspan></tspan><tspan
+         x="44.773438"
+         y="129.28376"
+         id="tspan5"><tspan
+           style="font-family:Pretendard;-inkscape-font-specification:Pretendard;fill:#000000;stroke:none"
+           id="tspan4">- inst/targets/download*.qs
+</tspan></tspan><tspan
+         x="44.773438"
+         y="156.11965"
+         id="tspan7"><tspan
+           style="font-family:Pretendard;-inkscape-font-specification:Pretendard;fill:#000000;stroke:none"
+           id="tspan6">- inst/targets/calc*.qs</tspan></tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,0,0.26458333,40.996516,95.816295)"
+       id="text2-8"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:21.3333px;font-family:Pretendard;-inkscape-font-specification:Pretendard;letter-spacing:0px;white-space:pre;shape-inside:url(#rect2-7);fill:#000000;stroke:none;stroke-width:1.24724"><tspan
+         x="23.064453"
+         y="140.4381"
+         id="tspan9"><tspan
+   style="font-weight:bold"
+   id="tspan8">Pipeline execution</tspan>
+</tspan><tspan
+         x="23.064453"
+         y="167.10473"
+         id="tspan10">- _targets.R
+</tspan><tspan
+         x="23.064453"
+         y="193.77135"
+         id="tspan12">- tar_run.sh
+</tspan><tspan
+         x="23.064453"
+         y="220.43798"
+         id="tspan13">- inst/targets/run.sh
+</tspan><tspan
+         x="23.064453"
+         y="247.1046"
+         id="tspan14">- inst/targets/targets_start.R</tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,0,0.26458333,82.996516,-19.055497)"
+       id="text4-6"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:21.3333px;font-family:Pretendard;-inkscape-font-specification:Pretendard;letter-spacing:0px;white-space:pre;shape-inside:url(#rect4-3);fill:#000000;stroke:none;stroke-width:1.24724"><tspan
+         x="18.994141"
+         y="421.28576"
+         id="tspan16"><tspan
+   style="font-weight:bold"
+   id="tspan15">Pipeline targets</tspan>
+</tspan><tspan
+         x="18.994141"
+         y="447.95238"
+         id="tspan19">- inst/targets/targets_*.R </tspan><tspan
+         x="18.994141"
+         y="474.61901"
+         id="tspan20">(except for targets_start.R)</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.329999;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker8-8)"
+       d="M 48.421833,111.19883 65.68249,126.68265"
+       id="path6-3" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.329999;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#ConcaveTriangle-9)"
+       d="M 102.23447,109.422 82.435481,126.42882"
+       id="path9-8" />
+  </g>
+</svg>
