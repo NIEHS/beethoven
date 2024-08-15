@@ -111,9 +111,10 @@ target_calculate_fit <-
                               year = df_feat_calc_nlcd_params$year
                             ),
                             locs = sf_feat_proc_aqs_sites,
-                            locs_id = arglist_common$char_locs_id,
+                            locs_id = arglist_common$char_siteid,
                             nthreads = 10L,
-                            mode = "exact"
+                            mode = "exact",
+                            max_cells = 3e7
                             ),
       pattern = cross(file_prep_calc_args, df_feat_calc_nlcd_params),
       iteration = "list",
