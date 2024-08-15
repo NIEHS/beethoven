@@ -990,10 +990,10 @@ attach_xy <-
     data_sfd <- data.frame(site_id = data_sf, data.frame(data_sfd))
     data_sfd <- stats::setNames(data_sfd, c(locs_id, "lon", "lat"))
 
-    data_full_lean <- data_full[, c(locs_id, time_id), with = FALSE]
+    # data_full_lean <- data_full[, c(locs_id, time_id), with = FALSE]
     data_full_attach <-
       collapse::join(
-        data_full_lean, data_sfd, on = locs_id, how = "left"
+        data_full, data_sfd, on = locs_id, how = "left"
       )
     return(data_full_attach)
   }

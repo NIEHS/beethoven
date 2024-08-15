@@ -386,6 +386,10 @@ Let's take a moment to be a user. You should consult specific file when:
 - `inst/targets/run.sh`: "the pipeline status is not reported to my email address."
 - `inst/targets/targets_*.R` files: any errors related to running targets except for lower level issues in `beethoven` or `amadeus` functions
 
+> [!NOTE]
+> Please expand the toggle below to display function trees for `inst/targets/targets_*.R` files.
+
+
 <details>
 <summary>`targets_*.R` file function tree</summary>
 
