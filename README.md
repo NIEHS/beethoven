@@ -386,6 +386,66 @@ Let's take a moment to be a user. You should consult specific file when:
 - `inst/targets/run.sh`: "the pipeline status is not reported to my email address."
 - `inst/targets/targets_*.R` files: any errors related to running targets except for lower level issues in `beethoven` or `amadeus` functions
 
+<details>
+<summary>`targets_*.R` file function tree</summary>
+
+```{mermaid}
+graph TD
+
+    %% Define styles for the target files
+    style arglist fill:#ffcccc,stroke-width:2px,stroke:#000000,opacity:0.5
+    style baselearner fill:#ccffcc,stroke-width:2px,stroke:#000000,opacity:0.5
+    style calculateF fill:#ccccff,stroke-width:2px,stroke:#000000,opacity:0.5
+    style download fill:#ffccff,stroke-width:2px,stroke:#000000,opacity:0.5
+    style initialize fill:#ccffff,stroke-width:2px,stroke:#000000,opacity:0.5
+    style metalearner fill:#ffffcc,stroke-width:2px,stroke:#000000,opacity:0.5
+    style predict fill:#ffcc99,stroke-width:2px,stroke:#000000,opacity:0.5
+    
+    %% Define the target files as nodes
+    arglist["**inst/targets/targets_arglist.R**"]
+    baselearner["**inst/targets/targets_baselearner.R**"]
+    calculateF["**inst/targets/targets_calculate.R**"]
+    download["**inst/targets/targets_download.R**"]
+    initialize["**inst/targets/targets_initialize.R**"]
+    metalearner["**inst/targets/targets_metalearner.R**"]
+    predict["**inst/targets/targets_predict.R**"]
+
+    %% Define the branches with arrowhead connections
+    fargdown["`set_args_download`"] ---|`set_args_download`| arglist
+    fargcalc["`set_args_calc`"] ---|`set_args_calc`| arglist
+    fraw["`feature_raw_download`"] ---|`feature_raw_download`| download
+    readlocs["`read_locs`"] ---|`read_locs`| initialize
+    fitbase["`fit_base_learner`"] ---|`fit_base_learner`| baselearner
+    switchmodel["`switch_model`"] ---|`switch_model`| baselearner
+    makesub["`make_subdata`"] ---|`make_subdata`| baselearner
+    covindexrset["`convert_cv_index_rset`"] ---|`convert_cv_index_rset`| baselearner
+    attach["`attach_xy`"] ---|`attach_xy`| baselearner
+    gencvsp["`generate_cv_index_sp`"] ---|`generate_cv_index_sp`| baselearner
+    gencvts["`generate_cv_index_ts`"] ---|`generate_cv_index_ts`| baselearner
+    gencvspt["`generate_cv_index_spt`"] ---|`generate_cv_index_spt`| baselearner
+    switchrset["`switch_generate_cv_rset`"] ---|`switch_generate_cv_rset`| baselearner
+    fcalc["`calculate`"] ---|`calculate`| calculateF
+    fcalcinj["`inject_calculate`"] ---|`inject_calculate`| calculateF
+    fcalcinjmod["`inject_modis_par`"] ---|`inject_modis_par`| calculateF
+    fcalcinjgmted["`inject_gmted`"] ---|`inject_gmted`| calculateF
+    fcalcinjmatch["`inject_match`"] ---|`inject_match`| calculateF
+    fcalcgeos["`calc_geos_strict`"] ---|`calc_geos_strict`| calculateF
+    fcalcgmted["`calc_gmted_direct`"] ---|`calc_gmted_direct`| calculateF
+    fcalcnarr2["`calc_narr2`"] ---|`calc_narr2`| calculateF
+    fparnarr["`par_narr`"] ---|`par_narr`| calculateF
+    fmetalearn["`fit_meta_learner`"] ---|`fit_meta_learner`| metalearner
+    G["`pred`"] ---|`pred`| predict
+
+    %% Apply thin solid dark grey lines to the branches
+    classDef branchStyle stroke-width:1px,stroke:#333333
+    class fargdown,fargcalc,fraw,readlocs,fitbase,switchmodel,makesub,covindexrset,attach,gencvsp,gencvts,gencvspt,switchrset,fcalc,fcalcinj,fcalcinjmod,fcalcinjgmted,fcalcinjmatch,fcalcgeos,fcalcgmted,fcalcnarr2,fparnarr,fmetalearn,G branchStyle
+
+
+
+```
+
+</details>
+
 
 ![](man/figures/pipeline-code-relations.svg)
 
