@@ -270,7 +270,8 @@ target_calculate_fit <-
         c(
           list(dt_feat_proc_aqs_sites_time),
           list_feat_calc_base_flat,
-          list(dt_feat_calc_gmted)
+          list(dt_feat_calc_gmted),
+          list(dt_feat_calc_nlcd),
         )
       ),
       description = "Base features with PM2.5"
@@ -284,11 +285,7 @@ target_calculate_fit <-
           dt_feat_calc_date,
           year_start = as.integer(substr(arglist_common$char_period[1], 1, 4)),
           year_end = as.integer(substr(arglist_common$char_period[2], 1, 4))
-        ) %>%
-        post_calc_autojoin(
-          df_coarse = dt_feat_calc_nlcd,
-          year_start = as.integer(substr(arglist_common$char_period[1], 1, 4)),
-          year_end = as.integer(substr(arglist_common$char_period[2], 1, 4))),
+        ),
       description = "data.table of all features with PM2.5"
     )
     # ,

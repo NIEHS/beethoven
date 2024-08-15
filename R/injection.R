@@ -53,6 +53,33 @@ feature_raw_download <-
   }
 
 
+#' Set which years to be processed
+#' @keywords Utility
+#' @param period character(2)/integer(2) of integer/character/Date.
+#' @param available vector of integer or Date. Available years to be processed.
+#' @returns A vector of years to be processed.
+#' @export
+set_target_years <-
+  function(
+    period = NULL,
+    available = NULL
+  ) {
+    if (is.character(period)) {
+      if (all(nchar(period) == 4)) {
+        period <- as.integer(period)
+      } else {
+        period <- as.integer(substr(period, 1, 4))
+      }
+    }
+    assigned <-
+      post_calc_year_expand(period[1], period[2], time_available = available)
+    return(assigned)
+  }
+
+
+
+
+
 # calculate over a list
 #' Spatiotemporal covariate calculation
 #' @keywords Calculation
@@ -70,13 +97,6 @@ feature_raw_download <-
 #' @importFrom data.table rbindlist
 #' @importFrom rlang inject
 #' @export
-# FIXME: this function works inefficiently in expense of
-# returning uniform list of length(|years|) output.
-# It could seriously affect the performance in scaled calculation
-# as it calculates the same covariate for several years.
-# Future updates should reduce the workload by calculating
-# source data years only then assign proper preceding years
-# to the output as another target.
 calculate <-
   function(
     domain = NULL,
