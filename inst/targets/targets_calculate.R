@@ -125,7 +125,7 @@ target_calculate_fit <-
     )
     ,
     tar_target(
-      name = list_feat_calc_nlcd_flat,
+      name = dt_feat_calc_nlcd,
       command =
         list_feat_calc_nlcd %>%
           collapse::rowbind(fill = TRUE) %>%
@@ -274,12 +274,6 @@ target_calculate_fit <-
         )
       ),
       description = "Base features with PM2.5"
-    )
-    ,
-    tar_target(
-      name = dt_feat_calc_nlcd,
-      command = collapse::rowbind(list_feat_calc_nlcd_flat, fill = TRUE),
-      description = "data.table of NLCD features"
     )
     ,
     targets::tar_target(
