@@ -7,6 +7,7 @@ BEETHOVEN=""
 # Should match the directory defined in _targets.R
 USER_DIR="/ddn/$USER"
 
+#Question: the above line and the if/else below, that will not write to /ddn/ directly will it? $USER results in some home path for the user?
 
 
 # Check if the directory exists, if not, create it
