@@ -23,6 +23,7 @@ arglist_download <-
     char_period = c("2018-01-01", "2022-12-31"),
     char_input_dir = "input",
     nasa_earth_data_token = NULL,#Sys.getenv("NASA_EARTHDATA_TOKEN"),
+    mod06_filelist = "inst/targets/mod06_links_2018_2022.csv",
     export = generate_list_download,
     path_export = "inst/targets/download_spec.qs"
   )

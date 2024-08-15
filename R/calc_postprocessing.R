@@ -637,10 +637,10 @@ impute_all <-
     imputed <-
       missRanger::missRanger(
         data = dt,
-        maxiter = 30L,
+        maxiter = 10L,
         num.trees = 300L,
         num.threads = nthreads_imputation,
-        mtry = 50L,
+        mtry = 100L,
         sample.fraction = 0.1
       )
 

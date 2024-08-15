@@ -126,14 +126,20 @@ target_calculate_fit <-
     ,
     tar_target(
       name = list_feat_calc_nlcd_flat,
-      command = lapply(list_feat_calc_nlcd,
-        function(x) {
-          if (length(x) == 1) {
-            x[[1]]
-          } else {
-            reduce_merge(x)
-          }
-        }),
+      command =
+        list_feat_calc_nlcd %>%
+          collapse::rowbind(fill = TRUE) %>%
+          collapse::funique() %>%
+          collapse::pivot(
+            ids = c(arglist_common$char_siteid, arglist_common$char_timeid),
+            values = names(.)[!names(.) %in% c(arglist_common$char_siteid, arglist_common$char_timeid)]
+          ) %>%
+          .[!is.na(.[["value"]]),] %>%
+          collapse::pivot(
+            ids = c("site_id", "time"),
+            values = c("value"),
+            how = "wider"
+          ),
       description = "NLCD feature list (all dt)"
     )
     ,

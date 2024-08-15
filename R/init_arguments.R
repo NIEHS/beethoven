@@ -310,6 +310,8 @@ set_args_calc <-
 #' @param char_input_dir Character string specifying the input path.
 #' Default is "input".
 #' @param nasa_earth_data_token Character string specifying the NASA Earth Data token.
+#' @param mod06_filelist character(1). File path to a CSV file with MOD06 download
+#'   URLs.
 #' @param year_nlcd numeric(2). Numeric vector specifying the NLCD years.
 #' Default is c(2019, 2021).
 #' @param export logical(1). If TRUE, the list is saved to `path_export`.
@@ -357,43 +359,43 @@ set_args_download <-
         mod11 = lapply(time_sequence,
           function(t) {
             list(dataset_name = "modis", directory_to_save = ain("modis/raw"),
-                     product = "MOD11A1",
-                     date = sprintf(char_date_temp, as.character(t)),
-                     nasa_earth_data_token = nasa_earth_data_token)
+                  product = "MOD11A1",
+                  date = sprintf(char_date_temp, as.character(t)),
+                  nasa_earth_data_token = nasa_earth_data_token)
           }),
         mod06 = lapply(time_sequence,
           function(t) {
             list(dataset_name = "modis", directory_to_save = ain("modis/raw"),
-                     product = "MOD06_L2",
-                     date = sprintf(char_date_temp, as.character(t)),
-nasa_earth_data_token = nasa_earth_data_token,
-                     mod06_links = mod06_filelist)
+                product = "MOD06_L2",
+                date = sprintf(char_date_temp, as.character(t)),
+                nasa_earth_data_token = nasa_earth_data_token,
+                mod06_links = mod06_filelist)
           }),
         mod09 = lapply(time_sequence,
           function(t) {
             list(dataset_name = "modis", directory_to_save = ain("modis/raw"),
-                     product = "MOD09GA",
-                     date = sprintf(char_date_temp, as.character(t)),
-nasa_earth_data_token = nasa_earth_data_token)
+                  product = "MOD09GA",
+                  date = sprintf(char_date_temp, as.character(t)),
+                  nasa_earth_data_token = nasa_earth_data_token)
           }),
         mcd19 = lapply(time_sequence,
           function(t) {
             list(dataset_name = "modis", directory_to_save = ain("modis/raw"),
-                     product = "MCD19A2", date = sprintf(char_date_temp, as.character(t)),
-                     nasa_earth_data_token = nasa_earth_data_token)
+                  product = "MCD19A2", date = sprintf(char_date_temp, as.character(t)),
+                  nasa_earth_data_token = nasa_earth_data_token)
           }),
         mod13 = lapply(time_sequence,
           function(t) {
             list(dataset_name = "modis", directory_to_save = ain("modis/raw"),
-                     product = "MOD13A2", date = sprintf(char_date_temp, as.character(t)),
-                     nasa_earth_data_token = nasa_earth_data_token)
+                  product = "MOD13A2", date = sprintf(char_date_temp, as.character(t)),
+                  nasa_earth_data_token = nasa_earth_data_token)
           }),
         viirs = lapply(time_sequence,
           function(t) {
             list(dataset_name = "modis", directory_to_save = ain("modis/raw"),
-                     product = "VNP46A2", date = sprintf(char_date_temp, as.character(t)),
-                     version = "5000",
-                     nasa_earth_data_token = nasa_earth_data_token)
+                  product = "VNP46A2", date = sprintf(char_date_temp, as.character(t)),
+                  version = "5000",
+                  nasa_earth_data_token = nasa_earth_data_token)
           }),
         geoscf_aqc = list(dataset_name = "geos", directory_to_save = ain("geos"),
                           collection = "aqc_tavg_1hr_g1440x721_v1",
@@ -414,7 +416,7 @@ nasa_earth_data_token = nasa_earth_data_token)
         nei = lapply(year_nei,
           function(y) {
           list(dataset_name = "nei", directory_to_save = ain("nei"),
-                   year_target = y, unzip = TRUE)
+                year_target = y, unzip = TRUE)
           }),
         tri = list(dataset_name = "tri",
                    directory_to_save = ain("tri"),
