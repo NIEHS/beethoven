@@ -271,7 +271,7 @@ target_calculate_fit <-
           list(dt_feat_proc_aqs_sites_time),
           list_feat_calc_base_flat,
           list(dt_feat_calc_gmted),
-          list(dt_feat_calc_nlcd),
+          list(dt_feat_calc_nlcd)
         )
       ),
       description = "Base features with PM2.5"
