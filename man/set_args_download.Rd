@@ -23,6 +23,9 @@ Default is "input".}
 
 \item{nasa_earth_data_token}{Character string specifying the NASA Earth Data token.}
 
+\item{mod06_filelist}{character(1). File path to a CSV file with MOD06 download
+URLs.}
+
 \item{year_nlcd}{numeric(2). Numeric vector specifying the NLCD years.
 Default is c(2019, 2021).}
 
