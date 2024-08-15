@@ -2,6 +2,7 @@ library(targets)
 library(tarchetypes)
 library(future)
 library(future.batchtools)
+library(dplyr)
 library(beethoven)
 
 Sys.setenv("LD_LIBRARY_PATH" = paste("/ddn/gs1/biotools/R/lib64/R/customlib", Sys.getenv("LD_LIBRARY_PATH"), sep = ":"))

@@ -362,8 +362,6 @@ The script will submit a job with effective commands with SLURM level directives
 
 # Developer's guide
 
-SUGGESTION: It may be a bit of work. But to use `tar_mermaid` to show various chunks of the pipeline. For example, can we visualize 
-each `targets_*.R` file so we could see the functions called and the connections?
 
 ## Preamble
 The objective of this document is to provide developers with the current implementation of `beethoven` pipeline for version 0.3.9.
@@ -383,11 +381,11 @@ Let's take a moment to be a user. You should consult specific file when:
 
 - `_targets.R`: you need to modify or saw errors on library locations, targets storage locations, required libraries
   - Check `set_args_*()` function parts when you encounter "file or directory not found" error
-- `inst/targets/run.sh`: "the pipeline status is not reported to my email address."
+- `run_slurm.sh`: "the pipeline status is not reported to my email address."
 - `inst/targets/targets_*.R` files: any errors related to running targets except for lower level issues in `beethoven` or `amadeus` functions
 
 > [!NOTE]
-> Please expand the toggle below to display function trees for `inst/targets/targets_*.R` files.
+> Please expand the toggle below to display function trees for `inst/targets/targets_*.R` files. Only functions that are directly called in each file are displayed due to screen real estate and readability concerns.
 
 
 <details>
@@ -444,13 +442,9 @@ graph LR
     %% Apply thin solid dark grey lines to the branches
     classDef branchStyle stroke-width:1px,stroke:#333333
     class fargdown,fargcalc,fraw,readlocs,fitbase,switchmodel,makesub,covindexrset,attach,gencvsp,gencvts,gencvspt,switchrset,fcalc,fcalcinj,fcalcinjmod,fcalcinjgmted,fcalcinjmatch,fcalcgeos,fcalcgmted,fcalcnarr2,fparnarr,fmetalearn,G branchStyle
-
-
-
 ```
 
 </details>
-
 
 
 ![](man/figures/pipeline-code-relations.svg)
@@ -497,8 +491,11 @@ QUESTION: Where (which function calls) and when is `inst/targets/init_target.sh`
 
 ![](man/figures/pipeline-schema.svg)
 
-As a compromise between the layouts for standard R packages and `targets` pipelines, we mainly keep `tar_target()` definitions in `inst/targets/`, whereas the `targets` required components are stored in the project root. All targets are recorded in `_targets/` directory by default, and it can be changed to somewhere else by defining an external directory at `store` argument in `tar_config_set()` in `_targets.R`.
+As a compromise between the layouts for standard R packages and `targets` pipelines, we mainly keep `tar_target()` definitions in `inst/targets/`, whereas the `targets` required components are stored in the project root. All targets are recorded in `_targets/` directory by default, and it can be changed to somewhere else by defining an external directory at `store` argument in `tar_config_set()` in `_targets.R`. If you change that part in `_targets.R`, you should run `init_targets_storage.sh` **in the project root** to create the specified directory.
 
+```shell
+. init_targets_storage.sh
+```
 
 ```r
 # replacing yaml file.
@@ -511,9 +508,8 @@ tar_config_set(
 For the future release and tests on various environments, one should check several lines across R and shell script files:
 
 - Shell script
-  - `/tar_run.sh`: this file is for running the host `targets` process **in an interactive session**. All system variables including `PATH` and `LD_LIBRARY_PATH` to align with the current development system environment. The lines in the provided file are set for NIEHS HPC.
-  - `inst/targets/run.sh`: this file is for running the host `targets process **on SLURM by SBATCH script**. 
-    The working directory is set in this bash script to the root of your project (i.e. `beethoven` clone root): 
+  - `/run_interactive.sh`: this file is for running the host `targets` process **in an interactive session**. All system variables including `PATH` and `LD_LIBRARY_PATH` to align with the current development system environment. The lines in the provided file are set for NIEHS HPC. Note that it may stall if there are too many other processes running on the interactive node.
+  - `/run_slurm.sh`: this file is for running the host `targets process **on SLURM by SBATCH script**, meaning that one should run `sbatch run_slurm.sh`. The working directory is set in this bash script to the root of your project (i.e. `beethoven` clone root) : 
   
 ```
       # modify it into the proper directory path. and output/error paths in the
@@ -532,7 +528,7 @@ For the future release and tests on various environments, one should check sever
 ## Basic structure of branches
 We will call "grand target" as a set of branches if any branching technique is applied at a target.
 
-When one target is branched out, the grand target should be a list, either being a nested or a plain list, depending on the context or the command run inside each branch. Branch names include automatic hash after the grand target name as a suffix. Users may use their own suffixes for legibility. Branches have their own good to provide succinct network layout (i.e., an interactive plot generated by `tar_visnetwork()`), while they add complication to debug. It is strongly advised that the unit function that is applied to each branch should be fully tested.
+When one target is branched out, the grand target should be a list, either being a nested or a plain list, depending on the context or the command run inside each branch. Branch names include automatic hash after the grand target name as a suffix. Users may use their own suffixes for legibility. Branches have their own good to provide succinct network layout (i.e., an interactive plot generated by `tar_visnetwork(targets_only = TRUE)`), while they add complication to debug. It is strongly advised that the unit function that is applied to each branch should be fully tested.
 
 ## Branching in beethoven
 Branching is actively employed in most parts in `beethoven`. Here we will navigate which targets are branched out and rationales for branching in each target.
