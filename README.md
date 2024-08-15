@@ -391,7 +391,7 @@ Let's take a moment to be a user. You should consult specific file when:
 
 
 ```mermaid
-graph TD
+graph LR
 
     %% Define styles for the target files
     style arglist fill:#ffcccc,stroke-width:2px,stroke:#000000,opacity:0.5
