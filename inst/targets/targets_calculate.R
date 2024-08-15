@@ -286,7 +286,7 @@ target_calculate_fit <-
           year_end = as.integer(substr(arglist_common$char_period[2], 1, 4))
         ) %>%
         post_calc_autojoin(
-          dt_coarse = dt_feat_calc_nlcd,
+          df_coarse = dt_feat_calc_nlcd,
           year_start = as.integer(substr(arglist_common$char_period[1], 1, 4)),
           year_end = as.integer(substr(arglist_common$char_period[2], 1, 4))),
       description = "data.table of all features with PM2.5"
