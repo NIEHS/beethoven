@@ -519,24 +519,4 @@ par_narr <- function(domain, path, date, locs, nthreads = 24L) {
 }
 
 
-#' Inject arguments into NLCD calculation function for branching
-#' @keywords Calculation
-#' @param year An integer specifying the year to calculate NLCD data for.
-#' @param radius An integer specifying the radius for the NLCD calculation.
-#' @param ... Additional arguments to be passed to the NLCD calculation
-#'  function.
-#' @returns data.frame object.
-#' @export
-inject_nlcd <-
-  function(
-    year = 2019,
-    radius = 1000,
-    ...
-  ) {
-    args_ext <- list(...)
-    args_ext <- c(args_ext, list(year = year))
-    inject_match(amadeus::calc_nlcd, args_ext)
-  }
-
-
 # nocov end
