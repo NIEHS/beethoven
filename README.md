@@ -389,7 +389,8 @@ Let's take a moment to be a user. You should consult specific file when:
 <details>
 <summary>`targets_*.R` file function tree</summary>
 
-```{mermaid}
+
+```mermaid
 graph TD
 
     %% Define styles for the target files
@@ -445,6 +446,7 @@ graph TD
 ```
 
 </details>
+
 
 
 ![](man/figures/pipeline-code-relations.svg)
