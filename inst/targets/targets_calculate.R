@@ -97,8 +97,9 @@ target_calculate_fit <-
       command = expand.grid(
         year = loadargs(file_prep_calc_args, "nlcd")$year,
         radius = loadargs(file_prep_calc_args, "nlcd")$radius
-      ),
-      iteration = "vector"
+      ) %>%
+      split(1:nrow(.)),
+      iteration = "list"
     )
     ,
     tar_target(
