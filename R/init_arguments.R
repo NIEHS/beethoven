@@ -221,7 +221,8 @@ set_args_calc <-
             mode = "exact",
             extent = NULL,
             radius = c(1e3, 1e4, 5e4),
-            max_cells = 1e8
+            max_cells = 1e8,
+            nthreads = 6L
           ),
           koppen = list(path = ain("koppen_geiger/data_files/Beck_KG_V1_present_0p0083.tif"), 
                         covariate = "koppen",

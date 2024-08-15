@@ -16,7 +16,7 @@ target_calculate_fit <-
     ,
     tar_target(
       chr_iter_calc_features,
-      command = c("hms", "nlcd", "tri", "nei",
+      command = c("hms", "tri", "nei",
                   "ecoregions", "koppen", "population", "groads"),
       iteration = "list",
       description = "Feature calculation"
@@ -93,6 +93,49 @@ target_calculate_fit <-
     )
     ,
     tar_target(
+      name = df_feat_calc_nlcd_params,
+      command = expand.grid(
+        year = loadargs(file_prep_calc_args, "nlcd")$year,
+        radius = loadargs(file_prep_calc_args, "nlcd")$radius
+      ),
+      iteration = "vector"
+    )
+    ,
+    tar_target(
+      name = list_feat_calc_nlcd,
+      command = inject_nlcd(year = df_feat_calc_nlcd_params$year,
+                            radius = df_feat_calc_nlcd_params$radius,
+                            from = amadeus::process_nlcd(
+                              path = loadargs(file_prep_calc_args, "nlcd")$path,
+                              year = df_feat_calc_nlcd_params$year
+                            ),
+                            locs = sf_feat_proc_aqs_sites,
+                            locs_id = arglist_common$char_locs_id,
+                            nthreads = 10L,
+                            mode = "exact"
+                            ),
+      pattern = cross(file_prep_calc_args, df_feat_calc_nlcd_params),
+      iteration = "list",
+      description = "NLCD feature list",
+      resources = set_slurm_resource(
+            ntasks = 1, ncpus = 10, memory = 8
+          )
+    )
+    ,
+    tar_target(
+      name = list_feat_calc_nlcd_flat,
+      command = lapply(list_feat_calc_nlcd,
+        function(x) {
+          if (length(x) == 1) {
+            x[[1]]
+          } else {
+            reduce_merge(x)
+          }
+        }),
+      description = "NLCD feature list (all dt)"
+    )
+    ,
+    tar_target(
       list_feat_calc_nasa,
       command =
         inject_modis_par(
@@ -141,6 +184,7 @@ target_calculate_fit <-
       command = #rlang::inject(
         par_narr(
           domain = loadargs(file_prep_calc_args, "narr")$domain,
+          path = loadargs(file_prep_calc_args, "narr")$path,
           date = arglist_common$char_period,
           locs = sf_feat_proc_aqs_sites,
           nthreads = arglist_common$nthreads_narr
@@ -224,13 +268,25 @@ target_calculate_fit <-
       description = "Base features with PM2.5"
     )
     ,
+    tar_target(
+      name = dt_feat_calc_nlcd,
+      command = collapse::rowbind(list_feat_calc_nlcd_flat, fill = TRUE),
+      description = "data.table of NLCD features"
+    )
+    ,
     targets::tar_target(
       dt_feat_calc_design,
       command =
         post_calc_autojoin(
           dt_feat_calc_base,
-          dt_feat_calc_date
-        ),
+          dt_feat_calc_date,
+          year_start = as.integer(substr(arglist_common$char_period[1], 1, 4)),
+          year_end = as.integer(substr(arglist_common$char_period[2], 1, 4))
+        ) %>%
+        post_calc_autojoin(
+          dt_coarse = dt_feat_calc_nlcd,
+          year_start = as.integer(substr(arglist_common$char_period[1], 1, 4)),
+          year_end = as.integer(substr(arglist_common$char_period[2], 1, 4))),
       description = "data.table of all features with PM2.5"
     )
     # ,
