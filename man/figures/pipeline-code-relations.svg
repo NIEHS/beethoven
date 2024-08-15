@@ -2,143 +2,184 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="146.12373mm"
-   height="74.188255mm"
-   viewBox="0 0 146.12373 74.188255"
+   width="146.69849mm"
+   height="74.512131mm"
+   viewBox="0 0 146.69849 74.512131"
    version="1.1"
    id="svg1"
+   inkscape:export-filename="pipeline-schema.svg"
+   inkscape:export-xdpi="300"
+   inkscape:export-ydpi="300"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:export-bgcolor="#ffffffff" />
   <defs
      id="defs1">
-    <rect
-       x="44.772865"
-       y="82.761963"
-       width="268.63718"
-       height="88.188972"
-       id="rect1-8" />
-    <rect
-       x="23.06481"
-       y="120.75106"
-       width="282.20471"
-       height="135.67535"
-       id="rect2-7" />
+    <marker
+       style="overflow:visible"
+       id="ConcaveTriangle"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Concave triangle arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="scale(0.7)"
+         d="M -2,-4 9,0 -2,4 c 2,-2.33 2,-5.66 0,-8 z"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:none"
+         id="path7" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="marker8"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Concave triangle arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="scale(0.7)"
+         d="M -2,-4 9,0 -2,4 c 2,-2.33 2,-5.66 0,-8 z"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:none"
+         id="path8" />
+    </marker>
     <rect
        x="18.994549"
        y="401.59903"
        width="290.34525"
        height="109.89703"
-       id="rect4-3" />
-    <marker
-       style="overflow:visible"
-       id="marker8-8"
-       refX="0"
-       refY="0"
-       orient="auto-start-reverse"
-       markerWidth="1"
-       markerHeight="1"
-       viewBox="0 0 1 1"
-       preserveAspectRatio="xMidYMid">
-      <path
-         transform="scale(0.7)"
-         d="M -2,-4 9,0 -2,4 c 2,-2.33 2,-5.66 0,-8 z"
-         style="fill:context-stroke;fill-rule:evenodd;stroke:none"
-         id="path8-8" />
-    </marker>
-    <marker
-       style="overflow:visible"
-       id="ConcaveTriangle-9"
-       refX="0"
-       refY="0"
-       orient="auto-start-reverse"
-       markerWidth="1"
-       markerHeight="1"
-       viewBox="0 0 1 1"
-       preserveAspectRatio="xMidYMid">
-      <path
-         transform="scale(0.7)"
-         d="M -2,-4 9,0 -2,4 c 2,-2.33 2,-5.66 0,-8 z"
-         style="fill:context-stroke;fill-rule:evenodd;stroke:none"
-         id="path7-6" />
-    </marker>
+       id="rect4" />
+    <rect
+       x="23.06481"
+       y="120.75106"
+       width="282.20471"
+       height="135.67535"
+       id="rect2" />
+    <rect
+       x="44.772865"
+       y="82.761963"
+       width="268.63718"
+       height="88.188972"
+       id="rect1-40" />
   </defs>
   <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(-9.025215,-88.192902)">
+     transform="translate(-12.117068,-4.5844469)">
     <text
        xml:space="preserve"
-       transform="matrix(0.26458333,0,0,0.26458333,-3.1573304,66.021428)"
-       id="text1-6"
-       style="font-size:21.3333px;font-family:'Intel One Mono';-inkscape-font-specification:'Intel One Mono';letter-spacing:0px;white-space:pre;shape-inside:url(#rect1-8);fill:none;stroke:#b6b6b6;stroke-width:1.24724"><tspan
+       transform="matrix(0.26458333,0,0,0.26458333,0.09161825,-17.866294)"
+       id="text1-5"
+       style="font-size:21.3333px;font-family:'Intel One Mono';-inkscape-font-specification:'Intel One Mono';letter-spacing:0px;white-space:pre;shape-inside:url(#rect1-40);fill:none;stroke:#b6b6b6;stroke-width:1.24724"
+       inkscape:export-filename="pipeline-code-relations.svg"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300"><tspan
          x="44.773438"
-         y="102.44787"
-         id="tspan3"><tspan
-           style="font-weight:bold;font-family:Pretendard;-inkscape-font-specification:'Pretendard Bold';fill:#000000;stroke:none"
+         y="102.2786"
+         id="tspan4"><tspan
+           style="font-weight:bold;font-family:Arial;-inkscape-font-specification:'Arial Bold';fill:#000000;stroke:none"
            id="tspan1">Pipeline configuration</tspan><tspan
-           style="font-family:Pretendard;-inkscape-font-specification:Pretendard;fill:#000000;stroke:none"
-           id="tspan2">
+           style="font-weight:bold;font-family:Arial;-inkscape-font-specification:'Arial Bold';fill:#000000;stroke:none"
+           id="tspan3">
 </tspan></tspan><tspan
          x="44.773438"
-         y="129.28376"
-         id="tspan5"><tspan
-           style="font-family:Pretendard;-inkscape-font-specification:Pretendard;fill:#000000;stroke:none"
-           id="tspan4">- inst/targets/download*.qs
-</tspan></tspan><tspan
-         x="44.773438"
-         y="156.11965"
+         y="129.24603"
          id="tspan7"><tspan
-           style="font-family:Pretendard;-inkscape-font-specification:Pretendard;fill:#000000;stroke:none"
-           id="tspan6">- inst/targets/calc*.qs</tspan></tspan></text>
+           style="font-family:Arial;-inkscape-font-specification:Arial"
+           id="tspan5">- inst/targets/download*.qs</tspan><tspan
+           style="font-weight:bold;font-family:Arial;-inkscape-font-specification:'Arial Bold';fill:#000000;stroke:none"
+           id="tspan6">
+</tspan></tspan><tspan
+         x="44.773438"
+         y="156.21347"
+         id="tspan9"><tspan
+           style="font-family:Arial;-inkscape-font-specification:Arial"
+           id="tspan8">- inst/targets/calc*.qs</tspan></tspan></text>
     <text
        xml:space="preserve"
-       transform="matrix(0.26458333,0,0,0.26458333,40.996516,95.816295)"
-       id="text2-8"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:21.3333px;font-family:Pretendard;-inkscape-font-specification:Pretendard;letter-spacing:0px;white-space:pre;shape-inside:url(#rect2-7);fill:#000000;stroke:none;stroke-width:1.24724"><tspan
+       transform="matrix(0.26458333,0,0,0.26458333,44.864323,12.031452)"
+       id="text2"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:21.3333px;font-family:Pretendard;-inkscape-font-specification:Pretendard;letter-spacing:0px;white-space:pre;shape-inside:url(#rect2);fill:#000000;stroke:none;stroke-width:1.24724"><tspan
          x="23.064453"
          y="140.4381"
-         id="tspan9"><tspan
-   style="font-weight:bold"
-   id="tspan8">Pipeline execution</tspan>
+         id="tspan11"><tspan
+   style="font-weight:bold;font-family:Arial;-inkscape-font-specification:'Arial Bold'"
+   id="tspan10">Pipeline execution</tspan>
 </tspan><tspan
          x="23.064453"
-         y="167.10473"
-         id="tspan10">- _targets.R
-</tspan><tspan
+         y="167.5748"
+         id="tspan13"><tspan
+           style="font-family:Arial;-inkscape-font-specification:Arial"
+           id="tspan12">- _targets.R
+</tspan></tspan><tspan
          x="23.064453"
-         y="193.77135"
-         id="tspan12">- tar_run.sh
-</tspan><tspan
+         y="194.71151"
+         id="tspan15"><tspan
+           style="font-family:Arial;-inkscape-font-specification:Arial"
+           id="tspan14">- run_interactive.sh
+</tspan></tspan><tspan
          x="23.064453"
-         y="220.43798"
-         id="tspan13">- inst/targets/run.sh
-</tspan><tspan
+         y="221.84821"
+         id="tspan17"><tspan
+           style="font-family:Arial;-inkscape-font-specification:Arial"
+           id="tspan16">- run_slurm.sh
+</tspan></tspan><tspan
          x="23.064453"
-         y="247.1046"
-         id="tspan14">- inst/targets/targets_start.R</tspan></text>
+         y="248.98491"
+         id="tspan19"><tspan
+           style="font-family:Arial;-inkscape-font-specification:Arial"
+           id="tspan18">- inst/targets/targets_start.R</tspan></tspan></text>
     <text
        xml:space="preserve"
-       transform="matrix(0.26458333,0,0,0.26458333,82.996516,-19.055497)"
-       id="text4-6"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:21.3333px;font-family:Pretendard;-inkscape-font-specification:Pretendard;letter-spacing:0px;white-space:pre;shape-inside:url(#rect4-3);fill:#000000;stroke:none;stroke-width:1.24724"><tspan
+       transform="matrix(0.26458333,0,0,0.26458333,86.864323,-102.84034)"
+       id="text4"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:21.3333px;font-family:Pretendard;-inkscape-font-specification:Pretendard;letter-spacing:0px;white-space:pre;shape-inside:url(#rect4);fill:#000000;stroke:none;stroke-width:1.24724"><tspan
          x="18.994141"
          y="421.28576"
-         id="tspan16"><tspan
-   style="font-weight:bold"
-   id="tspan15">Pipeline targets</tspan>
+         id="tspan21"><tspan
+   style="font-weight:bold;font-family:Arial;-inkscape-font-specification:'Arial Bold'"
+   id="tspan20">Pipeline targets</tspan>
 </tspan><tspan
          x="18.994141"
-         y="447.95238"
-         id="tspan19">- inst/targets/targets_*.R </tspan><tspan
+         y="448.42248"
+         id="tspan24"><tspan
+           style="font-family:Arial;-inkscape-font-specification:Arial"
+           id="tspan23">- inst/targets/targets_*.R </tspan></tspan><tspan
          x="18.994141"
-         y="474.61901"
-         id="tspan20">(except for targets_start.R)</tspan></text>
+         y="475.55919"
+         id="tspan26"><tspan
+           style="font-family:Arial;-inkscape-font-specification:Arial"
+           id="tspan25">(except for targets_start.R)</tspan></tspan></text>
     <path
-       style="fill:none;stroke:#000000;stroke-width:0.329999;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker8-8)"
-       d="M 48.421833,111.19883 65.68249,126.68265"
-       id="path6-3" />
+       style="fill:none;stroke:#000000;stroke-width:0.329999;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker8)"
+       d="M 52.28964,27.413984 69.550297,42.897806"
+       id="path6" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:0.329999;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#ConcaveTriangle-9)"
-       d="M 102.23447,109.422 82.435481,126.42882"
-       id="path9-8" />
+       style="fill:none;stroke:#000000;stroke-width:0.329999;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#ConcaveTriangle)"
+       d="M 106.10228,25.637154 86.303288,42.643976"
+       id="path9" />
   </g>
 </svg>
