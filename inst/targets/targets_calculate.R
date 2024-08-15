@@ -95,7 +95,7 @@ target_calculate_fit <-
     tar_target(
       name = df_feat_calc_nlcd_params,
       command = expand.grid(
-        year = loadargs(file_prep_calc_args, "nlcd")$year,
+        year = loadargs(file_prep_calc_args, "nlcd")$domain,
         radius = loadargs(file_prep_calc_args, "nlcd")$radius
       ) %>%
       split(1:nrow(.)),
