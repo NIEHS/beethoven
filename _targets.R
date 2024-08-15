@@ -11,6 +11,10 @@ tar_config_set(
   store = "/ddn/gs1/group/set/pipeline/beethoven_targets"
 )
 
+# maximum future exportable object size is set 20GB
+options(future.globals.maxSize = 20 * 2^30)
+
+
 generate_list_download <- FALSE
 
 arglist_download <-
