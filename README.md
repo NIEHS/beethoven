@@ -723,3 +723,6 @@ Due to `rsample` design, each cross-validation fold will include an **actual** `
 - Tweaking object for size reduction
 - Restoration upon size
 
+## Containerization
+- TODO: build GPU-enabled Apptainer image
+- TODO: make a new branch to replace `container-engine`
