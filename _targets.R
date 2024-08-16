@@ -51,7 +51,7 @@ tar_source("inst/targets/targets_predict.R")
 
 
 # bypass option
-Sys.setenv("BTV_DOWNLOAD_PASS" = "FALSE")
+Sys.setenv("BTV_DOWNLOAD_PASS" = "TRUE")
 
 #
 # bind custom built GDAL

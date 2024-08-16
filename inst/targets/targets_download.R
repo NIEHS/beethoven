@@ -32,7 +32,7 @@ target_download <-
       feature_raw_download(
         path = file_prep_download_args,
         dataset_name = char_rawdir_download),
-      pattern = map(file_prep_download_args, char_rawdir_download),
+      pattern = cross(file_prep_download_args, char_rawdir_download),
       iteration = "list"
     )
   )
