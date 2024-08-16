@@ -54,11 +54,13 @@ target_baselearner <-
             switch_model(model_type = df_learner_type$learner,
                          device = df_learner_type$device),
           cv_mode = df_learner_type$cv_mode,
-          args_generate_cv = list_base_args_cv[[df_learner_type$cv_mode]]
+          args_generate_cv = list_base_args_cv[[df_learner_type$cv_mode]],
+          # preferably match the number of threads to the random grid size.
+          nthreads = 10L
         ),
       pattern = map(df_learner_type),
       iteration = "list",
-      resources = set_slurm_resource(ncpus = 8L, memory = 8L, partition = "geo")
+      resources = set_slurm_resource(ncpus = 10L, memory = 8L, partition = "geo")
     )
 
   )
