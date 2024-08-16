@@ -159,6 +159,9 @@ switch_model <-
 #' @param yvar The target variable.
 #' @param xvar The predictor variables.
 #' @param vfold The number of folds for cross-validation.
+#' @param nthreads integer(1). The number of threads to be used for
+#'  tuning. Default is 8L. `learner = "elnet"` will utilize the multiple
+#'  threads in [future::multicore()] plan.
 #' @param trim_resamples logical(1). Default is TRUE, which replaces the actual
 #'   data.frames in splits column of `tune_results` object with NA.
 #' @param return_best logical(1). If TRUE, the best tuned model is returned.
@@ -189,6 +192,7 @@ fit_base_learner <-
     yvar = "Arithmetic.Mean",
     xvar = seq(5, ncol(dt_sample)),
     vfold = 5L,
+    nthreads = 8L,
     trim_resamples = FALSE,
     return_best = TRUE,
     args_generate_cv = NULL,
@@ -202,9 +206,12 @@ fit_base_learner <-
     dt_sample_rowidx <- make_subdata(dt_full, p = r_subsample)
     dt_sample <- dt_full[dt_sample_rowidx, ]
 
+    # generate random grid from hyperparameters
     model_params <- tune::extract_parameter_set_dials(model)
     grid_params <- dials::grid_random(model_params, size = tune_grid_size)
 
+    # detect model name
+    model_name <- model$engine
 
     base_recipe <-
       recipes::recipe(
@@ -236,6 +243,9 @@ fit_base_learner <-
         )
     }
 
+    if (model_name == "glmnet") {
+      future::plan(future::multicore, workers = nthreads)
+    }
     base_wftune <-
       fit_base_tune(
         recipe = base_recipe,
@@ -248,6 +258,9 @@ fit_base_learner <-
         return_best = return_best,
         data_full = dt_full
       )
+    if (model_name == "glmnet") {
+      future::plan(future::sequential)
+    }
 
     return(base_wftune)
   }
