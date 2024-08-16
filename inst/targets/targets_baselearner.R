@@ -58,7 +58,7 @@ target_baselearner <-
         ),
       pattern = map(df_learner_type),
       iteration = "list",
-      resources = set_slurm_resource(ncpus = 12L, memory = 20L, partition = "geo")
+      resources = set_slurm_resource(ncpus = 8L, memory = 8L, partition = "geo")
     )
 
   )

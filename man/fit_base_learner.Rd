@@ -11,8 +11,9 @@ fit_base_learner(
   model = NULL,
   folds = NULL,
   cv_mode = c("spatiotemporal", "spatial", "temporal"),
-  tune_mode = "bayes",
+  tune_mode = "grid",
   tune_bayes_iter = 10L,
+  tune_grid_size = 10L,
   learn_rate = 0.1,
   yvar = "Arithmetic.Mean",
   xvar = seq(5, ncol(dt_sample)),
@@ -38,10 +39,13 @@ Default is "mlp". Available options are "mlp", "xgb", "lightgbm", "elnet".}
 If NULL, \code{vfold} should be numeric to be used in \link[rsample:vfold_cv]{rsample::vfold_cv}.}
 
 \item{tune_mode}{character(1). Hyperparameter tuning mode.
-Default is "bayes", "grid" is acceptable.}
+Default is "grid", "bayes" is acceptable.}
 
 \item{tune_bayes_iter}{integer(1). The number of iterations for
 Bayesian optimization. Default is 10. Only used when \code{tune_mode = "bayes"}.}
+
+\item{tune_grid_size}{integer(1). The number of grid size for hyperparameter
+tuning. Default is 10. Only used when \code{tune_mode = "grid"}.}
 
 \item{learn_rate}{The learning rate for the model. For branching purpose.
 Default is 0.1.}
@@ -96,6 +100,8 @@ users can modify \code{learn_rate} explicitly, and other hyperparameters
 will be predefined (30 combinations per \code{learn_rate}).
 \item Elastic net: Hyperparameters \code{mixture} and \code{penalty} are tuned.
 }
+
+Tuning is performed based on random grid search (size = 10).
 }
 \note{
 tune package should be 1.2.0 or higher.

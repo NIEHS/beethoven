@@ -138,6 +138,8 @@ switch_model <-
 #'    users can modify `learn_rate` explicitly, and other hyperparameters
 #'    will be predefined (30 combinations per `learn_rate`).
 #'  * Elastic net: Hyperparameters `mixture` and `penalty` are tuned.
+#'
+#' Tuning is performed based on random grid search (size = 10).
 #' @param learner character(1). The base learner to be used.
 #'   Default is "mlp". Available options are "mlp", "xgb", "lightgbm", "elnet".
 #' @param dt_full The full data table to be used for prediction.
@@ -147,9 +149,11 @@ switch_model <-
 #' @param folds pre-generated rset object with minimal number of columns.
 #'   If NULL, `vfold` should be numeric to be used in [rsample::vfold_cv].
 #' @param tune_mode character(1). Hyperparameter tuning mode.
-#'   Default is "bayes", "grid" is acceptable.
+#'   Default is "grid", "bayes" is acceptable.
 #' @param tune_bayes_iter integer(1). The number of iterations for
 #'  Bayesian optimization. Default is 10. Only used when `tune_mode = "bayes"`.
+#' @param tune_grid_size integer(1). The number of grid size for hyperparameter
+#'  tuning. Default is 10. Only used when `tune_mode = "grid"`.
 #' @param learn_rate The learning rate for the model. For branching purpose.
 #'   Default is 0.1.
 #' @param yvar The target variable.
@@ -178,8 +182,9 @@ fit_base_learner <-
     model = NULL,
     folds = NULL,
     cv_mode  = c("spatiotemporal", "spatial", "temporal"),
-    tune_mode = "bayes",
+    tune_mode = "grid",
     tune_bayes_iter = 10L,
+    tune_grid_size = 10L,
     learn_rate = 0.1,
     yvar = "Arithmetic.Mean",
     xvar = seq(5, ncol(dt_sample)),
@@ -196,6 +201,10 @@ fit_base_learner <-
 
     dt_sample_rowidx <- make_subdata(dt_full, p = r_subsample)
     dt_sample <- dt_full[dt_sample_rowidx, ]
+
+    model_params <- tune::extract_parameter_set_dials(model)
+    grid_params <- dials::grid_random(model_params, size = tune_grid_size)
+
 
     base_recipe <-
       recipes::recipe(
@@ -233,10 +242,11 @@ fit_base_learner <-
         model = model,
         resample = base_vfold,
         tune_mode = tune_mode,
-        grid = NULL,
+        grid = grid_params,
         iter_bayes = tune_bayes_iter,
         trim_resamples = trim_resamples,
-        return_best = return_best
+        return_best = return_best,
+        data_full = dt_full
       )
 
     return(base_wftune)

@@ -509,7 +509,7 @@ For the future release and tests on various environments, one should check sever
 
 - Shell script
   - `/run_interactive.sh`: this file is for running the host `targets` process **in an interactive session**. All system variables including `PATH` and `LD_LIBRARY_PATH` to align with the current development system environment. The lines in the provided file are set for NIEHS HPC. Note that it may stall if there are too many other processes running on the interactive node.
-  - `/run_slurm.sh`: this file is for running the host `targets process **on SLURM by SBATCH script**, meaning that one should run `sbatch run_slurm.sh`. The working directory is set in this bash script to the root of your project (i.e. `beethoven` clone root) : 
+  - `/run_slurm.sh`: this file is for running the host `targets` process **on SLURM by SBATCH script**, meaning that one should run `sbatch run_slurm.sh`. The working directory is set in this bash script to the root of your project (i.e. `beethoven` clone root) : 
   
 ```
       # modify it into the proper directory path. and output/error paths in the
@@ -702,6 +702,11 @@ We want to actively adopt evolving packages in the `tidymodels` ecosystem while 
 * `spatialsample`
 * `tune`
 * `workflow`
+
+### Branching
+With rigorous branching, we maintain the base learner fitting targets as one node with 900 branches, which include $\texttt{3 (base learners)}\times 
+texttt{3 (CV strategies)}\times \texttt{100 resamples}$. LightGBM and multilayer perceptron models are running on GPUs, while elastic net models are fit on CPUs.
+
 
 ### Cross validation
 
