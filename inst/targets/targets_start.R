@@ -9,8 +9,7 @@ library(targets)
 # )
 
 tar_make_future(
-  list_feat_calc_base,
-  workers = 24
+  workers = 16
 )
 # TODO: should find a way of auto-invalidate feat_calc_(modis|viirs|geoscf)
 #     when the date range changes in the configuration.
