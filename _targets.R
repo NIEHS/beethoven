@@ -99,7 +99,7 @@ tar_option_set(
       "data.table", "sf", "terra", "exactextractr",
       #"crew", "crew.cluster", 
       "tigris", "dplyr",
-      "future.batchtools", "qs", "collapse",
+      "future.batchtools", "qs", "collapse", "bonsai",
       "tidymodels", "tune", "rsample", "torch", "brulee",
       "glmnet", "xgboost",
       "future", "future.apply", "future.callr", "callr",
