@@ -62,9 +62,9 @@ target_baselearner <-
         ,
         mlp = 
           expand.grid(
-            hidden_units = c(1024, 512, 256, 128, 64, 32),
+            hidden_units = c(1024, 512, 256, 128, 64),
             dropout = 1 / seq(5, 2, -1),
-            activation = c("relu"),
+            activation = c("relu", "leaky_relu"),
             learn_rate = c(0.1, 0.05, 0.01, 0.005)
           )
         ,

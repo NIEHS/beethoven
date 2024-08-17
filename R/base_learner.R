@@ -64,8 +64,8 @@ switch_model <-
         parsnip::mlp(
           hidden_units = parsnip::tune(),
           dropout = parsnip::tune(),
-          epochs = 500L,
-          activation = "relu",
+          epochs = 500,
+          activation = parsnip::tune(),
           learn_rate = parsnip::tune()
         ) %>%
         parsnip::set_engine("brulee", device = device) %>%
