@@ -9,7 +9,7 @@ target_baselearner <-
     targets::tar_target(
       name = df_learner_type,
       command = assign_learner_cv(
-        learner = c("lgb", "mlp", "elnet"),
+        learner = c("xgb", "mlp", "elnet"),
         cv_mode = c("spatial", "temporal", "spatiotemporal"),
         cv_rep = 100L,
         num_device = 2L
@@ -47,6 +47,13 @@ target_baselearner <-
       name = list_base_params_candidates,
       command = list(
         lgb =
+          expand.grid(
+            mtry = floor(c(0.05, 0.2, 0.05) * 2000L),
+            trees = seq(1000, 3000, 500),
+            learn_rate = c(0.1, 0.05, 0.01, 0.005)
+          )        
+        ,
+        xgb =
           expand.grid(
             mtry = floor(c(0.05, 0.2, 0.05) * 2000L),
             trees = seq(1000, 3000, 500),

@@ -251,7 +251,7 @@ fit_base_learner <-
     # model_params <- tune::extract_parameter_set_dials(model)
     # grid_params <- dials::grid_random(model_params, size = tune_grid_size)
     if (tune_mode == "grid") {
-      grid_row_idx <- sample(nrow(tune_grid_in), tune_grid_size)
+      grid_row_idx <- sample(nrow(tune_grid_in), tune_grid_size, replace = FALSE)
       grid_params <- tune_grid_in[grid_row_idx, ]
     } else {
       grid_params <- NULL
