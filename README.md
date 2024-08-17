@@ -690,7 +690,11 @@ post_calc_autojoin <-
 
 ## Base learners
 
-For efficiency, GPU-enabled version is recommended for `lightgbm` and `brulee`. These packages need to be installed manually with modifications of system environment variables. Developers should consult `lightgbm` official documentation and `brulee` GitHub repository (i.e., in `gpu` branch) to install the proper version of each package with careful consideration on the computing infrastructure. "GPU" here refers to CUDA-enabled devices produced by NVIDIA corporation. This does not necessarily mean that this package as a part of U.S. government work endorses NVIDIA corporation and its products in any sort.
+For efficiency, GPU-enabled version is recommended for `xgboost`/`lightgbm` and `brulee`. These packages need to be installed manually with modifications of system environment variables. Developers should consult `lightgbm` official documentation for building the package by hand, `xgboost` GitHub repository release page for installing the CUDA version manually and `brulee` GitHub repository (i.e., in `gpu` branch) to install the proper version of each package with careful consideration on the computing infrastructure. "GPU" here refers to CUDA-enabled devices produced by NVIDIA corporation. This does not necessarily mean that this package as a part of U.S. government work endorses NVIDIA corporation and its products in any sort.
+
+[!WARNING]
+> As of version 0.3.10, `xgboost` < v2.1.0 should be used due to breaking changes in v2.1.0 in handling additional arguments in `xgb.DMatrix` (cf. [xgboost pull record](https://github.com/dmlc/xgboost/pull/9862)), which leads to break `parsnip::boost_tree()` function call.
+
 
 ### tidymodels infrastructure
 
@@ -720,13 +724,21 @@ Due to `rsample` design, each cross-validation fold will include an **actual** `
 - `restore_*` functions restore `rset` object from row indices and their upstream `data.frame`
 - `generate_*` functions generate row indices from input `data.frame` by the user-defined cross-validation strategy.
 
-<!-- as of August 12, the functions are not fully implemented, i.e., fit_* function's row indices to rset parts are incomplete; each generate_* function is not checked whether it returns proper row indices.-->
+`fit_base_learner()` is a quite long and versatile function that accepts a dozen arguments, therefore developers should be aware of each component in the function. The current implementation separated `parsnip` and `tune` parts from `fit_base_learner()`. The flowchart of `fit_base_learner()` is displayed below.
 
-<!-- fit_* function outputs should be checked whether they are the predictions from the best-fit hyperparameter sets. Full data should be parametrized into fit_* functions to distinguish the full data from the reference data for generating row indices. -->
+```mermaid
+graph TD
+    %% Define the branches with arrowhead connections
+    frecipe["minimal data"] ---|recipes::recipe()| fittune
+    fmodel["parsnip model definition"] ---|`switch_model()`| fittune
+    ftune["tuning functions"] ---|`tune_*()`| fittune
+    fittune["tuning results"] ---|tune::select_best()| bestmodel
+    bestmodel["best model from tuning"] ---|tune::finalize_workflow()| bestworkflow
+    bestworkflow["workflow of the best model"] ---|parsnip::fit()| fitmodel
+    fitmodel["fitted best model with full data"] ---|predict()| bestfit
+    bestfit["predicted values from one base learner"]
+```
 
-- Object size issue
-- Tweaking object for size reduction
-- Restoration upon size
 
 ## Containerization
 - TODO: build GPU-enabled Apptainer image

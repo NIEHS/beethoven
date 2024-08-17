@@ -37,10 +37,12 @@ data.frames in splits column of \code{tune_results} object with NA.}
 \item{data_full}{The full data frame to be used for prediction.}
 }
 \value{
-List of 2:
+List of 3:
 \itemize{
 \item \code{base_prediction}: \code{data.frame} of the best model prediction.
 \item \code{base_parameter}: \code{tune_results} object of the best model.
+\item \code{best_performance}: \code{data.frame} of the performance metrics. It
+includes RMSE, MAPE, R-squared, and MAE for \strong{all} tuned models.
 }
 }
 \description{

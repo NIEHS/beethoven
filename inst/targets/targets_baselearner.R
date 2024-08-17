@@ -48,17 +48,17 @@ target_baselearner <-
       command = list(
         lgb =
           expand.grid(
-            mtry = floor(c(0.05, 0.2, 0.05) * 2000L),
-            trees = seq(1000, 3000, 500),
+            mtry = floor(c(0.025, seq(0.05, 0.2, 0.05)) * 2000L),
+            trees = seq(1000, 3000, 1000),
             learn_rate = c(0.1, 0.05, 0.01, 0.005)
-          )        
+          )
         ,
         xgb =
           expand.grid(
-            mtry = floor(c(0.05, 0.2, 0.05) * 2000L),
-            trees = seq(1000, 3000, 500),
+            mtry = floor(c(0.025, seq(0.05, 0.2, 0.05)) * 2000L),
+            trees = seq(1000, 3000, 1000),
             learn_rate = c(0.1, 0.05, 0.01, 0.005)
-          )        
+          )
         ,
         mlp = 
           expand.grid(
@@ -70,8 +70,9 @@ target_baselearner <-
         ,
         elnet =
           expand.grid(
+            # 0.05 step, 0 through 1
             mixture = seq(0, 1, length.out = 21),
-            penalty = 10 ^ seq(-3, 5)
+            penalty = 10 ^ seq(-3, 5, 1)
           )
       )
     )

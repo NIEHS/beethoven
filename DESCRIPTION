@@ -1,6 +1,6 @@
 Package: beethoven
 Title: Building an Extensible, rEproducible, Test-driven, Harmonized, Open-source, Versioned, ENsemble model for air quality
-Version: 0.3.10
+Version: 0.4.0
 Authors@R: c(
     person("Kyle", "Messier", , "kyle.messier@nih.gov", role = c("aut", "cre"), comment = c(ORCID = "0000-0001-9508-9623")),
     person("Insang", "Song", role = c("aut", "ctb"), comment = c(ORCID = "0000-0001-8732-3256")),
@@ -21,7 +21,6 @@ Imports:
   stats,
   terra,
   methods,
-  BART,
   data.table,
   future,
   targets,
@@ -32,7 +31,11 @@ Imports:
   tidyselect,
   yardstick,
   bonsai,
+  brulee,
+  glmnet,
   lightgbm,
+  torch,
+  xgboost (<= 2.0.3.1),
   vetiver,
   workflows,
   recipes,
@@ -54,10 +57,6 @@ Suggests:
   withr,
   tarchetypes,
   tidymodels,
-  xgboost,
-  torch,
-  brulee,
-  glmnet,
   knitr,
   rmarkdown,
   stars,
@@ -70,6 +69,7 @@ Suggests:
   furrr,
   quarto
 Remotes: NIEHS/amadeus, NIEHS/chopin
+SystemRequirements: NetCDF4, CUDA (>= 10.0)
 Encoding: UTF-8
 VignetteBuilder: knitr, rmarkdown
 Roxygen: list(markdown = TRUE)

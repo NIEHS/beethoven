@@ -251,7 +251,8 @@ fit_base_learner <-
     # model_params <- tune::extract_parameter_set_dials(model)
     # grid_params <- dials::grid_random(model_params, size = tune_grid_size)
     if (tune_mode == "grid") {
-      grid_row_idx <- sample(nrow(tune_grid_in), tune_grid_size, replace = FALSE)
+      grid_row_idx <-
+        sample(nrow(tune_grid_in), tune_grid_size, replace = FALSE)
       grid_params <- tune_grid_in[grid_row_idx, ]
     } else {
       grid_params <- NULL
@@ -479,9 +480,11 @@ fit_base_brulee <-
 #'  data.frames in splits column of `tune_results` object with NA.
 #' @param return_best logical(1). If TRUE, the best tuned model is returned.
 #' @param data_full The full data frame to be used for prediction.
-#' @returns List of 2:
+#' @returns List of 3:
 #'   * `base_prediction`: `data.frame` of the best model prediction.
 #'   * `base_parameter`: `tune_results` object of the best model.
+#'   * `best_performance`: `data.frame` of the performance metrics. It
+#'     includes RMSE, MAPE, R-squared, and MAE for **all** tuned models.
 #' @importFrom workflows workflow add_recipe add_model
 #' @importFrom tune tune_grid tune_bayes control_grid control_bayes
 #' @importFrom yardstick metric_set rmse mape rsq mae
@@ -508,7 +511,7 @@ fit_base_tune <-
       wf_config <-
         tune::control_grid(
           verbose = TRUE,
-          save_pred = TRUE,
+          save_pred = FALSE,
           save_workflow = TRUE
         )
       base_wftune <-
@@ -529,7 +532,7 @@ fit_base_tune <-
       wf_config <-
         tune::control_bayes(
           verbose = TRUE,
-          save_pred = TRUE,
+          save_pred = FALSE,
           save_workflow = TRUE
         )
       base_wftune <-
@@ -537,7 +540,13 @@ fit_base_tune <-
         tune::tune_bayes(
           resamples = resample,
           iter = iter_bayes,
-          metrics = yardstick::metric_set(yardstick::rmse, yardstick::mape),
+          metrics =
+          yardstick::metric_set(
+            yardstick::rmse,
+            yardstick::mae,
+            yardstick::mape,
+            yardstick::rsq
+          ),
           control = wf_config
         )
     }
@@ -545,21 +554,28 @@ fit_base_tune <-
       base_wftune$splits <- NA
     }
     if (return_best) {
-      base_wfparam <- tune::select_best(base_wftune)
+      # Select the best hyperparameters
+      base_wfparam <-
+        tune::select_best(
+          base_wftune,
+          metric = c("rmse", "rsq", "mae")
+        )
+
       # finalize workflow with the best tuned hyperparameters
-      base_wftune <- tune::finalize_workflow(base_wf, base_wfparam)
+      base_wfresult <- tune::finalize_workflow(base_wf, base_wfparam)
       # Best-fit model
-      base_wf_fit_best <- parsnip::fit(base_wftune, data = data_full)
+      base_wf_fit_best <- parsnip::fit(base_wfresult, data = data_full)
       # Prediction with the best model
       base_wf_pred_best <- predict(base_wf_fit_best, new_data = data_full)
 
-      base_wftune <-
+      base_wflist <-
         list(
           base_prediction = base_wf_pred_best,
-          base_parameter = base_wfparam
+          base_parameter = base_wfparam,
+          best_performance = base_wftune
         )
     }
-    return(base_wftune)
+    return(base_wflist)
   }
 
 
@@ -1279,34 +1295,34 @@ generate_cv_index_sp <-
     ...
   ) {
 
-  data_sf <- sf::st_as_sf(data, coords = target_cols, remove = FALSE)
-  cv_index <-
-    rlang::inject(
-      cv_make_fun(
-        data_sf,
-        !!!list(...)
+    data_sf <- sf::st_as_sf(data, coords = target_cols, remove = FALSE)
+    cv_index <-
+      rlang::inject(
+        cv_make_fun(
+          data_sf,
+          !!!list(...)
+        )
       )
-    )
 
-  # retrieve in_id
-  data_rowid <- seq_len(nrow(data))
-  newcv <- data_rowid
-  if (
-    !all(!is.na(Reduce(c, Map(function(x) is.na(x$out_id), cv_index$splits))))
-  ) {
-    newcv <-
-      lapply(
-        cv_index$splits,
-        function(x) list(analysis = x$in_id, assessment = x$out_id)
-      )
-  } else {
-    cv_index <- lapply(cv_index$splits, function(x) x$in_id)
-    for (i in seq_along(cv_index)) {
-      newcv[setdiff(data_rowid, cv_index[[i]])] <- i
+    # retrieve in_id
+    data_rowid <- seq_len(nrow(data))
+    newcv <- data_rowid
+    if (
+      !all(!is.na(Reduce(c, Map(function(x) is.na(x$out_id), cv_index$splits))))
+    ) {
+      newcv <-
+        lapply(
+          cv_index$splits,
+          function(x) list(analysis = x$in_id, assessment = x$out_id)
+        )
+    } else {
+      cv_index <- lapply(cv_index$splits, function(x) x$in_id)
+      for (i in seq_along(cv_index)) {
+        newcv[setdiff(data_rowid, cv_index[[i]])] <- i
+      }
     }
-  }
 
-  return(newcv)
+    return(newcv)
 }
 
 
