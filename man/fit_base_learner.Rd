@@ -5,7 +5,7 @@
 \title{Base learner: Multilayer perceptron with brulee}
 \usage{
 fit_base_learner(
-  learner = c("mlp", "xgb", "lightgbm", "elnet"),
+  learner = c("mlp", "xgb", "lgb", "elnet"),
   dt_full,
   r_subsample = 0.3,
   model = NULL,
@@ -27,7 +27,7 @@ fit_base_learner(
 }
 \arguments{
 \item{learner}{character(1). The base learner to be used.
-Default is "mlp". Available options are "mlp", "xgb", "lightgbm", "elnet".}
+Default is "mlp". Available options are "mlp", "xgb", "lgb", "elnet".}
 
 \item{dt_full}{The full data table to be used for prediction.}
 

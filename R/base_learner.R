@@ -141,7 +141,7 @@ switch_model <-
 #'
 #' Tuning is performed based on random grid search (size = 10).
 #' @param learner character(1). The base learner to be used.
-#'   Default is "mlp". Available options are "mlp", "xgb", "lightgbm", "elnet".
+#'   Default is "mlp". Available options are "mlp", "xgb", "lgb", "elnet".
 #' @param dt_full The full data table to be used for prediction.
 #' @param r_subsample numeric(1). The proportion of rows to be used.
 #' @param model The parsnip model object. Preferably generated from
@@ -179,7 +179,7 @@ switch_model <-
 #' @export
 fit_base_learner <-
   function(
-    learner = c("mlp", "xgb", "lightgbm", "elnet"),
+    learner = c("mlp", "xgb", "lgb", "elnet"),
     dt_full,
     r_subsample = 0.3,
     model = NULL,

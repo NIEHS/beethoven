@@ -12,8 +12,11 @@ tar_config_set(
   store = "/ddn/gs1/group/set/pipeline/beethoven_targets"
 )
 
-# maximum future exportable object size is set 20GB
-options(future.globals.maxSize = 20 * 2^30)
+# maximum future exportable object size is set 50GB
+# TODO: the maximum size error did not appear until recently
+#       and suddenly appeared. Need to investigate the cause.
+#       Should be removed after the investigation.
+options(future.globals.maxSize = 50 * 2^30)
 
 
 generate_list_download <- FALSE
@@ -68,7 +71,7 @@ plan(
         list(
           memory = 8,
           log.file = "slurm_run.log",
-          ncpus = 1, partition = "geo,highmem", ntasks = 1,
+          ncpus = 1, partition = "geo", ntasks = 1,
           email = arglist_common$char_user_email,
           error.file = "slurm_error.log"
         )
