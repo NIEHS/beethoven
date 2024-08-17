@@ -44,6 +44,32 @@ target_baselearner <-
     )
     ,
     targets::tar_target(
+      name = list_base_params_candidates,
+      command = list(
+        lgb =
+          expand.grid(
+            mtry = floor(c(0.05, 0.2, 0.05) * 2000L),
+            trees = seq(1000, 3000, 500),
+            learn_rate = c(0.1, 0.05, 0.01, 0.005)
+          )        
+        ,
+        mlp = 
+          expand.grid(
+            hidden_units = c(1024, 512, 256, 128, 64, 32),
+            dropout = 1 / seq(5, 2, -1),
+            activation = c("relu"),
+            learn_rate = c(0.1, 0.05, 0.01, 0.005)
+          )
+        ,
+        elnet =
+          expand.grid(
+            mixture = seq(0, 1, length.out = 21),
+            penalty = 10 ^ seq(-3, 5)
+          )
+      )
+    )
+    ,
+    targets::tar_target(
       name = workflow_learner_base_best,
       command =
         fit_base_learner(
@@ -55,7 +81,9 @@ target_baselearner <-
                          device = df_learner_type$device),
           cv_mode = df_learner_type$cv_mode,
           args_generate_cv = list_base_args_cv[[df_learner_type$cv_mode]],
+          tune_grid_in = list_base_params_candidates[[df_learner_type$learner]],
           # preferably match the number of threads to the random grid size.
+          tune_grid_size = 10L,
           nthreads = 10L
         ),
       pattern = map(df_learner_type),

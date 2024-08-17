@@ -64,7 +64,7 @@ switch_model <-
         parsnip::mlp(
           hidden_units = parsnip::tune(),
           dropout = parsnip::tune(),
-          epochs = 1000L,
+          epochs = 500L,
           activation = "relu",
           learn_rate = parsnip::tune()
         ) %>%
@@ -152,6 +152,9 @@ switch_model <-
 #'   Default is "grid", "bayes" is acceptable.
 #' @param tune_bayes_iter integer(1). The number of iterations for
 #'  Bayesian optimization. Default is 10. Only used when `tune_mode = "bayes"`.
+#' @param tune_grid_in data.frame object that includes the grid for
+#'   hyperparameter tuning. `tune_grid_size` rows will be randomly picked
+#'   from this data.frame for grid search.
 #' @param tune_grid_size integer(1). The number of grid size for hyperparameter
 #'  tuning. Default is 10. Only used when `tune_mode = "grid"`.
 #' @param learn_rate The learning rate for the model. For branching purpose.
@@ -187,6 +190,7 @@ fit_base_learner <-
     cv_mode  = c("spatiotemporal", "spatial", "temporal"),
     tune_mode = "grid",
     tune_bayes_iter = 10L,
+    tune_grid_in = NULL,
     tune_grid_size = 10L,
     learn_rate = 0.1,
     yvar = "Arithmetic.Mean",
@@ -205,10 +209,6 @@ fit_base_learner <-
 
     dt_sample_rowidx <- make_subdata(dt_full, p = r_subsample)
     dt_sample <- dt_full[dt_sample_rowidx, ]
-
-    # generate random grid from hyperparameters
-    model_params <- tune::extract_parameter_set_dials(model)
-    grid_params <- dials::grid_random(model_params, size = tune_grid_size)
 
     # detect model name
     model_name <- model$engine
@@ -242,6 +242,21 @@ fit_base_learner <-
           cv_index, dt_sample, cv_mode = cv_mode
         )
     }
+
+    # generate random grid from hyperparameters
+    # dials approach is too complicated to implement since
+    # we already declared tuning hyperparameters with tune(),
+    # which is not compatible with dials approach to limit
+    # possible value ranges per hyperparameter.
+    # model_params <- tune::extract_parameter_set_dials(model)
+    # grid_params <- dials::grid_random(model_params, size = tune_grid_size)
+    if (tune_mode == "grid") {
+      grid_row_idx <- sample(nrow(tune_grid_in), tune_grid_size)
+      grid_params <- tune_grid_in[grid_row_idx, ]
+    } else {
+      grid_params <- NULL
+    }
+
 
     if (model_name == "glmnet") {
       future::plan(future::multicore, workers = nthreads)

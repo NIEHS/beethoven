@@ -13,6 +13,7 @@ fit_base_learner(
   cv_mode = c("spatiotemporal", "spatial", "temporal"),
   tune_mode = "grid",
   tune_bayes_iter = 10L,
+  tune_grid_in = NULL,
   tune_grid_size = 10L,
   learn_rate = 0.1,
   yvar = "Arithmetic.Mean",
@@ -44,6 +45,10 @@ Default is "grid", "bayes" is acceptable.}
 
 \item{tune_bayes_iter}{integer(1). The number of iterations for
 Bayesian optimization. Default is 10. Only used when \code{tune_mode = "bayes"}.}
+
+\item{tune_grid_in}{data.frame object that includes the grid for
+hyperparameter tuning. \code{tune_grid_size} rows will be randomly picked
+from this data.frame for grid search.}
 
 \item{tune_grid_size}{integer(1). The number of grid size for hyperparameter
 tuning. Default is 10. Only used when \code{tune_mode = "grid"}.}
