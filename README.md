@@ -687,6 +687,27 @@ post_calc_autojoin <-
   }
 ```
 
+### Managing calculated features
+
+The calculation configuration files can be multiple, which means the calculated feature targets can also be multiple. The `dt_feat_calc_cumulative` target operates differently depending on the existence of a *.qs file in the `output/qs` directory. If there is any *.qs file in the `output/qs` directory, the `dt_feat_calc_design` target will be appended (i.e., `rbind()`-ed) to the contents of the `*.qs` files. The first run will assign a file name string to `dt_feat_calc_cumulative`.
+
+```r
+append_predecessors(
+  path_qs = "output/qs",
+  period_new = arglist_common$char_period,
+  input_new = dt_feat_calc_design,
+  nthreads = arglist_common$nthreads_append
+)
+```
+
+### Imputation
+
+The calculated features contain a fair amount of `NA` or `NaN`s depending on the raw dataset. We distinguish these into "true zeros" and "true missing" for the subsequent imputation process. For imputation, `missRanger` is used. The `missRanger` arguments can be adjusted in the `impute_all()` function.
+
+- True zeros: TRI features include many `NA`s as the raw data is a long `data.frame` with source location-chemicals pair keys. This structure requires long-to-wide pivoting, resulting in a sparse `data.frame` with `NA`s where no chemicals were reported in certain locations. Therefore, these `NA`s are considered true zeros.
+- Missing: daily satellite-derived features except for the 16-day NDVI are considered to include missing values. Such missing values are mainly coming from intermittent data transmission disruption or planned maintenance. `NA`s in the 16-day NDVI field are filled by the "last observation carried forward" principle. `NaN` values in others are replaced with `NA` and put into the imputation function.
+
+
 
 ## Base learners
 
