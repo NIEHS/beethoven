@@ -17,6 +17,9 @@ input/*
 inst/targets-wide
 ^.future/
 ^_targets/
+_targets.R
+_targets.yaml
+\*.Rproj
 \.out$
 \.err$
 \.sif$

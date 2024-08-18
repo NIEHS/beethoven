@@ -3,14 +3,19 @@ knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 
 ## ----load-terra---------------------------------------------------------------
 library(terra)
+library(tigris)
 
 ## ----load-usmain--------------------------------------------------------------
-usmain <- terra::vect("../tests/testdata/US-mainland-boundary.gpkg")
+usmain <- tigris::states(progress_bar = FALSE)
+exclude <- c("02", "15", "60", "66", "68", "69", "72", "78")
+usmain <- usmain[!usmain$STATEFP %in% exclude, ]
+usmain <- terra::vect(usmain)
+usmain <- terra::aggregate(usmain)
 usmain <- terra::project(usmain, "EPSG:5070")
 plot(usmain)
 
 
-## ----gen-grid-1km-------------------------------------------------------------
+## ----gen-grid-prep------------------------------------------------------------
 corner_ul <- c(-2.40, 3.26) * 1e6
 corner_lr <- c(2.40, 0.12) * 1e6
 
@@ -19,28 +24,30 @@ corners <- c(corner_ul, corner_lr)
 corners_re <- corners[c(1, 3, 4, 2)]
 names(corners_re) <- c("xmin", "xmax", "ymin", "ymax")
 corners_ext <- terra::ext(corners_re)
-corners_ras <-
-  terra::rast(
-    corners_ext,
-    resolution = c(1000L, 1000L),
-    crs = "EPSG:5070"
-  )
 
-terra::values(corners_ras) <- 1L
-corners_ras_sub <-
-  terra::crop(
-    corners_ras,
-    usmain,
-    snap = "out",
-    mask = TRUE
-  )
-
-corners_pnts <- terra::as.points(corners_ras_sub)
-corners_pnts_df <- as.data.frame(corners_pnts, geom = "XY")
-corners_pnts_df$site_id <- seq(1, nrow(corners_pnts_df))
-names(corners_pnts_df)[2:3] <- c("lon", "lat")
-corners_pnts_df <- corners_pnts_df[, c("site_id", "lon", "lat")]
-
+## ----gen-grid-1km, eval = FALSE-----------------------------------------------
+#  corners_ras <-
+#    terra::rast(
+#      corners_ext,
+#      resolution = c(1000L, 1000L),
+#      crs = "EPSG:5070"
+#    )
+#  
+#  terra::values(corners_ras) <- 1L
+#  corners_ras_sub <-
+#    terra::crop(
+#      corners_ras,
+#      usmain,
+#      snap = "out",
+#      mask = TRUE
+#    )
+#  
+#  corners_pnts <- terra::as.points(corners_ras_sub)
+#  corners_pnts_df <- as.data.frame(corners_pnts, geom = "XY")
+#  corners_pnts_df$site_id <- seq(1, nrow(corners_pnts_df))
+#  names(corners_pnts_df)[2:3] <- c("lon", "lat")
+#  corners_pnts_df <- corners_pnts_df[, c("site_id", "lon", "lat")]
+#  
 
 ## ----save-rds, eval = FALSE---------------------------------------------------
 #  saveRDS(

@@ -9,8 +9,9 @@ fit_base_learner(
   dt_full,
   r_subsample = 0.3,
   model = NULL,
-  folds = NULL,
+  folds = 5L,
   cv_mode = c("spatiotemporal", "spatial", "temporal"),
+  args_generate_cv = NULL,
   tune_mode = "grid",
   tune_bayes_iter = 10L,
   tune_grid_in = NULL,
@@ -18,11 +19,9 @@ fit_base_learner(
   learn_rate = 0.1,
   yvar = "Arithmetic.Mean",
   xvar = seq(5, ncol(dt_sample)),
-  vfold = 5L,
   nthreads = 8L,
   trim_resamples = FALSE,
   return_best = TRUE,
-  args_generate_cv = NULL,
   ...
 )
 }
@@ -37,8 +36,15 @@ Default is "mlp". Available options are "mlp", "xgb", "lgb", "elnet".}
 \item{model}{The parsnip model object. Preferably generated from
 \code{switch_model}.}
 
-\item{folds}{pre-generated rset object with minimal number of columns.
-If NULL, \code{vfold} should be numeric to be used in \link[rsample:vfold_cv]{rsample::vfold_cv}.}
+\item{folds}{integer(1). Number of cross-validation folds.
+If NULL, \code{cv_mode} should be defined to be used in \link[rsample:vfold_cv]{rsample::vfold_cv}.}
+
+\item{cv_mode}{character(1).
+Cross-validation mode. Default is "spatiotemporal".
+Available options are "spatiotemporal", "spatial", "temporal".}
+
+\item{args_generate_cv}{List of arguments to be passed to
+\code{switch_generate_cv_rset} function.}
 
 \item{tune_mode}{character(1). Hyperparameter tuning mode.
 Default is "grid", "bayes" is acceptable.}
@@ -59,8 +65,6 @@ Default is 0.1.}
 \item{yvar}{The target variable.}
 
 \item{xvar}{The predictor variables.}
-
-\item{vfold}{The number of folds for cross-validation.}
 
 \item{nthreads}{integer(1). The number of threads to be used for
 tuning. Default is 8L. \code{learner = "elnet"} will utilize the multiple

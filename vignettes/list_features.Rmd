@@ -1,7 +1,6 @@
 ---
 title: "List of features"
-date: "2024-04-02"
-author: "The SET team"
+author: "SET group"
 vignette: >
   %\VignetteIndexEntry{Generate prediction points}
   %\VignetteEngine{knitr::rmarkdown}

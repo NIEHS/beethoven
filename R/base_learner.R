@@ -146,8 +146,13 @@ switch_model <-
 #' @param r_subsample numeric(1). The proportion of rows to be used.
 #' @param model The parsnip model object. Preferably generated from
 #'   `switch_model`.
-#' @param folds pre-generated rset object with minimal number of columns.
-#'   If NULL, `vfold` should be numeric to be used in [rsample::vfold_cv].
+#' @param folds integer(1). Number of cross-validation folds.
+#'   If NULL, `cv_mode` should be defined to be used in [rsample::vfold_cv].
+#' @param cv_mode character(1).
+#'   Cross-validation mode. Default is "spatiotemporal".
+#'   Available options are "spatiotemporal", "spatial", "temporal".
+#' @param args_generate_cv List of arguments to be passed to
+#'  `switch_generate_cv_rset` function.
 #' @param tune_mode character(1). Hyperparameter tuning mode.
 #'   Default is "grid", "bayes" is acceptable.
 #' @param tune_bayes_iter integer(1). The number of iterations for
@@ -161,7 +166,6 @@ switch_model <-
 #'   Default is 0.1.
 #' @param yvar The target variable.
 #' @param xvar The predictor variables.
-#' @param vfold The number of folds for cross-validation.
 #' @param nthreads integer(1). The number of threads to be used for
 #'  tuning. Default is 8L. `learner = "elnet"` will utilize the multiple
 #'  threads in [future::multicore()] plan.
@@ -186,8 +190,9 @@ fit_base_learner <-
     dt_full,
     r_subsample = 0.3,
     model = NULL,
-    folds = NULL,
+    folds = 5L,
     cv_mode  = c("spatiotemporal", "spatial", "temporal"),
+    args_generate_cv = NULL,
     tune_mode = "grid",
     tune_bayes_iter = 10L,
     tune_grid_in = NULL,
@@ -195,11 +200,9 @@ fit_base_learner <-
     learn_rate = 0.1,
     yvar = "Arithmetic.Mean",
     xvar = seq(5, ncol(dt_sample)),
-    vfold = 5L,
     nthreads = 8L,
     trim_resamples = FALSE,
     return_best = TRUE,
-    args_generate_cv = NULL,
     ...
   ) {
     learner <- match.arg(learner)
@@ -223,8 +226,8 @@ fit_base_learner <-
       recipes::update_role(!!xvar) %>%
       recipes::update_role(!!yvar, new_role = "outcome")
 
-    if (is.null(folds)) {
-      base_vfold <- rsample::vfold_cv(dt_sample, v = vfold)
+    if (!is.null(folds)) {
+      base_vfold <- rsample::vfold_cv(dt_sample, v = folds)
     } else {
       args_generate_cv <-
         c(
@@ -301,6 +304,8 @@ fit_base_learner <-
 #' @importFrom workflows workflow add_recipe add_model
 #' @importFrom tune tune_grid tune_bayes control_grid control_bayes
 #' @importFrom yardstick metric_set rmse mape rsq mae
+#' @importFrom parsnip fit
+#' @importFrom stats predict
 fit_base_tune <-
   function(
     recipe,
@@ -379,7 +384,8 @@ fit_base_tune <-
       # Best-fit model
       base_wf_fit_best <- parsnip::fit(base_wfresult, data = data_full)
       # Prediction with the best model
-      base_wf_pred_best <- predict(base_wf_fit_best, new_data = data_full)
+      base_wf_pred_best <-
+        stats::predict(base_wf_fit_best, new_data = data_full)
 
       base_wflist <-
         list(
@@ -607,6 +613,8 @@ attach_xy <-
 #' @importFrom rsample manual_rset
 #' @importFrom anticlust balanced_clustering
 #' @importFrom dplyr group_by summarize across ungroup all_of
+#' @importFrom stats dist
+#' @importFrom utils combn
 #' @export
 #' @examples
 #' library(data.table)
@@ -645,7 +653,7 @@ generate_cv_index_spt <-
         stop("ngroup_init should be less than cv_pairs.")
       }
       # 2-combinations of ngroup_init check
-      if (ncol(combn(seq_len(ngroup_init), 2)) < cv_pairs) {
+      if (ncol(combn::combn(seq_len(ngroup_init), 2)) < cv_pairs) {
         stop(
           paste0(
             "cv_pairs cannot be larger than ",
@@ -765,6 +773,7 @@ generate_cv_index_spt <-
 #' )
 #' rset_ts <-
 #'   generate_cv_index_ts(data, time_col = "time", cv_fold = 10, window = 14)
+#' @importFrom stats quantile
 #' @export
 generate_cv_index_ts <-
   function(

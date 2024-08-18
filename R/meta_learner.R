@@ -100,6 +100,7 @@ fit_meta_learner <-
 #' @param meta_fitted Fitted meta learner model.
 #' @param new_data data.frame. New data. Must have the same
 #'   predictands and predictors as the training data.
+#' @importFrom stats predict
 #' @return Predicted values.
 #' @export
 predict_meta_learner <-
@@ -107,7 +108,7 @@ predict_meta_learner <-
     meta_fitted,
     new_data
   ) {
-    predict(meta_fitted, new_data)
+    stats::predict(meta_fitted, new_data)
   }
 
 # nocov end
