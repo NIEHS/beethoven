@@ -29,7 +29,7 @@ returns a list of MODIS files found in the specified path.
 modis_files <- load_modis_files(".", date = c("2018-01-01", "2018-01-31"))
 
 # Load MODIS files from a specific directory with a custom pattern
-modis_files <- load_modis_files("/path/to/files", pattern = "MOD.*hdf$", date = c("2018-01-01", "2018-01-31")
+modis_files <- load_modis_files("/path/to/files", pattern = "MOD.*hdf$", date = c("2018-01-01", "2018-01-31"))
 }
 }
 \keyword{Utility}

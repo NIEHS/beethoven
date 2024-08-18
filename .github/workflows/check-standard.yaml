@@ -30,6 +30,12 @@ jobs:
             any::rmarkdown
           needs: check
 
+      - name: Install dependencies
+        run: |
+          remotes::install_deps(dependencies = TRUE)
+          remotes::install_cran("rcmdcheck")
+          shell: Rscript {0}
+
       - name: install remote packages
         run: |
           Rscript -e 'remotes::install_github(sprintf("NIEHS/%s", c("amadeus", "chopin")), upgrade = FALSE)'

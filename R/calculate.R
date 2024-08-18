@@ -26,6 +26,7 @@
 #' @importFrom future plan multicore sequential
 #' @importFrom amadeus generate_date_sequence
 #' @importFrom terra describe rast time subset crs varnames vect sds extract
+#' @importFrom terra nlyr set.crs
 #' @importFrom dplyr full_join
 #' @export
 calc_geos_strict <-
@@ -374,6 +375,11 @@ calc_gmted_direct <- function(
 #'
 #' @return A data frame containing the aggregated values for each
 #'  location and time point.
+#' @importFrom amadeus calc_prepare_locs calc_worker
+#' @importFrom terra time
+#' @importFrom tidyr pivot_longer pivot_wider
+#' @importFrom dplyr rowwise mutate ungroup
+#' @importFrom data.table as.data.table
 #' @export
 calc_narr2 <- function(
   from,
