@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Insang Song" />
+
+<meta name="date" content="2024-01-15" />
+
+<title>Generate prediction points</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Generate prediction points</h1>
+<h4 class="author">Insang Song</h4>
+<h4 class="date">2024-01-15</h4>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(terra)</span></code></pre></div>
+<div id="objective" class="section level1">
+<h1>Objective</h1>
+<p>This vignette will demonstrate how the prediction grid points at 1-km
+resolution are generated from the polygon data of the mainland US with
+<code>terra</code> package.</p>
+</div>
+<div id="strategy" class="section level1">
+<h1>Strategy</h1>
+<ul>
+<li>We set the upper left and lower right corners then make regular grid
+points at 1,000 meter interval.</li>
+<li><code>EPSG:5070</code>, Conus Albers equal area projection, is used
+throughout this vignette.</li>
+</ul>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>usmain <span class="ot">&lt;-</span> terra<span class="sc">::</span><span class="fu">vect</span>(<span class="st">&quot;../tests/testdata/US-mainland-boundary.gpkg&quot;</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>usmain <span class="ot">&lt;-</span> terra<span class="sc">::</span><span class="fu">project</span>(usmain, <span class="st">&quot;EPSG:5070&quot;</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(usmain)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
+<div id="generate" class="section level1">
+<h1>Generate</h1>
+<p>Regular or random points can be generated from an extent or a polygon
+object with <code>terra::spatSample()</code> or
+<code>sf::st_sample()</code>. A faster way of generating regular points
+is to leverage a raster object, where cells are organized in a regular
+grid. The code block below generates 1-km resolution grid points
+following steps:</p>
+<ol style="list-style-type: decimal">
+<li>Identify corners to generate a rectangular extent (i.e.,
+<code>SpatExtent</code> object from <code>terra::ext()</code>)</li>
+<li>Create a <code>SpatRaster</code> object with a fixed resolution and
+coordinate system (in this case, <code>EPSG:5070</code>)</li>
+<li>Assign a value to the void raster</li>
+<li>Crop the raster object with the mainland US polygon</li>
+<li>Convert the cropped raster to points (we have a
+<code>SpatVector</code> object)</li>
+<li>Convert the <code>SpatVector</code> object to a three-column
+<code>data.frame</code> object</li>
+<li>Save the <code>data.frame</code> object from step 6 as an RDS
+file</li>
+</ol>
+<p>Steps 6 and 7 reduce the file size substantially as all data in the
+<code>data.frame</code> from step 6 are in numeric type. This means the
+data can be compressed efficiently.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>corner_ul <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">2.40</span>, <span class="fl">3.26</span>) <span class="sc">*</span> <span class="fl">1e6</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>corner_lr <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">2.40</span>, <span class="fl">0.12</span>) <span class="sc">*</span> <span class="fl">1e6</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>corners <span class="ot">&lt;-</span> <span class="fu">c</span>(corner_ul, corner_lr)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co"># reorganize xmin, ymin, xmax, ymax, which are ll, ur form</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>corners_re <span class="ot">&lt;-</span> corners[<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">2</span>)]</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(corners_re) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;xmin&quot;</span>, <span class="st">&quot;xmax&quot;</span>, <span class="st">&quot;ymin&quot;</span>, <span class="st">&quot;ymax&quot;</span>)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>corners_ext <span class="ot">&lt;-</span> terra<span class="sc">::</span><span class="fu">ext</span>(corners_re)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>corners_ras <span class="ot">&lt;-</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  terra<span class="sc">::</span><span class="fu">rast</span>(</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    corners_ext,</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">resolution =</span> <span class="fu">c</span>(1000L, 1000L),</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">crs =</span> <span class="st">&quot;EPSG:5070&quot;</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>terra<span class="sc">::</span><span class="fu">values</span>(corners_ras) <span class="ot">&lt;-</span> 1L</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>corners_ras_sub <span class="ot">&lt;-</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>  terra<span class="sc">::</span><span class="fu">crop</span>(</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    corners_ras,</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    usmain,</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">snap =</span> <span class="st">&quot;out&quot;</span>,</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">mask =</span> <span class="cn">TRUE</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>corners_pnts <span class="ot">&lt;-</span> terra<span class="sc">::</span><span class="fu">as.points</span>(corners_ras_sub)</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>corners_pnts_df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(corners_pnts, <span class="at">geom =</span> <span class="st">&quot;XY&quot;</span>)</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>corners_pnts_df<span class="sc">$</span>site_id <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">1</span>, <span class="fu">nrow</span>(corners_pnts_df))</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(corners_pnts_df)[<span class="dv">2</span><span class="sc">:</span><span class="dv">3</span>] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;lon&quot;</span>, <span class="st">&quot;lat&quot;</span>)</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>corners_pnts_df <span class="ot">&lt;-</span> corners_pnts_df[, <span class="fu">c</span>(<span class="st">&quot;site_id&quot;</span>, <span class="st">&quot;lon&quot;</span>, <span class="st">&quot;lat&quot;</span>)]</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  corners_pnts_df,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">&quot;./input/prediction_grid.rds&quot;</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">compress =</span> <span class="st">&quot;xz&quot;</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<p>Below is a map of 10-km grid points in the mainland US for faster
+rendering. The actual 1-km result will look denser.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  corners_pnts10,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">cex =</span> <span class="fl">0.1</span>,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">&quot;10-km grid points in the mainland US&quot;</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

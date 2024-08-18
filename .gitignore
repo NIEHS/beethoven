@@ -102,3 +102,4 @@ slurm_error.log
 
 # Apptainer images
 **/*.sif
+/Meta/

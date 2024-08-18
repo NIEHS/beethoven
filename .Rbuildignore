@@ -1,4 +1,3 @@
-^vignettes/
 ^tests/
 ^input/
 ^tools/
@@ -26,3 +25,5 @@ inst/targets-wide
 \.qmd$
 \.sh$
 R/reserved.R
+^doc$
+^Meta$

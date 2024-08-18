@@ -41,6 +41,7 @@ Imports:
   anticlust,
   qs,
   stringi,
+  tibble,
   collapse,
   tigris,
   graphics,
