@@ -99,7 +99,7 @@ switch_model <-
 
 
 
-#' Base learner: Multilayer perceptron with brulee
+#' Base learner: tune hyperparameters and retrieve the best model
 #'
 #' Multilayer perceptron model with different configurations of
 #' hidden units, dropout, activation, and learning rate using brulee
@@ -334,139 +334,6 @@ assign_learner_cv <-
   }
 
 
-
-#' Base learner: Multilayer perceptron with brulee
-#'
-#' Multilayer perceptron model with different configurations of
-#' hidden units, dropout, activation, and learning rate using brulee
-#' and tidymodels. With proper settings, users can utilize graphics
-#' processing units (GPU) to speed up the training process.
-#' @keywords Baselearner soft-deprecated
-#' @note tune package should be 1.2.0 or higher.
-#' brulee should be installed with GPU support.
-#' @details Hyperparameters `hidden_units`, `dropout`, `activation`,
-#'   and `learn_rate` are tuned. `With tune_mode = "grid"`,
-#'   users can modify `learn_rate` explicitly, and other hyperparameters
-#'   will be predefined (56 combinations per `learn_rate`).
-#' @param dt_imputed The input data table to be used for fitting.
-#' @param folds pre-generated rset object with minimal number of columns.
-#'   If NULL, `vfold` should be numeric to be used in [rsample::vfold_cv].
-#' @param tune_mode character(1). Hyperparameter tuning mode.
-#'   Default is "bayes", "grid" is acceptable.
-#' @param tune_bayes_iter integer(1). The number of iterations for
-#'  Bayesian optimization. Default is 10. Only used when `tune_mode = "bayes"`.
-#' @param learn_rate The learning rate for the model. For branching purpose.
-#'   Default is 0.1.
-#' @param yvar The target variable.
-#' @param xvar The predictor variables.
-#' @param vfold The number of folds for cross-validation.
-#' @param device The device to be used for training.
-#'   Default is "cuda:0". Make sure that your system is equipped
-#'   with CUDA-enabled graphical processing units.
-#' @param trim_resamples logical(1). Default is TRUE, which replaces the actual
-#'   data.frames in splits column of `tune_results` object with NA.
-#' @param return_best logical(1). If TRUE, the best tuned model is returned.
-#' @param ... Additional arguments to be passed.
-#'
-#' @returns The fitted workflow.
-#' @importFrom recipes recipe update_role
-#' @importFrom dplyr `%>%`
-#' @importFrom parsnip mlp set_engine set_mode
-#' @importFrom workflows workflow add_recipe add_model
-#' @importFrom tune tune_grid fit_best
-#' @importFrom tidyselect all_of
-#' @importFrom yardstick metric_set rmse
-#' @importFrom rsample vfold_cv
-#' @export
-fit_base_brulee <-
-  function(
-    dt_sample,
-    dt_full,
-    folds = NULL,
-    cv_mode  = c("spatiotemporal", "spatial", "temporal"),
-    tune_mode = "bayes",
-    tune_bayes_iter = 10L,
-    learn_rate = 0.1,
-    yvar = "Arithmetic.Mean",
-    xvar = seq(5, ncol(dt_sample)),
-    vfold = 5L,
-    device = "cuda:0",
-    trim_resamples = FALSE,
-    return_best = TRUE,
-    args_generate_cv = NULL,
-    ...
-  ) {
-    tune_mode <- match.arg(tune_mode, c("grid", "bayes"))
-    cv_mode <- match.arg(cv_mode)
-
-    # 2^9=512, 2^15=32768 (#param is around 10% of selected rows)
-    grid_hyper_tune <-
-      expand.grid(
-        hidden_units = list(c(1024), c(64, 64), c(32, 32, 32), c(16, 16, 16)),
-        dropout = 1 / seq(4, 2, -1),
-        activation = c("relu", "leaky_relu"),
-        learn_rate = learn_rate
-      )
-
-    base_recipe <-
-      recipes::recipe(
-        dt_sample[1, ]
-      ) %>%
-      # do we want to normalize the predictors?
-      # if so, an additional definition of truly continuous variables is needed
-      # recipes::step_normalize(recipes::all_numeric_predictors()) %>%
-      recipes::update_role(!!xvar) %>%
-      recipes::update_role(!!yvar, new_role = "outcome") #%>%
-    # recipes::step_normalize(!!yvar)
-
-    if (is.null(folds)) {
-      base_vfold <- rsample::vfold_cv(dt_sample, v = vfold)
-    } else {
-      args_generate_cv <-
-        c(
-          list(data = dt_sample, cv_mode = cv_mode),
-          args_generate_cv
-        )
-      # generate row index
-      cv_index <- inject_match(switch_generate_cv_rset, args_generate_cv)
-
-      # using cv_index, restore rset
-      # NOTE 08122024: not modified -- should be recoded
-      base_vfold <-
-        convert_cv_index_rset(
-          cv_index, dt_sample, cv_mode = cv_mode
-        )
-    }
-    # base_vfold <-
-    #   restore_rset_full(rset = base_vfold, data_full = dt_sample)
-
-    base_model <-
-      parsnip::mlp(
-        hidden_units = parsnip::tune(),
-        dropout = parsnip::tune(),
-        epochs = 1000L,
-        activation = parsnip::tune(),
-        learn_rate = parsnip::tune()
-      ) %>%
-      parsnip::set_engine("brulee", device = device) %>%
-      parsnip::set_mode("regression")
-
-    base_wftune <-
-      fit_base_tune(
-        recipe = base_recipe,
-        model = base_model,
-        resample = base_vfold,
-        tune_mode = tune_mode,
-        grid = grid_hyper_tune,
-        iter_bayes = tune_bayes_iter,
-        trim_resamples = trim_resamples,
-        return_best = return_best
-      )
-
-    return(base_wftune)
-  }
-
-
 #' Tune base learner
 #' @keywords Baselearner internal
 #' @param recipe The recipe object.
@@ -579,6 +446,137 @@ fit_base_tune <-
   }
 
 
+# nolint start
+#' Base learner: Multilayer perceptron with brulee
+#'
+#' Multilayer perceptron model with different configurations of
+#' hidden units, dropout, activation, and learning rate using brulee
+#' and tidymodels. With proper settings, users can utilize graphics
+#' processing units (GPU) to speed up the training process.
+#' @keywords Baselearner soft-deprecated
+#' @note tune package should be 1.2.0 or higher.
+#' brulee should be installed with GPU support.
+#' @details Hyperparameters `hidden_units`, `dropout`, `activation`,
+#'   and `learn_rate` are tuned. `With tune_mode = "grid"`,
+#'   users can modify `learn_rate` explicitly, and other hyperparameters
+#'   will be predefined (56 combinations per `learn_rate`).
+#' @param dt_imputed The input data table to be used for fitting.
+#' @param folds pre-generated rset object with minimal number of columns.
+#'   If NULL, `vfold` should be numeric to be used in [rsample::vfold_cv].
+#' @param tune_mode character(1). Hyperparameter tuning mode.
+#'   Default is "bayes", "grid" is acceptable.
+#' @param tune_bayes_iter integer(1). The number of iterations for
+#'  Bayesian optimization. Default is 10. Only used when `tune_mode = "bayes"`.
+#' @param learn_rate The learning rate for the model. For branching purpose.
+#'   Default is 0.1.
+#' @param yvar The target variable.
+#' @param xvar The predictor variables.
+#' @param vfold The number of folds for cross-validation.
+#' @param device The device to be used for training.
+#'   Default is "cuda:0". Make sure that your system is equipped
+#'   with CUDA-enabled graphical processing units.
+#' @param trim_resamples logical(1). Default is TRUE, which replaces the actual
+#'   data.frames in splits column of `tune_results` object with NA.
+#' @param return_best logical(1). If TRUE, the best tuned model is returned.
+#' @param ... Additional arguments to be passed.
+#'
+#' @returns The fitted workflow.
+#' @importFrom recipes recipe update_role
+#' @importFrom dplyr `%>%`
+#' @importFrom parsnip mlp set_engine set_mode
+#' @importFrom workflows workflow add_recipe add_model
+#' @importFrom tune tune_grid fit_best
+#' @importFrom tidyselect all_of
+#' @importFrom yardstick metric_set rmse
+#' @importFrom rsample vfold_cv
+fit_base_brulee <-
+  function(
+    dt_sample,
+    dt_full,
+    folds = NULL,
+    cv_mode  = c("spatiotemporal", "spatial", "temporal"),
+    tune_mode = "bayes",
+    tune_bayes_iter = 10L,
+    learn_rate = 0.1,
+    yvar = "Arithmetic.Mean",
+    xvar = seq(5, ncol(dt_sample)),
+    vfold = 5L,
+    device = "cuda:0",
+    trim_resamples = FALSE,
+    return_best = TRUE,
+    args_generate_cv = NULL,
+    ...
+  ) {
+    tune_mode <- match.arg(tune_mode, c("grid", "bayes"))
+    cv_mode <- match.arg(cv_mode)
+
+    # 2^9=512, 2^15=32768 (#param is around 10% of selected rows)
+    grid_hyper_tune <-
+      expand.grid(
+        hidden_units = list(c(1024), c(64, 64), c(32, 32, 32), c(16, 16, 16)),
+        dropout = 1 / seq(4, 2, -1),
+        activation = c("relu", "leaky_relu"),
+        learn_rate = learn_rate
+      )
+
+    base_recipe <-
+      recipes::recipe(
+        dt_sample[1, ]
+      ) %>%
+      # do we want to normalize the predictors?
+      # if so, an additional definition of truly continuous variables is needed
+      # recipes::step_normalize(recipes::all_numeric_predictors()) %>%
+      recipes::update_role(!!xvar) %>%
+      recipes::update_role(!!yvar, new_role = "outcome") #%>%
+    # recipes::step_normalize(!!yvar)
+
+    if (is.null(folds)) {
+      base_vfold <- rsample::vfold_cv(dt_sample, v = vfold)
+    } else {
+      args_generate_cv <-
+        c(
+          list(data = dt_sample, cv_mode = cv_mode),
+          args_generate_cv
+        )
+      # generate row index
+      cv_index <- inject_match(switch_generate_cv_rset, args_generate_cv)
+
+      # using cv_index, restore rset
+      # NOTE 08122024: not modified -- should be recoded
+      base_vfold <-
+        convert_cv_index_rset(
+          cv_index, dt_sample, cv_mode = cv_mode
+        )
+    }
+    # base_vfold <-
+    #   restore_rset_full(rset = base_vfold, data_full = dt_sample)
+
+    base_model <-
+      parsnip::mlp(
+        hidden_units = parsnip::tune(),
+        dropout = parsnip::tune(),
+        epochs = 1000L,
+        activation = parsnip::tune(),
+        learn_rate = parsnip::tune()
+      ) %>%
+      parsnip::set_engine("brulee", device = device) %>%
+      parsnip::set_mode("regression")
+
+    base_wftune <-
+      fit_base_tune(
+        recipe = base_recipe,
+        model = base_model,
+        resample = base_vfold,
+        tune_mode = tune_mode,
+        grid = grid_hyper_tune,
+        iter_bayes = tune_bayes_iter,
+        trim_resamples = trim_resamples,
+        return_best = return_best
+      )
+
+    return(base_wftune)
+  }
+
 # dt <- qs::qread("output/dt_feat_design_imputed_061024.qs")
 # dtd <- dplyr::as_tibble(dt)
 # dtfit <- fit_base_brulee(dtd, r_subsample = 0.3)
@@ -626,7 +624,6 @@ fit_base_tune <-
 #' @importFrom tidyselect all_of
 #' @importFrom yardstick metric_set rmse
 #' @importFrom rsample vfold_cv
-#' @export
 fit_base_xgb <-
   function(
     dt_imputed,
@@ -756,7 +753,6 @@ fit_base_xgb <-
 #' @importFrom tidyselect all_of
 #' @importFrom yardstick metric_set rmse
 #' @importFrom rsample vfold_cv
-#' @export
 fit_base_lightgbm <-
   function(
     dt_imputed,
@@ -865,7 +861,6 @@ fit_base_lightgbm <-
 #' @importFrom tidyselect all_of
 #' @importFrom yardstick metric_set rmse
 #' @importFrom rsample vfold_cv
-#' @export
 fit_base_elnet <-
   function(
     dt_imputed,
@@ -941,7 +936,7 @@ fit_base_elnet <-
     return(base_wftune)
 
   }
-
+# nolint end
 
 
 #' Generate manual rset object from spatiotemporal cross-validation indices
@@ -1335,7 +1330,7 @@ generate_cv_index_sp <-
 #' @returns None. A plot will be generated.
 #' @importFrom scatterplot3d scatterplot3d
 #' @importFrom graphics par
-#' @seealso [`generate_cv_index`]
+#' @seealso [`generate_cv_index()`]
 #' @export
 vis_spt_rset <-
   function(rsplit, cex = 0.02, angle = 60) {
@@ -1392,7 +1387,7 @@ switch_generate_cv_rset <-
 
 
 #' Restore the full data set from the rset object
-#' @keywords Baselearner
+#' @keywords Baselearner soft-deprecated
 #' @param rset [rsample::manual_rset()] object's `splits` column
 #' @param data_full data.table with all features
 #' @returns A list of data.table objects.

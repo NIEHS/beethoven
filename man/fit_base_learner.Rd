@@ -2,7 +2,7 @@
 % Please edit documentation in R/base_learner.R
 \name{fit_base_learner}
 \alias{fit_base_learner}
-\title{Base learner: Multilayer perceptron with brulee}
+\title{Base learner: tune hyperparameters and retrieve the best model}
 \usage{
 fit_base_learner(
   learner = c("mlp", "xgb", "lgb", "elnet"),

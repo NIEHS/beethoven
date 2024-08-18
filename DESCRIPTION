@@ -27,6 +27,7 @@ Imports:
   tune (>= 1.2.1),
   rlang,
   rsample,
+  spatialsample,
   tidyr,
   tidyselect,
   yardstick,
@@ -50,6 +51,7 @@ Imports:
   collapse,
   tigris,
   graphics,
+  scatterplot3d,
   scoringRules
 Suggests:
   testthat (>= 3.0.0),
@@ -65,7 +67,6 @@ Suggests:
   FNN,
   ggplot2,
   doRNG,
-  scatterplot3d,
   furrr,
   quarto
 Remotes: NIEHS/amadeus, NIEHS/chopin

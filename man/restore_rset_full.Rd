@@ -21,3 +21,4 @@ Restore the full data set from the rset object
 $splits should be present in rset.
 }
 \keyword{Baselearner}
+\keyword{soft-deprecated}

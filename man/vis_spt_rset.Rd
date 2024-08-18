@@ -20,6 +20,6 @@ None. A plot will be generated.
 Visualize the spatio-temporal cross-validation index
 }
 \seealso{
-\code{\link{generate_cv_index}}
+\code{\link[=generate_cv_index]{generate_cv_index()}}
 }
 \keyword{Baselearner}
