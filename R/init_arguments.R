@@ -143,7 +143,7 @@ set_args_calc <-
           viirs = load_modis_files(ain("modis/raw/5000/VNP46A2"), "h5$", date = list_common$char_period)
         )
 
-      list_proccalc <-
+      list_calcspec <-
         list(
           aqs = list(path = ain("aqs", TRUE),
                      date = list_common$char_period),
@@ -261,7 +261,7 @@ set_args_calc <-
           )
         )
 
-      attr(list_proccalc, "description") <-
+      attr(list_calcspec, "description") <-
         tibble::tribble(
           ~dataset, ~description,
           "mod11", "MODIS Land Surface Temperature Day/Night",
@@ -285,13 +285,13 @@ set_args_calc <-
           "population", "SEDAC Population Density"
         )
       if (is.null(path_export)) {
-        assign("arglist_proccalc", list_proccalc, envir = .GlobalEnv)
+        assign("arglist_calcspec", list_calcspec, envir = .GlobalEnv)
         return(list_common)
       } else {
         if (endsWith(path_export, "qs")) {
-          qs::qsave(list_proccalc, path_export)
+          qs::qsave(list_calcspec, path_export)
         } else if (endsWith(path_export, "rds")) {
-          saveRDS(list_proccalc, path_export)
+          saveRDS(list_calcspec, path_export)
         } else {
           stop("Please provide a valid file extension: qs or rds.")
         }

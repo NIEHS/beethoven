@@ -14,6 +14,7 @@ testthat::test_that("set_args_calc exports qs or rds file", {
       path_export = tempqsfile
     )
   )
+  testthat::expect_true(is.list(calcspec))
 
   # run set_args_calc with rds extension
   testthat::expect_no_error(
@@ -23,26 +24,41 @@ testthat::test_that("set_args_calc exports qs or rds file", {
       path_export = temprdsfile
     )
   )
+  testthat::expect_true(is.list(calcspec))
 
-  # side effect if try to search nonexisting paths
-  testthat::expect_error(
-    calcspec <- set_args_calc(
+  # blank paths if try to search nonexisting paths
+  testthat::expect_no_error(
+    calcspec_neq <- set_args_calc(
       char_input_dir = "/path/to/nonexisting",
       char_period = c("2018-01-01", "2018-01-31"),
       export = TRUE,
       path_export = tempqsfile
     )
   )
+  testthat::expect_true(is.list(calcspec_neq))
 
-  # side effect if try to search nonexisting paths
-  testthat::expect_error(
-    calcspec <- set_args_calc(
+  # blank paths if try to search nonexisting paths
+  testthat::expect_no_error(
+    calcspec_ner <- set_args_calc(
       char_input_dir = "/path/to/nonexisting",
       char_period = c("2018-01-01", "2018-01-31"),
       export = TRUE,
       path_export = temprdsfile
     )
   )
+  testthat::expect_true(is.list(calcspec_ner))
+
+  # GlobalEnv objects if no path_export is provided
+  testthat::expect_no_error(
+    calcspec_nullpath <- set_args_calc(
+      char_input_dir = "/path/to/nonexisting",
+      char_period = c("2018-01-01", "2018-01-31"),
+      export = TRUE,
+      path_export = NULL
+    )
+  )
+  testthat::expect_true(is.list(arglist_calcspec))
+
 
 })
 
@@ -98,6 +114,7 @@ testthat::test_that("set_args_download exports qs or rds file", {
     dlspecqs <- set_args_download(
       char_input_dir = "/path/to/nonexisting",
       char_period = c("2018-01-01", "2018-01-31"),
+      nasa_earth_data_token = "mytoken",
       export = TRUE,
       path_export = tempqsfile
     )
@@ -110,6 +127,7 @@ testthat::test_that("set_args_download exports qs or rds file", {
     dlspecrds <- set_args_download(
       char_input_dir = "/path/to/nonexisting",
       char_period = c("2018-01-01", "2018-01-31"),
+      nasa_earth_data_token = "mytoken",
       export = TRUE,
       path_export = temprdsfile
     )
@@ -122,8 +140,20 @@ testthat::test_that("set_args_download exports qs or rds file", {
     dlspecrds <- set_args_download(
       char_input_dir = "/path/to/nonexisting",
       char_period = c("2018-01-01", "2018-01-31"),
+      nasa_earth_data_token = "mytoken",
       export = TRUE,
       path_export = file.path(tmpdir, "specdl_test.txt")
+    )
+  )
+
+  # warning if no nasa_earth_data_token is provided
+  testthat::expect_warning(
+    dlspecrds <- set_args_download(
+      char_input_dir = "/path/to/nonexisting",
+      char_period = c("2018-01-01", "2018-01-31"),
+      nasa_earth_data_token = NULL,
+      export = TRUE,
+      path_export = file.path(tmpdir, "specdl_test.qs")
     )
   )
 

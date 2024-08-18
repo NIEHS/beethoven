@@ -31,6 +31,7 @@ data <- data.frame(
  time = seq.Date(from = as.Date("2021-01-01"), by = "day", length.out = 100),
  value = rnorm(100)
 )
-rset_ts <- generate_cv_index_ts(data, time_col = "time", cv_fold = 10, window = 14)
+rset_ts <-
+  generate_cv_index_ts(data, time_col = "time", cv_fold = 10, window = 14)
 }
 \keyword{Baselearner}

@@ -763,7 +763,8 @@ generate_cv_index_spt <-
 #'  time = seq.Date(from = as.Date("2021-01-01"), by = "day", length.out = 100),
 #'  value = rnorm(100)
 #' )
-#' rset_ts <- generate_cv_index_ts(data, time_col = "time", cv_fold = 10, window = 14)
+#' rset_ts <-
+#'   generate_cv_index_ts(data, time_col = "time", cv_fold = 10, window = 14)
 #' @export
 generate_cv_index_ts <-
   function(
@@ -858,7 +859,9 @@ generate_cv_index_sp <-
     data_rowid <- seq_len(nrow(data))
     newcv <- data_rowid
     if (
-      !all(!is.na(Reduce(c, Map(function(x) is.na(x$out_id), cv_index$splits))))
+      !all(
+        !is.na(Reduce(c, Map(function(x) is.na(x$out_id), cv_index$splits)))
+      )
     ) {
       newcv <-
         lapply(

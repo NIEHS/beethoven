@@ -749,14 +749,25 @@ Due to `rsample` design, each cross-validation fold will include an **actual** `
 
 ```mermaid
 graph TD
+    %% Define the target files as nodes
+    frecipe["minimal data"]
+    fittune["tuning results"]
+    fmodel["parsnip model definition"]
+    ftune["tuning functions"] 
+    bestmodel["best model from tuning"]
+    bestworkflow["workflow of the best model"]
+    fitmodel["fitted best model with full data"]
+    bestfit["predicted values from one base learner"]
+
+
     %% Define the branches with arrowhead connections
-    frecipe["minimal data"] ---|recipes::recipe()| fittune["tuning results"]
-    fmodel["parsnip model definition"] ---|`switch_model()`| fittune["tuning results"]
-    ftune["tuning functions"] ---|`tune_*()`| fittune["tuning results"]
-    fittune["tuning results"] ---|tune::select_best()| bestmodel["best model from tuning"]
-    bestmodel["best model from tuning"] ---|tune::finalize_workflow()| bestworkflow["workflow of the best model"]
-    bestworkflow["workflow of the best model"] ---|parsnip::fit()| fitmodel["fitted best model with full data"]
-    fitmodel["fitted best model with full data"] ---|predict()| bestfit["predicted values from one base learner"]
+    frecipe ---|recipes::recipe()| fittune
+    fmodel ---|`switch_model()`| fittune
+    ftune ---|`tune_*()`| fittune
+    fittune ---|tune::select_best()| bestmodel
+    bestmodel ---|tune::finalize_workflow()| bestworkflow
+    bestworkflow ---|parsnip::fit()| fitmodel
+    fitmodel ---|predict()| bestfit
 ```
 
 
