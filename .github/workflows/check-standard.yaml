@@ -34,7 +34,7 @@ jobs:
         run: |
           remotes::install_deps(dependencies = TRUE)
           remotes::install_cran("rcmdcheck")
-          shell: Rscript {0}
+        shell: Rscript {0}
 
       - name: install remote packages
         run: |
