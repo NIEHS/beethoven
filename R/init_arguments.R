@@ -269,7 +269,7 @@ set_args_calc <-
           "mod09", "MODIS Surface Reflectance",
           "mcd19_1km", "MCD19A2 1km",
           "mcd19_5km", "MCD19A2 5km",
-          "mod13", "MODIS Normalized Difference Vegetation Indexß",
+          "mod13", "MODIS Normalized Difference Vegetation Index",
           "viirs", "VIIRS Nighttime Lights",
           "hms", "NOAA Hazard Mapping System Smoke",
           "geoscf_aqc", "GEOS-CF AQC",

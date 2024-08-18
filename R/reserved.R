@@ -760,7 +760,7 @@ restore_fit_best <-
     tuned_best <- tune::show_best(rset_trimmed, n = 1)
     model_best <-
       rlang::inject(
-        parsnip::update(parsnip_spec, parameters = !!!as.list(tuned_best))
+        update(parsnip_spec, parameters = !!!as.list(tuned_best))
       )
 
     # fit the entire data

@@ -24,7 +24,7 @@ subsequently generate spatial cross-validation indices using
 cross-validation indices.
 Default is \code{spatialsample::spatial_block_cv}.}
 
-\item{r_subsample}{The proportion of rows to be sampled.}
+\item{...}{Additional arguments to be passed to \code{cv_make_fun}.}
 }
 \value{
 A list of numeric vectors with in- and out-of-sample row indices or

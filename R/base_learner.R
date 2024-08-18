@@ -816,7 +816,6 @@ generate_cv_index_ts <-
 #' Prepare spatial and spatiotemporal cross validation sets
 #' @keywords Baselearner
 #' @param data data.table with X, Y, and time information.
-#' @param r_subsample The proportion of rows to be sampled.
 #' @param target_cols character(3). Names of columns for X, Y.
 #'   Default is `c("lon", "lat")`. It is passed to sf::st_as_sf to
 #'   subsequently generate spatial cross-validation indices using
@@ -825,6 +824,7 @@ generate_cv_index_ts <-
 #' @param cv_make_fun function(1). Function to generate spatial
 #'   cross-validation indices.
 #'   Default is `spatialsample::spatial_block_cv`.
+#' @param ... Additional arguments to be passed to `cv_make_fun`.
 #' @seealso [`spatialsample::spatial_block_cv`],
 #'   [`spatialsample::spatial_clustering_cv`],
 #'   [`spatialsample::spatial_buffer_vfold_cv`]
@@ -885,7 +885,6 @@ generate_cv_index_sp <-
 #' @return None. A plot will be generated.
 #' @importFrom scatterplot3d scatterplot3d
 #' @importFrom graphics par
-#' @seealso [`generate_cv_index()`]
 #' @export
 vis_spt_rset <-
   function(rsplit, cex = 0.02, angle = 60) {
