@@ -653,7 +653,7 @@ generate_cv_index_spt <-
         stop("ngroup_init should be less than cv_pairs.")
       }
       # 2-combinations of ngroup_init check
-      if (ncol(combn::combn(seq_len(ngroup_init), 2)) < cv_pairs) {
+      if (ncol(utils::combn(seq_len(ngroup_init), 2)) < cv_pairs) {
         stop(
           paste0(
             "cv_pairs cannot be larger than ",
