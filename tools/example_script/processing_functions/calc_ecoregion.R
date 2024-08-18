@@ -3,7 +3,7 @@
 #' @param sites sf/SpatVector. Unique sites. Should include
 #'  a unique identifier field named \code{id_col}
 #' @param id_col character(1). Name of unique identifier.
-#' @returns a data.frame object with dummy variables and attributes of:
+#' @return a data.frame object with dummy variables and attributes of:
 #'   - \code{attr(., "ecoregion2_code")}: Ecoregion lv.2 code and key
 #'   - \code{attr(., "ecoregion3_code")}: Ecoregion lv.3 code and key
 #' @author Insang Song

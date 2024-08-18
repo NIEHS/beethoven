@@ -8,7 +8,7 @@ sites_st <- filter_unique_sites(include_time = TRUE)
 
 #' Calculate temporal dummy variables
 #' @input sites data.frame with a temporal field named "date"
-#' @returns data.frame with year, month, and weekday indicators.
+#' @return data.frame with year, month, and weekday indicators.
 #' @author Insang Song
 #' @importFrom methods is
 #' @importFrom data.table year

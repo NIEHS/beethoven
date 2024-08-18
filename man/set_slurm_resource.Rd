@@ -33,7 +33,8 @@ set_slurm_resource(
 A list of resources for \code{tar_resources}
 }
 \description{
-Set resource management for SLURM
+This function sets up resources for SLURM job submission.
+Note that this function is designed to work with \code{tar_make_future()}
 }
 \note{
 This function is designed to be used with \code{tar_resources}.

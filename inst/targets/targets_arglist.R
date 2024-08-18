@@ -67,7 +67,7 @@ library(beethoven)
 #' @param path_input Character string specifying the input path.
 #'   Default is "input".
 #'
-#' @returns A list of arguments for the calculation process.
+#' @return A list of arguments for the calculation process.
 #' @importFrom qs qsave
 #' @export
 set_args_calc <-

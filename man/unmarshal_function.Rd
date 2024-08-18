@@ -13,7 +13,11 @@ unmarshal_function(pkg_func_str)
 Function object.
 }
 \description{
-Unmarshal functions
+this function is developed to avoid
+random errors in compressing and decompressing R function objects
+with \code{qs::qsave} and \code{qs::qread}. If you encounter such errors, please use
+this function with function name strings to save and load the function
+objects.
 }
 \note{
 The function name string must include two colons \code{::}.

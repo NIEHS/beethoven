@@ -8,7 +8,7 @@ fit_meta_learner(
   data,
   p_col_sel = 0.5,
   rset = NULL,
-  yvar = "pm2.5",
+  yvar = "Arithmetic.Mean",
   xvar = character(0),
   tune_iter = 50L
 )
@@ -24,14 +24,20 @@ fit_meta_learner(
 
 \item{xvar}{character. Feature names.}
 
-\item{tune_iter}{integer(1). Bayesian optimization iterations.}
+\item{tune_iter}{integer(1). Bayesian optimization iterations.
+Default is 50.}
 }
 \value{
-best model object.
+List of 3, including the best-fit model, the best hyperparameters,
+and the all performance records from \code{tune::tune_bayes()}.
+Note that the meta learner function returns the best-fit model,
+not predicted values.
 }
 \description{
 This function subsets the full data by column subsamples (rate=50\%)
 The optimal hyperparameter search is performed based on spatial,
-temporal, and spatiotemporal cross-validation schemes and continuous
-ranked probability score (CRPS) with Bayesian optimization.
+temporal, and spatiotemporal cross-validation schemes.
+As of version 0.4.0, the function relies on RMSE to select the
+best hyperparameter set.
 }
+\keyword{meta_learner}

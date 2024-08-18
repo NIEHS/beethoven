@@ -11,7 +11,7 @@ set_args_calc(
   num_extent = c(-126, -62, 22, 52),
   char_user_email = paste0(Sys.getenv("USER"), "@nih.gov"),
   export = FALSE,
-  path_export = "inst/targets/punchcard_calc.qs",
+  path_export = "inst/targets/calc_spec.qs",
   char_input_dir = "input",
   nthreads_nasa = 14L,
   nthreads_tri = 5L,
@@ -44,7 +44,7 @@ Default is the current user's email with nih.gov domain.}
 is exported to \code{path_export}. Default is FALSE.}
 
 \item{path_export}{Character string specifying the export path.
-Default is "inst/targets/punchcard_calc.qs".}
+Default is "inst/targets/calc_spec.qs".}
 
 \item{char_input_dir}{Character string specifying the input path.
 Default is "input".}
@@ -78,7 +78,8 @@ Default is 64L.}
 }
 \value{
 A list of arguments for common use
-in the calculation process.
+in the calculation process. A *.qs or *.rds file defined in
+\code{path_export} is saved if \code{export} is TRUE.
 \itemize{
 \item char_siteid: Character string specifying the site ID.
 \item char_timeid: Character string specifying the time ID.

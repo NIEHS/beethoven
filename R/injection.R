@@ -6,7 +6,7 @@
 #'   dataset.
 #' @param dataset_name character(1). Dataset name.
 #' @param ... Arguments passed to `amadeus::download_data`
-#' @returns logical(1).
+#' @return logical(1).
 #' @export
 feature_raw_download <-
   function(
@@ -55,9 +55,11 @@ feature_raw_download <-
 
 #' Set which years to be processed
 #' @keywords Utility
+#' @note This function is designed to define the temporal domain
+#'   from the calculation period and the available years of raw data.
 #' @param period character(2)/integer(2) of integer/character/Date.
 #' @param available vector of integer or Date. Available years to be processed.
-#' @returns A vector of years to be processed.
+#' @return A vector of years to be processed.
 #' @export
 set_target_years <-
   function(
@@ -78,8 +80,6 @@ set_target_years <-
 
 
 
-
-
 # calculate over a list
 #' Spatiotemporal covariate calculation
 #' @keywords Calculation
@@ -93,7 +93,7 @@ set_target_years <-
 #' @param calc_function Function to calculate covariates.
 #' [`amadeus::calc_covariates`]
 #' @param ... Arguments passed to `process_function` and `calc_function`
-#' @returns A data.table object.
+#' @return A data.table object.
 #' @importFrom data.table rbindlist
 #' @importFrom rlang inject
 #' @export
@@ -227,7 +227,7 @@ calculate <-
 #' @param injection Additional arguments to be injected into
 #'   the calculate function.
 #'
-#' @returns The result of the calculate function with the injected arguments.
+#' @return The result of the calculate function with the injected arguments.
 #'
 #' @examples
 #' \dontrun{
@@ -253,7 +253,7 @@ inject_calculate <- function(covariate, locs, injection) {
 #'   features need to be calculated.
 #' @param injection **List** of dditional parameters to be passed to the
 #'   `calc_modis_par` function.
-#' @returns MODIS/VIIRS feature data.frame.
+#' @return MODIS/VIIRS feature data.frame.
 #' @seealso [`amadeus::calc_modis_daily`], [`amadeus::calc_modis_par`]
 #' @importFrom rlang inject
 #' @examples
@@ -295,7 +295,7 @@ inject_modis_par <- function(locs, injection) {
 #' @param injection A list of additional arguments to be passed to
 #'   the `calc_geos_strict` function.
 #' @param ... Placeholders
-#' @returns A modified data frame with injected geographic information.
+#' @return A modified data frame with injected geographic information.
 #' @export
 inject_geos <- function(locs, injection, ...) {
   rlang::inject(
@@ -327,7 +327,7 @@ inject_geos <- function(locs, injection, ...) {
 #' @param nthreads The number of threads to be used for parallel processing.
 #'  Default is 4.
 #'
-#' @returns A data frame containing the merged results of GMTED data
+#' @return A data frame containing the merged results of GMTED data
 #'   for each location within different radii.
 #' @importFrom future plan
 #' @importFrom future.apply future_lapply
@@ -359,6 +359,8 @@ inject_gmted <- function(locs, variable, radii, injection, nthreads = 4L) {
   return(radii_join)
 }
 
+# nocov end
+
 
 #' Reduce and merge a list of data tables
 #'
@@ -368,9 +370,10 @@ inject_gmted <- function(locs, variable, radii, injection, nthreads = 4L) {
 #'
 #' @param list_in A list of data tables to be merged.
 #' @param by The columns to merge the data tables on.
+#'   If `NULL`, the function will automatically detect the common column names.
 #' @param all.x logical(1). Keeping all rows from the first input.
 #' @param all.y logical(1). Keeping all rows from the second input.
-#' @returns A merged data table.
+#' @return A merged data table.
 #' @keywords Post-calculation
 #' @examples
 #' \dontrun{
@@ -427,7 +430,7 @@ inject_match <- function(f, args) {
 
 }
 
-
+# nocov start
 
 #' Inject arguments into NLCD calculation function for branching
 #' @keywords Calculation
@@ -435,7 +438,7 @@ inject_match <- function(f, args) {
 #' @param radius An integer specifying the radius for the NLCD calculation.
 #' @param ... Additional arguments to be passed to the NLCD calculation
 #'  function.
-#' @returns data.frame object.
+#' @return data.frame object.
 #' @export
 inject_nlcd <-
   function(

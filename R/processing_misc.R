@@ -5,7 +5,7 @@
 #' @param year integer(1). Year of the county shapefile.
 #' @param exclude character. State FIPS codes to exclude.
 #' Default is c("02", "15", "60", "66", "68", "69", "72", "78").
-#' @returns sf object
+#' @return sf object
 #' @importFrom tigris counties
 process_counties <-
   function(
@@ -24,7 +24,7 @@ process_counties <-
 #' Get Divisors
 #' @keywords Miscellaneous
 #' @param x integer(1). A positive integer.
-#' @returns A vector of divisors of x.
+#' @return A vector of divisors of x.
 divisor <-
   function(x) {
     xv <- seq_len(x)

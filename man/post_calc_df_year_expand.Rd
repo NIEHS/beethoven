@@ -16,7 +16,9 @@ post_calc_df_year_expand(
 )
 }
 \arguments{
-\item{df}{The input data frame.}
+\item{df}{The input data frame. The data frame should have the same
+number of rows per year, meaning that it assumes this argument is
+a spatial-only feature data.frame.}
 
 \item{locs_id}{The column name of the location identifier in the data frame.}
 
@@ -41,7 +43,7 @@ for each year based on the time period specified.
 }
 \note{
 Year expansion rule is to assign the nearest past year
-in the available years;#' if there is no past year in the available years,
+in the available years; if there is no past year in the available years,
 the first available year is rolled back to the start of the time period.
 }
 \examples{

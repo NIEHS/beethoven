@@ -5,7 +5,7 @@
 #' @param sites sf/SpatVector. Unique sites. Should include
 #'  a unique identifier field named \code{id_col}
 #' @param id_col character(1). Name of unique identifier.
-#' @returns a data.frame object with dummy variables and attributes of:
+#' @return a data.frame object with dummy variables and attributes of:
 #'   - \code{attr(., "ecoregion2_code")}: Ecoregion lv.2 code and key
 #'   - \code{attr(., "ecoregion3_code")}: Ecoregion lv.3 code and key
 #' @author Insang Song
@@ -84,7 +84,7 @@ calc_ecoregion <-
 #' @param sites sf/SpatVector. Unique sites. Should include
 #'  a unique identifier field named \code{id_col}
 #' @param id_col character(1). Name of unique identifier.
-#' @returns a data.frame object
+#' @return a data.frame object
 #' @author Insang Song
 #' @import terra
 #' @export
@@ -165,7 +165,7 @@ calc_koeppen_geiger <- calc_koppen_geiger
 
 #' Calculate temporal dummy variables
 #' @input sites data.frame with a temporal field named "date"
-#' @returns data.frame with year, month, and weekday indicators.
+#' @return data.frame with year, month, and weekday indicators.
 #' @author Insang Song
 #' @importFrom methods is
 #' @importFrom data.table year
@@ -245,7 +245,7 @@ calc_temporal_dummies <-
 #' @param date_in Date(1). date to query.
 #' @param foo closure. A function compatible with \code{SpatRaster}.
 #' @author Insang Song
-#' @returns A SpatRaster object.
+#' @return A SpatRaster object.
 #' @export
 get_vrt <- function(
     paths,
@@ -323,7 +323,7 @@ get_vrt <- function(
 #' @param foo function. A calculation function working with
 #' SpatRaster and sf.
 #' @author Insang Song
-#' @returns A SpatRaster object.
+#' @return A SpatRaster object.
 #' @export
 modis_worker <- function(
   paths,

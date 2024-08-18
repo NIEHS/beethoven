@@ -364,7 +364,7 @@ center_station_id <- 1013
 #' @param station_id_list A list of station IDs.
 #' @param r_thred The correlation threshold.
 #' @note Assume that the data is stored in the `./data/stations_data` directory.
-#' @returns A list containing the input tensor (x) and the target tensor (y).
+#' @return A list containing the input tensor (x) and the target tensor (y).
 make_tensors <- function(
     center_station = center_station_id,
     station_list = station_id_list,

@@ -11,7 +11,6 @@ generate_cv_index_spt(
   ngroup_init = 5L,
   cv_pairs = NULL,
   pairing = c("1", "2"),
-  cv_mode = c("spatiotemporal", "spatial", "temporal"),
   ...
 )
 }
@@ -44,13 +43,11 @@ are selected based on the rank.
 \item "2": rank the pairwise distances directly
 }}
 
-\item{cv_mode}{character(1). Spatiotemporal cross-validation indexing}
-
 \item{...}{Additional arguments to be passed.}
 }
 \value{
 List of numeric vectors with balanced cluster numbers and
-reference lists of analysis and assessment set numbers in attributes.
+reference lists of assessment set pair numbers in attributes.
 }
 \description{
 This function generates a spatio-temporal cross-validation index
@@ -58,9 +55,51 @@ based on the anticlust package. The function first calculates the
 spatial clustering index using the \code{\link[anticlust:balanced_clustering]{anticlust::balanced_clustering()}}
 function as default, and if \code{cv_pairs} is provided, it generates rank-based
 pairs based on the proximity between cluster centroids.
+\code{cv_pairs} can be NULL, in which case only the spatial clustering index
+is generated. \code{ngroup_init} should be lower than \code{cv_pairs}, while
+it imposes a condition that \code{nrow(data) \%\% ngroup_init} should be 0
+and \code{cv_pairs} should be less than the number of 2-combinations of
+\code{ngroup_init}. Each training set will get 50\% overlap
+with adjacent training sets. "Pairs (combinations)" are selected
+based on the rank of centroids of \code{ngroup_init} number of initial
+clusters, where users have two options.
+}
+\details{
+\itemize{
+\item Mode "1" assigns at least one pair for each
+initial cluster, meaning that \code{ngroup_init} pairs are assigned for each
+initial cluster, then the remaining pairs will be ranked to finalize
+the \code{cv_pairs} sets.
+\item Mode "2" will rank the pairwise distances
+directly, which may ignore some overly large initial clusters for pairing.
+}
+
+Of course, mode "2" is faster than mode "1", thus users are advised
+to use mode "2" when they are sure that the initial clusters are
+spatially uniformly distributed.
 }
 \note{
-\code{nrow(data) \%\% ngroup_init} should be 0.
+\code{nrow(data) \%\% ngroup_init} should be 0. This is a required
+condition for the anticlust::balanced_clustering().
+}
+\examples{
+library(data.table)
+data <- data.table(
+  lon = runif(100),
+  lat = runif(100),
+  time =
+  rep(
+    seq.Date(from = as.Date("2021-01-01"), to = as.Date("2021-01-05"),
+             by = "day"),
+    20
+  )
+)
+rset_spt <-
+  generate_cv_index_spt(
+    data, preprocessing = "normalize",
+    ngroup_init = 5L, cv_pairs = 6L
+  )
+rset_spt
 }
 \author{
 Insang Song

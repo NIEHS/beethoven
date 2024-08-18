@@ -9,7 +9,8 @@ reduce_merge(list_in, by = c("site_id", "time"), all.x = TRUE, all.y = FALSE)
 \arguments{
 \item{list_in}{A list of data tables to be merged.}
 
-\item{by}{The columns to merge the data tables on.}
+\item{by}{The columns to merge the data tables on.
+If \code{NULL}, the function will automatically detect the common column names.}
 
 \item{all.x}{logical(1). Keeping all rows from the first input.}
 

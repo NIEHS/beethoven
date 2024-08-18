@@ -34,7 +34,7 @@
 #' @keywords Utility
 #' @param argfile character(1). Path to the argument file. RDS format.
 #' @param dataset character(1). Dataset name.
-#' @returns A list of arguments stored in `dataset` slot of the
+#' @return A list of arguments stored in `dataset` slot of the
 #'   argument file.
 #' @importFrom qs qread
 #' @export
@@ -68,7 +68,7 @@ loadargs <- function(argfile, dataset) {
 #'   The default pattern is "hdf$".
 #' @param date A vector of two dates to filter the files by.
 #'   The default is an empty character vector.
-#' @returns A list of full file names of the MODIS files found
+#' @return A list of full file names of the MODIS files found
 #'   in the specified path.
 #'
 #' @examples
@@ -106,7 +106,7 @@ load_modis_files <- function(path, pattern = "hdf$", date = character(2)) {
 #' Default is `amadeus::process_aqs`
 #' @param export Export the file to qs. Default is FALSE.
 #' @param ... Passed arguments to `fun_aqs`
-#' @returns Depending on `fun_aqs` specification.
+#' @return Depending on `fun_aqs` specification.
 #' @importFrom qs qsave
 #' @export
 read_locs <-
@@ -122,15 +122,18 @@ read_locs <-
 
 
 
-
-
 #' Unmarshal functions
 #' @keywords Utility
 #' @param pkg_func_str Character string specifying the package and function.
-#' @returns Function object.
+#' @return Function object.
 #' @note The function name string must include two colons `::`.
 #' Also, the package preceding the two colons should be loaded in the
 #' current environment.
+#' @description this function is developed to avoid
+#'   random errors in compressing and decompressing R function objects
+#'   with `qs::qsave` and `qs::qread`. If you encounter such errors, please use
+#'   this function with function name strings to save and load the function
+#'   objects.
 #' @export
 #' @examples
 #' unmarshal_function("amadeus::process_aqs")
@@ -145,7 +148,6 @@ unmarshal_function <-
 
 
 
-
 #' Read paths from a directory with a specific file extension
 #' @keywords Utility
 #' @param path The directory path from which to read the paths.
@@ -153,7 +155,7 @@ unmarshal_function <-
 #' @param target_dates A character vector of length 2 containing
 #'  the start and end dates.
 #' @param julian logical(1). If `TRUE`, the dates are in Julian format.
-#' @returns A character vector containing the full paths of the matching files.
+#' @return A character vector containing the full paths of the matching files.
 #'
 #' @examples
 #' \dontrun{

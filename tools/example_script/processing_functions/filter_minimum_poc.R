@@ -15,7 +15,7 @@
 #' @param site_id character(1). Name of site id (not monitor id)
 #' @param poc_name character(1). Name of column containing POC values.
 #' @author Insang Song
-#' @returns a data.table object
+#' @return a data.table object
 #' @importFrom dplyr group_by
 #' @importFrom dplyr filter
 #' @importFrom dplyr ungroup

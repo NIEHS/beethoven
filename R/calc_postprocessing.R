@@ -10,7 +10,7 @@
 #' @param time_value The value to be assigned to the time column.
 #' @param time_id The name of the time column (default is "time").
 #'
-#' @returns The data frame with the added time column.
+#' @return The data frame with the added time column.
 #'
 #' @examples
 #' \dontrun{
@@ -39,7 +39,7 @@ add_time_col <- function(df, time_value, time_id = "time") {
 #' @param time_end integer(1). Ending year.
 #' @param time_unit character(1). Time unit. Default is `"year"`.
 #' @param time_available vector. Available years.
-#' @returns integer vector of length (time_end - time_start + 1).
+#' @return integer vector of length (time_end - time_start + 1).
 #' Each element will get the nearest preceeding available year.
 #' @note
 #' The minimum of `time_available` will be filled in front of the first
@@ -78,7 +78,9 @@ post_calc_year_expand <-
 #' This function expands a data frame by year, creating multiple rows
 #'  for each year based on the time period specified.
 #' @keywords Post-calculation
-#' @param df The input data frame.
+#' @param df The input data frame. The data frame should have the same
+#' number of rows per year, meaning that it assumes this argument is
+#' a spatial-only feature data.frame.
 #' @param locs_id The column name of the location identifier in the data frame.
 #' @param time_field The column name of the time field in the data frame.
 #' @param time_start The start of the time period.
@@ -87,9 +89,9 @@ post_calc_year_expand <-
 #' @param time_available A vector of available time periods.
 #' @param ... Placeholders.
 #' @note Year expansion rule is to assign the nearest past year
-#' in the available years;#' if there is no past year in the available years,
+#' in the available years; if there is no past year in the available years,
 #' the first available year is rolled back to the start of the time period.
-#' @returns The expanded data frame with multiple rows for each year.
+#' @return The expanded data frame with multiple rows for each year.
 #' @seealso [`post_calc_year_expand()`]
 #' @examples
 #' \dontrun{
@@ -151,7 +153,7 @@ post_calc_df_year_expand <- function(
 #' @param time logical(1). Whether or not include time identifier.
 #' Set this `TRUE` will supersede `by` value by appending time identifier.
 #' @param ... data.frame objects to merge
-#' @returns data.table
+#' @return data.table
 #' @keywords Post-calculation
 #' @importFrom data.table as.data.table
 #' @importFrom data.table merge.data.table
@@ -196,7 +198,7 @@ post_calc_merge_features <-
 #' @param df data.frame
 #' @param candidates character. Candidate column names.
 #' @param replace character. New column name.
-#' @returns data.frame
+#' @return data.frame
 #' @keywords Post-calculation
 #' @export
 post_calc_unify_timecols <-
@@ -242,7 +244,7 @@ post_calc_convert_time <-
 #' @importFrom methods is
 #' @importFrom data.table merge.data.table
 #' @importFrom data.table `:=`
-#' @returns data.frame
+#' @return data.frame
 post_calc_join_yeardate <-
   function(
     df_year,
@@ -280,7 +282,7 @@ post_calc_join_yeardate <-
 #' @param df_sp data.frame. Spatial-only covariates.
 #' @param df_spt data.frame. Spatiotemporal covariates.
 #' @note This version assumes the time_id contains Date-like strings.
-#' @returns data.frame
+#' @return data.frame
 #' @importFrom data.table merge.data.table
 #' @export
 post_calc_merge_all <-
@@ -331,7 +333,7 @@ post_calc_merge_all <-
 #'   "^lon$|^lat$|geoid|year$|description".
 #' @param strict logical(1). If `TRUE`,
 #'   only `c("site_id", "time")` will be kept.
-#' @returns The modified data frame with the specified columns removed.
+#' @return The modified data frame with the specified columns removed.
 #'
 #' @examples
 #' \dontrun{
@@ -355,6 +357,9 @@ post_calc_drop_cols <-
     return(df)
   }
 
+# nocov end
+
+
 #' Automatic joining by the time and spatial identifiers
 #' @description The key assumption is that all data frames will have
 #' time field and spatial field and the data should have one of date or year.
@@ -370,7 +375,7 @@ post_calc_drop_cols <-
 #' @param year_start The starting year of the time period.
 #' @param year_end The ending year of the time period.
 #' @keywords Post-calculation
-#' @returns A merged data table.
+#' @return A merged data table.
 #' @examples
 # nolint start
 #' \dontrun{
@@ -385,8 +390,7 @@ post_calc_drop_cols <-
 #' }
 # nolint end
 #' @importFrom data.table merge.data.table
-#' @importFrom rlang as_name
-#' @importFrom rlang sym
+#' @importFrom rlang as_name sym
 #' @export
 post_calc_autojoin <-
   function(
@@ -433,6 +437,7 @@ post_calc_autojoin <-
           message(
             "The time field includes years. Trying different join strategy."
           )
+          # derive the available years from the coarsely resolved data
           coarse_years <- sort(unique(unlist(as.integer(df_coarse[[field_t]]))))
           df_coarse2 <- post_calc_df_year_expand(
             df_coarse,
@@ -455,6 +460,7 @@ post_calc_autojoin <-
   }
 
 
+# nocov start
 
 #' Impute missing values and attach lagged features
 #' @keywords Post-calculation
@@ -478,7 +484,7 @@ post_calc_autojoin <-
 #' @param nthreads_imputation The number of threads to be used for
 #'   the imputation process.
 #'
-#' @returns The imputed data table with lagged features.
+#' @return The imputed data table with lagged features.
 #'
 #' @importFrom collapse set_collapse replace_inf replace_na fvar fnth
 #' @importFrom data.table setDTthreads setnafill
@@ -671,7 +677,7 @@ impute_all <-
 #' @param input_new The new input object to be appended.
 #' @param nthreads The number of threads to be used.
 #'
-#' @returns If no existing predecessors are found, the function saves
+#' @return If no existing predecessors are found, the function saves
 #'   the new input object and returns the name of the saved file.
 #'   If existing predecessors are found, the function appends
 #'   the new input object to the existing ones and returns the combined object.

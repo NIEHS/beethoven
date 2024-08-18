@@ -25,3 +25,4 @@ inst/targets-wide
 \.vscode
 \.qmd$
 \.sh$
+R/reserved.R

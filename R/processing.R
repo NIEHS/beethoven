@@ -161,7 +161,7 @@ process_geos_bulk <-
 #' @param path A character vector specifying the path to the data files.
 #' @param ... Additional parameters to be passed to other functions.
 #'
-#' @returns A SpatRaster object containing the processed NARR2 data.
+#' @return A SpatRaster object containing the processed NARR2 data.
 #'
 #' @details This function performs the following steps:
 #'   1. Sets up the directory path.

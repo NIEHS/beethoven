@@ -1,6 +1,4 @@
 
-# nocov start
-
 #' Set arguments for the calculation process
 #'
 #' This function sets the arguments for the calculation process.
@@ -20,7 +18,7 @@
 #' @param export logical(1). If TRUE, the list for the calculation process
 #'   is exported to `path_export`. Default is FALSE.
 #' @param path_export Character string specifying the export path.
-#'   Default is "inst/targets/punchcard_calc.qs".
+#'   Default is "inst/targets/calc_spec.qs".
 #' @param char_input_dir Character string specifying the input path.
 #'    Default is "input".
 #' @param nthreads_nasa integer(1). Number of threads for NASA data.
@@ -66,8 +64,10 @@
 #' - sedac_groads
 #' - sedac_population
 #'
-#' @returns A list of arguments for common use
-#'   in the calculation process.
+#' @return A list of arguments for common use
+#'   in the calculation process. A *.qs or *.rds file defined in
+#'  `path_export` is saved if `export` is TRUE.
+#'
 #' * char_siteid: Character string specifying the site ID.
 #' * char_timeid: Character string specifying the time ID.
 #' * char_period: Character vector specifying the time period.
@@ -95,7 +95,7 @@ set_args_calc <-
     num_extent = c(-126, -62, 22, 52),
     char_user_email = paste0(Sys.getenv("USER"), "@nih.gov"),
     export = FALSE,
-    path_export = "inst/targets/punchcard_calc.qs",
+    path_export = "inst/targets/calc_spec.qs",
     char_input_dir = "input",
     nthreads_nasa = 14L,
     nthreads_tri = 5L,
@@ -329,6 +329,17 @@ set_args_download <-
     export = FALSE,
     path_export = "inst/targets/download_spec.qs"
   ) {
+    # NULL NASA Earth Data token will warn users
+    if (is.null(nasa_earth_data_token)) {
+      warning(
+        paste0(
+          "Argument nasa_earth_data_token is NULL. ",
+          "Please provide a NASA Earth Data token to make the downloading ",
+          "process work properly."
+        )
+      )
+    }
+
     # append input path
     ain <- function(x) {
       file.path(char_input_dir, x)
@@ -467,5 +478,3 @@ set_args_download <-
   }
 
 # nolint end
-
-# nocov end

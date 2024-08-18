@@ -222,7 +222,7 @@ calc_geos_strict <-
 #' @param radius numeric(1). Radius for the extraction.
 #' @param fun character(1). Function to apply.
 #' @param ... Additional parameters to be passed to other functions.
-#' @returns A data.frame containing the extracted GMTED data.
+#' @return A data.frame containing the extracted GMTED data.
 #' @importFrom terra rast
 #' @importFrom terra varnames
 #' @importFrom terra extract
@@ -373,7 +373,7 @@ calc_gmted_direct <- function(
 #' @param ... Additional arguments to be passed to
 #'  the aggregation function.
 #'
-#' @returns A data frame containing the aggregated values for each
+#' @return A data frame containing the aggregated values for each
 #'  location and time point.
 #' @export
 calc_narr2 <- function(
@@ -485,7 +485,7 @@ calc_narr2 <- function(
 #' @param nthreads An integer specifying the number of threads
 #'  to use for parallel processing. Default is 24.
 #'
-#' @returns A list of results from the parallel processing.
+#' @return A list of results from the parallel processing.
 #' @importFrom future plan multicore sequential
 #' @importFrom future.apply future_lapply
 #' @export

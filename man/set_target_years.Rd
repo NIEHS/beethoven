@@ -17,4 +17,8 @@ A vector of years to be processed.
 \description{
 Set which years to be processed
 }
+\note{
+This function is designed to define the temporal domain
+from the calculation period and the available years of raw data.
+}
 \keyword{Utility}

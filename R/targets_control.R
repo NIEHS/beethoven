@@ -2,6 +2,9 @@
 
 
 #' Set resource management for SLURM
+#'
+#' This function sets up resources for SLURM job submission.
+#' Note that this function is designed to work with `tar_make_future()`
 #' @keywords Utility
 #' @param template_file SLURM job submission shell template path.
 #' @param partition character(1). Name of partition. Default is `"geo"`
@@ -12,7 +15,7 @@
 #' @param error_log character(1). Error log file name.
 #' @note This function is designed to be used with `tar_resources`.
 #' Suggested number of `ncpus` is more than 1 for typical multicore R tasks.
-#' @returns A list of resources for `tar_resources`
+#' @return A list of resources for `tar_resources`
 #' @author Insang Song
 #' @importFrom future tweak
 #' @importFrom future.batchtools batchtools_slurm

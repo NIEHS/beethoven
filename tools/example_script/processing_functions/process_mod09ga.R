@@ -99,7 +99,7 @@ get_vrt_old <- function(
 #' @param index_sds integer(1). The index of subdataset to draw.
 #' @param date_in Date(1). date to query.
 #' @param foo closure. A function compatible with \code{SpatRaster}.
-#' @returns A SpatRaster object.
+#' @return A SpatRaster object.
 get_vrt <- function(
   flist, index_sds = NULL, date_in, foo = mean) {
   today <- as.character(date_in)
