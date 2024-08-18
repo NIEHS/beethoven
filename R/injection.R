@@ -6,6 +6,8 @@
 #'   dataset.
 #' @param dataset_name character(1). Dataset name.
 #' @param ... Arguments passed to `amadeus::download_data`
+#' @importFrom amadeus download_data
+#' @importFrom rlang inject
 #' @return logical(1).
 #' @export
 feature_raw_download <-
@@ -96,6 +98,8 @@ set_target_years <-
 #' @return A data.table object.
 #' @importFrom data.table rbindlist
 #' @importFrom rlang inject
+#' @importFrom amadeus process_covariates calc_covariates
+#' @importFrom future plan sequential multicore
 #' @export
 calculate <-
   function(

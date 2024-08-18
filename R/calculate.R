@@ -20,14 +20,13 @@
 #' hard-coded subsets for subdataset selection
 #' @author Mitchell Manware, Insang Song
 #' @return a `SpatRaster` object;
-#' @importFrom terra rast
-#' @importFrom terra time
-#' @importFrom terra varnames
-#' @importFrom terra crs
-#' @importFrom terra subset
 #' @importFrom sf st_as_sf
 #' @importFrom future.apply future_lapply
 #' @importFrom data.table rbindlist
+#' @importFrom future plan multicore sequential
+#' @importFrom amadeus generate_date_sequence
+#' @importFrom terra describe rast time subset crs varnames vect sds extract
+#' @importFrom dplyr full_join
 #' @export
 calc_geos_strict <-
   function(path = NULL,
@@ -223,9 +222,9 @@ calc_geos_strict <-
 #' @param fun character(1). Function to apply.
 #' @param ... Additional parameters to be passed to other functions.
 #' @return A data.frame containing the extracted GMTED data.
-#' @importFrom terra rast
-#' @importFrom terra varnames
-#' @importFrom terra extract
+#' @importFrom terra rast varnames extract
+#' @importFrom amadeus process_gmted_codes calc_prepare_locs calc_worker
+#' @importFrom amadeus download_sanitize_path
 #' @export
 calc_gmted_direct <- function(
     variable = NULL,

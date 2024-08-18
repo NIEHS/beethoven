@@ -875,7 +875,7 @@ generate_cv_index_sp <-
       }
     }
 
-    return(newcv)
+  return(newcv)
 }
 
 

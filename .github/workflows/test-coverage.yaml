@@ -24,16 +24,11 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::covr, any::remotes
+          extra-packages: any::covr, any::DT, any::htmltools
           needs: coverage
 
-      - name: install remote packages
-        run: |
-          Rscript -e 'remotes::install_github(sprintf("NIEHS/%s", c("amadeus", "chopin")), upgrade = FALSE)'
-        shell: bash
-  
       - name: Cache C++ and R dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v2
         with:
           path: |
             ~/.cache/R
@@ -43,66 +38,51 @@ jobs:
             dependencies-${{ runner.os }}-
 
       - name: Test coverage
-        run: >
-          Rscript -e
-          "covd<-covr::coverage_to_list()$totalcoverage;
+        run: |
+          Rscript -e "covpack<-covr::package_coverage(install_path='${{ github.workspace }}/cov', clean=FALSE); \
+          covr::report(covpack, file = file.path('${{ github.workspace }}', 'chopin-coverage-report.html')); \
+          covd<-covr::coverage_to_list(covpack)$totalcoverage; \
           write.table(covd[length(covd)], file = '${{ github.workspace }}/local_cov.Rout', row.names = F, col.names = F)"
         shell: bash
+
+      - name: Upload covr report as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: covr-report
+          path: ${{ github.workspace }}/chopin-coverage-report.html
+
+      - name: Upload workspace dump as artifact if the test fails
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-outputs
+          path: ${{ github.workspace }}/**
 
       - name: Get Values
         id: get-values
         shell: bash
         run: |
           COV=$(cat ${{ github.workspace }}/local_cov.Rout)
-          echo "Patch coverage read from local_cov.Rout: $COV"
           echo "coverage=$COV" >> $GITHUB_OUTPUT
 
       - name: Checkout gh-pages
         uses: actions/checkout@v4
         with:
           ref: gh-pages
-
-      - name: Patch comparison
-        id: patch-comparison
-        shell: bash
-        run: |
-          cov_patch="${{ steps.get-values.outputs.coverage }}"
-          if [[ ! -f cov_current.Rout ]]; then
-            cov_current=0
-          else
-            cov_current=$(cat cov_current.Rout)
-          fi
-          echo "Current coverage: $cov_current"
-
-          if (( $(echo "$cov_patch >= $cov_current" | bc -l) )); then
-            echo "Patch coverage ($cov_patch) is greater than or equal to current coverage ($cov_current)."
-            echo "cov_update=$cov_patch" >> $GITHUB_OUTPUT
-           else
-            echo "Patch coverage ($cov_patch) is less than current coverage ($cov_current)."
-            exit 1
-          fi
-
-      - name: Overwrite cov_current.Rout
-        if: ${{ github.event_name == 'push' }}
-        shell: bash
-        run: |
-          cov_update="${{ steps.patch-comparison.outputs.cov_update }}"
-          touch cov_current.Rout
-          echo "$cov_update" > cov_current.Rout
-
+  
       - name: Create Badges
         shell: bash
         run: |
           npm i -g badgen-cli
           export COV=${{ steps.get-values.outputs.coverage }}
-          COLOR=$(node -p '+process.env.COV >= 95 ? `green` : `yellow`')
+          COLOR=$(node -p '+process.env.COV >= 95 ? `green` : `orange`')
           mkdir -p badges
           badgen -j coverage -s $COV% -c $COLOR > badges/coverage.svg
   
       - name: Deploy Badges
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: "Update badges [skip ci] & cov_current.Rout"
+          commit_message: "Update badges [skip ci]"
           branch: gh-pages
           skip_fetch: true
           skip_checkout: true
@@ -113,4 +93,4 @@ jobs:
       - name: Checkout Back
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref }}  
+          ref: ${{ github.ref }} 

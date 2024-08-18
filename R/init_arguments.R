@@ -85,6 +85,7 @@
 #' * nthreads_impute: Number of threads for imputing data.
 #' @author Insang Song
 #' @importFrom qs qsave
+#' @importFrom tibble tribble
 #' @export
 # nolint start
 set_args_calc <-

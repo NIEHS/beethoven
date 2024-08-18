@@ -284,6 +284,7 @@ post_calc_join_yeardate <-
 #' @note This version assumes the time_id contains Date-like strings.
 #' @return data.frame
 #' @importFrom data.table merge.data.table
+#' @importFrom amadeus calc_temporal_dummies
 #' @export
 post_calc_merge_all <-
   function(
@@ -749,21 +750,5 @@ append_predecessors <-
     }
   }
 
-
-# nested parallelization
-# IN PROGRESS
-# TODO: identify bottleneck
-#' @noRd
-par_nest <-
-  function(
-    path,
-    ...
-  ) {
-    chopin::par_grid(
-      path,
-      fun_dist = calculate,
-      ...
-    )
-  }
 
 # nocov end

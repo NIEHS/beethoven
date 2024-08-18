@@ -52,6 +52,5 @@ data <-
     path = "/path/to/data"
   )
 }
-
 }
 \keyword{Calculation}

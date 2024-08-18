@@ -185,7 +185,9 @@ process_geos_bulk <-
 #'     path = "/path/to/data"
 #'   )
 #' }
-#'
+#' @importFrom amadeus download_sanitize_path check_for_null_parameters
+#' @importFrom amadeus generate_date_sequence
+#' @importFrom terra rast time subset
 #' @export
 process_narr2 <- function(
     date = c("2023-09-01", "2023-09-01"),
