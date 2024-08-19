@@ -26,127 +26,6 @@ add_time_col <- function(df, time_value, time_id = "time") {
 }
 
 
-# 2018~2022, 2017, 2020
-# 2017 ... 2020 ...
-# 2017
-#' Map the available raw data years over the given period
-#' @description
-#' Many raw datasets are periodically updated and the period could
-#' be longer than a year. This function maps the available years
-#' over the given period.
-#' @keywords Post-calculation
-#' @param time_start integer(1). Starting year.
-#' @param time_end integer(1). Ending year.
-#' @param time_unit character(1). Time unit. Default is `"year"`.
-#' @param time_available vector. Available years.
-#' @return integer vector of length (time_end - time_start + 1).
-#' Each element will get the nearest preceeding available year.
-#' @note
-#' The minimum of `time_available` will be filled in front of the first
-#' available year when the minimum of `time_available` is greater
-#' than `time_start`.
-#' @examples
-#' \dontrun{
-#' process_calc_year_expand(2018, 2022, "year", c(2017, 2020, 2021))
-#' process_calc_year_expand(2018, 2022, "year", c(2020, 2021))
-#' }
-#' @export
-post_calc_year_expand <-
-  function(
-    time_start = NULL,
-    time_end = NULL,
-    time_unit = "year",
-    time_available = NULL
-  ) {
-    time_seq <- seq(time_start, time_end)
-    time_target_seq <- findInterval(time_seq, time_available)
-    time_target_seq <- time_available[time_target_seq]
-    if (min(time_available) > time_start) {
-      time_target_seq <-
-        c(
-          rep(min(time_available),
-              min(time_available) - time_start),
-          time_target_seq
-        )
-    }
-    return(time_target_seq)
-  }
-
-
-#' Expand a data frame by year
-#'
-#' This function expands a data frame by year, creating multiple rows
-#'  for each year based on the time period specified.
-#' @keywords Post-calculation
-#' @param df The input data frame. The data frame should have the same
-#' number of rows per year, meaning that it assumes this argument is
-#' a spatial-only feature data.frame.
-#' @param locs_id The column name of the location identifier in the data frame.
-#' @param time_field The column name of the time field in the data frame.
-#' @param time_start The start of the time period.
-#' @param time_end The end of the time period.
-#' @param time_unit The unit of time to expand the data frame. Only for record.
-#' @param time_available A vector of available time periods.
-#' @param ... Placeholders.
-#' @note Year expansion rule is to assign the nearest past year
-#' in the available years; if there is no past year in the available years,
-#' the first available year is rolled back to the start of the time period.
-#' @return The expanded data frame with multiple rows for each year.
-#' @seealso [`post_calc_year_expand()`]
-#' @examples
-#' \dontrun{
-#' df <- data.frame(year = c(2010, 2010, 2011, 2012),
-#'                  value = c(1, 2, 3, 4))
-#' df_expanded <-
-#'   post_calc_df_year_expand(df, locs_id = "site_id", time_field = "year",
-#'                            time_start = 2011, time_end = 2012,
-#'                            time_unit = "year")
-#' print(df_expanded)
-#' }
-#' @importFrom stats sd
-#' @export
-post_calc_df_year_expand <- function(
-  df,
-  locs_id = "site_id",
-  time_field = "time",
-  time_start = NULL,
-  time_end = NULL,
-  time_unit = "year",
-  time_available = NULL,
-  ...
-) {
-  time_summary <- table(unlist(df[[time_field]]))
-  if (length(time_summary) != 1) {
-    if (stats::sd(time_summary) != 0) {
-      stop("df should be a data frame with the same number of rows per year")
-    }
-  }
-  # assume that df is the row-bound data frame
-  if (is.character(df[[time_field]])) {
-    df[[time_field]] <- as.integer(df[[time_field]])
-  }
-  df_years <- unique(df[[time_field]])
-  nlocs <- length(unique(df[[locs_id]]))
-  year_period <- seq(time_start, time_end)
-  # assign the time period to the available years
-  year_assigned <-
-    post_calc_year_expand(time_start, time_end, time_unit, df_years)
-  df_years_repeats <- table(year_assigned)
-
-  # repeat data frames
-  df_expanded <- Map(
-    function(y) {
-      df_sub <- df[df[[time_field]] == df_years[y], ]
-      df_sub <- df_sub[rep(seq_len(nrow(df_sub)), df_years_repeats[y]), ]
-      return(df_sub)
-    },
-    seq_along(year_assigned)
-  )
-  df_expanded <- do.call(rbind, df_expanded)
-  df_expanded[[time_field]] <- rep(year_period, each = nlocs)
-  return(df_expanded)
-}
-
 
 #' Merge input data.frame objects
 #' @param by character. Joining keys. See [`merge`] for details.
@@ -230,6 +109,9 @@ post_calc_convert_time <-
     return(df)
   }
 
+# nocov end
+
+
 #' Join a data.frame with a year-only date column to
 #'  that with a full date column
 #' @description The full date column will be converted to a year column
@@ -272,6 +154,132 @@ post_calc_join_yeardate <-
     return(df_joined)
   }
 
+
+# 2018~2022, 2017, 2020
+# 2017 ... 2020 ...
+# 2017
+#' Map the available raw data years over the given period
+#' @description
+#' Many raw datasets are periodically updated and the period could
+#' be longer than a year. This function maps the available years
+#' over the given period.
+#' @keywords Post-calculation
+#' @param time_start integer(1). Starting year.
+#' @param time_end integer(1). Ending year.
+#' @param time_unit character(1). Time unit. Default is `"year"`.
+#' @param time_available vector. Available years.
+#' @return integer vector of length (time_end - time_start + 1).
+#' Each element will get the nearest preceeding available year.
+#' @note
+#' The minimum of `time_available` will be filled in front of the first
+#' available year when the minimum of `time_available` is greater
+#' than `time_start`.
+#' @examples
+#' \dontrun{
+#' process_calc_year_expand(2018, 2022, "year", c(2017, 2020, 2021))
+#' process_calc_year_expand(2018, 2022, "year", c(2020, 2021))
+#' }
+#' @export
+post_calc_year_expand <-
+  function(
+    time_start = NULL,
+    time_end = NULL,
+    time_unit = "year",
+    time_available = NULL
+  ) {
+    time_seq <- seq(time_start, time_end)
+    time_target_seq <- findInterval(time_seq, time_available)
+    time_target_seq <- time_available[time_target_seq]
+    if (min(time_available) > time_start) {
+      time_target_seq <-
+        c(
+          rep(min(time_available),
+              min(time_available) - time_start),
+          time_target_seq
+        )
+    }
+    return(time_target_seq)
+  }
+
+
+
+#' Expand a data frame by year
+#'
+#' This function expands a data frame by year, creating multiple rows
+#'  for each year based on the time period specified.
+#' @keywords Post-calculation
+#' @param df The input data frame. The data frame should have the same
+#' number of rows per year, meaning that it assumes this argument is
+#' a spatial-only feature data.frame.
+#' @param locs_id The column name of the location identifier in the data frame.
+#' @param time_field The column name of the time field in the data frame.
+#' @param time_start The start of the time period.
+#' @param time_end The end of the time period.
+#' @param time_unit The unit of time to expand the data frame. Only for record.
+#' @param time_available A vector of available time periods.
+#' @param ... Placeholders.
+#' @note Year expansion rule is to assign the nearest past year
+#' in the available years; if there is no past year in the available years,
+#' the first available year is rolled back to the start of the time period.
+#' @return The expanded data frame with multiple rows for each year.
+#' @seealso [`post_calc_year_expand()`]
+#' @examples
+#' \dontrun{
+#' df <- data.frame(year = c(2010, 2010, 2011, 2012),
+#'                  value = c(1, 2, 3, 4))
+#' df_expanded <-
+#'   post_calc_df_year_expand(df, locs_id = "site_id", time_field = "year",
+#'                            time_start = 2011, time_end = 2012,
+#'                            time_unit = "year")
+#' print(df_expanded)
+#' }
+#' @importFrom stats sd
+#' @export
+post_calc_df_year_expand <- function(
+  df,
+  locs_id = "site_id",
+  time_field = "time",
+  time_start = NULL,
+  time_end = NULL,
+  time_unit = "year",
+  time_available = NULL,
+  ...
+) {
+  time_summary <- table(unlist(df[[time_field]]))
+  if (length(time_summary) != 1) {
+    if (stats::sd(time_summary) != 0) {
+      stop("df should be a data frame with the same number of rows per year")
+    }
+  }
+  # assume that df is the row-bound data frame
+  if (is.character(df[[time_field]])) {
+    df[[time_field]] <- as.integer(df[[time_field]])
+  }
+  df_years <- unique(df[[time_field]])
+  nlocs <- length(unique(df[[locs_id]]))
+  year_period <- seq(time_start, time_end)
+  # assign the time period to the available years
+  year_assigned <-
+    post_calc_year_expand(time_start, time_end, time_unit, df_years)
+  df_years_repeats <- table(year_assigned)
+
+  # repeat data frames
+  df_expanded <- Map(
+    function(y) {
+      df_sub <- df[df[[time_field]] == df_years[y], ]
+      df_sub <- df_sub[rep(seq_len(nrow(df_sub)), df_years_repeats[y]), ]
+      return(df_sub)
+    },
+    seq_along(year_assigned)
+  )
+  df_expanded <- do.call(rbind, df_expanded)
+  df_expanded[[time_field]] <- rep(year_period, each = nlocs)
+  return(df_expanded)
+}
+
+
+
+# nocov start
 
 #' Merge spatial and spatiotemporal covariate data
 #' @keywords Post-calculation
