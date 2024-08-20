@@ -1,6 +1,6 @@
 Package: beethoven
 Title: Building an Extensible, rEproducible, Test-driven, Harmonized, Open-source, Versioned, ENsemble model for air quality
-Version: 0.3.5
+Version: 0.4.0
 Authors@R: c(
     person("Kyle", "Messier", , "kyle.messier@nih.gov", role = c("aut", "cre"), comment = c(ORCID = "0000-0001-9508-9623")),
     person("Insang", "Song", role = c("aut", "ctb"), comment = c(ORCID = "0000-0001-8732-3256")),
@@ -16,24 +16,23 @@ Authors@R: c(
 Description: Near Real Time air pollution model results and code produced by the SET group. It is fully tested, versioned, and open source and open access.
 Depends: R (>= 4.1.0)
 Imports:
+  amadeus,
   dplyr,
   sf,
   stats,
   terra,
   methods,
-  BART,
   data.table,
   future,
   targets,
   tune (>= 1.2.1),
   rlang,
   rsample,
+  spatialsample,
   tidyr,
   tidyselect,
   yardstick,
-  bonsai,
-  lightgbm,
-  vetiver,
+  torch,
   workflows,
   recipes,
   missRanger,
@@ -43,19 +42,25 @@ Imports:
   anticlust,
   qs,
   stringi,
+  tibble,
   collapse,
   tigris,
-  graphics
+  graphics,
+  scatterplot3d
 Suggests:
   testthat (>= 3.0.0),
   covr,
   withr,
-  tarchetypes,
-  tidymodels,
-  xgboost,
-  torch,
+  bonsai,
   brulee,
   glmnet,
+  lightgbm,
+  scoringRules,
+  future.mirai,
+  xgboost (<= 2.0.3.1),
+  vetiver,
+  tarchetypes,
+  tidymodels,
   knitr,
   rmarkdown,
   stars,
@@ -64,10 +69,10 @@ Suggests:
   FNN,
   ggplot2,
   doRNG,
-  scatterplot3d,
   furrr,
   quarto
 Remotes: NIEHS/amadeus, NIEHS/chopin
+SystemRequirements: NetCDF4, CUDA (>= 10.0)
 Encoding: UTF-8
 VignetteBuilder: knitr, rmarkdown
 Roxygen: list(markdown = TRUE)

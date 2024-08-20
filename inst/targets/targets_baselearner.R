@@ -6,301 +6,97 @@ target_baselearner <-
       attach_xy(dt_feat_calc_imputed, sf_feat_proc_aqs_sites)
     )
     ,
-    # P
     targets::tar_target(
-      name = list_feat_calc_xyt,
-      command =
-      lapply(
-        rep(1, 30),
-        function(x) {
-          make_subdata(dt_feat_calc_xyt, p = 0.3)
-        }
-      ),
+      name = df_learner_type,
+      command = assign_learner_cv(
+        learner = c("xgb", "mlp", "elnet"),
+        cv_mode = c("spatial", "temporal", "spatiotemporal"),
+        cv_rep = 100L,
+        num_device = 2L
+      ) %>%
+      split(seq_len(nrow(.))),
       iteration = "list"
     )
     ,
-    # length of 30 rsets
     targets::tar_target(
-      name = list_learner_base_cv_spt,
-      command =
-      prepare_cvindex(
-        data = list_feat_calc_xyt,
-        target_cols = c("lon", "lat", "time"),
-        cv_make_fun = generate_cv_index,
-        cv_fold = 8L,
-        cv_pairs = 10L,
-        preprocessing = "normalize",
-        pairing = "1"
-      ),
-      pattern = map(list_feat_calc_xyt),
-      iteration = "list"
-    )
-    ,
-    # length of 30
-    targets::tar_target(
-      name = list_learner_base_cv_spblock,
-      command =
-      prepare_cvindex(
-        data = list_feat_calc_xyt,
-        target_cols = c("lon", "lat"),
-        cv_make_fun = spatialsample::spatial_block_cv,
-        v = 10L,
-        method = "snake"
-      ),
-      pattern = map(list_feat_calc_xyt),
-      iteration = "list"
-    )
-    ,
-    # length of 30
-    targets::tar_target(
-      name = list_learner_base_cv_spcluster,
-      command =
-      prepare_cvindex(
-        data = list_feat_calc_xyt,
-        target_cols = c("lon", "lat"),
-        cv_make_fun = spatialsample::spatial_clustering_cv,
-        v = 10L,
-        cluster_function = "kmeans"
-      ),
-      pattern = map(list_feat_calc_xyt),
-      iteration = "list",
-      resources = set_slurm_resource(ncpus = 1L, memory = 32L, partition = "geo")
-    )
-    ,
-    # learn_rate branching
-    targets::tar_target(
-      name = num_learner_base_learn_device,
-      command =
-        split(
-          data.frame(
-            device = sprintf("cuda:%d", c(0, 1, 2, 3)),
-            rate = c(0.1, 0.05, 0.01, 0.001)
-          ), seq(1, 4)
+      name = list_base_args_cv,
+      command = list(
+        spatial = list(
+          target_cols = c("lon", "lat"),
+          cv_make_fun = generate_cv_index_sp,
+          v = 10L,
+          method = "snake"
         ),
-      description = "device and learning rate",
-      iteration = "list"
+        temporal = list(
+          cv_fold = 10L,
+          time_col = "time",
+          window = 14L
+        ),
+        spatiotemporal = list(
+          target_cols = c("lon", "lat", "time"),
+          cv_make_fun = generate_cv_index_spt,
+          ngroup_init = 8L,
+          cv_pairs = 10L,
+          preprocessing = "normalize",
+          pairing = "1"
+        )
+      )
     )
     ,
-    # wf: workflow
-    # xgb-spt-cv
-    # length of 120 (4 * 30)
     targets::tar_target(
-      workflow_learner_base_lgb_spt,
-      fit_base_lightgbm(
-        dt_feat_calc_imputed,
-        folds = list_learner_base_cv_spt,
-        tune_mode = "grid",
-        learn_rate = num_learner_base_learn_device$rate,
-        device = num_learner_base_learn_device$device
-      ),
-      pattern = cross(num_learner_base_learn_device, list_learner_base_cv_spt),
-      resources = set_slurm_resource(ncpus = 6L, memory = 20L, partition = "geo")
+      name = list_base_params_candidates,
+      command = list(
+        lgb =
+          expand.grid(
+            mtry = floor(c(0.025, seq(0.05, 0.2, 0.05)) * 2000L),
+            trees = seq(1000, 3000, 1000),
+            learn_rate = c(0.1, 0.05, 0.01, 0.005)
+          )
+        ,
+        xgb =
+          expand.grid(
+            mtry = floor(c(0.025, seq(0.05, 0.2, 0.05)) * 2000L),
+            trees = seq(1000, 3000, 1000),
+            learn_rate = c(0.1, 0.05, 0.01, 0.005)
+          )
+        ,
+        mlp = 
+          expand.grid(
+            hidden_units = c(1024, 512, 256, 128, 64),
+            dropout = 1 / seq(5, 2, -1),
+            activation = c("relu", "leaky_relu"),
+            learn_rate = c(0.1, 0.05, 0.01, 0.005)
+          )
+        ,
+        elnet =
+          expand.grid(
+            # 0.05 step, 0 through 1
+            mixture = seq(0, 1, length.out = 21),
+            penalty = 10 ^ seq(-3, 5, 1)
+          )
+      )
     )
     ,
-    # length of 120
     targets::tar_target(
-      workflow_learner_base_lgb_spblock,
-      fit_base_lightgbm(
-        dt_feat_calc_imputed,
-        folds = list_learner_base_cv_spblock,
-        tune_mode = "grid",
-        learn_rate = num_learner_base_learn_device$rate,
-        device = num_learner_base_learn_device$device
-      ),
-      pattern = cross(num_learner_base_learn_device, list_learner_base_cv_spblock),
-      resources = set_slurm_resource(ncpus = 6L, memory = 20L, partition = "geo")
-    )
-    ,
-    # length of 120
-    targets::tar_target(
-      workflow_learner_base_xgb_spcluster,
-      fit_base_lightgbm(
-        dt_feat_calc_imputed,
-        folds = list_learner_base_cv_spcluster,
-        tune_mode = "grid",
-        learn_rate = num_learner_base_learn_device$rate,
-        device = num_learner_base_learn_device$device
-      ),
-      pattern = cross(num_learner_base_learn_device, list_learner_base_cv_spcluster),
-      resources = set_slurm_resource(ncpus = 6L, memory = 20L, partition = "geo")
-    )
-    ,
-    # mlp-cv: iterate by combination of rate+device and cv strategy
-    # length of 120
-    targets::tar_target(
-      workflow_learner_base_mlp_spt,
-      fit_base_brulee(
-        dt_feat_calc_imputed,
-        folds = list_learner_base_cv_spt,
-        tune_mode = "grid",
-        learn_rate = num_learner_base_learn_device$rate,
-        device = num_learner_base_learn_device$device
-      ),
-      pattern = cross(num_learner_base_learn_device, list_learner_base_cv_spt),
-      resources = set_slurm_resource(ncpus = 6L, memory = 20L, partition = "geo,gpu")
-    )
-    ,
-    # length of 120
-    targets::tar_target(
-      workflow_learner_base_mlp_spblock,
-      fit_base_brulee(
-        dt_feat_calc_imputed,
-        folds = list_learner_base_cv_spblock,
-        tune_mode = "grid",
-        learn_rate = num_learner_base_learn_device$rate,
-        device = num_learner_base_learn_device$device
-      ),
-      pattern = cross(num_learner_base_learn_device, list_learner_base_cv_spblock),
-      resources = set_slurm_resource(ncpus = 6L, memory = 20L, partition = "geo,gpu")
-    )
-    ,
-    # length of 120
-    targets::tar_target(
-      workflow_learner_base_mlp_spcluster,
-      fit_base_brulee(
-        dt_feat_calc_imputed,
-        folds = list_learner_base_cv_spcluster,
-        tune_mode = "grid",
-        learn_rate = num_learner_base_learn_device$rate,
-        device = num_learner_base_learn_device$device
-      ),
-      pattern = cross(num_learner_base_learn_device, list_learner_base_cv_spcluster),
-      resources = set_slurm_resource(ncpus = 6L, memory = 20L, partition = "geo,gpu")
-    )
-    ,
-    # elnet-cv is branched out only by subsamples.
-    # length of 30
-    targets::tar_target(
-      workflow_learner_base_elnet_spt,
-      fit_base_elnet(
-        dt_feat_calc_imputed,
-        folds = list_learner_base_cv_spt,
-        nthreads = 32L
-      ),
-      pattern = map(list_learner_base_cv_spt),
+      name = workflow_learner_base_best,
+      command =
+        fit_base_learner(
+          learner = df_learner_type$learner,
+          dt_full = dt_feat_calc_xyt,
+          r_subsample = 0.3,
+          model =
+            switch_model(model_type = df_learner_type$learner,
+                         device = df_learner_type$device),
+          cv_mode = df_learner_type$cv_mode,
+          args_generate_cv = list_base_args_cv[[df_learner_type$cv_mode]],
+          tune_grid_in = list_base_params_candidates[[df_learner_type$learner]],
+          # preferably match the number of threads to the random grid size.
+          tune_grid_size = 10L,
+          nthreads = 10L
+        ),
+      pattern = map(df_learner_type),
       iteration = "list",
-      resources = set_slurm_resource(ncpus = 32L, memory = 8L, partition = "geo")
+      resources = set_slurm_resource(ncpus = 10L, memory = 8L, partition = "geo")
     )
-    ,
-    # length of 30
-    targets::tar_target(
-      workflow_learner_base_elnet_spblock,
-      fit_base_elnet(
-        dt_feat_calc_imputed,
-        folds = list_learner_base_cv_spblock,
-        nthreads = 32L
-      ),
-      pattern = map(list_learner_base_cv_spblock),
-      iteration = "list",
-      resources = set_slurm_resource(ncpus = 32L, memory = 8L, partition = "geo")
-    )
-    ,
-    # length of 30
-    targets::tar_target(
-      workflow_learner_base_elnet_spcluster,
-      fit_base_elnet(
-        dt_feat_calc_imputed,
-        folds = list_learner_base_cv_spcluster,
-        nthreads = 32L
-      ),
-      pattern = map(list_learner_base_cv_spcluster),
-      iteration = "list",
-      resources = set_slurm_resource(ncpus = 32L, memory = 8L, partition = "geo")
-    )
-    ,
-    # combine tuning results to find the best model
-    # xgb and mlp were branched out by learn_rate;
-    # learn_rate comes first, thus subsamples are organized
-    # in a manner of 1 2 3 4 5 ... 30 1 2 3 4 5 ... 30 ...
-    # combine the results with indices of 1 31 61 91 / 2 32 62 92 / ... / 30 60 90 120. Could be changed per #subsamples.
-    # elnet is length of 30 (or #subsamples)
-    targets::tar_target(
-      list_learner_base_lgb_best_spt,
-      restore_fit_best(
-        workflow_learner_base_lgb_spt,
-        rset_full = list_learner_base_cv_spt,
-        df_full = dt_feat_calc_imputed,
-        nested = TRUE
-      )
-    )
-    ,
-    targets::tar_target(
-      list_learner_base_lgb_best_spblock,
-      restore_fit_best(
-        workflow_learner_base_lgb_spblock,
-        rset_full = list_learner_base_cv_spblock,
-        df_full = dt_feat_calc_imputed,
-        nested = TRUE
-      )
-    )
-    ,
-    targets::tar_target(
-      list_learner_base_lgb_best_spcluster,
-      restore_fit_best(
-        workflow_learner_base_lgb_spcluster,
-        rset_full = list_learner_base_cv_spcluster,
-        df_full = dt_feat_calc_imputed,
-        nested = TRUE
-      )
-    )
-    ,
-    targets::tar_target(
-      list_learner_base_mlp_best_spt,
-      restore_fit_best(
-        workflow_learner_base_mlp_spt,
-        rset_full = list_learner_base_cv_spt,
-        df_full = dt_feat_calc_imputed,
-        nested = TRUE
-      )
-    )
-    ,
-    targets::tar_target(
-      list_learner_base_mlp_best_spblock,
-      restore_fit_best(
-        workflow_learner_base_mlp_spblock,
-        rset_full = list_learner_base_cv_spblock,
-        df_full = dt_feat_calc_imputed,
-        nested = TRUE
-      )
-    )
-    ,
-    targets::tar_target(
-      list_learner_base_mlp_best_spcluster,
-      restore_fit_best(
-        workflow_learner_base_mlp_spcluster,
-        rset_full = list_learner_base_cv_spcluster,
-        df_full = dt_feat_calc_imputed,
-        nested = TRUE
-      )
-    )
-    ,
-    targets::tar_target(
-      list_learner_base_elnet_best_spt,
-      restore_fit_best(
-        workflow_learner_base_elnet_spt,
-        rset_full = list_learner_base_cv_spt,
-        df_full = dt_feat_calc_imputed,
-        nested = TRUE
-      )
-    )
-    ,
-    targets::tar_target(
-      list_learner_base_elnet_best_spblock,
-      restore_fit_best(
-        workflow_learner_base_elnet_spblock,
-        rset_full = list_learner_base_cv_spblock,
-        df_full = dt_feat_calc_imputed,
-        nested = TRUE
-      )
-    )
-    ,
-    targets::tar_target(
-      list_learner_base_elnet_best_spcluster,
-      restore_fit_best(
-        workflow_learner_base_elnet_spcluster,
-        rset_full = list_learner_base_cv_spcluster,
-        df_full = dt_feat_calc_imputed,
-        nested = TRUE
-      )
-    )
+
   )

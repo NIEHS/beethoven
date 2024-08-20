@@ -9,7 +9,7 @@
 #' @param date_in Date(1). date to query.
 #' @param foo closure. A function compatible with \code{SpatRaster}.
 #' @author Insang Song
-#' @returns A SpatRaster object.
+#' @return A SpatRaster object.
 #' @export
 get_vrt <- function(
   paths,
@@ -169,7 +169,7 @@ assign_ext_vnp46 <- function(
 #' @param foo function. A calculation function working with
 #' SpatRaster and sf.
 #' @author Insang Song
-#' @returns A SpatRaster object.
+#' @return A SpatRaster object.
 #' @importFrom terra extract
 #' @importFrom terra project
 #' @importFrom terra vect

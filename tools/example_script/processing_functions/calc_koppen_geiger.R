@@ -6,7 +6,7 @@
 #' @param sites sf/SpatVector. Unique sites. Should include
 #'  a unique identifier field named \code{id_col}
 #' @param id_col character(1). Name of unique identifier.
-#' @returns a data.frame object
+#' @return a data.frame object
 #' @author Insang Song
 #' @import terra
 #' @export

@@ -1,6 +1,6 @@
 #' Check torch installation and load
 #' @param default_device character(1). "cpu", "cuda", or "mps"
-#' @returns NULL
+#' @return NULL
 #' @author Insang Song
 #' @importFrom torch torch_is_installed
 #' @importFrom torch torch_device

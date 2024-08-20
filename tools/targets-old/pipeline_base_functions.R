@@ -4,7 +4,7 @@
 #' @param var_short Short variable name to call from the CSV fiel
 #' @param file Path to the configuration file
 #' @param ... Arguments passed to the command
-#' @returns Depending on the specification in the punchcard.
+#' @return Depending on the specification in the punchcard.
 #' @examples
 #' meta_run("root_absolute")
 #' meta_run("root_relative")
@@ -42,7 +42,7 @@ meta_run <-
 #' @param error_log character(1). Error log file name.
 #' @notes This function is designed to be used with `tar_resources`.
 #' Suggested number of `ncpus` is more than 1 for typical multicore R tasks.
-#' @returns A list of resources for `tar_resources`
+#' @return A list of resources for `tar_resources`
 #' @author Insang Song
 #' @importFrom future tweak
 #' @importFrom future.batchtools batchtools_slurm
@@ -84,7 +84,7 @@ set_slurm_resource <-
 #' @param fun_aqs function to import AQS data.
 #' Default is `amadeus::process_aqs`
 #' @param ... Passed arguments to `fun_aqs`
-#' @returns Depending on `fun_aqs` specification.
+#' @return Depending on `fun_aqs` specification.
 #' @import amadeus process_aqs
 #' @export
 read_locs <-
@@ -105,7 +105,7 @@ read_locs <-
 #' @param date_end character(1).
 #' @param return_format character(1). One of `"sf"` or `"terra"`
 #' @author Insang Song
-#' @returns a data.table object
+#' @return a data.table object
 #' @importFrom dplyr group_by
 #' @importFrom dplyr filter
 #' @importFrom dplyr ungroup
@@ -173,7 +173,7 @@ get_aqs_data <-
 #' @param df_covar covariates data.frame
 #' @param locs_id location identifier
 #' @param time_id time identifier
-#' @returns data.frame
+#' @return data.frame
 #' @author Insang Song
 #' @importFrom data.table merge.data.table
 post_calc_join_pm25_features <-
@@ -198,7 +198,7 @@ post_calc_join_pm25_features <-
 #' @param path download path.
 #' @param dname Dataset name. See [`amadeus::download_data`] for details.
 #' @param ... Arguments passed to `amadeus::download_data`
-#' @returns logical(1).
+#' @return logical(1).
 feature_raw_download <-
   function(
     path = NULL,
@@ -220,7 +220,7 @@ feature_raw_download <-
 #' @param year integer(1). Year of the county shapefile.
 #' @param exclude character. State FIPS codes to exclude.
 #' Default is c("02", "15", "60", "66", "68", "69", "72", "78").
-#' @returns sf object
+#' @return sf object
 #' @importFrom tigris counties
 #' @export
 process_counties <-
@@ -244,7 +244,7 @@ process_counties <-
 #' @param calc_function Covariate calculator. Default is
 #' [`amadeus::calc_covariates`]
 #' @param ... Arguments passed to `calc_function`
-#' @returns Nothing. It will automatically save xz-compressed
+#' @return Nothing. It will automatically save xz-compressed
 #' RDS file to `outpath`
 #' @importFrom rlang inject
 #' @export
@@ -288,7 +288,7 @@ calculate_single <-
 #' @param calc_function Function to calculate covariates.
 #' [`amadeus::calc_covariates`]
 #' @param ... Arguments passed to `process_function` and `calc_function`
-#' @returns A data.table object.
+#' @return A data.table object.
 #' @importFrom data.table rbindlist
 #' @importFrom rlang inject
 #' @export
@@ -357,7 +357,7 @@ calculate_multi <-
 #' @param time logical(1). Whether or not include time identifier.
 #' Set this `TRUE` will supersede `by` value by appending time identifier.
 #' @param ... data.frame objects to merge
-#' @returns data.table
+#' @return data.table
 #' @importFrom data.table as.data.table
 #' @export
 post_calc_merge_features <-
@@ -395,7 +395,7 @@ post_calc_merge_features <-
 #' @param df data.frame
 #' @param candidates character. Candidate column names.
 #' @param replace character. New column name.
-#' @returns data.frame
+#' @return data.frame
 #' @export
 post_calc_unify_timecols <-
   function(
@@ -437,7 +437,7 @@ post_calc_convert_time <-
 #' @param spid character(1). Name of the unique location identifier field.
 #' @importFrom methods is
 #' @importFrom data.table merge.data.table
-#' @returns data.frame
+#' @return data.frame
 post_calc_join_yeardate <-
   function(
     df_year,
@@ -472,7 +472,7 @@ post_calc_join_yeardate <-
 #' @param df_sp data.frame. Spatial-only covariates.
 #' @param df_spt data.frame. Spatiotemporal covariates.
 #' @note This version assumes the time_id contains Date-like strings.
-#' @returns data.frame
+#' @return data.frame
 #' @importFrom amadeus calc_temporal_dummies
 #' @export
 post_calc_merge_all <-
@@ -512,7 +512,7 @@ post_calc_merge_all <-
 #' @param path The directory path from which to read the paths.
 #' @param extension The file extension to match. Defaults to ".hdf".
 #' @param target_dates A character vector of length 2 containing the start and end dates.
-#' @returns A character vector containing the full paths of the matching files.
+#' @return A character vector containing the full paths of the matching files.
 #'
 #' @examples
 #' # Read paths from a directory with default extension
@@ -544,7 +544,7 @@ read_paths <- function(path, extension = ".hdf", target_dates = c("2020-01-01", 
 #' Search package functions
 #' @param package character(1). Package name.
 #' @param search character(1). Search term.
-#' @returns A character vector containing the matching function names.
+#' @return A character vector containing the matching function names.
 #' @examples
 #' # Search for functions in the `amadeus` package
 #' search_function("amadeus", "process_")
@@ -555,7 +555,7 @@ search_function <- function(package, search){
 
 #' Get data.frame of function parameters
 #' @param functions character. Vector of function names.
-#' @returns A data.frame containing the parameters of the functions.
+#' @return A data.frame containing the parameters of the functions.
 df_params <- function(functions) {
   params <- lapply(functions, function(x) {
     args <- dplyr::as_tibble(lapply(as.list(formals(get(x))), \(p) list(p)), .name_repair = "minimal")

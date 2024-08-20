@@ -22,7 +22,7 @@
 #' @param remove_zip logical(1). Remove metadata zip file from
 #' directory_with_data Default = `FALSE`.
 #' @author Mariana Kassien, Insang Song, Mitchell Manware
-#' @returns NULL; Separate comma-separated value (CSV) files of
+#' @return NULL; Separate comma-separated value (CSV) files of
 #' monitors and the daily representative values
 #' will be stored in directory_to_save.
 #' @export

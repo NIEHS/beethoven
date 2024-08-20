@@ -8,16 +8,8 @@ library(targets)
 #   to = "_targets.R"
 # )
 
-.libPaths(
-  c(
-    "/ddn/gs1/biotools/R/lib64/R/custompkg",
-    .libPaths()
-  )
-)
-
-
 tar_make_future(
-  workers = 24
+  workers = 16
 )
 # TODO: should find a way of auto-invalidate feat_calc_(modis|viirs|geoscf)
 #     when the date range changes in the configuration.

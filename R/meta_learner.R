@@ -1,150 +1,114 @@
-# nolint start
-#' Fit a BART (Bayesian Additive Regression Tree) meta learner. It takes predictions of other models such as kriging, GLM, machine learning models as input and fits a BART Model
-#' @param base_predictor_list - P x 1 list where P = p is a base predictor
-#' vector (numeric). Each predictor vector should be the same length and
-#' named.
-#' @param kfolds integer, index of k-folds for cross-validation. This should be
-#' produced with regards to spatial and/or temporal considerations
-#' @param y dependent variable
-#' @param ... Passed arguments to \link[BART]{wbart}
-#' @return meta_fit_obj object of meta learner
-#' @export
-#' @examples NULL
-# nolint end
-meta_learner_fit <- function(base_predictor_list,
-                             kfolds, y, ...) {
-  # Unnamed base_predictor_list is not accepted
-  if (is.null(names(base_predictor_list)) ||
-        any(is.na(names(base_predictor_list)))) {
-    stop("base_predictor_list should be a named list.\n")
-  }
+# nocov start
 
-  # check lengths of each base predictor add a test for names
-  if (sapply(base_predictor_list, length, simplify = TRUE) |>
-        stats::var() != 0) {
-    stop("Error in meta_learner_fit:
-         Base predictors need to be the same length")
-  }
-
-  # check that length of base predictors is the same than y
-  if (lengths(base_predictor_list)[1] != length(y)) {
-    stop("Error in meta_learner_fit:
-         Predictors and response are not the same length")
-  }
-
-  # check that length of kfolds is the same than y
-  if (length(kfolds) != length(y)) {
-    stop("Error in meta_learner_fit:
-         kfolds vector and response are not the same length")
-  }
-
-  # check that base_predictor_list only contains only numeric
-  if (any(sapply(base_predictor_list, class) != "numeric")) {
-    stop("Error in meta_learner_fit:
-         Some of base predictors are not numeric")
-  }
-
-  # convert list to data.frame
-  x_design <- as.data.frame(base_predictor_list)
-
-  # Unique k-folds (typically 5 or 10)
-  nk <- length(unique(kfolds))
-  # Pre-allocate list of meta objects
-  meta_fit_obj <- vector(mode = "list", length = nk)
-  for (i in 1:nk) {
-    # get the training and test sets
-    x_tr <- x_design[kfolds != i, ]
-    x_te <- x_design[kfolds == i, ]
-    y_tr <- y[kfolds != i]
-    # Fit the BART model
-    meta_fit_obj[[i]] <- BART::wbart(
-      x.train = x_tr,
-      y.train = y_tr,
-      x.test = x_te,
-      ...
-    )
-  }
-  return(meta_fit_obj)
-}
-
-
-# nolint start
-#' Create meta_learner predictions from the list of BART fit objects and predictions of base learners
-#' @description
-#' The meta learner used in this package, Bayesian Additive Regression Tree (BART), is not explicitly a spatiotemporal model, but the input covariates (outputs of each base learner) are S-T based.
-# nolint end
-#' @param meta_fit list of BART objects from meta_learner_fit
-#' @param base_outputs_stdt stdt object.
-#' list with datatable containing lat, lon, time and the covariates
-#' (outputs of each base learner) at prediction locations and crs.
-#' @param nthreads integer(1). Number of threads used in [BART::predict.wbart]
-#' @note  The predictions can be a rast or sf, which depends on the same
-#' respective format of the covariance matrix input - cov_pred
-#' @return meta_pred: the final meta learner predictions
-#' @importFrom data.table .SD
-#' @import BART
-#' @importFrom stats predict
-#' @export
+#' Fit meta learner
 #'
-#' @examples NULL
-#' @references https://rspatial.github.io/terra/reference/predict.html
-meta_learner_predict <- function(meta_fit, base_outputs_stdt, nthreads = 2) {
-  if (!(identical(class(base_outputs_stdt), c("list", "stdt")))) {
-    stop("Error: param base_outputs_stdt is not in stdt format.")
+#' This function subsets the full data by column subsamples (rate=50%)
+#' The optimal hyperparameter search is performed based on spatial,
+#' temporal, and spatiotemporal cross-validation schemes.
+#' As of version 0.4.0, the function relies on RMSE to select the
+#' best hyperparameter set.
+#' @keywords meta_learner
+#' @param data data.frame. Full data.
+#' @param p_col_sel numeric(1). Rate of column resampling. Default is 0.5.
+#' @param rset rset object. Specification of training/test sets.
+#' @param yvar character(1). Outcome variable name
+#' @param xvar character. Feature names.
+#' @param tune_iter integer(1). Bayesian optimization iterations.
+#' Default is 50.
+#' @importFrom parsnip linear_reg
+#' @importFrom workflows workflow add_variables add_model
+#' @importFrom yardstick metric_set rmse mae
+#' @importFrom tune tune tune_bayes select_best
+#' @return List of 3, including the best-fit model, the best hyperparameters,
+#' and the all performance records from `tune::tune_bayes()`.
+#' Note that the meta learner function returns the best-fit model,
+#' not predicted values.
+#' @export
+fit_meta_learner <-
+  function(
+    data,
+    p_col_sel = 0.5,
+    rset = NULL,
+    yvar = "Arithmetic.Mean",
+    xvar = character(0),
+    tune_iter = 50L
+  ) {
+
+    # define model
+    meta_model <-
+      parsnip::linear_reg(
+        engine = "glmnet",
+        mode = "regression",
+        penalty = tune::tune(),
+        mixture = tune::tune()
+      )
+
+    # define recipe
+    meta_recipe <-
+      recipes::recipe(
+        data[1, ]
+      ) %>%
+      recipes::update_role(!!xvar) %>%
+      recipes::update_role(!!yvar, new_role = "outcome")
+
+    # define workflow from recipe and model
+    meta_workflow <-
+      workflows::workflow() %>%
+      workflows::add_recipe(
+        meta_recipe
+      ) %>%
+      workflows::add_model(meta_model)
+
+    # tune hyperparameters per Bayesian optimization
+    meta_tuned <-
+      tune::tune_bayes(
+        object = meta_workflow,
+        resamples = rset,
+        iter = tune_iter,
+        control = tune::control_bayes(
+          verbose = TRUE,
+          save_pred = FALSE,
+          save_workflow = TRUE
+        ),
+        metrics = yardstick::metric_set(
+          yardstick::rmse, yardstick::mae, yardstick::rsq
+        )
+      )
+
+    meta_wfparam <-
+      tune::select_best(
+        meta_tuned,
+        metric = c("rmse", "rsq", "mae")
+      )
+
+    # finalize workflow with the best tuned hyperparameters
+    meta_wfresult <- tune::finalize_workflow(meta_workflow, meta_wfparam)
+    # Best-fit model
+    meta_wf_fit_best <- parsnip::fit(meta_wfresult, data = data)
+
+    meta_wflist <-
+      list(
+        meta_fitted = meta_wf_fit_best,
+        meta_parameter = meta_wfparam,
+        best_performance = meta_tuned
+      )
+    return(meta_wflist)
   }
 
-  base_outputs <- base_outputs_stdt$stdt
-
-  if (any(!(colnames(meta_fit[[1]]$varcount) %in% colnames(base_outputs)))) {
-    stop("Error: baselearners list incomplete or with wrong names")
+#' Predict meta learner
+#' @keywords meta_learner
+#' @param meta_fitted Fitted meta learner model.
+#' @param new_data data.frame. New data. Must have the same
+#'   predictands and predictors as the training data.
+#' @importFrom stats predict
+#' @return Predicted values.
+#' @export
+predict_meta_learner <-
+  function(
+    meta_fitted,
+    new_data
+  ) {
+    stats::predict(meta_fitted, new_data)
   }
 
-  # extract baselearners predictions used in metalearner
-  base_name_index <- seq(1, ncol(base_outputs))
-  # changed to integer indices
-  # as we impose the fixed column order in stdt objects.
-  spt_name_index <- grep("(lon|lat|time)", colnames(base_outputs))
-  base_name_index <- base_name_index[-spt_name_index]
-  mat_pred <- as.matrix(base_outputs[, .SD, .SDcols = base_name_index])
-
-  # pre-allocate
-  meta_pred <- matrix(nrow = nrow(mat_pred), ncol = length(meta_fit))
-
-  iter_pred <- function(
-      meta_fit_in = meta_fit,
-      mat_pred_in,
-      meta_pred_in = meta_pred,
-      nthreads_in = nthreads) {
-    for (i in seq_along(meta_fit_in)) {
-      meta_pred_in[, i] <-
-        predict(
-          object = meta_fit_in[[i]],
-          newdata = mat_pred_in,
-          mc.cores = nthreads_in
-        ) |>
-        apply(2, mean)
-    }
-    meta_pred_out <- apply(meta_pred_in, 1, mean)
-    return(meta_pred_out)
-  }
-
-  meta_pred_out <- iter_pred(mat_pred_in = mat_pred)
-  meta_pred_out <- meta_pred_out |>
-    matrix(ncol = 1) |>
-    as.data.frame()
-  names(meta_pred_out) <- "meta_pred"
-  spt_names <- grep("(lon|lat|time)", colnames(base_outputs), value = TRUE)
-
-  meta_pred_out <-
-    cbind(
-      base_outputs[, .SD, .SDcols = spt_names],
-      meta_pred_out
-    )
-  meta_pred_out <- list(
-    "stdt" = meta_pred_out,
-    "crs_dt" = base_outputs_stdt$crs_dt
-  )
-  class(meta_pred_out) <- c("list", "stdt")
-
-  return(meta_pred_out)
-}
+# nocov end

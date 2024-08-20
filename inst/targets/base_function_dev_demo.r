@@ -751,3 +751,50 @@ lapply(lfna, function(x) {
   xxd <- x[duplicated(xx) | duplicated(xx, fromLast = TRUE),]
   dim(xxd)
 })
+
+
+
+library(sf)
+options(sf_use_s2 = FALSE)
+# Define the coordinates of the point in North Carolina
+lon <- -79.0558
+lat <- 35.7596
+
+# Create the point sf object
+point <- st_point(c(lon, lat))
+point <- st_sfc(point, crs = 4326)
+point <- st_as_sf(point)
+point$site_id <- "1"
+point$time <- "2024-01-01"
+
+inject_nlcd(year = 2021,
+                            radius = 1000,
+                            from = amadeus::process_nlcd(
+                              path = "/ddn/gs1/group/set/Projects/NRT-AP-Model/input/nlcd/data_files",
+                              year = 2021
+                            ),
+                            locs = point,
+                            locs_id = "site_id",
+                            nthreads = 1L,
+                            mode = "exact",
+                            max_cells = 3e7
+                            )
+
+df_feat_calc_nlcd_params <- data.frame(
+  year = 2021,
+  radius = 1000
+)
+file_prep_calc_args <- "inst/targets/calc_spec.qs"
+
+inject_nlcd(year = df_feat_calc_nlcd_params$year,
+                            radius = df_feat_calc_nlcd_params$radius,
+                            from = amadeus::process_nlcd(
+                              path = loadargs(file_prep_calc_args, "nlcd")$path,
+                              year = df_feat_calc_nlcd_params$year
+                            ),
+                            locs = point,
+                            locs_id = arglist_common$char_siteid,
+                            nthreads = 10L,
+                            mode = "exact",
+                            max_cells = 3e7
+                            )

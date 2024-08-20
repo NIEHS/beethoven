@@ -23,8 +23,18 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::rcmdcheck, any::remotes, any::units, any::rmarkdown
+          extra-packages: |
+            any::rcmdcheck
+            any::remotes
+            any::units
+            any::rmarkdown
           needs: check
+
+      - name: Install dependencies
+        run: |
+          remotes::install_deps(dependencies = TRUE)
+          remotes::install_cran("rcmdcheck")
+        shell: Rscript {0}
 
       - name: install remote packages
         run: |

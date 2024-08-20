@@ -19,7 +19,7 @@ options(sf_use_s2 = FALSE)
 #'  Should be in "YYYY-MM-DD" format.
 #' @param date_end character(1). End date.
 #'  Should be in "YYYY-MM-DD" format.
-#' @returns data.table object with three or four fields.
+#' @return data.table object with three or four fields.
 #' - "site_id"
 #' - "lon": in WGS 1984 (EPSG:4326)
 #' - "lat": in WGS 1984 (EPSG:4326)
