@@ -1,8 +1,5 @@
 # Base learners and auxiliary functions for base learners
 
-
-# nocov start
-
 #' Make sampled subdataframes for base learners
 #'
 #' Per beethoven resampling strategy, this function selects
@@ -949,6 +946,3 @@ switch_generate_cv_rset <-
     cvindex <- inject_match(target_fun, list(...))
     return(cvindex)
   }
-
-
-# nocov end

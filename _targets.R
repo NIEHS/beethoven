@@ -11,7 +11,7 @@ Sys.setenv("LD_LIBRARY_PATH" = paste("/ddn/gs1/biotools/R/lib64/R/customlib", Sy
 
 # replacing yaml file.
 tar_config_set(
-  store = "/ddn/gs1/group/set/pipeline/beethoven_targets"
+  store = "/ddn/gs1/home/manwareme/beethoven/beethoven_targets"
 )
 
 # maximum future exportable object size is set 50GB

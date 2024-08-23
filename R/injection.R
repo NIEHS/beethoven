@@ -1,4 +1,3 @@
-# nocov start
 
 #' Check file status and download if necessary
 #' @keywords Utility
@@ -222,7 +221,7 @@ calculate <-
 
 
 #' Injects the calculate function with specified arguments.
-#'
+#' @description
 #' This function injects the calculate function with the specified arguments,
 #' allowing for dynamic customization of the function's behavior.
 #' @keywords Calculation
@@ -230,9 +229,7 @@ calculate <-
 #' @param locs The locations to be used in the calculation.
 #' @param injection Additional arguments to be injected into
 #'   the calculate function.
-#'
 #' @return The result of the calculate function with the injected arguments.
-#'
 #' @examples
 #' \dontrun{
 #' inject_calculate(
@@ -251,7 +248,6 @@ inject_calculate <- function(covariate, locs, injection) {
 }
 
 #' Injects arguments to parallelize MODIS/VIIRS data processing
-#'
 #' @keywords Calculation
 #' @param locs A data frame containing the locations for which MODIS
 #'   features need to be calculated.
@@ -287,12 +283,11 @@ inject_modis_par <- function(locs, injection) {
 }
 
 #' Injects geographic information into a data frame
-#'
+#' @description
 #' This function injects geographic information into a data frame using
 #'   the `calc_geos_strict` function. The injected information includes
 #'   latitude and longitude coordinates based on the specified locations,
 #'   a location ID column, a window range, and a snapping option.
-#'
 #' @keywords Calculation
 #' @param locs A data frame containing the locations for which
 #'   geographic information needs to be injected.
@@ -315,11 +310,10 @@ inject_geos <- function(locs, injection, ...) {
 
 
 #' Injects GMTED data into specified locations
-#'
+#' @description
 #' This function injects GMTED (Global Multi-resolution Terrain Elevation Data)
 #'  into specified locations. It calculates the GMTED values for each
 #'  location within different radii and returns the merged results.
-#'
 #' @keywords Calculation
 #' @param locs A data frame/sf/SpatVector containing the locations
 #'   where GMTED variables needs to be calculated
@@ -330,7 +324,6 @@ inject_geos <- function(locs, injection, ...) {
 #'   the `calc_gmted_direct` function.
 #' @param nthreads The number of threads to be used for parallel processing.
 #'  Default is 4.
-#'
 #' @return A data frame containing the merged results of GMTED data
 #'   for each location within different radii.
 #' @importFrom future plan
@@ -341,12 +334,13 @@ inject_gmted <- function(locs, variable, radii, injection, nthreads = 4L) {
   future::plan(future::multicore, workers = nthreads)
 
   radii_list <- split(radii, seq_along(radii))
+
   radii_rep <-
     future.apply::future_lapply(
       radii_list,
       function(r) {
         rlang::inject(
-          calc_gmted_direct(
+          beethoven::calc_gmted_direct(
             locs = locs,
             locs_id = "site_id",
             radius = r,
@@ -357,21 +351,19 @@ inject_gmted <- function(locs, variable, radii, injection, nthreads = 4L) {
       },
       future.seed = TRUE
     )
+
   radii_rep <- lapply(radii_rep, function(x) as.data.frame(x))
-  radii_join <- reduce_merge(radii_rep, "site_id")
+  radii_join <- beethoven::reduce_merge(radii_rep, "site_id")
   future::plan(future::sequential)
   return(radii_join)
 }
 
-# nocov end
-
 
 #' Reduce and merge a list of data tables
-#'
+#' @description
 #' This function takes a list of data tables and merges them together
 #'  using the specified columns. It uses the `merge.data.table` function
 #'  from the `data.table` package to perform the merge.
-#'
 #' @param list_in A list of data tables to be merged.
 #' @param by The columns to merge the data tables on.
 #'   If `NULL`, the function will automatically detect the common column names.
@@ -434,7 +426,6 @@ inject_match <- function(f, args) {
 
 }
 
-# nocov start
 
 #' Inject arguments into NLCD calculation function for branching
 #' @keywords Calculation
@@ -454,5 +445,3 @@ inject_nlcd <-
     args_ext <- c(args_ext, list(year = year, radius = radius))
     inject_match(amadeus::calc_nlcd, args_ext)
   }
-
-# nocov end

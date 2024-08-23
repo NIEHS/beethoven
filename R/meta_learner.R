@@ -1,4 +1,3 @@
-# nocov start
 
 #' Fit meta learner
 #'
@@ -110,5 +109,3 @@ predict_meta_learner <-
   ) {
     stats::predict(meta_fitted, new_data)
   }
-
-# nocov end

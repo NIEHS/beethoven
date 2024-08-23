@@ -1,5 +1,3 @@
-# nocov start
-
 
 #' Process atmospheric composition data by chunks
 #' @keywords Calculation
@@ -80,16 +78,17 @@ calc_geos_strict <-
 
     #### identify collection
     collection <- regmatches(
-      data_paths[1],
+      data_paths,
       # the pattern accommodates 3-4 characters for the variable name,
       # 3-4 alphanumerics for the temporal resolution,
       # 8-9 alphanumerics for the output dimensions
       # nolint start
       regexpr(
         "GEOS-CF.v01.rpl.(aqc|chm)_[[:alpha:]]{3,4}_[[:alnum:]]{3,4}_[[:alnum:]]{8,9}_v[1-9]",
-        data_paths[1]
+        data_paths # mm-tests-0816 search all data paths for > 1 collection
       )
     )
+    collection <- unique(collection)
     cat(
       paste0(
         "Identified collection ",
@@ -97,10 +96,16 @@ calc_geos_strict <-
         ".\n"
       )
     )
-    if (length(unique(collection)) > 1) {
-      warning(
-        "Multiple collections detected. Returning data for all collections.\n"
+    if (length(collection) > 1) {
+      stop(
+        paste0(
+          "Multiple collections detected. Ensure that data files ",
+          "for each collection are stored in different directories ",
+          "(ie. 'chm' in 'data/chm/' and 'aqc' in 'data/aqc/').\n"
+        )
       )
+      # mm-tests-0816 return error for multiple collections in one path
+      # instead of warning to retain down-stream functionality
     }
 
     filename_date <- sort(regmatches(
@@ -279,10 +284,16 @@ calc_gmted_direct <- function(
     sprintf("LDU_E%s", statistic_to[match(statistic, statistic_from)])
 
   #### identify file path
-  paths <- list.dirs(
+  # mm-tests-0816 replaced "list.dir" with "list.files" to accomodate for
+  # spatially subsetted and saved files
+  # using "list.dir" does not properly read file path for re-written ESRI ASCII
+  # grid file
+  paths <- list.files(
     path,
-    full.names = TRUE
+    full.names = TRUE,
+    include.dirs = TRUE
   )
+
   data_path <-
     grep(
       sprintf(
@@ -292,6 +303,9 @@ calc_gmted_direct <- function(
       ),
       paths, value = TRUE
     )
+  # mm-tests-0816 ensures that .prj and .aux.xml files are not read
+  # with terra::rast if path points to re-written ASCII file
+  data_path <- data_path[!grepl("\\.prj$|\\.aux\\.xml$", data_path)]
 
   #### import data
   data <- terra::rast(data_path, win = win)
@@ -389,8 +403,8 @@ calc_narr2 <- function(
   fun = "mean",
   ...
 ) {
-  #
-  name <- geometry <- value <- NULL
+  # name <- geometry <- value <- NULL
+  name <- value <- NULL
   ### prepare locations list
   sites_list <- amadeus::calc_prepare_locs(
     from = from,
@@ -418,10 +432,13 @@ calc_narr2 <- function(
           bind = TRUE
         )
         sites_extracted_day <- data.frame(sites_extracted_day)
-        if ("geometry" %in% names(sites_extracted_day)) {
-          sites_extracted_day <- sites_extracted_day |>
-            dplyr::select(-geometry)
-        }
+        # mm-tests-0816 pending removal
+        # "geometry" column is dropped during locs = locs[, "site_id"],
+        # in line 410
+        # if ("geometry" %in% names(sites_extracted_day)) {
+        #   sites_extracted_day <- sites_extracted_day |>
+        #     dplyr::select(-geometry)
+        # }
         return(sites_extracted_day)
       },
       time_split
@@ -435,10 +452,13 @@ calc_narr2 <- function(
         bind = TRUE
       )
     sites_extracted <- as.data.frame(sites_extracted)
-    if ("geometry" %in% names(sites_extracted)) {
-      sites_extracted <- sites_extracted |>
-        dplyr::select(-geometry)
-    }
+    # mm-tests-0816 pending removal
+    # "geometry" column is dropped during locs = locs[, "site_id"],
+    # in line 410
+    # if ("geometry" %in% names(sites_extracted)) {
+    #   sites_extracted <- sites_extracted |>
+    #     dplyr::select(-geometry)
+    # }
   }
   sites_extracted <-
     sites_extracted |>
@@ -522,6 +542,3 @@ par_narr <- function(domain, path, date, locs, nthreads = 24L) {
   return(res)
 
 }
-
-
-# nocov end

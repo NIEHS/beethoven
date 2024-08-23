@@ -1,5 +1,3 @@
-# nocov start
-
 
 #' Add Time Column
 #'
@@ -108,8 +106,6 @@ post_calc_convert_time <-
     df <- df[, `:=`(time, as.character(time))]
     return(df)
   }
-
-# nocov end
 
 
 #' Join a data.frame with a year-only date column to
@@ -278,9 +274,6 @@ post_calc_df_year_expand <- function(
 }
 
 
-
-# nocov start
-
 #' Merge spatial and spatiotemporal covariate data
 #' @keywords Post-calculation
 #' @param locs Location. e.g., AQS sites.
@@ -365,8 +358,6 @@ post_calc_drop_cols <-
     df <- df[, -idx_remove, with = FALSE]
     return(df)
   }
-
-# nocov end
 
 
 #' Automatic joining by the time and spatial identifiers
@@ -468,8 +459,6 @@ post_calc_autojoin <-
     return(joined)
   }
 
-
-# nocov start
 
 #' Impute missing values and attach lagged features
 #' @keywords Post-calculation
@@ -757,6 +746,3 @@ append_predecessors <-
       return(bound_large)
     }
   }
-
-
-# nocov end

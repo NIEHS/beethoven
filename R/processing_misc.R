@@ -1,4 +1,3 @@
-# nocov start
 
 #' Load county sf object
 #' @keywords Calculation
@@ -30,5 +29,3 @@ divisor <-
     xv <- seq_len(x)
     xv[which(x %% xv == 0)]
   }
-
-# nocov end
