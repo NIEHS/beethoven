@@ -102,9 +102,10 @@ post_calc_convert_time <-
   function(
     df
   ) {
-    df <- data.table::copy(data.table::as.data.table(df))
-    df <- df[, `:=`(time, as.character(time))]
-    return(df)
+    stopifnot("time" %in% names(df))
+    df1 <- data.table::copy(data.table::as.data.table(df))
+    df1[, time := as.character(time)]
+    return(df1)
   }
 
 
@@ -310,12 +311,16 @@ post_calc_merge_all <-
         locs_merged, df_spt,
         by = c(locs_id, time_id)
       )
+    # need POSIXt class for amadeus function
+    locs_merged[[time_id]] <- as.POSIXct(locs_merged[[time_id]])
     locs_merged <-
       amadeus::calc_temporal_dummies(
         locs = locs_merged,
         locs_id = locs_id,
         year = target_years
       )
+    # reset time as character
+    locs_merged[[time_id]] <- as.character(locs_merged[[time_id]])
     return(locs_merged)
   }
 
@@ -501,8 +506,14 @@ impute_all <-
   ) {
     data.table::setDTthreads(nthreads_dt)
     if (is.character(dt)) {
-      dt <- file.path("output/qs", dt)
-      dt <- qs::qread(dt)
+      if(!endsWith(dt, ".qs")) {
+        stop(
+          paste0(
+            "If `dt` points to a file, provide full path to .qs file.\n"
+          )
+        )
+      }
+      dt <- qs::qread(file.path(dt))
     }
     dt$time <- as.POSIXct(dt$time)
     # remove unnecessary columns
