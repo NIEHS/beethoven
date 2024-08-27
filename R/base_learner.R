@@ -740,6 +740,8 @@ generate_cv_index_spt <-
       # ref_list contains the index of the group pairs
       ref_list <-
         Map(c, data_exd_rowid[search_idx], data_exd_colid[search_idx])
+    } else {
+      ref_list <- NULL
     }
     attr(index_cv, "ref_list") <- ref_list
     # generate row index for restoring rset

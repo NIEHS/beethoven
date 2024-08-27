@@ -281,44 +281,43 @@ testthat::test_that("post_calc_merge_all", {
 
 ################################################################################
 ##### post_calc_drop_cols
-# testthat::test_that("post_calc_drop_cols", {
-#   # sample data
-#   dt_sample <- data.frame(
-#     lon = -70:-75,
-#     lat = 30:35,
-#     geoid = sprintf("L%s", 1:6),
-#     year = 2000:2005,
-#     other = rep("saved", 6)
-#   )
+testthat::test_that("post_calc_drop_cols", {
+  # sample data
+  dt_sample <- data.frame(
+    lon = -70:-75,
+    lat = 30:35,
+    site_id = sprintf("L%s", 1:6),
+    year = 2000:2005,
+    other = rep("saved", 6)
+  )
   
-#   # expect no error with strict = FALSE
-#   testthat::expect_no_error(
-#     dt_weak <- post_calc_drop_cols(
-#       df = dt_sample,
-#       candidates = "geoid|year",
-#       strict = FALSE
-#     )
-#   )
-#   # expect 3 columns (dropped "year" and "geoid")
-#   testthat::expect_length(names(dt_weak))
+  # expect no error with strict = FALSE
+  testthat::expect_no_error(
+    dt_weak <- post_calc_drop_cols(
+      df = data.table::data.table(dt_sample),
+      candidates = "geoid|year",
+      strict = FALSE
+    )
+  )
+  # expect 3 columns (dropped "year")
+  testthat::expect_length(names(dt_weak), 4)
 
 
-#   # expect no error with strict = TRUE
-#   testthat::expect_no_error(
-#     dt_strict <- post_calc_drop_cols(
-#       df = dt_sample,
-#       strict = TRUE
-#     )
-#   )
-#   # expect 1 columns (only "saved")
-#   testthat::expect_length(names(dt_strict))
-# })
+  # expect no error with strict = TRUE
+  testthat::expect_no_error(
+    dt_strict <- post_calc_drop_cols(
+      df = data.table::data.table(dt_sample),
+      strict = TRUE
+    )
+  )
+  # expect 1 columns (only "site_id")
+  testthat::expect_length(names(dt_strict), 1)
+})
 
 
 ################################################################################
 ##### post_calc_autojoin
 testthat::test_that("post_calc_autojoin expands and joins data.frames with different temporal resolutions", {
-  withr::local_package("dplyr")
   withr::local_package("data.table")
 
   # data.frame that are resolved daily

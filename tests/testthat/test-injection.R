@@ -5,7 +5,7 @@
 ################################################################################
 ##### feature_raw_download
 testthat::test_that("feature_raw_download", {
-  withr::local_package("dplyr")
+  
   withr::local_package("rlang")
   withr::local_package("qs")
 
@@ -124,7 +124,7 @@ testthat::test_that("set_target_years", {
 ################################################################################
 ##### inject_calc
 testthat::test_that("inject_calc (hms + hms)", {
-  withr::local_package("dplyr")
+  
   withr::local_package("rlang")
 
   # sample location
@@ -216,7 +216,7 @@ testthat::test_that("inject_calc (hms + hms)", {
 ################################################################################
 ##### inject_modis_par
 testthat::test_that("inject_modis_par (MOD11A1)", {
-  withr::local_package("dplyr")
+  
   withr::local_package("rlang")
 
   # sample location
@@ -261,7 +261,7 @@ testthat::test_that("inject_modis_par (MOD11A1)", {
 ################################################################################
 ##### inject_geos
 testthat::test_that("inject_geos (chm, aqc, and combined)", {
-  withr::local_package("dplyr")
+  
   withr::local_package("rlang")
 
   # sample location
@@ -348,7 +348,7 @@ testthat::test_that("inject_geos (chm, aqc, and combined)", {
 ################################################################################
 ##### inject_gmted
 testthat::test_that("inject_gmted (breakline emphasis)", {
-  withr::local_package("dplyr")
+  
   withr::local_package("rlang")
 
   # sample location
@@ -394,7 +394,7 @@ testthat::test_that("inject_gmted (breakline emphasis)", {
 ################################################################################
 ##### reduce_merge
 testthat::test_that("reduce_merge joins all relevant data.frames", {
-  withr::local_package("dplyr")
+  
   withr::local_package("rlang")
 
   # Create example data tables
@@ -413,7 +413,7 @@ testthat::test_that("reduce_merge joins all relevant data.frames", {
 })
 
 testthat::test_that("reduce_merge handles different number of rows", {
-  withr::local_package("dplyr")
+  
   withr::local_package("rlang")
 
   # Create example data tables
@@ -475,7 +475,6 @@ testthat::test_that("inject_match only passes the matching arguments", {
 ################################################################################
 ##### inject_nlcd
 testthat::test_that("inject_nlcd (2019 and 2021)", {
-  withr::local_package("dplyr")
   withr::local_package("rlang")
   withr::local_package("amadeus")
 

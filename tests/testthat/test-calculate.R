@@ -5,7 +5,6 @@
 ################################################################################
 ##### par_narr
 testthat::test_that("par_narr (weasd + omega)", {
-  withr::local_package("dplyr")
   withr::local_package("rlang")
 
   # sample location
