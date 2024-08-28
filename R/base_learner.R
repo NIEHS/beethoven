@@ -232,7 +232,23 @@ fit_base_learner <-
           args_generate_cv
         )
       # generate row index
-      cv_index <- inject_match(switch_generate_cv_rset, args_generate_cv)
+      # cv_index <- inject_match(switch_generate_cv_rset, args_generate_cv)
+
+      # manually replicate switch_generate_cv_rset function
+      # the formals() argument used in inject_match does not properly
+      # identify the expected arguments in the switched functions
+      # identify cv_mode
+      cv_mode_arg <- match.arg(cv_mode)
+      target_fun <-
+        switch(
+          cv_mode_arg,
+          spatial = generate_cv_index_sp,
+          temporal = generate_cv_index_ts,
+          spatiotemporal = generate_cv_index_spt
+        )
+
+      # generate row index
+      cv_index <- inject_match(target_fun, args_generate_cv)
 
       # using cv_index, restore rset
       base_vfold <-
@@ -254,6 +270,11 @@ fit_base_learner <-
       grid_params <- tune_grid_in[grid_row_idx, ]
     } else {
       grid_params <- NULL
+      # drop mtry from model arguments if using baysian tuning
+      # for xgboost
+      if (model$engine %in% c("xgboost", "lightgbm")) {
+        model <- model %>% parsnip::set_args(mtry = NULL)
+      }
     }
 
 

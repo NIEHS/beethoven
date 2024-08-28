@@ -104,3 +104,6 @@ slurm_error.log
 **/*.sif
 /Meta/
 /doc/
+
+# interactive targets
+targets_start.Rout
