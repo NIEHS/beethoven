@@ -8,8 +8,8 @@ testthat::test_that("fit elnet (folds + grid)", {
   # import sample data
   # sample inlcudes 2 months data for 3 sites
   # subset to only 50 predictors for light weight
-  dt_long <- readRDS(
-    testthat::test_path("..", "testdata", "base", "dt_long.rds")
+  dt_base <- readRDS(
+    testthat::test_path("..", "testdata", "base", "dt_base.rds")
   )
 
 
@@ -27,7 +27,7 @@ testthat::test_that("fit elnet (folds + grid)", {
   testthat::expect_warning(
     elnet1 <- fit_base_learner(
       learner = "elnet",
-      dt_full = dt_long,
+      dt_full = dt_base,
       r_subsample = 0.3,
       model = elnet_model,
       folds = 5L,
@@ -37,7 +37,7 @@ testthat::test_that("fit elnet (folds + grid)", {
       tune_grid_size = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
-      xvar = seq(5, ncol(dt_long)),
+      xvar = seq(5, ncol(dt_base)),
       nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
@@ -56,9 +56,7 @@ testthat::test_that("fit elnet (folds + grid)", {
   testthat::expect_true(is.numeric(elnet1$base_prediction$.pred))
   # expect base predictions have more than 1 value
   # will be updated for SD/variance checks but hard with small sample
-  testthat::expect_true(
-    length(unique(elnet1$base_prediction$.pred)) > 1
-  )
+  testthat::expect_true(length(unique(elnet1$base_prediction$.pred)) > 1)
 
 
   # spatial
@@ -66,7 +64,7 @@ testthat::test_that("fit elnet (folds + grid)", {
   testthat::expect_warning(
     elnet2 <- fit_base_learner(
       learner = "elnet",
-      dt_full = dt_long,
+      dt_full = dt_base,
       r_subsample = 0.3,
       model = elnet_model,
       folds = 5L,
@@ -76,7 +74,7 @@ testthat::test_that("fit elnet (folds + grid)", {
       tune_grid_size = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
-      xvar = seq(5, ncol(dt_long)),
+      xvar = seq(5, ncol(dt_base)),
       nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
@@ -95,9 +93,7 @@ testthat::test_that("fit elnet (folds + grid)", {
   testthat::expect_true(is.numeric(elnet2$base_prediction$.pred))
   # expect base predictions have more than 1 value
   # will be updated for SD/variance checks but hard with small sample
-  testthat::expect_true(
-    length(unique(elnet2$base_prediction$.pred)) > 1
-  )
+  testthat::expect_true(length(unique(elnet2$base_prediction$.pred)) > 1)
 
 
   # spatiotemporal
@@ -105,7 +101,7 @@ testthat::test_that("fit elnet (folds + grid)", {
   testthat::expect_warning(
     elnet3 <- fit_base_learner(
       learner = "elnet",
-      dt_full = dt_long,
+      dt_full = dt_base,
       r_subsample = 0.3,
       model = elnet_model,
       folds = 5L,
@@ -115,7 +111,7 @@ testthat::test_that("fit elnet (folds + grid)", {
       tune_grid_size = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
-      xvar = seq(5, ncol(dt_long)),
+      xvar = seq(5, ncol(dt_base)),
       nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
@@ -134,9 +130,7 @@ testthat::test_that("fit elnet (folds + grid)", {
   testthat::expect_true(is.numeric(elnet3$base_prediction$.pred))
   # expect base predictions have more than 1 value
   # will be updated for SD/variance checks but hard with small sample
-  testthat::expect_true(
-    length(unique(elnet3$base_prediction$.pred)) > 1
-  )
+  testthat::expect_true(length(unique(elnet3$base_prediction$.pred)) > 1)
 
 })
 
@@ -147,8 +141,8 @@ testthat::test_that("fit elnet (folds + bayes)", {
   # import sample data
   # sample inlcudes 2 months data for 3 sites
   # subset to only 50 predictors for light weight
-  dt_long <- readRDS(
-    testthat::test_path("..", "testdata", "base", "dt_long.rds")
+  dt_base <- readRDS(
+    testthat::test_path("..", "testdata", "base", "dt_base.rds")
   )
 
 
@@ -161,7 +155,7 @@ testthat::test_that("fit elnet (folds + bayes)", {
   testthat::expect_warning(
     elnet4 <- fit_base_learner(
       learner = "elnet",
-      dt_full = dt_long,
+      dt_full = dt_base,
       r_subsample = 0.3,
       model = elnet_model,
       folds = 5L,
@@ -170,7 +164,7 @@ testthat::test_that("fit elnet (folds + bayes)", {
       tune_bayes_iter = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
-      xvar = seq(5, ncol(dt_long)),
+      xvar = seq(5, ncol(dt_base)),
       nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
@@ -189,9 +183,7 @@ testthat::test_that("fit elnet (folds + bayes)", {
   testthat::expect_true(is.numeric(elnet4$base_prediction$.pred))
   # expect base predictions have more than 1 value
   # will be updated for SD/variance checks but hard with small sample
-  # testthat::expect_true(
-  #   length(unique(elnet4$base_prediction$.pred)) > 1
-  # )
+  # testthat::expect_true(length(unique(elnet4$base_prediction$.pred)) > 1)
 
 
   # spatial
@@ -199,7 +191,7 @@ testthat::test_that("fit elnet (folds + bayes)", {
   testthat::expect_warning(
     elnet5 <- fit_base_learner(
       learner = "elnet",
-      dt_full = dt_long,
+      dt_full = dt_base,
       r_subsample = 0.3,
       model = elnet_model,
       folds = 5L,
@@ -208,7 +200,7 @@ testthat::test_that("fit elnet (folds + bayes)", {
       tune_bayes_iter = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
-      xvar = seq(5, ncol(dt_long)),
+      xvar = seq(5, ncol(dt_base)),
       nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
@@ -227,9 +219,7 @@ testthat::test_that("fit elnet (folds + bayes)", {
   testthat::expect_true(is.numeric(elnet5$base_prediction$.pred))
   # expect base predictions have more than 1 value
   # will be updated for SD/variance checks but hard with small sample
-  # testthat::expect_true(
-  #   length(unique(elnet5$base_prediction$.pred)) > 1
-  # )
+  # testthat::expect_true(length(unique(elnet5$base_prediction$.pred)) > 1)
 
 
   # spatiotemporal
@@ -237,7 +227,7 @@ testthat::test_that("fit elnet (folds + bayes)", {
   testthat::expect_warning(
     elnet6 <- fit_base_learner(
       learner = "elnet",
-      dt_full = dt_long,
+      dt_full = dt_base,
       r_subsample = 0.3,
       model = elnet_model,
       folds = 5L,
@@ -246,7 +236,7 @@ testthat::test_that("fit elnet (folds + bayes)", {
       tune_bayes_iter = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
-      xvar = seq(5, ncol(dt_long)),
+      xvar = seq(5, ncol(dt_base)),
       nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
@@ -265,9 +255,7 @@ testthat::test_that("fit elnet (folds + bayes)", {
   testthat::expect_true(is.numeric(elnet6$base_prediction$.pred))
   # expect base predictions have more than 1 value
   # will be updated for SD/variance checks but hard with small sample
-  # testthat::expect_true(
-  #   length(unique(elnet6$base_prediction$.pred)) > 1
-  # )
+  # testthat::expect_true(length(unique(elnet6$base_prediction$.pred)) > 1)
 
 })
 
@@ -278,8 +266,8 @@ testthat::test_that("fit elnet (args_generate_cv + grid)", {
   # import sample data
   # sample inlcudes 2 months data for 3 sites
   # subset to only 50 predictors for light weight
-  dt_long <- readRDS(
-    testthat::test_path("..", "testdata", "base", "dt_long.rds")
+  dt_base <- readRDS(
+    testthat::test_path("..", "testdata", "base", "dt_base.rds")
   )
 
 
@@ -302,7 +290,7 @@ testthat::test_that("fit elnet (args_generate_cv + grid)", {
   testthat::expect_warning(
     elnet7 <- fit_base_learner(
       learner = "elnet",
-      dt_full = dt_long,
+      dt_full = dt_base,
       r_subsample = 0.3,
       model = elnet_model,
       folds = NULL,
@@ -313,7 +301,7 @@ testthat::test_that("fit elnet (args_generate_cv + grid)", {
       tune_grid_size = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
-      xvar = seq(5, ncol(dt_long)),
+      xvar = seq(5, ncol(dt_base)),
       nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
@@ -332,9 +320,7 @@ testthat::test_that("fit elnet (args_generate_cv + grid)", {
   testthat::expect_true(is.numeric(elnet7$base_prediction$.pred))
   # expect base predictions have more than 1 value
   # will be updated for SD/variance checks but hard with small sample
-  testthat::expect_true(
-    length(unique(elnet7$base_prediction$.pred)) > 1
-  )
+  testthat::expect_true(length(unique(elnet7$base_prediction$.pred)) > 1)
 
 
   # spatial
@@ -347,7 +333,7 @@ testthat::test_that("fit elnet (args_generate_cv + grid)", {
   testthat::expect_warning(
     elnet8 <- fit_base_learner(
       learner = "elnet",
-      dt_full = data.table::data.table(dt_long),
+      dt_full = data.table::data.table(dt_base),
       r_subsample = 0.3,
       model = elnet_model,
       folds = NULL,
@@ -358,7 +344,7 @@ testthat::test_that("fit elnet (args_generate_cv + grid)", {
       tune_grid_size = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
-      xvar = seq(5, ncol(dt_long)),
+      xvar = seq(5, ncol(dt_base)),
       nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
@@ -377,9 +363,7 @@ testthat::test_that("fit elnet (args_generate_cv + grid)", {
   testthat::expect_true(is.numeric(elnet8$base_prediction$.pred))
   # expect base predictions have more than 1 value
   # will be updated for SD/variance checks but hard with small sample
-  testthat::expect_true(
-    length(unique(elnet8$base_prediction$.pred)) > 1
-  )
+  testthat::expect_true(length(unique(elnet8$base_prediction$.pred)) > 1)
 
 
   # spatiotemporal
@@ -394,7 +378,7 @@ testthat::test_that("fit elnet (args_generate_cv + grid)", {
   testthat::expect_warning(
     elnet9 <- fit_base_learner(
       learner = "elnet",
-      dt_full = data.table::data.table(dt_long),
+      dt_full = data.table::data.table(dt_base),
       r_subsample = 1, # full sample dataset for accurate ngroup cv
       model = elnet_model,
       folds = NULL,
@@ -405,7 +389,7 @@ testthat::test_that("fit elnet (args_generate_cv + grid)", {
       tune_grid_size = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
-      xvar = seq(5, ncol(dt_long)),
+      xvar = seq(5, ncol(dt_base)),
       nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
@@ -424,9 +408,7 @@ testthat::test_that("fit elnet (args_generate_cv + grid)", {
   testthat::expect_true(is.numeric(elnet9$base_prediction$.pred))
   # expect base predictions have more than 1 value
   # will be updated for SD/variance checks but hard with small sample
-  testthat::expect_true(
-    length(unique(elnet9$base_prediction$.pred)) > 1
-  )
+  testthat::expect_true(length(unique(elnet9$base_prediction$.pred)) > 1)
 
 })
 
@@ -437,8 +419,8 @@ testthat::test_that("fit elnet (args_generate_cv + bayes)", {
   # import sample data
   # sample inlcudes 2 months data for 3 sites
   # subset to only 50 predictors for light weight
-  dt_long <- readRDS(
-    testthat::test_path("..", "testdata", "base", "dt_long.rds")
+  dt_base <- readRDS(
+    testthat::test_path("..", "testdata", "base", "dt_base.rds")
   )
 
 
@@ -456,7 +438,7 @@ testthat::test_that("fit elnet (args_generate_cv + bayes)", {
   testthat::expect_warning(
     elnet10 <- fit_base_learner(
       learner = "elnet",
-      dt_full = dt_long,
+      dt_full = dt_base,
       r_subsample = 0.3,
       model = elnet_model,
       folds = NULL,
@@ -466,7 +448,7 @@ testthat::test_that("fit elnet (args_generate_cv + bayes)", {
       tune_bayes_iter = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
-      xvar = seq(5, ncol(dt_long)),
+      xvar = seq(5, ncol(dt_base)),
       nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
@@ -485,9 +467,7 @@ testthat::test_that("fit elnet (args_generate_cv + bayes)", {
   testthat::expect_true(is.numeric(elnet10$base_prediction$.pred))
   # expect base predictions have more than 1 value
   # will be updated for SD/variance checks but hard with small sample
-  # testthat::expect_true(
-  #   length(unique(elnet10$base_prediction$.pred)) > 1
-  # )
+  # testthat::expect_true(length(unique(elnet10$base_prediction$.pred)) > 1)
 
 
   # spatial
@@ -500,7 +480,7 @@ testthat::test_that("fit elnet (args_generate_cv + bayes)", {
   testthat::expect_warning(
     elnet11 <- fit_base_learner(
       learner = "elnet",
-      dt_full = dt_long,
+      dt_full = dt_base,
       r_subsample = 0.3,
       model = elnet_model,
       folds = NULL,
@@ -510,7 +490,7 @@ testthat::test_that("fit elnet (args_generate_cv + bayes)", {
       tune_bayes_iter = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
-      xvar = seq(5, ncol(dt_long)),
+      xvar = seq(5, ncol(dt_base)),
       nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
@@ -529,9 +509,7 @@ testthat::test_that("fit elnet (args_generate_cv + bayes)", {
   testthat::expect_true(is.numeric(elnet11$base_prediction$.pred))
   # expect base predictions have more than 1 value
   # will be updated for SD/variance checks but hard with small sample
-  # testthat::expect_true(
-  #   length(unique(elnet11$base_prediction$.pred)) > 1
-  # )
+  # testthat::expect_true(length(unique(elnet11$base_prediction$.pred)) > 1)
 
 
   # spatiotemporal
@@ -546,7 +524,7 @@ testthat::test_that("fit elnet (args_generate_cv + bayes)", {
   testthat::expect_warning(
     elnet12 <- fit_base_learner(
       learner = "elnet",
-      dt_full = data.table::data.table(dt_long),
+      dt_full = data.table::data.table(dt_base),
       r_subsample = 1, # full sample dataset for accurate ngroup cv
       model = elnet_model,
       folds = NULL,
@@ -556,7 +534,7 @@ testthat::test_that("fit elnet (args_generate_cv + bayes)", {
       tune_bayes_iter = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
-      xvar = seq(5, ncol(dt_long)),
+      xvar = seq(5, ncol(dt_base)),
       nthreads = 1,
       trim_resamples = TRUE, # trim samples
       return_best = TRUE
@@ -575,9 +553,7 @@ testthat::test_that("fit elnet (args_generate_cv + bayes)", {
   testthat::expect_true(is.numeric(elnet12$base_prediction$.pred))
   # expect base predictions have more than 1 value
   # will be updated for SD/variance checks but hard with small sample
-  # testthat::expect_true(
-  #   length(unique(elnet12$base_prediction$.pred)) > 1
-  # )
+  # testthat::expect_true(length(unique(elnet12$base_prediction$.pred)) > 1)
   # expect NA only in base performance splits due to trim
   testthat::expect_equal(unique(elnet12$best_performance[[1]]), NA)
 

@@ -4,142 +4,136 @@
 
 ################################################################################
 ##### folds + grid tuning
-# testthat::test_that("fit lightgbm (folds + grid)", {
-#   # import sample data
-#   # sample inlcudes 2 months data for 3 sites
-#   # subset to only 50 predictors for light weight
-#   dt_long <- readRDS(
-#     testthat::test_path("..", "testdata", "base", "dt_long.rds")
-#   )
+testthat::test_that("fit lightgbm (folds + grid)", {
+  # import sample data
+  # sample inlcudes 2 months data for 3 sites
+  # subset to only 50 predictors for light weight
+  dt_base <- readRDS(
+    testthat::test_path("..", "testdata", "base", "dt_base.rds")
+  )
 
 
-#   # set model
-#   lgb_model <- switch_model("lgb")
-#   # set grid
-#   lgb_grid <- expand.grid(
-#     mtry = c(300),
-#     trees = seq(1000, 3000, 1000),
-#     learn_rate = c(0.1)
-#   )
+  # set model
+  lgb_model <- switch_model("lgb")
+  # set grid
+  lgb_grid <- expand.grid(
+    mtry = c(300),
+    trees = seq(1000, 3000, 1000),
+    learn_rate = c(0.1)
+  )
 
 
-#   # temporal
-#   # warning is due to 3 metrcis (rmse, rsq, mae)
-#   testthat::expect_warning(
-#     lgb1 <- fit_base_learner(
-#         learner = "lgb",
-#         dt_full = dt_long,
-#         r_subsample = 0.3,
-#         model = lgb_model,
-#         folds = 5L,
-#         cv_mode = "temporal",
-#         tune_mode = "grid",
-#         tune_grid_in = lgb_grid,
-#         tune_grid_size = 2,
-#         learn_rate = 0.1,
-#         yvar = "Arithmetic.Mean",
-#         xvar = seq(5, ncol(dt_long)),
-#         nthreads = 1,
-#         trim_resamples = FALSE,
-#         return_best = TRUE
-#     )
-#   )
-#   # expect a list
-#   testthat::expect_true(is.list(lgb1))
-#   # expect length 3
-#   testthat::expect_length(lgb1, 3)
-#   # expect sub-items are tibble data.frames
-#   testthat::expect_equal(
-#     unlist(lapply(1:3, function(x) methods::is(lgb1[[x]], "tbl_df"))),
-#     c(TRUE, TRUE, TRUE)
-#   )
-#   # expect base predictions are numeric
-#   testthat::expect_true(is.numeric(lgb1$base_prediction$.pred))
-#   # expect base predictions have more than 1 value
-#   # will be updated for SD/variance checks but hard with small sample
-#   testthat::expect_true(
-#     length(unique(lgb1$base_prediction$.pred)) > 1
-#   )
+  # temporal
+  # warning is due to 3 metrics (rmse, rsq, mae)
+  testthat::expect_warning(
+    lgb1 <- fit_base_learner(
+      learner = "lgb",
+      dt_full = dt_base,
+      r_subsample = 0.3,
+      model = lgb_model,
+      folds = 5L,
+      cv_mode = "temporal",
+      tune_mode = "grid",
+      tune_grid_in = lgb_grid,
+      tune_grid_size = 2,
+      learn_rate = 0.1,
+      yvar = "Arithmetic.Mean",
+      xvar = seq(5, ncol(dt_base)),
+      nthreads = 1,
+      trim_resamples = FALSE,
+      return_best = TRUE
+    )
+  )
+  # expect a list
+  testthat::expect_true(is.list(lgb1))
+  # expect length 3
+  testthat::expect_length(lgb1, 3)
+  # expect sub-items are tibble data.frames
+  testthat::expect_equal(
+    unlist(lapply(1:3, function(x) methods::is(lgb1[[x]], "tbl_df"))),
+    c(TRUE, TRUE, TRUE)
+  )
+  # expect base predictions are numeric
+  testthat::expect_true(is.numeric(lgb1$base_prediction$.pred))
+  # expect base predictions have more than 1 value
+  # will be updated for SD/variance checks but hard with small sample
+  testthat::expect_true(length(unique(lgb1$base_prediction$.pred)) > 1)
 
 
-#   # spatial
-#   # warning is due to 3 metrcis (rmse, rsq, mae)
-#   testthat::expect_warning(
-#     lgb2 <- fit_base_learner(
-#         learner = "lgb",
-#         dt_full = dt_long,
-#         r_subsample = 0.3,
-#         model = lgb_model,
-#         folds = 5L,
-#         cv_mode = "spatial",
-#         tune_mode = "grid",
-#         tune_grid_in = lgb_grid,
-#         tune_grid_size = 2,
-#         learn_rate = 0.1,
-#         yvar = "Arithmetic.Mean",
-#         xvar = seq(5, ncol(dt_long)),
-#         nthreads = 1,
-#         trim_resamples = FALSE,
-#         return_best = TRUE
-#     )
-#   )
-#   # expect a list
-#   testthat::expect_true(is.list(lgb2))
-#   # expect length 3
-#   testthat::expect_length(lgb2, 3)
-#   # expect sub-items are tibble data.frames
-#   testthat::expect_equal(
-#     unlist(lapply(1:3, function(x) methods::is(lgb2[[x]], "tbl_df"))),
-#     c(TRUE, TRUE, TRUE)
-#   )
-#   # expect base predictions are numeric
-#   testthat::expect_true(is.numeric(lgb2$base_prediction$.pred))
-#   # expect base predictions have more than 1 value
-#   # will be updated for SD/variance checks but hard with small sample
-#   testthat::expect_true(
-#     length(unique(lgb2$base_prediction$.pred)) > 1
-#   )
+  # spatial
+  # warning is due to 3 metrics (rmse, rsq, mae)
+  testthat::expect_warning(
+    lgb2 <- fit_base_learner(
+      learner = "lgb",
+      dt_full = dt_base,
+      r_subsample = 0.3,
+      model = lgb_model,
+      folds = 5L,
+      cv_mode = "spatial",
+      tune_mode = "grid",
+      tune_grid_in = lgb_grid,
+      tune_grid_size = 2,
+      learn_rate = 0.1,
+      yvar = "Arithmetic.Mean",
+      xvar = seq(5, ncol(dt_base)),
+      nthreads = 1,
+      trim_resamples = FALSE,
+      return_best = TRUE
+    )
+  )
+  # expect a list
+  testthat::expect_true(is.list(lgb2))
+  # expect length 3
+  testthat::expect_length(lgb2, 3)
+  # expect sub-items are tibble data.frames
+  testthat::expect_equal(
+    unlist(lapply(1:3, function(x) methods::is(lgb2[[x]], "tbl_df"))),
+    c(TRUE, TRUE, TRUE)
+  )
+  # expect base predictions are numeric
+  testthat::expect_true(is.numeric(lgb2$base_prediction$.pred))
+  # expect base predictions have more than 1 value
+  # will be updated for SD/variance checks but hard with small sample
+  testthat::expect_true(length(unique(lgb2$base_prediction$.pred)) > 1)
 
 
-#   # spatiotemporal
-#   # warning is due to 3 metrcis (rmse, rsq, mae)
-#   testthat::expect_warning(
-#     lgb3 <- fit_base_learner(
-#         learner = "lgb",
-#         dt_full = dt_long,
-#         r_subsample = 0.3,
-#         model = lgb_model,
-#         folds = 5L,
-#         cv_mode = "spatiotemporal",
-#         tune_mode = "grid",
-#         tune_grid_in = lgb_grid,
-#         tune_grid_size = 2,
-#         learn_rate = 0.1,
-#         yvar = "Arithmetic.Mean",
-#         xvar = seq(5, ncol(dt_long)),
-#         nthreads = 1,
-#         trim_resamples = FALSE,
-#         return_best = TRUE
-#     )
-#   )
-#   # expect a list
-#   testthat::expect_true(is.list(lgb3))
-#   # expect length 3
-#   testthat::expect_length(lgb3, 3)
-#   # expect sub-items are tibble data.frames
-#   testthat::expect_equal(
-#     unlist(lapply(1:3, function(x) methods::is(lgb3[[x]], "tbl_df"))),
-#     c(TRUE, TRUE, TRUE)
-#   )
-#   # expect base predictions are numeric
-#   testthat::expect_true(is.numeric(lgb3$base_prediction$.pred))
-#   # expect base predictions have more than 1 value
-#   # will be updated for SD/variance checks but hard with small sample
-#   testthat::expect_true(
-#     length(unique(lgb3$base_prediction$.pred)) > 1
-#   )
+  # spatiotemporal
+  # warning is due to 3 metrics (rmse, rsq, mae)
+  testthat::expect_warning(
+    lgb3 <- fit_base_learner(
+      learner = "lgb",
+      dt_full = dt_base,
+      r_subsample = 0.3,
+      model = lgb_model,
+      folds = 5L,
+      cv_mode = "spatiotemporal",
+      tune_mode = "grid",
+      tune_grid_in = lgb_grid,
+      tune_grid_size = 2,
+      learn_rate = 0.1,
+      yvar = "Arithmetic.Mean",
+      xvar = seq(5, ncol(dt_base)),
+      nthreads = 1,
+      trim_resamples = FALSE,
+      return_best = TRUE
+    )
+  )
+  # expect a list
+  testthat::expect_true(is.list(lgb3))
+  # expect length 3
+  testthat::expect_length(lgb3, 3)
+  # expect sub-items are tibble data.frames
+  testthat::expect_equal(
+    unlist(lapply(1:3, function(x) methods::is(lgb3[[x]], "tbl_df"))),
+    c(TRUE, TRUE, TRUE)
+  )
+  # expect base predictions are numeric
+  testthat::expect_true(is.numeric(lgb3$base_prediction$.pred))
+  # expect base predictions have more than 1 value
+  # will be updated for SD/variance checks but hard with small sample
+  testthat::expect_true(length(unique(lgb3$base_prediction$.pred)) > 1)
   
-# })
+})
 
 
 ################################################################################
@@ -148,8 +142,8 @@
 #   # import sample data
 #   # sample inlcudes 2 months data for 3 sites
 #   # subset to only 50 predictors for light weight
-#   dt_long <- readRDS(
-#     testthat::test_path("..", "testdata", "base", "dt_long.rds")
+#   dt_base <- readRDS(
+#     testthat::test_path("..", "testdata", "base", "dt_base.rds")
 #   )
 
 
@@ -158,11 +152,11 @@
 
 
 #   # temporal
-#   # warning is due to 3 metrcis (rmse, rsq, mae)
+#   # warning is due to 3 metrics (rmse, rsq, mae)
 #   testthat::expect_warning(
 #     lgb4 <- fit_base_learner(
 #         learner = "lgb",
-#         dt_full = dt_long,
+#         dt_full = dt_base,
 #         r_subsample = 0.3,
 #         model = lgb_model,
 #         folds = 5L,
@@ -171,7 +165,7 @@
 #         tune_bayes_iter = 2,
 #         learn_rate = 0.1,
 #         yvar = "Arithmetic.Mean",
-#         xvar = seq(5, ncol(dt_long)),
+#         xvar = seq(5, ncol(dt_base)),
 #         nthreads = 1,
 #         trim_resamples = FALSE,
 #         return_best = TRUE
@@ -190,17 +184,15 @@
 #   testthat::expect_true(is.numeric(lgb4$base_prediction$.pred))
 #   # expect base predictions have more than 1 value
 #   # will be updated for SD/variance checks but hard with small sample
-#   testthat::expect_true(
-#     length(unique(lgb4$base_prediction$.pred)) > 1
-#   )
+#   testthat::expect_true(length(unique(lgb4$base_prediction$.pred)) > 1)
 
 
 #   # spatial
-#   # warning is due to 3 metrcis (rmse, rsq, mae)
+#   # warning is due to 3 metrics (rmse, rsq, mae)
 #   testthat::expect_warning(
 #     lgb5 <- fit_base_learner(
 #         learner = "lgb",
-#         dt_full = dt_long,
+#         dt_full = dt_base,
 #         r_subsample = 0.3,
 #         model = lgb_model,
 #         folds = 5L,
@@ -209,7 +201,7 @@
 #         tune_bayes_iter = 2,
 #         learn_rate = 0.1,
 #         yvar = "Arithmetic.Mean",
-#         xvar = seq(5, ncol(dt_long)),
+#         xvar = seq(5, ncol(dt_base)),
 #         nthreads = 1,
 #         trim_resamples = FALSE,
 #         return_best = TRUE
@@ -228,17 +220,15 @@
 #   testthat::expect_true(is.numeric(lgb5$base_prediction$.pred))
 #   # expect base predictions have more than 1 value
 #   # will be updated for SD/variance checks but hard with small sample
-#   testthat::expect_true(
-#     length(unique(lgb5$base_prediction$.pred)) > 1
-#   )
+#   testthat::expect_true(length(unique(lgb5$base_prediction$.pred)) > 1)
 
 
 #   # spatiotemporal
-#   # warning is due to 3 metrcis (rmse, rsq, mae)
+#   # warning is due to 3 metrics (rmse, rsq, mae)
 #   testthat::expect_warning(
 #     lgb6 <- fit_base_learner(
 #         learner = "lgb",
-#         dt_full = dt_long,
+#         dt_full = dt_base,
 #         r_subsample = 0.3,
 #         model = lgb_model,
 #         folds = 5L,
@@ -247,7 +237,7 @@
 #         tune_bayes_iter = 2,
 #         learn_rate = 0.1,
 #         yvar = "Arithmetic.Mean",
-#         xvar = seq(5, ncol(dt_long)),
+#         xvar = seq(5, ncol(dt_base)),
 #         nthreads = 1,
 #         trim_resamples = FALSE,
 #         return_best = TRUE
@@ -266,9 +256,7 @@
 #   testthat::expect_true(is.numeric(lgb6$base_prediction$.pred))
 #   # expect base predictions have more than 1 value
 #   # will be updated for SD/variance checks but hard with small sample
-#   testthat::expect_true(
-#     length(unique(lgb6$base_prediction$.pred)) > 1
-#   )
+#   testthat::expect_true(length(unique(lgb6$base_prediction$.pred)) > 1)
   
 # })
 
@@ -279,8 +267,8 @@
 #   # import sample data
 #   # sample inlcudes 2 months data for 3 sites
 #   # subset to only 50 predictors for light weight
-#   dt_long <- readRDS(
-#     testthat::test_path("..", "testdata", "base", "dt_long.rds")
+#   dt_base <- readRDS(
+#     testthat::test_path("..", "testdata", "base", "dt_base.rds")
 #   )
 
 
@@ -295,7 +283,7 @@
 
 
 #   # temporal
-#   # warning is due to 3 metrcis (rmse, rsq, mae)
+#   # warning is due to 3 metrics (rmse, rsq, mae)
 #   args_temp <- list(
 #     time_col = "time",
 #     cv_fold = 10L,
@@ -304,7 +292,7 @@
 #   testthat::expect_warning(
 #     lgb7 <- fit_base_learner(
 #         learner = "lgb",
-#         dt_full = dt_long,
+#         dt_full = dt_base,
 #         r_subsample = 0.3,
 #         model = lgb_model,
 #         folds = NULL,
@@ -315,7 +303,7 @@
 #         tune_grid_size = 1,
 #         learn_rate = 0.1,
 #         yvar = "Arithmetic.Mean",
-#         xvar = seq(5, ncol(dt_long)),
+#         xvar = seq(5, ncol(dt_base)),
 #         nthreads = 1,
 #         trim_resamples = FALSE,
 #         return_best = TRUE
@@ -334,13 +322,11 @@
 #   testthat::expect_true(is.numeric(lgb7$base_prediction$.pred))
 #   # expect base predictions have more than 1 value
 #   # will be updated for SD/variance checks but hard with small sample
-#   testthat::expect_true(
-#     length(unique(lgb7$base_prediction$.pred)) > 1
-#   )
+#   testthat::expect_true(length(unique(lgb7$base_prediction$.pred)) > 1)
 
 
 #   # spatial
-#   # warning is due to 3 metrcis (rmse, rsq, mae)
+#   # warning is due to 3 metrics (rmse, rsq, mae)
 #   args_spatial = list(
 #     target_cols = c("lon", "lat"),
 #     cv_make_fun = spatialsample::spatial_block_cv,
@@ -349,7 +335,7 @@
 #   testthat::expect_warning(
 #     lgb8 <- fit_base_learner(
 #         learner = "lgb",
-#         dt_full = dt_long,
+#         dt_full = dt_base,
 #         r_subsample = 0.3,
 #         model = lgb_model,
 #         folds = NULL,
@@ -360,7 +346,7 @@
 #         tune_grid_size = 1,
 #         learn_rate = 0.1,
 #         yvar = "Arithmetic.Mean",
-#         xvar = seq(5, ncol(dt_long)),
+#         xvar = seq(5, ncol(dt_base)),
 #         nthreads = 1,
 #         trim_resamples = FALSE,
 #         return_best = TRUE
@@ -379,13 +365,11 @@
 #   testthat::expect_true(is.numeric(lgb8$base_prediction$.pred))
 #   # expect base predictions have more than 1 value
 #   # will be updated for SD/variance checks but hard with small sample
-#   testthat::expect_true(
-#     length(unique(lgb8$base_prediction$.pred)) > 1
-#   )
+#   testthat::expect_true(length(unique(lgb8$base_prediction$.pred)) > 1)
 
 
 #   # spatiotemporal
-#   # warning is due to 3 metrcis (rmse, rsq, mae)
+#   # warning is due to 3 metrics (rmse, rsq, mae)
 #   args_spatiotemporal <- list(
 #     target_cols = c("lon", "lat", "time"),
 #     preprocessing = "none",
@@ -396,7 +380,7 @@
 #   testthat::expect_warning(
 #     lgb9 <- fit_base_learner(
 #         learner = "lgb",
-#         dt_full = data.table::data.table(dt_long),
+#         dt_full = data.table::data.table(dt_base),
 #         r_subsample = 1, # full sample dataset for accurate ngroup cv
 #         model = lgb_model,
 #         folds = NULL,
@@ -407,7 +391,7 @@
 #         tune_grid_size = 1,
 #         learn_rate = 0.1,
 #         yvar = "Arithmetic.Mean",
-#         xvar = seq(5, ncol(dt_long)),
+#         xvar = seq(5, ncol(dt_base)),
 #         nthreads = 1,
 #         trim_resamples = FALSE,
 #         return_best = TRUE
@@ -426,9 +410,7 @@
 #   testthat::expect_true(is.numeric(lgb9$base_prediction$.pred))
 #   # expect base predictions have more than 1 value
 #   # will be updated for SD/variance checks but hard with small sample
-#   testthat::expect_true(
-#     length(unique(lgb9$base_prediction$.pred)) > 1
-#   )
+#   testthat::expect_true(length(unique(lgb9$base_prediction$.pred)) > 1)
   
 # })
 
@@ -439,8 +421,8 @@
 #   # import sample data
 #   # sample inlcudes 2 months data for 3 sites
 #   # subset to only 50 predictors for light weight
-#   dt_long <- readRDS(
-#     testthat::test_path("..", "testdata", "base", "dt_long.rds")
+#   dt_base <- readRDS(
+#     testthat::test_path("..", "testdata", "base", "dt_base.rds")
 #   )
 
 
@@ -449,7 +431,7 @@
 
 
 #   # temporal
-#   # warning is due to 3 metrcis (rmse, rsq, mae)
+#   # warning is due to 3 metrics (rmse, rsq, mae)
 #   args_temp <- list(
 #     time_col = "time",
 #     cv_fold = 10L,
@@ -458,7 +440,7 @@
 #   testthat::expect_warning(
 #     lgb10 <- fit_base_learner(
 #         learner = "lgb",
-#         dt_full = dt_long,
+#         dt_full = dt_base,
 #         r_subsample = 0.3,
 #         model = lgb_model,
 #         folds = NULL,
@@ -468,7 +450,7 @@
 #         tune_bayes_iter = 1,
 #         learn_rate = 0.1,
 #         yvar = "Arithmetic.Mean",
-#         xvar = seq(5, ncol(dt_long)),
+#         xvar = seq(5, ncol(dt_base)),
 #         nthreads = 1,
 #         trim_resamples = FALSE,
 #         return_best = TRUE
@@ -487,13 +469,11 @@
 #   testthat::expect_true(is.numeric(lgb10$base_prediction$.pred))
 #   # expect base predictions have more than 1 value
 #   # will be updated for SD/variance checks but hard with small sample
-#   # testthat::expect_true(
-#   #   length(unique(lgb10$base_prediction$.pred)) > 1
-#   # )
+#   # testthat::expect_true(length(unique(lgb10$base_prediction$.pred)) > 1)
 
 
 #   # spatial
-#   # warning is due to 3 metrcis (rmse, rsq, mae)
+#   # warning is due to 3 metrics (rmse, rsq, mae)
 #   args_spatial = list(
 #     target_cols = c("lon", "lat"),
 #     cv_make_fun = spatialsample::spatial_block_cv,
@@ -502,7 +482,7 @@
 #   testthat::expect_warning(
 #     lgb11 <- fit_base_learner(
 #         learner = "lgb",
-#         dt_full = dt_long,
+#         dt_full = dt_base,
 #         r_subsample = 0.3,
 #         model = lgb_model,
 #         folds = NULL,
@@ -512,7 +492,7 @@
 #         tune_bayes_iter = 1,
 #         learn_rate = 0.1,
 #         yvar = "Arithmetic.Mean",
-#         xvar = seq(5, ncol(dt_long)),
+#         xvar = seq(5, ncol(dt_base)),
 #         nthreads = 1,
 #         trim_resamples = FALSE,
 #         return_best = TRUE
@@ -531,13 +511,11 @@
 #   testthat::expect_true(is.numeric(lgb11$base_prediction$.pred))
 #   # expect base predictions have more than 1 value
 #   # will be updated for SD/variance checks but hard with small sample
-#   # testthat::expect_true(
-#   #   length(unique(lgb11$base_prediction$.pred)) > 1
-#   # )
+#   # testthat::expect_true(length(unique(lgb11$base_prediction$.pred)) > 1)
 
 
 #   # spatiotemporal
-#   # warning is due to 3 metrcis (rmse, rsq, mae)
+#   # warning is due to 3 metrics (rmse, rsq, mae)
 #   args_spatiotemporal <- list(
 #     target_cols = c("lon", "lat", "time"),
 #     preprocessing = "none",
@@ -548,7 +526,7 @@
 #   testthat::expect_warning(
 #     lgb12 <- fit_base_learner(
 #         learner = "lgb",
-#         dt_full = data.table::data.table(dt_long),
+#         dt_full = data.table::data.table(dt_base),
 #         r_subsample = 1, # full sample dataset for accurate ngroup cv
 #         model = lgb_model,
 #         folds = NULL,
@@ -558,7 +536,7 @@
 #         tune_bayes_iter = 1,
 #         learn_rate = 0.1,
 #         yvar = "Arithmetic.Mean",
-#         xvar = seq(5, ncol(dt_long)),
+#         xvar = seq(5, ncol(dt_base)),
 #         nthreads = 1,
 #         trim_resamples = TRUE, # trim samples
 #         return_best = TRUE
@@ -577,9 +555,7 @@
 #   testthat::expect_true(is.numeric(lgb12$base_prediction$.pred))
 #   # expect base predictions have more than 1 value
 #   # will be updated for SD/variance checks but hard with small sample
-#   # testthat::expect_true(
-#   #   length(unique(lgb12$base_prediction$.pred)) > 1
-#   # )
+#   # testthat::expect_true(length(unique(lgb12$base_prediction$.pred)) > 1)
 #   # expect NA only in base performance splits due to trim
 #   testthat::expect_equal(unique(lgb12$best_performance[[1]]), NA)
 

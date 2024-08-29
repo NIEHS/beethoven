@@ -8,8 +8,8 @@ testthat::test_that("fit mlp (folds + grid))", {
   # import sample data
   # sample inlcudes 2 months data for 3 sites
   # subset to only 50 predictors for light weight
-  dt_long <- readRDS(
-    testthat::test_path("..", "testdata", "base", "dt_long.rds")
+  dt_base <- readRDS(
+    testthat::test_path("..", "testdata", "base", "dt_base.rds")
   )
 
 
@@ -29,7 +29,7 @@ testthat::test_that("fit mlp (folds + grid))", {
   testthat::expect_warning(
     mlp1 <- fit_base_learner(
       learner = "mlp",
-      dt_full = dt_long,
+      dt_full = dt_base,
       r_subsample = 0.3,
       model = mlp_model,
       folds = 5L,
@@ -39,7 +39,7 @@ testthat::test_that("fit mlp (folds + grid))", {
       tune_grid_size = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
-      xvar = seq(5, ncol(dt_long)),
+      xvar = seq(5, ncol(dt_base)),
       nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
@@ -58,9 +58,7 @@ testthat::test_that("fit mlp (folds + grid))", {
   testthat::expect_true(is.numeric(mlp1$base_prediction$.pred))
   # expect base predictions have more than 1 value
   # will be updated for SD/variance checks but hard with small sample
-  testthat::expect_true(
-    length(unique(mlp1$base_prediction$.pred)) > 1
-  )
+  testthat::expect_true(length(unique(mlp1$base_prediction$.pred)) > 1)
 
 
   # spatial
@@ -68,7 +66,7 @@ testthat::test_that("fit mlp (folds + grid))", {
   testthat::expect_warning(
     mlp2 <- fit_base_learner(
       learner = "mlp",
-      dt_full = dt_long,
+      dt_full = dt_base,
       r_subsample = 0.3,
       model = mlp_model,
       folds = 5L,
@@ -78,7 +76,7 @@ testthat::test_that("fit mlp (folds + grid))", {
       tune_grid_size = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
-      xvar = seq(5, ncol(dt_long)),
+      xvar = seq(5, ncol(dt_base)),
       nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
@@ -97,9 +95,7 @@ testthat::test_that("fit mlp (folds + grid))", {
   testthat::expect_true(is.numeric(mlp2$base_prediction$.pred))
   # expect base predictions have more than 1 value
   # will be updated for SD/variance checks but hard with small sample
-  testthat::expect_true(
-    length(unique(mlp2$base_prediction$.pred)) > 1
-  )
+  testthat::expect_true(length(unique(mlp2$base_prediction$.pred)) > 1)
 
 
   # spatiotemporal
@@ -107,7 +103,7 @@ testthat::test_that("fit mlp (folds + grid))", {
   testthat::expect_warning(
     mlp3 <- fit_base_learner(
       learner = "mlp",
-      dt_full = dt_long,
+      dt_full = dt_base,
       r_subsample = 0.3,
       model = mlp_model,
       folds = 5L,
@@ -117,7 +113,7 @@ testthat::test_that("fit mlp (folds + grid))", {
       tune_grid_size = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
-      xvar = seq(5, ncol(dt_long)),
+      xvar = seq(5, ncol(dt_base)),
       nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
@@ -136,9 +132,7 @@ testthat::test_that("fit mlp (folds + grid))", {
   testthat::expect_true(is.numeric(mlp3$base_prediction$.pred))
   # expect base predictions have more than 1 value
   # will be updated for SD/variance checks but hard with small sample
-  testthat::expect_true(
-    length(unique(mlp3$base_prediction$.pred)) > 1
-  )
+  testthat::expect_true(length(unique(mlp3$base_prediction$.pred)) > 1)
 
 })
 
@@ -149,8 +143,8 @@ testthat::test_that("fit mlp (folds + bayes)", {
   # import sample data
   # sample inlcudes 2 months data for 3 sites
   # subset to only 50 predictors for light weight
-  dt_long <- readRDS(
-    testthat::test_path("..", "testdata", "base", "dt_long.rds")
+  dt_base <- readRDS(
+    testthat::test_path("..", "testdata", "base", "dt_base.rds")
   )
 
 
@@ -163,7 +157,7 @@ testthat::test_that("fit mlp (folds + bayes)", {
   testthat::expect_warning(
     mlp4 <- fit_base_learner(
       learner = "mlp",
-      dt_full = dt_long,
+      dt_full = dt_base,
       r_subsample = 0.3,
       model = mlp_model,
       folds = 5L,
@@ -172,7 +166,7 @@ testthat::test_that("fit mlp (folds + bayes)", {
       tune_bayes_iter = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
-      xvar = seq(5, ncol(dt_long)),
+      xvar = seq(5, ncol(dt_base)),
       nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
@@ -191,9 +185,7 @@ testthat::test_that("fit mlp (folds + bayes)", {
   testthat::expect_true(is.numeric(mlp4$base_prediction$.pred))
   # expect base predictions have more than 1 value
   # will be updated for SD/variance checks but hard with small sample
-  # testthat::expect_true(
-  #   length(unique(mlp4$base_prediction$.pred)) > 1
-  # )
+  # testthat::expect_true(length(unique(mlp4$base_prediction$.pred)) > 1)
 
 
   # spatial
@@ -201,7 +193,7 @@ testthat::test_that("fit mlp (folds + bayes)", {
   testthat::expect_warning(
     mlp5 <- fit_base_learner(
       learner = "mlp",
-      dt_full = dt_long,
+      dt_full = dt_base,
       r_subsample = 0.3,
       model = mlp_model,
       folds = 5L,
@@ -210,7 +202,7 @@ testthat::test_that("fit mlp (folds + bayes)", {
       tune_bayes_iter = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
-      xvar = seq(5, ncol(dt_long)),
+      xvar = seq(5, ncol(dt_base)),
       nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
@@ -229,9 +221,7 @@ testthat::test_that("fit mlp (folds + bayes)", {
   testthat::expect_true(is.numeric(mlp5$base_prediction$.pred))
   # expect base predictions have more than 1 value
   # will be updated for SD/variance checks but hard with small sample
-  # testthat::expect_true(
-  #   length(unique(mlp5$base_prediction$.pred)) > 1
-  # )
+  # testthat::expect_true(length(unique(mlp5$base_prediction$.pred)) > 1)
 
 
   # spatiotemporal
@@ -239,7 +229,7 @@ testthat::test_that("fit mlp (folds + bayes)", {
   testthat::expect_warning(
     mlp6 <- fit_base_learner(
       learner = "mlp",
-      dt_full = dt_long,
+      dt_full = dt_base,
       r_subsample = 0.3,
       model = mlp_model,
       folds = 5L,
@@ -248,7 +238,7 @@ testthat::test_that("fit mlp (folds + bayes)", {
       tune_bayes_iter = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
-      xvar = seq(5, ncol(dt_long)),
+      xvar = seq(5, ncol(dt_base)),
       nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
@@ -267,9 +257,7 @@ testthat::test_that("fit mlp (folds + bayes)", {
   testthat::expect_true(is.numeric(mlp6$base_prediction$.pred))
   # expect base predictions have more than 1 value
   # will be updated for SD/variance checks but hard with small sample
-  # testthat::expect_true(
-  #   length(unique(mlp6$base_prediction$.pred)) > 1
-  # )
+  # testthat::expect_true(length(unique(mlp6$base_prediction$.pred)) > 1)
 
 })
 
@@ -280,8 +268,8 @@ testthat::test_that("fit mlp (args_generate_cv + grid)", {
   # import sample data
   # sample inlcudes 2 months data for 3 sites
   # subset to only 50 predictors for light weight
-  dt_long <- readRDS(
-    testthat::test_path("..", "testdata", "base", "dt_long.rds")
+  dt_base <- readRDS(
+    testthat::test_path("..", "testdata", "base", "dt_base.rds")
   )
 
 
@@ -305,7 +293,7 @@ testthat::test_that("fit mlp (args_generate_cv + grid)", {
   testthat::expect_warning(
     mlp7 <- fit_base_learner(
       learner = "mlp",
-      dt_full = dt_long,
+      dt_full = dt_base,
       r_subsample = 0.3,
       model = mlp_model,
       args_generate_cv = args_temp,
@@ -316,7 +304,7 @@ testthat::test_that("fit mlp (args_generate_cv + grid)", {
       tune_grid_size = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
-      xvar = seq(5, ncol(dt_long)),
+      xvar = seq(5, ncol(dt_base)),
       nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
@@ -335,9 +323,7 @@ testthat::test_that("fit mlp (args_generate_cv + grid)", {
   testthat::expect_true(is.numeric(mlp7$base_prediction$.pred))
   # expect base predictions have more than 1 value
   # will be updated for SD/variance checks but hard with small sample
-  testthat::expect_true(
-    length(unique(mlp7$base_prediction$.pred)) > 1
-  )
+  testthat::expect_true(length(unique(mlp7$base_prediction$.pred)) > 1)
 
 
   # spatial
@@ -350,7 +336,7 @@ testthat::test_that("fit mlp (args_generate_cv + grid)", {
   testthat::expect_warning(
     mlp8 <- fit_base_learner(
       learner = "mlp",
-      dt_full = data.table::data.table(dt_long),
+      dt_full = data.table::data.table(dt_base),
       r_subsample = 0.3,
       model = mlp_model,
       args_generate_cv = args_spatial,
@@ -361,7 +347,7 @@ testthat::test_that("fit mlp (args_generate_cv + grid)", {
       tune_grid_size = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
-      xvar = seq(5, ncol(dt_long)),
+      xvar = seq(5, ncol(dt_base)),
       nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
@@ -380,9 +366,7 @@ testthat::test_that("fit mlp (args_generate_cv + grid)", {
   testthat::expect_true(is.numeric(mlp8$base_prediction$.pred))
   # expect base predictions have more than 1 value
   # will be updated for SD/variance checks but hard with small sample
-  testthat::expect_true(
-    length(unique(mlp8$base_prediction$.pred)) > 1
-  )
+  testthat::expect_true(length(unique(mlp8$base_prediction$.pred)) > 1)
 
 
   # spatiotemporal
@@ -397,7 +381,7 @@ testthat::test_that("fit mlp (args_generate_cv + grid)", {
   testthat::expect_warning(
     mlp9 <- fit_base_learner(
       learner = "mlp",
-      dt_full = data.table::data.table(dt_long),
+      dt_full = data.table::data.table(dt_base),
       r_subsample = 1, # full sample dataset for accurate ngroup cv
       model = mlp_model,
       args_generate_cv = args_spatiotemporal,
@@ -408,7 +392,7 @@ testthat::test_that("fit mlp (args_generate_cv + grid)", {
       tune_grid_size = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
-      xvar = seq(5, ncol(dt_long)),
+      xvar = seq(5, ncol(dt_base)),
       nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
@@ -427,9 +411,7 @@ testthat::test_that("fit mlp (args_generate_cv + grid)", {
   testthat::expect_true(is.numeric(mlp9$base_prediction$.pred))
   # expect base predictions have more than 1 value
   # will be updated for SD/variance checks but hard with small sample
-  testthat::expect_true(
-    length(unique(mlp9$base_prediction$.pred)) > 1
-  )
+  testthat::expect_true(length(unique(mlp9$base_prediction$.pred)) > 1)
 
 })
 
@@ -440,8 +422,8 @@ testthat::test_that("fit mlp (args_generate_cv + bayes)", {
   # import sample data
   # sample inlcudes 2 months data for 3 sites
   # subset to only 50 predictors for light weight
-  dt_long <- readRDS(
-    testthat::test_path("..", "testdata", "base", "dt_long.rds")
+  dt_base <- readRDS(
+    testthat::test_path("..", "testdata", "base", "dt_base.rds")
   )
 
 
@@ -459,7 +441,7 @@ testthat::test_that("fit mlp (args_generate_cv + bayes)", {
   testthat::expect_warning(
     mlp10 <- fit_base_learner(
       learner = "mlp",
-      dt_full = dt_long,
+      dt_full = dt_base,
       r_subsample = 0.3,
       model = mlp_model,
       folds = NULL,
@@ -469,7 +451,7 @@ testthat::test_that("fit mlp (args_generate_cv + bayes)", {
       tune_bayes_iter = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
-      xvar = seq(5, ncol(dt_long)),
+      xvar = seq(5, ncol(dt_base)),
       nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
@@ -488,9 +470,7 @@ testthat::test_that("fit mlp (args_generate_cv + bayes)", {
   testthat::expect_true(is.numeric(mlp10$base_prediction$.pred))
   # expect base predictions have more than 1 value
   # will be updated for SD/variance checks but hard with small sample
-  # testthat::expect_true(
-  #   length(unique(mlp10$base_prediction$.pred)) > 1
-  # )
+  # testthat::expect_true(length(unique(mlp10$base_prediction$.pred)) > 1)
 
 
   # spatial
@@ -503,7 +483,7 @@ testthat::test_that("fit mlp (args_generate_cv + bayes)", {
   testthat::expect_warning(
     mlp11 <- fit_base_learner(
       learner = "mlp",
-      dt_full = dt_long,
+      dt_full = dt_base,
       r_subsample = 0.3,
       model = mlp_model,
       folds = NULL,
@@ -513,7 +493,7 @@ testthat::test_that("fit mlp (args_generate_cv + bayes)", {
       tune_bayes_iter = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
-      xvar = seq(5, ncol(dt_long)),
+      xvar = seq(5, ncol(dt_base)),
       nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
@@ -532,9 +512,7 @@ testthat::test_that("fit mlp (args_generate_cv + bayes)", {
   testthat::expect_true(is.numeric(mlp11$base_prediction$.pred))
   # expect base predictions have more than 1 value
   # will be updated for SD/variance checks but hard with small sample
-  # testthat::expect_true(
-  #   length(unique(mlp11$base_prediction$.pred)) > 1
-  # )
+  # testthat::expect_true(length(unique(mlp11$base_prediction$.pred)) > 1)
 
 
   # spatiotemporal
@@ -549,7 +527,7 @@ testthat::test_that("fit mlp (args_generate_cv + bayes)", {
   testthat::expect_warning(
     mlp12 <- fit_base_learner(
       learner = "mlp",
-      dt_full = data.table::data.table(dt_long),
+      dt_full = data.table::data.table(dt_base),
       r_subsample = 1, # full sample dataset for accurate ngroup cv
       model = mlp_model,
       folds = NULL,
@@ -559,7 +537,7 @@ testthat::test_that("fit mlp (args_generate_cv + bayes)", {
       tune_bayes_iter = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
-      xvar = seq(5, ncol(dt_long)),
+      xvar = seq(5, ncol(dt_base)),
       nthreads = 1,
       trim_resamples = TRUE, # trim samples
       return_best = TRUE
@@ -578,9 +556,7 @@ testthat::test_that("fit mlp (args_generate_cv + bayes)", {
   testthat::expect_true(is.numeric(mlp12$base_prediction$.pred))
   # expect base predictions have more than 1 value
   # will be updated for SD/variance checks but hard with small sample
-  # testthat::expect_true(
-  #   length(unique(mlp12$base_prediction$.pred)) > 1
-  # )
+  # testthat::expect_true(length(unique(mlp12$base_prediction$.pred)) > 1)
   # expect NA only in base performance splits due to trim
   testthat::expect_equal(unique(mlp12$best_performance[[1]]), NA)
 

@@ -8,8 +8,8 @@ testthat::test_that("fit xgboost (folds + grid)", {
   # import sample data
   # sample inlcudes 2 months data for 3 sites
   # subset to only 50 predictors for light weight
-  dt_long <- readRDS(
-    testthat::test_path("..", "testdata", "base", "dt_long.rds")
+  dt_base <- readRDS(
+    testthat::test_path("..", "testdata", "base", "dt_base.rds")
   )
 
 
@@ -28,7 +28,7 @@ testthat::test_that("fit xgboost (folds + grid)", {
   testthat::expect_warning(
     xgb1 <- fit_base_learner(
       learner = "xgb",
-      dt_full = dt_long,
+      dt_full = dt_base,
       r_subsample = 0.3,
       model = xgb_model,
       folds = 5L,
@@ -38,7 +38,7 @@ testthat::test_that("fit xgboost (folds + grid)", {
       tune_grid_size = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
-      xvar = seq(5, ncol(dt_long)),
+      xvar = seq(5, ncol(dt_base)),
       nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
@@ -57,9 +57,7 @@ testthat::test_that("fit xgboost (folds + grid)", {
   testthat::expect_true(is.numeric(xgb1$base_prediction$.pred))
   # expect base predictions have more than 1 value
   # will be updated for SD/variance checks but hard with small sample
-  testthat::expect_true(
-    length(unique(xgb1$base_prediction$.pred)) > 1
-  )
+  testthat::expect_true(length(unique(xgb1$base_prediction$.pred)) > 1)
 
 
   # spatial
@@ -67,7 +65,7 @@ testthat::test_that("fit xgboost (folds + grid)", {
   testthat::expect_warning(
     xgb2 <- fit_base_learner(
       learner = "xgb",
-      dt_full = dt_long,
+      dt_full = dt_base,
       r_subsample = 0.3,
       model = xgb_model,
       folds = 5L,
@@ -77,7 +75,7 @@ testthat::test_that("fit xgboost (folds + grid)", {
       tune_grid_size = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
-      xvar = seq(5, ncol(dt_long)),
+      xvar = seq(5, ncol(dt_base)),
       nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
@@ -96,9 +94,7 @@ testthat::test_that("fit xgboost (folds + grid)", {
   testthat::expect_true(is.numeric(xgb2$base_prediction$.pred))
   # expect base predictions have more than 1 value
   # will be updated for SD/variance checks but hard with small sample
-  testthat::expect_true(
-    length(unique(xgb2$base_prediction$.pred)) > 1
-  )
+  testthat::expect_true(length(unique(xgb2$base_prediction$.pred)) > 1)
 
 
   # spatiotemporal
@@ -106,7 +102,7 @@ testthat::test_that("fit xgboost (folds + grid)", {
   testthat::expect_warning(
     xgb3 <- fit_base_learner(
       learner = "xgb",
-      dt_full = dt_long,
+      dt_full = dt_base,
       r_subsample = 0.3,
       model = xgb_model,
       folds = 5L,
@@ -116,7 +112,7 @@ testthat::test_that("fit xgboost (folds + grid)", {
       tune_grid_size = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
-      xvar = seq(5, ncol(dt_long)),
+      xvar = seq(5, ncol(dt_base)),
       nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
@@ -135,9 +131,7 @@ testthat::test_that("fit xgboost (folds + grid)", {
   testthat::expect_true(is.numeric(xgb3$base_prediction$.pred))
   # expect base predictions have more than 1 value
   # will be updated for SD/variance checks but hard with small sample
-  testthat::expect_true(
-    length(unique(xgb3$base_prediction$.pred)) > 1
-  )
+  testthat::expect_true(length(unique(xgb3$base_prediction$.pred)) > 1)
   
 })
 
@@ -148,8 +142,8 @@ testthat::test_that("fit xgboost (folds + bayes)", {
   # import sample data
   # sample inlcudes 2 months data for 3 sites
   # subset to only 50 predictors for light weight
-  dt_long <- readRDS(
-    testthat::test_path("..", "testdata", "base", "dt_long.rds")
+  dt_base <- readRDS(
+    testthat::test_path("..", "testdata", "base", "dt_base.rds")
   )
 
 
@@ -162,7 +156,7 @@ testthat::test_that("fit xgboost (folds + bayes)", {
   testthat::expect_warning(
     xgb4 <- fit_base_learner(
       learner = "xgb",
-      dt_full = dt_long,
+      dt_full = dt_base,
       r_subsample = 0.3,
       model = xgb_model,
       folds = 5L,
@@ -171,7 +165,7 @@ testthat::test_that("fit xgboost (folds + bayes)", {
       tune_bayes_iter = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
-      xvar = seq(5, ncol(dt_long)),
+      xvar = seq(5, ncol(dt_base)),
       nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
@@ -190,9 +184,7 @@ testthat::test_that("fit xgboost (folds + bayes)", {
   testthat::expect_true(is.numeric(xgb4$base_prediction$.pred))
   # expect base predictions have more than 1 value
   # will be updated for SD/variance checks but hard with small sample
-  # testthat::expect_true(
-  #   length(unique(xgb4$base_prediction$.pred)) > 1
-  # )
+  # testthat::expect_true(length(unique(xgb4$base_prediction$.pred)) > 1)
 
 
   # spatial
@@ -200,7 +192,7 @@ testthat::test_that("fit xgboost (folds + bayes)", {
   testthat::expect_warning(
     xgb5 <- fit_base_learner(
       learner = "xgb",
-      dt_full = dt_long,
+      dt_full = dt_base,
       r_subsample = 0.3,
       model = xgb_model,
       folds = 5L,
@@ -209,7 +201,7 @@ testthat::test_that("fit xgboost (folds + bayes)", {
       tune_bayes_iter = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
-      xvar = seq(5, ncol(dt_long)),
+      xvar = seq(5, ncol(dt_base)),
       nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
@@ -228,9 +220,7 @@ testthat::test_that("fit xgboost (folds + bayes)", {
   testthat::expect_true(is.numeric(xgb5$base_prediction$.pred))
   # expect base predictions have more than 1 value
   # will be updated for SD/variance checks but hard with small sample
-  # testthat::expect_true(
-  #   length(unique(xgb5$base_prediction$.pred)) > 1
-  # )
+  # testthat::expect_true(length(unique(xgb5$base_prediction$.pred)) > 1)
 
 
   # spatiotemporal
@@ -238,7 +228,7 @@ testthat::test_that("fit xgboost (folds + bayes)", {
   testthat::expect_warning(
     xgb6 <- fit_base_learner(
       learner = "xgb",
-      dt_full = dt_long,
+      dt_full = dt_base,
       r_subsample = 0.3,
       model = xgb_model,
       folds = 5L,
@@ -247,7 +237,7 @@ testthat::test_that("fit xgboost (folds + bayes)", {
       tune_bayes_iter = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
-      xvar = seq(5, ncol(dt_long)),
+      xvar = seq(5, ncol(dt_base)),
       nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
@@ -266,9 +256,7 @@ testthat::test_that("fit xgboost (folds + bayes)", {
   testthat::expect_true(is.numeric(xgb6$base_prediction$.pred))
   # expect base predictions have more than 1 value
   # will be updated for SD/variance checks but hard with small sample
-  # testthat::expect_true(
-  #   length(unique(xgb6$base_prediction$.pred)) > 1
-  # )
+  # testthat::expect_true(length(unique(xgb6$base_prediction$.pred)) > 1)
   
 })
 
@@ -279,8 +267,8 @@ testthat::test_that("fit xgboost (args_generate_cv + grid)", {
   # import sample data
   # sample inlcudes 2 months data for 3 sites
   # subset to only 50 predictors for light weight
-  dt_long <- readRDS(
-    testthat::test_path("..", "testdata", "base", "dt_long.rds")
+  dt_base <- readRDS(
+    testthat::test_path("..", "testdata", "base", "dt_base.rds")
   )
 
 
@@ -304,7 +292,7 @@ testthat::test_that("fit xgboost (args_generate_cv + grid)", {
   testthat::expect_warning(
     xgb7 <- fit_base_learner(
       learner = "xgb",
-      dt_full = dt_long,
+      dt_full = dt_base,
       r_subsample = 0.3,
       model = xgb_model,
       folds = NULL,
@@ -315,7 +303,7 @@ testthat::test_that("fit xgboost (args_generate_cv + grid)", {
       tune_grid_size = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
-      xvar = seq(5, ncol(dt_long)),
+      xvar = seq(5, ncol(dt_base)),
       nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
@@ -334,9 +322,7 @@ testthat::test_that("fit xgboost (args_generate_cv + grid)", {
   testthat::expect_true(is.numeric(xgb7$base_prediction$.pred))
   # expect base predictions have more than 1 value
   # will be updated for SD/variance checks but hard with small sample
-  testthat::expect_true(
-    length(unique(xgb7$base_prediction$.pred)) > 1
-  )
+  testthat::expect_true(length(unique(xgb7$base_prediction$.pred)) > 1)
 
 
   # spatial
@@ -349,7 +335,7 @@ testthat::test_that("fit xgboost (args_generate_cv + grid)", {
   testthat::expect_warning(
     xgb8 <- fit_base_learner(
       learner = "xgb",
-      dt_full = dt_long,
+      dt_full = dt_base,
       r_subsample = 0.3,
       model = xgb_model,
       folds = NULL,
@@ -360,7 +346,7 @@ testthat::test_that("fit xgboost (args_generate_cv + grid)", {
       tune_grid_size = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
-      xvar = seq(5, ncol(dt_long)),
+      xvar = seq(5, ncol(dt_base)),
       nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
@@ -379,9 +365,7 @@ testthat::test_that("fit xgboost (args_generate_cv + grid)", {
   testthat::expect_true(is.numeric(xgb8$base_prediction$.pred))
   # expect base predictions have more than 1 value
   # will be updated for SD/variance checks but hard with small sample
-  testthat::expect_true(
-    length(unique(xgb8$base_prediction$.pred)) > 1
-  )
+  testthat::expect_true(length(unique(xgb8$base_prediction$.pred)) > 1)
 
 
   # spatiotemporal
@@ -396,7 +380,7 @@ testthat::test_that("fit xgboost (args_generate_cv + grid)", {
   testthat::expect_warning(
     xgb9 <- fit_base_learner(
       learner = "xgb",
-      dt_full = data.table::data.table(dt_long),
+      dt_full = data.table::data.table(dt_base),
       r_subsample = 1, # full sample dataset for accurate ngroup cv
       model = xgb_model,
       folds = NULL,
@@ -407,7 +391,7 @@ testthat::test_that("fit xgboost (args_generate_cv + grid)", {
       tune_grid_size = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
-      xvar = seq(5, ncol(dt_long)),
+      xvar = seq(5, ncol(dt_base)),
       nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
@@ -426,9 +410,7 @@ testthat::test_that("fit xgboost (args_generate_cv + grid)", {
   testthat::expect_true(is.numeric(xgb9$base_prediction$.pred))
   # expect base predictions have more than 1 value
   # will be updated for SD/variance checks but hard with small sample
-  testthat::expect_true(
-    length(unique(xgb9$base_prediction$.pred)) > 1
-  )
+  testthat::expect_true(length(unique(xgb9$base_prediction$.pred)) > 1)
   
 })
 
@@ -439,8 +421,8 @@ testthat::test_that("fit xgboost (args_generate_cv + bayes)", {
   # import sample data
   # sample inlcudes 2 months data for 3 sites
   # subset to only 50 predictors for light weight
-  dt_long <- readRDS(
-    testthat::test_path("..", "testdata", "base", "dt_long.rds")
+  dt_base <- readRDS(
+    testthat::test_path("..", "testdata", "base", "dt_base.rds")
   )
 
 
@@ -458,7 +440,7 @@ testthat::test_that("fit xgboost (args_generate_cv + bayes)", {
   testthat::expect_warning(
     xgb10 <- fit_base_learner(
       learner = "xgb",
-      dt_full = dt_long,
+      dt_full = dt_base,
       r_subsample = 0.3,
       model = xgb_model,
       folds = NULL,
@@ -468,7 +450,7 @@ testthat::test_that("fit xgboost (args_generate_cv + bayes)", {
       tune_bayes_iter = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
-      xvar = seq(5, ncol(dt_long)),
+      xvar = seq(5, ncol(dt_base)),
       nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
@@ -487,9 +469,7 @@ testthat::test_that("fit xgboost (args_generate_cv + bayes)", {
   testthat::expect_true(is.numeric(xgb10$base_prediction$.pred))
   # expect base predictions have more than 1 value
   # will be updated for SD/variance checks but hard with small sample
-  # testthat::expect_true(
-  #   length(unique(xgb10$base_prediction$.pred)) > 1
-  # )
+  # testthat::expect_true(length(unique(xgb10$base_prediction$.pred)) > 1)
 
 
   # spatial
@@ -502,7 +482,7 @@ testthat::test_that("fit xgboost (args_generate_cv + bayes)", {
   testthat::expect_warning(
     xgb11 <- fit_base_learner(
       learner = "xgb",
-      dt_full = dt_long,
+      dt_full = dt_base,
       r_subsample = 0.3,
       model = xgb_model,
       folds = NULL,
@@ -512,7 +492,7 @@ testthat::test_that("fit xgboost (args_generate_cv + bayes)", {
       tune_bayes_iter = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
-      xvar = seq(5, ncol(dt_long)),
+      xvar = seq(5, ncol(dt_base)),
       nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
@@ -531,9 +511,7 @@ testthat::test_that("fit xgboost (args_generate_cv + bayes)", {
   testthat::expect_true(is.numeric(xgb11$base_prediction$.pred))
   # expect base predictions have more than 1 value
   # will be updated for SD/variance checks but hard with small sample
-  # testthat::expect_true(
-  #   length(unique(xgb11$base_prediction$.pred)) > 1
-  # )
+  # testthat::expect_true(length(unique(xgb11$base_prediction$.pred)) > 1)
 
 
   # spatiotemporal
@@ -548,7 +526,7 @@ testthat::test_that("fit xgboost (args_generate_cv + bayes)", {
   testthat::expect_warning(
     xgb12 <- fit_base_learner(
       learner = "xgb",
-      dt_full = data.table::data.table(dt_long),
+      dt_full = data.table::data.table(dt_base),
       r_subsample = 1, # full sample dataset for accurate ngroup cv
       model = xgb_model,
       folds = NULL,
@@ -558,7 +536,7 @@ testthat::test_that("fit xgboost (args_generate_cv + bayes)", {
       tune_bayes_iter = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
-      xvar = seq(5, ncol(dt_long)),
+      xvar = seq(5, ncol(dt_base)),
       nthreads = 1,
       trim_resamples = TRUE, # trim samples
       return_best = TRUE
@@ -577,9 +555,7 @@ testthat::test_that("fit xgboost (args_generate_cv + bayes)", {
   testthat::expect_true(is.numeric(xgb12$base_prediction$.pred))
   # expect base predictions have more than 1 value
   # will be updated for SD/variance checks but hard with small sample
-  # testthat::expect_true(
-  #   length(unique(xgb12$base_prediction$.pred)) > 1
-  # )
+  # testthat::expect_true(length(unique(xgb12$base_prediction$.pred)) > 1)
   # expect NA only in base performance splits due to trim
   testthat::expect_equal(unique(xgb12$best_performance[[1]]), NA)
 
