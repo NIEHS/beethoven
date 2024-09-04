@@ -1,5 +1,5 @@
 #' Combine prediction values from base learners
-#' 
+#' @description
 #' This function combines outcome data (observations) with the prediction
 #' values from each base learner.
 #' @keywords meta_learner

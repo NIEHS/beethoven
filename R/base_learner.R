@@ -324,6 +324,8 @@ fit_base_learner <-
 #' @importFrom yardstick metric_set rmse mape rsq mae
 #' @importFrom parsnip fit
 #' @importFrom stats predict
+#' @importFrom rlang quo_get_expr
+#' @export
 fit_base_tune <-
   function(
     recipe,
@@ -386,9 +388,12 @@ fit_base_tune <-
           control = wf_config
         )
     }
-    if (trim_resamples) {
-      base_wftune$splits <- NA
-    }
+    # DEVELOPMENT CHANGE
+    # mm-0904 Drop base_wftune from return when trim_resamples = TRUE
+    # due to large data size. 1 iter > 25Gb
+    # if (trim_resamples) {
+    #   base_wftune$splits <- NA
+    # }
     if (return_best) {
       # Select the best hyperparameters
       base_wfparam <-
@@ -396,9 +401,20 @@ fit_base_tune <-
           base_wftune,
           metric = c("rmse", "rsq", "mae")
         )
-
       # finalize workflow with the best tuned hyperparameters
       base_wfresult <- tune::finalize_workflow(base_wf, base_wfparam)
+
+      # DEVELOPMENT CHANGE
+      # mm-0904 unlist multi-layered hidden units if mlp model
+      if (model$engine == "brulee" && is.list(grid$hidden_units)) {
+        base_wfresult$fit$actions$model$spec$args$hidden_units <-
+          unlist(
+            rlang::quo_get_expr(
+              base_wfresult$fit$actions$model$spec$args$hidden_units
+            )
+          )
+      }
+
       # Best-fit model
       base_wf_fit_best <- parsnip::fit(base_wfresult, data = data_full)
       # Prediction with the best model
@@ -411,6 +427,11 @@ fit_base_tune <-
           base_parameter = base_wfparam,
           best_performance = base_wftune
         )
+    }
+    # DEVELOPMENT CHANGE
+    # mm-0904 see above
+    if (trim_resamples) {
+      base_wflist <- base_wflist[-3]
     }
     return(base_wflist)
   }

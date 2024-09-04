@@ -18,7 +18,8 @@ tar_config_set(
 # TODO: the maximum size error did not appear until recently
 #       and suddenly appeared. Need to investigate the cause.
 #       Should be removed after the investigation.
-options(future.globals.maxSize = 50 * 2^30)
+# options(future.globals.maxSize = 50 * 2^30)
+options(future.globals.maxSize = 60 * 1024^3)  # 60 GiB
 
 
 generate_list_download <- FALSE
@@ -106,7 +107,7 @@ tar_option_set(
       "glmnet", "xgboost",
       "future", "future.apply", "future.callr", "callr",
       "stars", "rlang", "parallelly"),
-  library = c("/ddn/gs1/home/songi2/r-libs"),
+  library = c("/ddn/gs1/group/set/isong-archive/r-libs"),
   repository = "local",
   error = "abridge",
   memory = "transient",
@@ -123,8 +124,8 @@ list(
   target_init,
   target_download,
   target_calculate_fit,
-  target_baselearner#,
-  # target_metalearner,
+  target_baselearner,
+  target_metalearner#,
   # target_calculate_predict,
   # target_predict,
   # # documents and summary statistics

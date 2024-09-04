@@ -5,19 +5,19 @@
 ################################################################################
 ##### make_subdata
 testthat::test_that("make_subdata", {
-  dt_long <- readRDS(
-    testthat::test_path("..", "testdata", "base", "dt_long.rds")
+  dt_base <- readRDS(
+    testthat::test_path("..", "testdata", "base", "dt_base.rds")
   )
 
   # expect no error for rows to be sampled
   testthat::expect_no_error(
-    make_rows <- make_subdata(data = dt_long, n = 50)
+    make_rows <- make_subdata(data = dt_base, n = 50)
   )
   # expect 50 rows
   testthat::expect_length(make_rows, 50)
 
   # expect error for NULL p and n
-  testthat::expect_error(make_subdata(data = dt_long, n = NULL, p = NULL))
+  testthat::expect_error(make_subdata(data = dt_base, n = NULL, p = NULL))
 })
 
 

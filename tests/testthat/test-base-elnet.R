@@ -34,7 +34,7 @@ testthat::test_that("fit elnet (folds + grid)", {
       cv_mode = "temporal",
       tune_mode = "grid",
       tune_grid_in = elnet_grid,
-      tune_grid_size = 1,
+      tune_grid_size = 2,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
@@ -71,7 +71,7 @@ testthat::test_that("fit elnet (folds + grid)", {
       cv_mode = "spatial",
       tune_mode = "grid",
       tune_grid_in = elnet_grid,
-      tune_grid_size = 1,
+      tune_grid_size = 2,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
@@ -108,7 +108,7 @@ testthat::test_that("fit elnet (folds + grid)", {
       cv_mode = "spatiotemporal",
       tune_mode = "grid",
       tune_grid_in = elnet_grid,
-      tune_grid_size = 1,
+      tune_grid_size = 2,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
@@ -161,7 +161,7 @@ testthat::test_that("fit elnet (folds + bayes)", {
       folds = 5L,
       cv_mode = "temporal",
       tune_mode = "bayes",
-      tune_bayes_iter = 1,
+      tune_bayes_iter = 2,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
@@ -197,7 +197,7 @@ testthat::test_that("fit elnet (folds + bayes)", {
       folds = 5L,
       cv_mode = "spatial",
       tune_mode = "bayes",
-      tune_bayes_iter = 1,
+      tune_bayes_iter = 2,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
@@ -233,7 +233,7 @@ testthat::test_that("fit elnet (folds + bayes)", {
       folds = 5L,
       cv_mode = "spatiotemporal",
       tune_mode = "bayes",
-      tune_bayes_iter = 1,
+      tune_bayes_iter = 2,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
@@ -298,7 +298,7 @@ testthat::test_that("fit elnet (args_generate_cv + grid)", {
       cv_mode = "temporal",
       tune_mode = "grid",
       tune_grid_in = elnet_grid,
-      tune_grid_size = 1,
+      tune_grid_size = 2,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
@@ -341,7 +341,7 @@ testthat::test_that("fit elnet (args_generate_cv + grid)", {
       cv_mode = "spatial",
       tune_mode = "grid",
       tune_grid_in = elnet_grid,
-      tune_grid_size = 1,
+      tune_grid_size = 2,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
@@ -386,7 +386,7 @@ testthat::test_that("fit elnet (args_generate_cv + grid)", {
       cv_mode = "spatiotemporal",
       tune_mode = "grid",
       tune_grid_in = elnet_grid,
-      tune_grid_size = 1,
+      tune_grid_size = 2,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
@@ -445,7 +445,7 @@ testthat::test_that("fit elnet (args_generate_cv + bayes)", {
       args_generate_cv = args_temp,
       cv_mode = "temporal",
       tune_mode = "bayes",
-      tune_bayes_iter = 1,
+      tune_bayes_iter = 2,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
@@ -487,7 +487,7 @@ testthat::test_that("fit elnet (args_generate_cv + bayes)", {
       args_generate_cv = args_spatial,
       cv_mode = "spatial",
       tune_mode = "bayes",
-      tune_bayes_iter = 1,
+      tune_bayes_iter = 2,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
@@ -531,7 +531,7 @@ testthat::test_that("fit elnet (args_generate_cv + bayes)", {
       args_generate_cv = args_spatiotemporal,
       cv_mode = "spatiotemporal",
       tune_mode = "bayes",
-      tune_bayes_iter = 1,
+      tune_bayes_iter = 2,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
@@ -543,11 +543,11 @@ testthat::test_that("fit elnet (args_generate_cv + bayes)", {
   # expect a list
   testthat::expect_true(is.list(elnet12))
   # expect length 3
-  testthat::expect_length(elnet12, 3)
+  testthat::expect_length(elnet12, 2) # LENGTH 2 DUE TO UPDATED TRIM
   # expect sub-items are tibble data.frames
   testthat::expect_equal(
-    unlist(lapply(1:3, function(x) methods::is(elnet12[[x]], "tbl_df"))),
-    c(TRUE, TRUE, TRUE)
+    unlist(lapply(1:2, function(x) methods::is(elnet12[[x]], "tbl_df"))),
+    c(TRUE, TRUE)
   )
   # expect base predictions are numeric
   testthat::expect_true(is.numeric(elnet12$base_prediction$.pred))
@@ -555,6 +555,6 @@ testthat::test_that("fit elnet (args_generate_cv + bayes)", {
   # will be updated for SD/variance checks but hard with small sample
   # testthat::expect_true(length(unique(elnet12$base_prediction$.pred)) > 1)
   # expect NA only in base performance splits due to trim
-  testthat::expect_equal(unique(elnet12$best_performance[[1]]), NA)
+  # testthat::expect_equal(unique(elnet12$best_performance[[1]]), NA)
 
 })
