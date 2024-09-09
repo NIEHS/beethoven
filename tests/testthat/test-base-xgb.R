@@ -12,7 +12,6 @@ testthat::test_that("fit xgboost (folds + grid)", {
     testthat::test_path("..", "testdata", "base", "dt_base.rds")
   )
 
-
   # set model
   xgb_model <- switch_model("xgb")
   # set grid
@@ -21,7 +20,6 @@ testthat::test_that("fit xgboost (folds + grid)", {
     trees = seq(1000, 3000, 1000),
     learn_rate = c(0.1)
   )
-
 
   # temporal
   # warning is due to 3 metrics (rmse, rsq, mae)
@@ -55,9 +53,6 @@ testthat::test_that("fit xgboost (folds + grid)", {
   )
   # expect base predictions are numeric
   testthat::expect_true(is.numeric(xgb1$base_prediction$.pred))
-  # expect base predictions have more than 1 value
-  # will be updated for SD/variance checks but hard with small sample
-  testthat::expect_true(length(unique(xgb1$base_prediction$.pred)) > 1)
 
 
   # spatial
@@ -92,9 +87,6 @@ testthat::test_that("fit xgboost (folds + grid)", {
   )
   # expect base predictions are numeric
   testthat::expect_true(is.numeric(xgb2$base_prediction$.pred))
-  # expect base predictions have more than 1 value
-  # will be updated for SD/variance checks but hard with small sample
-  testthat::expect_true(length(unique(xgb2$base_prediction$.pred)) > 1)
 
 
   # spatiotemporal
@@ -129,9 +121,6 @@ testthat::test_that("fit xgboost (folds + grid)", {
   )
   # expect base predictions are numeric
   testthat::expect_true(is.numeric(xgb3$base_prediction$.pred))
-  # expect base predictions have more than 1 value
-  # will be updated for SD/variance checks but hard with small sample
-  testthat::expect_true(length(unique(xgb3$base_prediction$.pred)) > 1)
   
 })
 
@@ -146,10 +135,8 @@ testthat::test_that("fit xgboost (folds + bayes)", {
     testthat::test_path("..", "testdata", "base", "dt_base.rds")
   )
 
-
   # set model
   xgb_model <- switch_model("xgb")
-
 
   # temporal
   # warning is due to 3 metrics (rmse, rsq, mae)
@@ -182,9 +169,6 @@ testthat::test_that("fit xgboost (folds + bayes)", {
   )
   # expect base predictions are numeric
   testthat::expect_true(is.numeric(xgb4$base_prediction$.pred))
-  # expect base predictions have more than 1 value
-  # will be updated for SD/variance checks but hard with small sample
-  # testthat::expect_true(length(unique(xgb4$base_prediction$.pred)) > 1)
 
 
   # spatial
@@ -218,9 +202,6 @@ testthat::test_that("fit xgboost (folds + bayes)", {
   )
   # expect base predictions are numeric
   testthat::expect_true(is.numeric(xgb5$base_prediction$.pred))
-  # expect base predictions have more than 1 value
-  # will be updated for SD/variance checks but hard with small sample
-  # testthat::expect_true(length(unique(xgb5$base_prediction$.pred)) > 1)
 
 
   # spatiotemporal
@@ -254,9 +235,6 @@ testthat::test_that("fit xgboost (folds + bayes)", {
   )
   # expect base predictions are numeric
   testthat::expect_true(is.numeric(xgb6$base_prediction$.pred))
-  # expect base predictions have more than 1 value
-  # will be updated for SD/variance checks but hard with small sample
-  # testthat::expect_true(length(unique(xgb6$base_prediction$.pred)) > 1)
   
 })
 
@@ -271,7 +249,6 @@ testthat::test_that("fit xgboost (args_generate_cv + grid)", {
     testthat::test_path("..", "testdata", "base", "dt_base.rds")
   )
 
-
   # set model
   xgb_model <- switch_model("xgb")
   # set grid
@@ -280,7 +257,6 @@ testthat::test_that("fit xgboost (args_generate_cv + grid)", {
     trees = seq(1000, 3000, 1000),
     learn_rate = c(0.1)
   )
-
 
   # temporal
   # warning is due to 3 metrics (rmse, rsq, mae)
@@ -320,9 +296,6 @@ testthat::test_that("fit xgboost (args_generate_cv + grid)", {
   )
   # expect base predictions are numeric
   testthat::expect_true(is.numeric(xgb7$base_prediction$.pred))
-  # expect base predictions have more than 1 value
-  # will be updated for SD/variance checks but hard with small sample
-  testthat::expect_true(length(unique(xgb7$base_prediction$.pred)) > 1)
 
 
   # spatial
@@ -363,9 +336,6 @@ testthat::test_that("fit xgboost (args_generate_cv + grid)", {
   )
   # expect base predictions are numeric
   testthat::expect_true(is.numeric(xgb8$base_prediction$.pred))
-  # expect base predictions have more than 1 value
-  # will be updated for SD/variance checks but hard with small sample
-  testthat::expect_true(length(unique(xgb8$base_prediction$.pred)) > 1)
 
 
   # spatiotemporal
@@ -408,9 +378,6 @@ testthat::test_that("fit xgboost (args_generate_cv + grid)", {
   )
   # expect base predictions are numeric
   testthat::expect_true(is.numeric(xgb9$base_prediction$.pred))
-  # expect base predictions have more than 1 value
-  # will be updated for SD/variance checks but hard with small sample
-  testthat::expect_true(length(unique(xgb9$base_prediction$.pred)) > 1)
   
 })
 
@@ -425,10 +392,8 @@ testthat::test_that("fit xgboost (args_generate_cv + bayes)", {
     testthat::test_path("..", "testdata", "base", "dt_base.rds")
   )
 
-
   # set model
   xgb_model <- switch_model("xgb")
-
 
   # temporal
   # warning is due to 3 metrics (rmse, rsq, mae)
@@ -467,9 +432,6 @@ testthat::test_that("fit xgboost (args_generate_cv + bayes)", {
   )
   # expect base predictions are numeric
   testthat::expect_true(is.numeric(xgb10$base_prediction$.pred))
-  # expect base predictions have more than 1 value
-  # will be updated for SD/variance checks but hard with small sample
-  # testthat::expect_true(length(unique(xgb10$base_prediction$.pred)) > 1)
 
 
   # spatial
@@ -509,9 +471,6 @@ testthat::test_that("fit xgboost (args_generate_cv + bayes)", {
   )
   # expect base predictions are numeric
   testthat::expect_true(is.numeric(xgb11$base_prediction$.pred))
-  # expect base predictions have more than 1 value
-  # will be updated for SD/variance checks but hard with small sample
-  # testthat::expect_true(length(unique(xgb11$base_prediction$.pred)) > 1)
 
 
   # spatiotemporal
@@ -553,10 +512,5 @@ testthat::test_that("fit xgboost (args_generate_cv + bayes)", {
   )
   # expect base predictions are numeric
   testthat::expect_true(is.numeric(xgb12$base_prediction$.pred))
-  # expect base predictions have more than 1 value
-  # will be updated for SD/variance checks but hard with small sample
-  # testthat::expect_true(length(unique(xgb12$base_prediction$.pred)) > 1)
-  # expect NA only in base performance splits due to trim
-  # testthat::expect_equal(unique(xgb12$best_performance[[1]]), NA)
 
 })

@@ -12,7 +12,6 @@ testthat::test_that("fit mlp (folds + grid))", {
     testthat::test_path("..", "testdata", "base", "dt_base.rds")
   )
 
-
   # set model
   mlp_model <- switch_model("mlp")
   # set grid
@@ -22,7 +21,6 @@ testthat::test_that("fit mlp (folds + grid))", {
     activation = c("relu"),
     learn_rate = c(0.1)
    )
-
 
   # temporal
   # warning is due to 3 metrics (rmse, rsq, mae)
@@ -56,9 +54,6 @@ testthat::test_that("fit mlp (folds + grid))", {
   )
   # expect base predictions are numeric
   testthat::expect_true(is.numeric(mlp1$base_prediction$.pred))
-  # expect base predictions have more than 1 value
-  # will be updated for SD/variance checks but hard with small sample
-  # testthat::expect_true(length(unique(mlp1$base_prediction$.pred)) > 1)
 
 
   # spatial
@@ -93,9 +88,6 @@ testthat::test_that("fit mlp (folds + grid))", {
   )
   # expect base predictions are numeric
   testthat::expect_true(is.numeric(mlp2$base_prediction$.pred))
-  # expect base predictions have more than 1 value
-  # will be updated for SD/variance checks but hard with small sample
-  # testthat::expect_true(length(unique(mlp2$base_prediction$.pred)) > 1)
 
 
   # spatiotemporal
@@ -130,9 +122,6 @@ testthat::test_that("fit mlp (folds + grid))", {
   )
   # expect base predictions are numeric
   testthat::expect_true(is.numeric(mlp3$base_prediction$.pred))
-  # expect base predictions have more than 1 value
-  # will be updated for SD/variance checks but hard with small sample
-  # testthat::expect_true(length(unique(mlp3$base_prediction$.pred)) > 1)
 
 })
 
@@ -147,10 +136,8 @@ testthat::test_that("fit mlp (folds + bayes)", {
     testthat::test_path("..", "testdata", "base", "dt_base.rds")
   )
 
-
   # set model
   mlp_model <- switch_model("mlp")
-
 
   # temporal
   # warning is due to 3 metrics (rmse, rsq, mae)
@@ -183,9 +170,6 @@ testthat::test_that("fit mlp (folds + bayes)", {
   )
   # expect base predictions are numeric
   testthat::expect_true(is.numeric(mlp4$base_prediction$.pred))
-  # expect base predictions have more than 1 value
-  # will be updated for SD/variance checks but hard with small sample
-  # testthat::expect_true(length(unique(mlp4$base_prediction$.pred)) > 1)
 
 
   # spatial
@@ -219,9 +203,6 @@ testthat::test_that("fit mlp (folds + bayes)", {
   )
   # expect base predictions are numeric
   testthat::expect_true(is.numeric(mlp5$base_prediction$.pred))
-  # expect base predictions have more than 1 value
-  # will be updated for SD/variance checks but hard with small sample
-  # testthat::expect_true(length(unique(mlp5$base_prediction$.pred)) > 1)
 
 
   # spatiotemporal
@@ -255,9 +236,6 @@ testthat::test_that("fit mlp (folds + bayes)", {
   )
   # expect base predictions are numeric
   testthat::expect_true(is.numeric(mlp6$base_prediction$.pred))
-  # expect base predictions have more than 1 value
-  # will be updated for SD/variance checks but hard with small sample
-  # testthat::expect_true(length(unique(mlp6$base_prediction$.pred)) > 1)
 
 })
 
@@ -271,7 +249,6 @@ testthat::test_that("fit mlp (args_generate_cv + grid)", {
   dt_base <- readRDS(
     testthat::test_path("..", "testdata", "base", "dt_base.rds")
   )
-
 
   # set model
   mlp_model <- switch_model("mlp")
@@ -321,9 +298,6 @@ testthat::test_that("fit mlp (args_generate_cv + grid)", {
   )
   # expect base predictions are numeric
   testthat::expect_true(is.numeric(mlp7$base_prediction$.pred))
-  # expect base predictions have more than 1 value
-  # will be updated for SD/variance checks but hard with small sample
-  # testthat::expect_true(length(unique(mlp7$base_prediction$.pred)) > 1)
 
 
   # spatial
@@ -364,9 +338,6 @@ testthat::test_that("fit mlp (args_generate_cv + grid)", {
   )
   # expect base predictions are numeric
   testthat::expect_true(is.numeric(mlp8$base_prediction$.pred))
-  # expect base predictions have more than 1 value
-  # will be updated for SD/variance checks but hard with small sample
-  # testthat::expect_true(length(unique(mlp8$base_prediction$.pred)) > 1)
 
 
   # spatiotemporal
@@ -409,9 +380,6 @@ testthat::test_that("fit mlp (args_generate_cv + grid)", {
   )
   # expect base predictions are numeric
   testthat::expect_true(is.numeric(mlp9$base_prediction$.pred))
-  # expect base predictions have more than 1 value
-  # will be updated for SD/variance checks but hard with small sample
-  # testthat::expect_true(length(unique(mlp9$base_prediction$.pred)) > 1)
 
 })
 
@@ -426,10 +394,8 @@ testthat::test_that("fit mlp (args_generate_cv + bayes)", {
     testthat::test_path("..", "testdata", "base", "dt_base.rds")
   )
 
-
   # set model
   mlp_model <- switch_model("mlp")
-
 
   # temporal
   # warning is due to 3 metrics (rmse, rsq, mae)
@@ -468,9 +434,6 @@ testthat::test_that("fit mlp (args_generate_cv + bayes)", {
   )
   # expect base predictions are numeric
   testthat::expect_true(is.numeric(mlp10$base_prediction$.pred))
-  # expect base predictions have more than 1 value
-  # will be updated for SD/variance checks but hard with small sample
-  # testthat::expect_true(length(unique(mlp10$base_prediction$.pred)) > 1)
 
 
   # spatial
@@ -510,9 +473,6 @@ testthat::test_that("fit mlp (args_generate_cv + bayes)", {
   )
   # expect base predictions are numeric
   testthat::expect_true(is.numeric(mlp11$base_prediction$.pred))
-  # expect base predictions have more than 1 value
-  # will be updated for SD/variance checks but hard with small sample
-  # testthat::expect_true(length(unique(mlp11$base_prediction$.pred)) > 1)
 
 
   # spatiotemporal
@@ -554,10 +514,5 @@ testthat::test_that("fit mlp (args_generate_cv + bayes)", {
   )
   # expect base predictions are numeric
   testthat::expect_true(is.numeric(mlp12$base_prediction$.pred))
-  # expect base predictions have more than 1 value
-  # will be updated for SD/variance checks but hard with small sample
-  # testthat::expect_true(length(unique(mlp12$base_prediction$.pred)) > 1)
-  # expect NA only in base performance splits due to trim
-  # testthat::expect_equal(unique(mlp12$best_performance[[1]]), NA)
 
 })

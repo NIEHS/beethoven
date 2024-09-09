@@ -3,9 +3,16 @@ library(tarchetypes)
 library(future)
 library(future.batchtools)
 library(dplyr)
-library(beethoven)
+library(
+  beethoven,
+  lib.loc = "/ddn/gs1/home/manwareme/R/x86_64-pc-linux-gnu-library/4.3"
+)
 library(tidymodels)
 library(bonsai)
+library(
+  torch,
+  lib.loc = "/ddn/gs1/biotools/R/lib64/R/library"
+)
 
 Sys.setenv("LD_LIBRARY_PATH" = paste("/ddn/gs1/biotools/R/lib64/R/customlib", Sys.getenv("LD_LIBRARY_PATH"), sep = ":"))
 
@@ -97,16 +104,18 @@ if (Sys.getenv("BTV_DOWNLOAD_PASS") == "TRUE") {
 # variables and GPU versions of the packages.
 # TODO: check if the controller and resources setting are required
 tar_option_set(
-  packages =
-    c("beethoven", "amadeus", "chopin", "targets", "tarchetypes",
-      "data.table", "sf", "terra", "exactextractr",
-      #"crew", "crew.cluster", 
-      "tigris", "dplyr",
-      "future.batchtools", "qs", "collapse", "bonsai",
-      "tidymodels", "tune", "rsample", "torch", "brulee",
-      "glmnet", "xgboost",
-      "future", "future.apply", "future.callr", "callr",
-      "stars", "rlang", "parallelly"),
+  packages = c(
+    "beethoven",
+    "amadeus", "chopin", "targets", "tarchetypes",
+    "data.table", "sf", "terra", "exactextractr",
+    #"crew", "crew.cluster", 
+    "tigris", "dplyr",
+    "future.batchtools", "qs", "collapse", "bonsai",
+    "tidymodels", "tune", "rsample", "torch", "brulee",
+    "glmnet", "xgboost",
+    "future", "future.apply", "future.callr", "callr",
+    "stars", "rlang", "parallelly"
+  ),
   library = c("/ddn/gs1/group/set/isong-archive/r-libs"),
   repository = "local",
   error = "abridge",

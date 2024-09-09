@@ -12,16 +12,14 @@
 #     testthat::test_path("..", "testdata", "base", "dt_base.rds")
 #   )
 
-
 #   # set model
-#   lgb_model <- switch_model("lgb")
+#   lgb_model <- switch_model("lgb", device = NULL)
 #   # set grid
 #   lgb_grid <- expand.grid(
 #     mtry = c(300),
 #     trees = seq(1000, 3000, 1000),
 #     learn_rate = c(0.1)
 #   )
-
 
 #   # temporal
 #   # warning is due to 3 metrics (rmse, rsq, mae)
@@ -55,9 +53,6 @@
 #   )
 #   # expect base predictions are numeric
 #   testthat::expect_true(is.numeric(lgb1$base_prediction$.pred))
-#   # expect base predictions have more than 1 value
-#   # will be updated for SD/variance checks but hard with small sample
-#   testthat::expect_true(length(unique(lgb1$base_prediction$.pred)) > 1)
 
 
 #   # spatial
@@ -92,9 +87,6 @@
 #   )
 #   # expect base predictions are numeric
 #   testthat::expect_true(is.numeric(lgb2$base_prediction$.pred))
-#   # expect base predictions have more than 1 value
-#   # will be updated for SD/variance checks but hard with small sample
-#   testthat::expect_true(length(unique(lgb2$base_prediction$.pred)) > 1)
 
 
 #   # spatiotemporal
@@ -129,9 +121,6 @@
 #   )
 #   # expect base predictions are numeric
 #   testthat::expect_true(is.numeric(lgb3$base_prediction$.pred))
-#   # expect base predictions have more than 1 value
-#   # will be updated for SD/variance checks but hard with small sample
-#   testthat::expect_true(length(unique(lgb3$base_prediction$.pred)) > 1)
   
 # })
 
@@ -146,10 +135,8 @@
 #     testthat::test_path("..", "testdata", "base", "dt_base.rds")
 #   )
 
-
 #   # set model
 #   lgb_model <- switch_model("lgb")
-
 
 #   # temporal
 #   # warning is due to 3 metrics (rmse, rsq, mae)
@@ -182,9 +169,6 @@
 #   )
 #   # expect base predictions are numeric
 #   testthat::expect_true(is.numeric(lgb4$base_prediction$.pred))
-#   # expect base predictions have more than 1 value
-#   # will be updated for SD/variance checks but hard with small sample
-#   testthat::expect_true(length(unique(lgb4$base_prediction$.pred)) > 1)
 
 
 #   # spatial
@@ -218,9 +202,6 @@
 #   )
 #   # expect base predictions are numeric
 #   testthat::expect_true(is.numeric(lgb5$base_prediction$.pred))
-#   # expect base predictions have more than 1 value
-#   # will be updated for SD/variance checks but hard with small sample
-#   testthat::expect_true(length(unique(lgb5$base_prediction$.pred)) > 1)
 
 
 #   # spatiotemporal
@@ -254,9 +235,6 @@
 #   )
 #   # expect base predictions are numeric
 #   testthat::expect_true(is.numeric(lgb6$base_prediction$.pred))
-#   # expect base predictions have more than 1 value
-#   # will be updated for SD/variance checks but hard with small sample
-#   testthat::expect_true(length(unique(lgb6$base_prediction$.pred)) > 1)
   
 # })
 
@@ -271,7 +249,6 @@
 #     testthat::test_path("..", "testdata", "base", "dt_base.rds")
 #   )
 
-
 #   # set model
 #   lgb_model <- switch_model("lgb")
 #   # set grid
@@ -280,7 +257,6 @@
 #     trees = seq(1000, 3000, 1000),
 #     learn_rate = c(0.1)
 #   )
-
 
 #   # temporal
 #   # warning is due to 3 metrics (rmse, rsq, mae)
@@ -320,9 +296,6 @@
 #   )
 #   # expect base predictions are numeric
 #   testthat::expect_true(is.numeric(lgb7$base_prediction$.pred))
-#   # expect base predictions have more than 1 value
-#   # will be updated for SD/variance checks but hard with small sample
-#   testthat::expect_true(length(unique(lgb7$base_prediction$.pred)) > 1)
 
 
 #   # spatial
@@ -363,9 +336,6 @@
 #   )
 #   # expect base predictions are numeric
 #   testthat::expect_true(is.numeric(lgb8$base_prediction$.pred))
-#   # expect base predictions have more than 1 value
-#   # will be updated for SD/variance checks but hard with small sample
-#   testthat::expect_true(length(unique(lgb8$base_prediction$.pred)) > 1)
 
 
 #   # spatiotemporal
@@ -408,9 +378,6 @@
 #   )
 #   # expect base predictions are numeric
 #   testthat::expect_true(is.numeric(lgb9$base_prediction$.pred))
-#   # expect base predictions have more than 1 value
-#   # will be updated for SD/variance checks but hard with small sample
-#   testthat::expect_true(length(unique(lgb9$base_prediction$.pred)) > 1)
   
 # })
 
@@ -425,10 +392,8 @@
 #     testthat::test_path("..", "testdata", "base", "dt_base.rds")
 #   )
 
-
 #   # set model
 #   lgb_model <- switch_model("lgb")
-
 
 #   # temporal
 #   # warning is due to 3 metrics (rmse, rsq, mae)
@@ -467,9 +432,6 @@
 #   )
 #   # expect base predictions are numeric
 #   testthat::expect_true(is.numeric(lgb10$base_prediction$.pred))
-#   # expect base predictions have more than 1 value
-#   # will be updated for SD/variance checks but hard with small sample
-#   # testthat::expect_true(length(unique(lgb10$base_prediction$.pred)) > 1)
 
 
 #   # spatial
@@ -509,9 +471,6 @@
 #   )
 #   # expect base predictions are numeric
 #   testthat::expect_true(is.numeric(lgb11$base_prediction$.pred))
-#   # expect base predictions have more than 1 value
-#   # will be updated for SD/variance checks but hard with small sample
-#   # testthat::expect_true(length(unique(lgb11$base_prediction$.pred)) > 1)
 
 
 #   # spatiotemporal
@@ -553,10 +512,5 @@
 #   )
 #   # expect base predictions are numeric
 #   testthat::expect_true(is.numeric(lgb12$base_prediction$.pred))
-#   # expect base predictions have more than 1 value
-#   # will be updated for SD/variance checks but hard with small sample
-#   # testthat::expect_true(length(unique(lgb12$base_prediction$.pred)) > 1)
-#   # expect NA only in base performance splits due to trim
-#   testthat::expect_equal(unique(lgb12$best_performance[[1]]), NA)
 
 # })
