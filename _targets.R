@@ -9,10 +9,10 @@ library(
 )
 library(tidymodels)
 library(bonsai)
-library(
-  torch,
-  lib.loc = "/ddn/gs1/biotools/R/lib64/R/library"
-)
+# library(
+#   torch,
+#   lib.loc = "/ddn/gs1/biotools/R/lib64/R/library"
+# )
 
 Sys.setenv("LD_LIBRARY_PATH" = paste("/ddn/gs1/biotools/R/lib64/R/customlib", Sys.getenv("LD_LIBRARY_PATH"), sep = ":"))
 
@@ -57,7 +57,8 @@ arglist_common <-
 
 tar_source("inst/targets/targets_initialize.R")
 tar_source("inst/targets/targets_download.R")
-tar_source("inst/targets/targets_calculate.R")
+tar_source("inst/targets/targets_calculate_fit.R")
+tar_source("inst/targets/targets_calculate_predict.R")
 tar_source("inst/targets/targets_baselearner.R")
 tar_source("inst/targets/targets_metalearner.R")
 tar_source("inst/targets/targets_predict.R")
@@ -105,8 +106,7 @@ if (Sys.getenv("BTV_DOWNLOAD_PASS") == "TRUE") {
 # TODO: check if the controller and resources setting are required
 tar_option_set(
   packages = c(
-    "beethoven",
-    "amadeus", "chopin", "targets", "tarchetypes",
+    "beethoven", "amadeus", "chopin", "targets", "tarchetypes",
     "data.table", "sf", "terra", "exactextractr",
     #"crew", "crew.cluster", 
     "tigris", "dplyr",
@@ -134,8 +134,8 @@ list(
   target_download,
   target_calculate_fit,
   target_baselearner,
-  target_metalearner#,
-  # target_calculate_predict,
+  target_metalearner,
+  target_calculate_predict#,
   # target_predict,
   # # documents and summary statistics
   # targets::tar_target(

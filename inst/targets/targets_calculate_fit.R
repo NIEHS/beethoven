@@ -14,34 +14,34 @@ target_calculate_fit <-
       description = "Calculation arguments in QS file"
     )
     ,
-    tar_target(
+    targets::tar_target(
       chr_iter_calc_features,
       command = c("hms", "tri", "nei",
                   "ecoregions", "koppen", "population", "groads"),
       iteration = "list",
-      description = "Feature calculation"
+      description = "Base features"
     )
     ,
     # "year" is included: tri, nlcd, nei
     # "time" is included: hms
-    tar_target(
+    targets::tar_target(
       chr_iter_calc_nasa,
       command = c(
          "mod11", "mod06", "mod13",
          "mcd19_1km", "mcd19_5km", "mod09", "viirs"
           ),
       iteration = "list",
-      description = "MODIS/VIIRS feature calculation"
+      description = "MODIS/VIIRS features"
     )
     ,
-    tar_target(
+    targets::tar_target(
       chr_iter_calc_geoscf,
       command = c("geoscf_chm", "geoscf_aqc"),
       iteration = "vector",
-      description = "GEOS-CF feature calculation"
+      description = "GEOS-CF features"
     )
     ,
-    tar_target(
+    targets::tar_target(
       name = chr_iter_calc_gmted_vars,
       command = c(
           "Breakline Emphasis", "Systematic Subsample",
@@ -50,10 +50,10 @@ target_calculate_fit <-
           "Standard Deviation Statistic"
         ),
       iteration = "list",
-      description = "GMTED variables"
+      description = "GMTED features"
     )
     ,
-    tar_target(
+    targets::tar_target(
       list_feat_calc_base,
       command =
         inject_calculate(
@@ -62,11 +62,11 @@ target_calculate_fit <-
           injection = loadargs(file_prep_calc_args, chr_iter_calc_features)),
       pattern = cross(file_prep_calc_args, chr_iter_calc_features),
       iteration = "list",
-      description = "Base feature list",
+      description = "Calculate base features (fit)",
       priority = 1
     )
     ,
-    tar_target(
+    targets::tar_target(
       list_feat_calc_base_flat,
       command = lapply(list_feat_calc_base,
         function(x) {
@@ -89,20 +89,21 @@ target_calculate_fit <-
             collapse::rowbind(x, use.names = TRUE, fill = TRUE)
           }
           }),
-      description = "Base feature list (all dt)"
+      description = "Calculated base feature list (all dt) (fit)"
     )
     ,
-    tar_target(
+    targets::tar_target(
       name = df_feat_calc_nlcd_params,
       command = expand.grid(
         year = loadargs(file_prep_calc_args, "nlcd")$domain,
         radius = loadargs(file_prep_calc_args, "nlcd")$radius
       ) %>%
       split(1:nrow(.)),
-      iteration = "list"
+      iteration = "list",
+      description = "NLCD features"
     )
     ,
-    tar_target(
+    targets::tar_target(
       name = list_feat_calc_nlcd,
       command = inject_nlcd(year = df_feat_calc_nlcd_params$year,
                             radius = df_feat_calc_nlcd_params$radius,
@@ -118,13 +119,13 @@ target_calculate_fit <-
                             ),
       pattern = cross(file_prep_calc_args, df_feat_calc_nlcd_params),
       iteration = "list",
-      description = "NLCD feature list",
+      description = "Calculate NLCD features (fit)",
       resources = set_slurm_resource(
             ntasks = 1, ncpus = 10, memory = 8
           )
     )
     ,
-    tar_target(
+    targets::tar_target(
       name = dt_feat_calc_nlcd,
       command =
         list_feat_calc_nlcd %>%
@@ -140,10 +141,10 @@ target_calculate_fit <-
             values = c("value"),
             how = "wider"
           ),
-      description = "NLCD feature list (all dt)"
+      description = "NLCD feature list (all dt) (fit)"
     )
     ,
-    tar_target(
+    targets::tar_target(
       list_feat_calc_nasa,
       command =
         inject_modis_par(
@@ -154,10 +155,10 @@ target_calculate_fit <-
             ntasks = 1, ncpus = arglist_common$nthreads_nasa, memory = 8
           ),
       iteration = "list",
-      description = "MODIS/VIIRS feature list"
+      description = "Calculate MODIS/VIIRS features (fit)"
     )
     ,
-    tar_target(
+    targets::tar_target(
       list_feat_calc_geoscf,
       inject_geos(
         locs = sf_feat_proc_aqs_sites,
@@ -168,10 +169,10 @@ target_calculate_fit <-
       resources = set_slurm_resource(
             ntasks = 1, ncpus = arglist_common$nthreads_geoscf, memory = 4
           ),
-      description = "GEOS-CF feature list"
+      description = "Calculate GEOS-CF features (fit)"
     )
     ,
-    tar_target(
+    targets::tar_target(
       name = list_feat_calc_gmted,
       command = inject_gmted(
         locs = sf_feat_proc_aqs_sites,
@@ -184,7 +185,7 @@ target_calculate_fit <-
       resources = set_slurm_resource(
             ntasks = 1, ncpus = arglist_common$nthreads_gmted, memory = 8
           ),
-      description = "GMTED feature list"
+      description = "Calculate GMTED features (fit)"
     )
     ,
     targets::tar_target(
@@ -201,8 +202,9 @@ target_calculate_fit <-
       pattern = map(file_prep_calc_args),
       iteration = "list",
       resources = set_slurm_resource(
-            ntasks = 1, ncpus = arglist_common$nthreads_narr, memory = 20 
-          )
+        ntasks = 1, ncpus = arglist_common$nthreads_narr, memory = 20
+      ),
+      description = "Calculate NARR features (fit)"
     )
     ,
     # targets::tar_target(
@@ -219,36 +221,31 @@ target_calculate_fit <-
     #       )
     # )
     # ,
-    tar_target(
+    targets::tar_target(
       dt_feat_calc_gmted,
       command = reduce_merge(list_feat_calc_gmted, "site_id"),
-      description = "data.table of GMTED features"
+      description = "data.table of GMTED features (fit)"
     )
     ,
-    tar_target(
+    targets::tar_target(
       dt_feat_calc_nasa,
       command = reduce_merge(list_feat_calc_nasa),
-      description = "data.table of MODIS/VIIRS features"
+      description = "data.table of MODIS/VIIRS features (fit)"
     )
     ,
-    tar_target(
+    targets::tar_target(
       dt_feat_calc_geoscf,
       command = reduce_merge(list_feat_calc_geoscf),
-      description = "data.table of GEOS-CF features"
+      description = "data.table of GEOS-CF features (fit)"
     )
     ,
-    tar_target(
+    targets::tar_target(
       dt_feat_calc_narr,
-      command =
-        # collapse::join(
-          reduce_merge(list_feat_calc_narr, by = NULL),
-        #   reduce_merge(list_feat_calc_narr_apptainer, by = NULL),
-        #   on = c("site_id", "time"),
-        #   how = "full"
-        # )
+      command = reduce_merge(list_feat_calc_narr, by = NULL),
+      description = "data.table of NARR features (fit)"
     )
     ,
-    tar_target(
+    targets::tar_target(
       dt_feat_calc_date,
       command = 
       Reduce(
@@ -259,10 +256,10 @@ target_calculate_fit <-
           dt_feat_calc_nasa
         )
       ),
-      description = "data.table of all daily features"
+      description = "data.table of all daily features (fit)"
     )
     ,
-    tar_target(
+    targets::tar_target(
       dt_feat_calc_base,
       command = 
       Reduce(
@@ -300,7 +297,7 @@ target_calculate_fit <-
     #   description = "data.table of all features with PM2.5"
     # )
     ,
-    tar_target(
+    targets::tar_target(
       dt_feat_calc_cumulative,
       command = append_predecessors(
         path_qs = "output/qs",
@@ -313,7 +310,7 @@ target_calculate_fit <-
             ntasks = 1, ncpus = arglist_common$nthreads_append, memory = 16
           )
     ),
-    tar_target(
+    targets::tar_target(
       dt_feat_calc_imputed,
       command =
       impute_all(
@@ -326,40 +323,5 @@ target_calculate_fit <-
       resources = set_slurm_resource(
             ntasks = 1, ncpus = arglist_common$nthreads_impute, memory = 8
           )
-    )
-  )
-
-
-
-
-## Targets for prediction grid features ####
-## FIXME: align with the "_fit" targets
-## TODO: chopin's gridset implementation
-## TODO: prospective or retrospective, or both?
-target_calculate_predict <-
-  list(
-    tar_target(
-      char_pred_calc_base,
-      command =
-        terra::writeVector(
-          terra::vect(
-            data(prediction_grid, package = "chopin"),
-            geom = c("lon", "lat"),
-            crs = "EPSG:5070"
-          ),
-          filename = "input/prediction_grid.gpkg"
-        )
-    ),
-    tar_target(
-      sf_pred_calc_grid,
-      command = chopin::par_make_gridset(
-
-      )
-    ),
-    tar_target(
-      dt_pred_calc_base,
-      command = chopin::par_grid(
-
-      )
     )
   )
