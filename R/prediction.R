@@ -63,6 +63,7 @@ split_dates <- function(
 #' Extract the first and last elements of a list
 #' @param dates list. A list of dates.
 #' @return a character vector with the first and last dates from the list.
+#' @export
 fl_dates <- function(
   dates
 ) {
