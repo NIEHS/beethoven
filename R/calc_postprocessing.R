@@ -506,7 +506,7 @@ impute_all <-
   ) {
     data.table::setDTthreads(nthreads_dt)
     if (is.character(dt)) {
-      if(!endsWith(dt, ".qs")) {
+      if (!endsWith(dt, ".qs")) {
         stop(
           paste0(
             "If `dt` points to a file, provide full path to .qs file.\n"

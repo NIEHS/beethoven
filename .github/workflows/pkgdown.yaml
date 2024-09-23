@@ -34,6 +34,7 @@ jobs:
         with:
           extra-packages: |
             any::pkgdown,
+            any::remotes,
             local::.
           needs: website
 

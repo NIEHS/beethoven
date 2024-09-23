@@ -53,7 +53,7 @@ pred_colname <-
     pred_colname_randomid <-
       paste(pred_colname, sample(1e4:1e5 - 1, 1), sep = "_")
     return(pred_colname_randomid)
-}
+  }
 
 
 #' Fit meta learner
