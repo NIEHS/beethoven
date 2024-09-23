@@ -10,6 +10,7 @@
 #' @param yvar character(1). Outcome variable name.
 #' @return a data.frame object, including the target columns from `data` and
 #' the predictions for each base learner.
+#' @keywords Utility
 #' @export
 attach_pred <-
   function(
@@ -40,6 +41,7 @@ attach_pred <-
 #' @keywords meta_learner
 #' @param pred Base learner outcomes.
 #' @return a character for column name.
+#' @keywords Utility
 #' @export
 pred_colname <-
   function(
