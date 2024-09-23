@@ -17,4 +17,5 @@ a list object, with data frames combined by common column names.
 This function combines the sublists of dynamically branched targets object
 as a preprocessor for \code{reduce_merge} function.
 }
+\keyword{Utility}
 \keyword{prediction}

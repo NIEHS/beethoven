@@ -17,3 +17,4 @@ a list object, with date ranges split into subranges.
 \description{
 Split a date range into subranges of equal length as a list.
 }
+\keyword{Utility}

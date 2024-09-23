@@ -15,3 +15,4 @@ a character vector with the first and last dates from the list.
 \description{
 Extract the first and last elements of a list
 }
+\keyword{Utility}

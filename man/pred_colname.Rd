@@ -15,4 +15,5 @@ a character for column name.
 \description{
 Assign column name to base learner prediction based on hyperparameters.
 }
+\keyword{Utility}
 \keyword{meta_learner}
