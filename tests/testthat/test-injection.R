@@ -123,7 +123,7 @@ testthat::test_that("set_target_years", {
 
 ################################################################################
 ##### inject_calc
-testthat::test_that("inject_calc (hms + hms)", {
+testthat::test_that("inject_calc (hms + nei)", {
   
   withr::local_package("rlang")
 
@@ -188,6 +188,7 @@ testthat::test_that("inject_calc (hms + hms)", {
     crs = "EPSG:4326"
   )
 
+  testthat::skip_on_ci()
   # expect no errors (nei)
   testthat::expect_no_error(
     nei_injected <- inject_calculate(

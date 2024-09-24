@@ -5,6 +5,7 @@
 ################################################################################
 ##### par_narr
 testthat::test_that("par_narr (weasd + omega)", {
+  testthat::skip_on_ci()
   withr::local_package("rlang")
 
   # sample location

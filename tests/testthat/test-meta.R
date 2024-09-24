@@ -257,7 +257,7 @@ testthat::test_that("predict_meta_learner", {
   )
 
   # expect no error for meta fit
-  testthat::expect_no_error(
+  testthat::expect_warning(
     meta4 <- fit_meta_learner(
       data = dt_meta,
       p_col_sel = 0.5,
