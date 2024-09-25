@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">beethoven</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,22 +44,28 @@
 
       <dl><dt>
 
+          <code><a href="attach_pred.html">attach_pred()</a></code>
+
+        </dt>
+        <dd>Combine prediction values from base learners</dd>
+      </dl><dl><dt>
+
           <code><a href="attach_xy.html">attach_xy()</a></code>
 
         </dt>
         <dd>Attach XY coordinates to a data frame</dd>
       </dl><dl><dt>
 
-          <code><a href="df_params.html">df_params()</a></code>
-
-        </dt>
-        <dd>Get data.frame of function parameters</dd>
-      </dl><dl><dt>
-
           <code><a href="feature_raw_download.html">feature_raw_download()</a></code>
 
         </dt>
         <dd>Check file status and download if necessary</dd>
+      </dl><dl><dt>
+
+          <code><a href="fl_dates.html">fl_dates()</a></code>
+
+        </dt>
+        <dd>Extract the first and last elements of a list</dd>
       </dl><dl><dt>
 
           <code><a href="load_modis_files.html">load_modis_files()</a></code>
@@ -74,6 +80,12 @@
         <dd>Load arguments from the formatted argument list file</dd>
       </dl><dl><dt>
 
+          <code><a href="pred_colname.html">pred_colname()</a></code>
+
+        </dt>
+        <dd>Assign column name to base learner prediction based on hyperparameters.</dd>
+      </dl><dl><dt>
+
           <code><a href="read_locs.html">read_locs()</a></code>
 
         </dt>
@@ -86,10 +98,10 @@
         <dd>Read paths from a directory with a specific file extension</dd>
       </dl><dl><dt>
 
-          <code><a href="search_function.html">search_function()</a></code>
+          <code><a href="reduce_list.html">reduce_list()</a></code>
 
         </dt>
-        <dd>Search package functions</dd>
+        <dd>Combine dynamically branched sublists based on common column names</dd>
       </dl><dl><dt>
 
           <code><a href="set_args_calc.html">set_args_calc()</a></code>
@@ -108,6 +120,24 @@
 
         </dt>
         <dd>Set resource management for SLURM</dd>
+      </dl><dl><dt>
+
+          <code><a href="set_target_years.html">set_target_years()</a></code>
+
+        </dt>
+        <dd>Set which years to be processed</dd>
+      </dl><dl><dt>
+
+          <code><a href="split_dates.html">split_dates()</a></code>
+
+        </dt>
+        <dd>Split a date range into subranges</dd>
+      </dl><dl><dt>
+
+          <code><a href="unmarshal_function.html">unmarshal_function()</a></code>
+
+        </dt>
+        <dd>Unmarshal functions</dd>
       </dl></div><div class="section level2">
 
       <h3 id="calculation">Calculation<a class="anchor" aria-label="anchor" href="#calculation"></a></h3>
@@ -124,7 +154,7 @@
           <code><a href="calc_geos_strict.html">calc_geos_strict()</a></code>
 
         </dt>
-        <dd>Process atmospheric composition data by chunks (v3)</dd>
+        <dd>Process atmospheric composition data by chunks</dd>
       </dl><dl><dt>
 
           <code><a href="calc_gmted_direct.html">calc_gmted_direct()</a></code>
@@ -163,10 +193,22 @@
         <dd>Injects GMTED data into specified locations</dd>
       </dl><dl><dt>
 
+          <code><a href="inject_match.html">inject_match()</a></code>
+
+        </dt>
+        <dd>Injects the calculate function with matched arguments.</dd>
+      </dl><dl><dt>
+
           <code><a href="inject_modis_par.html">inject_modis_par()</a></code>
 
         </dt>
         <dd>Injects arguments to parallelize MODIS/VIIRS data processing</dd>
+      </dl><dl><dt>
+
+          <code><a href="inject_nlcd.html">inject_nlcd()</a></code>
+
+        </dt>
+        <dd>Inject arguments into NLCD calculation function for branching</dd>
       </dl><dl><dt>
 
           <code><a href="par_narr.html">par_narr()</a></code>
@@ -190,7 +232,7 @@
           <code><a href="process_narr2.html">process_narr2()</a></code>
 
         </dt>
-        <dd>Process NARR2 Data</dd>
+        <dd>Process NARR Data (v2)</dd>
       </dl></div><div class="section level2">
 
       <h3 id="post-calculation">Post-calculation<a class="anchor" aria-label="anchor" href="#post-calculation"></a></h3>
@@ -293,40 +335,46 @@
 
       <dl><dt>
 
+          <code><a href="assign_learner_cv.html">assign_learner_cv()</a></code>
+
+        </dt>
+        <dd>Shuffle cross-validation mode for each learner type</dd>
+      </dl><dl><dt>
+
           <code><a href="convert_cv_index_rset.html">convert_cv_index_rset()</a></code>
 
         </dt>
         <dd>Generate manual rset object from spatiotemporal cross-validation indices</dd>
       </dl><dl><dt>
 
-          <code><a href="fit_base_brulee.html">fit_base_brulee()</a></code>
+          <code><a href="fit_base_learner.html">fit_base_learner()</a></code>
 
         </dt>
-        <dd>Base learner: Multilayer perceptron with brulee</dd>
+        <dd>Base learner: tune hyperparameters and retrieve the best model</dd>
       </dl><dl><dt>
 
-          <code><a href="fit_base_elnet.html">fit_base_elnet()</a></code>
+          <code><a href="fit_base_tune.html">fit_base_tune()</a></code>
 
         </dt>
-        <dd>Base learner: Elastic net</dd>
+        <dd>Tune base learner</dd>
       </dl><dl><dt>
 
-          <code><a href="fit_base_lightgbm.html">fit_base_lightgbm()</a></code>
+          <code><a href="generate_cv_index_sp.html">generate_cv_index_sp()</a></code>
 
         </dt>
-        <dd>Base learner: Light Gradient Boosting Machine (LightGBM)</dd>
+        <dd>Prepare spatial and spatiotemporal cross validation sets</dd>
       </dl><dl><dt>
 
-          <code><a href="fit_base_xgb.html">fit_base_xgb()</a></code>
-
-        </dt>
-        <dd>Base learner: Extreme gradient boosting (XGBoost)</dd>
-      </dl><dl><dt>
-
-          <code><a href="generate_cv_index.html">generate_cv_index()</a></code>
+          <code><a href="generate_cv_index_spt.html">generate_cv_index_spt()</a></code>
 
         </dt>
         <dd>Generate spatio-temporal cross-validation index with anticlust</dd>
+      </dl><dl><dt>
+
+          <code><a href="generate_cv_index_ts.html">generate_cv_index_ts()</a></code>
+
+        </dt>
+        <dd>Generate temporal cross-validation index</dd>
       </dl><dl><dt>
 
           <code><a href="make_subdata.html">make_subdata()</a></code>
@@ -335,25 +383,19 @@
         <dd>Make sampled subdataframes for base learners</dd>
       </dl><dl><dt>
 
-          <code><a href="prepare_cvindex.html">prepare_cvindex()</a></code>
+          <code><a href="switch_generate_cv_rset.html">switch_generate_cv_rset()</a></code>
 
         </dt>
-        <dd>Prepare spatial and spatiotemporal cross validation sets</dd>
+        <dd>Choose cross-validation strategy for the base learner</dd>
       </dl><dl><dt>
 
-          <code><a href="restore_fit_best.html">restore_fit_best()</a></code>
+          <code><a href="switch_model.html">switch_model()</a></code>
 
         </dt>
-        <dd>Restore the full data set from two rset objects then fit the best model</dd>
+        <dd>Define a base learner model based on parsnip and tune</dd>
       </dl><dl><dt>
 
-          <code><a href="restore_rset_full.html">restore_rset_full()</a></code>
-
-        </dt>
-        <dd>Restore the full data set from the rset object</dd>
-      </dl><dl><dt>
-
-          <code><a href="vis_rset.html">vis_rset()</a></code>
+          <code><a href="vis_spt_rset.html">vis_spt_rset()</a></code>
 
         </dt>
         <dd>Visualize the spatio-temporal cross-validation index</dd>
@@ -370,16 +412,16 @@
 
       <dl><dt>
 
-          <code><a href="meta_learner_fit.html">meta_learner_fit()</a></code>
+          <code><a href="fit_meta_learner.html">fit_meta_learner()</a></code>
 
         </dt>
-        <dd>Fit a BART (Bayesian Additive Regression Tree) meta learner. It takes predictions of other models such as kriging, GLM, machine learning models as input and fits a BART Model</dd>
+        <dd>Fit meta learner</dd>
       </dl><dl><dt>
 
-          <code><a href="meta_learner_predict.html">meta_learner_predict()</a></code>
+          <code><a href="predict_meta_learner.html">predict_meta_learner()</a></code>
 
         </dt>
-        <dd>Create meta_learner predictions from the list of BART fit objects and predictions of base learners</dd>
+        <dd>Predict meta learner</dd>
       </dl></div><div class="section level2">
 
       <h3 id="miscellaneous">Miscellaneous<a class="anchor" aria-label="anchor" href="#miscellaneous"></a></h3>
@@ -397,12 +439,6 @@
 
         </dt>
         <dd>Get Divisors</dd>
-      </dl><dl><dt>
-
-          <code><a href="grapes-tin-grapes.html">`%tin%`</a></code>
-
-        </dt>
-        <dd>Check if a query date falls within a time interval</dd>
       </dl></div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
@@ -413,7 +449,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer></div>

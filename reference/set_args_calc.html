@@ -11,7 +11,7 @@ extent, user email, export path, and input path."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">beethoven</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,7 +33,7 @@ extent, user email, export path, and input path."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Set arguments for the calculation process</h1>
-      <small class="dont-index">Source: <a href="https://github.com/NIEHS/beethoven/blob/main/R/pipeline_base_functions.R" class="external-link"><code>R/pipeline_base_functions.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/NIEHS/beethoven/blob/main/R/set_arguments.R" class="external-link"><code>R/set_arguments.R</code></a></small>
       <div class="d-none name"><code>set_args_calc.Rd</code></div>
     </div>
 
@@ -52,10 +52,9 @@ extent, user email, export path, and input path.</p>
 <span>  num_extent <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">126</span>, <span class="op">-</span><span class="fl">62</span>, <span class="fl">22</span>, <span class="fl">52</span><span class="op">)</span>,</span>
 <span>  char_user_email <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"USER"</span><span class="op">)</span>, <span class="st">"@nih.gov"</span><span class="op">)</span>,</span>
 <span>  export <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  path_export <span class="op">=</span> <span class="st">"inst/targets/punchcard_calc.qs"</span>,</span>
+<span>  path_export <span class="op">=</span> <span class="st">"inst/targets/calc_spec.qs"</span>,</span>
 <span>  char_input_dir <span class="op">=</span> <span class="st">"input"</span>,</span>
 <span>  nthreads_nasa <span class="op">=</span> <span class="fl">14L</span>,</span>
-<span>  nthreads_hms <span class="op">=</span> <span class="fl">3L</span>,</span>
 <span>  nthreads_tri <span class="op">=</span> <span class="fl">5L</span>,</span>
 <span>  nthreads_geoscf <span class="op">=</span> <span class="fl">10L</span>,</span>
 <span>  nthreads_gmted <span class="op">=</span> <span class="fl">4L</span>,</span>
@@ -103,7 +102,7 @@ is exported to <code>path_export</code>. Default is FALSE.</p></dd>
 
 <dt id="arg-path-export">path_export<a class="anchor" aria-label="anchor" href="#arg-path-export"></a></dt>
 <dd><p>Character string specifying the export path.
-Default is "inst/targets/punchcard_calc.qs".</p></dd>
+Default is "inst/targets/calc_spec.qs".</p></dd>
 
 
 <dt id="arg-char-input-dir">char_input_dir<a class="anchor" aria-label="anchor" href="#arg-char-input-dir"></a></dt>
@@ -114,11 +113,6 @@ Default is "input".</p></dd>
 <dt id="arg-nthreads-nasa">nthreads_nasa<a class="anchor" aria-label="anchor" href="#arg-nthreads-nasa"></a></dt>
 <dd><p>integer(1). Number of threads for NASA data.
 Default is 14L.</p></dd>
-
-
-<dt id="arg-nthreads-hms">nthreads_hms<a class="anchor" aria-label="anchor" href="#arg-nthreads-hms"></a></dt>
-<dd><p>integer(1). Number of threads for HMS data.
-Default is 3L.</p></dd>
 
 
 <dt id="arg-nthreads-tri">nthreads_tri<a class="anchor" aria-label="anchor" href="#arg-nthreads-tri"></a></dt>
@@ -164,14 +158,14 @@ Default is 64L.</p></dd>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A list of arguments for common use
-in the calculation process.</p><ul><li><p>char_siteid: Character string specifying the site ID.</p></li>
+in the calculation process. A *.qs or *.rds file defined in
+<code>path_export</code> is saved if <code>export</code> is TRUE.</p><ul><li><p>char_siteid: Character string specifying the site ID.</p></li>
 <li><p>char_timeid: Character string specifying the time ID.</p></li>
 <li><p>char_period: Character vector specifying the time period.</p></li>
 <li><p>num_extent: Numeric vector specifying the extent.</p></li>
 <li><p>char_user_email: Character string specifying the user email.</p></li>
 <li><p>char_input_dir: Character string specifying the input path.</p></li>
 <li><p>nthreads_nasa: Number of threads for NASA data.</p></li>
-<li><p>nthreads_hms: Number of threads for HMS data.</p></li>
 <li><p>nthreads_tri: Number of threads for TRI data.</p></li>
 <li><p>nthreads_geoscf: Number of threads for GEOS-CF data.</p></li>
 <li><p>nthreads_gmted: Number of threads for GMTED data.</p></li>
@@ -219,7 +213,7 @@ path_input should contain the following subdirectories:</p><ul><li><p>modis/raw/
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer></div>

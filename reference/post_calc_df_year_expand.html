@@ -9,7 +9,7 @@ for each year based on the time period specified."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">beethoven</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,7 +31,7 @@ for each year based on the time period specified."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Expand a data frame by year</h1>
-      <small class="dont-index">Source: <a href="https://github.com/NIEHS/beethoven/blob/main/R/pipeline_base_functions.R" class="external-link"><code>R/pipeline_base_functions.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/NIEHS/beethoven/blob/main/R/calc_postprocessing.R" class="external-link"><code>R/calc_postprocessing.R</code></a></small>
       <div class="d-none name"><code>post_calc_df_year_expand.Rd</code></div>
     </div>
 
@@ -59,7 +59,9 @@ for each year based on the time period specified.</p>
 
 
 <dl><dt id="arg-df">df<a class="anchor" aria-label="anchor" href="#arg-df"></a></dt>
-<dd><p>The input data frame.</p></dd>
+<dd><p>The input data frame. The data frame should have the same
+number of rows per year, meaning that it assumes this argument is
+a spatial-only feature data.frame.</p></dd>
 
 
 <dt id="arg-locs-id">locs_id<a class="anchor" aria-label="anchor" href="#arg-locs-id"></a></dt>
@@ -97,7 +99,7 @@ for each year based on the time period specified.</p>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
     <p>Year expansion rule is to assign the nearest past year
-in the available years;#' if there is no past year in the available years,
+in the available years; if there is no past year in the available years,
 the first available year is rolled back to the start of the time period.</p>
     </div>
     <div class="section level2">
@@ -127,7 +129,7 @@ the first available year is rolled back to the start of the time period.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer></div>

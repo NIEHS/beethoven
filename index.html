@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">beethoven</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,11 +46,15 @@
   </div>
 </nav><div class="container template-home">
 <div class="row">
-  <main id="main" class="col-md-9">
-<div class="section level1">
-<div class="page-header"><h1 id="building-an-extensible-reproducible-test-driven-harmonized-open-source-versioned-ensemble-model-for-air-quality">Building an Extensible, rEproducible, Test-driven, Harmonized, Open-source, Versioned, ENsemble model for air quality<a class="anchor" aria-label="anchor" href="#building-an-extensible-reproducible-test-driven-harmonized-open-source-versioned-ensemble-model-for-air-quality"></a>
+  <main id="main" class="col-md-9"><div class="section level1">
+<div class="page-header"><h1 id="building-an-extensible-reproducible-test-driven-harmonized-open-source-versioned-ensemble-model-for-air-quality-">Building an Extensible, rEproducible, Test-driven, Harmonized, Open-source, Versioned, ENsemble model for air quality <a href="https://niehs.github.io/beethoven"><img align="right" src="reference/figures/beethoven-logo.png" width="168px" alt="two hexagons with distributed tan, orange, and teal with geometric symbols placed. Two hexagons are diagonally placed from the top left to the bottom right"></a><a></a>
+<a class="anchor" aria-label="anchor" href="#building-an-extensible-reproducible-test-driven-harmonized-open-source-versioned-ensemble-model-for-air-quality-"></a>
 </h1></div>
+<p>
+</p>
+<p><a href="https://github.com/NIEHS/beethoven/actions/workflows/check-standard.yaml" class="external-link"><img src="https://github.com/NIEHS/beethoven/actions/workflows/check-standard.yaml/badge.svg" alt="R-CMD-check"></a> <a href="https://github.com/NIEHS/beethoven/actions/workflows/test-coverage.yaml" class="external-link"><img src="https://NIEHS.github.io/beethoven/badges/coverage.svg" alt="cov"></a> <a href="https://github.com/NIEHS/beethoven/actions/workflows/lint.yaml" class="external-link"><img src="https://github.com/NIEHS/beethoven/actions/workflows/lint.yaml/badge.svg" alt="lint"></a> <a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a></p>
 <p>Group Project for the Spatiotemporal Exposures and Toxicology group with help from friends <span class="emoji" data-emoji="smiley">😃</span> <span class="emoji" data-emoji="cowboy_hat_face">🤠</span> <span class="emoji" data-emoji="earth_americas">🌎</span></p>
+
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -202,8 +206,6 @@
 <li>
 <code>targets</code> which include the important pipeline file <code>_targets.R</code>
 </li>
-<li>
-<code>lookup</code> Is a subdirectory for text file lookup table used in the pipeline to synchronize paths, names, abbreviations, etc.</li>
 </ul>
 </li>
 <li>
@@ -213,11 +215,8 @@
 <h5 id="the-following-sub-directories-are-not-including-the-package-build-and-included-only-in-the-source-code-here">The following sub-directories are not including the package build and included only in the source code here<a class="anchor" aria-label="anchor" href="#the-following-sub-directories-are-not-including-the-package-build-and-included-only-in-the-source-code-here"></a>
 </h5>
 <ul>
-<li><p><code>tools/</code> This sub-directory is dedicated to educational or demonstration material (e.g. Rshiny).</p></li>
-<li><p><code>input/</code> <strong><em>warning soon to be deprecated</em></strong> This sub-directory contains data used during the analysis. It is going to be superceded by the use of <code>targets</code></p></li>
-<li><p><code>output/</code> <strong><em>warning: soon to be deprecated</em></strong> This sub-directory contains data used during the analysis. It is going to be superceded by the use of <code>targets</code> Currently, as of 3/29/24, the output folder contains .rds files for each of the covariates/features for model development. e.g.:</p></li>
-<li><p>NRTAP_Covars_NLCD.rds</p></li>
-<li><p>NRTAP_Covars_TRI.rds</p></li>
+<li>
+<code>tools/</code> This sub-directory is dedicated to educational or demonstration material (e.g. Rshiny).</li>
 </ul>
 </div>
 </div>
@@ -236,7 +235,7 @@
 <h3 id="naming-conventions">Naming Conventions<a class="anchor" aria-label="anchor" href="#naming-conventions"></a>
 </h3>
 <p>Naming things is hard and somewhat subjective. Nonetheless, consistent naming conventions make for better reproducibility, interpretability, and future extensibility. Here, we provide the <code>beethoven</code> naming conventions for objects as used in <code>targets</code> and for naming functions within the package (i.e. <strong>R/</strong>). For <code>tar_target</code> functions, we use the following naming conventions:</p>
-<p>Naming conventions for <code>tar</code> objects. We are motivated by the <a href="https://cfconventions.org/Data/cf-standard-names/docs/guidelines.html" class="external-link">Compositional Forecast</a> (CF) model naming conventions:</p>
+<p>Naming conventions for <code>targets</code> objects. We are motivated by the <a href="https://cfconventions.org/Data/cf-standard-names/docs/guidelines.html" class="external-link">Compositional Forecast</a> (CF) model naming conventions:</p>
 <p>e.g. [surface] [component] standard_name [at surface] [in medium] [due to process] [assuming condition] In CF, the entire process can be known from the required and optional naming pieces.</p>
 <p>Here, we use the following naming convention:</p>
 <p><strong>[R object type]_[role-suffix]_[stage]_[source]_[spacetime]</strong></p>
@@ -246,15 +245,15 @@
 <h4 id="naming-section-definitions">Naming section definitions:<a class="anchor" aria-label="anchor" href="#naming-section-definitions"></a>
 </h4>
 <ul>
-<li><p><strong>R object type</strong>: sf, datatable, tibble, SpatRaster, SpatVector</p></li>
+<li><p><strong>R object type</strong>: chr (character), list, sf, dt (datatable), tibble, SpatRaster, SpatVector</p></li>
 <li>
 <p><strong>role:</strong> Detailed description of the role of the object in the pipeline. Allowable keywords:</p>
 <ul>
 <li>PM25</li>
-<li>feature (i.e. geographic covariate)</li>
+<li>feat (feature) (i.e. geographic covariate)</li>
 <li>base_model
 <ul>
-<li>base_model suffix types: linear, random_forest, xgboost, neural_net etc.</li>
+<li>base_model suffix types: linear, random_forest, lgb (lightGBM), xgb (xgboost), mlp (neural network, multilayer perceptron) etc.</li>
 </ul>
 </li>
 <li>meta_model</li>
@@ -266,8 +265,7 @@
 <p><strong>stage</strong>: the stage of the pipeline the object is used in. Object transformations are also articulated here. Allowable keywords:</p>
 <ul>
 <li>raw</li>
-<li>process</li>
-<li>calc</li>
+<li>calc: results from processing-calculation chains</li>
 <li>fit: Ready for base/meta learner fitting</li>
 <li>result: Final result</li>
 <li>log</li>
@@ -284,8 +282,8 @@
 <li>NARR</li>
 <li>GEOSCF</li>
 <li>TRI</li>
+<li>NEI</li>
 <li>KOPPENGEIGER</li>
-<li>MERRA2</li>
 <li>HMS</li>
 <li>gROADS</li>
 <li>POPULATION</li>
@@ -374,14 +372,13 @@
 <code class="sourceCode R"><span><span class="fu"><a href="reference/set_args_calc.html">set_args_calc</a></span><span class="op">(</span></span>
 <span>  char_siteid <span class="op">=</span> <span class="st">"site_id"</span>,</span>
 <span>  char_timeid <span class="op">=</span> <span class="st">"time"</span>,</span>
-<span>  char_period <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2018-01-01"</span>, <span class="st">"2022-10-31"</span><span class="op">)</span>,</span>
+<span>  char_period <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2018-01-01"</span>, <span class="st">"2022-12-31"</span><span class="op">)</span>,</span>
 <span>  num_extent <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">126</span>, <span class="op">-</span><span class="fl">62</span>, <span class="fl">22</span>, <span class="fl">52</span><span class="op">)</span>,</span>
 <span>  char_user_email <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"USER"</span><span class="op">)</span>, <span class="st">"@nih.gov"</span><span class="op">)</span>,</span>
 <span>  export <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  path_export <span class="op">=</span> <span class="st">"inst/targets/punchcard_calc.qs"</span>,</span>
+<span>  path_export <span class="op">=</span> <span class="st">"inst/targets/calc_spec.qs"</span>,</span>
 <span>  path_input <span class="op">=</span> <span class="st">"input"</span>,</span>
 <span>  nthreads_nasa <span class="op">=</span> <span class="fl">14L</span>,</span>
-<span>  nthreads_hms <span class="op">=</span> <span class="fl">3L</span>,</span>
 <span>  nthreads_tri <span class="op">=</span> <span class="fl">5L</span>,</span>
 <span>  nthreads_geoscf <span class="op">=</span> <span class="fl">10L</span>,</span>
 <span>  nthreads_gmted <span class="op">=</span> <span class="fl">4L</span>,</span>
@@ -398,12 +395,464 @@
 <blockquote>
 <p>[!NOTE] With <code>export = TRUE</code>, it will take some time to proceed to the next because it will recursively search hdf file paths. The time is affected by the number of files to search or the length of the period (<code>char_period</code>).</p>
 </blockquote>
+<blockquote>
+<p>[!WARNING] Please make sure that you are at the project root before proceeding to the following. The HPC example requires additional edits related to SBATCH directives and project root directory.</p>
+</blockquote>
 <pre class="shell"><code>Rscript inst/targets/targets_start.R &amp;</code></pre>
+<p>Or in NIEHS HPC, modify several lines to match your user environment:</p>
+<pre class="shell"><code># ...
+#SBATCH --output=YOUR_PATH/pipeline_out.out
+#SBATCH --error=YOUR_PATH/pipeline_err.err
+# ...
+# The --mail-user flag is optional
+#SBATCH --mail-user=MYACCOUNT@nih.gov
+# ...
+USER_PROJDIR=/YOUR/PROJECT/ROOT
+nohup nice -4 Rscript $USER_PROJDIR/inst/targets/targets_start.R</code></pre>
+<p><code>YOUR_PATH</code>, <code>MYACCOUNT</code> and <code>/YOUR_PROJECT_ROOT</code> should be changed. In the end, you can run the following command:</p>
+<pre class="shell"><code>sbatch inst/targets/run.sh</code></pre>
+<p>The script will submit a job with effective commands with SLURM level directives defined by lines starting <code>#SBATCH</code>, which allocate CPU threads and memory from the specified partition.</p>
+<p><code>inst/targets/run.sh</code> includes several lines exporting environment variables to bind GDAL/GEOS/PROJ versions newer than system default, geospatial packages built upon these libraries, and the user library location where required packages are installed. The environment variables need to be changed following NIEHS HPC system changes in the future.</p>
 <blockquote>
 <p>[!WARNING] <code>set_args_*</code> family for downloading and summarizing prediction outcomes will be added in the future version.</p>
 </blockquote>
 </div>
 </div>
+</div>
+</div>
+<div class="section level1">
+<h1 id="developers-guide">Developer’s guide<a class="anchor" aria-label="anchor" href="#developers-guide"></a>
+</h1>
+<div class="section level2">
+<h2 id="preamble">Preamble<a class="anchor" aria-label="anchor" href="#preamble"></a>
+</h2>
+<p>The objective of this document is to provide developers with the current implementation of <code>beethoven</code> pipeline for version 0.3.9.</p>
+<p>We assume the potential users have basic knowledge of <code>targets</code> and <code>tarchetypes</code> packages as well as functional and meta-programming. It is recommended to read Advanced R (by Hadley Wickham)’s chapters for these topics.</p>
+</div>
+<div class="section level2">
+<h2 id="pipeline-component-and-basic-implementation">Pipeline component and basic implementation<a class="anchor" aria-label="anchor" href="#pipeline-component-and-basic-implementation"></a>
+</h2>
+<p>The pipeline is based on <code>targets</code> package. All targets are <strong>stored</strong> in a designated storage, which can be either a directory path or a URL when one uses cloud storage or web servers. Here we classify the components into three groups:</p>
+<ol style="list-style-type: decimal">
+<li>Pipeline execution components: the highest level script to run the pipeline.</li>
+<li>Pipeline configuration components: function arguments that are injected into the functions in each target.</li>
+<li>Pipeline target components: definitions of each target, essentially lists of <code><a href="https://docs.ropensci.org/targets/reference/tar_target.html" class="external-link">targets::tar_target()</a></code> call classified by pipeline steps</li>
+</ol>
+<p>Let’s take a moment to be a user. You should consult specific file when:</p>
+<ul>
+<li>
+<code>_targets.R</code>: you need to modify or saw errors on library locations, targets storage locations, required libraries
+<ul>
+<li>Check <code>set_args_*()</code> function parts when you encounter “file or directory not found” error</li>
+</ul>
+</li>
+<li>
+<code>run_slurm.sh</code>: “the pipeline status is not reported to my email address.”</li>
+<li>
+<code>inst/targets/targets_*.R</code> files: any errors related to running targets except for lower level issues in <code>beethoven</code> or <code>amadeus</code> functions</li>
+</ul>
+<blockquote>
+<p>[!NOTE] Please expand the toggle below to display function trees for <code>inst/targets/targets_*.R</code> files. Only functions that are directly called in each file are displayed due to screen real estate and readability concerns.</p>
+</blockquote>
+<details><summary><code>targets_*.R</code> file function tree
+</summary><pre class="mermaid"><code>graph LR
+
+    %% Define styles for the target files
+    style arglist fill:#ffcccc,stroke-width:2px,stroke:#000000,opacity:0.5
+    style baselearner fill:#ccffcc,stroke-width:2px,stroke:#000000,opacity:0.5
+    style calculateF fill:#ccccff,stroke-width:2px,stroke:#000000,opacity:0.5
+    style download fill:#ffccff,stroke-width:2px,stroke:#000000,opacity:0.5
+    style initialize fill:#ccffff,stroke-width:2px,stroke:#000000,opacity:0.5
+    style metalearner fill:#ffffcc,stroke-width:2px,stroke:#000000,opacity:0.5
+    style predict fill:#ffcc99,stroke-width:2px,stroke:#000000,opacity:0.5
+
+    %% Define the target files as nodes
+    arglist["**inst/targets/targets_arglist.R**"]
+    baselearner["**inst/targets/targets_baselearner.R**"]
+    calculateF["**inst/targets/targets_calculate.R**"]
+    download["**inst/targets/targets_download.R**"]
+    initialize["**inst/targets/targets_initialize.R**"]
+    metalearner["**inst/targets/targets_metalearner.R**"]
+    predict["**inst/targets/targets_predict.R**"]
+
+    %% Define the branches with arrowhead connections
+    fargdown["`set_args_download`"] ---|`set_args_download`| arglist
+    fargcalc["`set_args_calc`"] ---|`set_args_calc`| arglist
+    fraw["`feature_raw_download`"] ---|`feature_raw_download`| download
+    readlocs["`read_locs`"] ---|`read_locs`| initialize
+    fitbase["`fit_base_learner`"] ---|`fit_base_learner`| baselearner
+    switchmodel["`switch_model`"] ---|`switch_model`| baselearner
+    makesub["`make_subdata`"] ---|`make_subdata`| baselearner
+    covindexrset["`convert_cv_index_rset`"] ---|`convert_cv_index_rset`| baselearner
+    attach["`attach_xy`"] ---|`attach_xy`| baselearner
+    gencvsp["`generate_cv_index_sp`"] ---|`generate_cv_index_sp`| baselearner
+    gencvts["`generate_cv_index_ts`"] ---|`generate_cv_index_ts`| baselearner
+    gencvspt["`generate_cv_index_spt`"] ---|`generate_cv_index_spt`| baselearner
+    switchrset["`switch_generate_cv_rset`"] ---|`switch_generate_cv_rset`| baselearner
+    fcalc["`calculate`"] ---|`calculate`| calculateF
+    fcalcinj["`inject_calculate`"] ---|`inject_calculate`| calculateF
+    fcalcinjmod["`inject_modis_par`"] ---|`inject_modis_par`| calculateF
+    fcalcinjgmted["`inject_gmted`"] ---|`inject_gmted`| calculateF
+    fcalcinjmatch["`inject_match`"] ---|`inject_match`| calculateF
+    fcalcgeos["`calc_geos_strict`"] ---|`calc_geos_strict`| calculateF
+    fcalcgmted["`calc_gmted_direct`"] ---|`calc_gmted_direct`| calculateF
+    fcalcnarr2["`calc_narr2`"] ---|`calc_narr2`| calculateF
+    fparnarr["`par_narr`"] ---|`par_narr`| calculateF
+    fmetalearn["`fit_meta_learner`"] ---|`fit_meta_learner`| metalearner
+    G["`pred`"] ---|`pred`| predict
+
+    %% Apply thin solid dark grey lines to the branches
+    classDef branchStyle stroke-width:1px,stroke:#333333
+    class fargdown,fargcalc,fraw,readlocs,fitbase,switchmodel,makesub,covindexrset,attach,gencvsp,gencvts,gencvspt,switchrset,fcalc,fcalcinj,fcalcinjmod,fcalcinjgmted,fcalcinjmatch,fcalcgeos,fcalcgmted,fcalcnarr2,fparnarr,fmetalearn,G branchStyle</code></pre>
+</details><p><img src="reference/figures/pipeline-code-relations.svg"></p>
+<p>The details of argument injection is illustrated below. The specific arguments to inject are loaded from QS files that are required to be saved in <code>inst/targets</code> directory. Each QS file contains a nested list object where function arguments for downloading raw data and calculating features are defined and store.</p>
+<div class="section level4">
+<h4 id="insttargetsdownload_specqs">
+<code>inst/targets/download_spec.qs</code><a class="anchor" aria-label="anchor" href="#insttargetsdownload_specqs"></a>
+</h4>
+<p>The file is generated by a <code>beethoven</code> function <code>set_args_download</code>. In <code>_targets.R</code> file, one can skip to generate this file if raw data download is already done or unnecessary.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">generate_list_download</span> <span class="op">&lt;-</span> <span class="cn">FALSE</span></span>
+<span></span>
+<span><span class="va">arglist_download</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu"><a href="reference/set_args_download.html">set_args_download</a></span><span class="op">(</span></span>
+<span>    char_period <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2018-01-01"</span>, <span class="st">"2022-12-31"</span><span class="op">)</span>,</span>
+<span>    char_input_dir <span class="op">=</span> <span class="st">"input"</span>,</span>
+<span>    nasa_earth_data_token <span class="op">=</span> <span class="cn">NULL</span>,<span class="co">#Sys.getenv("NASA_EARTHDATA_TOKEN"),</span></span>
+<span>    export <span class="op">=</span> <span class="va">generate_list_download</span>,</span>
+<span>    path_export <span class="op">=</span> <span class="st">"inst/targets/download_spec.qs"</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level4">
+<h4 id="insttargetscalc_specqs">
+<code>inst/targets/calc_spec.qs</code><a class="anchor" aria-label="anchor" href="#insttargetscalc_specqs"></a>
+</h4>
+<p><code><a href="reference/set_args_calc.html">set_args_calc()</a></code> function will generate this file. The file name can be changed (<code>path_export = "inst/targets/calc_spec.qs"</code>), but it must start with <code>calc_</code> as the file name prefix is used to search QS files to manage different periods. Like <code>download_spec.qs</code>, whether or not to run this function can be specified by a logical variable named <code>generate_list_calc</code> in <code>_targets.R</code> file.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">generate_list_calc</span> <span class="op">&lt;-</span> <span class="cn">FALSE</span></span>
+<span></span>
+<span><span class="va">arglist_common</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu"><a href="reference/set_args_calc.html">set_args_calc</a></span><span class="op">(</span></span>
+<span>    char_siteid <span class="op">=</span> <span class="st">"site_id"</span>,</span>
+<span>    char_timeid <span class="op">=</span> <span class="st">"time"</span>,</span>
+<span>    char_period <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2018-01-01"</span>, <span class="st">"2022-12-31"</span><span class="op">)</span>,</span>
+<span>    num_extent <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">126</span>, <span class="op">-</span><span class="fl">62</span>, <span class="fl">22</span>, <span class="fl">52</span><span class="op">)</span>,</span>
+<span>    char_user_email <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"USER"</span><span class="op">)</span>, <span class="st">"@nih.gov"</span><span class="op">)</span>,</span>
+<span>    export <span class="op">=</span> <span class="va">generate_list_calc</span>,</span>
+<span>    path_export <span class="op">=</span> <span class="st">"inst/targets/calc_spec.qs"</span>,</span>
+<span>    char_input_dir <span class="op">=</span> <span class="st">"/ddn/gs1/group/set/Projects/NRT-AP-Model/input"</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
+<p>QUESTION: Where (which function calls) and when is <code>inst/targets/init_target.sh</code> used?</p>
+<p><img src="reference/figures/pipeline-schema.svg"></p>
+<p>As a compromise between the layouts for standard R packages and <code>targets</code> pipelines, we mainly keep <code>tar_target()</code> definitions in <code>inst/targets/</code>, whereas the <code>targets</code> required components are stored in the project root. All targets are recorded in <code>_targets/</code> directory by default, and it can be changed to somewhere else by defining an external directory at <code>store</code> argument in <code>tar_config_set()</code> in <code>_targets.R</code>. If you change that part in <code>_targets.R</code>, you should run <code>init_targets_storage.sh</code> <strong>in the project root</strong> to create the specified directory.</p>
+<pre class="shell"><code>. init_targets_storage.sh</code></pre>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># replacing yaml file.</span></span>
+<span><span class="fu">tar_config_set</span><span class="op">(</span></span>
+<span>  store <span class="op">=</span> <span class="st">"/__your__desired__location__"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="before-running-the-pipeline">Before running the pipeline<a class="anchor" aria-label="anchor" href="#before-running-the-pipeline"></a>
+</h2>
+<p>For the future release and tests on various environments, one should check several lines across R and shell script files:</p>
+<ul>
+<li>Shell script
+<ul>
+<li>
+<code>/run_interactive.sh</code>: this file is for running the host <code>targets</code> process <strong>in an interactive session</strong>. All system variables including <code>PATH</code> and <code>LD_LIBRARY_PATH</code> to align with the current development system environment. The lines in the provided file are set for NIEHS HPC. Note that it may stall if there are too many other processes running on the interactive node.</li>
+<li>
+<code>/run_slurm.sh</code>: this file is for running the host <code>targets</code> process <strong>on SLURM by SBATCH script</strong>, meaning that one should run <code>sbatch run_slurm.sh</code>. The working directory is set in this bash script to the root of your project (i.e. <code>beethoven</code> clone root) :</li>
+</ul>
+</li>
+</ul>
+<pre><code>      # modify it into the proper directory path. and output/error paths in the
+      # # SBATCH directives
+      USER_PROJDIR=/ddn/gs1/home/$USER/projects
+
+      nohup nice -4 Rscript $USER_PROJDIR/beethoven/inst/targets/targets_start.R</code></pre>
+<ul>
+<li>R script
+<ul>
+<li>
+<code>/targets.R</code>: Lines 10-12, <code>tar_config_set(store = ...)</code> should be reviewed if it is set properly not to overwrite successfully run targets.</li>
+<li>
+<code>/targets.R</code>: <code>set_args_download</code> and <code>set_args_calc</code> functions, i.e., <code>char_input_dir</code> argument and <code>char_period</code>.</li>
+<li>
+<code>/targets.R</code>: <code>library</code> argument value in <code>tar_option_set</code> to match the current system environment</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="basic-structure-of-branches">Basic structure of branches<a class="anchor" aria-label="anchor" href="#basic-structure-of-branches"></a>
+</h2>
+<p>We will call “grand target” as a set of branches if any branching technique is applied at a target.</p>
+<p>When one target is branched out, the grand target should be a list, either being a nested or a plain list, depending on the context or the command run inside each branch. Branch names include automatic hash after the grand target name as a suffix. Users may use their own suffixes for legibility. Branches have their own good to provide succinct network layout (i.e., an interactive plot generated by <code>tar_visnetwork(targets_only = TRUE)</code>), while they add complication to debug. It is strongly advised that the unit function that is applied to each branch should be fully tested.</p>
+</div>
+<div class="section level2">
+<h2 id="branching-in-beethoven">Branching in beethoven<a class="anchor" aria-label="anchor" href="#branching-in-beethoven"></a>
+</h2>
+<p>Branching is actively employed in most parts in <code>beethoven</code>. Here we will navigate which targets are branched out and rationales for branching in each target.</p>
+<div class="section level3">
+<h3 id="downloading-raw-data-from-the-source">Downloading raw data from the source<a class="anchor" aria-label="anchor" href="#downloading-raw-data-from-the-source"></a>
+</h3>
+<p>Download targets are separated from the calculation-model fitting sequence and operate a bit different from other targets. Arguments stored in a QS file or QS files (<code>inst/targets/download_*.qs</code>) are injected to <code><a href="https://niehs.github.io/amadeus/reference/download_data.html" class="external-link">amadeus::download_data()</a></code> and it will initiate building raw data download targets. The target is rigorous branched out thus is represented as one square node when one runs <code><a href="https://docs.ropensci.org/targets/reference/tar_visnetwork.html" class="external-link">targets::tar_visnetwork()</a></code>. Building the target named ‘lgl_rawdir_download’ will download the raw data from the internet and it will be performed <strong>sequentially</strong> under the current setting.</p>
+<p>Users may bypass the downloading targets by setting a temporary system variable with <code>Sys.setenv("BTV_DOWNLOAD_PASS" = "FALSE")</code>, which is included in <code>_targets.R</code>.</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># bypass option</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Sys.setenv.html" class="external-link">Sys.setenv</a></span><span class="op">(</span><span class="st">"BTV_DOWNLOAD_PASS"</span> <span class="op">=</span> <span class="st">"FALSE"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># abridged for display...</span></span>
+<span></span>
+<span><span class="co"># # nullify download target if bypass option is set</span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"BTV_DOWNLOAD_PASS"</span><span class="op">)</span> <span class="op">==</span> <span class="st">"TRUE"</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">target_download</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="list_feat_calc_base">
+<code>list_feat_calc_base</code><a class="anchor" aria-label="anchor" href="#list_feat_calc_base"></a>
+</h3>
+<p>Per <code>beethoven</code> targets naming convention, this object will be a list and it has eight elements at the first level. We use “first level” here as the list is nested. It is also related to maintain <code>list_feat_calc_base_flat</code> at the following target. Eight elements are defined in a preceding target <code>chr_iter_calc_features</code>:</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span>    <span class="fu">tar_target</span><span class="op">(</span></span>
+<span>      <span class="va">chr_iter_calc_features</span>,</span>
+<span>      command <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"hms"</span>, <span class="st">"tri"</span>, <span class="st">"nei"</span>,</span>
+<span>                  <span class="st">"ecoregions"</span>, <span class="st">"koppen"</span>, <span class="st">"population"</span>, <span class="st">"groads"</span><span class="op">)</span>,</span>
+<span>      iteration <span class="op">=</span> <span class="st">"list"</span>,</span>
+<span>      description <span class="op">=</span> <span class="st">"Feature calculation"</span></span>
+<span>    <span class="op">)</span></span></code></pre></div>
+<p>Using <code>inject_calculate</code> function and argument lists generated by <code>set_args_calc</code> function, <code>chr_iter_calc_features</code> are passed to <code>amadeus</code> functions for calculation. Please note that the pattern of <code>list_feat_calc_base</code> is not simply <code>map(chr_iter_calc_features)</code>, rather <code>cross(file_prep_calc_args, chr_iter_calc_features)</code>, for potential expansion to keep multiple argument files in the future.</p>
+<p>Each element in <code>chr_iter_calc_features</code> is iterated as a list then <code>list_feat_calc_base</code> will be a nested list. <code>list_feat_calc_base</code> will merge nested elements into one <code>data.frame</code> (<code>data.table</code> actually), resulting in a non-nested <code>list</code>, which means each element in this <code>list</code> object is a <code>data.frame</code>.</p>
+</div>
+<div class="section level3">
+<h3 id="list_feat_calc_nlcd">
+<code>list_feat_calc_nlcd</code><a class="anchor" aria-label="anchor" href="#list_feat_calc_nlcd"></a>
+</h3>
+<p>From version 0.3.10, NLCD target is separated from <code>list_feat_calc_base</code> from runtime concerns. Here we take nested parallelization strategy, where each <code><a href="https://niehs.github.io/amadeus/reference/calc_nlcd.html" class="external-link">amadeus::calc_nlcd()</a></code> run with different year and buffer size is parallelized where each will use 10 threads. In the initial study period, we have six combinations (two NLCD years in 2019 and 2021, and three radii of 1, 10, and 50 kilometers). Thus, the NLCD target will use 60 threads, but not necessarily concurrently. Each combination will get its slot in the resulting list target, therefore the following <code>dt_feat_calc_nlcd</code> is created by <code>data.frame</code> pivotting.</p>
+</div>
+<div class="section level3">
+<h3 id="list_feat_calc_nasa">
+<code>list_feat_calc_nasa</code><a class="anchor" aria-label="anchor" href="#list_feat_calc_nasa"></a>
+</h3>
+<p>MODIS-VIIRS product processing is a bit more complex than others since many preprocessing steps are involved in this raw data. Please note that <code>chr_iter_calc_nasa</code> divides MOD19A2 product by spatial resolution since difference in spatial resolution of raster layers makes it difficult to stack layers that can be advantageous to improve processing speed. The branching itself is simple to use a character vector of length 7 to iterate the process, but there is a different avenue that might introduce complexity in terms of computational infrastructure and implementation of parallel processing.</p>
+<p>We introduced nested parallelization to expedite the MODIS/VIIRS processing, where <code>tar_make_future</code> will submit jobs per MODIS/VIIRS product code via SLURM batchtools and multiple threads are used in each job. If one wants to make a transition to <code>crew</code> based pipeline operation in the future, this part indeed requires a tremendous amount of refactoring not only in beethoven functions but also amadeus functions considering features of <code>crew</code>/<code>mirai</code> workers which are different from <code>future</code>.</p>
+</div>
+<div class="section level3">
+<h3 id="list_feat_calc_geoscf">
+<code>list_feat_calc_geoscf</code><a class="anchor" aria-label="anchor" href="#list_feat_calc_geoscf"></a>
+</h3>
+<p>We use a character vector of length 2 to distinguish chm from aqc products. A modified version of <code><a href="https://niehs.github.io/amadeus/reference/calc_geos.html" class="external-link">amadeus::calc_geos</a></code>, <code>calc_geos_strict</code> is employed to calculate features. The key modification is to fix the radius argument as zero then to remove the top-level argument radius from the function.</p>
+</div>
+<div class="section level3">
+<h3 id="list_feat_calc_gmted">
+<code>list_feat_calc_gmted</code><a class="anchor" aria-label="anchor" href="#list_feat_calc_gmted"></a>
+</h3>
+<p>Here we use custom function <code>calc_gmted_direct</code>, which has different logic from what was used in <code><a href="https://niehs.github.io/amadeus/reference/calc_gmted.html" class="external-link">amadeus::calc_gmted</a></code>. <code>inject_gmted</code> uses that function to parallelize the calculation by radius length.</p>
+</div>
+<div class="section level3">
+<h3 id="list_feat_calc_narr">
+<code>list_feat_calc_narr</code><a class="anchor" aria-label="anchor" href="#list_feat_calc_narr"></a>
+</h3>
+<p>Again, modified functions <code>process_narr2</code> and <code>calc_narr2</code> are applied and the parallelization for NARR data is done by <code>par_narr</code>. Here we did not branch out by NARR variable names since they are a bit long (length of 46) such that each dispatched branch will add up overhead to submit SLURM job for each variable.</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="merge-branches">Merge branches<a class="anchor" aria-label="anchor" href="#merge-branches"></a>
+</h2>
+<p>Functions with prefix <code>post_calc_</code> merge branches, which contain various internal structures. Most of the branches are list of depth 1, which means <code>data.frame</code> or <code>data.table</code> objects are in each list element. Others are list of depth 2.</p>
+<div class="section level3">
+<h3 id="tackling-space-time-discrepancy">Tackling space-time discrepancy<a class="anchor" aria-label="anchor" href="#tackling-space-time-discrepancy"></a>
+</h3>
+<p>Each source data have different temporal resolution and update frequency. This leads to the different dimensions across targets due to the measures to save time for computation. For example, NLCD targets will get N (number of sites) times 2 (2019 and 2021 per initial study period as of August 2024), whereas NARR targets will get N times <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">|</mo><mi>D</mi><mo stretchy="true" form="postfix">|</mo></mrow><annotation encoding="application/x-tex">|D|</annotation></semantics></math> (where <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>D</mi><annotation encoding="application/x-tex">D</annotation></semantics></math> is the set of dates), which equals to the full site-date combinations during the study period. To tackle the discrepancy across calculated targets, automatic expansion strategy is implemented by inferring temporal resolution from targets. Automatic expansion starts from resolving native temporal resolution from each target then proceeds to adding a provisional field year from date, which is removed after all required join operations will be completed. Most of the time, date-to-year conversion is performed internally in <code>expand</code> functions in <code>beethoven</code> and full space-time <code>data.frame</code> is prioritized to left join the multiple targets.</p>
+</div>
+<div class="section level3">
+<h3 id="value-filling-strategies">Value filling strategies<a class="anchor" aria-label="anchor" href="#value-filling-strategies"></a>
+</h3>
+<p>Temporal resolution discrepancy makes <code>NA</code> values in joined <code>data.frame</code>s. In MODIS/VIIRS targets, NDVI (a subdataset of MOD13A1 product) is based on a 16-day cycle, differing from other products on a daily cycle. We consider the reported date of “16-day cycle” as the <strong>last day</strong> of the cycle.</p>
+<ul>
+<li>
+<strong>MODIS/VIIRS</strong>: Therefore, the <code>NA</code> values introduced by joining <code>data.frame</code>s by date field are filled in <code>impute_all</code> using <code><a href="https://rdatatable.gitlab.io/data.table/reference/nafill.html" class="external-link">data.table::setnafill</a></code> with next observation carried forward (<code>type = "nocb"</code>) option.</li>
+<li>MODIS/VIIRS targets may have <code>NaN</code> values where nonexisting values are assigned as replacements. These values are replaced with <code>NA</code> at first, then with zeros.</li>
+<li>Other nonignorable <code>NA</code>s in the joined target will be imputed by missForest (name of the original method used; actually using <code>missRanger</code> package for efficiency).</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="autojoin-functions">Autojoin functions<a class="anchor" aria-label="anchor" href="#autojoin-functions"></a>
+</h3>
+<p>Automatic join function <code>post_calc_autojoin</code> is one of the most complex function in <code>beethoven</code> codebase, which encapsulates the efforts to resolve all sorts of space-time discrepancies across targets. Full and coarse site-date combinations and full and coarse site-year combinations are automatically resolved in the function. The coarse site-year combination is a challenge since some years are out of the study period and such <em>anchor</em> years should be repeated to fill in for no gaps in the joined data. Another <code>post_calc_df_year_expand</code> and its upstream <code>post_calc_year_expand</code> function repeat coarse site-year <code>data.frame</code>s properly to ensure that there will be no years with missing values.</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">post_calc_autojoin</span> <span class="op">&lt;-</span></span>
+<span>  <span class="kw">function</span><span class="op">(</span></span>
+<span>    <span class="va">df_fine</span>,</span>
+<span>    <span class="va">df_coarse</span>,</span>
+<span>    <span class="va">field_sp</span> <span class="op">=</span> <span class="st">"site_id"</span>,</span>
+<span>    <span class="va">field_t</span> <span class="op">=</span> <span class="st">"time"</span>,</span>
+<span>    <span class="va">year_start</span> <span class="op">=</span> <span class="fl">2018L</span>,</span>
+<span>    <span class="va">year_end</span> <span class="op">=</span> <span class="fl">2022L</span></span>
+<span>  <span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="co"># Dataset specific preprocessing</span></span>
+<span>    <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/any.html" class="external-link">any</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"population"</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">df_coarse</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>      <span class="va">df_coarse</span> <span class="op">&lt;-</span> <span class="va">df_coarse</span><span class="op">[</span>, <span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"time"</span><span class="op">)</span>, with <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span></span>
+<span>    <span class="op">}</span></span>
+<span></span>
+<span>    <span class="co"># Detect common field names</span></span>
+<span>    <span class="va">common_field</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sets.html" class="external-link">intersect</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">df_fine</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">df_coarse</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span>    <span class="co"># Clean inputs to retain necessary fields</span></span>
+<span>    <span class="va">df_fine</span> <span class="op">&lt;-</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/as.data.table.html" class="external-link">as.data.table</a></span><span class="op">(</span><span class="va">df_fine</span><span class="op">)</span></span>
+<span>    <span class="va">df_coarse</span> <span class="op">&lt;-</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/as.data.table.html" class="external-link">as.data.table</a></span><span class="op">(</span><span class="va">df_coarse</span><span class="op">)</span></span>
+<span>    <span class="va">df_fine</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/post_calc_drop_cols.html">post_calc_drop_cols</a></span><span class="op">(</span><span class="va">df_fine</span><span class="op">)</span></span>
+<span>    <span class="va">df_coarse</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/post_calc_drop_cols.html">post_calc_drop_cols</a></span><span class="op">(</span><span class="va">df_coarse</span><span class="op">)</span></span>
+<span></span>
+<span>    <span class="co"># Take strategy depending on the length of common field names</span></span>
+<span>    <span class="co"># Length 1 means that `site_id` is the only intersecting field</span></span>
+<span>    <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">common_field</span><span class="op">)</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="op">{</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">common_field</span><span class="op">)</span></span>
+<span>      <span class="kw">if</span> <span class="op">(</span><span class="va">common_field</span> <span class="op">==</span> <span class="va">field_sp</span><span class="op">)</span> <span class="op">{</span></span>
+<span>        <span class="va">joined</span> <span class="op">&lt;-</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/merge.html" class="external-link">merge.data.table</a></span><span class="op">(</span></span>
+<span>          <span class="va">df_fine</span>, <span class="va">df_coarse</span>,</span>
+<span>          by <span class="op">=</span> <span class="va">field_sp</span>,</span>
+<span>          all.x <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>        <span class="op">)</span></span>
+<span>      <span class="op">}</span></span>
+<span>    <span class="op">}</span></span>
+<span>    <span class="co"># When space-time join is requested,</span></span>
+<span>    <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">common_field</span><span class="op">)</span> <span class="op">==</span> <span class="fl">2</span><span class="op">)</span> <span class="op">{</span></span>
+<span>      <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="va">common_field</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">field_sp</span>, <span class="va">field_t</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>        <span class="co"># Type check to characters</span></span>
+<span>        <span class="va">df_fine</span><span class="op">[[</span><span class="va">field_t</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">df_fine</span><span class="op">[[</span><span class="va">field_t</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span>        <span class="va">df_coarse</span><span class="op">[[</span><span class="va">field_t</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">df_coarse</span><span class="op">[[</span><span class="va">field_t</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span>        </span>
+<span>        <span class="co"># When `time` field contains years, `as.Date` call will return error(s)</span></span>
+<span>        <span class="va">t_coarse</span> <span class="op">&lt;-</span> <span class="kw"><a href="https://rdrr.io/r/base/try.html" class="external-link">try</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="va">df_coarse</span><span class="op">[[</span><span class="va">field_t</span><span class="op">]</span><span class="op">]</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
+<span>        <span class="co"># If an error is detected, print information</span></span>
+<span>        <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">inherits</a></span><span class="op">(</span><span class="va">t_coarse</span>, <span class="st">"try-error"</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>          <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span></span>
+<span>            <span class="st">"The time field includes years. Trying different join strategy."</span></span>
+<span>          <span class="op">)</span></span>
+<span>          <span class="va">coarse_years</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">df_coarse</span><span class="op">[[</span><span class="va">field_t</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span>          </span>
+<span>          <span class="co"># coarse site-year combination is expanded</span></span>
+<span>          <span class="va">df_coarse2</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/post_calc_df_year_expand.html">post_calc_df_year_expand</a></span><span class="op">(</span></span>
+<span>            <span class="va">df_coarse</span>,</span>
+<span>            time_start <span class="op">=</span> <span class="va">year_start</span>,</span>
+<span>            time_end <span class="op">=</span> <span class="va">year_end</span>,</span>
+<span>            time_available <span class="op">=</span> <span class="va">coarse_years</span></span>
+<span>          <span class="op">)</span></span>
+<span>          <span class="va">joined</span> <span class="op">&lt;-</span></span>
+<span>            <span class="fu"><a href="reference/post_calc_join_yeardate.html">post_calc_join_yeardate</a></span><span class="op">(</span><span class="va">df_coarse2</span>, <span class="va">df_fine</span>, <span class="va">field_t</span>, <span class="va">field_t</span><span class="op">)</span></span>
+<span>        <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
+<span>          <span class="co"># site-date combination data.frames are joined as they are regardless of coarseness</span></span>
+<span>          <span class="co"># Left join is enforced</span></span>
+<span>          <span class="va">joined</span> <span class="op">&lt;-</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/merge.html" class="external-link">merge.data.table</a></span><span class="op">(</span></span>
+<span>            <span class="va">df_fine</span>, <span class="va">df_coarse</span>,</span>
+<span>            by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">field_sp</span>, <span class="va">field_t</span><span class="op">)</span>,</span>
+<span>            all.x <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>          <span class="op">)</span></span>
+<span>        <span class="op">}</span></span>
+<span>      <span class="op">}</span></span>
+<span>    <span class="op">}</span></span>
+<span>    <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">joined</span><span class="op">)</span></span>
+<span>  <span class="op">}</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="managing-calculated-features">Managing calculated features<a class="anchor" aria-label="anchor" href="#managing-calculated-features"></a>
+</h3>
+<p>The calculation configuration files can be multiple, which means the calculated feature targets can also be multiple. The <code>dt_feat_calc_cumulative</code> target operates differently depending on the existence of a <em>.qs file in the <code>output/qs</code> directory. If there is any </em>.qs file in the <code>output/qs</code> directory, the <code>dt_feat_calc_design</code> target will be appended (i.e., <code><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind()</a></code>-ed) to the contents of the <code>*.qs</code> files. The first run will assign a file name string to <code>dt_feat_calc_cumulative</code>.</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/append_predecessors.html">append_predecessors</a></span><span class="op">(</span></span>
+<span>  path_qs <span class="op">=</span> <span class="st">"output/qs"</span>,</span>
+<span>  period_new <span class="op">=</span> <span class="va">arglist_common</span><span class="op">$</span><span class="va">char_period</span>,</span>
+<span>  input_new <span class="op">=</span> <span class="va">dt_feat_calc_design</span>,</span>
+<span>  nthreads <span class="op">=</span> <span class="va">arglist_common</span><span class="op">$</span><span class="va">nthreads_append</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="imputation">Imputation<a class="anchor" aria-label="anchor" href="#imputation"></a>
+</h3>
+<p>The calculated features contain a fair amount of <code>NA</code> or <code>NaN</code>s depending on the raw dataset. We distinguish these into “true zeros” and “true missing” for the subsequent imputation process. For imputation, <code>missRanger</code> is used. The <code>missRanger</code> arguments can be adjusted in the <code><a href="reference/impute_all.html">impute_all()</a></code> function.</p>
+<ul>
+<li><p>True zeros: TRI features include many <code>NA</code>s as the raw data is a long <code>data.frame</code> with source location-chemicals pair keys. This structure requires long-to-wide pivoting, resulting in a sparse <code>data.frame</code> with <code>NA</code>s where no chemicals were reported in certain locations. Therefore, these <code>NA</code>s are considered true zeros.</p></li>
+<li><p>Missing: daily satellite-derived features except for the 16-day NDVI are considered to include missing values. Such missing values are mainly coming from intermittent data transmission disruption or planned maintenance. <code>NA</code>s in the 16-day NDVI field are filled by the “last observation carried forward” principle. <code>NaN</code> values in others are replaced with <code>NA</code> and put into the imputation function.</p></li>
+</ul>
+</div>
+</div>
+<div class="section level2">
+<h2 id="base-learners">Base learners<a class="anchor" aria-label="anchor" href="#base-learners"></a>
+</h2>
+<p>For efficiency, GPU-enabled version is recommended for <code>xgboost</code>/<code>lightgbm</code> and <code>brulee</code>. These packages need to be installed manually with modifications of system environment variables. Developers should consult <code>lightgbm</code> official documentation for building the package by hand, <code>xgboost</code> GitHub repository release page for installing the CUDA version manually and <code>brulee</code> GitHub repository (i.e., in <code>gpu</code> branch) to install the proper version of each package with careful consideration on the computing infrastructure. “GPU” here refers to CUDA-enabled devices produced by NVIDIA corporation. This does not necessarily mean that this package as a part of U.S. government work endorses NVIDIA corporation and its products in any sort.</p>
+<blockquote>
+<p>[!WARNING] As of version 0.3.10, <code>xgboost</code> &lt; v2.1.0 should be used due to breaking changes in v2.1.0 in handling additional arguments in <code>xgb.DMatrix</code> (cf. <a href="https://github.com/dmlc/xgboost/pull/9862" class="external-link">xgboost pull record</a>), which leads to break <code><a href="https://parsnip.tidymodels.org/reference/boost_tree.html" class="external-link">parsnip::boost_tree()</a></code> function call.</p>
+</blockquote>
+<div class="section level3">
+<h3 id="tidymodels-infrastructure">tidymodels infrastructure<a class="anchor" aria-label="anchor" href="#tidymodels-infrastructure"></a>
+</h3>
+<p>We want to actively adopt evolving packages in the <code>tidymodels</code> ecosystem while keeping as minimal dependency tree as possible. In this package, major <code>tidymodels</code> packages that are used in base and meta learners include–</p>
+<ul>
+<li><code>parsnip</code></li>
+<li><code>recipe</code></li>
+<li><code>rsample</code></li>
+<li><code>spatialsample</code></li>
+<li><code>tune</code></li>
+<li><code>workflow</code></li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="branching">Branching<a class="anchor" aria-label="anchor" href="#branching"></a>
+</h3>
+<p>With rigorous branching, we maintain the base learner fitting targets as one node with 900 branches, which include <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="monospace">𝟹 (𝚋𝚊𝚜𝚎 𝚕𝚎𝚊𝚛𝚗𝚎𝚛𝚜)</mtext><mo>×</mo><mi>t</mi><mi>e</mi><mi>x</mi><mi>t</mi><mi>t</mi><mi>t</mi><mrow><mn>3</mn><mrow><mo stretchy="true" form="prefix">(</mo><mi>C</mi><mi>V</mi><mi>s</mi><mi>t</mi><mi>r</mi><mi>a</mi><mi>t</mi><mi>e</mi><mi>g</mi><mi>i</mi><mi>e</mi><mi>s</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mo>×</mo><mtext mathvariant="monospace">𝟷𝟶𝟶 𝚛𝚎𝚜𝚊𝚖𝚙𝚕𝚎𝚜</mtext></mrow><annotation encoding="application/x-tex">\texttt{3 (base learners)}\times
+texttt{3 (CV strategies)}\times \texttt{100 resamples}</annotation></semantics></math>. LightGBM and multilayer perceptron models are running on GPUs, while elastic net models are fit on CPUs.</p>
+</div>
+<div class="section level3">
+<h3 id="cross-validation">Cross validation<a class="anchor" aria-label="anchor" href="#cross-validation"></a>
+</h3>
+<p>Due to <code>rsample</code> design, each cross-validation fold will include an <strong>actual</strong> <code>data.frame</code> (<code>tibble</code>) object. It has own good for self-contained modeling practices that easily guarantee reproducibility, however, it also has limitations when used with large data and <code>targets</code> pipeline as <code>targets</code> <strong>stores</strong> such objects in disk space. Such characteristics lead to inflate the disk space for base and meta learner training. Ten-fold cross-validation sets from 900K<em>3.2K <code>data.frame</code> take <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>9</mn><mtext mathvariant="monospace">𝙼</mtext><mo>×</mo><mn>3.2</mn><mtext mathvariant="monospace">𝙺</mtext><mo>×</mo><mn>8</mn><mtext mathvariant="monospace">𝚋𝚢𝚝𝚎𝚜</mtext></mrow><annotation encoding="application/x-tex">9\texttt{M} \times 3.2\texttt{K} \times 8\texttt{bytes}</annotation></semantics></math>=230GB. Randomization schemes for model ensemble will increase that size to 10 times and more, which is equivalent to 2.3TB and more when uncompressed. The current development version modifies the original <code>rsample</code>’s <code>rset</code> design to store </em>row indices* of the joined <code>data.frame</code> target to reduce data size in disk.</p>
+<div class="section level4">
+<h4 id="use-rset-object-in-the-last-resort">Use <code>rset</code> object in the last resort<a class="anchor" aria-label="anchor" href="#use-rset-object-in-the-last-resort"></a>
+</h4>
+<p><code>rset</code> object is a powerful tool to ensure that all cross-validation sets “flow” through the modeling process, but has a limitation in large-scale modeling with <code>target</code>: storage issues. When one stores <code>rset</code> objects in the pipeline even with a mild randomization (e.g., 30% row sampling in the base learner step in <code>beethoven</code> pipeline), the total disk space required to keep <code>rset</code> object easily exceed several times of the original <code>data.frame</code> object. Thus, we prefer to keep <em>row indices</em> to restore <code>rset</code> object <em>inside</em> each base learner fitting function. Row indices here are derived from the row subsamples for base learners. <code>targets</code> will only store row indices bound with each subsample, such that the total usage of storage will be reduced significantly. Besides the disk space concerns, it has its own good to reduce the overhead or I/O for compressing massive <code>data.frame</code> (actually, <code>tibble</code>) objects.</p>
+<ul>
+<li>
+<code>restore_*</code> functions restore <code>rset</code> object from row indices and their upstream <code>data.frame</code>
+</li>
+<li>
+<code>generate_*</code> functions generate row indices from input <code>data.frame</code> by the user-defined cross-validation strategy.</li>
+</ul>
+<p><code><a href="reference/fit_base_learner.html">fit_base_learner()</a></code> is a quite long and versatile function that accepts a dozen arguments, therefore developers should be aware of each component in the function. The current implementation separated <code>parsnip</code> and <code>tune</code> parts from <code><a href="reference/fit_base_learner.html">fit_base_learner()</a></code>. The flowchart of <code><a href="reference/fit_base_learner.html">fit_base_learner()</a></code> is displayed below.</p>
+<pre class="mermaid"><code>graph TD
+    %% Define the target files as nodes
+    frecipe["minimal data"]
+    fittune["tuning results"]
+    fmodel["parsnip model definition"]
+    ftune["tuning functions"]
+    bestmodel["best model from tuning"]
+    bestworkflow["workflow of the best model"]
+    fitmodel["fitted best model with full data"]
+    bestfit["predicted values from one base learner"]
+
+
+    %% Define the branches with arrowhead connections
+    frecipe ---|recipes::recipe()| fittune
+    fmodel ---|`switch_model()`| fittune
+    ftune ---|`tune_*()`| fittune
+    fittune ---|tune::select_best()| bestmodel
+    bestmodel ---|tune::finalize_workflow()| bestworkflow
+    bestworkflow ---|parsnip::fit()| fitmodel
+    fitmodel ---|predict()| bestfit</code></pre>
+</div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="containerization">Containerization<a class="anchor" aria-label="anchor" href="#containerization"></a>
+</h2>
+<ul>
+<li>TODO: build GPU-enabled Apptainer image</li>
+<li>TODO: make a new branch to replace <code>container-engine</code>
+</li>
+</ul>
 </div>
 </div>
 
@@ -446,15 +895,7 @@
 </ul>
 </div>
 
-<div class="dev-status">
-<h2 data-toc-skip>Dev status</h2>
-<ul class="list-unstyled">
-<li><a href="https://github.com/NIEHS/beethoven/actions/workflows/check-standard.yaml" class="external-link"><img src="https://github.com/NIEHS/beethoven/actions/workflows/check-standard.yaml/badge.svg" alt="R-CMD-check"></a></li>
-<li><a href="https://github.com/NIEHS/beethoven/actions" class="external-link"><img src="https://NIEHS.github.io/beethoven/badges/coverage.svg" alt="cov"></a></li>
-<li><a href="https://github.com/NIEHS/beethoven/actions/workflows/lint.yaml" class="external-link"><img src="https://github.com/NIEHS/beethoven/actions/workflows/lint.yaml/badge.svg" alt="lint"></a></li>
-<li><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a></li>
-</ul>
-</div>
+
 
   </aside>
 </div>
@@ -465,7 +906,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer>

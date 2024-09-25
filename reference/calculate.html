@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">beethoven</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -29,7 +29,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Spatiotemporal covariate calculation</h1>
-      <small class="dont-index">Source: <a href="https://github.com/NIEHS/beethoven/blob/main/R/pipeline_base_functions.R" class="external-link"><code>R/pipeline_base_functions.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/NIEHS/beethoven/blob/main/R/injection.R" class="external-link"><code>R/injection.R</code></a></small>
       <div class="d-none name"><code>calculate.Rd</code></div>
     </div>
 
@@ -43,8 +43,8 @@
 <span>  domain <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  domain_name <span class="op">=</span> <span class="st">"year"</span>,</span>
 <span>  nthreads <span class="op">=</span> <span class="fl">1L</span>,</span>
-<span>  process_function <span class="op">=</span> <span class="fu">amadeus</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/amadeus/man/process_covariates.html" class="external-link">process_covariates</a></span>,</span>
-<span>  calc_function <span class="op">=</span> <span class="fu">amadeus</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/amadeus/man/calc_covariates.html" class="external-link">calc_covariates</a></span>,</span>
+<span>  process_function <span class="op">=</span> <span class="fu">amadeus</span><span class="fu">::</span><span class="va"><a href="https://niehs.github.io/amadeus/reference/process_covariates.html" class="external-link">process_covariates</a></span>,</span>
+<span>  calc_function <span class="op">=</span> <span class="fu">amadeus</span><span class="fu">::</span><span class="va"><a href="https://niehs.github.io/amadeus/reference/calc_covariates.html" class="external-link">calc_covariates</a></span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -69,12 +69,12 @@ Nullable; If <code>NULL</code>, it will be set to <code>c(1)</code>.</p></dd>
 
 <dt id="arg-process-function">process_function<a class="anchor" aria-label="anchor" href="#arg-process-function"></a></dt>
 <dd><p>Raw data processor. Default is
-<code><a href="https://rdrr.io/pkg/amadeus/man/process_covariates.html" class="external-link">amadeus::process_covariates</a></code></p></dd>
+<code><a href="https://niehs.github.io/amadeus/reference/process_covariates.html" class="external-link">amadeus::process_covariates</a></code></p></dd>
 
 
 <dt id="arg-calc-function">calc_function<a class="anchor" aria-label="anchor" href="#arg-calc-function"></a></dt>
 <dd><p>Function to calculate covariates.
-<code><a href="https://rdrr.io/pkg/amadeus/man/calc_covariates.html" class="external-link">amadeus::calc_covariates</a></code></p></dd>
+<code><a href="https://niehs.github.io/amadeus/reference/calc_covariates.html" class="external-link">amadeus::calc_covariates</a></code></p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -95,7 +95,7 @@ Nullable; If <code>NULL</code>, it will be set to <code>c(1)</code>.</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer></div>

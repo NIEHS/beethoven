@@ -9,7 +9,7 @@ returns a list of MODIS files found in the specified path."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">beethoven</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,7 +31,7 @@ returns a list of MODIS files found in the specified path."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Load MODIS files from a specified path.</h1>
-      <small class="dont-index">Source: <a href="https://github.com/NIEHS/beethoven/blob/main/R/pipeline_base_functions.R" class="external-link"><code>R/pipeline_base_functions.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/NIEHS/beethoven/blob/main/R/load.R" class="external-link"><code>R/load.R</code></a></small>
       <div class="d-none name"><code>load_modis_files.Rd</code></div>
     </div>
 
@@ -73,10 +73,19 @@ in the specified path.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
 <span class="r-in"><span><span class="co"># Load MODIS files from the current directory</span></span></span>
-<span class="r-in"><span><span class="va">modis_files</span> <span class="op">&lt;-</span> <span class="fu">load_modis_files</span><span class="op">(</span><span class="st">"."</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">modis_files</span> <span class="op">&lt;-</span></span></span>
+<span class="r-in"><span>  <span class="fu">load_modis_files</span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="st">"."</span>,</span></span>
+<span class="r-in"><span>    date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2018-01-01"</span>, <span class="st">"2018-01-31"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Load MODIS files from a specific directory with a custom pattern</span></span></span>
-<span class="r-in"><span><span class="va">modis_files</span> <span class="op">&lt;-</span> <span class="fu">load_modis_files</span><span class="op">(</span><span class="st">"/path/to/files"</span>, pattern <span class="op">=</span> <span class="st">"MOD.*hdf$"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">modis_files</span> <span class="op">&lt;-</span></span></span>
+<span class="r-in"><span>  <span class="fu">load_modis_files</span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="st">"/path/to/files"</span>,</span></span>
+<span class="r-in"><span>    pattern <span class="op">=</span> <span class="st">"MOD.*hdf$"</span>,</span></span>
+<span class="r-in"><span>    date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2018-01-01"</span>, <span class="st">"2018-01-31"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
@@ -89,7 +98,7 @@ in the specified path.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer></div>
