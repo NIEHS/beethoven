@@ -1,4 +1,3 @@
-# nocov start
 
 #' Load county sf object
 #' @keywords Calculation
@@ -27,8 +26,7 @@ process_counties <-
 #' @return A vector of divisors of x.
 divisor <-
   function(x) {
-    xv <- seq_len(x)
+    stopifnot(!is.character(x))
+    xv <- seq_len(as.integer(x))
     xv[which(x %% xv == 0)]
   }
-
-# nocov end

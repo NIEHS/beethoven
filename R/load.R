@@ -1,4 +1,3 @@
-# nocov start
 
 ## file check: chunking
 ## if using tarchetypes::tar_files,
@@ -46,7 +45,11 @@ loadargs <- function(argfile, dataset) {
   } else {
     stop("Invalid format.")
   }
-  check_args <- arglist[[dataset]]
+  if (length(dataset) == 1) {
+    check_args <- arglist[[dataset]]
+  } else {
+    check_args <- arglist[dataset]
+  }
   namecheck <- grep("preprocess|_function", names(check_args))
   if (length(namecheck) > 0) {
     for (i in namecheck) {
@@ -108,7 +111,8 @@ load_modis_files <- function(path, pattern = "hdf$", date = character(2)) {
   return(modis_files)
 }
 
-
+# nocov start
+## wrapped in no coverage while looking for `fun_aqs`
 #' Read AQS data
 #' @keywords Utility
 #' @param fun_aqs function to import AQS data.
@@ -129,7 +133,7 @@ read_locs <-
     if (export) qs::qsave(aqs_read, file = "input/sf_feat_proc_aqs_sites.qs")
     return(aqs_read)
   }
-
+# nocov end
 
 
 #' Unmarshal functions
@@ -200,5 +204,3 @@ read_paths <-
     }
     return(flist)
   }
-
-# nocov end

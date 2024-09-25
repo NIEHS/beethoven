@@ -1,5 +1,3 @@
-# nocov start
-
 
 #' Add Time Column
 #'
@@ -104,12 +102,11 @@ post_calc_convert_time <-
   function(
     df
   ) {
-    df <- data.table::copy(data.table::as.data.table(df))
-    df <- df[, `:=`(time, as.character(time))]
-    return(df)
+    stopifnot("time" %in% names(df))
+    df1 <- data.table::copy(data.table::as.data.table(df))
+    df1[, time := as.character(time)]
+    return(df1)
   }
-
-# nocov end
 
 
 #' Join a data.frame with a year-only date column to
@@ -278,9 +275,6 @@ post_calc_df_year_expand <- function(
 }
 
 
-
-# nocov start
-
 #' Merge spatial and spatiotemporal covariate data
 #' @keywords Post-calculation
 #' @param locs Location. e.g., AQS sites.
@@ -317,12 +311,16 @@ post_calc_merge_all <-
         locs_merged, df_spt,
         by = c(locs_id, time_id)
       )
+    # need POSIXt class for amadeus function
+    locs_merged[[time_id]] <- as.POSIXct(locs_merged[[time_id]])
     locs_merged <-
       amadeus::calc_temporal_dummies(
         locs = locs_merged,
         locs_id = locs_id,
         year = target_years
       )
+    # reset time as character
+    locs_merged[[time_id]] <- as.character(locs_merged[[time_id]])
     return(locs_merged)
   }
 
@@ -365,8 +363,6 @@ post_calc_drop_cols <-
     df <- df[, -idx_remove, with = FALSE]
     return(df)
   }
-
-# nocov end
 
 
 #' Automatic joining by the time and spatial identifiers
@@ -469,8 +465,6 @@ post_calc_autojoin <-
   }
 
 
-# nocov start
-
 #' Impute missing values and attach lagged features
 #' @keywords Post-calculation
 #' @note
@@ -512,8 +506,14 @@ impute_all <-
   ) {
     data.table::setDTthreads(nthreads_dt)
     if (is.character(dt)) {
-      dt <- file.path("output/qs", dt)
-      dt <- qs::qread(dt)
+      if (!endsWith(dt, ".qs")) {
+        stop(
+          paste0(
+            "If `dt` points to a file, provide full path to .qs file.\n"
+          )
+        )
+      }
+      dt <- qs::qread(file.path(dt))
     }
     dt$time <- as.POSIXct(dt$time)
     # remove unnecessary columns
@@ -757,6 +757,3 @@ append_predecessors <-
       return(bound_large)
     }
   }
-
-
-# nocov end

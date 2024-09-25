@@ -1,5 +1,3 @@
-# nocov start
-
 
 #' Set resource management for SLURM
 #'
@@ -50,6 +48,3 @@ set_slurm_resource <-
       )
     )
   }
-
-
-# nocov end

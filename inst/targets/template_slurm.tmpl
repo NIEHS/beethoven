@@ -53,4 +53,5 @@ error.file = fs::path_expand(resources$error.file)
 
 ## Run R:
 ## we merge R output with stdout from SLURM, which gets then logged via --output option
-Rscript -e '.libPaths(c("/ddn/gs1/biotools/R/lib64/R/custompkg", "/ddn/gs1/home/songi2/r-libs", .libPaths()));batchtools::doJobCollection("<%= uri %>")'
+# Rscript -e '.libPaths(c("/ddn/gs1/biotools/R/lib64/R/custompkg", "/ddn/gs1/home/songi2/r-libs", .libPaths()));batchtools::doJobCollection("<%= uri %>")'
+Rscript -e '.libPaths(c("/ddn/gs1/biotools/R/lib64/R/custompkg", "/ddn/gs1/home/manwareme/R/x86_64-pc-linux-gnu-library/4.3", "/ddn/gs1/home/songi2/r-libs", .libPaths()));batchtools::doJobCollection("<%= uri %>")'

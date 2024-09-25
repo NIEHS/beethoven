@@ -1,4 +1,4 @@
-# nocov start
+
 # please note that functions here are modified version of
 # the original functions in the package amadeus (<0.2.0)
 
@@ -240,17 +240,23 @@ process_narr2 <- function(
     )
   )
 
-  search_abbr <- list.dirs(path)[-1]
-  search_abbr <- sub(paste0(path, "/"), "", search_abbr)
-  search_to <- c(
-    "ATSFC", "ALBDO", "ACPRC", "DSWRF", "ACEVP",
-    "HCLAF", "PLBLH", "LCLAF", "LATHF", "MCLAF",
-    "OMEGA", "PRWTR", "PRATE", "PRSFC", "SENHF",
-    "SPHUM", "SNWCV", "SLMSC", "CLDCV", "ULWRF",
-    "UWIND", "VISIB", "VWIND", "ACSNW"
+  # mm-tests-0816 new variable abbreviation method
+  # previous method resulted in "MET_NA..." names for
+  # all variables
+  variable_abbr <- sprintf(
+    "MET_%s",
+    toupper(
+      gsub(
+        "_",
+        "",
+        gsub(
+          "\\.",
+          "",
+          variable
+        )
+      )
+    )
   )
-  search_to <-
-    sprintf("MET_%s", search_to[match(variable, search_abbr)])
 
   #### initiate for loop
   data_full <- terra::rast()
@@ -277,7 +283,7 @@ process_narr2 <- function(
     if (length(lvinfo) == 0) {
       cat("Detected monolevel data...\n")
       names(data_year) <- paste0(
-        search_to, "_",
+        variable_abbr, "_",
         gsub("-", "", data_year_tinfo)
       )
     } else {
@@ -288,7 +294,7 @@ process_narr2 <- function(
       terra::time(data_year) <- as.Date(data_year_tinfo)
       names(data_year) <- sprintf(
         "%s_%s_%s",
-        search_to,
+        variable_abbr,
         lvinfo,
         gsub("-", "", data_year_tinfo)
       )
@@ -327,7 +333,3 @@ process_narr2 <- function(
   #### return SpatRaster
   return(data_return)
 }
-
-
-
-# nocov end

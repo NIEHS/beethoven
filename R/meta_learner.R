@@ -1,4 +1,62 @@
-# nocov start
+#' Combine prediction values from base learners
+#' @description
+#' This function combines outcome data (observations) with the prediction
+#' values from each base learner.
+#' @keywords meta_learner
+#' @param data data.frame(1). Full data.
+#' @param pred list(1). List with base learner prediction values.
+#' @param target_cols characters(1). Columns to retain from the full
+#' data.frame.
+#' @param yvar character(1). Outcome variable name.
+#' @return a data.frame object, including the target columns from `data` and
+#' the predictions for each base learner.
+#' @keywords Utility
+#' @export
+attach_pred <-
+  function(
+    data,
+    pred,
+    target_cols = c("site_id", "time", "Event.Type", "lon", "lat"),
+    yvar = "Arithmetic.Mean"
+  ) {
+    stopifnot(!is.null(data))
+    stopifnot(!is.null(target_cols))
+    stopifnot(!is.null(yvar))
+    if (!(yvar %in% target_cols)) {
+      target_cols <- c(target_cols, yvar)
+    }
+    data_targets <- data[, which(names(data) %in% target_cols)]
+
+    pred_merge <- do.call(cbind, (lapply(pred, function(x) x[[1]][, 1])))
+    colnames(pred_merge) <- unlist(lapply(pred, pred_colname))
+
+    stopifnot(nrow(data_targets) == nrow(pred_merge))
+    data_pred <- cbind(data_targets, pred_merge)
+
+    return(data_pred)
+  }
+
+
+#' Assign column name to base learner prediction based on hyperparameters.
+#' @keywords meta_learner
+#' @param pred Base learner outcomes.
+#' @return a character for column name.
+#' @keywords Utility
+#' @export
+pred_colname <-
+  function(
+    pred
+  ) {
+    id <- substr(setdiff(names(pred[[2]]), ".config"), 1, 3)
+    value <- as.character(pred[[2]][1, 1:(ncol(pred[[2]]) - 1)])
+    pred_colname <- paste(paste0(id, value), collapse = "_")
+    # random value appended to hyperparameter in case multiple models
+    # use same hyperparameter combinations
+    pred_colname_randomid <-
+      paste(pred_colname, sample(1e4:1e5 - 1, 1), sep = "_")
+    return(pred_colname_randomid)
+  }
+
 
 #' Fit meta learner
 #'
@@ -110,5 +168,3 @@ predict_meta_learner <-
   ) {
     stats::predict(meta_fitted, new_data)
   }
-
-# nocov end

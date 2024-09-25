@@ -9,9 +9,15 @@ target_baselearner <-
     targets::tar_target(
       name = df_learner_type,
       command = assign_learner_cv(
-        learner = c("xgb", "mlp", "elnet"),
+        # DEVELOPMENT CHANGE mm-0829
+        # learner = c("xgb", "mlp", "elnet"),
+        learner = c("elnet"),
+        # DEVELOPMENT CHANGE mm-0829
         cv_mode = c("spatial", "temporal", "spatiotemporal"),
-        cv_rep = 100L,
+        # cv_mode = c("spatiotemporal"),
+        # DEVELOPMENT CHANGE mm-0829
+        # cv_rep = 100L,
+        cv_rep = 1L,
         num_device = 2L
       ) %>%
       split(seq_len(nrow(.))),
@@ -46,28 +52,34 @@ target_baselearner <-
     targets::tar_target(
       name = list_base_params_candidates,
       command = list(
-        lgb =
-          expand.grid(
-            mtry = floor(c(0.025, seq(0.05, 0.2, 0.05)) * 2000L),
-            trees = seq(1000, 3000, 1000),
-            learn_rate = c(0.1, 0.05, 0.01, 0.005)
-          )
-        ,
-        xgb =
-          expand.grid(
-            mtry = floor(c(0.025, seq(0.05, 0.2, 0.05)) * 2000L),
-            trees = seq(1000, 3000, 1000),
-            learn_rate = c(0.1, 0.05, 0.01, 0.005)
-          )
-        ,
-        mlp = 
-          expand.grid(
-            hidden_units = c(1024, 512, 256, 128, 64),
-            dropout = 1 / seq(5, 2, -1),
-            activation = c("relu", "leaky_relu"),
-            learn_rate = c(0.1, 0.05, 0.01, 0.005)
-          )
-        ,
+        # DEVELOPMENT CHANGE mm-0829
+        # lgb =
+        #   expand.grid(
+        #     mtry = floor(c(0.025, seq(0.05, 0.2, 0.05)) * 2000L),
+        #     trees = seq(1000, 3000, 1000),
+        #     learn_rate = c(0.1, 0.05, 0.01, 0.005)
+        #   )
+        # ,
+        # xgb =
+        #   expand.grid(
+        #     mtry = floor(c(0.025, seq(0.05, 0.2, 0.05)) * 2000L),
+        #     trees = seq(1000, 3000, 1000),
+        #     learn_rate = c(0.1, 0.05, 0.01, 0.005)
+        #   )
+        # ,
+        # mlp = 
+        #   expand.grid(
+        #     # hidden_units = c(1024, 512, 256, 128, 64),
+        #     hidden_units = list(
+        #       c(256, 256), c(256, 512),
+        #       c(512, 512), c(512, 1024),
+        #       c(256, 512, 1024)
+        #     ),
+        #     dropout = 1 / seq(5, 2, -1),
+        #     activation = c("relu", "leaky_relu"),
+        #     learn_rate = c(0.1, 0.05, 0.01, 0.005)
+        #   )
+        # ,
         elnet =
           expand.grid(
             # 0.05 step, 0 through 1
@@ -91,12 +103,17 @@ target_baselearner <-
           args_generate_cv = list_base_args_cv[[df_learner_type$cv_mode]],
           tune_grid_in = list_base_params_candidates[[df_learner_type$learner]],
           # preferably match the number of threads to the random grid size.
-          tune_grid_size = 10L,
-          nthreads = 10L
+          # DEVELOPMENT CHANGE mm-0903
+          # tune_grid_size = 10L,
+          # nthreads = 10L
+          tune_grid_size = 2L,
+          nthreads = 2L,
+          # trim resamples for lightweight base learners
+          trim_resamples = TRUE
         ),
       pattern = map(df_learner_type),
       iteration = "list",
       resources = set_slurm_resource(ncpus = 10L, memory = 8L, partition = "geo")
     )
-
+    
   )

@@ -1,8 +1,5 @@
 # Base learners and auxiliary functions for base learners
 
-
-# nocov start
-
 #' Make sampled subdataframes for base learners
 #'
 #' Per beethoven resampling strategy, this function selects
@@ -235,7 +232,23 @@ fit_base_learner <-
           args_generate_cv
         )
       # generate row index
-      cv_index <- inject_match(switch_generate_cv_rset, args_generate_cv)
+      # cv_index <- inject_match(switch_generate_cv_rset, args_generate_cv)
+
+      # manually replicate switch_generate_cv_rset function
+      # the formals() argument used in inject_match does not properly
+      # identify the expected arguments in the switched functions
+      # identify cv_mode
+      cv_mode_arg <- match.arg(cv_mode)
+      target_fun <-
+        switch(
+          cv_mode_arg,
+          spatial = generate_cv_index_sp,
+          temporal = generate_cv_index_ts,
+          spatiotemporal = generate_cv_index_spt
+        )
+
+      # generate row index
+      cv_index <- inject_match(target_fun, args_generate_cv)
 
       # using cv_index, restore rset
       base_vfold <-
@@ -257,6 +270,11 @@ fit_base_learner <-
       grid_params <- tune_grid_in[grid_row_idx, ]
     } else {
       grid_params <- NULL
+      # drop mtry from model arguments if using baysian tuning
+      # for xgboost
+      if (model$engine %in% c("xgboost", "lightgbm")) {
+        model <- model %>% parsnip::set_args(mtry = NULL)
+      }
     }
 
 
@@ -306,6 +324,8 @@ fit_base_learner <-
 #' @importFrom yardstick metric_set rmse mape rsq mae
 #' @importFrom parsnip fit
 #' @importFrom stats predict
+#' @importFrom rlang quo_get_expr
+#' @export
 fit_base_tune <-
   function(
     recipe,
@@ -368,9 +388,12 @@ fit_base_tune <-
           control = wf_config
         )
     }
-    if (trim_resamples) {
-      base_wftune$splits <- NA
-    }
+    # DEVELOPMENT CHANGE
+    # mm-0904 Drop base_wftune from return when trim_resamples = TRUE
+    # due to large data size. 1 iter > 25Gb
+    # if (trim_resamples) {
+    #   base_wftune$splits <- NA
+    # }
     if (return_best) {
       # Select the best hyperparameters
       base_wfparam <-
@@ -378,9 +401,20 @@ fit_base_tune <-
           base_wftune,
           metric = c("rmse", "rsq", "mae")
         )
-
       # finalize workflow with the best tuned hyperparameters
       base_wfresult <- tune::finalize_workflow(base_wf, base_wfparam)
+
+      # DEVELOPMENT CHANGE
+      # mm-0904 unlist multi-layered hidden units if mlp model
+      if (model$engine == "brulee" && is.list(grid$hidden_units)) {
+        base_wfresult$fit$actions$model$spec$args$hidden_units <-
+          unlist(
+            rlang::quo_get_expr(
+              base_wfresult$fit$actions$model$spec$args$hidden_units
+            )
+          )
+      }
+
       # Best-fit model
       base_wf_fit_best <- parsnip::fit(base_wfresult, data = data_full)
       # Prediction with the best model
@@ -393,6 +427,11 @@ fit_base_tune <-
           base_parameter = base_wfparam,
           best_performance = base_wftune
         )
+    }
+    # DEVELOPMENT CHANGE
+    # mm-0904 see above
+    if (trim_resamples) {
+      base_wflist <- base_wflist[-3]
     }
     return(base_wflist)
   }
@@ -467,6 +506,7 @@ assign_learner_cv <-
 #' training-test data.frames and a column of labels.
 #' @author Insang Song
 #' @importFrom rsample make_splits manual_rset
+#' @export
 convert_cv_index_rset <-
   function(
     cvindex,
@@ -743,6 +783,8 @@ generate_cv_index_spt <-
       # ref_list contains the index of the group pairs
       ref_list <-
         Map(c, data_exd_rowid[search_idx], data_exd_colid[search_idx])
+    } else {
+      ref_list <- NULL
     }
     attr(index_cv, "ref_list") <- ref_list
     # generate row index for restoring rset
@@ -949,6 +991,3 @@ switch_generate_cv_rset <-
     cvindex <- inject_match(target_fun, list(...))
     return(cvindex)
   }
-
-
-# nocov end

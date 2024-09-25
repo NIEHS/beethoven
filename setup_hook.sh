@@ -35,7 +35,7 @@ chmod +x $HOOKS_DIR/post-checkout
  
 WRITE_USERS=("messierkp" "songi2")
 # Get the current username
-CURRENT_USER=\$(whoami)
+CURRENT_USER=$(whoami)
  
 # Set default permissions (read and execute)
 DEFAULT_PERMISSIONS=554
