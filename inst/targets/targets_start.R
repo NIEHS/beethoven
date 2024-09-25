@@ -1,8 +1,4 @@
-# load targets
-library(
-  beethoven,
-  lib.loc = "/ddn/gs1/home/manwareme/R/x86_64-pc-linux-gnu-library/4.3"
-)
+library(beethoven, lib.loc = "/ddn/gs1/tools/set/R432/lib64/R/library")
 library(targets)
 # assume that the working directory is beethoven git repository directory
 # only runs after package deployment

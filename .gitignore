@@ -95,6 +95,7 @@ _targets
 # future batchtools outputs
 .future
 slurm_error.log
+slurm/
 
 # SLURM messages and logs
 **/*.err

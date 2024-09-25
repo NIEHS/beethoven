@@ -3,18 +3,12 @@ library(tarchetypes)
 library(future)
 library(future.batchtools)
 library(dplyr)
-library(
-  beethoven,
-  lib.loc = "/ddn/gs1/home/manwareme/R/x86_64-pc-linux-gnu-library/4.3"
-)
+library(beethoven, lib.loc = "/ddn/gs1/tools/set/R432/lib64/R/library")
 library(tidymodels)
 library(bonsai)
-# library(
-#   torch,
-#   lib.loc = "/ddn/gs1/biotools/R/lib64/R/library"
-# )
+# library(torch)
 
-Sys.setenv("LD_LIBRARY_PATH" = paste("/ddn/gs1/biotools/R/lib64/R/customlib", Sys.getenv("LD_LIBRARY_PATH"), sep = ":"))
+Sys.setenv("LD_LIBRARY_PATH" = paste("/ddn/gs1/set/R432/lib64/R/lib", Sys.getenv("LD_LIBRARY_PATH"), sep = ":"))
 
 # replacing yaml file.
 tar_config_set(
@@ -116,7 +110,7 @@ tar_option_set(
     "future", "future.apply", "future.callr", "callr",
     "stars", "rlang", "parallelly"
   ),
-  library = c("/ddn/gs1/group/set/isong-archive/r-libs"),
+  library = c("/ddn/gs1/home/manwareme/R/beethoven/packages"),
   repository = "local",
   error = "abridge",
   memory = "transient",
