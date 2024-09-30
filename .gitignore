@@ -107,3 +107,7 @@ slurm_error.log
 
 # interactive targets
 targets_start.Rout
+
+.netrc
+.urs_cookies
+beethoven_branching_notes.txt
