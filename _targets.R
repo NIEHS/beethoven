@@ -110,7 +110,7 @@ tar_option_set(
     "future", "future.apply", "future.callr", "callr",
     "stars", "rlang", "parallelly"
   ),
-  library = c("/ddn/gs1/home/manwareme/R/beethoven/packages"),
+  library = c("/ddn/gs1/tools/set/R432/lib64/R/library"),
   repository = "local",
   error = "abridge",
   memory = "transient",

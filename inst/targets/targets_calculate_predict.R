@@ -7,12 +7,12 @@
 target_calculate_predict <-
   list(
     targets::tar_target(
-      default_libPaths,
-      command = .libPaths()
+      library,
+      command = .Library
     ),
     targets::tar_target(
-      default_Library,
-      command = .Library
+      libPaths,
+      command = .libPaths()
     ),
     targets::tar_target(
       df_pred_calc_grid,
@@ -370,7 +370,8 @@ target_calculate_predict <-
     # ,
     targets::tar_target(
       chr_pred_calc_gmted_radii,
-      command = c(103),# 1e3, 1e4, 5e4),
+      # command = c(0, 1e3, 1e4, 5e4),
+      command = c(200),
       description = "Radii for GMTED features"
     )
     ,
