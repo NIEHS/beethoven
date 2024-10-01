@@ -48,14 +48,14 @@ jobs:
         uses: actions/cache@v3
         with:
           path: beethoven_dl_calc.sif
-          key: sif-cache-${{ hashFiles('container/beethoven_dl_calc.def') }}
+          key: sif-cache-${{ hashFiles('beethoven_dl_calc.def') }}
 
       - name: Create run_dl_calc_tests.R dynamically
         run: |
-          echo 'testthat::test_file("/mnt/tests/testthat/test_download.R")' > tests/testthat/run_dl_calc_tests.R
-          echo 'testthat::test_file("/mnt/tests/testthat/test_calculate.R")' >> tests/testthat/run_dl_calc_tests.R
+          echo 'testthat::test_file("tests/testthat/test_download.R")' > tests/testthat/run_dl_calc_tests.R
+          echo 'testthat::test_file("tests/testthat/test_calculate.R")' >> tests/testthat/run_dl_calc_tests.R
 
 
       - name: Run tests inside the container
         run: | 
-          apptainer exec container/beethoven_dl_calc.sif Rscript tests/testhat/run_dl_calc_tests.R
+          apptainer exec beethoven_dl_calc.sif Rscript tests/testhat/run_dl_calc_tests.R
