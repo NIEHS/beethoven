@@ -1,0 +1,73 @@
+name: Test Coverage for Download and Calculate via Apptainer
+
+on:
+  push:
+    branches: [main, master, dev]
+  pull_request:
+    branches: [main, master, dev]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Create run_dl_calc_tests.R dynamically
+        run: |
+          mkdir -p tests/testthat  # Ensure the directory exists
+          echo 'testthat::test_file("tests/testthat/test_download.R")' > tests/testthat/run_dl_calc_tests.R
+          echo 'testthat::test_file("tests/testthat/test_calculate.R")' >> tests/testthat/run_dl_calc_tests.R
+
+      - name: Install Apptainer dependencies
+        run: |
+          sudo apt-get update && sudo apt-get install -y \
+          libseccomp-dev \
+          squashfs-tools \
+          cryptsetup \
+          wget
+
+      - name: Install Apptainer
+        run: |
+          wget https://github.com/apptainer/apptainer/releases/download/v1.1.0/apptainer-1.1.0.tar.gz
+          tar -xvf apptainer-1.1.0.tar.gz
+          cd apptainer-1.1.0
+          ./mconfig && make -C builddir && sudo make -C builddir install
+
+      - name: Restore .sif file from cache
+        id: cache-sif
+        uses: actions/cache@v3
+        with:
+          path: beethoven_dl_calc.sif
+          key: sif-cache-${{ runner.os }}-${{ hashFiles('container/beethoven_dl_calc.def') }}
+          restore-keys: |
+            sif-cache-${{ runner.os }}-
+
+      - name: Build the Apptainer container (if cache miss)
+        if: steps.cache-sif.outputs.cache-hit != 'true'
+        run: |
+          apptainer build --fakeroot beethoven_dl_calc.sif container/beethoven_dl_calc.def
+
+      - name: Cache the .sif file
+        if: steps.cache-sif.outputs.cache-hit != 'true'
+        uses: actions/cache@v3
+        with:
+          path: beethoven_dl_calc.sif
+          key: sif-cache-${{ runner.os }}-${{ hashFiles('container/beethoven_dl_calc.def') }}
+
+      - name: Check if .sif file exists
+        run: |
+          if [ ! -f beethoven_dl_calc.sif ]; then
+            echo "Error: .sif file not found!"
+            exit 1
+          fi
+
+      - name: Run R tests
+        run: |
+          apptainer exec \
+            --bind $PWD/inst:/pipeline \
+            --bind $PWD/input:/input \
+            --bind $PWD:/mnt \
+            beethoven_dl_calc.sif \
+            Rscript /mnt/tests/testthat/run_dl_calc_tests.R
