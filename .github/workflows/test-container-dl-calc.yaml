@@ -40,7 +40,7 @@ jobs:
       - name: Build the Apptainer container (if cache miss)
         if: steps.cache-sif.outputs.cache-hit != 'true'
         run: |
-          apptainer build beethoven_dl_calc.sif beethoven_dl_calc.def
+          apptainer build container/beethoven_dl_calc.sif beethoven_dl_calc.def
 
       - name: Cache the .sif file
         if: steps.cache-sif.outputs.cache-hit != 'true'
