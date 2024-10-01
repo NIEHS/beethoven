@@ -1,4 +1,8 @@
 ################################################################################
+############################      DEVELOPMENT      #############################
+##### Development work to refactor the pipeline for non-injected targets.
+
+################################################################################
 ##### libraries
 library(targets)
 library(tarchetypes)
@@ -14,6 +18,26 @@ Sys.setenv(
     sep = ":"
   )
 )
+
+################################################################################
+##### development functions
+reduce_list_dt <- function(df_list) {
+  grouped_dfs <- list()
+  for (df in df_list) {
+    col_names <- paste(sort(colnames(df)), collapse = ",")
+    if (!col_names %in% names(grouped_dfs)) {
+      grouped_dfs[[col_names]] <- list()
+    }
+    df <- as.data.table(df)
+    grouped_dfs[[col_names]] <- append(grouped_dfs[[col_names]], list(df))
+  }
+  combined_list <- lapply(grouped_dfs, function(dfs) {
+    rbindlist(dfs)  # More memory-efficient rbind for data.tables
+  })
+  names(combined_list) <- seq_along(combined_list)
+  return(combined_list)
+}
+
 
 ################################################################################
 ##### controllers
@@ -43,18 +67,19 @@ calc_controller <- crew_controller_slurm(
   workers = 32,
   seconds_idle = 30,
   slurm_partition = "geo",
-  slurm_memory_gigabytes_per_cpu = 4,
+  slurm_memory_gigabytes_per_cpu = 8,
   slurm_cpus_per_task = 2,
   script_lines = script_lines
 )
-dt_controller <- crew_controller_slurm(
-  name = "dt_controller",
+highmem_controller <- crew_controller_slurm(
+  name = "highmem_controller",
   workers = 1,
   seconds_idle = 30,
-  slurm_partition = "geo",
-  slurm_memory_gigabytes_per_cpu = 32,
-  slurm_cpus_per_task = 1,
-  script_lines = script_lines
+  slurm_partition = "highmem",
+  slurm_memory_gigabytes_per_cpu = 64,
+  slurm_cpus_per_task = 2,
+  script_lines = script_lines,
+  launch_max = 10
 )
 
 ################################################################################
@@ -76,7 +101,7 @@ tar_option_set(
   controller = crew_controller_group(
     default_controller,
     calc_controller,
-    dt_controller
+    highmem_controller
   ),
   resources = tar_resources(
     crew = tar_resources_crew(
@@ -88,6 +113,25 @@ tar_option_set(
 ################################################################################
 ##### pipeline
 list(
+  targets::tar_target(
+    sf_feat_proc_aqs_sites,
+    amadeus::process_aqs(
+      export = FALSE,
+      path = list.files(
+        path = file.path(
+          "/ddn/gs1/group/set/Projects/NRT-AP-Model/input",
+          "aqs",
+          "data_files"
+        ),
+        pattern = "daily_88101_[0-9]{4}.csv",
+        full.names = TRUE
+      ),
+      date = c("2018-01-01", "2022-12-31"),
+      mode = "location",
+      return_format = "sf"
+    ),
+    description = "AQS sites"
+  ),
   tar_target(
     sf_locs,
     command = sf::read_sf(
@@ -95,20 +139,31 @@ list(
     )
   ),
   tar_target(
-    sf_locs_sample,
+    sf_grid,
     command = sf::st_as_sf(
-      sf::st_sample(sf_locs, 100000)
+      sf::st_sample(sf_locs, 200000)
     )
   ),
   tar_target(
-    sf_locs_scale,
+    sf_sample,
     command = cbind(
       site_id = sprintf(
         "A_%06d",
-        seq_len(nrow(sf_locs_sample))
+        seq_len(nrow(sf_grid))
       ),
-      sf_locs_sample
+      sf_grid
     )
+  ),
+  tar_target(
+    list_sample,
+    command = base::split(
+      sf_sample,
+      ceiling(seq_len(nrow(sf_sample)) / 50000)
+    )
+  ),
+  tar_target(
+    chr_sample,
+    command = names(list_sample)
   ),
   tar_target(
     list_dates,
@@ -122,9 +177,9 @@ list(
     command = names(list_dates)
   ),
   tar_target(
-    list_geos,
+    list_split_geos,
     command = beethoven::inject_geos(
-      locs = sf_locs_scale,
+      locs = list_sample[[chr_sample]],
       injection = list(
         path = paste0(
           "/ddn/gs1/group/set/Projects/NRT-AP-Model/input/geos/",
@@ -134,7 +189,7 @@ list(
         nthreads = 1
       )
     ),
-    pattern = map(chr_dates),
+    pattern = cross(chr_sample, chr_dates),
     iteration = "list",
     resources = tar_resources(
       crew = tar_resources_crew(
@@ -143,14 +198,23 @@ list(
     )
   ),
   targets::tar_target(
-    dt_geos,
-    command = reduce_merge(list(reduce_list(list_geos)[[1]])),
+    list_geos,
+    command = rbind(list_split_geos),
     resources = tar_resources(
       crew = tar_resources_crew(
-        controller = "dt_controller"
+        controller = "highmem_controller"
       )
     )
   )
+  # targets::tar_target(
+  #   dt_geos,
+  #   command = reduce_merge(list_geos),
+  #   resources = tar_resources(
+  #     crew = tar_resources_crew(
+  #       controller = "dt_controller"
+  #     )
+  #   )
+  # )
   # tar_target(
   #   chr_narr,
   #   command = c("weasd", "air.sfc")
@@ -180,12 +244,12 @@ list(
   # targets::tar_target(
   #   dt_narr,
   #   command = reduce_merge(
-    #   lapply(
-    #     list(list_narr),
-    #     function(x) reduce_merge(reduce_list(lapply(x, "[[", 1)))
-    #   ),
-    #   by = c("site_id", "time")
-    # ),
+  #   lapply(
+  #     list(list_narr),
+  #     function(x) reduce_merge(reduce_list(lapply(x, "[[", 1)))
+  #   ),
+  #   by = c("site_id", "time")
+  # ),
   #   resources = tar_resources(
   #     crew = tar_resources_crew(
   #       controller = "dt_controller"

@@ -1,8 +1,8 @@
 #!/bin/bash
 
 #SBATCH --job-name=crew
-#SBATCH --output=/ddn/gs1/home/manwareme/beethoven/targets_crew/slurm/output.out
-#SBATCH --error=/ddn/gs1/home/manwareme/beethoven/targets_crew/slurm/error.err
+#SBATCH --output=/ddn/gs1/home/manwareme/beethoven/beethoven/dev/branch/slurm/output.out
+#SBATCH --error=/ddn/gs1/home/manwareme/beethoven/beethoven/dev/branch/slurm/error.err
 #SBATCH --mail-type=END,FAIL
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=2

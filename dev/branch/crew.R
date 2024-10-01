@@ -1,7 +1,6 @@
 ################################################################################
 ##### make pipeline
-.libPaths()
-targets::tar_destroy(ask = FALSE)
+# targets::tar_destroy(ask = FALSE)
 targets::tar_make()
 
 
