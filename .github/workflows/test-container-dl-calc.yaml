@@ -34,8 +34,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: beethoven_dl_calc.sif
-          key: sif-cache-${{ hashFiles('containers/beethoven_dl_calc.def') }}
-          restore-keys: sif-cache-
+          key: sif-cache-${{ runner.os }}-${{ hashFiles('container/beethoven_dl_calc.def') }}
+          restore-keys: |
+            sif-cache-${{ runner.os }}-
 
       - name: Build the Apptainer container (if cache miss)
         if: steps.cache-sif.outputs.cache-hit != 'true'
@@ -47,7 +48,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: beethoven_dl_calc.sif
-          key: sif-cache-${{ hashFiles('containers/beethoven_dl_calc.def') }}
+          key: sif-cache-${{ hashFiles('container/beethoven_dl_calc.def') }}
 
       - name: Create run_dl_calc_tests.R dynamically
         run: |
@@ -56,10 +57,5 @@ jobs:
 
 
       - name: Run tests inside the container
-        run: |
-          apptainer exec \
-            --bind $PWD/inst:/pipeline \
-            --bind $PWD/input:/input \
-            --bind $PWD/_targets:/opt/_targets \
-            --bind $PWD:/mnt \
-            Rscript tests/testhat/run_dl_calc_tests.R
+        run: | 
+          apptainer exec container/beethoven_dl_calc.sif Rscript tests/testhat/run_dl_calc_tests.R
