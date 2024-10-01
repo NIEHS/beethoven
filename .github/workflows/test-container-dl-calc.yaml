@@ -1,4 +1,4 @@
-name: CI tests for download and calculate with Apptainer
+name: test coverage for download and calculate via Apptainer
 
 on:
   push:
