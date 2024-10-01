@@ -53,7 +53,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: beethoven_dl_calc.sif
-          key: sif-cache-${{ hashFiles('beethoven_dl_calc.def') }}
+          key: sif-cache-${{ runner.os }}-${{ hashFiles('beethoven_dl_calc.def') }}
 
 
 
@@ -62,7 +62,6 @@ jobs:
           apptainer exec \
             --bind $PWD/inst:/pipeline \
             --bind $PWD/input:/input \
-            --bind $PWD/_targets:/opt/_targets \
             --bind $PWD:/mnt \
             beethoven_dl_calc.sif \
             Rscript /mnt/tests/testhat/run_dl_calc_tests.R
