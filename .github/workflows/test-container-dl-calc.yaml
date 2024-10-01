@@ -62,4 +62,4 @@ jobs:
             --bind $PWD/input:/input \
             --bind $PWD/_targets:/opt/_targets \
             --bind $PWD:/mnt \
-            Rscript mnt/tests/testhat/run_dl_calc_tests.R
+            Rscript tests/testhat/run_dl_calc_tests.R
