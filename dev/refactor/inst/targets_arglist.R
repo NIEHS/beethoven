@@ -24,9 +24,24 @@ target_arglist <-
     )
     ,
     targets::tar_target(
-      generate_list_download,
-      command = FALSE,
-      description = "Export (TRUE) or not (FALSE) download argument file"
+      chr_dates_julian,
+      command = format(
+        amadeus::generate_date_sequence(
+          chr_daterange[1],
+          chr_daterange[2],
+          FALSE
+        ),
+        "%Y%j"
+      ),
+      description = "Julian dates"
+    )
+    ,
+    targets::tar_target(
+      list_dates_julian,
+      command = split(
+        chr_dates_julian,
+        ceiling(seq_along(chr_dates_julian) / 50)
+      )
     )
     ,
     targets::tar_target(
@@ -36,16 +51,9 @@ target_arglist <-
         char_input_dir = "input",
         nasa_earth_data_token = NULL, #Sys.getenv("NASA_EARTHDATA_TOKEN"),
         mod06_filelist = "inst/mod06_links_2018_2022.csv",
-        export = generate_list_download,
-        path_export = "inst/download_spec.qs"
+        export = FALSE
       ),
       description = "Set download arguments"
-    )
-    ,
-    targets::tar_target(
-      generate_list_calc,
-      command = FALSE,
-      description = "Export (TRUE) or not (FALSE) calculation argument file"
     )
     ,
     targets::tar_target(
@@ -56,8 +64,7 @@ target_arglist <-
         char_period = chr_daterange,
         num_extent = c(-126, -62, 22, 52),
         char_user_email = paste0(Sys.getenv("USER"), "@nih.gov"),
-        export = generate_list_calc,
-        path_export = "inst/calc_spec.qs",
+        export = FALSE,
         char_input_dir = "/ddn/gs1/group/set/Projects/NRT-AP-Model/input"
       ),
       description = "Set calculation arguments"

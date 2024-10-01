@@ -3,7 +3,7 @@
 target_aqs <-
   list(
     # targets::tar_target(
-    #   sf_feat_proc_aqs_sites,
+    #   sf_feat_proc_aqs_sites_REAL,
     #   read_locs(
     #     export = FALSE,
     #     path = list.files(
@@ -42,7 +42,7 @@ target_aqs <-
     #   description = "AQS sites with time"
     # )
     # ,
-    ##### AQS SITES PLACEHOLDER WHILE R_LIBS DEVELOPMENT #####
+    #######################    AQS SITES PLACEHOLDER     #######################
     targets::tar_target(
       sf_locs,
       command = sf::read_sf(

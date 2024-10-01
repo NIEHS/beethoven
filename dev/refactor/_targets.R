@@ -29,8 +29,6 @@ Sys.setenv("BTV_DOWNLOAD_PASS" = "TRUE")
 
 ################################################################################
 ##############################      TARGETS      ###############################
-
-################################################################################
 ##### controllers
 # nolint start
 script_lines <- paste0("
@@ -41,7 +39,7 @@ export PATH=/ddn/gs1/tools/set/R432/bin/R:/ddn/gs1/tools/cuda11.8/bin:$PATH
 export LD_LIBRARY_PATH=/ddn/gs1/tools/set/R432/lib64/R/lib:/ddn/gs1/tools/cuda11.8/lib64:$LD_LIBRARY_PATH
 export R_LIBS_USER=/ddn/gs1/tools/set/R432/lib64/R/library:$R_LIBS_USER
 
-module load /ddn/gs1/tools/set/R432/lib64/R/bin/R
+module load /ddn/gs1/tools/set/R432/bin/R
 "
 )
 # nolint end
@@ -62,6 +60,15 @@ calc_controller <- crew.cluster::crew_controller_slurm(
   slurm_partition = "geo",
   slurm_memory_gigabytes_per_cpu = 8,
   slurm_cpus_per_task = 2,
+  script_lines = script_lines
+)
+nasa_controller <- crew.cluster::crew_controller_slurm(
+  name = "nasa_controller",
+  workers = 16,
+  seconds_idle = 30,
+  slurm_partition = "geo",
+  slurm_memory_gigabytes_per_cpu = 4,
+  slurm_cpus_per_task = 8,
   script_lines = script_lines
 )
 highmem_controller <- crew.cluster::crew_controller_slurm(
@@ -100,6 +107,7 @@ targets::tar_option_set(
   controller = crew_controller_group(
     default_controller,
     calc_controller,
+    nasa_controller,
     highmem_controller
   ),
   resources = tar_resources(

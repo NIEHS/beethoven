@@ -19,4 +19,4 @@ export R_LIBS_USER=/ddn/gs1/tools/set/R432/lib64/R/library:$R_LIBS_USER
 # USER_PROJDIR=/ddn/gs1/home/$USER/projects
 USER_PROJDIR=/ddn/gs1/home/manwareme/beethoven/
 
-nohup nice -4 /ddn/gs1/tools/set/R432/lib64/R/bin/Rscript --no-init-file --no-environ $USER_PROJDIR/beethoven/dev/refactor/inst/targets_start.R
+nohup nice -4 /ddn/gs1/tools/set/R432/bin/Rscript --no-init-file --no-environ $USER_PROJDIR/beethoven/dev/refactor/inst/targets_start.R
