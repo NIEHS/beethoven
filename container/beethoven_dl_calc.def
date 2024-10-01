@@ -1,10 +1,6 @@
 BootStrap: docker
 From: rocker/geospatial:latest
 
-%files
-    /ddn/gs1/tools/set/R432/lib64/R/library /R_packages
-
-
 %post
     # Update package list
     apt-get update
@@ -27,7 +23,7 @@ From: rocker/geospatial:latest
     mkdir /input
     mkdir /opt/_targets
 
-    Rscript -e "install.packages(c('pak','targets','tarchetypes','crew','crew.cluster'))"
+    Rscript -e "install.packages(c('pak','targets','tarchetypes','crew','crew.cluster','testthat'))"
     Rscript -e "pak::pkg_install('NIEHS/amadeus')"
     Rscript -e "remotes::install_github('NIEHS/beethoven')"
 

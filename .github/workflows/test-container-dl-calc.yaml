@@ -1,0 +1,67 @@
+name: CI tests for download and calculate with Apptainer
+
+on:
+  push:
+    branches:
+      - [main, dev]
+  pull_request:
+    branches:
+      - [main, dev]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install Apptainer dependencies
+        run: |
+          sudo apt-get update && sudo apt-get install -y \
+          libseccomp-dev \
+          squashfs-tools \
+          cryptsetup \
+          wget
+
+      - name: Install Apptainer
+        run: |
+          wget https://github.com/apptainer/apptainer/releases/download/v1.1.0/apptainer-1.1.0.tar.gz
+          tar -xvf apptainer-1.1.0.tar.gz
+          cd apptainer-1.1.0
+          ./mconfig && make -C builddir && sudo make -C builddir install
+
+      - name: Restore .sif file from cache
+        id: cache-sif
+        uses: actions/cache@v3
+        with:
+          path: beethoven_dl_calc.sif
+          key: sif-cache-${{ hashFiles('../../containers/beethoven_dl_calc.def') }}
+          restore-keys: sif-cache-
+
+      - name: Build the Apptainer container (if cache miss)
+        if: steps.cache-sif.outputs.cache-hit != 'true'
+        run: |
+          apptainer build my_container.sif path/to/Singularity.def
+
+      - name: Cache the .sif file
+        if: steps.cache-sif.outputs.cache-hit != 'true'
+        uses: actions/cache@v3
+        with:
+          path: beethoven_dl_calc.sif
+          key: sif-cache-${{ hashFiles('../../containers/beethoven_dl_calc.def') }}
+
+      - name: Create run_dl_calc_tests.R dynamically
+        run: |
+          echo 'testthat::test_file("/mnt/tests/testthat/test_download.R")' > tests/testthat/run_dl_calc_tests.R
+          echo 'testthat::test_file("/mnt/tests/testthat/test_calculate.R")' >> tests/testthat/run_dl_calc_tests.R
+
+
+      - name: Run tests inside the container
+        run: |
+          apptainer exec \
+            --bind $PWD/inst:/pipeline \
+            --bind $PWD/input:/input \
+            --bind $PWD/_targets:/opt/_targets \
+            --bind $PWD:/mnt \
+            Rscript mnt/tests/testhat/run_dl_calc_tests.R
