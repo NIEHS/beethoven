@@ -1,4 +1,4 @@
-name: test coverage for download and calculate via Apptainer
+name: Test Coverage for Download and Calculate via Apptainer
 
 on:
   push:
@@ -16,6 +16,7 @@ jobs:
 
       - name: Create run_dl_calc_tests.R dynamically
         run: |
+          mkdir -p tests/testthat  # Ensure the directory exists
           echo 'testthat::test_file("tests/testthat/test_download.R")' > tests/testthat/run_dl_calc_tests.R
           echo 'testthat::test_file("tests/testthat/test_calculate.R")' >> tests/testthat/run_dl_calc_tests.R
 
@@ -39,7 +40,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: beethoven_dl_calc.sif
-          key: sif-cache-${{ runner.os }}-${{ hashFiles('beethoven_dl_calc.def') }}
+          key: sif-cache-${{ runner.os }}-${{ hashFiles('container/beethoven_dl_calc.def') }}
           restore-keys: |
             sif-cache-${{ runner.os }}-
 
@@ -53,9 +54,14 @@ jobs:
         uses: actions/cache@v3
         with:
           path: beethoven_dl_calc.sif
-          key: sif-cache-${{ runner.os }}-${{ hashFiles('beethoven_dl_calc.def') }}
+          key: sif-cache-${{ runner.os }}-${{ hashFiles('container/beethoven_dl_calc.def') }}
 
-
+      - name: Check if .sif file exists
+        run: |
+          if [ ! -f beethoven_dl_calc.sif ]; then
+            echo "Error: .sif file not found!"
+            exit 1
+          fi
 
       - name: Run R tests
         run: |
@@ -64,4 +70,4 @@ jobs:
             --bind $PWD/input:/input \
             --bind $PWD:/mnt \
             beethoven_dl_calc.sif \
-            Rscript /mnt/tests/testhat/run_dl_calc_tests.R
+            Rscript /mnt/tests/testthat/run_dl_calc_tests.R
