@@ -28,8 +28,7 @@ Sys.setenv(
 Sys.setenv("BTV_DOWNLOAD_PASS" = "TRUE")
 
 ################################################################################
-##############################      TARGETS      ###############################
-##### controllers
+##### controller script lines
 # nolint start
 script_lines <- paste0("
 #SBATCH --mail-type=END,FAIL
@@ -44,6 +43,8 @@ module load /ddn/gs1/tools/set/R432/bin/R
 )
 # nolint end
 
+################################################################################
+##### controllers
 default_controller <- crew.cluster::crew_controller_slurm(
   name = "default_controller",
   workers = 4,
@@ -58,16 +59,16 @@ calc_controller <- crew.cluster::crew_controller_slurm(
   workers = 32,
   seconds_idle = 30,
   slurm_partition = "geo",
-  slurm_memory_gigabytes_per_cpu = 8,
+  slurm_memory_gigabytes_per_cpu = 4,
   slurm_cpus_per_task = 2,
   script_lines = script_lines
 )
 nasa_controller <- crew.cluster::crew_controller_slurm(
   name = "nasa_controller",
-  workers = 16,
+  workers = 32,
   seconds_idle = 30,
   slurm_partition = "geo",
-  slurm_memory_gigabytes_per_cpu = 4,
+  slurm_memory_gigabytes_per_cpu = 8,
   slurm_cpus_per_task = 8,
   script_lines = script_lines
 )

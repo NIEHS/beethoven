@@ -542,3 +542,28 @@ par_narr <- function(domain, path, date, locs, nthreads = 24L) {
   return(res)
 
 }
+
+#' Identify MODIS files
+#' @description
+#' This function identifies the relevant MODIS file paths based on
+#' path, list of julian dates, and index. Designed to help set arguments
+#' for the `inject_modis_par` function.
+#' @keywords Calculation
+#' @param path A character vector specifying the path to the MODIS data.
+#' @param list A list of julian dates.
+#' @param index An integer specifying the index of the julian date to use.
+#' @return A character vector of MODIS file paths.
+#' @export
+query_modis_files <- function(path, list, index) {
+  grep_files <- list.files(
+    path,
+    full.names = TRUE,
+    recursive = TRUE
+  ) |> grep(
+    pattern = paste0(
+      "A", list[[index]], collapse = "|"
+    ),
+    value = TRUE
+  )
+  return(grep_files)
+}
