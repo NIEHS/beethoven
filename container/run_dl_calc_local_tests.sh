@@ -4,8 +4,8 @@
 #SBATCH --mem=128G
 #SBATCH --cpus-per-task=4
 #SBATCH --ntasks=16
-#SBATCH --output=slurm_messages/slurm-%j.out
-#SBATCH --error=slurm_messages/slurm-%j.err
+#SBATCH --output=../slurm_messages/slurm-%j.out
+#SBATCH --error=../slurm_messages/slurm-%j.err
 #SBATCH --mail-user=kyle.messier@nih.gov
 #SBATCH --mail-type=ALL
 
