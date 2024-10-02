@@ -194,8 +194,21 @@ target_calculate_fit <-
     ,
     targets::tar_target(
       dt_feat_calc_mod11,
-      command = reduce_list(list_feat_calc_mod11),
+      command = data.table::data.table(reduce_list(list_feat_calc_mod11)[[1]]),
       description = "data.table of MODIS [MOD11] features (fit)"
+    )
+    ,
+    ############################     MODIS/VIIRS     ###########################
+    targets::tar_target(
+      dt_feat_calc_nasa,
+      command = reduce_merge(
+        list(
+          dt_feat_calc_mod11
+          # dt_feat_calc_mod13
+        ),
+        by = NULL
+      ),
+      description = "data.table of MODIS/VIIRS features (fit)"
     )
     ,
     ###############################    GMTED     ###############################
@@ -253,14 +266,14 @@ target_calculate_fit <-
         post_calc_autojoin,
         list(
           dt_feat_calc_geoscf,
-          dt_feat_calc_narr
+          dt_feat_calc_narr,
           # dt_feat_calc_hms,
-          # dt_feat_calc_nasa
+          dt_feat_calc_nasa
         )
       ),
       resources = tar_resources(
         crew = tar_resources_crew(
-          controller = "calc_controller"
+          controller = "highmem_controller"
         )
       ),
       description = "data.table of all features (fit)"
