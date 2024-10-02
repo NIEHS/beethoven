@@ -3,16 +3,11 @@ library(tarchetypes)
 library(dplyr)
 library(crew)
 library(future)
-library(future.batchtools)
-library(dplyr)
-library(beethoven, lib.loc = "/ddn/gs1/tools/set/R432/lib64/R/library")
-library(tidymodels)
-library(bonsai)
-# library(torch)
+library(beethoven)
+library(amadeus)
 
-Sys.setenv("LD_LIBRARY_PATH" = paste("/ddn/gs1/set/R432/lib64/R/lib", Sys.getenv("LD_LIBRARY_PATH"), sep = ":"))
 
-# replacing yaml file.
+# targets store location corresponds to _targets/ in the root of the project
 tar_config_set(
   store = "/opt/_targets"
 )
@@ -72,19 +67,14 @@ my_fun_b <- function(x) {
 
 
 tar_option_set(
-  packages = c(
-    "beethoven", "amadeus", "chopin", "targets", "tarchetypes",
-    "data.table", "sf", "terra", "exactextractr",
-    #"crew", "crew.cluster", 
-    "tigris", "dplyr",
-    "future.batchtools", "qs", "collapse", "bonsai",
-    "tidymodels", "tune", "rsample", "torch", "brulee",
-    "glmnet", "xgboost",
-    "future", "future.apply", "future.callr", "callr",
-    "stars", "rlang", "parallelly"
-  ),
-  library = c("/ddn/gs1/tools/set/R432/lib64/R/library"),
-  repository = "local",
+  packages =
+    c( "amadeus", "targets", "tarchetypes",
+      "data.table", "sf", "terra", "exactextractr",
+       "dplyr", "qs", "callr",  "stars", "rlang"),
+  controller = crew_controller_group(geo_controller),
+  resources = tar_resources(
+    crew = tar_resources_crew(controller = "geo_controller")
+  ),  
   error = "abridge",
   memory = "transient",
   format = "qs",
