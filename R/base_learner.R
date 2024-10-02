@@ -506,6 +506,7 @@ assign_learner_cv <-
 #' training-test data.frames and a column of labels.
 #' @author Insang Song
 #' @importFrom rsample make_splits manual_rset
+#' @export
 convert_cv_index_rset <-
   function(
     cvindex,
