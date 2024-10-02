@@ -5,7 +5,7 @@ target_arglist <-
     targets::tar_target(
       chr_daterange,
       command = c("2018-01-01", "2018-07-31"),
-      description = "Date range ***** CRITIAL TARGET *****"
+      description = "Date range ***** CRITICAL TARGET *****"
     )
     ,
     targets::tar_target(
@@ -65,7 +65,8 @@ target_arglist <-
         num_extent = c(-126, -62, 22, 52),
         char_user_email = paste0(Sys.getenv("USER"), "@nih.gov"),
         export = FALSE,
-        char_input_dir = "/ddn/gs1/group/set/Projects/NRT-AP-Model/input"
+        # char_input_dir = "/ddn/gs1/group/set/Projects/NRT-AP-Model/input"
+        char_input_dir = "./input"
       ),
       description = "Set calculation arguments"
     )

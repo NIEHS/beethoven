@@ -197,7 +197,7 @@ target_calculate_fit <-
     #   ),
     #   pattern = map(chr_dates),
     #   iteration = "list",
-    #   cue = tar_cue(mode = "never"),
+    #   # cue = tar_cue(mode = "never"),
     #   description = "MODIS - MOD06 arguments"
     # )
     # ,
@@ -214,7 +214,7 @@ target_calculate_fit <-
     #       controller = "nasa_controller"
     #     )
     #   ),
-    #   cue = tar_cue(mode = "never"),
+    #   # cue = tar_cue(mode = "never"),
     #   description = "Calculate MODIS - MOD06 features (fit)"
     # )
     # ,
@@ -389,7 +389,7 @@ target_calculate_fit <-
     #   ),
     #   pattern = map(chr_dates),
     #   iteration = "list",
-    #   cue = tar_cue(mode = "never"),
+    #   # cue = tar_cue(mode = "never"),
     #   description = "MODIS - VIIRS arguments"
     # )
     # ,
@@ -406,7 +406,7 @@ target_calculate_fit <-
     #       controller = "nasa_controller"
     #     )
     #   ),
-    #   cue = tar_cue(mode = "never"),
+    #   # cue = tar_cue(mode = "never"),
     #   description = "Calculate MODIS - VIIRS features (fit)"
     # )
     # ,
@@ -424,7 +424,7 @@ target_calculate_fit <-
             list_feat_calc_mod09
             # list_feat_calc_viirs
           ),
-          function(x) data.table::data.table(reduce_list(x))
+          function(x) data.table::data.table(reduce_list(x)[[1]])
         ),
         by = NULL
       ),
@@ -475,14 +475,146 @@ target_calculate_fit <-
       description = "Calculate GMTED features (fit)"
     )
     ,
+    ###############################    NLCD      ###############################
+    # targets::tar_target(
+    #   chr_iter_calc_nlcd_years,
+    #   command = query_nlcd_years(unique(substr(chr_dates_julian, 1, 4))),
+    #   description = "NLCD years"
+    # )
+    # ,
+    targets::tar_target(
+      df_feat_calc_nlcd_params,
+      command = expand.grid(
+        year = c(2019, 2021),
+        radius = c(1000)# , 10000, 50000)
+      ) %>%
+        split(seq_len(nrow(.))),
+      iteration = "list",
+      description = "NLCD features"
+    )
+    ,
+    targets::tar_target(
+      list_feat_calc_nlcd,
+      command = inject_nlcd(
+        locs = sf_feat_proc_aqs_sites,
+        locs_id = arglist_common$char_siteid,
+        year = df_feat_calc_nlcd_params$year,
+        radius = df_feat_calc_nlcd_params$radius,
+        from = amadeus::process_nlcd(
+          path = paste0(arglist_common$char_input_dir, "/nlcd/data_files/"),
+          year = df_feat_calc_nlcd_params$year
+        ),
+        nthreads = 1,
+        mode = "exact",
+        max_cells = 3e7
+      ),
+      iteration = "list",
+      pattern = map(df_feat_calc_nlcd_params),
+      resources = tar_resources(
+        crew = tar_resources_crew(
+          controller = "calc_controller"
+        )
+      ),
+      description = "Calculate NLCD features (fit)"
+    )
+    ,
+    # targets::tar_target(
+    #   name = dt_feat_calc_nlcd,
+    #   command =
+    #     list_feat_calc_nlcd %>%
+    #       collapse::rowbind(fill = TRUE) %>%
+    #       collapse::funique() %>%
+    #       collapse::pivot(
+    #         ids = c(arglist_common$char_siteid, arglist_common$char_timeid),
+    #         values = names(.)[!names(.) %in% c(arglist_common$char_siteid, arglist_common$char_timeid)]
+    #       ) %>%
+    #       .[!is.na(.[["value"]]),] %>%
+    #       collapse::pivot(
+    #         ids = c("site_id", "time"),
+    #         values = c("value"),
+    #         how = "wider"
+    #       ),
+    #   description = "NLCD feature list (all dt) (fit)"
+    # )
+    # ,
+    ##############################    KOPPEN     ###################$###########
+    targets::tar_target(
+      dt_feat_calc_koppen,
+      command = inject_calculate(
+        covariate = "koppen",
+        locs = sf_feat_proc_aqs_sites,
+        injection = list(
+          path = paste0(
+            arglist_common$char_input_dir,
+            "/koppen_geiger",
+            "/data_files",
+            "/Beck_KG_V1_present_0p0083.tif"
+          ),
+          nthreads = 1,
+          covariate = "koppen"
+        )
+      ),
+      resources = tar_resources(
+        crew = tar_resources_crew(
+          controller = "calc_controller"
+        )
+      ),
+      description = "Calculate Koppen Geiger features (fit)"
+    )
+    ,
+    ############################    POPULATION     #############################
+    targets::tar_target(
+      chr_iter_calc_pop_radii,
+      command = c(1000, 10000, 50000),
+      description = "Population radii"
+    )
+    ,
+    targets::tar_target(
+      list_feat_calc_pop,
+      command = inject_calculate(
+        covariate = "population",
+        locs = sf_feat_proc_aqs_sites,
+        injection = list(
+          path = paste0(
+            arglist_common$char_input_dir,
+            "/sedac_population",
+            "/data_files",
+            "/gpw_v4_population_density_adjusted_to_",
+            "2015_unwpp_country_totals_rev11_2020_30_sec.tif"
+          ),
+          fun = "mean",
+          radius = chr_iter_calc_pop_radii,
+          nthreads = 1,
+          covariate = "population"
+        )
+      ),
+      pattern = map(chr_iter_calc_pop_radii),
+      iteration = "list",
+      resources = tar_resources(
+        crew = tar_resources_crew(
+          controller = "calc_controller"
+        )
+      ),
+      description = "Calculate population features (fit)"
+    )
+    ,
+    targets::tar_target(
+      dt_feat_calc_pop,
+      command = reduce_merge(
+        lapply(
+          list_feat_calc_pop,
+          function(x) data.table::data.table(reduce_list(x)[[1]])
+        ),
+        c("site_id", "time", "population_year")
+      ),
+      description = "data.table of population features (fit)"
+    )
+    ,
     ############################################################################
     ##### Covariates to calculate
-    # NLCD
     # TRI
     # NEI
     # ECOREGIONS
-    # KOPPEN
-    # POPULATION
     # GROADS
     ############################################################################
     targets::tar_target(

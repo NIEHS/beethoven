@@ -2,6 +2,7 @@
 ##############################      REFACTOR      ##############################
 ##### Development work to refactor the pipeline for non-injected targets.
 
+
 ################################################################################
 ##### libraries
 library(targets)
@@ -10,38 +11,39 @@ library(crew)
 library(crew.cluster)
 library(beethoven)
 library(dplyr)
-library(tidymodels)
-library(bonsai)
+# library(tidymodels)
+# library(bonsai)
 
 ################################################################################
 ##### environmental variables
-Sys.setenv(
-  "LD_LIBRARY_PATH" = paste(
-    "/ddn/gs1/tools/set/R432/lib64/R/lib",
-    Sys.getenv("LD_LIBRARY_PATH"),
-    sep = ":"
-  )
-)
+# Sys.setenv(
+#   "LD_LIBRARY_PATH" = paste(
+#     "/ddn/gs1/tools/set/R432/lib64/R/lib",
+#     Sys.getenv("LD_LIBRARY_PATH"),
+#     sep = ":"
+#   )
+# )
 
 ################################################################################
-##### skip download targets
+##### skip download targetsll
 Sys.setenv("BTV_DOWNLOAD_PASS" = "TRUE")
 
 ################################################################################
 ##### controller script lines
 # nolint start
-script_lines <- paste0("
-#SBATCH --mail-type=END,FAIL
-#SBATCH --mail-user=manwareme@nih.gov
+# script_lines <- paste0("
+# #SBATCH --mail-type=END,FAIL
+# #SBATCH --mail-user=manwareme@nih.gov
 
-export PATH=/ddn/gs1/tools/set/R432/bin/R:/ddn/gs1/tools/cuda11.8/bin:$PATH
-export LD_LIBRARY_PATH=/ddn/gs1/tools/set/R432/lib64/R/lib:/ddn/gs1/tools/cuda11.8/lib64:$LD_LIBRARY_PATH
-export R_LIBS_USER=/ddn/gs1/tools/set/R432/lib64/R/library:$R_LIBS_USER
+# export PATH=/ddn/gs1/tools/set/R432/bin/R:/ddn/gs1/tools/cuda11.8/bin:$PATH
+# export LD_LIBRARY_PATH=/ddn/gs1/tools/set/R432/lib64/R/lib:/ddn/gs1/tools/cuda11.8/lib64:$LD_LIBRARY_PATH
+# export R_LIBS_USER=/ddn/gs1/tools/set/R432/lib64/R/library:$R_LIBS_USER
 
-module load /ddn/gs1/tools/set/R432/bin/R
-"
-)
+# module load /ddn/gs1/tools/set/R432/bin/R
+# "
+# )
 # nolint end
+script_lines <- ""
 
 ################################################################################
 ##### controllers
@@ -65,11 +67,11 @@ calc_controller <- crew.cluster::crew_controller_slurm(
 )
 nasa_controller <- crew.cluster::crew_controller_slurm(
   name = "nasa_controller",
-  workers = 32,
+  workers = 16,
   seconds_idle = 30,
   slurm_partition = "geo",
   slurm_memory_gigabytes_per_cpu = 8,
-  slurm_cpus_per_task = 8,
+  slurm_cpus_per_task = 10,
   script_lines = script_lines
 )
 highmem_controller <- crew.cluster::crew_controller_slurm(
@@ -85,9 +87,10 @@ highmem_controller <- crew.cluster::crew_controller_slurm(
 
 ################################################################################
 ##### store
-targets::tar_config_set(
-  store = "/ddn/gs1/home/manwareme/beethoven/beethoven_refactor"
-)
+# targets::tar_config_set(
+#   store = "/ddn/gs1/home/manwareme/beethoven/beethoven_refactor"
+# )
+targets::tar_config_set("_targets")
 
 ################################################################################
 ##### options
@@ -96,7 +99,7 @@ targets::tar_option_set(
     "beethoven", "targets", "tarchetypes", "dplyr",
     "data.table", "sf", "crew", "crew.cluster"
   ),
-  library = c("/ddn/gs1/tools/set/R432/lib64/R/library"),
+  # library = c("/ddn/gs1/tools/set/R432/lib64/R/library"),
   repository = "local",
   error = "continue",
   memory = "transient",

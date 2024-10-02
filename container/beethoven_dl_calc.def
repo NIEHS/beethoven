@@ -18,17 +18,15 @@ From: rocker/geospatial:latest
     export LANG=en_US.UTF-8
     export LC_ALL=en_US.UTF-8
 
+    # Install SLURM client for job submission
+    apt-get install -y slurm-client
 
     mkdir /pipeline
     mkdir /input
     mkdir /opt/_targets
 
-    Rscript -e "install.packages(c('pak','targets','tarchetypes','crew','crew.cluster','testthat'))"
-    Rscript -e "pak::pkg_install('NIEHS/amadeus')"
-    Rscript -e "remotes::install_github('NIEHS/beethoven')"
-
-
-
+    Rscript -e "install.packages(c('pak','targets','tarchetypes','crew','crew.cluster','testthat','amadeus'))"
+    Rscript -e "pak::pak('NIEHS/beethoven@dev-0930')"
    
 %environment
     # Set locale for the container environment
