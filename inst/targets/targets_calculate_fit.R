@@ -32,21 +32,21 @@ target_calculate_fit <-
         chr_iter_calc_geoscf
       ),
       iteration = "list",
-      resources = tar_resources(
-        crew = tar_resources_crew(
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
           controller = "calc_controller"
         )
       ),
-      cue = tar_cue(mode = "never"),
+      cue = targets::tar_cue(mode = "never"),
       description = "Calculate GEOS-CF features (fit)"
     )
     ,
     targets::tar_target(
       dt_feat_calc_geoscf,
       command = reduce_merge(reduce_list(list_feat_calc_geoscf)),
-      resources = tar_resources(
-        crew = tar_resources_crew(
-          controller = "highmem_controller"
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "calc_controller"
         )
       ),
       description = "data.table of GEOS-CF features (fit)"
@@ -80,12 +80,12 @@ target_calculate_fit <-
         chr_iter_calc_narr
       ),
       iteration = "list",
-      resources = tar_resources(
-        crew = tar_resources_crew(
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
           controller = "calc_controller"
         )
       ),
-      cue = tar_cue(mode = "never"),
+      cue = targets::tar_cue(mode = "never"),
       description = "Calculate NARR features (fit)"
     )
     ,
@@ -98,9 +98,9 @@ target_calculate_fit <-
         ),
         by = c("site_id", "time")
       ),
-      resources = tar_resources(
-        crew = tar_resources_crew(
-          controller = "highmem_controller"
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "calc_controller"
         )
       ),
       description = "data.table of NARR features (fit)"
@@ -123,20 +123,20 @@ target_calculate_fit <-
     #   ),
     #   pattern = map(chr_dates),
     #   iteration = "list",
-    #   resources = tar_resources(
-    #     crew = tar_resources_crew(
+    #   resources = targets::tar_resources(
+    #     crew = targets::tar_resources_crew(
     #       controller = "calc_controller"
     #     )
     #   ),
-    #   cue = tar_cue(mode = "never"),
+    #   cue = targets::tar_cue(mode = "never"),
     #   description = "Calculate HMS features (fit)"
     # )
     # ,
     # targets::tar_target(
     #   dt_feat_calc_hms,
     #   command = reduce_merge(reduce_list(list_feat_calc_hms)),
-    #   resources = tar_resources(
-    #     crew = tar_resources_crew(
+    #   resources = targets::tar_resources(
+    #     crew = targets::tar_resources_crew(
     #       controller = "calc_controller"
     #     )
     #   ),
@@ -159,7 +159,7 @@ target_calculate_fit <-
       ),
       pattern = map(chr_dates),
       iteration = "list",
-      # cue = tar_cue(mode = "never"),
+      # cue = targets::tar_cue(mode = "never"),
       description = "MODIS - MOD11 arguments"
     )
     ,
@@ -171,12 +171,12 @@ target_calculate_fit <-
       ),
       pattern = map(list_args_calc_mod11),
       iteration = "list",
-      resources = tar_resources(
-        crew = tar_resources_crew(
-          controller = "nasa_controller"
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "calc_controller"
         )
       ),
-      # cue = tar_cue(mode = "never"),
+      # cue = targets::tar_cue(mode = "never"),
       description = "Calculate MODIS - MOD11 features (fit)"
     )
     ,
@@ -197,7 +197,7 @@ target_calculate_fit <-
     #   ),
     #   pattern = map(chr_dates),
     #   iteration = "list",
-    #   # cue = tar_cue(mode = "never"),
+    #   # cue = targets::tar_cue(mode = "never"),
     #   description = "MODIS - MOD06 arguments"
     # )
     # ,
@@ -209,12 +209,12 @@ target_calculate_fit <-
     #   ),
     #   pattern = map(list_args_calc_mod06),
     #   iteration = "list",
-    #   resources = tar_resources(
-    #     crew = tar_resources_crew(
-    #       controller = "nasa_controller"
+    #   resources = targets::tar_resources(
+    #     crew = targets::tar_resources_crew(
+    #       controller = "calc_controller"
     #     )
     #   ),
-    #   # cue = tar_cue(mode = "never"),
+    #   # cue = targets::tar_cue(mode = "never"),
     #   description = "Calculate MODIS - MOD06 features (fit)"
     # )
     # ,
@@ -234,7 +234,7 @@ target_calculate_fit <-
       ),
       pattern = map(chr_dates),
       iteration = "list",
-      # cue = tar_cue(mode = "never"),
+      # cue = targets::tar_cue(mode = "never"),
       description = "MODIS - MOD13 arguments"
     )
     ,
@@ -246,12 +246,12 @@ target_calculate_fit <-
       ),
       pattern = map(list_args_calc_mod13),
       iteration = "list",
-      resources = tar_resources(
-        crew = tar_resources_crew(
-          controller = "nasa_controller"
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "calc_controller"
         )
       ),
-      # cue = tar_cue(mode = "never"),
+      # cue = targets::tar_cue(mode = "never"),
       description = "Calculate MODIS - MOD13 features (fit)"
     )
     ,
@@ -271,7 +271,7 @@ target_calculate_fit <-
       ),
       pattern = map(chr_dates),
       iteration = "list",
-      # cue = tar_cue(mode = "never"),
+      # cue = targets::tar_cue(mode = "never"),
       description = "MODIS - MCD19_1km arguments"
     )
     ,
@@ -283,12 +283,12 @@ target_calculate_fit <-
       ),
       pattern = map(list_args_calc_mcd19_1km),
       iteration = "list",
-      resources = tar_resources(
-        crew = tar_resources_crew(
-          controller = "nasa_controller"
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "calc_controller"
         )
       ),
-      # cue = tar_cue(mode = "never"),
+      # cue = targets::tar_cue(mode = "never"),
       description = "Calculate MODIS - MCD19_1km features (fit)"
     )
     ,
@@ -311,7 +311,7 @@ target_calculate_fit <-
       ),
       pattern = map(chr_dates),
       iteration = "list",
-      # cue = tar_cue(mode = "never"),
+      # cue = targets::tar_cue(mode = "never"),
       description = "MODIS - MCD19_5km arguments"
     )
     ,
@@ -323,12 +323,12 @@ target_calculate_fit <-
       ),
       pattern = map(list_args_calc_mcd19_5km),
       iteration = "list",
-      resources = tar_resources(
-        crew = tar_resources_crew(
-          controller = "nasa_controller"
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "calc_controller"
         )
       ),
-      # cue = tar_cue(mode = "never"),
+      # cue = targets::tar_cue(mode = "never"),
       description = "Calculate MODIS - MCD19_5km features (fit)"
     )
     ,
@@ -351,7 +351,7 @@ target_calculate_fit <-
       ),
       pattern = map(chr_dates),
       iteration = "list",
-      # cue = tar_cue(mode = "never"),
+      # cue = targets::tar_cue(mode = "never"),
       description = "MODIS - MOD09 arguments"
     )
     ,
@@ -363,12 +363,12 @@ target_calculate_fit <-
       ),
       pattern = map(list_args_calc_mod09),
       iteration = "list",
-      resources = tar_resources(
-        crew = tar_resources_crew(
-          controller = "nasa_controller"
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "calc_controller"
         )
       ),
-      # cue = tar_cue(mode = "never"),
+      # cue = targets::tar_cue(mode = "never"),
       description = "Calculate MODIS - MOD09 features (fit)"
     )
     ,
@@ -389,7 +389,7 @@ target_calculate_fit <-
     #   ),
     #   pattern = map(chr_dates),
     #   iteration = "list",
-    #   # cue = tar_cue(mode = "never"),
+    #   # cue = targets::tar_cue(mode = "never"),
     #   description = "MODIS - VIIRS arguments"
     # )
     # ,
@@ -401,12 +401,12 @@ target_calculate_fit <-
     #   ),
     #   pattern = map(list_args_calc_viirs),
     #   iteration = "list",
-    #   resources = tar_resources(
-    #     crew = tar_resources_crew(
-    #       controller = "nasa_controller"
+    #   resources = targets::tar_resources(
+    #     crew = targets::tar_resources_crew(
+    #       controller = "calc_controller"
     #     )
     #   ),
-    #   # cue = tar_cue(mode = "never"),
+    #   # cue = targets::tar_cue(mode = "never"),
     #   description = "Calculate MODIS - VIIRS features (fit)"
     # )
     # ,
@@ -428,9 +428,9 @@ target_calculate_fit <-
         ),
         by = NULL
       ),
-      resources = tar_resources(
-        crew = tar_resources_crew(
-          controller = "highmem_controller"
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "calc_controller"
         )
       ),
       description = "data.table of MODIS/VIIRS features (fit)"
@@ -467,8 +467,8 @@ target_calculate_fit <-
       ),
       iteration = "list",
       pattern = cross(chr_iter_calc_gmted_vars, chr_iter_calc_gmted_radii),
-      resources = tar_resources(
-        crew = tar_resources_crew(
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
           controller = "calc_controller"
         )
       ),
@@ -516,8 +516,8 @@ target_calculate_fit <-
       ),
       iteration = "list",
       pattern = map(df_feat_calc_nlcd_params),
-      resources = tar_resources(
-        crew = tar_resources_crew(
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
           controller = "calc_controller"
         )
       ),
@@ -562,8 +562,8 @@ target_calculate_fit <-
           covariate = "koppen"
         )
       ),
-      resources = tar_resources(
-        crew = tar_resources_crew(
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
           controller = "calc_controller"
         )
       ),
@@ -598,8 +598,8 @@ target_calculate_fit <-
       ),
       pattern = map(chr_iter_calc_pop_radii),
       iteration = "list",
-      resources = tar_resources(
-        crew = tar_resources_crew(
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
           controller = "calc_controller"
         )
       ),
@@ -635,9 +635,9 @@ target_calculate_fit <-
           dt_feat_calc_nasa
         )
       ),
-      resources = tar_resources(
-        crew = tar_resources_crew(
-          controller = "highmem_controller"
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "calc_controller"
         )
       ),
       description = "data.table of all features (fit)"
@@ -716,8 +716,8 @@ target_calculate_fit <-
     #     nthreads = 1
     #   ),
     #   description = "Cumulative feature calculation",
-    #   resources = tar_resources(
-    #     crew = tar_resources_crew(
+    #   resources = targets::tar_resources(
+    #     crew = targets::tar_resources_crew(
     #       controller = "calc_controller"
     #     )
     #   )
@@ -735,8 +735,8 @@ target_calculate_fit <-
     #     nthreads_imputation = 1
     #   ),
     #   description = "Imputed features + lags",
-    #   resources = tar_resources(
-    #     crew = tar_resources_crew(
+    #   resources = targets::tar_resources(
+    #     crew = targets::tar_resources_crew(
     #       controller = "calc_controller"
     #     )
     #   )

@@ -5,12 +5,12 @@
 
 ################################################################################
 ##############################      LIBRARIES      #############################
-library(targets)
-library(tarchetypes)
-library(crew)
-library(crew.cluster)
-library(beethoven)
-library(dplyr)
+# library(targets)
+# library(tarchetypes)
+# library(crew)
+# library(crew.cluster)
+# library(beethoven)
+# library(dplyr)
 # library(tidymodels)
 # library(bonsai)
 
@@ -29,7 +29,7 @@ calc_controller <- crew::crew_controller_local(
 
 ################################################################################
 ##############################        STORE       ##############################
-targets::tar_config_set(store = "_targets")
+targets::tar_config_set(store = "_targets/")
 
 ################################################################################
 ##############################       OPTIONS      ##############################
@@ -46,7 +46,7 @@ targets::tar_option_set(
   deployment = "worker",
   garbage_collection = TRUE,
   seed = 202401L,
-  controller = crew_controller_group(
+  controller = crew::crew_controller_group(
     default_controller,
     calc_controller
   )
@@ -55,9 +55,9 @@ targets::tar_option_set(
 ################################################################################
 ###########################      SOURCE TARGETS      ###########################
 targets::tar_source("inst/targets/targets_arglist.R")
-# targets::tar_source("inst/targets/targets_aqs.R")
+targets::tar_source("inst/targets/targets_aqs.R")
 # targets::tar_source("inst/targets/targets_download.R")
-# targets::tar_source("inst/targets/targets_calculate_fit.R")
+targets::tar_source("inst/targets/targets_calculate_fit.R")
 
 ################################################################################
 ##############################      DOWNLOAD      ##############################
@@ -69,8 +69,8 @@ if (Sys.getenv("BTV_DOWNLOAD_PASS") == "TRUE") {
 ################################################################################
 ##############################      PIPELINE      ##############################
 list(
-  target_arglist
-  # target_aqs
+  target_arglist,
+  target_aqs,
   # target_download,
-  # target_calculate_fit
+  target_calculate_fit
 )

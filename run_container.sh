@@ -14,14 +14,6 @@
 apptainer exec \
   --bind $PWD/inst:/inst \
   --bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input \
-  --bind /ddn/gs1/home/manwareme/beethoven/_targets:/_targets \
   --bind $PWD:/mnt \
   beethoven_dl_calc.sif \
-  Rscript --no-init-file --no-environ /mnt/inst/targets/targets_start.R
-
-# apptainer exec \
-#   --bind $PWD/inst:/inst \
-#   --bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input \
-#   --bind /ddn/gs1/home/manwareme/beethoven/beethoven_refactor:/_targets \
-#   --bind $PWD:/mnt \
-#   beethoven_dl_calc.sif R
+  Rscript --no-init-file /mnt/inst/targets/targets_start.R

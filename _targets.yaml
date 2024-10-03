@@ -1,3 +1,2 @@
 main:
-  store: _targets
-  inherits: _targets
+  store: _targets/

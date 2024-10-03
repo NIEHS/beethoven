@@ -1,7 +1,5 @@
 ################################################################################
 ##############################      LIBPATHS       #############################
-print("Imported library paths:")
-.libPaths()
 .libPaths(
   grep(
     paste0("biotools|", Sys.getenv("USER")), .libPaths(),
@@ -9,7 +7,7 @@ print("Imported library paths:")
     invert = TRUE
   )
 )
-print("Set library paths:")
+cat("Active library paths:\n")
 .libPaths()
 
 ############################      RUN PIPELINE      ############################

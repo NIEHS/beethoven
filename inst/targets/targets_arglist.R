@@ -4,7 +4,7 @@ target_arglist <-
   list(
     targets::tar_target(
       chr_daterange,
-      command = c("2018-01-01", "2018-07-31"),
+      command = c("2018-01-01", "2018-01-31"),
       description = "Date range ***** CRITICAL TARGET *****"
     )
     ,
@@ -12,7 +12,7 @@ target_arglist <-
       list_dates,
       command = beethoven::split_dates(
         dates = chr_daterange,
-        n = 50
+        n = 10
       ),
       description = "Split date range into list"
     )
@@ -65,7 +65,7 @@ target_arglist <-
         num_extent = c(-126, -62, 22, 52),
         char_user_email = paste0(Sys.getenv("USER"), "@nih.gov"),
         export = FALSE,
-        char_input_dir = "input/"
+        char_input_dir = "/input"
       ),
       description = "Set calculation arguments"
     )
