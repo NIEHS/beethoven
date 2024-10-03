@@ -1,2 +1,3 @@
 main:
-  store: /ddn/gs1/home/manwareme/beethoven/beethoven_targets
+  store: _targets
+  inherits: _targets

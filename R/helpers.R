@@ -1,7 +1,6 @@
-# srun --partition=geo --cpus-per-task=1 --pty top
-# scontrol show node gn040815 # geo cluster
-# scontrol show node cn040827 # hihgmem cluster
-# sacct -j 303493 --format=JobID,Elapsed,TotalCPU,MaxRSS
+# Helper functions for checking SLURM jobs and nodes
+
+# nocov start
 job <- function(job_id) {
   system(
     paste0("sacct -j ", job_id, " --format=JobID,Elapsed,TotalCPU,MaxRSS")
@@ -32,3 +31,4 @@ cancel <- function() {
 batch <- function(file = "run.sh") {
   system(paste0("sbatch ", file))
 }
+# nocov end

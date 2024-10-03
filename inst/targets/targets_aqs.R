@@ -2,6 +2,19 @@
 ##### Import US EPA AQS data
 target_aqs <-
   list(
+    targets::tar_target(
+      aqs_files,
+      command = list.files(
+        path = file.path(
+          arglist_common$char_input_dir,
+          "aqs",
+          "data_files"
+        ),
+        pattern = "daily_88101_[0-9]{4}.csv",
+        full.names = TRUE
+      )
+    )
+    ,
     # targets::tar_target(
     #   sf_feat_proc_aqs_sites_REAL,
     #   read_locs(
@@ -19,6 +32,11 @@ target_aqs <-
     #     mode = "location",
     #     return_format = "sf"
     #   ),
+    #   # resources = tar_resources(
+    #   #   crew = tar_resources_crew(
+    #   #     controller = "calc_controller"
+    #   #   )
+    #   # ),
     #   description = "AQS sites"
     # )
     # ,

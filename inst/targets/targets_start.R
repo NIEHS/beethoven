@@ -1,26 +1,16 @@
-library(beethoven, lib.loc = "/ddn/gs1/tools/set/R432/lib64/R/library")
-library(targets)
-# assume that the working directory is beethoven git repository directory
-# only runs after package deployment
-# file.copy(
-#   from = system.file("targets", "_targets.R", package = "beethoven"),
-#   to = "_targets.R"
-# )
-
-tar_make_future(
-  workers = 16
+################################################################################
+##############################      LIBPATHS       #############################
+print("Imported library paths:")
+.libPaths()
+.libPaths(
+  grep(
+    paste0("biotools|", Sys.getenv("USER")), .libPaths(),
+    value = TRUE,
+    invert = TRUE
+  )
 )
-# TODO: should find a way of auto-invalidate feat_calc_(modis|viirs|geoscf)
-#     when the date range changes in the configuration.
-# manual example includes:
-# targets::tar_invalidate(
-#   matches("feat_calc_(modis|viirs|geoscf)")
-# )
+print("Set library paths:")
+.libPaths()
 
-# selective execution, mix with time components
-# status saving with timestamp? editable log/config file?
-# tar_make_future(
-#   names = contains("download")
-# )
-
-# tar_visnetwork(targets_only = TRUE)
+############################      RUN PIPELINE      ############################
+targets::tar_make()
