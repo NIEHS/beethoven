@@ -2,35 +2,25 @@
 ##### Calculate covariates at US EPA AQS sites
 target_calculate_fit <-
   list(
-    ###############################   GEOS-CF   ################################
+    ###########################         GEOS         ###########################
     targets::tar_target(
-      chr_iter_calc_geoscf,
-      command = c(
-        "aqc_tavg_1hr_g1440x721_v1",
-        "chm_tavg_1hr_g1440x721_v1"
-      ),
-      iteration = "vector",
-      description = "GEOS-CF features"
-    )
-    ,
-    targets::tar_target(
-      list_feat_calc_geoscf,
-      command = inject_geos(
-        locs = sf_feat_proc_aqs_sites,
-        injection = list(
-          date = fl_dates(list_dates[[chr_dates]]),
-          path = paste0(
-            arglist_common$char_input_dir,
-            "/geos/",
-            chr_iter_calc_geoscf
-          ),
-          nthreads = 1
+      list_feat_calc_geos,
+      command = {
+        download_geos
+        inject_geos(
+          locs = sf_feat_proc_aqs_sites,
+          injection = list(
+            date = fl_dates(list_dates[[chr_dates]]),
+            path = paste0(
+              arglist_common$char_input_dir,
+              "/geos/",
+              chr_iter_calc_geos
+            ),
+            nthreads = 1
+          )
         )
-      ),
-      pattern = cross(
-        chr_dates,
-        chr_iter_calc_geoscf
-      ),
+      },
+      pattern = cross(chr_iter_calc_geos, chr_dates),
       iteration = "list",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(
@@ -42,8 +32,8 @@ target_calculate_fit <-
     )
     ,
     targets::tar_target(
-      dt_feat_calc_geoscf,
-      command = reduce_merge(reduce_list(list_feat_calc_geoscf)),
+      dt_feat_calc_geos,
+      command = reduce_merge(reduce_list(list_feat_calc_geos)),
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(
           controller = "calc_controller"
@@ -52,29 +42,19 @@ target_calculate_fit <-
       description = "data.table of GEOS-CF features (fit)"
     )
     ,
-    ###############################    NARR     ################################
-    targets::tar_target(
-      chr_iter_calc_narr,
-      command = c(
-        "air.sfc", "albedo", "apcp"
-        # "air.sfc", "albedo", "apcp", "dswrf", "evap", "hcdc", "hpbl",
-        # "lcdc", "lhtfl", "mcdc", "omega", "pr_wtr", "prate", "pres.sfc",
-        # "shtfl", "shum", "snowc", "soilm", "tcdc", "ulwrf.sfc", "uwnd.10m",
-        # "vis", "vwnd.10m", "weasd"
-      ),
-      iteration = "vector",
-      description = "NARR features"
-    )
-    ,
+    ###########################         NARR         ###########################
     targets::tar_target(
       list_feat_calc_narr,
-      command = par_narr(
-        domain = chr_iter_calc_narr,
-        path = paste0(arglist_common$char_input_dir, "/narr/"),
-        date = fl_dates(list_dates[[chr_dates]]),
-        locs = sf_feat_proc_aqs_sites,
-        nthreads = 1
-      ),
+      command = {
+        download_narr
+        par_narr(
+          domain = chr_iter_calc_narr,
+          path = paste0(arglist_common$char_input_dir, "/narr/"),
+          date = fl_dates(list_dates[[chr_dates]]),
+          locs = sf_feat_proc_aqs_sites,
+          nthreads = 1
+        )
+      },
       pattern = cross(
         chr_dates,
         chr_iter_calc_narr
@@ -106,60 +86,72 @@ target_calculate_fit <-
       description = "data.table of NARR features (fit)"
     )
     ,
-    ###############################     HMS     ################################
-    # targets::tar_target(
-    #   list_feat_calc_hms,
-    #   command = inject_calculate(
-    #     covariate = "hms",
-    #     locs = sf_feat_proc_aqs_sites,
-    #     injection = list(
-    #       path = paste0(
-    #         arglist_common$char_input_dir,
-    #         "/HMS_Smoke/data_files/"
-    #       ),
-    #       date = fl_dates(list_dates[[chr_dates]]),
-    #       covariate = "hms"
-    #     )
-    #   ),
-    #   pattern = map(chr_dates),
-    #   iteration = "list",
-    #   resources = targets::tar_resources(
-    #     crew = targets::tar_resources_crew(
-    #       controller = "calc_controller"
-    #     )
-    #   ),
-    #   cue = targets::tar_cue(mode = "never"),
-    #   description = "Calculate HMS features (fit)"
-    # )
-    # ,
-    # targets::tar_target(
-    #   dt_feat_calc_hms,
-    #   command = reduce_merge(reduce_list(list_feat_calc_hms)),
-    #   resources = targets::tar_resources(
-    #     crew = targets::tar_resources_crew(
-    #       controller = "calc_controller"
-    #     )
-    #   ),
-    #   description = "data.table of HMS features (fit)"
-    # )
-    # ,
-    ############################    MODIS - MOD11     ##########################
+    ###########################         HMS          ###########################
     targets::tar_target(
-      list_args_calc_mod11,
-      command = list(
-        from = query_modis_files(
-          paste0(arglist_common$char_input_dir, "/modis/raw/61/MOD11A1/"),
-          list_dates_julian,
-          chr_dates
-        ),
-        name_covariates = c("MOD_SFCTD_0_", "MOD_SFCTN_0_"),
-        subdataset = "^LST_",
-        nthreads = 1,
-        radius = c(1000, 10000, 50000)
-      ),
+      list_feat_calc_hms,
+      command = {
+        download_hms
+        inject_calculate(
+          covariate = "hms",
+          locs = sf_feat_proc_aqs_sites,
+          injection = list(
+            path = paste0(
+              arglist_common$char_input_dir,
+              "/hms/data_files/"
+            ),
+            date = fl_dates(list_dates[[chr_dates]]),
+            covariate = "hms"
+          )
+        )
+      },
       pattern = map(chr_dates),
       iteration = "list",
-      # cue = targets::tar_cue(mode = "never"),
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "calc_controller"
+        )
+      ),
+      cue = targets::tar_cue(mode = "never"),
+      description = "Calculate HMS features (fit)"
+    )
+    ,
+    targets::tar_target(
+      dt_feat_calc_hms,
+      command = reduce_merge(
+        lapply(
+          list(list_feat_calc_hms),
+          function(x) reduce_merge(reduce_list(lapply(x, "[[", 1)))
+        ),
+        by = c("site_id", "time")
+      ),
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "calc_controller"
+        )
+      ),
+      description = "data.table of HMS features (fit)"
+    )
+    ,
+    ###########################       MODIS - MOD11       ######################
+    targets::tar_target(
+      list_args_calc_mod11,
+      command = {
+        # download_mod11
+        list(
+          from = query_modis_files(
+            paste0(arglist_common$char_input_dir, "/modis/raw/61/MOD11A1/"),
+            list_dates_julian,
+            chr_dates
+          ),
+          name_covariates = c("MOD_SFCTD_0_", "MOD_SFCTN_0_"),
+          subdataset = "^LST_",
+          nthreads = 1,
+          radius = chr_iter_radii
+        )
+      },
+      pattern = map(chr_dates),
+      iteration = "list",
+      cue = targets::tar_cue(mode = "never"),
       description = "MODIS - MOD11 arguments"
     )
     ,
@@ -176,65 +168,71 @@ target_calculate_fit <-
           controller = "calc_controller"
         )
       ),
-      # cue = targets::tar_cue(mode = "never"),
+      cue = targets::tar_cue(mode = "never"),
       description = "Calculate MODIS - MOD11 features (fit)"
     )
     ,
-    ############################    MODIS - MOD06     ##########################
-    # targets::tar_target(
-    #   list_args_calc_mod06,
-    #   command = list(
-    #     from = query_modis_files(
-    #       paste0(arglist_common$char_input_dir, "/modis/raw/61/MOD06_L2/"),
-    #       list_dates_julian,
-    #       chr_dates
-    #     ),
-    #     name_covariates = c("MOD_CLCVD_0_", "MOD_CLCVN_0_"),
-    #     subdataset = c("Cloud_Fraction_Day", "Cloud_Fraction_Night"),
-    #     nthreads = 1,
-    #     preprocess = amadeus::process_modis_swath,
-    #     radius = c(1000, 10000, 50000)
-    #   ),
-    #   pattern = map(chr_dates),
-    #   iteration = "list",
-    #   # cue = targets::tar_cue(mode = "never"),
-    #   description = "MODIS - MOD06 arguments"
-    # )
-    # ,
-    # targets::tar_target(
-    #   list_feat_calc_mod06,
-    #   command = inject_modis_par(
-    #     locs = sf_feat_proc_aqs_sites,
-    #     injection = list_args_calc_mod06
-    #   ),
-    #   pattern = map(list_args_calc_mod06),
-    #   iteration = "list",
-    #   resources = targets::tar_resources(
-    #     crew = targets::tar_resources_crew(
-    #       controller = "calc_controller"
-    #     )
-    #   ),
-    #   # cue = targets::tar_cue(mode = "never"),
-    #   description = "Calculate MODIS - MOD06 features (fit)"
-    # )
-    # ,
-    ############################    MODIS - MOD13     ##########################
+    ###########################       MODIS - MOD06       ######################
     targets::tar_target(
-      list_args_calc_mod13,
-      command = list(
-        from = query_modis_files(
-          paste0(arglist_common$char_input_dir, "/modis/raw/61/MOD13A2/"),
-          list_dates_julian,
-          chr_dates
-        ),
-        name_covariates = "MOD_NDVIV_0_",
-        subdataset = "(NDVI)",
-        nthreads = 1,
-        radius = c(1000, 10000, 50000)
-      ),
+      list_args_calc_mod06,
+      command = {
+        # download_mod06
+        list(
+          from = query_modis_files(
+            paste0(arglist_common$char_input_dir, "/modis/raw/61/MOD06_L2/"),
+            list_dates_julian,
+            chr_dates
+          ),
+          name_covariates = c("MOD_CLCVD_0_", "MOD_CLCVN_0_"),
+          subdataset = c("Cloud_Fraction_Day", "Cloud_Fraction_Night"),
+          nthreads = 1,
+          preprocess = amadeus::process_modis_swath,
+          radius = chr_iter_radii
+        )
+      },
       pattern = map(chr_dates),
       iteration = "list",
-      # cue = targets::tar_cue(mode = "never"),
+      cue = targets::tar_cue(mode = "never"),
+      description = "MODIS - MOD06 arguments"
+    )
+    ,
+    targets::tar_target(
+      list_feat_calc_mod06,
+      command = inject_modis_par(
+        locs = sf_feat_proc_aqs_sites,
+        injection = list_args_calc_mod06
+      ),
+      pattern = map(list_args_calc_mod06),
+      iteration = "list",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "calc_controller"
+        )
+      ),
+      cue = targets::tar_cue(mode = "never"),
+      description = "Calculate MODIS - MOD06 features (fit)"
+    )
+    ,
+    ###########################       MODIS - MOD13       ######################
+    targets::tar_target(
+      list_args_calc_mod13,
+      command = {
+        # download_mod13
+        list(
+          from = query_modis_files(
+            paste0(arglist_common$char_input_dir, "/modis/raw/61/MOD13A2/"),
+            list_dates_julian,
+            chr_dates
+          ),
+          name_covariates = "MOD_NDVIV_0_",
+          subdataset = "(NDVI)",
+          nthreads = 1,
+          radius = chr_iter_radii
+        )
+      },
+      pattern = map(chr_dates),
+      iteration = "list",
+      cue = targets::tar_cue(mode = "never"),
       description = "MODIS - MOD13 arguments"
     )
     ,
@@ -251,27 +249,30 @@ target_calculate_fit <-
           controller = "calc_controller"
         )
       ),
-      # cue = targets::tar_cue(mode = "never"),
+      cue = targets::tar_cue(mode = "never"),
       description = "Calculate MODIS - MOD13 features (fit)"
     )
     ,
-    ############################    MODIS - MCD19_1km     ######################
+    ###########################     MODIS - MCD19_1km     ######################
     targets::tar_target(
       list_args_calc_mcd19_1km,
-      command = list(
-        from = query_modis_files(
-          paste0(arglist_common$char_input_dir, "/modis/raw/61/MCD19A2/"),
-          list_dates_julian,
-          chr_dates
-        ),
-        name_covariates = c("MOD_AD4TA_0_", "MOD_AD5TA_0_"),
-        subdataset = "^Optical_Depth",
-        nthreads = 1,
-        radius = c(1000, 10000, 50000)
-      ),
+      command = {
+        # download_mcd19
+        list(
+          from = query_modis_files(
+            paste0(arglist_common$char_input_dir, "/modis/raw/61/MCD19A2/"),
+            list_dates_julian,
+            chr_dates
+          ),
+          name_covariates = c("MOD_AD4TA_0_", "MOD_AD5TA_0_"),
+          subdataset = "^Optical_Depth",
+          nthreads = 1,
+          radius = chr_iter_radii
+        )
+      },
       pattern = map(chr_dates),
       iteration = "list",
-      # cue = targets::tar_cue(mode = "never"),
+      cue = targets::tar_cue(mode = "never"),
       description = "MODIS - MCD19_1km arguments"
     )
     ,
@@ -288,30 +289,33 @@ target_calculate_fit <-
           controller = "calc_controller"
         )
       ),
-      # cue = targets::tar_cue(mode = "never"),
+      cue = targets::tar_cue(mode = "never"),
       description = "Calculate MODIS - MCD19_1km features (fit)"
     )
     ,
-    ############################    MODIS - MCD19_5km     ######################
+    ###########################     MODIS - MCD19_5km     ######################
     targets::tar_target(
       list_args_calc_mcd19_5km,
-      command = list(
-        from = query_modis_files(
-          paste0(arglist_common$char_input_dir, "/modis/raw/61/MCD19A2/"),
-          list_dates_julian,
-          chr_dates
-        ),
-        name_covariates = c(
-          "MOD_CSZAN_0_", "MOD_CVZAN_0_", "MOD_RAZAN_0_",
-          "MOD_SCTAN_0_", "MOD_GLNAN_0_"
-        ),
-        subdataset = "cos|RelAZ|Angle",
-        nthreads = 1,
-        radius = c(1000, 10000, 50000)
-      ),
+      command = {
+        # download_mcd19
+        list(
+          from = query_modis_files(
+            paste0(arglist_common$char_input_dir, "/modis/raw/61/MCD19A2/"),
+            list_dates_julian,
+            chr_dates
+          ),
+          name_covariates = c(
+            "MOD_CSZAN_0_", "MOD_CVZAN_0_", "MOD_RAZAN_0_",
+            "MOD_SCTAN_0_", "MOD_GLNAN_0_"
+          ),
+          subdataset = "cos|RelAZ|Angle",
+          nthreads = 1,
+          radius = chr_iter_radii
+        )
+      },
       pattern = map(chr_dates),
       iteration = "list",
-      # cue = targets::tar_cue(mode = "never"),
+      cue = targets::tar_cue(mode = "never"),
       description = "MODIS - MCD19_5km arguments"
     )
     ,
@@ -328,30 +332,33 @@ target_calculate_fit <-
           controller = "calc_controller"
         )
       ),
-      # cue = targets::tar_cue(mode = "never"),
+      cue = targets::tar_cue(mode = "never"),
       description = "Calculate MODIS - MCD19_5km features (fit)"
     )
     ,
-    ############################    MODIS - MOD09     ##########################
+    ###########################       MODIS - MOD09       ######################
     targets::tar_target(
       list_args_calc_mod09,
-      command = list(
-        from = query_modis_files(
-          paste0(arglist_common$char_input_dir, "/modis/raw/61/MOD09GA/"),
-          list_dates_julian,
-          chr_dates
-        ),
-        name_covariates = c(
-          "MOD_SFCRF_1_", "MOD_SFCRF_2_", "MOD_SFCRF_3_", "MOD_SFCRF_4_",
-          "MOD_SFCRF_5_", "MOD_SFCRF_6_", "MOD_SFCRF_7_"
-        ),
-        subdataset = "^sur_refl_",
-        nthreads = 1,
-        radius = c(1000, 10000, 50000)
-      ),
+      command = {
+        # download_mod09
+        list(
+          from = query_modis_files(
+            paste0(arglist_common$char_input_dir, "/modis/raw/61/MOD09GA/"),
+            list_dates_julian,
+            chr_dates
+          ),
+          name_covariates = c(
+            "MOD_SFCRF_1_", "MOD_SFCRF_2_", "MOD_SFCRF_3_", "MOD_SFCRF_4_",
+            "MOD_SFCRF_5_", "MOD_SFCRF_6_", "MOD_SFCRF_7_"
+          ),
+          subdataset = "^sur_refl_",
+          nthreads = 1,
+          radius = chr_iter_radii
+        )
+      },
       pattern = map(chr_dates),
       iteration = "list",
-      # cue = targets::tar_cue(mode = "never"),
+      cue = targets::tar_cue(mode = "never"),
       description = "MODIS - MOD09 arguments"
     )
     ,
@@ -368,61 +375,64 @@ target_calculate_fit <-
           controller = "calc_controller"
         )
       ),
-      # cue = targets::tar_cue(mode = "never"),
+      cue = targets::tar_cue(mode = "never"),
       description = "Calculate MODIS - MOD09 features (fit)"
     )
     ,
-    ############################    MODIS - VIIRS     ##########################
-    # targets::tar_target(
-    #   list_args_calc_viirs,
-    #   command = list(
-    #     from = query_modis_files(
-    #       paste0(arglist_common$char_input_dir, "/modis/raw/5000/VNP46A2/"),
-    #       list_dates_julian,
-    #       chr_dates
-    #     ),
-    #     name_covariates = "MOD_LGHTN_0_",
-    #     subdataset = 3,
-    #     preprocess = amadeus::process_blackmarble,
-    #     nthreads = 1,
-    #     radius = c(1000, 10000, 50000)
-    #   ),
-    #   pattern = map(chr_dates),
-    #   iteration = "list",
-    #   # cue = targets::tar_cue(mode = "never"),
-    #   description = "MODIS - VIIRS arguments"
-    # )
-    # ,
-    # targets::tar_target(
-    #   list_feat_calc_viirs,
-    #   command = inject_modis_par(
-    #     locs = sf_feat_proc_aqs_sites,
-    #     injection = list_args_calc_viirs
-    #   ),
-    #   pattern = map(list_args_calc_viirs),
-    #   iteration = "list",
-    #   resources = targets::tar_resources(
-    #     crew = targets::tar_resources_crew(
-    #       controller = "calc_controller"
-    #     )
-    #   ),
-    #   # cue = targets::tar_cue(mode = "never"),
-    #   description = "Calculate MODIS - VIIRS features (fit)"
-    # )
-    # ,
-    ############################     MODIS/VIIRS     ###########################
+    ###########################       MODIS - VIIRS       ######################
+    targets::tar_target(
+      list_args_calc_viirs,
+      command = {
+        # download_viirs
+        list(
+          from = query_modis_files(
+            paste0(arglist_common$char_input_dir, "/modis/raw/5000/VNP46A2/"),
+            list_dates_julian,
+            chr_dates
+          ),
+          name_covariates = "MOD_LGHTN_0_",
+          subdataset = 3,
+          preprocess = amadeus::process_blackmarble,
+          nthreads = 1,
+          radius = chr_iter_radii
+        )
+      },
+      pattern = map(chr_dates),
+      iteration = "list",
+      cue = targets::tar_cue(mode = "never"),
+      description = "MODIS - VIIRS arguments"
+    )
+    ,
+    targets::tar_target(
+      list_feat_calc_viirs,
+      command = inject_modis_par(
+        locs = sf_feat_proc_aqs_sites,
+        injection = list_args_calc_viirs
+      ),
+      pattern = map(list_args_calc_viirs),
+      iteration = "list",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "calc_controller"
+        )
+      ),
+      cue = targets::tar_cue(mode = "never"),
+      description = "Calculate MODIS - VIIRS features (fit)"
+    )
+    ,
+    ###########################        MODIS/VIIRS        ######################
     targets::tar_target(
       dt_feat_calc_nasa,
       command = reduce_merge(
         lapply(
           list(
             list_feat_calc_mod11,
-            # list_feat_calc_mod06,
+            list_feat_calc_mod06,
             list_feat_calc_mod13,
             list_feat_calc_mcd19_1km,
             list_feat_calc_mcd19_5km,
-            list_feat_calc_mod09
-            # list_feat_calc_viirs
+            list_feat_calc_mod09,
+            list_feat_calc_viirs
           ),
           function(x) data.table::data.table(reduce_list(x)[[1]])
         ),
@@ -436,18 +446,7 @@ target_calculate_fit <-
       description = "data.table of MODIS/VIIRS features (fit)"
     )
     ,
-    ###############################    GMTED     ###############################
-    targets::tar_target(
-      chr_iter_calc_gmted_vars,
-      command = c(
-        "Breakline Emphasis", "Systematic Subsample",
-        "Median Statistic", "Minimum Statistic",
-        "Mean Statistic", "Maximum Statistic",
-        "Standard Deviation Statistic"
-      ),
-      description = "GMTED features"
-    )
-    ,
+    ###########################         GMTED        ###########################
     targets::tar_target(
       chr_iter_calc_gmted_radii,
       command = c(0, 1e3, 1e4, 5e4),
@@ -456,15 +455,18 @@ target_calculate_fit <-
     ,
     targets::tar_target(
       list_feat_calc_gmted,
-      command = inject_gmted(
-        locs = sf_feat_proc_aqs_sites,
-        variable = chr_iter_calc_gmted_vars,
-        radii = chr_iter_calc_gmted_radii,
-        injection = list(
-          path = paste0(arglist_common$char_input_dir, "/gmted/data_files"),
-          covariate = "gmted"
+      command = {
+        download_gmted
+        inject_gmted(
+          locs = sf_feat_proc_aqs_sites,
+          variable = chr_iter_calc_gmted_vars,
+          radii = chr_iter_calc_gmted_radii,
+          injection = list(
+            path = paste0(arglist_common$char_input_dir, "/gmted/data_files"),
+            covariate = "gmted"
+          )
         )
-      ),
+      },
       iteration = "list",
       pattern = cross(chr_iter_calc_gmted_vars, chr_iter_calc_gmted_radii),
       resources = targets::tar_resources(
@@ -481,18 +483,12 @@ target_calculate_fit <-
       description = "data.table of GMTED features (fit)"
     )
     ,
-    ###############################    NLCD      ###############################
-    # targets::tar_target(
-    #   chr_iter_calc_nlcd_years,
-    #   command = query_nlcd_years(unique(substr(chr_dates_julian, 1, 4))),
-    #   description = "NLCD years"
-    # )
-    # ,
+    ###########################         NLCD         ###########################
     targets::tar_target(
       df_feat_calc_nlcd_params,
       command = expand.grid(
-        year = c(2019, 2021),
-        radius = c(1000, 10000)# , 50000)
+        year = chr_iter_calc_nlcd,
+        radius = chr_iter_radii
       ) %>%
         split(seq_len(nrow(.))),
       iteration = "list",
@@ -501,19 +497,22 @@ target_calculate_fit <-
     ,
     targets::tar_target(
       list_feat_calc_nlcd,
-      command = inject_nlcd(
-        locs = sf_feat_proc_aqs_sites,
-        locs_id = arglist_common$char_siteid,
-        year = df_feat_calc_nlcd_params$year,
-        radius = df_feat_calc_nlcd_params$radius,
-        from = amadeus::process_nlcd(
-          path = paste0(arglist_common$char_input_dir, "/nlcd/data_files/"),
-          year = df_feat_calc_nlcd_params$year
-        ),
-        nthreads = 1,
-        mode = "exact",
-        max_cells = 3e7
-      ),
+      command = {
+        download_nlcd
+        inject_nlcd(
+          locs = sf_feat_proc_aqs_sites,
+          locs_id = arglist_common$char_siteid,
+          year = df_feat_calc_nlcd_params$year,
+          radius = df_feat_calc_nlcd_params$radius,
+          from = amadeus::process_nlcd(
+            path = paste0(arglist_common$char_input_dir, "/nlcd/data_files/"),
+            year = df_feat_calc_nlcd_params$year
+          ),
+          nthreads = 1,
+          mode = "exact",
+          max_cells = 3e7
+        )
+      },
       iteration = "list",
       pattern = map(df_feat_calc_nlcd_params),
       resources = targets::tar_resources(
@@ -545,23 +544,26 @@ target_calculate_fit <-
       description = "NLCD feature list (all dt) (fit)"
     )
     ,
-    ##############################    KOPPEN     ###################$###########
+    ###########################        KOPPEN        ###########################
     targets::tar_target(
       dt_feat_calc_koppen,
-      command = inject_calculate(
-        covariate = "koppen",
-        locs = sf_feat_proc_aqs_sites,
-        injection = list(
-          path = paste0(
-            arglist_common$char_input_dir,
-            "/koppen_geiger",
-            "/data_files",
-            "/Beck_KG_V1_present_0p0083.tif"
-          ),
-          nthreads = 1,
-          covariate = "koppen"
+      command = {
+        download_koppen
+        inject_calculate(
+          covariate = "koppen",
+          locs = sf_feat_proc_aqs_sites,
+          injection = list(
+            path = paste0(
+              arglist_common$char_input_dir,
+              "/koppen_geiger",
+              "/data_files",
+              "/Beck_KG_V1_present_0p0083.tif"
+            ),
+            nthreads = 1,
+            covariate = "koppen"
+          )
         )
-      ),
+      },
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(
           controller = "calc_controller"
@@ -570,33 +572,30 @@ target_calculate_fit <-
       description = "Calculate Koppen Geiger features (fit)"
     )
     ,
-    ############################    POPULATION     #############################
-    targets::tar_target(
-      chr_iter_calc_pop_radii,
-      command = c(1000, 10000, 50000),
-      description = "Population radii"
-    )
-    ,
+    ###########################      POPULATION      ###########################
     targets::tar_target(
       list_feat_calc_pop,
-      command = inject_calculate(
-        covariate = "population",
-        locs = sf_feat_proc_aqs_sites,
-        injection = list(
-          path = paste0(
-            arglist_common$char_input_dir,
-            "/sedac_population",
-            "/data_files",
-            "/gpw_v4_population_density_adjusted_to_",
-            "2015_unwpp_country_totals_rev11_2020_30_sec.tif"
-          ),
-          fun = "mean",
-          radius = chr_iter_calc_pop_radii,
-          nthreads = 1,
-          covariate = "population"
+      command = {
+        download_population
+        inject_calculate(
+          covariate = "population",
+          locs = sf_feat_proc_aqs_sites,
+          injection = list(
+            path = paste0(
+              arglist_common$char_input_dir,
+              "/population",
+              "/data_files",
+              "/gpw_v4_population_density_adjusted_to_",
+              "2015_unwpp_country_totals_rev11_2020_30_sec.tif"
+            ),
+            fun = "mean",
+            radius = chr_iter_radii,
+            nthreads = 1,
+            covariate = "population"
+          )
         )
-      ),
-      pattern = map(chr_iter_calc_pop_radii),
+      },
+      pattern = map(chr_iter_radii),
       iteration = "list",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(
@@ -618,19 +617,219 @@ target_calculate_fit <-
       description = "data.table of population features (fit)"
     )
     ,
-    ############################################################################
-    ##### Covariates to calculate
-    # TRI
-    # NEI
-    # ECOREGIONS
-    # GROADS
+    ###########################         TRI          ###########################
+    targets::tar_target(
+      df_feat_calc_tri_params,
+      command = expand.grid(year = chr_years, radius = chr_iter_radii) %>%
+        split(seq_len(nrow(.))),
+      iteration = "list",
+      description = "TRI features"
+    )
+    ,
+    targets::tar_target(
+      list_feat_calc_tri,
+      command = {
+        download_tri
+        inject_calculate(
+          covariate = "tri",
+          locs = sf_feat_proc_aqs_sites,
+          injection = list(
+            domain = df_feat_calc_tri_params$year,
+            domain_name = "year",
+            path = paste0(arglist_common$char_input_dir, "/tri/"),
+            radius = df_feat_calc_tri_params$radius,
+            nthreads = 1,
+            covariate = "tri"
+          )
+        )
+      },
+      iteration = "list",
+      pattern = map(df_feat_calc_tri_params),
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "calc_controller"
+        )
+      ),
+      description = "Calculate TRI features (fit)"
+    )
+    ,
+    targets::tar_target(
+      dt_feat_calc_tri,
+      command = reduce_merge(
+        lapply(
+          list_feat_calc_tri,
+          function(x) data.table::data.table(reduce_list(x)[[1]])
+        ),
+        c("site_id", "time")
+      ),
+      description = "data.table of TRI features (fit)"
+    )
+    ,
+    ###########################         NEI          ###########################
+    targets::tar_target(
+      list_feat_calc_nei,
+      command = {
+        download_nei
+        inject_calculate(
+          covariate = "tri",
+          locs = sf_feat_proc_aqs_sites,
+          injection = list(
+            domain = chr_iter_calc_nei,
+            domain_name = "year",
+            path = paste0(arglist_common$char_input_dir, "/nei/data_files"),
+            covariate = "nei"
+          )
+        )
+      },
+      iteration = "list",
+      pattern = map(chr_iter_calc_nei),
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "calc_controller"
+        )
+      ),
+      description = "Calculate NEI features (fit)"
+    )
+    ,
+    targets::tar_target(
+      dt_feat_calc_nei,
+      command = reduce_list(
+        lapply(
+          list_feat_calc_nei,
+          function(x) data.table::data.table(reduce_list(x)[[1]])
+        )
+      )[[1]],
+      description = "data.table of NEI features (fit)"
+    )
+    ,
+    ###########################      ECOREGIONS      ###########################
+    # targets::tar_target(
+    #   sf_ecoregions,
+    #   command = sf::st_read(
+    #     paste0(
+    #       arglist_common$char_input_dir,
+    #       "/ecoregions/data_files",
+    #       "/us_eco_l3_state_boundaries.shp"
+    #     )
+    #   )
+    # )
+    # ,
+    # targets::tar_target(
+    #   calc_ecoregions,
+    #   command = amadeus::calc_ecoregion(
+    #     from = amadeus::process_ecoregion(
+    #       path = paste0(
+    #         arglist_common$char_input_dir,
+    #         "/ecoregions/data_files",
+    #         "/us_eco_l3_state_boundaries.shp"
+    #       )
+    #     ),
+    #     locs = sf_feat_proc_aqs_sites,
+    #     locs_id = arglist_common$char_siteid
+    #   )
+    # )
+    # ,
+    # targets::tar_target(
+    #   dt_feat_calc_ecoregions_dup,
+    #   command = {
+    #     download_ecoregions
+    #     data.table::data.table(
+    #       amadeus::calc_ecoregion(
+    #         from = amadeus::process_ecoregion(
+    #           path = paste0(
+    #             arglist_common$char_input_dir,
+    #             "/ecoregions/data_files",
+    #             "/us_eco_l3_state_boundaries.shp"
+    #           )
+    #         ),
+    #         locs = sf_feat_proc_aqs_sites,
+    #         locs_id = arglist_common$char_siteid
+    #       )
+    #     )
+    #   },
+    #   resources = targets::tar_resources(
+    #     crew = targets::tar_resources_crew(
+    #       controller = "calc_controller"
+    #     )
+    #   ),
+    #   description = "data.table of Ecoregions features (fit)"
+    # )
+    # ,
+    # targets::tar_target(
+    #   dt_feat_calc_ecoregions,
+    #   command = {
+    #     download_ecoregions
+    #     inject_calculate(
+    #       covariate = "ecoregions",
+    #       locs = sf_feat_proc_aqs_sites,
+    #       injection = list(
+    #         path = paste0(
+    #           arglist_common$char_input_dir,
+    #           "/ecoregions/data_files",
+    #           "/us_eco_l3_state_boundaries.shp"
+    #         ),
+    #         nthreads = 1,
+    #         covariate = "ecoregions"
+    #       )
+    #     )[[1]]
+    #   },
+    #   resources = targets::tar_resources(
+    #     crew = targets::tar_resources_crew(
+    #       controller = "calc_controller"
+    #     )
+    #   ),
+    #   description = "data.table of Ecoregions features (fit)"
+    # )
+    # ,
+    ###########################        GROADS        ###########################
+    targets::tar_target(
+      list_feat_calc_groads,
+      command = {
+        download_groads
+        inject_calculate(
+          covariate = "groads",
+          locs = sf_feat_proc_aqs_sites,
+          injection = list(
+            path = paste0(
+              arglist_common$char_input_dir,
+              "/groads/data_files",
+              "/gROADS-v1-americas.gdb"
+            ),
+            radius = chr_iter_radii,
+            nthreads = 1,
+            covariate = "groads"
+          )
+        )
+      },
+      iteration = "list",
+      pattern = map(chr_iter_radii),
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "calc_controller"
+        )
+      ),
+      description = "Calculate gRoads features (fit)"
+    )
+    ,
+    targets::tar_target(
+      dt_feat_calc_groads,
+      command = reduce_merge(
+        lapply(
+          list_feat_calc_groads,
+          function(x) data.table::data.table(reduce_list(x)[[1]])
+        ),
+        by = c("site_id", "groads_year", "description")
+      ),
+      description = "data.table of gRoads features (fit)"
+    )
+    ,
     ########################       DATE FEATURES       #########################
     targets::tar_target(
       dt_feat_calc_date,
       command = Reduce(
         post_calc_autojoin,
         list(
-          dt_feat_calc_geoscf,
+          dt_feat_calc_geos,
           dt_feat_calc_narr,
           dt_feat_calc_nasa
         )
@@ -648,13 +847,13 @@ target_calculate_fit <-
       list_feat_calc_base_flat,
       command = lapply(
         list(
-          # dt_feat_calc_hms,
-          # dt_feat_calc_tri,
-          # dt_feat_calc_nei,
+          list(dt_feat_calc_hms),
+          list(dt_feat_calc_tri),
+          list(dt_feat_calc_nei),
           # dt_feat_calc_ecoregions,
           dt_feat_calc_koppen,
-          list(dt_feat_calc_pop)
-          # dt_feat_calc_groads
+          list(dt_feat_calc_pop),
+          list(dt_feat_calc_groads)
         ),
         function(x) {
           if (length(x) == 1) {
@@ -686,10 +885,10 @@ target_calculate_fit <-
       command = Reduce(
         post_calc_autojoin,
         c(
-          # list(dt_feat_proc_aqs_sites_time),
+          list(dt_feat_proc_aqs_sites_time),
           list_feat_calc_base_flat,
           list(dt_feat_calc_gmted),
-          list(dt_feat_calc_nlcd)
+          list(data.table::data.table(dt_feat_calc_nlcd))
         )
       ),
       description = "Base features with PM2.5"
@@ -725,11 +924,8 @@ target_calculate_fit <-
     # targets::tar_target(
     #   dt_feat_calc_imputed,
     #   command = impute_all(
-    #     dt_feat_calc_cumulative,
+    #     dt_feat_calc_design,
     #     period = arglist_common$char_period,
-    #     # nthreads_dt = arglist_common$nthreads_impute,
-    #     # nthreads_collapse = arglist_common$nthreads_impute,
-    #     # nthreads_imputation = arglist_common$nthreads_impute
     #     nthreads_dt = 1,
     #     nthreads_collapse = 1,
     #     nthreads_imputation = 1

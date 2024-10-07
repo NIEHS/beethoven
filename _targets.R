@@ -3,18 +3,6 @@
 ##### Main file controlling the settings, options, and sourcing of targets
 ##### for the beethoven analysis pipeline.
 
-################################################################################
-##############################      LIBRARIES      #############################
-# library(targets)
-# library(tarchetypes)
-# library(crew)
-# library(crew.cluster)
-# library(beethoven)
-# library(dplyr)
-# library(tidymodels)
-# library(bonsai)
-
-################################################################################
 #############################      CONTROLLER      #############################
 default_controller <- crew::crew_controller_local(
   name = "default_controller",
@@ -27,11 +15,9 @@ calc_controller <- crew::crew_controller_local(
   seconds_idle = 30
 )
 
-################################################################################
 ##############################        STORE       ##############################
 targets::tar_config_set(store = "_targets/")
 
-################################################################################
 ##############################       OPTIONS      ##############################
 targets::tar_option_set(
   packages = c(
@@ -52,25 +38,22 @@ targets::tar_option_set(
   )
 )
 
-################################################################################
 ###########################      SOURCE TARGETS      ###########################
-targets::tar_source("inst/targets/targets_arglist.R")
+targets::tar_source("inst/targets/targets_initiate.R")
+targets::tar_source("inst/targets/targets_download.R")
 targets::tar_source("inst/targets/targets_aqs.R")
-# targets::tar_source("inst/targets/targets_download.R")
 targets::tar_source("inst/targets/targets_calculate_fit.R")
 
-################################################################################
 ##############################      DOWNLOAD      ##############################
-Sys.setenv("BTV_DOWNLOAD_PASS" = "TRUE")
-if (Sys.getenv("BTV_DOWNLOAD_PASS") == "TRUE") {
+download_skip <- FALSE
+if (download_skip == TRUE) {
   target_download <- NULL
 }
 
-################################################################################
 ##############################      PIPELINE      ##############################
 list(
-  target_arglist,
+  target_initiate,
+  target_download,
   target_aqs,
-  # target_download,
   target_calculate_fit
 )
