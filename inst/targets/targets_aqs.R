@@ -7,8 +7,7 @@ target_aqs <-
       sf_feat_proc_aqs_sites,
       command = {
         download_aqs
-        read_locs(
-          export = FALSE,
+        amadeus::process_aqs(
           path = list.files(
             path = file.path(
               arglist_common$char_input_dir,
@@ -30,7 +29,7 @@ target_aqs <-
       dt_feat_proc_aqs_sites_time,
       command = {
         download_aqs
-        read_locs(
+        amadeus::process_aqs(
           path = list.files(
             path = file.path(
               arglist_common$char_input_dir,
