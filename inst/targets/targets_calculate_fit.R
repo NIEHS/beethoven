@@ -55,10 +55,7 @@ target_calculate_fit <-
           nthreads = 1
         )
       },
-      pattern = cross(
-        chr_dates,
-        chr_iter_calc_narr
-      ),
+      pattern = cross(chr_dates, chr_iter_calc_narr),
       iteration = "list",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(
@@ -136,7 +133,7 @@ target_calculate_fit <-
     targets::tar_target(
       list_args_calc_mod11,
       command = {
-        # download_mod11
+        download_mod11
         list(
           from = query_modis_files(
             paste0(arglist_common$char_input_dir, "/modis/raw/61/MOD11A1/"),
@@ -176,7 +173,7 @@ target_calculate_fit <-
     targets::tar_target(
       list_args_calc_mod06,
       command = {
-        # download_mod06
+        download_mod06
         list(
           from = query_modis_files(
             paste0(arglist_common$char_input_dir, "/modis/raw/61/MOD06_L2/"),
@@ -217,7 +214,7 @@ target_calculate_fit <-
     targets::tar_target(
       list_args_calc_mod13,
       command = {
-        # download_mod13
+        download_mod13
         list(
           from = query_modis_files(
             paste0(arglist_common$char_input_dir, "/modis/raw/61/MOD13A2/"),
@@ -257,7 +254,7 @@ target_calculate_fit <-
     targets::tar_target(
       list_args_calc_mcd19_1km,
       command = {
-        # download_mcd19
+        download_mcd19
         list(
           from = query_modis_files(
             paste0(arglist_common$char_input_dir, "/modis/raw/61/MCD19A2/"),
@@ -297,7 +294,7 @@ target_calculate_fit <-
     targets::tar_target(
       list_args_calc_mcd19_5km,
       command = {
-        # download_mcd19
+        download_mcd19
         list(
           from = query_modis_files(
             paste0(arglist_common$char_input_dir, "/modis/raw/61/MCD19A2/"),
@@ -340,7 +337,7 @@ target_calculate_fit <-
     targets::tar_target(
       list_args_calc_mod09,
       command = {
-        # download_mod09
+        download_mod09
         list(
           from = query_modis_files(
             paste0(arglist_common$char_input_dir, "/modis/raw/61/MOD09GA/"),
@@ -383,7 +380,7 @@ target_calculate_fit <-
     targets::tar_target(
       list_args_calc_viirs,
       command = {
-        # download_viirs
+        download_viirs
         list(
           from = query_modis_files(
             paste0(arglist_common$char_input_dir, "/modis/raw/5000/VNP46A2/"),

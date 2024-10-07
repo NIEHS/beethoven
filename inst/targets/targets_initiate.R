@@ -38,6 +38,26 @@ target_initiate <-
       description = "File of MOD06 links"
     )
     ,
+    ##### 4. chr_input_dir is the file path to the input directory. This target
+    #####    controls where the raw data files are downloaded to and imported
+    #####    from. This file path **MUST** be mounted to the container at run
+    #####    time in the `run_container.sh` script.
+    targets::tar_target(
+      chr_input_dir,
+      command = "/input",
+      description = "Input directory"
+    )
+    ,
+    ##### 5. chr_dates_split controls the size of temporal splits. Splitting the
+    #####    temporal range into smaller chunks allows for parallel processing
+    #####    across multiple workers. It also allows for dispatching new dynamic
+    #####    branches when the temporal range is updated.
+    targets::tar_target(
+      num_dates_split,
+      command = 10,
+      description = "Number of days to include in each temporal split"
+    )
+    ,
     ############################################################################
     ############################################################################
     ############################################################################
@@ -54,7 +74,7 @@ target_initiate <-
       list_dates,
       command = beethoven::split_dates(
         dates = chr_daterange,
-        n = 10
+        n = num_dates_split
       ),
       description = "Split date range into list"
     )
@@ -82,7 +102,7 @@ target_initiate <-
       list_dates_julian,
       command = split(
         chr_dates_julian,
-        ceiling(seq_along(chr_dates_julian) / 10)
+        ceiling(seq_along(chr_dates_julian) / num_dates_split)
       )
     )
     ,
@@ -101,8 +121,7 @@ target_initiate <-
         char_period = chr_daterange,
         num_extent = c(-126, -62, 22, 52),
         char_user_email = paste0(Sys.getenv("USER"), "@nih.gov"),
-        export = FALSE,
-        char_input_dir = "/input"
+        char_input_dir = chr_input_dir
       ),
       description = "Set calculation arguments"
     )
