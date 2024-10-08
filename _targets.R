@@ -11,12 +11,12 @@ default_controller <- crew::crew_controller_local(
 )
 calc_controller <- crew::crew_controller_local(
   name = "calc_controller",
-  workers = 200,
+  workers = 96,
   seconds_idle = 30
 )
 
 ##############################        STORE       ##############################
-targets::tar_config_set(store = "_targets/")
+targets::tar_config_set(store = "/opt/_targets")
 
 ##############################       OPTIONS      ##############################
 targets::tar_option_set(
@@ -39,6 +39,7 @@ targets::tar_option_set(
 )
 
 ###########################      SOURCE TARGETS      ###########################
+targets::tar_source("inst/targets/targets_critical.R")
 targets::tar_source("inst/targets/targets_initiate.R")
 targets::tar_source("inst/targets/targets_download.R")
 targets::tar_source("inst/targets/targets_aqs.R")
@@ -52,6 +53,7 @@ if (download_skip == TRUE) {
 
 ##############################      PIPELINE      ##############################
 list(
+  target_critical,
   target_initiate,
   target_download,
   target_aqs,

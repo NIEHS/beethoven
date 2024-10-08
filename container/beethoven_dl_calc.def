@@ -31,7 +31,7 @@ From: rocker/geospatial:latest
     Rscript -e "install.packages('ps', version = '1.8.0')"
     Rscript -e "install.packages(c('pak', 'targets', 'tarchetypes', 'crew', \
         'crew.cluster', 'testthat', 'tidymodels', 'bonsai'))"
-    Rscript -e "pak::pak('NIEHS/amadeus@mm-modis-1007')"
+    Rscript -e "pak::pak('NIEHS/amadeus')"
     Rscript -e "pak::pak('NIEHS/beethoven@dev-0930')"
 
 %environment
