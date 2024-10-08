@@ -133,7 +133,7 @@ target_calculate_fit <-
     targets::tar_target(
       list_args_calc_mod11,
       command = {
-        download_mod11
+        download_modis_clean # download_mod11
         list(
           from = query_modis_files(
             paste0(arglist_common$char_input_dir, "/modis/raw/61/MOD11A1/"),
@@ -173,7 +173,7 @@ target_calculate_fit <-
     targets::tar_target(
       list_args_calc_mod06,
       command = {
-        download_mod06
+        download_modis_clean # download_mod06
         list(
           from = query_modis_files(
             paste0(arglist_common$char_input_dir, "/modis/raw/61/MOD06_L2/"),
@@ -214,7 +214,7 @@ target_calculate_fit <-
     targets::tar_target(
       list_args_calc_mod13,
       command = {
-        download_mod13
+        download_modis_clean # download_mod13
         list(
           from = query_modis_files(
             paste0(arglist_common$char_input_dir, "/modis/raw/61/MOD13A2/"),
@@ -254,7 +254,7 @@ target_calculate_fit <-
     targets::tar_target(
       list_args_calc_mcd19_1km,
       command = {
-        download_mcd19
+        download_modis_clean # download_mcd19
         list(
           from = query_modis_files(
             paste0(arglist_common$char_input_dir, "/modis/raw/61/MCD19A2/"),
@@ -294,7 +294,7 @@ target_calculate_fit <-
     targets::tar_target(
       list_args_calc_mcd19_5km,
       command = {
-        download_mcd19
+        download_modis_clean # download_mcd19
         list(
           from = query_modis_files(
             paste0(arglist_common$char_input_dir, "/modis/raw/61/MCD19A2/"),
@@ -337,7 +337,7 @@ target_calculate_fit <-
     targets::tar_target(
       list_args_calc_mod09,
       command = {
-        download_mod09
+        download_modis_clean # download_mod09
         list(
           from = query_modis_files(
             paste0(arglist_common$char_input_dir, "/modis/raw/61/MOD09GA/"),
@@ -380,7 +380,7 @@ target_calculate_fit <-
     targets::tar_target(
       list_args_calc_viirs,
       command = {
-        download_viirs
+        download_modis_clean # download_viirs
         list(
           from = query_modis_files(
             paste0(arglist_common$char_input_dir, "/modis/raw/5000/VNP46A2/"),
@@ -699,85 +699,67 @@ target_calculate_fit <-
       description = "data.table of NEI features (fit)"
     )
     ,
+    ############################################################################
+    ############################################################################
     ###########################      ECOREGIONS      ###########################
-    # targets::tar_target(
-    #   sf_ecoregions,
-    #   command = sf::st_read(
-    #     paste0(
-    #       arglist_common$char_input_dir,
-    #       "/ecoregions/data_files",
-    #       "/us_eco_l3_state_boundaries.shp"
-    #     )
-    #   )
-    # )
-    # ,
-    # targets::tar_target(
-    #   calc_ecoregions,
-    #   command = amadeus::calc_ecoregion(
-    #     from = amadeus::process_ecoregion(
-    #       path = paste0(
-    #         arglist_common$char_input_dir,
-    #         "/ecoregions/data_files",
-    #         "/us_eco_l3_state_boundaries.shp"
-    #       )
-    #     ),
-    #     locs = sf_feat_proc_aqs_sites,
-    #     locs_id = arglist_common$char_siteid
-    #   )
-    # )
-    # ,
-    # targets::tar_target(
-    #   dt_feat_calc_ecoregions_dup,
-    #   command = {
-    #     download_ecoregions
-    #     data.table::data.table(
-    #       amadeus::calc_ecoregion(
-    #         from = amadeus::process_ecoregion(
-    #           path = paste0(
-    #             arglist_common$char_input_dir,
-    #             "/ecoregions/data_files",
-    #             "/us_eco_l3_state_boundaries.shp"
-    #           )
-    #         ),
-    #         locs = sf_feat_proc_aqs_sites,
-    #         locs_id = arglist_common$char_siteid
-    #       )
-    #     )
-    #   },
-    #   resources = targets::tar_resources(
-    #     crew = targets::tar_resources_crew(
-    #       controller = "calc_controller"
-    #     )
-    #   ),
-    #   description = "data.table of Ecoregions features (fit)"
-    # )
-    # ,
-    # targets::tar_target(
-    #   dt_feat_calc_ecoregions,
-    #   command = {
-    #     download_ecoregions
-    #     inject_calculate(
-    #       covariate = "ecoregions",
-    #       locs = sf_feat_proc_aqs_sites,
-    #       injection = list(
-    #         path = paste0(
-    #           arglist_common$char_input_dir,
-    #           "/ecoregions/data_files",
-    #           "/us_eco_l3_state_boundaries.shp"
-    #         ),
-    #         nthreads = 1,
-    #         covariate = "ecoregions"
-    #       )
-    #     )[[1]]
-    #   },
-    #   resources = targets::tar_resources(
-    #     crew = targets::tar_resources_crew(
-    #       controller = "calc_controller"
-    #     )
-    #   ),
-    #   description = "data.table of Ecoregions features (fit)"
-    # )
-    # ,
+    ##### Ecoregions covariates have been calculated manually due to ongoing
+    ##### issues with the `process_ecoregions` and `calc_ecoregions` functions.
+    ##### Covariates have been calculated at all sites from 2018 to 2024, and
+    ##### are filtered to the relevant sites after import.
+    ##### amadeus::download_aqs(
+    #####   year = c(2018, 2024),
+    #####   directory_to_save = paste0(arglist_common$char_input_dir, "/aqs"),
+    #####   unzip = TRUE,
+    #####   remove_zip = TRUE,
+    #####   acknowledgement = TRUE,
+    #####   download = TRUE
+    ##### )
+    ##### sf_aqs_2018_2024 <- amadeus::process_aqs(
+    #####   path = list.files(
+    #####     path = paste0(arglist_common$char_input_dir, "/aqs/data_files"),
+    #####     full.names = TRUE,
+    #####     recursive = TRUE
+    #####   ),
+    #####   date = c("2018-01-01", "2024-12-31"),
+    #####   mode = "location",
+    #####   return_format = "sf"
+    ##### )
+    ##### qs_feat_calc_ecoregions <- data.table::data.table(
+    #####   amadeus::calc_ecoregion(
+    #####     from = amadeus::process_ecoregion(
+    #####       path = paste0(
+    #####         paste0(
+    #####           arglist_common$char_input_dir,
+    #####           "ecoregions/",
+    #####           "data_files/us_eco_l3_state_boundaries.shp"
+    #####         )
+    #####       )
+    #####     ),
+    #####     locs = sf_aqs_2018_2024,
+    #####     locs_id = "site_id",
+    #####   )
+    ##### )
+    ##### qs::qsave(
+    #####   qs_feat_calc_ecoregions,
+    #####   file = "./inst/extdata/dt_feat_calc_ecoregion.qs"
+    ##### )
+    targets::tar_target(
+      qs_feat_calc_ecoregions,
+      command = qs::qread("/inst/extdata/qs_feat_calc_ecoregions.qs"),
+      description = "Import calculated ecoregion features (2018 - 2024)"
+    )
+    ,
+    targets::tar_target(
+      dt_feat_calc_ecoregions,
+      command = qs_feat_calc_ecoregions[
+        qs_feat_calc_ecoregions$site_id %in% sf_feat_proc_aqs_sites$site_id,
+      ],
+      description = "data.table of Ecoregions features (fit)"
+    )
+    ############################################################################
+    ############################################################################
+    ############################################################################
+    ,
     ###########################        GROADS        ###########################
     targets::tar_target(
       list_feat_calc_groads,
@@ -847,7 +829,7 @@ target_calculate_fit <-
           list(dt_feat_calc_hms),
           list(dt_feat_calc_tri),
           list(dt_feat_calc_nei),
-          # dt_feat_calc_ecoregions,
+          list(dt_feat_calc_ecoregions),
           dt_feat_calc_koppen,
           list(dt_feat_calc_pop),
           list(dt_feat_calc_groads)
@@ -902,22 +884,6 @@ target_calculate_fit <-
       ),
       description = "data.table of all features with PM2.5"
     )
-    # ,
-    # targets::tar_target(
-    #   dt_feat_calc_cumulative,
-    #   command = append_predecessors(
-    #     path_qs = "output/qs",
-    #     period_new = arglist_common$char_period,
-    #     input_new = dt_feat_calc_design,
-    #     nthreads = 1
-    #   ),
-    #   description = "Cumulative feature calculation",
-    #   resources = targets::tar_resources(
-    #     crew = targets::tar_resources_crew(
-    #       controller = "calc_controller"
-    #     )
-    #   )
-    # ),
     # targets::tar_target(
     #   dt_feat_calc_imputed,
     #   command = impute_all(

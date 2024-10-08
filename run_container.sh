@@ -3,7 +3,7 @@
 #SBATCH --job-name=beethoven
 #SBATCH --mail-user=manwareme@nih.gov
 #SBATCH --mail-type=END,FAIL
-#SBATCH --partition=normal
+#SBATCH --partition=geo
 #SBATCH --ntasks=1
 #SBATCH --mem=100G
 #SBATCH --cpus-per-task=50

@@ -222,6 +222,41 @@ target_download <-
       description = "Download MODIS - VIIRS data"
     )
     ,
+    ############################################################################
+    ############################################################################
+    ###########################       MODIS - DEBUG       ######################
+    ##### This target detects corrupt MODIS files which were improperly
+    ##### downloaded and are empty. The files are not downloaded due to missing
+    ##### SSL certiciation abilities of the container. Corrupt files are removed
+    ##### to ensure the downstream targets still dispatch and complete without
+    ##### errors.
+    targets::tar_target(
+      download_modis_clean,
+      command = {
+        download_mod06
+        download_mod09
+        download_mod11
+        download_mod13
+        download_mcd19
+        download_viirs
+        modis_corrupt_files <- list.files(
+          paste0(arglist_common$char_input_dir, "/modis/raw/"),
+          recursive = TRUE,
+          full.names = TRUE,
+          pattern = ".h07v03.061."
+        )
+        for (c in seq_along(modis_corrupt_files)) {
+          if (file.size(modis_corrupt_files[c]) == 0) {
+            file.remove(modis_corrupt_files[c])
+          }
+        }
+      },
+      description = "Clean corrupt MODIS files [DEBUG]"
+    )
+    ############################################################################
+    ############################################################################
+    ############################################################################
+    ,
     ###########################         GMTED        ###########################
     targets::tar_target(
       chr_iter_calc_gmted_vars,
