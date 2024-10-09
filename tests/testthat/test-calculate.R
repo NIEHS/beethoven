@@ -92,3 +92,27 @@ testthat::test_that("par_narr (weasd + omega)", {
   )
 
 })
+
+################################################################################
+##### query_modis_files
+testthat::test_that("query_modis_files", {
+
+  path <- testthat::test_path("..", "testdata", "calculate", "modis")
+  list <- list(
+    c("2018001"), c("2018002")
+  )
+
+  # expect no error
+  testthat::expect_no_error(
+    files1 <- query_modis_files(path, list, index = 1)
+  )
+  # expect 23 files
+  testthat::expect_length(files1, 23)
+
+  # expect no error
+  testthat::expect_no_error(
+    files2 <- query_modis_files(path, list, index = 1)
+  )
+  # expect 23 files
+  testthat::expect_length(files2, 23)
+})
