@@ -34,7 +34,7 @@ target_critical <-
     #####    the new date range.
     targets::tar_target(
       chr_mod06_links,
-      command = "/inst/targets/mod06_links_2018_2022.csv",
+      command = "/inst/extdata/mod06_links_2018_2022.csv",
       description = "File of MOD06 links"
     )
     ,
