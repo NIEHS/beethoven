@@ -45,12 +45,6 @@ targets::tar_source("inst/targets/targets_download.R")
 targets::tar_source("inst/targets/targets_aqs.R")
 targets::tar_source("inst/targets/targets_calculate_fit.R")
 
-##############################      DOWNLOAD      ##############################
-download_skip <- FALSE
-if (download_skip == TRUE) {
-  target_download <- NULL
-}
-
 ##############################      PIPELINE      ##############################
 list(
   target_critical,
