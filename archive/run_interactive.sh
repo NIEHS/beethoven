@@ -1,12 +1,8 @@
 #!/bin/bash
 
-export PATH=$PATH:/ddn/gs1/tools/cuda11.8/bin
-export LD_LIBRARY_PATH=/ddn/gs1/biotools/R/lib64/R/customlib:/ddn/gs1/tools/cuda11.8/lib64:$LD_LIBRARY_PATH
-if [ "$USER" != "songi2" ]; then
-    export R_LIBS_USER=/ddn/gs1/biotools/R/lib64/R/custompkg:/ddn/gs1/biotools/R/lib64/R/library
-else
-    export R_LIBS_USER=/ddn/gs1/home/songi2/r-libs:$R_LIBS_USER:/ddn/gs1/biotools/R/lib64/R/library
-fi
+export PATH=/ddn/gs1/tools/set/R432/bin/R:/ddn/gs1/tools/cuda11.8/bin:$PATH
+export LD_LIBRARY_PATH=/ddn/gs1/tools/set/R432/lib64/R/lib:/ddn/gs1/tools/cuda11.8/lib64:$LD_LIBRARY_PATH
+export R_LIBS_USER=/ddn/gs1/tools/set/R432/lib64/R/library:$R_LIBS_USER
 
 # Submit the pipeline as a background process with ./run.sh
 # module load R # Uncomment if R is an environment module.

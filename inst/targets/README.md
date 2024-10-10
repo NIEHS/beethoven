@@ -1,23 +1,37 @@
 # Developer's guide
 
 ## Preamble
-The objective of this document is to provide developers with the current implementation of `beethoven` pipeline as of July 20, 2024 (version 0.3.7)
+The objective of this document is to provide developers with the current implementation of `beethoven` pipeline as of October 9, 2024 (version 0.4.2)
 
 We assume the potential users have basic knowledge of `targets` and `tarchetypes` packages as well as functional programming and metaprogramming. It is recommended to read Advanced R (by Hadley Wickham)'s chapters for these topics.
 
 ## Before running the pipeline
-For the future release and tests on various environments, one should check several lines across R and shell script files:
+For developing and running the pipeline, users should check several lines across R and shell script files:
 
-- Shell script
-  - `/tar_run.sh`: all system variables including `PATH` and `LD_LIBRARY_PATH` to align with the current system environment. The lines in the provided file are set for NIEHS HPC.
-  - `inst/targets/run.sh`: project directory path
-  - `inst/targets/run_impute.sh` (if necessary when the imputation target is dispatched separately): project directory path
-- R script
-  - `/targets.R`: Lines 10-12, `tar_config_set(store = ...)` should be reviewed if it is set properly not to overwrite successfully run targets.
-  - `/targets.R`: `set_args_download` and `set_args_calc` functions, i.e., `char_input_dir` argument and `char_period`.
-  - `/targets.R`: `library` argument value in `tar_option_set` to match the current system environment
+- Container
+  - `/beethoven_dl_calc.sif`: The container image is not hosted on GitHub due to the large file size, so the image must be built by each. The definition file can be found at `/container/beethoven_dl_calc.sh`, and the container image can be build by running `sh build_dl_calc.sh` **from within the `/container` folder. Once the container image is built, it can be copied or moved to the repository root for running the pipeline (`mv beethoven_dl_calc.sif ../` or `cp beethoven_dl_calc.sif ../`).
 
+- Shell
+  - `/run_container.sh`: file controls SLURM submission details (ie, `--mem`, `--cpus-per-task`), and **which local directories are mounted to the container**. Local directories which must be explicitly mounted to the container at run time are 1. group data store (line 17) and 2. local targets store (line 18). For ongoing development, a local directory is used for targets store.
 
+- R
+  - `/_targets.R`: Ensure sum of controller-specific workers (line 9 + line 14) is equal to the total number of workers requested in `/run_container.R` (line 9).
+  - `/_targets.R`: Ensure targets store (line 18) matches the mount location in `/run_container.sh` (line 18 **after the semicolon**).
+  - `/inst/targets/targets_critical.R`: Critical targets are those which will require changes between users (`chr_nasa_token`), for development (`num_dates_split`), manual updates (`/inst/extdata/mod06_links_2018_2022.csv` called via `chr_mod06_links`), and mounted data path (`chr_input_dir`). **Most importantly**, critical target `chr_daterange` controls the entire temporal range of the downstream pipeline. Time-related specifications (dates, months, years, julian dates, etc) are defined relative to `chr_daterange`.
+
+## Refactor (October 9, 2024)
+Targets have been refactored to decrease reliance on "injection" functions, which obscured the source-specific inputs and relied on external (non-target) file. Refactoring from generalized injection functions to source-specific functions adds code, but is easier to follow, debug, and develop. To compare original to refactored code, see `/archive/targets_download_DEPRICATED.R` and `/inst/targets/targets_download.R`.
+
+## Ongoing development
+- `dt_feat_calc_ecoregions`
+  - Calculating ecoregion covariates with `amadeus::process_ecoregion` and `amadeus::calc_ecoregion` function returns errors. See [discussion](https://github.com/orgs/NIEHS/projects/8/views/1?layout=board&pane=issue&itemId=82653782&issue=NIEHS%7Cbeethoven%7C376).
+  - For development purpose, ecoregion covariates have been manually calculated for all AQS sites from 2018 to 2024. Sites are filtered to relevant sites after import.
+  - `/inst/targets/targets_calculate_fit.R` (line 746)
+
+- `download_[modis]`
+  - Current container definition file does not support SSL Certificate verification, which is required for downloading MODIS/VIIRS `.hdf` files. See [discussion](https://github.com/orgs/NIEHS/projects/8/views/1?layout=board&pane=issue&itemId=82627613&issue=NIEHS%7Cbeethoven%7C375).
+  - For development purpose, the `download_modis_clean` target deletes all corruptly downloaded data files to ensure downstream targets complete.
+  - `/inst/targets/targets_download.R` (line 234)
 
 ## Basic structure of branches
 We will call "grand target" as a set of branches if any branching technique is applied at a target.
