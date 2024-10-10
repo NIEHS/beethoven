@@ -203,13 +203,18 @@ calc_geos_strict <-
       return(rast_ext)
 
     }
-    future::plan(future::multicore, workers = 10)
+    # future::plan(future::multicore, workers = 10)
+    # rast_summary <-
+    #   future.apply::future_lapply(
+    #     future_inserted,
+    #     function(fs) summary_byvar(fs = fs)
+    #   )
+    # future::plan(future::sequential)
     rast_summary <-
-      future.apply::future_lapply(
+      lapply(
         future_inserted,
         function(fs) summary_byvar(fs = fs)
       )
-    future::plan(future::sequential)
     rast_summary <- data.table::rbindlist(rast_summary)
 
     return(rast_summary)
