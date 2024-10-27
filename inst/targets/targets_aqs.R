@@ -6,7 +6,7 @@ target_aqs <-
     targets::tar_target(
       sf_feat_proc_aqs_sites,
       command = {
-        download_aqs
+        # download_aqs
         amadeus::process_aqs(
           path = list.files(
             path = file.path(
@@ -28,7 +28,7 @@ target_aqs <-
     targets::tar_target(
       dt_feat_proc_aqs_sites_time,
       command = {
-        download_aqs
+        # download_aqs
         amadeus::process_aqs(
           path = list.files(
             path = file.path(

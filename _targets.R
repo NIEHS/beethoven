@@ -11,7 +11,7 @@ default_controller <- crew::crew_controller_local(
 )
 calc_controller <- crew::crew_controller_local(
   name = "calc_controller",
-  workers = 96,
+  workers = 20,
   seconds_idle = 30
 )
 
@@ -49,7 +49,7 @@ targets::tar_source("inst/targets/targets_calculate_fit.R")
 list(
   target_critical,
   target_initiate,
-  target_download,
+  #target_download,
   target_aqs,
   target_calculate_fit
 )

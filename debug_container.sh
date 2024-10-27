@@ -1,5 +1,7 @@
 #!/bin/bash
 
+DEBUG_TARGET=$1
+
 #SBATCH --job-name=beethoven
 #SBATCH --mail-user=manwareme@nih.gov
 #SBATCH --mail-type=END,FAIL
@@ -17,7 +19,7 @@ apptainer exec \
   --bind /ddn:/input \
   --bind $PWD/_targets:/opt/_targets \
   beethoven_dl_calc.sif \
-  Rscript --no-init-file /mnt/inst/targets/targets_start.R
+  Rscript --no-init-file -e "targets::tar_read('$DEBUG_TARGET')"
 
 # run interactive R session in the container
 # apptainer exec --bind $PWD/inst:/inst --bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input --bind $PWD:/mnt beethoven_dl_calc.sif R
