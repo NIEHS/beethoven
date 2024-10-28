@@ -725,7 +725,7 @@ target_calculate_fit <-
     #####   return_format = "sf"
     ##### )
     ##### qs_feat_calc_ecoregions <- data.table::data.table(
-    #####   amadeus::calc_ecoregion(
+    #####   amadeus::calculate_ecoregion(
     #####     from = amadeus::process_ecoregion(
     #####       path = paste0(
     #####         paste0(
