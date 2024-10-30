@@ -30,8 +30,8 @@ From: rocker/geospatial:latest
     # Install R packages
     Rscript -e "install.packages(c('pak', 'targets', 'tarchetypes', 'crew', \
         'crew.cluster', 'testthat', 'tidymodels', 'bonsai'))"
-    Rscript -e "pak::pak('NIEHS/amadeus')"
-    Rscript -e "pak::pak('NIEHS/beethoven@dev-0930')"
+    Rscript -e "pak::pak('NIEHS/amadeus@1.1.4')"
+    Rscript -e "pak::pak('NIEHS/beethoven@dev')"
 
 %environment
     # Set locale for the container environment

@@ -32,10 +32,24 @@ testthat::test_that("reduce_list", {
 ##### split_dates
 testthat::test_that("split_dates", {
   testthat::expect_no_error(
-    sd1 <- split_dates(c("2022-01-01", "2022-12-31"), 10)
+    sd1 <- split_dates(c("2022-01-01", "2022-12-31"), 5, year = TRUE)
   )
   testthat::expect_true(is.list(sd1))
-  testthat::expect_length(sd1, ceiling(365 / 10))
+  # all lists are 5 because dates are within same year
+  testthat::expect_true(unlist(unique(lapply(sd1, length))) == 5)
+
+  testthat::expect_no_error(
+    sd2 <- split_dates(c("2022-12-01", "2023-01-31"), 20)
+  )
+  testthat::expect_true(is.list(sd2))
+  testthat::expect_length(sd2, 4)
+  testthat::expect_length(unlist(unique(lapply(sd2, length))), 2)
+
+  testthat::expect_no_error(
+    sd3 <- split_dates(c("2022-12-01", "2023-01-29"), 5, year = FALSE)
+  )
+  # all lists are 5 because year = FALSE
+  testthat::expect_true(unlist(unique(lapply(sd3, length))) == 5)
 })
 
 

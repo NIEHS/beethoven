@@ -49,8 +49,7 @@ target_initiate <-
     ,
     targets::tar_target(
       chr_iter_radii,
-      command = c(1000, 10000),
-      # command = c(1000, 10000, 50000),
+      command = c(1000, 10000, 50000),
       description = "Buffer radii"
     )
     ,

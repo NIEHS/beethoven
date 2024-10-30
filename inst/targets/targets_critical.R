@@ -12,7 +12,7 @@ target_critical <-
     #####    chr_daterange.
     targets::tar_target(
       chr_daterange,
-      command = c("2018-01-01", "2018-01-31"),
+      command = c("2018-01-01", "2019-12-31"),
       description = "Date range"
     )
     ,
