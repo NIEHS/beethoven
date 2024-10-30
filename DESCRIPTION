@@ -16,7 +16,7 @@ Authors@R: c(
 Description: Near Real Time air pollution model results and code produced by the SET group. It is fully tested, versioned, and open source and open access.
 Depends: R (>= 4.1.0)
 Imports:
-  amadeus,
+  amadeus (>= 1.1.4),
   dplyr,
   sf,
   stats,
