@@ -45,19 +45,24 @@ reduce_list <- function(df_list) {
 #' @param n integer(1). Number of dates in each subrange.
 #' @param year logical(1). If `TRUE`, sublists will contain only one year. This
 #' may result in sublists with fewer than `n` dates.
+#' @param julian logical(1). If `TRUE`, dates are in Julian format.
 #' @return a list object, with date ranges split into subranges.
 #' @keywords Utility
 #' @export
 split_dates <- function(
   dates,
   n,
-  year = TRUE
+  year = TRUE,
+  julian = FALSE
 ) {
   dates_full <- amadeus::generate_date_sequence(
     dates[1],
     dates[2],
     sub_hyphen = FALSE
   )
+  if (julian) {
+    dates_full <- format(dates_full, "%Y%j")
+  }
   if (year) {
     u_years <- unique(substr(dates_full, 1, 4))
     list_split <- lapply(

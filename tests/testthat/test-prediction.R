@@ -50,6 +50,12 @@ testthat::test_that("split_dates", {
   )
   # all lists are 5 because year = FALSE
   testthat::expect_true(unlist(unique(lapply(sd3, length))) == 5)
+
+  # julian dates
+  testthat::expect_no_error(
+    sd4 <- split_dates(c("2022-01-01", "2022-01-05"), 5, julian = TRUE)
+  )
+  testthat::expect_equal(nchar(sd4[[1]][[1]]), 7)
 })
 
 
