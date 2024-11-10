@@ -115,3 +115,6 @@ beethoven_branching_notes.txt
 
 # NASA Earthdata login credentials
 inst/extdata/nasa_token.txt
+
+# flexible library for beethoven ad-hoc update
+lib-flex

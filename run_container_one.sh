@@ -12,6 +12,10 @@ DEBUG_TARGET=$1
 #SBATCH --error=/ddn/gs1/home/manwareme/beethoven/beethoven/slurm/beethoven_%j.err
 #SBATCH --output=/ddn/gs1/home/manwareme/beethoven/beethoven/slurm/beethoven_%j.out
 
+# if [ "$(whoami)" = "isong" ]; then
+#   mount /ddn
+# fi
+
 # run pipeline in the container
 apptainer exec \
   --bind $PWD:/mnt \
@@ -19,8 +23,7 @@ apptainer exec \
   --bind /ddn:/input \
   --bind $PWD/_targets:/opt/_targets \
   beethoven_dl_calc.sif \
-  Rscript --no-init-file -e "targets::tar_read('$DEBUG_TARGET')"
-  # Rscript --no-init-file -e "sf::st_write(targets::tar_read('$DEBUG_TARGET'), '/mnt/sf_base.gpkg')"
+  Rscript --no-init-file -e "targets::tar_make('$DEBUG_TARGET')"
 
 # run interactive R session in the container
 # apptainer exec --bind $PWD/inst:/inst --bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input --bind $PWD:/mnt beethoven_dl_calc.sif R

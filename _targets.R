@@ -19,6 +19,12 @@ calc_controller <- crew::crew_controller_local(
 targets::tar_config_set(store = "/opt/_targets")
 
 ##############################       OPTIONS      ##############################
+
+.libPaths(
+  c("/mnt/lib-flex", .libPaths())
+)
+
+
 targets::tar_option_set(
   packages = c(
     "beethoven", "targets", "tarchetypes", "dplyr",

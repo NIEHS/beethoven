@@ -117,17 +117,18 @@ calculate <-
     domainlist <- split(domain, seq_along(domain))
     years_data <- seq_along(domain) + 2017
 
-    if (nthreads == 1L) {
-      future::plan(future::sequential)
-    } else {
-      future::plan(future::multicore, workers = nthreads)
-    }
+    # if (nthreads == 1L) {
+    #   future::plan(future::sequential)
+    # } else {
+    #   future::plan(future::multicore, workers = nthreads)
+    # }
     # double twists: list_iteration is made to distinguish
     # cases where a single radius is accepted or ones have no radius
     # argument.
     res_calc <-
       #try(
-      future.apply::future_mapply(
+      mapply(
+      # future.apply::future_mapply(
         function(domain_each, year_each) {
           # we assume that ... have no "year" and "from" arguments
           args_process <- c(arg = domain_each, list(...))
@@ -187,11 +188,11 @@ calculate <-
             }
           return(df_iteration_calc)
         },
-        domainlist, years_data, SIMPLIFY = FALSE,
-        future.seed = TRUE
+        domainlist, years_data,
+        SIMPLIFY = FALSE
       )
 
-    future::plan(future::sequential)
+    # future::plan(future::sequential)
     if (inherits(res_calc, "try-error")) {
       cat(paste0(attr(res_calc, "condition")$message, "\n"))
       stop("Results do not match expectations.")

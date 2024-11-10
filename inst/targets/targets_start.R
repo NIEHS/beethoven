@@ -7,6 +7,11 @@
     invert = TRUE
   )
 )
+
+.libPaths(
+  c("/mnt/lib-flex", .libPaths())
+)
+
 cat("Active library paths:\n")
 .libPaths()
 

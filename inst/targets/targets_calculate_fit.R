@@ -662,6 +662,7 @@ target_calculate_fit <-
             domain = df_feat_calc_tri_params$year,
             domain_name = "year",
             path = paste0(arglist_common$char_input_dir, "/tri/"),
+            variables = c(1, 13, 12, 14, 3 + c(20, 34, 36, 47, 48, 49)),
             radius = df_feat_calc_tri_params$radius,
             nthreads = 1,
             covariate = "tri"
@@ -693,29 +694,28 @@ target_calculate_fit <-
     ###########################         NEI          ###########################
     targets::tar_target(
       chr_iter_calc_nei,
-      command = c(""),
-      iteration = "list",
+      command = c("2017", "2020"),
+      #iteration = "list",
       description = "NEI domain dummy"
     )
     ,
-    
     targets::tar_target(
       list_feat_calc_nei,
       command = {
         # download_nei
         inject_calculate(
-          covariate = "tri",
+          covariate = "nei",
           locs = sf_feat_proc_aqs_sites,
           injection = list(
-            domain = NULL,
+            domain = chr_iter_calc_nei,
             domain_name = "year",
             path = paste0(arglist_common$char_input_dir, "/nei/data_files"),
             covariate = "nei"
           )
         )
       },
-      # iteration = "list",
-      # pattern = map(chr_iter_calc_nei),
+       #iteration = "list",
+       #pattern = map(chr_iter_calc_nei),
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(
           controller = "calc_controller"
