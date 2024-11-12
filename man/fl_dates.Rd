@@ -2,17 +2,18 @@
 % Please edit documentation in R/prediction.R
 \name{fl_dates}
 \alias{fl_dates}
-\title{Extract the first and last elements of a list}
+\title{Extract the first and last elements of a vector}
 \usage{
 fl_dates(dates)
 }
 \arguments{
-\item{dates}{list. A list of dates.}
+\item{dates}{vector. A vector of dates.}
 }
 \value{
-a character vector with the first and last dates from the list.
+a character vector of length 2 with
+the first and last dates from the list.
 }
 \description{
-Extract the first and last elements of a list
+Extract the first and last elements of a vector
 }
 \keyword{Utility}

@@ -62,14 +62,32 @@ split_dates <- function(
   return(dates_split)
 }
 
-#' Extract the first and last elements of a list
-#' @param dates list. A list of dates.
-#' @return a character vector with the first and last dates from the list.
+#' Extract the first and last elements of a vector
+#' @param dates vector. A vector of dates.
+#' @return a character vector of length 2 with
+#'   the first and last dates from the list.
 #' @export
 #' @keywords Utility
 fl_dates <- function(
   dates
 ) {
+  first <- dates[1]
+  last <- dates[length(dates)]
+  return(c(first, last))
+}
+
+
+#' Extract the first and last elements of a list of date vectors
+#'
+#' It flattens the list first, then extracts the first and the last dates.
+#' @param dates list. A list of dates.
+#' @return a character vector with the first and last dates from the list.
+#' @export
+#' @keywords Utility
+fl_dates_flatten <- function(
+  dates
+) {
+  dates <- unlist(dates)
   first <- dates[1]
   last <- dates[length(dates)]
   return(c(first, last))

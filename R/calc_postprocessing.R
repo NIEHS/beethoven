@@ -286,7 +286,7 @@ post_calc_df_year_expand <- function(
 #' @note This version assumes the time_id contains Date-like strings.
 #' @return data.frame
 #' @importFrom data.table merge.data.table
-#' @importFrom amadeus calc_temporal_dummies
+#' @importFrom amadeus calculate_temporal_dummies
 #' @export
 post_calc_merge_all <-
   function(
@@ -314,7 +314,7 @@ post_calc_merge_all <-
     # need POSIXt class for amadeus function
     locs_merged[[time_id]] <- as.POSIXct(locs_merged[[time_id]])
     locs_merged <-
-      amadeus::calc_temporal_dummies(
+      amadeus::calculate_temporal_dummies(
         locs = locs_merged,
         locs_id = locs_id,
         year = target_years

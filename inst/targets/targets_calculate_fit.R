@@ -5,11 +5,21 @@ target_calculate_fit <-
     ###########################         GEOS         ###########################
     targets::tar_target(
       chr_iter_calc_geos,
-      command = c("geoscf_chm", "geoscf_aqc"),
-      iteration = "vector",
-      description = "GEOS-CF feature calculation"
+      command = c(
+        "aqc_tavg_1hr_g1440x721_v1",
+        "chm_tavg_1hr_g1440x721_v1"
+      ),
+      iteration = "list",
+      description = "GEOS-CF features"
     )
     ,
+    # targets::tar_target(
+    #   chr_iter_calc_geos,
+    #   command = c("geoscf_chm", "geoscf_aqc"),
+    #   iteration = "vector",
+    #   description = "GEOS-CF feature calculation"
+    # )
+    # ,
     targets::tar_target(
       list_feat_calc_geos,
       command = {
@@ -17,17 +27,18 @@ target_calculate_fit <-
         inject_geos(
           locs = sf_feat_proc_aqs_sites,
           injection = list(
-            date = fl_dates(list_dates[[chr_dates]]),
-            path = paste0(
+            date = fl_dates(list_dates),
+            path = file.path(
               arglist_common$char_input_dir,
-              "/geos/",
+              "geos",
               chr_iter_calc_geos
             ),
             nthreads = 1
           )
         )
       },
-      pattern = cross(chr_iter_calc_geos, chr_dates),
+      #pattern = map(chr_iter_calc_geos),
+      pattern = cross(chr_iter_calc_geos, list_dates),
       iteration = "list",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(
@@ -66,12 +77,12 @@ target_calculate_fit <-
         par_narr(
           domain = chr_iter_calc_narr,
           path = paste0(arglist_common$char_input_dir, "/narr/"),
-          date = fl_dates(list_dates[[chr_dates]]),
+          date = fl_dates(unlist(list_dates)),
           locs = sf_feat_proc_aqs_sites,
           nthreads = 1
         )
       },
-      pattern = cross(chr_dates, chr_iter_calc_narr),
+      pattern = cross(list_dates, chr_iter_calc_narr),
       iteration = "list",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(

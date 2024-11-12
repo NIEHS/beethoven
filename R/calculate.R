@@ -40,7 +40,8 @@ calc_geos_strict <-
         paths <- list.files(
           path,
           pattern = "GEOS-CF.v01.rpl",
-          full.names = TRUE
+          full.names = TRUE,
+          recursive = TRUE
         )
         paths <- paths[grep(
           ".nc4",
@@ -524,10 +525,11 @@ par_narr <- function(domain, path, date, locs, nthreads = 24L) {
   if (!dir.exists(path)) {
     stop("The specified path does not exist.")
   }
-  future::plan(future::multicore, workers = nthreads)
+  # future::plan(future::multicore, workers = nthreads)
 
   res <-
-    future.apply::future_lapply(
+    # future.apply::future_lapply(
+    lapply(
       domain,
       function(x) {
         from <- process_narr2(
@@ -543,7 +545,7 @@ par_narr <- function(domain, path, date, locs, nthreads = 24L) {
       },
       future.seed = TRUE
     )
-  future::plan(future::sequential)
+  # future::plan(future::sequential)
   return(res)
 
 }

@@ -242,7 +242,7 @@ process_counties <-
 #' @param process_function Raw data processor. Default is
 #' [`amadeus::process_covariates`]
 #' @param calc_function Covariate calculator. Default is
-#' [`amadeus::calc_covariates`]
+#' [`amadeus::calculate_covariates`]
 #' @param ... Arguments passed to `calc_function`
 #' @return Nothing. It will automatically save xz-compressed
 #' RDS file to `outpath`
@@ -251,7 +251,7 @@ process_counties <-
 calculate_single <-
   function(
     process_function = amadeus::process_covariates,
-    calc_function = amadeus::calc_covariates,
+    calc_function = amadeus::calculate_covariates,
     ...
   ) {
     prep_calc <-
@@ -286,7 +286,7 @@ calculate_single <-
 #' @param process_function Raw data processor. Default is
 #' [`amadeus::process_covariates`]
 #' @param calc_function Function to calculate covariates.
-#' [`amadeus::calc_covariates`]
+#' [`amadeus::calculate_covariates`]
 #' @param ... Arguments passed to `process_function` and `calc_function`
 #' @return A data.table object.
 #' @importFrom data.table rbindlist
@@ -299,7 +299,7 @@ calculate_multi <-
     # outpath = NULL,
     domain = NULL,
     process_function = amadeus::process_covariates,
-    calc_function = amadeus::calc_covariates,
+    calc_function = amadeus::calculate_covariates,
     ...
   ) {
     domainlist <- split(domain, seq_along(domain))

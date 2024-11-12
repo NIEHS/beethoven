@@ -9,7 +9,7 @@ calculate(
   domain_name = "year",
   nthreads = 1L,
   process_function = amadeus::process_covariates,
-  calc_function = amadeus::calc_covariates,
+  calc_function = amadeus::calculate_covariates,
   ...
 )
 }
@@ -26,7 +26,7 @@ Nullable; If \code{NULL}, it will be set to \code{c(1)}.}
 \code{\link[amadeus:process_covariates]{amadeus::process_covariates}}}
 
 \item{calc_function}{Function to calculate covariates.
-\code{\link[amadeus:calc_covariates]{amadeus::calc_covariates}}}
+\code{\link[amadeus:calculate_covariates]{amadeus::calculate_covariates}}}
 
 \item{...}{Arguments passed to \code{process_function} and \code{calc_function}}
 }

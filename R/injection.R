@@ -92,12 +92,12 @@ set_target_years <-
 #' @param process_function Raw data processor. Default is
 #' [`amadeus::process_covariates`]
 #' @param calc_function Function to calculate covariates.
-#' [`amadeus::calc_covariates`]
+#' [`amadeus::calculate_covariates`]
 #' @param ... Arguments passed to `process_function` and `calc_function`
 #' @return A data.table object.
 #' @importFrom data.table rbindlist
 #' @importFrom rlang inject
-#' @importFrom amadeus process_covariates calc_covariates
+#' @importFrom amadeus process_covariates calculate_covariates
 #' @importFrom future plan sequential multicore
 #' @export
 calculate <-
@@ -106,7 +106,7 @@ calculate <-
     domain_name = "year",
     nthreads = 1L,
     process_function = amadeus::process_covariates,
-    calc_function = amadeus::calc_covariates,
+    calc_function = amadeus::calculate_covariates,
     ...
   ) {
     if (is.null(domain)) {
@@ -253,9 +253,9 @@ inject_calculate <- function(covariate, locs, injection) {
 #' @param locs A data frame containing the locations for which MODIS
 #'   features need to be calculated.
 #' @param injection **List** of dditional parameters to be passed to the
-#'   `calc_modis_par` function.
+#'   `calculate_modis_par` function.
 #' @return MODIS/VIIRS feature data.frame.
-#' @seealso [`amadeus::calc_modis_daily`], [`amadeus::calc_modis_par`]
+#' @seealso [`amadeus::calculate_modis_daily`], [`amadeus::calculate_modis_par`]
 #' @importFrom rlang inject
 #' @examples
 #' \dontrun{
@@ -275,7 +275,7 @@ inject_calculate <- function(covariate, locs, injection) {
 #' @export
 inject_modis_par <- function(locs, injection) {
   rlang::inject(
-    amadeus::calc_modis_par(
+    amadeus::calculate_modis_par(
       locs = locs,
       locs_id = "site_id",
       !!!injection
@@ -327,17 +327,16 @@ inject_geos <- function(locs, injection, ...) {
 #'  Default is 4.
 #' @return A data frame containing the merged results of GMTED data
 #'   for each location within different radii.
-#' @importFrom future plan
-#' @importFrom future.apply future_lapply
 #' @importFrom rlang inject
 #' @export
 inject_gmted <- function(locs, variable, radii, injection, nthreads = 4L) {
-  future::plan(future::multicore, workers = nthreads)
+  # future::plan(future::multicore, workers = nthreads)
 
   radii_list <- split(radii, seq_along(radii))
 
   radii_rep <-
-    future.apply::future_lapply(
+    # future.apply::future_lapply(
+    lapply(
       radii_list,
       function(r) {
         rlang::inject(
@@ -355,7 +354,7 @@ inject_gmted <- function(locs, variable, radii, injection, nthreads = 4L) {
 
   radii_rep <- lapply(radii_rep, function(x) as.data.frame(x))
   radii_join <- beethoven::reduce_merge(radii_rep, "site_id")
-  future::plan(future::sequential)
+  # future::plan(future::sequential)
   return(radii_join)
 }
 
@@ -444,5 +443,5 @@ inject_nlcd <-
   ) {
     args_ext <- list(...)
     args_ext <- c(args_ext, list(year = year, radius = radius))
-    inject_match(amadeus::calc_nlcd, args_ext)
+    inject_match(amadeus::calculate_nlcd, args_ext)
   }
