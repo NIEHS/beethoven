@@ -28,7 +28,8 @@ targets::tar_config_set(store = "/opt/_targets")
 targets::tar_option_set(
   packages = c(
     "beethoven", "targets", "tarchetypes", "dplyr",
-    "data.table", "sf", "crew", "crew.cluster"
+    "data.table", "sf", "crew", "crew.cluster",
+    "amadeus"
   ),
   repository = "local",
   error = "continue",

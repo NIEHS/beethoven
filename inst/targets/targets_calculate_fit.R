@@ -123,12 +123,12 @@ target_calculate_fit <-
               arglist_common$char_input_dir,
               "/hms/data_files/"
             ),
-            date = fl_dates(list_dates[[chr_dates]]),
+            date = fl_dates(unlist(list_dates)),
             covariate = "hms"
           )
         )
       },
-      pattern = map(chr_dates),
+      pattern = map(list_dates),
       iteration = "list",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(
@@ -532,6 +532,12 @@ target_calculate_fit <-
     )
     ,
     targets::tar_target(
+      chr_iter_calc_nlcd,
+      command = c(2019, 2021),
+      description = "NLCD years"
+    )
+    ,
+    targets::tar_target(
       list_feat_calc_nlcd,
       command = {
         # download_nlcd
@@ -792,7 +798,7 @@ target_calculate_fit <-
     ##### )
     targets::tar_target(
       qs_feat_calc_ecoregions,
-      command = qs::qread("/inst/extdata/qs_feat_calc_ecoregions.qs"),
+      command = qs::qread("/mnt/inst/extdata/qs_feat_calc_ecoregions.qs"),
       description = "Import calculated ecoregion features (2018 - 2024)"
     )
     ,
