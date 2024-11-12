@@ -2,6 +2,9 @@
 ##############################      BEETHOVEN      #############################
 ##### Main file controlling the settings, options, and sourcing of targets
 ##### for the beethoven analysis pipeline.
+.libPaths(
+  c("/mnt/lib-flex", .libPaths())
+)
 
 #############################      CONTROLLER      #############################
 default_controller <- crew::crew_controller_local(
@@ -20,10 +23,6 @@ targets::tar_config_set(store = "/opt/_targets")
 
 ##############################       OPTIONS      ##############################
 
-.libPaths(
-  c("/mnt/lib-flex", .libPaths())
-)
-
 
 targets::tar_option_set(
   packages = c(
@@ -31,6 +30,8 @@ targets::tar_option_set(
     "data.table", "sf", "crew", "crew.cluster",
     "amadeus"
   ),
+  # add
+  library = c("/mnt/lib-flex", .libPaths()),
   repository = "local",
   error = "continue",
   memory = "transient",
