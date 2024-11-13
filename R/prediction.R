@@ -46,6 +46,9 @@ reduce_list <- function(df_list) {
 #' @param year logical(1). If `TRUE`, sublists will contain only one year. This
 #' may result in sublists with fewer than `n` dates.
 #' @param julian logical(1). If `TRUE`, dates are in Julian format.
+#' @param append logical(1). If `TRUE`, append new dates to the previous list,
+#' if it exists and is stored at `path`.
+#' @param path character(1). File path to store the previous list of dates.
 #' @return a list object, with date ranges split into subranges.
 #' @keywords Utility
 #' @export
@@ -53,22 +56,35 @@ split_dates <- function(
   dates,
   n,
   year = TRUE,
-  julian = FALSE
+  julian = FALSE,
+  append = FALSE,
+  path = "/inst/extdata/list_dates.qs"
 ) {
+  ##### full list of dates
   dates_full <- amadeus::generate_date_sequence(
     dates[1],
     dates[2],
     sub_hyphen = FALSE
   )
-  if (julian) {
-    dates_full <- format(dates_full, "%Y%j")
+
+  ##### if appending, include only dates after the last date in the
+  ##### previous list
+  if (append && file.exists(path)) {
+    dates_prev <- qs::qread(path)
+    prev_last <- tail(dates_prev[[length(dates_prev)]], n = 1)
+    dates_include <- dates_full[dates_full > prev_last]
+  } else {
+    dates_prev <- NULL
+    dates_include <- dates_full
   }
+
+  ##### include only dates from the same year in each sublist item
   if (year) {
-    u_years <- unique(substr(dates_full, 1, 4))
+    u_years <- unique(substr(dates_include, 1, 4))
     list_split <- lapply(
       u_years,
       function(year) {
-        dates_year <- grep(year, dates_full, value = TRUE)
+        dates_year <- grep(year, dates_include, value = TRUE)
         base::split(
           dates_year,
           ceiling(seq_along(dates_year) / n)
@@ -79,11 +95,28 @@ split_dates <- function(
     names(dates_split) <- seq(1, length(dates_split), 1)
   } else {
     dates_split <- base::split(
-      dates_full,
-      ceiling(seq_along(dates_full) / n)
+      dates_include,
+      ceiling(seq_along(dates_include) / n)
     )
   }
-  return(dates_split)
+
+  ##### convert to julian date format
+  if (julian) {
+    dates_julian <- lapply(dates_split, function(x) format(as.Date(x), "%Y%j"))
+  } else {
+    dates_julian <- dates_split
+  }
+
+  ##### append prevoius list of dates
+  if (append) {
+    dates_return <- c(dates_prev, dates_julian)
+    names(dates_return) <- seq(1, length(dates_return), 1)
+    qs::qsave(dates_return, path)
+  } else {
+    dates_return <- dates_julian
+  }
+
+  return(dates_return)
 }
 
 #' Extract the first and last elements of a list

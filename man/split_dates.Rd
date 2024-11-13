@@ -4,7 +4,14 @@
 \alias{split_dates}
 \title{Split a date range into subranges}
 \usage{
-split_dates(dates, n, year = TRUE, julian = FALSE)
+split_dates(
+  dates,
+  n,
+  year = TRUE,
+  julian = FALSE,
+  append = FALSE,
+  path = "/inst/extdata/list_dates.qs"
+)
 }
 \arguments{
 \item{dates}{character(2). date to query. \code{"YYYY-MM-DD"} format.}
@@ -15,6 +22,11 @@ split_dates(dates, n, year = TRUE, julian = FALSE)
 may result in sublists with fewer than \code{n} dates.}
 
 \item{julian}{logical(1). If \code{TRUE}, dates are in Julian format.}
+
+\item{append}{logical(1). If \code{TRUE}, append new dates to the previous list,
+if it exists and is stored at \code{path}.}
+
+\item{path}{character(1). File path to store the previous list of dates.}
 }
 \value{
 a list object, with date ranges split into subranges.
