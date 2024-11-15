@@ -98,7 +98,6 @@ set_target_years <-
 #' @importFrom data.table rbindlist
 #' @importFrom rlang inject
 #' @importFrom amadeus process_covariates calculate_covariates
-#' @importFrom future plan sequential multicore
 #' @export
 calculate <-
   function(
@@ -117,17 +116,11 @@ calculate <-
     domainlist <- split(domain, seq_along(domain))
     years_data <- seq_along(domain) + 2017
 
-    if (nthreads == 1L) {
-      future::plan(future::sequential)
-    } else {
-      future::plan(future::multicore, workers = nthreads)
-    }
     # double twists: list_iteration is made to distinguish
     # cases where a single radius is accepted or ones have no radius
     # argument.
     res_calc <-
-      #try(
-      future.apply::future_mapply(
+      mapply(
         function(domain_each, year_each) {
           # we assume that ... have no "year" and "from" arguments
           args_process <- c(arg = domain_each, list(...))
@@ -187,11 +180,10 @@ calculate <-
             }
           return(df_iteration_calc)
         },
-        domainlist, years_data, SIMPLIFY = FALSE,
-        future.seed = TRUE
+        domainlist, years_data,
+        SIMPLIFY = FALSE
       )
 
-    future::plan(future::sequential)
     if (inherits(res_calc, "try-error")) {
       cat(paste0(attr(res_calc, "condition")$message, "\n"))
       stop("Results do not match expectations.")
@@ -252,7 +244,7 @@ inject_calculate <- function(covariate, locs, injection) {
 #' @param locs A data frame containing the locations for which MODIS
 #'   features need to be calculated.
 #' @param injection **List** of dditional parameters to be passed to the
-#'   `amadeus::calculate_modis_par` function.
+#'   `calculate_modis_par` function.
 #' @return MODIS/VIIRS feature data.frame.
 #' @seealso [`amadeus::calculate_modis_daily`], [`amadeus::calculate_modis_par`]
 #' @importFrom rlang inject
@@ -326,17 +318,14 @@ inject_geos <- function(locs, injection, ...) {
 #'  Default is 4.
 #' @return A data frame containing the merged results of GMTED data
 #'   for each location within different radii.
-#' @importFrom future plan
-#' @importFrom future.apply future_lapply
 #' @importFrom rlang inject
 #' @export
 inject_gmted <- function(locs, variable, radii, injection, nthreads = 4L) {
-  future::plan(future::multicore, workers = nthreads)
 
   radii_list <- split(radii, seq_along(radii))
 
   radii_rep <-
-    future.apply::future_lapply(
+    lapply(
       radii_list,
       function(r) {
         rlang::inject(
@@ -354,7 +343,7 @@ inject_gmted <- function(locs, variable, radii, injection, nthreads = 4L) {
 
   radii_rep <- lapply(radii_rep, function(x) as.data.frame(x))
   radii_join <- beethoven::reduce_merge(radii_rep, "site_id")
-  future::plan(future::sequential)
+
   return(radii_join)
 }
 
