@@ -17,7 +17,8 @@ target_initiate <-
         dates = chr_daterange,
         n = num_dates_split
       ),
-      description = "Split date range into list"
+      description = "Split date range into list",
+      iteration = "vector"
     )
     ,
     targets::tar_target(

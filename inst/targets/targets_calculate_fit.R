@@ -9,17 +9,10 @@ target_calculate_fit <-
         "aqc_tavg_1hr_g1440x721_v1",
         "chm_tavg_1hr_g1440x721_v1"
       ),
-      iteration = "list",
+      iteration = "vector",
       description = "GEOS-CF features"
     )
     ,
-    # targets::tar_target(
-    #   chr_iter_calc_geos,
-    #   command = c("geoscf_chm", "geoscf_aqc"),
-    #   iteration = "vector",
-    #   description = "GEOS-CF feature calculation"
-    # )
-    # ,
     targets::tar_target(
       list_feat_calc_geos,
       command = {
@@ -27,7 +20,7 @@ target_calculate_fit <-
         inject_geos(
           locs = sf_feat_proc_aqs_sites,
           injection = list(
-            date = fl_dates(list_dates),
+            date = fl_dates(unlist(list_dates)),
             path = file.path(
               arglist_common$char_input_dir,
               "geos",
@@ -37,7 +30,6 @@ target_calculate_fit <-
           )
         )
       },
-      #pattern = map(chr_iter_calc_geos),
       pattern = cross(chr_iter_calc_geos, list_dates),
       iteration = "list",
       resources = targets::tar_resources(
