@@ -19,9 +19,7 @@
 #' @author Mitchell Manware, Insang Song
 #' @return a `SpatRaster` object;
 #' @importFrom sf st_as_sf
-#' @importFrom future.apply future_lapply
 #' @importFrom data.table rbindlist
-#' @importFrom future plan multicore sequential
 #' @importFrom amadeus generate_date_sequence
 #' @importFrom terra describe rast time subset crs varnames vect sds extract
 #' @importFrom terra nlyr set.crs
@@ -203,13 +201,7 @@ calc_geos_strict <-
       return(rast_ext)
 
     }
-    # future::plan(future::multicore, workers = 10)
-    # rast_summary <-
-    #   future.apply::future_lapply(
-    #     future_inserted,
-    #     function(fs) summary_byvar(fs = fs)
-    #   )
-    # future::plan(future::sequential)
+
     rast_summary <-
       lapply(
         future_inserted,
@@ -516,18 +508,15 @@ calc_narr2 <- function(
 #'  to use for parallel processing. Default is 24.
 #'
 #' @return A list of results from the parallel processing.
-#' @importFrom future plan multicore sequential
-#' @importFrom future.apply future_lapply
 #' @export
-par_narr <- function(domain, path, date, locs, nthreads = 24L) {
+par_narr <- function(domain, path, date, locs) {
 
   if (!dir.exists(path)) {
     stop("The specified path does not exist.")
   }
-  future::plan(future::multicore, workers = nthreads)
 
   res <-
-    future.apply::future_lapply(
+    lapply(
       domain,
       function(x) {
         from <- process_narr2(
@@ -540,10 +529,8 @@ par_narr <- function(domain, path, date, locs, nthreads = 24L) {
           locs = locs,
           locs_id = "site_id"
         )
-      },
-      future.seed = TRUE
+      }
     )
-  future::plan(future::sequential)
   return(res)
 
 }
@@ -572,3 +559,277 @@ query_modis_files <- function(path, list, index) {
   )
   return(grep_files)
 }
+
+
+
+#' Calculate MODIS product covariates in multiple CPU threads
+#' @param from character. List of paths to MODIS/VIIRS files.
+#' @param locs sf/SpatVector object. Unique locs where covariates
+#' will be calculated.
+#' @param locs_id character(1). Site identifier. Default is `"site_id"`
+#' @param radius numeric. Radii to calculate covariates.
+#' Default is `c(0, 1000, 10000, 50000)`.
+#' @param preprocess function. Function to handle HDF files.
+#' @param name_covariates character. Name header of covariates.
+#' e.g., `"MOD_NDVIF_0_"`.
+#' The calculated covariate names will have a form of
+#' "\code{\{name_covariates\}\{zero-padded buffer radius in meters\}}",
+#' e.g., 'MOD_NDVIF_0_50000' where 50 km radius circular buffer
+#' was used to calculate mean NDVI value.
+#' @param subdataset Indices, names, or search patterns for subdatasets.
+#' Find detail usage of the argument in notes.
+#' @param fun_summary character or function. Function to summarize
+#'  extracted raster values.
+#' @param package_list_add character. A vector with package names to load
+#'  these in each thread. Note that `sf`, `terra`, `exactextractr`,
+#' `doParallel`, `parallelly` and `dplyr` are the default packages to be
+#' loaded.
+#' @param export_list_add character. A vector with object names to export
+#'  to each thread. It should be minimized to spare memory.
+#' @param max_cells integer(1). Maximum number of cells to be read at once.
+#' Higher values will expedite processing, but will increase memory usage.
+#' Maximum possible value is `2^31 - 1`.
+#' See [`exactextractr::exact_extract`] for details.
+#' @param geom FALSE/"sf"/"terra".. Should the function return with geometry?
+#' Default is `FALSE`, options with geometry are "sf" or "terra". The
+#' coordinate reference system of the `sf` or `SpatVector` is that of `from.`
+#' @param ... Arguments passed to `preprocess`.
+# nolint start
+#' @description `calculate_modis_par` essentially runs [`calculate_modis_daily`] function
+#' in each thread (subprocess). Based on daily resolution, each day's workload
+#' will be distributed to each thread. With `product` argument,
+#' the files are processed by a customized function where the unique structure
+#' and/or characteristics of the products are considered. `nthreads`
+#' argument should be carefully selected in consideration of the machine's
+#' CPU and memory capacities as products have their own memory pressure.
+#' `locs` should be `sf` object as it is exportable to parallel workers.
+# nolint end
+#' @note Overall, this function and dependent routines assume that the file
+#' system can handle concurrent access to the (network) disk by multiple
+#' processes. File system characteristics, package versions, and hardware
+#' settings and specification can affect the processing efficiency.
+#' `locs` is expected to be convertible to `sf` object. `sf`, `SpatVector`, and
+#' other class objects that could be converted to `sf` can be used.
+#' Common arguments in `preprocess` functions such as `date` and `path` are
+#' automatically detected and passed to the function. Please note that
+#' `locs` here and `path` in `preprocess` functions are assumed to have a
+#' standard naming convention of raw files from NASA.
+#' The argument `subdataset` should be in a proper format
+#' depending on `preprocess` function:
+#' * `process_modis_merge()`: Regular expression pattern.
+#'   e.g., `"^LST_"`
+#' * `process_modis_swath()`: Subdataset names.
+#'   e.g., `c("Cloud_Fraction_Day", "Cloud_Fraction_Night")`
+#' * `process_blackmarble()`: Subdataset number.
+#'   e.g., for VNP46A2 product, 3L.
+#' Dates with less than 80 percent of the expected number of tiles,
+#' which are determined by the mode of the number of tiles, are removed.
+#' Users will be informed of the dates with insufficient tiles.
+#' The result data.frame will have an attribute with the dates with
+#' insufficient tiles.
+#' @return A data.frame or SpatVector with an attribute:
+#' * `attr(., "dates_dropped")`: Dates with insufficient tiles.
+#'   Note that the dates mean the dates with insufficient tiles,
+#'   not the dates without available tiles.
+#' @seealso
+#' This function leverages the calculation of single-day MODIS
+#' covariates:
+#' * [`calculate_modis_daily()`]
+#'
+#' Also, for preprocessing, please refer to:
+#' * [`process_modis_merge()`]
+#' * [`process_modis_swath()`]
+#' * [`process_blackmarble()`]
+#' @importFrom methods is
+#' @importFrom sf st_as_sf
+#' @importFrom sf st_drop_geometry
+#' @importFrom terra nlyr
+#' @importFrom dplyr bind_rows
+#' @importFrom dplyr left_join
+#' @importFrom rlang inject
+#' @importFrom parallelly availableWorkers
+#' @examples
+#' ## NOTE: Example is wrapped in `\dontrun{}` as function requires a large
+#' ##       amount of data which is not included in the package.
+#' \dontrun{
+#' locs <- data.frame(lon = -78.8277, lat = 35.95013, id = "001")
+#' locs <- terra::vect(locs, geom = c("lon", "lat"), crs = "EPSG:4326")
+#' calculate_modis(
+#'   from =
+#'     list.files("./data", pattern = "VNP46A2.", full.names = TRUE),
+#'   locs = locs,
+#'   locs_id = "site_id",
+#'   radius = c(0L, 1000L),
+#'   preprocess = process_modis_merge,
+#'   name_covariates = "cloud_fraction_0",
+#'   subdataset = "Cloud_Fraction",
+#'   fun_summary = "mean"
+#' )
+#' }
+#' @export
+calculate_modis <-
+  function(
+    from = NULL,
+    locs = NULL,
+    locs_id = "site_id",
+    radius = c(0L, 1e3L, 1e4L, 5e4L),
+    preprocess = amadeus::process_modis_merge,
+    name_covariates = NULL,
+    subdataset = NULL,
+    fun_summary = "mean",
+    package_list_add = NULL,
+    export_list_add = NULL,
+    max_cells = 3e7,
+    geom = FALSE,
+    ...
+  ) {
+    amadeus::check_geom(geom)
+    if (!is.function(preprocess)) {
+      stop("preprocess should be one of process_modis_merge,
+process_modis_swath, or process_blackmarble.")
+    }
+    # read all arguments
+    # nolint start
+    hdf_args <- c(as.list(environment()), list(...))
+    # nolint end
+    dates_available_m <-
+      regmatches(from, regexpr("A20\\d{2,2}[0-3]\\d{2,2}", from))
+    dates_available <- sort(unique(dates_available_m))
+    dates_available <- sub("A", "", dates_available)
+
+    # When multiple dates are concerned,
+    # the number of tiles are expected to be the same.
+    # Exceptions could exist, so here the number of tiles are checked.
+    summary_available <- table(dates_available_m)
+    summary_available_mode <-
+      sort(table(summary_available), decreasing = TRUE)[1]
+    summary_available_mode <- as.numeric(names(summary_available_mode))
+    summary_available_insuf <-
+      which(summary_available < floor(summary_available_mode * 0.8))
+
+    if (length(summary_available_insuf) > 0) {
+      dates_insuf <-
+        as.Date(dates_available[summary_available_insuf], "%Y%j")
+      message(
+        paste0(
+          "The number of tiles on the following dates are insufficient: ",
+          paste(dates_insuf, collapse = ", "),
+          ".\n"
+        )
+      )
+      # finally it removes the dates with insufficient tiles
+      dates_available <- dates_available[-summary_available_insuf]
+    } else {
+      dates_insuf <- NA
+    }
+
+    locs_input <- try(sf::st_as_sf(locs), silent = TRUE)
+    if (inherits(locs_input, "try-error")) {
+      stop("locs cannot be convertible to sf.
+      Please convert locs into a sf object to proceed.\n")
+    }
+
+    export_list <- c()
+    package_list <-
+      c("sf", "terra", "exactextractr", "data.table", "stars",
+        "dplyr", "parallelly", "rlang", "amadeus")
+    if (!is.null(export_list_add)) {
+      export_list <- append(export_list, export_list_add)
+    }
+    if (!is.null(package_list_add)) {
+      package_list <- append(package_list, package_list_add)
+    }
+
+    # make clusters
+    idx_date_available <- seq_along(dates_available)
+    list_date_available <-
+      split(idx_date_available, idx_date_available)
+    calc_results <-
+      lapply(
+        list_date_available,
+        FUN = function(datei) {
+          options(sf_use_s2 = FALSE)
+          # nolint start
+          day_to_pick <- dates_available[datei]
+          # nolint end
+          day_to_pick <- as.Date(day_to_pick, format = "%Y%j")
+
+          radiusindex <- seq_along(radius)
+          radiusindexlist <- split(radiusindex, radiusindex)
+
+          hdf_args <- c(hdf_args, list(date = day_to_pick))
+          hdf_args <- c(hdf_args, list(path = hdf_args$from))
+          # unified interface with rlang::inject
+          vrt_today <-
+            rlang::inject(preprocess(!!!hdf_args))
+
+          if (sum(terra::nlyr(vrt_today)) != length(name_covariates)) {
+            message("The number of layers in the input raster do not match
+                    the length of name_covariates.\n")
+          }
+
+          res0 <-
+            lapply(radiusindexlist,
+              function(k) {
+                name_radius <-
+                  sprintf("%s%05d",
+                          name_covariates,
+                          radius[k])
+                extracted <-
+                  try(
+                    amadeus::calculate_modis_daily(
+                      locs = locs_input,
+                      from = vrt_today,
+                      locs_id = locs_id,
+                      date = as.character(day_to_pick),
+                      fun_summary = fun_summary,
+                      name_extracted = name_radius,
+                      radius = radius[k],
+                      max_cells = max_cells,
+                      geom = FALSE
+                    )
+                  )
+                if (inherits(extracted, "try-error")) {
+                  # coerce to avoid errors
+                  error_df <- data.frame(
+                    matrix(-99999,
+                           ncol = length(name_radius) + 1,
+                           nrow = nrow(locs_input))
+                  )
+                  error_df <- stats::setNames(error_df, c(locs_id, name_radius))
+                  error_df[[locs_id]] <- unlist(locs_input[[locs_id]])
+                  error_df$time <- day_to_pick
+                  extracted <- error_df
+                }
+                return(extracted)
+              }
+            )
+          res <-
+            Reduce(function(x, y) {
+              dplyr::left_join(x, y,
+                by = c(locs_id, "time")
+              )
+            },
+            res0)
+          return(res)
+
+        }
+      )
+    calc_results <- do.call(dplyr::bind_rows, calc_results)
+    if (geom %in% c("sf", "terra")) {
+      # merge
+      calc_results_return <- merge(
+        locs_input,
+        calc_results,
+        by = locs_id
+      )
+      if (geom == "terra") {
+        calc_results_return <- terra::vect(calc_results_return)
+      }
+    } else {
+      calc_results_return <- calc_results
+    }
+    attr(calc_results_return, "dates_dropped") <- dates_insuf
+    Sys.sleep(1L)
+    return(calc_results_return)
+  }

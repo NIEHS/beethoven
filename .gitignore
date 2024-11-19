@@ -118,3 +118,7 @@ inst/extdata/nasa_token.txt
 
 debug/
 debug*.sh
+
+
+# dev
+lib-flex/**
