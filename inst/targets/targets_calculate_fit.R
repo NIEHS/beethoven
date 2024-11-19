@@ -63,15 +63,6 @@ target_calculate_fit <-
     )
     ,
     targets::tar_target(
-      name = chr_iter_calc_narr,
-      command = c("air.sfc", "albedo", "apcp", "dswrf", "evap", "hcdc",
-                  "hpbl", "lcdc", "lhtfl", "mcdc", "omega", "pr_wtr",
-                  "pres.sfc", "shtfl", "snowc", "soilm",    
-                  "tcdc", "ulwrf.sfc", "uwnd.10m", "vis", "vwnd.10m", "weasd"),
-      iteration = "vector"
-    )
-    ,
-    targets::tar_target(
       list_feat_calc_narr,
       command = {
         # download_narr
