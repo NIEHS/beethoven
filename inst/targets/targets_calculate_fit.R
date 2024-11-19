@@ -161,7 +161,6 @@ target_calculate_fit <-
           ),
           name_covariates = c("MOD_SFCTD_0_", "MOD_SFCTN_0_"),
           subdataset = "^LST_",
-          nthreads = 1,
           radius = chr_iter_radii
         )
       },
@@ -173,7 +172,7 @@ target_calculate_fit <-
     ,
     targets::tar_target(
       list_feat_calc_mod11,
-      command = inject_modis_par(
+      command = inject_modis(
         locs = sf_feat_proc_aqs_sites,
         injection = list_args_calc_mod11
       ),
@@ -201,7 +200,6 @@ target_calculate_fit <-
           ),
           name_covariates = c("MOD_CLCVD_0_", "MOD_CLCVN_0_"),
           subdataset = c("Cloud_Fraction_Day", "Cloud_Fraction_Night"),
-          nthreads = 1,
           preprocess = amadeus::process_modis_swath,
           radius = chr_iter_radii
         )
@@ -214,7 +212,7 @@ target_calculate_fit <-
     ,
     targets::tar_target(
       list_feat_calc_mod06,
-      command = inject_modis_par(
+      command = inject_modis(
         locs = sf_feat_proc_aqs_sites,
         injection = list_args_calc_mod06
       ),
@@ -242,7 +240,6 @@ target_calculate_fit <-
           ),
           name_covariates = "MOD_NDVIV_0_",
           subdataset = "(NDVI)",
-          nthreads = 1,
           radius = chr_iter_radii
         )
       },
@@ -254,7 +251,7 @@ target_calculate_fit <-
     ,
     targets::tar_target(
       list_feat_calc_mod13,
-      command = inject_modis_par(
+      command = inject_modis(
         locs = sf_feat_proc_aqs_sites,
         injection = list_args_calc_mod13
       ),
@@ -282,7 +279,6 @@ target_calculate_fit <-
           ),
           name_covariates = c("MOD_AD4TA_0_", "MOD_AD5TA_0_"),
           subdataset = "^Optical_Depth",
-          nthreads = 1,
           radius = chr_iter_radii
         )
       },
@@ -294,7 +290,7 @@ target_calculate_fit <-
     ,
     targets::tar_target(
       list_feat_calc_mcd19_1km,
-      command = inject_modis_par(
+      command = inject_modis(
         locs = sf_feat_proc_aqs_sites,
         injection = list_args_calc_mcd19_1km
       ),
@@ -325,7 +321,6 @@ target_calculate_fit <-
             "MOD_SCTAN_0_", "MOD_GLNAN_0_"
           ),
           subdataset = "cos|RelAZ|Angle",
-          nthreads = 1,
           radius = chr_iter_radii
         )
       },
@@ -337,7 +332,7 @@ target_calculate_fit <-
     ,
     targets::tar_target(
       list_feat_calc_mcd19_5km,
-      command = inject_modis_par(
+      command = inject_modis(
         locs = sf_feat_proc_aqs_sites,
         injection = list_args_calc_mcd19_5km
       ),
@@ -368,7 +363,6 @@ target_calculate_fit <-
             "MOD_SFCRF_5_", "MOD_SFCRF_6_", "MOD_SFCRF_7_"
           ),
           subdataset = "^sur_refl_",
-          nthreads = 1,
           radius = chr_iter_radii
         )
       },
@@ -380,7 +374,7 @@ target_calculate_fit <-
     ,
     targets::tar_target(
       list_feat_calc_mod09,
-      command = inject_modis_par(
+      command = inject_modis(
         locs = sf_feat_proc_aqs_sites,
         injection = list_args_calc_mod09
       ),
@@ -409,7 +403,6 @@ target_calculate_fit <-
           name_covariates = "MOD_LGHTN_0_",
           subdataset = 3,
           preprocess = amadeus::process_blackmarble,
-          nthreads = 1,
           radius = chr_iter_radii
         )
       },
@@ -421,7 +414,7 @@ target_calculate_fit <-
     ,
     targets::tar_target(
       list_feat_calc_viirs,
-      command = inject_modis_par(
+      command = inject_modis(
         locs = sf_feat_proc_aqs_sites,
         injection = list_args_calc_viirs
       ),
