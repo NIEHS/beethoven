@@ -241,6 +241,7 @@ inject_calculate <- function(covariate, locs, injection) {
 
 #' Injects arguments to parallelize MODIS/VIIRS data processing
 #' @keywords Calculation
+#' @note Soon to be deprecated per dropping future dependency.
 #' @param locs A data frame containing the locations for which MODIS
 #'   features need to be calculated.
 #' @param injection **List** of dditional parameters to be passed to the

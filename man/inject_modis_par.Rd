@@ -19,6 +19,9 @@ MODIS/VIIRS feature data.frame.
 \description{
 Injects arguments to parallelize MODIS/VIIRS data processing
 }
+\note{
+Soon to be deprecated per dropping future dependency.
+}
 \examples{
 \dontrun{
 files <-
