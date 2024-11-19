@@ -31,7 +31,6 @@ targets::tar_option_set(
     "amadeus"
   ),
   # add
-  library = c("/mnt/lib-flex", .libPaths()),
   repository = "local",
   error = "continue",
   memory = "transient",

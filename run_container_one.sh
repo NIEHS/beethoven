@@ -22,7 +22,7 @@ apptainer exec \
   --bind $PWD/inst:/inst \
   --bind /ddn:/input \
   --bind $PWD/_targets:/opt/_targets \
-  beethoven_dl_calc.sif \
+  beethoven_dl_calc_20241119.sif \
   Rscript --no-init-file -e "targets::tar_make('$DEBUG_TARGET')"
 
 # run interactive R session in the container
