@@ -4,7 +4,7 @@
 \alias{par_narr}
 \title{Parallelize NARR feature calculation}
 \usage{
-par_narr(domain, path, date, locs, nthreads = 24L)
+par_narr(domain, path, date, locs)
 }
 \arguments{
 \item{domain}{A character vector specifying the domains to process.}
