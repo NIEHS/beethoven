@@ -5,8 +5,8 @@
 #SBATCH --mail-type=END,FAIL
 #SBATCH --partition=geo
 #SBATCH --ntasks=1
-#SBATCH --mem=100G
-#SBATCH --cpus-per-task=50
+#SBATCH --mem=800G
+#SBATCH --cpus-per-task=100
 #SBATCH --error=/ddn/gs1/home/manwareme/beethoven/beethoven/slurm/beethoven_%j.err
 #SBATCH --output=/ddn/gs1/home/manwareme/beethoven/beethoven/slurm/beethoven_%j.out
 

@@ -15,4 +15,3 @@ tab_feature <-
 knitr::kable(
   tab_feature
 )
-

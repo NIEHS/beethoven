@@ -54,7 +54,7 @@ target_critical <-
     #####    branches when the temporal range is updated.
     targets::tar_target(
       num_dates_split,
-      command = 10,
+      command = 50,
       description = "Number of days to include in each temporal split"
     )
     ############################################################################

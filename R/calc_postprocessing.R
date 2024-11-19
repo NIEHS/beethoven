@@ -659,7 +659,7 @@ impute_all <-
         sample.fraction = 0.1
       )
 
-    imputed <- amadeus::calc_temporal_dummies(imputed, "time")
+    imputed <- amadeus::calculate_temporal_dummies(imputed, "time")
     return(imputed)
     # lagged features: changing period (period[1] + 1 day)
     # period <- as.Date(period)
@@ -670,7 +670,7 @@ impute_all <-
     # index_lag <- grep(paste(index_lag, collapse = "|"), names(dt))
     # target_lag <- imputed[, index_lag, with = FALSE]
 
-    # output <- amadeus::calc_lagged(target_lag, period, 1, "site_id")
+    # output <- amadeus::calculate_lagged(target_lag, period, 1, "site_id")
     # return(output)
   }
 

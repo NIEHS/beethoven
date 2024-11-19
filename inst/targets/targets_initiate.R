@@ -28,30 +28,19 @@ target_initiate <-
     )
     ,
     targets::tar_target(
-      chr_dates_julian,
-      command = format(
-        amadeus::generate_date_sequence(
-          chr_daterange[1],
-          chr_daterange[2],
-          FALSE
-        ),
-        "%Y%j"
-      ),
-      description = "Julian dates"
-    )
-    ,
-    targets::tar_target(
       list_dates_julian,
-      command = split(
-        chr_dates_julian,
-        ceiling(seq_along(chr_dates_julian) / num_dates_split)
-      )
+      command = beethoven::split_dates(
+        dates = chr_daterange,
+        n = num_dates_split,
+        year = TRUE,
+        julian = TRUE
+      ),
+      description = "Split date range into list (Julian)"
     )
     ,
     targets::tar_target(
       chr_iter_radii,
-      command = c(1000, 10000),
-      # command = c(1000, 10000, 50000),
+      command = c(1000, 10000, 50000),
       description = "Buffer radii"
     )
     ,

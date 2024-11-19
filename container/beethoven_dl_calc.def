@@ -31,7 +31,7 @@ From: rocker/geospatial:latest
     Rscript -e "install.packages(c('pak', 'targets', 'tarchetypes', 'crew', \
         'crew.cluster', 'testthat', 'tidymodels', 'bonsai'))"
     Rscript -e "pak::pak('NIEHS/amadeus')"
-    Rscript -e "pak::pak('NIEHS/beethoven@isong-exp')"
+    Rscript -e "pak::pak('NIEHS/beethoven@dev-isong-1115', ask = FALSE)"
 
 %environment
     # Set locale for the container environment
