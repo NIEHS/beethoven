@@ -4,25 +4,32 @@ target_aqs <-
   list(
     ###########################         AQS          ###########################
     targets::tar_target(
-      sf_feat_proc_aqs_sites,
+      list_feat_proc_aqs_sites,
       command = {
         download_aqs
-        amadeus::process_aqs(
-          path = list.files(
-            path = file.path(
-              arglist_common$char_input_dir,
-              "aqs",
-              "data_files"
-            ),
-            pattern = "daily_88101_[0-9]{4}.csv",
-            full.names = TRUE
-          ),
-          date = arglist_common$char_period,
+        sf_feat_proc_aqs_sites_date <- amadeus::process_aqs(
+          path = file.path(chr_input_dir, "aqs", "data_files"),
+          date = chr_daterange,
           mode = "location",
+          data_field = "Arithmetic.Mean",
           return_format = "sf"
         )
+        list_feat_split_aqs_sites <- lapply(
+          split(
+            sf_feat_proc_aqs_sites_date,
+            sf_feat_proc_aqs_sites_date$site_id
+          ),
+          function(x) {
+            rownames(x) <- NULL
+            x
+          }
+        )
+        list_feat_sort_aqs_sites <- list_feat_split_aqs_sites[
+          sort(names(list_feat_split_aqs_sites))
+        ]
+        list_feat_sort_aqs_sites
       },
-      description = "AQS sites"
+      description = "AQS locations"
     )
     ,
     targets::tar_target(
@@ -45,6 +52,6 @@ target_aqs <-
           return_format = "data.table"
         )
       },
-      description = "AQS sites with time"
+      description = "AQS locations with time and data"
     )
   )

@@ -4,14 +4,9 @@
 ##### for the beethoven analysis pipeline.
 
 #############################      CONTROLLER      #############################
-default_controller <- crew::crew_controller_local(
-  name = "default_controller",
-  workers = 4,
-  seconds_idle = 30
-)
-calc_controller <- crew::crew_controller_local(
-  name = "calc_controller",
-  workers = 96,
+beethoven_controller <- crew::crew_controller_local(
+  name = "beethoven_controller",
+  workers = 225,
   seconds_idle = 30
 )
 
@@ -21,8 +16,8 @@ targets::tar_config_set(store = "/opt/_targets")
 ##############################       OPTIONS      ##############################
 targets::tar_option_set(
   packages = c(
-    "beethoven", "targets", "tarchetypes", "dplyr",
-    "data.table", "sf", "crew", "crew.cluster"
+    "amadeus", "targets", "tarchetypes", "geotargets", "dplyr", "tidyverse",
+    "data.table", "sf", "crew", "crew.cluster", "lubridate", "qs"
   ),
   repository = "local",
   error = "continue",
@@ -32,10 +27,7 @@ targets::tar_option_set(
   deployment = "worker",
   garbage_collection = TRUE,
   seed = 202401L,
-  controller = crew::crew_controller_group(
-    default_controller,
-    calc_controller
-  )
+  controller = crew::crew_controller_group(beethoven_controller)
 )
 
 ###########################      SOURCE TARGETS      ###########################
