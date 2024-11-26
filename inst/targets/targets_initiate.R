@@ -33,6 +33,16 @@ target_initiate <-
     )
     ,
     targets::tar_target(
+      list_dates_small,
+      command = beethoven::split_dates(
+        dates = chr_daterange,
+        n = 10,
+        year = TRUE
+      ),
+      description = "Dates as list (YYYY-MM-DD) | GEOS-CF"
+    )
+    ,
+    targets::tar_target(
       chr_iter_radii,
       command = c(1000, 10000, 50000),
       description = "Buffer radii"

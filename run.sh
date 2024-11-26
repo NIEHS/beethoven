@@ -6,7 +6,7 @@
 #SBATCH --partition=geo
 #SBATCH --ntasks=1
 #SBATCH --mem=900G
-#SBATCH --cpus-per-task=225
+#SBATCH --cpus-per-task=200
 #SBATCH --error=slurm/beethoven_%j.err
 #SBATCH --output=slurm/beethoven_%j.out
 

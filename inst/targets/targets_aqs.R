@@ -24,10 +24,16 @@ target_aqs <-
             x
           }
         )
-        list_feat_sort_aqs_sites <- list_feat_split_aqs_sites[
-          sort(names(list_feat_split_aqs_sites))
-        ]
-        list_feat_sort_aqs_sites
+        list_feat_state_aqs_sites <- lapply(
+          lapply(
+            split(
+              names(list_feat_split_aqs_sites),
+              substr(names(list_feat_split_aqs_sites), 1, 2)
+            ), function(x) list_feat_split_aqs_sites[x]
+          ),
+          function(x) dplyr::bind_rows(x)
+        )
+        list_feat_state_aqs_sites
       },
       description = "AQS locations"
     )
