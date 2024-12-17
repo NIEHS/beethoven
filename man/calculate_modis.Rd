@@ -74,7 +74,7 @@ not the dates without available tiles.
 }
 }
 \description{
-\code{calculate_modis_par} essentially runs \code{\link{calculate_modis_daily}} function
+\code{calculate_modis} essentially runs \code{\link{calculate_modis_daily}} function
 in each thread (subprocess). Based on daily resolution, each day's workload
 will be distributed to each thread. With \code{product} argument,
 the files are processed by a customized function where the unique structure
@@ -143,3 +143,4 @@ Also, for preprocessing, please refer to:
 \item \code{\link[=process_blackmarble]{process_blackmarble()}}
 }
 }
+\keyword{Calculation}
