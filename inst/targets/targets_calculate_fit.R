@@ -587,8 +587,8 @@ target_calculate_fit <-
       list_feat_calc_pop,
       command = {
         download_population
-        amadeus::calculate_sedac_population(
-          from = amadeus::process_sedac_population(
+        amadeus::calculate_population(
+          from = amadeus::process_population(
             path = file.path(
               chr_input_dir,
               "population",
@@ -727,8 +727,8 @@ target_calculate_fit <-
       list_feat_calc_groads,
       command = {
         download_groads
-        amadeus::calculate_sedac_groads(
-          from = amadeus::process_sedac_groads(
+        amadeus::calculate_groads(
+          from = amadeus::process_groads(
             path = file.path(
               chr_input_dir,
               "groads",

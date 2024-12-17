@@ -342,7 +342,7 @@ target_download <-
     targets::tar_target(
       download_population,
       command = {
-        amadeus::download_sedac_population(
+        amadeus::download_population(
           data_resolution = "30 second",
           data_format = "GeoTIFF",
           year = "2020",
@@ -421,7 +421,7 @@ target_download <-
     targets::tar_target(
       download_groads,
       command = {
-        amadeus::download_sedac_groads(
+        amadeus::download_groads(
           data_region = "Americas",
           data_format = "Geodatabase",
           directory_to_save = file.path(chr_input_dir, "groads"),
