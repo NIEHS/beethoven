@@ -504,8 +504,6 @@ calc_narr2 <- function(
 #' @param date A character vector specifying the date of the
 #'  NARR data to process.
 #' @param locs A data frame specifying the locations to calculate NARR data for.
-#' @param nthreads An integer specifying the number of threads
-#'  to use for parallel processing. Default is 24.
 #'
 #' @return A list of results from the parallel processing.
 #' @export

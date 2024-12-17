@@ -36,7 +36,6 @@ Imports:
   recipes,
   missRanger,
   parsnip,
-  future.apply,
   future.batchtools,
   anticlust,
   qs,
@@ -45,7 +44,9 @@ Imports:
   collapse,
   tigris,
   graphics,
-  scatterplot3d
+  scatterplot3d,
+  amadeus,
+  parallelly
 Suggests:
   testthat (>= 3.0.0),
   covr,
@@ -70,7 +71,7 @@ Suggests:
   doRNG,
   furrr,
   quarto
-Remotes: NIEHS/amadeus@1.1.4, NIEHS/chopin
+Remotes: NIEHS/chopin
 SystemRequirements: NetCDF4, CUDA (>= 10.0)
 Encoding: UTF-8
 VignetteBuilder: knitr, rmarkdown

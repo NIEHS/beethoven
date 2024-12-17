@@ -11,7 +11,7 @@ inject_modis_par(locs, injection)
 features need to be calculated.}
 
 \item{injection}{\strong{List} of dditional parameters to be passed to the
-\code{calculate_modis_par} function.}
+\code{calculate_modis} function.}
 }
 \value{
 MODIS/VIIRS feature data.frame.
@@ -39,6 +39,6 @@ inject_modis_par(
 }
 }
 \seealso{
-\code{\link[amadeus:calculate_modis_daily]{amadeus::calculate_modis_daily}}, \code{\link[amadeus:calculate_modis_par]{amadeus::calculate_modis_par}}
+\code{\link[amadeus:calculate_modis_daily]{amadeus::calculate_modis_daily}}, \code{\link[amadeus:calculate_modis]{amadeus::calculate_modis}}
 }
 \keyword{Calculation}

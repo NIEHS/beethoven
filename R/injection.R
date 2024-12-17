@@ -245,9 +245,9 @@ inject_calculate <- function(covariate, locs, injection) {
 #' @param locs A data frame containing the locations for which MODIS
 #'   features need to be calculated.
 #' @param injection **List** of dditional parameters to be passed to the
-#'   `calculate_modis_par` function.
+#'   `calculate_modis` function.
 #' @return MODIS/VIIRS feature data.frame.
-#' @seealso [`amadeus::calculate_modis_daily`], [`amadeus::calculate_modis_par`]
+#' @seealso [`amadeus::calculate_modis_daily`], [`amadeus::calculate_modis`]
 #' @importFrom rlang inject
 #' @examples
 #' \dontrun{
@@ -267,7 +267,7 @@ inject_calculate <- function(covariate, locs, injection) {
 #' @export
 inject_modis_par <- function(locs, injection) {
   rlang::inject(
-    amadeus::calculate_modis_par(
+    amadeus::calculate_modis(
       locs = locs,
       locs_id = "site_id",
       !!!injection
@@ -301,7 +301,7 @@ inject_modis_par <- function(locs, injection) {
 #' @export
 inject_modis <- function(locs, injection) {
   rlang::inject(
-    calculate_modis(
+    amadeus::calculate_modis(
       locs = locs,
       locs_id = "site_id",
       !!!injection
