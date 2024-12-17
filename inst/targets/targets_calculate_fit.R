@@ -4,7 +4,7 @@ target_calculate_fit <-
   list(
     ###########################         GEOS         ###########################
     targets::tar_target(
-      list_feat_calc_geos_aqs,
+      list_feat_calc_geos_aqc,
       command = {
         download_geos_buffer
         beethoven::calc_geos_strict(
@@ -15,6 +15,9 @@ target_calculate_fit <-
         )
       },
       pattern = cross(list_feat_proc_aqs_sites, list_dates),
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_100")
+      ),
       iteration = "list",
       description = "Calculate GEOS-CF features | aqc | fit"
     )
@@ -32,26 +35,30 @@ target_calculate_fit <-
       },
       pattern = cross(list_feat_proc_aqs_sites, list_dates),
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "midmem_controller")
+        crew = targets::tar_resources_crew(controller = "controller_100")
       ),
       iteration = "list",
       description = "Calculate GEOS-CF features | chm | fit"
     )
     ,
-    # targets::tar_target(
-    #   dt_feat_calc_geos,
-    #   command = beethoven::reduce_merge(
-    #     beethoven::reduce_list(list_feat_calc_geos)
-    #   ),
-    #   description = "data.table of GEOS-CF features | fit"
-    # )
-    # ,
+    targets::tar_target(
+      dt_feat_calc_geos,
+      command = beethoven::reduce_merge(
+        c(
+          beethoven::reduce_list(list_feat_calc_geos_aqc),
+          beethoven::reduce_list(list_feat_calc_geos_chm)
+        ),
+        by = c("site_id", "time", "CO", "NO2", "SO2")
+      ),
+      description = "data.table of GEOS-CF features | fit"
+    )
+    ,
     ###########################         NARR         ###########################
     targets::tar_target(
       list_feat_calc_narr,
       command = {
         download_narr_buffer
-        amadeus::calculate_narr(
+        dt_iter_calc_narr <- amadeus::calculate_narr(
           from = amadeus::process_narr(
             path = file.path(chr_input_dir, "narr", chr_iter_calc_narr),
             variable = chr_iter_calc_narr,
@@ -63,6 +70,13 @@ target_calculate_fit <-
           fun = "mean",
           geom = FALSE
         )
+        if (length(grep("level", names(dt_iter_calc_narr))) == 1) {
+          dt_iter_calc_narr <-
+            dt_iter_calc_narr[dt_iter_calc_narr$level == 1000, ]
+          dt_iter_calc_narr <-
+            dt_iter_calc_narr[, -grep("level", names(dt_iter_calc_narr))]
+        }
+        dt_iter_calc_narr
       },
       pattern = cross(list_feat_proc_aqs_sites, list_dates, chr_iter_calc_narr),
       iteration = "list",
@@ -75,13 +89,6 @@ target_calculate_fit <-
         beethoven::reduce_list(list_feat_calc_narr),
         by = c("site_id", "time")
       ),
-      # command = reduce_merge(
-      #   lapply(
-      #     list(list_feat_calc_narr),
-      #     function(x) reduce_merge(reduce_list(lapply(x, "[[", 1)))
-      #   ),
-      #   by = c("site_id", "time")
-      # ),
       description = "data.table of NARR features | fit"
     )
     ,
@@ -113,49 +120,52 @@ target_calculate_fit <-
     )
     ,
     ###########################       MODIS - MOD11       ######################
-    # targets::tar_target(
-    #   chr_args_calc_mod11_files,
-    #   command = {
-    #     download_mod11
-    #     list.files(
-    #       file.path(chr_input_dir, "modis", "raw", "61", "MOD11A1"),
-    #       full.names = TRUE,
-    #       recursive = TRUE
-    #     )
-    #   },
-    #   description = "MODIS - MOD11 files"
-    # )
-    # ,
-    # targets::tar_target(
-    #   list_args_calc_mod11,
-    #   command = list(
-    #     from = grep(
-    #       x = chr_args_calc_mod11_files,
-    #       pattern = paste0(
-    #         "MOD11A1.A", unlist(list_dates_julian), collapse = "|"
-    #       ),
-    #       value = TRUE
-    #     ),
-    #     name_covariates = c("MOD_SFCTD_0_", "MOD_SFCTN_0_"),
-    #     subdataset = "^LST_",
-    #     radius = chr_iter_radii
-    #   ),
-    #   pattern = map(list_dates_julian),
-    #   iteration = "list",
-    #   description = "MODIS - MOD11 arguments"
-    # )
-    # ,
-    # targets::tar_target(
-    #   list_feat_calc_mod11,
-    #   command = beethoven::inject_modis(
-    #     locs = list_feat_proc_aqs_sites[[1]],
-    #     injection = list_args_calc_mod11
-    #   ),
-    #   pattern = cross(list_feat_proc_aqs_sites, list_args_calc_mod11),
-    #   iteration = "list",
-    #   description = "Calculate MODIS - MOD11 features | fit"
-    # )
-    # ,
+    targets::tar_target(
+      chr_args_calc_mod11_files,
+      command = {
+        download_mod11
+        list.files(
+          file.path(chr_input_dir, "modis", "raw", "61", "MOD11A1"),
+          full.names = TRUE,
+          recursive = TRUE
+        )
+      },
+      description = "MODIS - MOD11 files"
+    )
+    ,
+    targets::tar_target(
+      list_args_calc_mod11,
+      command = list(
+        from = grep(
+          x = chr_args_calc_mod11_files,
+          pattern = paste0(
+            "MOD11A1.A", unlist(list_dates_julian), collapse = "|"
+          ),
+          value = TRUE
+        ),
+        name_covariates = c("MOD_SFCTD_0_", "MOD_SFCTN_0_"),
+        subdataset = "^LST_",
+        radius = chr_iter_radii
+      ),
+      pattern = map(list_dates_julian),
+      iteration = "list",
+      description = "MODIS - MOD11 arguments"
+    )
+    ,
+    targets::tar_target(
+      list_feat_calc_mod11,
+      command = beethoven::inject_modis(
+        locs = list_feat_proc_aqs_sites[[1]],
+        injection = list_args_calc_mod11
+      ),
+      pattern = cross(list_feat_proc_aqs_sites, list_args_calc_mod11),
+      iteration = "list",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_50")
+      ),
+      description = "Calculate MODIS - MOD11 features | fit"
+    )
+    ,
     ###########################       MODIS - MOD06       ######################
     targets::tar_target(
       chr_args_calc_mod06_files,
@@ -190,17 +200,20 @@ target_calculate_fit <-
       description = "MODIS - MOD06 arguments"
     )
     ,
-    # targets::tar_target(
-    #   list_feat_calc_mod06,
-    #   command = beethoven::inject_modis(
-    #     locs = list_feat_proc_aqs_sites[[1]],
-    #     injection = list_args_calc_mod06
-    #   ),
-    #   pattern = cross(list_feat_proc_aqs_sites, list_args_calc_mod06),
-    #   iteration = "list",
-    #   description = "Calculate MODIS - MOD06 features | fit"
-    # )
-    # ,
+    targets::tar_target(
+      list_feat_calc_mod06,
+      command = beethoven::inject_modis(
+        locs = list_feat_proc_aqs_sites[[1]],
+        injection = list_args_calc_mod06
+      ),
+      pattern = cross(list_feat_proc_aqs_sites, list_args_calc_mod06),
+      iteration = "list",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_50")
+      ),
+      description = "Calculate MODIS - MOD06 features | fit"
+    )
+    ,
     ###########################       MODIS - MOD13       ######################
     targets::tar_target(
       chr_args_calc_mod13_files,
@@ -234,187 +247,202 @@ target_calculate_fit <-
       description = "MODIS - MOD13 arguments"
     )
     ,
-    # targets::tar_target(
-    #   list_feat_calc_mod13,
-    #   command = beethoven::inject_modis(
-    #     locs = list_feat_proc_aqs_sites[[1]],
-    #     injection = list_args_calc_mod13
-    #   ),
-    #   pattern = cross(list_feat_proc_aqs_sites, list_args_calc_mod13),
-    #   iteration = "list",
-    #   description = "Calculate MODIS - MOD13 features | fit"
-    # )
-    # ,
+    targets::tar_target(
+      list_feat_calc_mod13,
+      command = beethoven::inject_modis(
+        locs = list_feat_proc_aqs_sites[[1]],
+        injection = list_args_calc_mod13
+      ),
+      pattern = cross(list_feat_proc_aqs_sites, list_args_calc_mod13),
+      iteration = "list",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_100")
+      ),
+      description = "Calculate MODIS - MOD13 features | fit"
+    )
+    ,
     ###########################     MODIS - MCD19_1km     ######################
-    # targets::tar_target(
-    #   chr_args_calc_mcd19_files,
-    #   command = {
-    #     download_mcd19
-    #     list.files(
-    #       file.path(chr_input_dir, "modis", "raw", "61", "MCD19A2"),
-    #       full.names = TRUE,
-    #       recursive = TRUE
-    #     )
-    #   },
-    #   description = "MODIS - MCD19_*km files"
-    # )
-    # ,
-    # targets::tar_target(
-    #   list_args_calc_mcd19_1km,
-    #   command = list(
-    #     from = grep(
-    #       x = chr_args_calc_mcd19_files,
-    #       pattern = paste0(
-    #         "MCD19A2.A", unlist(list_dates_julian), collapse = "|"
-    #       ),
-    #       value = TRUE
-    #     ),
-    #     name_covariates = c("MOD_AD4TA_0_", "MOD_AD5TA_0_"),
-    #     subdataset = "^Optical_Depth",
-    #     radius = chr_iter_radii
-    #   ),
-    #   pattern = map(list_dates_julian),
-    #   iteration = "list",
-    #   description = "MODIS - MCD19_1km arguments"
-    # )
-    # ,
-    # targets::tar_target(
-    #   list_feat_calc_mcd19_1km,
-    #   command = beethoven::inject_modis(
-    #     locs = list_feat_proc_aqs_sites[[1]],
-    #     injection = list_args_calc_mcd19_1km
-    #   ),
-    #   pattern = cross(list_feat_proc_aqs_sites, list_args_calc_mcd19_1km),
-    #   iteration = "list",
-    #   description = "Calculate MODIS - MCD19_1km features | fit"
-    # )
-    # ,
+    targets::tar_target(
+      chr_args_calc_mcd19_files,
+      command = {
+        download_mcd19
+        list.files(
+          file.path(chr_input_dir, "modis", "raw", "61", "MCD19A2"),
+          full.names = TRUE,
+          recursive = TRUE
+        )
+      },
+      description = "MODIS - MCD19_*km files"
+    )
+    ,
+    targets::tar_target(
+      list_args_calc_mcd19_1km,
+      command = list(
+        from = grep(
+          x = chr_args_calc_mcd19_files,
+          pattern = paste0(
+            "MCD19A2.A", unlist(list_dates_julian), collapse = "|"
+          ),
+          value = TRUE
+        ),
+        name_covariates = c("MOD_AD4TA_0_", "MOD_AD5TA_0_"),
+        subdataset = "^Optical_Depth",
+        radius = chr_iter_radii
+      ),
+      pattern = map(list_dates_julian),
+      iteration = "list",
+      description = "MODIS - MCD19_1km arguments"
+    )
+    ,
+    targets::tar_target(
+      list_feat_calc_mcd19_1km,
+      command = beethoven::inject_modis(
+        locs = list_feat_proc_aqs_sites[[1]],
+        injection = list_args_calc_mcd19_1km
+      ),
+      pattern = cross(list_feat_proc_aqs_sites, list_args_calc_mcd19_1km),
+      iteration = "list",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_250")
+      ),
+      description = "Calculate MODIS - MCD19_1km features | fit"
+    )
+    ,
     ###########################     MODIS - MCD19_5km     ######################
-    # targets::tar_target(
-    #   list_args_calc_mcd19_5km,
-    #   command = list(
-    #     from = grep(
-    #       x = chr_args_calc_mcd19_files,
-    #       pattern = paste0(
-    #         "MCD19A2.A", unlist(list_dates_julian), collapse = "|"
-    #       ),
-    #       value = TRUE
-    #     ),
-    #     name_covariates = c(
-    #       "MOD_CSZAN_0_", "MOD_CVZAN_0_", "MOD_RAZAN_0_",
-    #       "MOD_SCTAN_0_", "MOD_GLNAN_0_"
-    #     ),
-    #     subdataset = "cos|RelAZ|Angle",
-    #     radius = chr_iter_radii
-    #   ),
-    #   pattern = map(list_dates_julian),
-    #   iteration = "list",
-    #   description = "MODIS - MCD19_5km arguments"
-    # )
-    # ,
-    # targets::tar_target(
-    #   list_feat_calc_mcd19_5km,
-    #   command = beethoven::inject_modis(
-    #     locs = list_feat_proc_aqs_sites[[1]],
-    #     injection = list_args_calc_mcd19_5km
-    #   ),
-    #   pattern = cross(list_feat_proc_aqs_sites, list_args_calc_mcd19_5km),
-    #   iteration = "list",
-    #   description = "Calculate MODIS - MCD19_5km features | fit"
-    # )
-    # ,
+    targets::tar_target(
+      list_args_calc_mcd19_5km,
+      command = list(
+        from = grep(
+          x = chr_args_calc_mcd19_files,
+          pattern = paste0(
+            "MCD19A2.A", unlist(list_dates_julian), collapse = "|"
+          ),
+          value = TRUE
+        ),
+        name_covariates = c(
+          "MOD_CSZAN_0_", "MOD_CVZAN_0_", "MOD_RAZAN_0_",
+          "MOD_SCTAN_0_", "MOD_GLNAN_0_"
+        ),
+        subdataset = "cos|RelAZ|Angle",
+        radius = chr_iter_radii
+      ),
+      pattern = map(list_dates_julian),
+      iteration = "list",
+      description = "MODIS - MCD19_5km arguments"
+    )
+    ,
+    targets::tar_target(
+      list_feat_calc_mcd19_5km,
+      command = beethoven::inject_modis(
+        locs = list_feat_proc_aqs_sites[[1]],
+        injection = list_args_calc_mcd19_5km
+      ),
+      pattern = cross(list_feat_proc_aqs_sites, list_args_calc_mcd19_5km),
+      iteration = "list",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_250")
+      ),
+      description = "Calculate MODIS - MCD19_5km features | fit"
+    )
+    ,
     ###########################       MODIS - MOD09       ######################
-    # targets::tar_target(
-    #   chr_args_calc_mod09_files,
-    #   command = {
-    #     download_mod09
-    #     list.files(
-    #       file.path(chr_input_dir, "modis", "raw", "61", "MOD09GA"),
-    #       full.names = TRUE,
-    #       recursive = TRUE
-    #     )
-    #   },
-    #   description = "MODIS - MOD09 files"
-    # )
-    # ,
-    # targets::tar_target(
-    #   list_args_calc_mod09,
-    #   command = list(
-    #     from = grep(
-    #       x = chr_args_calc_mod09_files,
-    #       pattern = paste0(
-    #         "MOD09GA.A", unlist(list_dates_julian), collapse = "|"
-    #       ),
-    #       value = TRUE
-    #     ),
-    #     name_covariates = c(
-    #       "MOD_SFCRF_1_", "MOD_SFCRF_2_", "MOD_SFCRF_3_", "MOD_SFCRF_4_",
-    #       "MOD_SFCRF_5_", "MOD_SFCRF_6_", "MOD_SFCRF_7_"
-    #     ),
-    #     subdataset = "^sur_refl_",
-    #     radius = chr_iter_radii
-    #   ),
-    #   pattern = map(list_dates_julian),
-    #   iteration = "list",
-    #   description = "MODIS - MOD09 arguments"
-    # )
-    # ,
-    # targets::tar_target(
-    #   list_feat_calc_mod09,
-    #   command = beethoven::inject_modis(
-    #     locs = list_feat_proc_aqs_sites[[1]],
-    #     injection = list_args_calc_mod09
-    #   ),
-    #   pattern = cross(list_feat_proc_aqs_sites, list_args_calc_mod09),
-    #   iteration = "list",
-    #   description = "Calculate MODIS - MOD09 features | fit"
-    # )
-    # ,
+    targets::tar_target(
+      chr_args_calc_mod09_files,
+      command = {
+        download_mod09
+        list.files(
+          file.path(chr_input_dir, "modis", "raw", "61", "MOD09GA"),
+          full.names = TRUE,
+          recursive = TRUE
+        )
+      },
+      description = "MODIS - MOD09 files"
+    )
+    ,
+    targets::tar_target(
+      list_args_calc_mod09,
+      command = list(
+        from = grep(
+          x = chr_args_calc_mod09_files,
+          pattern = paste0(
+            "MOD09GA.A", unlist(list_dates_julian), collapse = "|"
+          ),
+          value = TRUE
+        ),
+        name_covariates = c(
+          "MOD_SFCRF_1_", "MOD_SFCRF_2_", "MOD_SFCRF_3_", "MOD_SFCRF_4_",
+          "MOD_SFCRF_5_", "MOD_SFCRF_6_", "MOD_SFCRF_7_"
+        ),
+        subdataset = "^sur_refl_",
+        radius = chr_iter_radii
+      ),
+      pattern = map(list_dates_julian),
+      iteration = "list",
+      description = "MODIS - MOD09 arguments"
+    )
+    ,
+    targets::tar_target(
+      list_feat_calc_mod09,
+      command = beethoven::inject_modis(
+        locs = list_feat_proc_aqs_sites[[1]],
+        injection = list_args_calc_mod09
+      ),
+      pattern = cross(list_feat_proc_aqs_sites, list_args_calc_mod09),
+      iteration = "list",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_25")
+      ),
+      description = "Calculate MODIS - MOD09 features | fit"
+    )
+    ,
     ###########################       MODIS - VIIRS       ######################
-    # targets::tar_target(
-    #   chr_args_calc_viirs_files,
-    #   command = {
-    #     download_viirs
-    #     list.files(
-    #       file.path(chr_input_dir, "modis", "raw", "5000", "VNP46A2"),
-    #       full.names = TRUE,
-    #       recursive = TRUE
-    #     )
-    #   },
-    #   description = "MODIS - VIIRS files"
-    # )
-    # ,
-    # targets::tar_target(
-    #   list_args_calc_viirs,
-    #   command = list(
-    #     from = grep(
-    #       x = chr_args_calc_viirs_files,
-    #       pattern = paste0(
-    #         "VNP46A2.A", unlist(list_dates_julian), collapse = "|"
-    #       ),
-    #       value = TRUE
-    #     ),
-    #     name_covariates = "MOD_LGHTN_0_",
-    #     subdataset = 3,
-    #     preprocess = amadeus::process_blackmarble,
-    #     radius = chr_iter_radii
-    #   ),
-    #   pattern = map(list_dates_julian),
-    #   iteration = "list",
-    #   description = "MODIS - VIIRS arguments"
-    # )
-    # ,
-    # targets::tar_target(
-    #   list_feat_calc_viirs,
-    #   command = beethoven::inject_modis(
-    #     locs = list_feat_proc_aqs_sites[[1]],
-    #     injection = list_args_calc_viirs
-    #   ),
-    #   pattern = cross(list_feat_proc_aqs_sites, list_args_calc_viirs),
-    #   iteration = "list",
-    #   description = "Calculate MODIS - VIIRS features | fit"
-    # )
-    # ,
+    targets::tar_target(
+      chr_args_calc_viirs_files,
+      command = {
+        download_viirs
+        list.files(
+          file.path(chr_input_dir, "modis", "raw", "5000", "VNP46A2"),
+          full.names = TRUE,
+          recursive = TRUE
+        )
+      },
+      description = "MODIS - VIIRS files"
+    )
+    ,
+    targets::tar_target(
+      list_args_calc_viirs,
+      command = list(
+        from = grep(
+          x = chr_args_calc_viirs_files,
+          pattern = paste0(
+            "VNP46A2.A", unlist(list_dates_julian), collapse = "|"
+          ),
+          value = TRUE
+        ),
+        name_covariates = "MOD_LGHTN_0_",
+        subdataset = 3,
+        preprocess = amadeus::process_blackmarble,
+        radius = chr_iter_radii
+      ),
+      pattern = map(list_dates_julian),
+      iteration = "list",
+      description = "MODIS - VIIRS arguments"
+    )
+    ,
+    targets::tar_target(
+      list_feat_calc_viirs,
+      command = beethoven::inject_modis(
+        locs = list_feat_proc_aqs_sites[[1]],
+        injection = list_args_calc_viirs
+      ),
+      pattern = cross(list_feat_proc_aqs_sites, list_args_calc_viirs),
+      iteration = "list",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_100")
+      ),
+      description = "Calculate MODIS - VIIRS features | fit"
+    )
+    ,
     ###########################        MODIS/VIIRS        ######################
     # targets::tar_target(
     #   dt_feat_calc_nasa,
@@ -484,51 +512,51 @@ target_calculate_fit <-
       description = "NLCD features"
     )
     ,
-    # targets::tar_target(
-    #   list_feat_calc_nlcd,
-    #   command = {
-    #     download_nlcd
-    #     beethoven::inject_nlcd(
-    #       locs = dplyr::bind_rows(list_feat_proc_aqs_sites),
-    #       # NOTE: locs are all AQS sites for computational efficiency
-    #       locs_id = "site_id",
-    #       year = df_feat_calc_nlcd_params$year,
-    #       radius = df_feat_calc_nlcd_params$radius,
-    #       from = amadeus::process_nlcd(
-    #         path = file.path(chr_input_dir, "nlcd", "data_files"),
-    #         year = df_feat_calc_nlcd_params$year
-    #       ),
-    #       nthreads = 1,
-    #       mode = "exact",
-    #       max_cells = 3e7
-    #     )
-    #   },
-    #   iteration = "list",
-    #   pattern = map(df_feat_calc_nlcd_params),
-    #   description = "Calculate NLCD features | fit"
-    # )
-    # ,
-    # targets::tar_target(
-    #   name = dt_feat_calc_nlcd,
-    #   command = list_feat_calc_nlcd %>%
-    #     collapse::rowbind(fill = TRUE) %>%
-    #     collapse::funique() %>%
-    #     collapse::pivot(
-    #       ids = c("site_id", "time"),
-    #       values = names(.)[!names(.) %in% c(
-    #         "site_id",
-    #         "time"
-    #       )]
-    #     ) %>%
-    #     .[!is.na(.[["value"]]),] %>%
-    #     collapse::pivot(
-    #       ids = c("site_id", "time"),
-    #       values = c("value"),
-    #       how = "wider"
-    #     ),
-    #   description = "NLCD feature list (all dt) | fit"
-    # )
-    # ,
+    targets::tar_target(
+      list_feat_calc_nlcd,
+      command = {
+        download_nlcd
+        beethoven::inject_nlcd(
+          locs = dplyr::bind_rows(list_feat_proc_aqs_sites),
+          # NOTE: locs are all AQS sites for computational efficiency
+          locs_id = "site_id",
+          year = df_feat_calc_nlcd_params$year,
+          radius = df_feat_calc_nlcd_params$radius,
+          from = amadeus::process_nlcd(
+            path = file.path(chr_input_dir, "nlcd", "data_files"),
+            year = df_feat_calc_nlcd_params$year
+          ),
+          nthreads = 1,
+          mode = "exact",
+          max_cells = 3e7
+        )
+      },
+      iteration = "list",
+      pattern = map(df_feat_calc_nlcd_params),
+      description = "Calculate NLCD features | fit"
+    )
+    ,
+    targets::tar_target(
+      name = dt_feat_calc_nlcd,
+      command = list_feat_calc_nlcd %>%
+        collapse::rowbind(fill = TRUE) %>%
+        collapse::funique() %>%
+        collapse::pivot(
+          ids = c("site_id", "time"),
+          values = names(.)[!names(.) %in% c(
+            "site_id",
+            "time"
+          )]
+        ) %>%
+        .[!is.na(.[["value"]]),] %>%
+        collapse::pivot(
+          ids = c("site_id", "time"),
+          values = c("value"),
+          how = "wider"
+        ),
+      description = "NLCD feature list (all dt) | fit"
+    )
+    ,
     ###########################        KOPPEN        ###########################
     targets::tar_target(
       dt_feat_calc_koppen,

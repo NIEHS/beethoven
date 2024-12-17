@@ -67,14 +67,11 @@ target_download <-
     ###########################         NARR         ###########################
     targets::tar_target(
       chr_iter_calc_narr,
-      # NOTE: omega and shum variables excluded for dev due to observations
-      #       at multiple pressure levels
       command = c(
         "air.sfc", "albedo", "apcp", "dswrf", "evap", "hcdc", "hpbl",
         "lcdc", "lhtfl", "mcdc", "pr_wtr", "prate", "pres.sfc",
         "shtfl", "snowc", "soilm", "tcdc", "ulwrf.sfc", "uwnd.10m",
-        "vis", "vwnd.10m", "weasd"
-        # "omega", "shum"
+        "vis", "vwnd.10m", "weasd", "omega", "shum"
       ),
       description = "NARR features"
     )
@@ -130,27 +127,27 @@ target_download <-
     )
     ,
     ###########################       MODIS - MOD11       ######################
-    # targets::tar_target(
-    #   download_mod11,
-    #   command = {
-    #     amadeus::download_modis(
-    #       product = "MOD11A1",
-    #       nasa_earth_data_token = chr_nasa_token,
-    #       date = beethoven::fl_dates(unlist(list_dates)),
-    #       directory_to_save = file.path(
-    #         chr_input_dir, "modis", "raw", "61", "MOD11A1"
-    #       ),
-    #       remove_command = list_download_args$remove_command,
-    #       acknowledgement = list_download_args$acknowledgement,
-    #       download = list_download_args$download,
-    #       hash = list_download_args$hash
-    #     )
-    #     TRUE
-    #   },
-    #   pattern = map(list_dates),
-    #   description = "Download MODIS - MOD11 data"
-    # )
-    # ,
+    targets::tar_target(
+      download_mod11,
+      command = {
+        amadeus::download_modis(
+          product = "MOD11A1",
+          nasa_earth_data_token = chr_nasa_token,
+          date = beethoven::fl_dates(unlist(list_dates)),
+          directory_to_save = file.path(
+            chr_input_dir, "modis", "raw", "61", "MOD11A1"
+          ),
+          remove_command = list_download_args$remove_command,
+          acknowledgement = list_download_args$acknowledgement,
+          download = list_download_args$download,
+          hash = list_download_args$hash
+        )
+        TRUE
+      },
+      pattern = map(list_dates),
+      description = "Download MODIS - MOD11 data"
+    )
+    ,
     ###########################       MODIS - MOD06       ######################
     targets::tar_target(
       download_mod06,
@@ -197,72 +194,72 @@ target_download <-
     )
     ,
     ###########################       MODIS - MCD19       ######################
-    # targets::tar_target(
-    #   download_mcd19,
-    #   command = {
-    #     amadeus::download_modis(
-    #       product = "MCD19A2",
-    #       nasa_earth_data_token = chr_nasa_token,
-    #       date = beethoven::fl_dates(unlist(list_dates)),
-    #       directory_to_save = file.path(
-    #         chr_input_dir, "modis", "raw", "61", "MCD19A2"
-    #       ),
-    #       remove_command = list_download_args$remove_command,
-    #       acknowledgement = list_download_args$acknowledgement,
-    #       download = list_download_args$download,
-    #       hash = list_download_args$hash
-    #     )
-    #     TRUE
-    #   },
-    #   pattern = map(list_dates),
-    #   description = "Download MODIS - MCD19 data"
-    # )
-    # ,
+    targets::tar_target(
+      download_mcd19,
+      command = {
+        amadeus::download_modis(
+          product = "MCD19A2",
+          nasa_earth_data_token = chr_nasa_token,
+          date = beethoven::fl_dates(unlist(list_dates)),
+          directory_to_save = file.path(
+            chr_input_dir, "modis", "raw", "61", "MCD19A2"
+          ),
+          remove_command = list_download_args$remove_command,
+          acknowledgement = list_download_args$acknowledgement,
+          download = list_download_args$download,
+          hash = list_download_args$hash
+        )
+        TRUE
+      },
+      pattern = map(list_dates),
+      description = "Download MODIS - MCD19 data"
+    )
+    ,
     ###########################       MODIS - MOD09       ######################
-    # targets::tar_target(
-    #   download_mod09,
-    #   command = {
-    #     amadeus::download_modis(
-    #       product = "MOD09GA",
-    #       nasa_earth_data_token = chr_nasa_token,
-    #       date = beethoven::fl_dates(unlist(list_dates)),
-    #       directory_to_save = file.path(
-    #         chr_input_dir, "modis", "raw", "61", "MOD09GA"
-    #       ),
-    #       remove_command = list_download_args$remove_command,
-    #       acknowledgement = list_download_args$acknowledgement,
-    #       download = list_download_args$download,
-    #       hash = list_download_args$hash
-    #     )
-    #     TRUE
-    #   },
-    #   pattern = map(list_dates),
-    #   description = "Download MODIS - MOD09 data"
-    # )
-    # ,
+    targets::tar_target(
+      download_mod09,
+      command = {
+        amadeus::download_modis(
+          product = "MOD09GA",
+          nasa_earth_data_token = chr_nasa_token,
+          date = beethoven::fl_dates(unlist(list_dates)),
+          directory_to_save = file.path(
+            chr_input_dir, "modis", "raw", "61", "MOD09GA"
+          ),
+          remove_command = list_download_args$remove_command,
+          acknowledgement = list_download_args$acknowledgement,
+          download = list_download_args$download,
+          hash = list_download_args$hash
+        )
+        TRUE
+      },
+      pattern = map(list_dates),
+      description = "Download MODIS - MOD09 data"
+    )
+    ,
     ###########################       MODIS - VIIRS       ######################
-    # targets::tar_target(
-    #   download_viirs,
-    #   command = {
-    #     amadeus::download_modis(
-    #       product = "VNP46A2",
-    #       version = "5000",
-    #       nasa_earth_data_token = chr_nasa_token,
-    #       date = beethoven::fl_dates(unlist(list_dates)),
-    #       directory_to_save = file.path(
-    #         chr_input_dir, "modis", "raw", "5000", "VNP46A2"
-    #       ),
-    #       remove_command = list_download_args$remove_command,
-    #       acknowledgement = list_download_args$acknowledgement,
-    #       download = list_download_args$download,
-    #       hash = list_download_args$hash
-    #     )
-    #     TRUE
-    #   },
-    #   pattern = map(list_dates),
-    #   description = "Download MODIS - VIIRS data"
-    # )
-    # ,
+    targets::tar_target(
+      download_viirs,
+      command = {
+        amadeus::download_modis(
+          product = "VNP46A2",
+          version = "5000",
+          nasa_earth_data_token = chr_nasa_token,
+          date = beethoven::fl_dates(unlist(list_dates)),
+          directory_to_save = file.path(
+            chr_input_dir, "modis", "raw", "5000", "VNP46A2"
+          ),
+          remove_command = list_download_args$remove_command,
+          acknowledgement = list_download_args$acknowledgement,
+          download = list_download_args$download,
+          hash = list_download_args$hash
+        )
+        TRUE
+      },
+      pattern = map(list_dates),
+      description = "Download MODIS - VIIRS data"
+    )
+    ,
     ###########################         GMTED        ###########################
     targets::tar_target(
       chr_iter_calc_gmted_vars,
