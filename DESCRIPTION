@@ -45,7 +45,7 @@ Imports:
   tigris,
   graphics,
   scatterplot3d,
-  amadeus,
+  amadeus (>= 1.2.0),
   parallelly
 Suggests:
   testthat (>= 3.0.0),

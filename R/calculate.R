@@ -561,6 +561,7 @@ query_modis_files <- function(path, list, index) {
 
 
 #' Calculate MODIS product covariates in multiple CPU threads
+#' @keywords Calculation
 #' @param from character. List of paths to MODIS/VIIRS files.
 #' @param locs sf/SpatVector object. Unique locs where covariates
 #' will be calculated.
@@ -593,7 +594,7 @@ query_modis_files <- function(path, list, index) {
 #' coordinate reference system of the `sf` or `SpatVector` is that of `from.`
 #' @param ... Arguments passed to `preprocess`.
 # nolint start
-#' @description `calculate_modis_par` essentially runs [`calculate_modis_daily`] function
+#' @description `calculate_modis` essentially runs [`calculate_modis_daily`] function
 #' in each thread (subprocess). Based on daily resolution, each day's workload
 #' will be distributed to each thread. With `product` argument,
 #' the files are processed by a customized function where the unique structure

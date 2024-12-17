@@ -4,7 +4,7 @@
 ##### for the beethoven analysis pipeline.
 
 #############################      CONTROLLER      #############################
-##### `controller_250` uses full allocation of workers (~4 Gb per worker).
+##### `controller_250` uses full allocation of workers (~4.0 Gb per worker).
 controller_250 <- crew::crew_controller_local(
   name = "controller_250",
   workers = 250,
