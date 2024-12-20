@@ -16,6 +16,7 @@
 <url><loc>https://niehs.github.io/beethoven/reference/calc_gmted_direct.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/calc_narr2.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/calculate.html</loc></url>
+<url><loc>https://niehs.github.io/beethoven/reference/calculate_modis.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/convert_cv_index_rset.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/divisor.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/feature_raw_download.html</loc></url>
@@ -32,6 +33,7 @@
 <url><loc>https://niehs.github.io/beethoven/reference/inject_geos.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/inject_gmted.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/inject_match.html</loc></url>
+<url><loc>https://niehs.github.io/beethoven/reference/inject_modis.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/inject_modis_par.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/inject_nlcd.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/load_modis_files.html</loc></url>

@@ -8,8 +8,8 @@
 <title>Building an Extensible, rEproducible, Test-driven, Harmonized, Open-source, Versioned, ENsemble model for air quality • beethoven</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Building an Extensible, rEproducible, Test-driven, Harmonized, Open-source, Versioned, ENsemble model for air quality">
 <meta name="description" content="Near Real Time air pollution model results and code produced by the SET group. It is fully tested, versioned, and open source and open access.">
 <meta property="og:description" content="Near Real Time air pollution model results and code produced by the SET group. It is fully tested, versioned, and open source and open access.">
@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">beethoven</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -631,7 +631,7 @@ nohup nice -4 Rscript $USER_PROJDIR/inst/targets/targets_start.R</code></pre>
 <h3 id="list_feat_calc_nlcd">
 <code>list_feat_calc_nlcd</code><a class="anchor" aria-label="anchor" href="#list_feat_calc_nlcd"></a>
 </h3>
-<p>From version 0.3.10, NLCD target is separated from <code>list_feat_calc_base</code> from runtime concerns. Here we take nested parallelization strategy, where each <code><a href="https://niehs.github.io/amadeus/reference/calc_nlcd.html" class="external-link">amadeus::calc_nlcd()</a></code> run with different year and buffer size is parallelized where each will use 10 threads. In the initial study period, we have six combinations (two NLCD years in 2019 and 2021, and three radii of 1, 10, and 50 kilometers). Thus, the NLCD target will use 60 threads, but not necessarily concurrently. Each combination will get its slot in the resulting list target, therefore the following <code>dt_feat_calc_nlcd</code> is created by <code>data.frame</code> pivotting.</p>
+<p>From version 0.3.10, NLCD target is separated from <code>list_feat_calc_base</code> from runtime concerns. Here we take nested parallelization strategy, where each <code>amadeus::calc_nlcd()</code> run with different year and buffer size is parallelized where each will use 10 threads. In the initial study period, we have six combinations (two NLCD years in 2019 and 2021, and three radii of 1, 10, and 50 kilometers). Thus, the NLCD target will use 60 threads, but not necessarily concurrently. Each combination will get its slot in the resulting list target, therefore the following <code>dt_feat_calc_nlcd</code> is created by <code>data.frame</code> pivotting.</p>
 </div>
 <div class="section level3">
 <h3 id="list_feat_calc_nasa">
@@ -644,13 +644,13 @@ nohup nice -4 Rscript $USER_PROJDIR/inst/targets/targets_start.R</code></pre>
 <h3 id="list_feat_calc_geoscf">
 <code>list_feat_calc_geoscf</code><a class="anchor" aria-label="anchor" href="#list_feat_calc_geoscf"></a>
 </h3>
-<p>We use a character vector of length 2 to distinguish chm from aqc products. A modified version of <code><a href="https://niehs.github.io/amadeus/reference/calc_geos.html" class="external-link">amadeus::calc_geos</a></code>, <code>calc_geos_strict</code> is employed to calculate features. The key modification is to fix the radius argument as zero then to remove the top-level argument radius from the function.</p>
+<p>We use a character vector of length 2 to distinguish chm from aqc products. A modified version of <code>amadeus::calc_geos</code>, <code>calc_geos_strict</code> is employed to calculate features. The key modification is to fix the radius argument as zero then to remove the top-level argument radius from the function.</p>
 </div>
 <div class="section level3">
 <h3 id="list_feat_calc_gmted">
 <code>list_feat_calc_gmted</code><a class="anchor" aria-label="anchor" href="#list_feat_calc_gmted"></a>
 </h3>
-<p>Here we use custom function <code>calc_gmted_direct</code>, which has different logic from what was used in <code><a href="https://niehs.github.io/amadeus/reference/calc_gmted.html" class="external-link">amadeus::calc_gmted</a></code>. <code>inject_gmted</code> uses that function to parallelize the calculation by radius length.</p>
+<p>Here we use custom function <code>calc_gmted_direct</code>, which has different logic from what was used in <code>amadeus::calc_gmted</code>. <code>inject_gmted</code> uses that function to parallelize the calculation by radius length.</p>
 </div>
 <div class="section level3">
 <h3 id="list_feat_calc_narr">
@@ -674,7 +674,7 @@ nohup nice -4 Rscript $USER_PROJDIR/inst/targets/targets_start.R</code></pre>
 <p>Temporal resolution discrepancy makes <code>NA</code> values in joined <code>data.frame</code>s. In MODIS/VIIRS targets, NDVI (a subdataset of MOD13A1 product) is based on a 16-day cycle, differing from other products on a daily cycle. We consider the reported date of “16-day cycle” as the <strong>last day</strong> of the cycle.</p>
 <ul>
 <li>
-<strong>MODIS/VIIRS</strong>: Therefore, the <code>NA</code> values introduced by joining <code>data.frame</code>s by date field are filled in <code>impute_all</code> using <code><a href="https://rdatatable.gitlab.io/data.table/reference/nafill.html" class="external-link">data.table::setnafill</a></code> with next observation carried forward (<code>type = "nocb"</code>) option.</li>
+<strong>MODIS/VIIRS</strong>: Therefore, the <code>NA</code> values introduced by joining <code>data.frame</code>s by date field are filled in <code>impute_all</code> using <code><a href="https://rdrr.io/pkg/data.table/man/nafill.html" class="external-link">data.table::setnafill</a></code> with next observation carried forward (<code>type = "nocb"</code>) option.</li>
 <li>MODIS/VIIRS targets may have <code>NaN</code> values where nonexisting values are assigned as replacements. These values are replaced with <code>NA</code> at first, then with zeros.</li>
 <li>Other nonignorable <code>NA</code>s in the joined target will be imputed by missForest (name of the original method used; actually using <code>missRanger</code> package for efficiency).</li>
 </ul>
@@ -702,8 +702,8 @@ nohup nice -4 Rscript $USER_PROJDIR/inst/targets/targets_start.R</code></pre>
 <span>    <span class="va">common_field</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sets.html" class="external-link">intersect</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">df_fine</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">df_coarse</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span>    <span class="co"># Clean inputs to retain necessary fields</span></span>
-<span>    <span class="va">df_fine</span> <span class="op">&lt;-</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/as.data.table.html" class="external-link">as.data.table</a></span><span class="op">(</span><span class="va">df_fine</span><span class="op">)</span></span>
-<span>    <span class="va">df_coarse</span> <span class="op">&lt;-</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/as.data.table.html" class="external-link">as.data.table</a></span><span class="op">(</span><span class="va">df_coarse</span><span class="op">)</span></span>
+<span>    <span class="va">df_fine</span> <span class="op">&lt;-</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/data.table/man/as.data.table.html" class="external-link">as.data.table</a></span><span class="op">(</span><span class="va">df_fine</span><span class="op">)</span></span>
+<span>    <span class="va">df_coarse</span> <span class="op">&lt;-</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/data.table/man/as.data.table.html" class="external-link">as.data.table</a></span><span class="op">(</span><span class="va">df_coarse</span><span class="op">)</span></span>
 <span>    <span class="va">df_fine</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/post_calc_drop_cols.html">post_calc_drop_cols</a></span><span class="op">(</span><span class="va">df_fine</span><span class="op">)</span></span>
 <span>    <span class="va">df_coarse</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/post_calc_drop_cols.html">post_calc_drop_cols</a></span><span class="op">(</span><span class="va">df_coarse</span><span class="op">)</span></span>
 <span></span>
@@ -712,7 +712,7 @@ nohup nice -4 Rscript $USER_PROJDIR/inst/targets/targets_start.R</code></pre>
 <span>    <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">common_field</span><span class="op">)</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="op">{</span></span>
 <span>      <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">common_field</span><span class="op">)</span></span>
 <span>      <span class="kw">if</span> <span class="op">(</span><span class="va">common_field</span> <span class="op">==</span> <span class="va">field_sp</span><span class="op">)</span> <span class="op">{</span></span>
-<span>        <span class="va">joined</span> <span class="op">&lt;-</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/merge.html" class="external-link">merge.data.table</a></span><span class="op">(</span></span>
+<span>        <span class="va">joined</span> <span class="op">&lt;-</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/data.table/man/merge.html" class="external-link">merge.data.table</a></span><span class="op">(</span></span>
 <span>          <span class="va">df_fine</span>, <span class="va">df_coarse</span>,</span>
 <span>          by <span class="op">=</span> <span class="va">field_sp</span>,</span>
 <span>          all.x <span class="op">=</span> <span class="cn">TRUE</span></span>
@@ -747,7 +747,7 @@ nohup nice -4 Rscript $USER_PROJDIR/inst/targets/targets_start.R</code></pre>
 <span>        <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
 <span>          <span class="co"># site-date combination data.frames are joined as they are regardless of coarseness</span></span>
 <span>          <span class="co"># Left join is enforced</span></span>
-<span>          <span class="va">joined</span> <span class="op">&lt;-</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/merge.html" class="external-link">merge.data.table</a></span><span class="op">(</span></span>
+<span>          <span class="va">joined</span> <span class="op">&lt;-</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/data.table/man/merge.html" class="external-link">merge.data.table</a></span><span class="op">(</span></span>
 <span>            <span class="va">df_fine</span>, <span class="va">df_coarse</span>,</span>
 <span>            by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">field_sp</span>, <span class="va">field_t</span><span class="op">)</span>,</span>
 <span>            all.x <span class="op">=</span> <span class="cn">TRUE</span></span>
