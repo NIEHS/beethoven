@@ -38,7 +38,7 @@ system.time(
 jj
 
 profvis::profvis(
-kx <- amadeus::calc_covariates(
+kx <- amadeus::calculate_covariates(
     covariate = "nlcd",
     from = amadeus::process_covariates(covariate = "nlcd", path = "input/nlcd/raw", year = 2019L),
     locs = tar_read(sf_feat_proc_aqs_sites)[1:200,],
@@ -164,7 +164,7 @@ kk <- amadeus::process_ecoregion(path = "input/ecoregions/raw")
 kx <- amadeus::calc_ecoregion(from = kk, locs = tar_read(sf_feat_proc_aqs_sites) |> terra::vect())
 
 kl <- amadeus::process_covariates("ecoregions", path = "input/ecoregions/raw")
-kz <- amadeus::calc_covariates("ecoregions", from = kl, locs = tar_read(sf_feat_proc_aqs_sites) |> terra::vect())
+kz <- amadeus::calculate_covariates("ecoregions", from = kl, locs = tar_read(sf_feat_proc_aqs_sites) |> terra::vect())
 as.data.table(kz)
 
 

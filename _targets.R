@@ -4,14 +4,34 @@
 ##### for the beethoven analysis pipeline.
 
 #############################      CONTROLLER      #############################
-default_controller <- crew::crew_controller_local(
-  name = "default_controller",
-  workers = 4,
+##### `controller_250` uses full allocation of workers (~4.0 Gb per worker).
+controller_250 <- crew::crew_controller_local(
+  name = "controller_250",
+  workers = 250,
   seconds_idle = 30
 )
-calc_controller <- crew::crew_controller_local(
-  name = "calc_controller",
-  workers = 96,
+##### `controller_100` uses 100 workers (~10.0 Gb per worker).
+controller_100 <- crew::crew_controller_local(
+  name = "controller_100",
+  workers = 100,
+  seconds_idle = 30
+)
+##### `controller_75` uses 75 workers (~13.33 Gb per worker).
+controller_75 <- crew::crew_controller_local(
+  name = "controller_75",
+  workers = 75,
+  seconds_idle = 30
+)
+##### `controller_50` uses 50 workers (~20.0 Gb per worker).
+controller_50 <- crew::crew_controller_local(
+  name = "controller_50",
+  workers = 50,
+  seconds_idle = 30
+)
+##### `controller_25` uses 25 workers (~40.0 Gb per worker).
+controller_25 <- crew::crew_controller_local(
+  name = "controller_25",
+  workers = 25,
   seconds_idle = 30
 )
 
@@ -21,8 +41,8 @@ targets::tar_config_set(store = "/opt/_targets")
 ##############################       OPTIONS      ##############################
 targets::tar_option_set(
   packages = c(
-    "beethoven", "targets", "tarchetypes", "dplyr",
-    "data.table", "sf", "crew", "crew.cluster"
+    "amadeus", "targets", "tarchetypes", "dplyr", "tidyverse",
+    "data.table", "sf", "crew", "crew.cluster", "lubridate", "qs2"
   ),
   repository = "local",
   error = "continue",
@@ -33,8 +53,8 @@ targets::tar_option_set(
   garbage_collection = TRUE,
   seed = 202401L,
   controller = crew::crew_controller_group(
-    default_controller,
-    calc_controller
+    controller_250, controller_100, controller_75,
+    controller_50, controller_25
   )
 )
 

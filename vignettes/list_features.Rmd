@@ -1,8 +1,8 @@
 ---
 title: "List of features"
-author: "SET group"
+output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Generate prediction points}
+  %\VignetteIndexEntry{List of features}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 pkgdown:

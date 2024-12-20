@@ -88,25 +88,22 @@ set_target_years <-
 #' Depending on temporal resolution of raw datasets.
 #' Nullable; If `NULL`, it will be set to `c(1)`.
 #' @param domain_name character(1). Name of the domain. Default is `"year"`.
-#' @param nthreads integer(1). Number of threads to use.
 #' @param process_function Raw data processor. Default is
 #' [`amadeus::process_covariates`]
 #' @param calc_function Function to calculate covariates.
-#' [`amadeus::calc_covariates`]
+#' [`amadeus::calculate_covariates`]
 #' @param ... Arguments passed to `process_function` and `calc_function`
 #' @return A data.table object.
 #' @importFrom data.table rbindlist
 #' @importFrom rlang inject
-#' @importFrom amadeus process_covariates calc_covariates
-#' @importFrom future plan sequential multicore
+#' @importFrom amadeus process_covariates calculate_covariates
 #' @export
 calculate <-
   function(
     domain = NULL,
     domain_name = "year",
-    nthreads = 1L,
     process_function = amadeus::process_covariates,
-    calc_function = amadeus::calc_covariates,
+    calc_function = amadeus::calculate_covariates,
     ...
   ) {
     if (is.null(domain)) {
@@ -117,17 +114,11 @@ calculate <-
     domainlist <- split(domain, seq_along(domain))
     years_data <- seq_along(domain) + 2017
 
-    if (nthreads == 1L) {
-      future::plan(future::sequential)
-    } else {
-      future::plan(future::multicore, workers = nthreads)
-    }
     # double twists: list_iteration is made to distinguish
     # cases where a single radius is accepted or ones have no radius
     # argument.
     res_calc <-
-      #try(
-      future.apply::future_mapply(
+      mapply(
         function(domain_each, year_each) {
           # we assume that ... have no "year" and "from" arguments
           args_process <- c(arg = domain_each, list(...))
@@ -187,11 +178,10 @@ calculate <-
             }
           return(df_iteration_calc)
         },
-        domainlist, years_data, SIMPLIFY = FALSE,
-        future.seed = TRUE
+        domainlist, years_data,
+        SIMPLIFY = FALSE
       )
 
-    future::plan(future::sequential)
     if (inherits(res_calc, "try-error")) {
       cat(paste0(attr(res_calc, "condition")$message, "\n"))
       stop("Results do not match expectations.")
@@ -249,12 +239,13 @@ inject_calculate <- function(covariate, locs, injection) {
 
 #' Injects arguments to parallelize MODIS/VIIRS data processing
 #' @keywords Calculation
+#' @note Soon to be deprecated per dropping future dependency.
 #' @param locs A data frame containing the locations for which MODIS
 #'   features need to be calculated.
 #' @param injection **List** of dditional parameters to be passed to the
-#'   `calc_modis_par` function.
+#'   `calculate_modis` function.
 #' @return MODIS/VIIRS feature data.frame.
-#' @seealso [`amadeus::calc_modis_daily`], [`amadeus::calc_modis_par`]
+#' @seealso [`amadeus::calculate_modis_daily`], [`amadeus::calculate_modis`]
 #' @importFrom rlang inject
 #' @examples
 #' \dontrun{
@@ -268,19 +259,54 @@ inject_calculate <- function(covariate, locs, injection) {
 #' inject_modis_par(
 #'   locs = my_locs,
 #'   injection = list(path = files, subdataset = "Cloud_Fraction_Day",
-#'      name_covariates = "MOD_CLCVD_0_", nthreads = 2L,
+#'      name_covariates = "MOD_CLCVD_0_",
 #'      preprocess = amadeus::process_modis_swath, radius = c(1000)))
 #' }
 #' @export
 inject_modis_par <- function(locs, injection) {
   rlang::inject(
-    amadeus::calc_modis_par(
+    amadeus::calculate_modis(
       locs = locs,
       locs_id = "site_id",
       !!!injection
     )
   )
 }
+
+#' Injects arguments into MODIS/VIIRS data processing function
+#' @keywords Calculation
+#' @param locs A data frame containing the locations for which MODIS
+#'   features need to be calculated.
+#' @param injection **List** of dditional parameters to be passed to the
+#'   `calculate_modis_par` function.
+#' @return MODIS/VIIRS feature data.frame.
+#' @importFrom rlang inject
+#' @examples
+#' \dontrun{
+#' files <-
+#'   c(
+#'     "/downloads/modis/mod06/MOD06_L2.A2022001.0000.061.2022001160000.hdf",
+#'    "/downloads/modis/mod06/MOD06_L2.A2022001.0005.061.2022001160000.hdf"
+#'   )
+#' my_locs <- data.frame(site_id = 1:2, lon = c(-88, -87), lat = c(35, 35))
+#' my_locs <- sf::st_as_sf(my_locs, coords = c("lon", "lat"))
+#' inject_modis(
+#'   locs = my_locs,
+#'   injection = list(path = files, subdataset = "Cloud_Fraction_Day",
+#'      name_covariates = "MOD_CLCVD_0_",
+#'      preprocess = amadeus::process_modis_swath, radius = c(1000)))
+#' }
+#' @export
+inject_modis <- function(locs, injection) {
+  rlang::inject(
+    amadeus::calculate_modis(
+      locs = locs,
+      locs_id = "site_id",
+      !!!injection
+    )
+  )
+}
+
 
 #' Injects geographic information into a data frame
 #' @description
@@ -322,21 +348,16 @@ inject_geos <- function(locs, injection, ...) {
 #'   to be calculated.
 #' @param injection A list of additional arguments to be passed to
 #'   the `calc_gmted_direct` function.
-#' @param nthreads The number of threads to be used for parallel processing.
-#'  Default is 4.
 #' @return A data frame containing the merged results of GMTED data
 #'   for each location within different radii.
-#' @importFrom future plan
-#' @importFrom future.apply future_lapply
 #' @importFrom rlang inject
 #' @export
-inject_gmted <- function(locs, variable, radii, injection, nthreads = 4L) {
-  future::plan(future::multicore, workers = nthreads)
+inject_gmted <- function(locs, variable, radii, injection) {
 
   radii_list <- split(radii, seq_along(radii))
 
   radii_rep <-
-    future.apply::future_lapply(
+    lapply(
       radii_list,
       function(r) {
         rlang::inject(
@@ -348,13 +369,12 @@ inject_gmted <- function(locs, variable, radii, injection, nthreads = 4L) {
             !!!injection
           )
         )
-      },
-      future.seed = TRUE
+      }
     )
 
   radii_rep <- lapply(radii_rep, function(x) as.data.frame(x))
   radii_join <- beethoven::reduce_merge(radii_rep, "site_id")
-  future::plan(future::sequential)
+
   return(radii_join)
 }
 
@@ -443,5 +463,5 @@ inject_nlcd <-
   ) {
     args_ext <- list(...)
     args_ext <- c(args_ext, list(year = year, radius = radius))
-    inject_match(amadeus::calc_nlcd, args_ext)
+    inject_match(amadeus::calculate_nlcd, args_ext)
   }

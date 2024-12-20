@@ -4,7 +4,7 @@
 \alias{par_narr}
 \title{Parallelize NARR feature calculation}
 \usage{
-par_narr(domain, path, date, locs, nthreads = 24L)
+par_narr(domain, path, date, locs)
 }
 \arguments{
 \item{domain}{A character vector specifying the domains to process.}
@@ -15,9 +15,6 @@ par_narr(domain, path, date, locs, nthreads = 24L)
 NARR data to process.}
 
 \item{locs}{A data frame specifying the locations to calculate NARR data for.}
-
-\item{nthreads}{An integer specifying the number of threads
-to use for parallel processing. Default is 24.}
 }
 \value{
 A list of results from the parallel processing.

@@ -15,7 +15,7 @@ testthat::test_that("set_args_download exports qs or rds file", {
 
   # run set_args_download with qs extension
   testthat::expect_warning(
-    calcspec1 <- set_args_download(
+    calcspec1 <- beethoven::set_args_download(
       char_period = c("2018-01-01", "2018-01-31"),
       export = FALSE,
       path_export = tempqsfile
@@ -26,7 +26,7 @@ testthat::test_that("set_args_download exports qs or rds file", {
 
   # run set_args_download with rds extension
   testthat::expect_warning(
-    calcspec2 <- set_args_download(
+    calcspec2 <- beethoven::set_args_download(
       char_period = c("2018-01-01", "2018-01-31"),
       export = FALSE,
       path_export = temprdsfile
@@ -37,7 +37,7 @@ testthat::test_that("set_args_download exports qs or rds file", {
 
   # run set_args_download with qs file and nasa token
   testthat::expect_no_error(
-    dlspec1 <- set_args_download(
+    dlspec1 <- beethoven::set_args_download(
       char_period = c("2018-01-01", "2018-01-31"),
       export = FALSE,
       nasa_earth_data_token = "mytoken",
@@ -49,7 +49,7 @@ testthat::test_that("set_args_download exports qs or rds file", {
 
   # run set_args_download with rds file and nasa token
   testthat::expect_no_error(
-    dlspec2 <- set_args_download(
+    dlspec2 <- beethoven::set_args_download(
       char_period = c("2018-01-01", "2018-01-31"),
       export = FALSE,
       nasa_earth_data_token = "mytoken",
@@ -61,7 +61,7 @@ testthat::test_that("set_args_download exports qs or rds file", {
 
   # export download spec to qs file will give a message
   testthat::expect_message(
-    dlspecqs <- set_args_download(
+    dlspecqs <- beethoven::set_args_download(
       char_input_dir = "/path/to/nonexisting",
       char_period = c("2018-01-01", "2018-01-31"),
       nasa_earth_data_token = "mytoken",
@@ -75,7 +75,7 @@ testthat::test_that("set_args_download exports qs or rds file", {
 
   # export download spec to rds file will give a message
   testthat::expect_message(
-    dlspecrds <- set_args_download(
+    dlspecrds <- beethoven::set_args_download(
       char_input_dir = "/path/to/nonexisting",
       char_period = c("2018-01-01", "2018-01-31"),
       nasa_earth_data_token = "mytoken",
@@ -89,7 +89,7 @@ testthat::test_that("set_args_download exports qs or rds file", {
 
   # export download spec to a file with other extensions will stop
   testthat::expect_error(
-    dlspecrds <- set_args_download(
+    dlspecrds <- beethoven::set_args_download(
       char_input_dir = "/path/to/nonexisting",
       char_period = c("2018-01-01", "2018-01-31"),
       nasa_earth_data_token = "mytoken",
@@ -100,7 +100,7 @@ testthat::test_that("set_args_download exports qs or rds file", {
 
   # warning if no nasa_earth_data_token is provided
   testthat::expect_warning(
-    dlspecrds <- set_args_download(
+    dlspecrds <- beethoven::set_args_download(
       char_input_dir = "/path/to/nonexisting",
       char_period = c("2018-01-01", "2018-01-31"),
       nasa_earth_data_token = NULL,
@@ -126,7 +126,7 @@ testthat::test_that("set_args_calc exports qs or rds file", {
 
   # run set_args_calc with qs extension
   testthat::expect_no_error(
-    calcspec1 <- set_args_calc(
+    calcspec1 <- beethoven::set_args_calc(
       char_period = c("2018-01-01", "2018-01-31"),
       export = FALSE,
       path_export = tempqsfile
@@ -137,7 +137,7 @@ testthat::test_that("set_args_calc exports qs or rds file", {
 
   # run set_args_calc with rds extension
   testthat::expect_no_error(
-    calcspec2 <- set_args_calc(
+    calcspec2 <- beethoven::set_args_calc(
       char_period = c("2018-01-01", "2018-01-31"),
       export = FALSE,
       path_export = temprdsfile
@@ -148,7 +148,7 @@ testthat::test_that("set_args_calc exports qs or rds file", {
 
   # blank paths if try to search nonexisting paths
   testthat::expect_no_error(
-    calcspec_neq <- set_args_calc(
+    calcspec_neq <- beethoven::set_args_calc(
       char_input_dir = "/path/to/nonexisting",
       char_period = c("2018-01-01", "2018-01-31"),
       export = TRUE,
@@ -161,7 +161,7 @@ testthat::test_that("set_args_calc exports qs or rds file", {
 
   # blank paths if try to search nonexisting paths
   testthat::expect_no_error(
-    calcspec_ner <- set_args_calc(
+    calcspec_ner <- beethoven::set_args_calc(
       char_input_dir = "/path/to/nonexisting",
       char_period = c("2018-01-01", "2018-01-31"),
       export = TRUE,
@@ -174,7 +174,7 @@ testthat::test_that("set_args_calc exports qs or rds file", {
 
   # GlobalEnv objects if no path_export is provided
   testthat::expect_no_error(
-    calcspec_nullpath <- set_args_calc(
+    calcspec_nullpath <- beethoven::set_args_calc(
       char_input_dir = "/path/to/nonexisting",
       char_period = c("2018-01-01", "2018-01-31"),
       export = TRUE,
@@ -185,7 +185,7 @@ testthat::test_that("set_args_calc exports qs or rds file", {
 
   # error with non-qs or -rds extension
   testthat::expect_error(
-    set_args_calc(
+    beethoven::set_args_calc(
       char_input_dir = "/path/to/nonexisting",
       char_period = c("2018-01-01", "2018-01-31"),
       export = TRUE,

@@ -1,6 +1,6 @@
 Package: beethoven
 Title: Building an Extensible, rEproducible, Test-driven, Harmonized, Open-source, Versioned, ENsemble model for air quality
-Version: 0.4.2
+Version: 0.4.3
 Authors@R: c(
     person("Kyle", "Messier", , "kyle.messier@nih.gov", role = c("aut", "cre"), comment = c(ORCID = "0000-0001-9508-9623")),
     person("Insang", "Song", role = c("aut", "ctb"), comment = c(ORCID = "0000-0001-8732-3256")),
@@ -16,7 +16,6 @@ Authors@R: c(
 Description: Near Real Time air pollution model results and code produced by the SET group. It is fully tested, versioned, and open source and open access.
 Depends: R (>= 4.1.0)
 Imports:
-  amadeus,
   dplyr,
   sf,
   stats,
@@ -37,7 +36,6 @@ Imports:
   recipes,
   missRanger,
   parsnip,
-  future.apply,
   future.batchtools,
   anticlust,
   qs,
@@ -46,7 +44,9 @@ Imports:
   collapse,
   tigris,
   graphics,
-  scatterplot3d
+  scatterplot3d,
+  amadeus,
+  parallelly
 Suggests:
   testthat (>= 3.0.0),
   covr,
@@ -71,7 +71,7 @@ Suggests:
   doRNG,
   furrr,
   quarto
-Remotes: NIEHS/amadeus, NIEHS/chopin
+Remotes: NIEHS/chopin, NIEHS/amadeus@1.2.1
 SystemRequirements: NetCDF4, CUDA (>= 10.0)
 Encoding: UTF-8
 VignetteBuilder: knitr, rmarkdown

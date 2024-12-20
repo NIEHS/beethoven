@@ -14,7 +14,17 @@ From: rocker/geospatial:latest
         fonts-unifont
 
     # Install SSL certificates
-    apt-get install -y ca-certificates
+    # apt-get install -y ca-certificates
+
+    # Install curl for downloading data
+    # apt-get install -y curl
+
+    ## NEW
+    apt-get update && apt-get install -y \
+      libcurl4-openssl-dev \
+      libssl-dev \
+      ca-certificates \
+      curl
 
     # Set locale for the environment
     echo "LANG=en_US.UTF-8" >> /etc/default/locale
@@ -29,9 +39,10 @@ From: rocker/geospatial:latest
 
     # Install R packages
     Rscript -e "install.packages(c('pak', 'targets', 'tarchetypes', 'crew', \
-        'crew.cluster', 'testthat', 'tidymodels', 'bonsai'))"
-    Rscript -e "pak::pak('NIEHS/amadeus')"
-    Rscript -e "pak::pak('NIEHS/beethoven@dev-0930')"
+        'crew.cluster', 'testthat', 'tidymodels', 'bonsai', 'qs2', 'mirai', \
+        'nanonext'))"
+    Rscript -e "pak::pak('NIEHS/amadeus@1.2.1')"
+    Rscript -e "pak::pak('NIEHS/beethoven@dev-1028')"
 
 %environment
     # Set locale for the container environment

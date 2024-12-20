@@ -4,12 +4,17 @@
 \alias{split_dates}
 \title{Split a date range into subranges}
 \usage{
-split_dates(dates, n)
+split_dates(dates, n, year = TRUE, julian = FALSE)
 }
 \arguments{
 \item{dates}{character(2). date to query. \code{"YYYY-MM-DD"} format.}
 
 \item{n}{integer(1). Number of dates in each subrange.}
+
+\item{year}{logical(1). If \code{TRUE}, sublists will contain only one year. This
+may result in sublists with fewer than \code{n} dates.}
+
+\item{julian}{logical(1). If \code{TRUE}, dates are in Julian format.}
 }
 \value{
 a list object, with date ranges split into subranges.

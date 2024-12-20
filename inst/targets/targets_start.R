@@ -11,4 +11,4 @@ cat("Active library paths:\n")
 .libPaths()
 
 ############################      RUN PIPELINE      ############################
-targets::tar_make()
+targets::tar_make(reporter = "verbose_positives")
