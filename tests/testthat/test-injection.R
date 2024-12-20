@@ -345,47 +345,47 @@ testthat::test_that("inject_geos (chm, aqc, and combined)", {
 
 ################################################################################
 ##### inject_gmted
-# testthat::test_that("inject_gmted (breakline emphasis)", {
+testthat::test_that("inject_gmted (breakline emphasis)", {
   
-#   withr::local_package("rlang")
+  withr::local_package("rlang")
 
-#   # sample location
-#   loc <- data.frame(lon = -78.8277, lat = 35.95013, site_id = "A1")
+  # sample location
+  loc <- data.frame(lon = -78.8277, lat = 35.95013, site_id = "A1")
 
-#   # breakline emphasis
-#   gmted_injection <- list(
-#     path = testthat::test_path(
-#       "..", "testdata", "injection", "gmted", "be75_grd"
-#     )
-#   )
-#   # expect no error with breakline emphasis data
-#   testthat::expect_no_error(
-#     calc_be <- beethoven::inject_gmted(
-#       locs = loc,
-#       variable = "Breakline Emphasis",
-#       radii = c(10, 100),
-#       injection = gmted_injection
-#     )
-#   )
-#   # expect a data.frame
-#   testthat::expect_s3_class(calc_be, "data.frame")
-#   # expect 1 row and 3 columns
-#   testthat::expect_equal(dim(calc_be), c(1, 3))
-#   # expect no NA values in any column
-#   testthat::expect_false("TRUE" %in% any(is.na(calc_be)))
+  # breakline emphasis
+  gmted_injection <- list(
+    path = testthat::test_path(
+      "..", "testdata", "injection", "gmted", "be75_grd"
+    )
+  )
+  # expect no error with breakline emphasis data
+  testthat::expect_no_error(
+    calc_be <- beethoven::inject_gmted(
+      locs = loc,
+      variable = "Breakline Emphasis",
+      radii = c(10, 100),
+      injection = gmted_injection
+    )
+  )
+  # expect a data.frame
+  testthat::expect_s3_class(calc_be, "data.frame")
+  # expect 1 row and 3 columns
+  testthat::expect_equal(dim(calc_be), c(1, 3))
+  # expect no NA values in any column
+  testthat::expect_false("TRUE" %in% any(is.na(calc_be)))
 
 
-#   # expect error with missing variable
-#   # NOTE: direct test of calc_gmted_direct
-#   testthat::expect_error(
-#     beethoven::calc_gmted_direct(
-#       locs = loc,
-#       locs_id = "site_id",
-#       radii = c(10, 100),
-#       path = gmted_injection$path,
-#     )
-#   )
-# })
+  # expect error with missing variable
+  # NOTE: direct test of calc_gmted_direct
+  testthat::expect_error(
+    beethoven::calc_gmted_direct(
+      locs = loc,
+      locs_id = "site_id",
+      radii = c(10, 100),
+      path = gmted_injection$path,
+    )
+  )
+})
 
 
 ################################################################################

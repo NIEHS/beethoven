@@ -5,7 +5,7 @@
 export CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 
-# Run download and calculation covariate tests via container_covariates.sif.
+# Run download and covariate calculation tests via container_covariates.sif.
 apptainer exec \
   --bind $PWD:/mnt \
   --bind /tmp:/opt/tmp \
@@ -16,7 +16,7 @@ apptainer exec \
    source_files <- list.files('/mnt/R', full.names = TRUE); \
    covr::file_coverage(source_files, test_files)"
 
-# Run base and meta learner tests via container_models.sif.
+# Run base- and meta-learner tests via container_models.sif.
 # apptainer exec \
 #   --bind /tmp:/opt/tmp \
 #   container_models.sif Rscript -e \

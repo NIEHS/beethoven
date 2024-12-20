@@ -44,7 +44,6 @@ From: rocker/geospatial:latest
     Rscript -e "pak::pak('NIEHS/amadeus@1.2.1')"
     Rscript -e "pak::pak('NIEHS/beethoven@dev-1028')"
 
-
 %environment
     # Set locale for the container environment
     export LANG=en_US.UTF-8
