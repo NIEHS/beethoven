@@ -34,7 +34,7 @@ my_locs <- sf::st_as_sf(my_locs, coords = c("lon", "lat"))
 inject_modis_par(
   locs = my_locs,
   injection = list(path = files, subdataset = "Cloud_Fraction_Day",
-     name_covariates = "MOD_CLCVD_0_", nthreads = 2L,
+     name_covariates = "MOD_CLCVD_0_",
      preprocess = amadeus::process_modis_swath, radius = c(1000)))
 }
 }

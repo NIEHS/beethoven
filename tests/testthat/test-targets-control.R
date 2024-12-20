@@ -4,10 +4,10 @@
 
 ################################################################################
 ##### set_slurm_resource
-test_that("set_slurm_resource returns the correct structure", {
+testthat::test_that("set_slurm_resource returns the correct structure", {
   # expect no error
   testthat::expect_no_error(
-    res <- set_slurm_resource(
+    res <- beethoven::set_slurm_resource(
       template_file = "inst/targets/template_slurm.tmpl",
       partition = "cluster",
       ncpus = 2L,

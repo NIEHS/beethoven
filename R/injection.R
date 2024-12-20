@@ -88,7 +88,6 @@ set_target_years <-
 #' Depending on temporal resolution of raw datasets.
 #' Nullable; If `NULL`, it will be set to `c(1)`.
 #' @param domain_name character(1). Name of the domain. Default is `"year"`.
-#' @param nthreads integer(1). Number of threads to use.
 #' @param process_function Raw data processor. Default is
 #' [`amadeus::process_covariates`]
 #' @param calc_function Function to calculate covariates.
@@ -103,7 +102,6 @@ calculate <-
   function(
     domain = NULL,
     domain_name = "year",
-    nthreads = 1L,
     process_function = amadeus::process_covariates,
     calc_function = amadeus::calculate_covariates,
     ...
@@ -261,7 +259,7 @@ inject_calculate <- function(covariate, locs, injection) {
 #' inject_modis_par(
 #'   locs = my_locs,
 #'   injection = list(path = files, subdataset = "Cloud_Fraction_Day",
-#'      name_covariates = "MOD_CLCVD_0_", nthreads = 2L,
+#'      name_covariates = "MOD_CLCVD_0_",
 #'      preprocess = amadeus::process_modis_swath, radius = c(1000)))
 #' }
 #' @export
@@ -350,13 +348,11 @@ inject_geos <- function(locs, injection, ...) {
 #'   to be calculated.
 #' @param injection A list of additional arguments to be passed to
 #'   the `calc_gmted_direct` function.
-#' @param nthreads The number of threads to be used for parallel processing.
-#'  Default is 4.
 #' @return A data frame containing the merged results of GMTED data
 #'   for each location within different radii.
 #' @importFrom rlang inject
 #' @export
-inject_gmted <- function(locs, variable, radii, injection, nthreads = 4L) {
+inject_gmted <- function(locs, variable, radii, injection) {
 
   radii_list <- split(radii, seq_along(radii))
 
@@ -373,8 +369,7 @@ inject_gmted <- function(locs, variable, radii, injection, nthreads = 4L) {
             !!!injection
           )
         )
-      },
-      future.seed = TRUE
+      }
     )
 
   radii_rep <- lapply(radii_rep, function(x) as.data.frame(x))

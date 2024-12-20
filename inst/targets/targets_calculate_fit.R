@@ -444,26 +444,26 @@ target_calculate_fit <-
     )
     ,
     ###########################        MODIS/VIIRS        ######################
-    # targets::tar_target(
-    #   dt_feat_calc_nasa,
-    #   command = beethoven::reduce_merge(
-    #     lapply(
-    #       list(
-    #         list_feat_calc_mod11,
-    #         list_feat_calc_mod06,
-    #         list_feat_calc_mod13,
-    #         list_feat_calc_mcd19_1km,
-    #         list_feat_calc_mcd19_5km,
-    #         list_feat_calc_mod09,
-    #         list_feat_calc_viirs
-    #       ),
-    #       function(x) data.table::data.table(beethoven::reduce_list(x)[[1]])
-    #     ),
-    #     by = NULL
-    #   ),
-    #   description = "data.table of MODIS/VIIRS features | fit"
-    # )
-    # ,
+    targets::tar_target(
+      dt_feat_calc_nasa,
+      command = beethoven::reduce_merge(
+        lapply(
+          list(
+            list_feat_calc_mod11,
+            list_feat_calc_mod06,
+            list_feat_calc_mod13,
+            list_feat_calc_mcd19_1km,
+            list_feat_calc_mcd19_5km,
+            list_feat_calc_mod09,
+            list_feat_calc_viirs
+          ),
+          function(x) data.table::data.table(beethoven::reduce_list(x)[[1]])
+        ),
+        by = NULL
+      ),
+      description = "data.table of MODIS/VIIRS features | fit"
+    )
+    ,
     ###########################         GMTED        ###########################
     targets::tar_target(
       chr_iter_calc_gmted_radii,
@@ -755,94 +755,95 @@ target_calculate_fit <-
       ),
       description = "data.table of gRoads features | fit"
     )
-    # ,
+    ,
     ########################       DATE FEATURES       #########################
-    # targets::tar_target(
-    #   dt_feat_calc_date,
-    #   command = Reduce(
-    #     post_calc_autojoin,
-    #     list(
-    #       dt_feat_calc_geos,
-    #       dt_feat_calc_narr,
-    #       dt_feat_calc_nasa
-    #     )
-    #   ),
-    #   description = "data.table of all features | fit"
-    # )
-    # ,
+    targets::tar_target(
+      dt_feat_calc_date,
+      command = Reduce(
+        beethoven::post_calc_autojoin,
+        list(
+          dt_feat_calc_geos,
+          dt_feat_calc_narr,
+          dt_feat_calc_nasa
+        )
+      ),
+      description = "data.table of all features | fit"
+    )
+    ,
     ########################       BASE FEATURES       #########################
-    # targets::tar_target(
-    #   list_feat_calc_base_flat,
-    #   command = lapply(
-    #     list(
-    #       list(dt_feat_calc_hms),
-    #       list(dt_feat_calc_tri),
-    #       list(dt_feat_calc_nei),
-    #       list(dt_feat_calc_ecoregions),
-    #       dt_feat_calc_koppen,
-    #       list(dt_feat_calc_pop),
-    #       list(dt_feat_calc_groads)
-    #     ),
-    #     function(x) {
-    #       if (length(x) == 1) {
-    #         x[[1]]
-    #       } else if (
-    #         sum(grepl("light|medium|heavy", sapply(x, \(t) names(t)))) == 3
-    #       ) {
-    #         xr <- lapply(x, \(dt) {
-    #           dta <- data.table::copy(dt)
-    #           dta <- dta[, time := as.character(time)]
-    #           return(dta)
-    #         })
-    #         xrr <- Reduce(
-    #           function(x, y) {
-    #             collapse::join(x, y, on = c("site_id", "time"), how = "full")
-    #           },
-    #           xr
-    #         )
-    #         return(xrr)
-    #       } else {
-    #         collapse::rowbind(x, use.names = TRUE, fill = TRUE)
-    #       }
-    #     }),
-    #   description = "Calculated base feature list (all dt) | fit"
-    # )
-    # ,
-    # targets::tar_target(
-    #   dt_feat_calc_base,
-    #   command = Reduce(
-    #     post_calc_autojoin,
-    #     c(
-    #       list(dt_feat_proc_aqs_sites_time),
-    #       list_feat_calc_base_flat,
-    #       list(dt_feat_calc_gmted),
-    #       list(data.table::data.table(dt_feat_calc_nlcd))
-    #     )
-    #   ),
-    #   description = "Base features with PM2.5 | fit"
-    # )
-    # ,
+    targets::tar_target(
+      list_feat_calc_base_flat,
+      command = lapply(
+        list(
+          list(dt_feat_calc_hms),
+          list(dt_feat_calc_tri),
+          list(dt_feat_calc_nei),
+          list(dt_feat_calc_ecoregions),
+          list(dt_feat_calc_koppen),
+          list(dt_feat_calc_pop),
+          list(dt_feat_calc_groads)
+        ),
+        function(x) {
+          if (length(x) == 1) {
+            x[[1]]
+          } else if (
+            sum(grepl("light|medium|heavy", sapply(x, \(t) names(t)))) == 3
+          ) {
+            xr <- lapply(x, \(dt) {
+              dta <- data.table::copy(dt)
+              dta <- dta[, time := as.character(time)]
+              return(dta)
+            })
+            xrr <- Reduce(
+              function(x, y) {
+                collapse::join(x, y, on = c("site_id", "time"), how = "full")
+              },
+              xr
+            )
+            return(xrr)
+          } else {
+            collapse::rowbind(x, use.names = TRUE, fill = TRUE)
+          }
+        }
+      ),
+      description = "Calculated base feature list (all dt) | fit"
+    )
+    ,
+    targets::tar_target(
+      dt_feat_calc_base,
+      command = Reduce(
+        beethoven::post_calc_autojoin,
+        c(
+          list(dt_feat_proc_aqs_sites_time),
+          list_feat_calc_base_flat,
+          list(dt_feat_calc_gmted),
+          list(data.table::data.table(dt_feat_calc_nlcd))
+        )
+      ),
+      description = "Base features with PM2.5 | fit"
+    )
+    ,
     #######################     CUMULATIVE FEATURES      #######################
-    # targets::tar_target(
-    #   dt_feat_calc_design,
-    #   command = post_calc_autojoin(
-    #     dt_feat_calc_base,
-    #     dt_feat_calc_date,
-    #     year_start = as.integer(substr(chr_daterange[1], 1, 4)),
-    #     year_end = as.integer(substr(chr_daterange[2], 1, 4))
-    #   ),
-    #   description = "data.table of all features with PM2.5 | fit"
-    # )
-    # ,
-    # targets::tar_target(
-    #   dt_feat_calc_imputed,
-    #   command = impute_all(
-    #     dt_feat_calc_design,
-    #     period = chr_daterange,
-    #     nthreads_dt = 1,
-    #     nthreads_collapse = 1,
-    #     nthreads_imputation = 1
-    #   ),
-    #   description = "Imputed features + lags"
-    # )
+    targets::tar_target(
+      dt_feat_calc_design,
+      command = beethoven::post_calc_autojoin(
+        dt_feat_calc_base,
+        dt_feat_calc_date,
+        year_start = as.integer(substr(chr_daterange[1], 1, 4)),
+        year_end = as.integer(substr(chr_daterange[2], 1, 4))
+      ),
+      description = "data.table of all features with PM2.5 | fit"
+    )
+    ,
+    targets::tar_target(
+      dt_feat_calc_imputed,
+      command = beethoven::impute_all(
+        dt_feat_calc_design,
+        period = chr_daterange,
+        nthreads_dt = 32,
+        nthreads_collapse = 32,
+        nthreads_imputation = 32
+      ),
+      description = "Imputed features + lags"
+    )
   )
