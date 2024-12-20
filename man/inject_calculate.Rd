@@ -4,7 +4,7 @@
 \alias{inject_calculate}
 \title{Injects the calculate function with specified arguments.}
 \usage{
-inject_calculate(covariate, locs, injection)
+inject_calculate(covariate, locs, injection, grid = NULL)
 }
 \arguments{
 \item{covariate}{character(1). The name of the covariate to be calculated.}
@@ -13,6 +13,8 @@ inject_calculate(covariate, locs, injection)
 
 \item{injection}{Additional arguments to be injected into
 the calculate function.}
+
+\item{grid}{sf object of unpadded unit grid from \code{chopin::par_pad_grid()}}
 }
 \value{
 The result of the calculate function with the injected arguments.

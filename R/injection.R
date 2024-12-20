@@ -221,6 +221,7 @@ calculate <-
 #' @param locs The locations to be used in the calculation.
 #' @param injection Additional arguments to be injected into
 #'   the calculate function.
+#' @param grid sf object of unpadded unit grid from `chopin::par_pad_grid()`
 #' @return The result of the calculate function with the injected arguments.
 #' @examples
 #' \dontrun{
@@ -230,7 +231,12 @@ calculate <-
 #' )
 #' }
 #' @export
-inject_calculate <- function(covariate, locs, injection) {
+inject_calculate <- function(
+  covariate, locs, injection, grid = NULL
+) {
+  if (!is.null(grid)) {
+    locs <- locs[grid, ]
+  }
   rlang::inject(
     calculate(
       locs = locs,
@@ -352,11 +358,14 @@ inject_geos <- function(locs, injection, ...) {
 #'   the `calc_gmted_direct` function.
 #' @param nthreads The number of threads to be used for parallel processing.
 #'  Default is 4.
+#' @param grid sf object of unpadded unit grid from `chopin::par_pad_grid()`
 #' @return A data frame containing the merged results of GMTED data
 #'   for each location within different radii.
 #' @importFrom rlang inject
 #' @export
-inject_gmted <- function(locs, variable, radii, injection, nthreads = 4L) {
+inject_gmted <- function(
+  locs, variable, radii, injection, nthreads = 4L, grid = NULL
+) {
 
   radii_list <- split(radii, seq_along(radii))
 
@@ -364,6 +373,10 @@ inject_gmted <- function(locs, variable, radii, injection, nthreads = 4L) {
     lapply(
       radii_list,
       function(r) {
+        if (!is.null(grid)) {
+          locs <- locs[grid, ]
+        }
+
         rlang::inject(
           beethoven::calc_gmted_direct(
             locs = locs,
@@ -455,6 +468,7 @@ inject_match <- function(f, args) {
 #' @keywords Calculation
 #' @param year An integer specifying the year to calculate NLCD data for.
 #' @param radius An integer specifying the radius for the NLCD calculation.
+#' @param grid sf object of unpadded unit grid from `chopin::par_pad_grid()`
 #' @param ... Additional arguments to be passed to the NLCD calculation
 #'  function.
 #' @return data.frame object.
@@ -463,10 +477,13 @@ inject_nlcd <-
   function(
     year = 2019,
     radius = 1000,
+    grid = NULL,
     ...
   ) {
     args_ext <- list(...)
+    if (!is.null(grid)) {
+      args_ext$locs <- args_ext$locs[grid, ]
+    }
     args_ext <- c(args_ext, list(year = year, radius = radius))
-    inject_match(amadeus::calculate_nlcd, args_ext)
     inject_match(amadeus::calculate_nlcd, args_ext)
   }

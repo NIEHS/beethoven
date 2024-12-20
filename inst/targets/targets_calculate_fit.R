@@ -2,6 +2,13 @@
 ##### Calculate covariates at US EPA AQS sites
 target_calculate_fit <-
   list(
+    targets::tar_target(
+      sf_grid_split,
+      command = chopin::par_pad_grid(sf_feat_proc_aqs_sites, mode = "grid", nx = 4L, ny = 4L, padding = 30000)[[1]] |> sf::st_as_sf(),
+      iteration = "list",
+      description = "unpadded grid for split computation"
+    )
+    ,
     ###########################         GEOS         ###########################
     targets::tar_target(
       chr_iter_calc_geos,
@@ -118,11 +125,12 @@ target_calculate_fit <-
             ),
             date = fl_dates(unlist(list_dates)),
             covariate = "hms"
-          )
+          ),
+          grid = sf_grid_split
         )
       },
-      pattern = map(list_dates),
-      iteration = "list",
+      pattern = cross(list_dates, sf_grid_split),
+      iteration = "vector",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(
           controller = "calc_controller"

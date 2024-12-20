@@ -37,6 +37,7 @@ targets::tar_option_set(
   format = "qs",
   storage = "worker",
   deployment = "worker",
+  library = .libPaths(),
   garbage_collection = TRUE,
   seed = 202401L,
   controller = crew::crew_controller_group(

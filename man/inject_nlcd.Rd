@@ -4,12 +4,14 @@
 \alias{inject_nlcd}
 \title{Inject arguments into NLCD calculation function for branching}
 \usage{
-inject_nlcd(year = 2019, radius = 1000, ...)
+inject_nlcd(year = 2019, radius = 1000, grid = NULL, ...)
 }
 \arguments{
 \item{year}{An integer specifying the year to calculate NLCD data for.}
 
 \item{radius}{An integer specifying the radius for the NLCD calculation.}
+
+\item{grid}{sf object of unpadded unit grid from \code{chopin::par_pad_grid()}}
 
 \item{...}{Additional arguments to be passed to the NLCD calculation
 function.}
