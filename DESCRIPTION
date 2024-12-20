@@ -45,7 +45,6 @@ Imports:
   tigris,
   graphics,
   scatterplot3d,
-  amadeus,
   parallelly
 Suggests:
   testthat (>= 3.0.0),
@@ -71,7 +70,7 @@ Suggests:
   doRNG,
   furrr,
   quarto
-Remotes: NIEHS/chopin
+Remotes: NIEHS/chopin, NIEHS/amadeus@1.2.1
 SystemRequirements: NetCDF4, CUDA (>= 10.0)
 Encoding: UTF-8
 VignetteBuilder: knitr, rmarkdown
