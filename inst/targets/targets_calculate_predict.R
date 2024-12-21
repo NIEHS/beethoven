@@ -18,7 +18,7 @@ target_calculate_predict <-
       df_pred_calc_grid,
       command = qs::qread(
         list.files(
-          path = file.path("inst", "targets"),
+          path = file.path("inst", "extdata"),
           pattern = "prediction_grid.qs",
           full.names = TRUE
         )
@@ -152,8 +152,8 @@ target_calculate_predict <-
     )
     ,
     targets::tar_target(
-      dt_feat_calc_hms,
-      command = beethoven::reduce_list(list_feat_calc_hms)[[1]],
+      dt_pred_calc_hms,
+      command = beethoven::reduce_list(list_pred_calc_hms)[[1]],
       description = "data.table of HMS features | fit"
     )
     ,
@@ -296,11 +296,8 @@ target_calculate_predict <-
       ),
       iteration = "list",
       description = "Calculate NLCD features with branched sublists (pred)",
-      resources = set_slurm_resource(
-        ntasks = 1,
-        ncpus = 8L,
-        memory = 32,
-        partition = "normal"
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "calc_controller")
       )
     )
     ,
@@ -440,10 +437,8 @@ target_calculate_predict <-
         chr_pred_calc_grid_DEV,
         chr_pred_calc_gmted_radii
       ),
-      resources = set_slurm_resource(
-        ntasks = 1,
-        ncpus = arglist_common$nthreads_gmted,
-        memory = 8
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "calc_controller")
       ),
       description = "Calculate GMTED features with branched sublists (pred)"
     )

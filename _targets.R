@@ -13,6 +13,31 @@ controller_250 <- crew::crew_controller_local(
   workers = 250,
   seconds_idle = 30
 )
+##### `controller_100` uses 100 workers (~10.0 Gb per worker).
+controller_100 <- crew::crew_controller_local(
+  name = "controller_100",
+  workers = 100,
+  seconds_idle = 30
+)
+##### `controller_75` uses 75 workers (~13.33 Gb per worker).
+controller_75 <- crew::crew_controller_local(
+  name = "controller_75",
+  workers = 75,
+  seconds_idle = 30
+)
+##### `controller_50` uses 50 workers (~20.0 Gb per worker).
+controller_50 <- crew::crew_controller_local(
+  name = "controller_50",
+  workers = 50,
+  seconds_idle = 30
+)
+##### `controller_25` uses 25 workers (~40.0 Gb per worker).
+controller_25 <- crew::crew_controller_local(
+  name = "controller_25",
+  workers = 25,
+  seconds_idle = 30
+)
+# legacy
 calc_controller <- crew::crew_controller_local(
   name = "calc_controller",
   workers = 20,
@@ -52,6 +77,7 @@ targets::tar_source("inst/targets/targets_initiate.R")
 targets::tar_source("inst/targets/targets_download.R")
 targets::tar_source("inst/targets/targets_aqs.R")
 targets::tar_source("inst/targets/targets_calculate_fit.R")
+targets::tar_source("inst/targets/targets_calculate_predict.R")
 
 ##############################      PIPELINE      ##############################
 list(

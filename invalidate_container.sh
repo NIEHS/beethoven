@@ -19,7 +19,8 @@ apptainer exec \
   --bind /ddn:/input \
   --bind $PWD/_targets:/opt/_targets \
   beethoven_dl_calc.sif \
-  Rscript --no-init-file -e "targets::tar_invalidate('$DEBUG_TARGET')"
+  Rscript --no-init-file -e "targets::tar_destroy()"
+  #"targets::tar_invalidate('$DEBUG_TARGET')"
 
 # run interactive R session in the container
 # apptainer exec --bind $PWD/inst:/inst --bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input --bind $PWD:/mnt beethoven_dl_calc.sif R

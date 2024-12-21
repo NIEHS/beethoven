@@ -43,6 +43,7 @@ From: rocker/geospatial:latest
         'nanonext'))"
     Rscript -e "pak::pak('NIEHS/amadeus@1.2.1')"
     Rscript -e "pak::pak('NIEHS/beethoven@dev-1028')"
+    Rscript -e "pak::pak('ropensci/chopin')"
 
 %environment
     # Set locale for the container environment
