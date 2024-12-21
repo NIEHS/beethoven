@@ -4,8 +4,8 @@ target_calculate_fit <-
   list(
     targets::tar_target(
       sf_grid_split,
-      command = chopin::par_pad_grid(sf_feat_proc_aqs_sites, mode = "grid", nx = 4L, ny = 4L, padding = 30000)[[1]] |> sf::st_as_sf(),
-      iteration = "list",
+      command = chopin::par_pad_grid(sf_feat_proc_aqs_sites, mode = "grid", nx = 3L, ny = 2L, padding = 30000)[[1]] |> sf::st_as_sf(),
+      iteration = "vector",
       description = "unpadded grid for split computation"
     )
     ,
@@ -597,9 +597,12 @@ target_calculate_fit <-
             ),
             nthreads = 1,
             covariate = "koppen"
-          )
+          ),
+          grid = sf_grid_split
         )
       },
+      iteration = "list",
+      pattern = map(sf_grid_split),
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(
           controller = "calc_controller"
@@ -628,10 +631,11 @@ target_calculate_fit <-
             radius = chr_iter_radii,
             nthreads = 1,
             covariate = "population"
-          )
+          ),
+          grid = sf_grid_split
         )
       },
-      pattern = map(chr_iter_radii),
+      pattern = cross(chr_iter_radii, sf_grid_split),
       iteration = "list",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(
