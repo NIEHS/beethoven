@@ -12,11 +12,11 @@ For developing and running the pipeline, users should check several lines across
   - `/beethoven_dl_calc.sif`: The container image is not hosted on GitHub due to the large file size, so the image must be built by each. The definition file can be found at `/container/beethoven_dl_calc.sh`, and the container image can be build by running `sh build_dl_calc.sh` **from within the `/container` folder. Once the container image is built, it can be copied or moved to the repository root for running the pipeline (`mv beethoven_dl_calc.sif ../` or `cp beethoven_dl_calc.sif ../`).
 
 - Shell
-  - `/run_container.sh`: file controls SLURM submission details (ie, `--mem`, `--cpus-per-task`), and **which local directories are mounted to the container**. Local directories which must be explicitly mounted to the container at run time are 1. group data store (line 17) and 2. local targets store (line 18). For ongoing development, a local directory is used for targets store.
+  - `/run.sh`: file controls SLURM submission details (ie, `--mem`, `--cpus-per-task`), and **which local directories are mounted to the container**. Local directories which must be explicitly mounted to the container at run time are 1. group data store (line 17) and 2. local targets store (line 18). For ongoing development, a local directory is used for targets store.
 
 - R
-  - `/_targets.R`: Ensure sum of controller-specific workers (line 9 + line 14) is equal to the total number of workers requested in `/run_container.R` (line 9).
-  - `/_targets.R`: Ensure targets store (line 18) matches the mount location in `/run_container.sh` (line 18 **after the semicolon**).
+  - `/_targets.R`: Ensure sum of controller-specific workers (line 9 + line 14) is equal to the total number of workers requested in `/run.R` (line 9).
+  - `/_targets.R`: Ensure targets store (line 18) matches the mount location in `/run.sh` (line 18 **after the semicolon**).
   - `/inst/targets/targets_critical.R`: Critical targets are those which will require changes between users (`chr_nasa_token`), for development (`num_dates_split`), manual updates (`/inst/extdata/mod06_links_2018_2022.csv` called via `chr_mod06_links`), and mounted data path (`chr_input_dir`). **Most importantly**, critical target `chr_daterange` controls the entire temporal range of the downstream pipeline. Time-related specifications (dates, months, years, julian dates, etc) are defined relative to `chr_daterange`.
 
 ## Refactor (October 9, 2024)

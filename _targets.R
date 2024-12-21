@@ -7,9 +7,10 @@
 )
 
 #############################      CONTROLLER      #############################
-default_controller <- crew::crew_controller_local(
-  name = "default_controller",
-  workers = 4,
+##### `controller_250` uses full allocation of workers (~4.0 Gb per worker).
+controller_250 <- crew::crew_controller_local(
+  name = "controller_250",
+  workers = 250,
   seconds_idle = 30
 )
 calc_controller <- crew::crew_controller_local(
@@ -26,9 +27,9 @@ targets::tar_config_set(store = "/opt/_targets")
 
 targets::tar_option_set(
   packages = c(
-    "beethoven", "targets", "tarchetypes", "dplyr",
-    "data.table", "sf", "crew", "crew.cluster",
-    "amadeus"
+    "amadeus", "targets", "tarchetypes", "dplyr", "tidyverse",
+    "data.table", "sf", "crew", "crew.cluster", "lubridate", "qs2",
+    "chopin"
   ),
   # add
   repository = "local",
@@ -41,8 +42,7 @@ targets::tar_option_set(
   garbage_collection = TRUE,
   seed = 202401L,
   controller = crew::crew_controller_group(
-    default_controller,
-    calc_controller
+    controller_250, calc_controller
   )
 )
 
@@ -59,5 +59,6 @@ list(
   target_initiate,
   #target_download,
   target_aqs,
-  target_calculate_fit
+  target_calculate_fit,
+  target_calculate_predict
 )

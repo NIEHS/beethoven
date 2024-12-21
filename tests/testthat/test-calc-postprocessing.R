@@ -18,7 +18,7 @@ testthat::test_that("post_calc_merge_features", {
 
   # expect no error with two date-enabled data
   testthat::expect_no_error(
-    dt_pcmf1 <- post_calc_merge_features(
+    dt_pcmf1 <- beethoven::post_calc_merge_features(
       by = c("site_id"),
       time = TRUE,
       dt_geos,
@@ -33,7 +33,7 @@ testthat::test_that("post_calc_merge_features", {
 
   # expect no error with date and no-time data
   testthat::expect_no_error(
-    dt_pcmf2 <- post_calc_merge_features(
+    dt_pcmf2 <- beethoven::post_calc_merge_features(
       by = c("site_id"),
       time = FALSE,
       dt_geos,
@@ -53,7 +53,7 @@ testthat::test_that("post_calc_merge_features", {
 
   # expect NA values with merging date wiith no-time data AND time = TRUE
   testthat::expect_no_error(
-    dt_pcmf3 <- post_calc_merge_features(
+    dt_pcmf3 <- beethoven::post_calc_merge_features(
       by = c("site_id"),
       time = TRUE,
       dt_geos,
@@ -71,7 +71,7 @@ testthat::test_that("post_calc_merge_features", {
   )
   dt_geos_ll <- merge(dt_geos, lonlat, by = "site_id")
   testthat::expect_no_error(
-    dt_pcmf4 <- post_calc_merge_features(
+    dt_pcmf4 <- beethoven::post_calc_merge_features(
       by = c("site_id"),
       time = TRUE,
       dt_geos_ll,
@@ -96,7 +96,7 @@ testthat::test_that("post_calc_unify_timecols", {
   
   # expect no error when colname is set to time
   testthat::expect_no_error(
-    dt_pcut <- post_calc_unify_timecols(
+    dt_pcut <- beethoven::post_calc_unify_timecols(
       df = dt_nlcd,
       candidates = "year",
       replace = "time"
@@ -111,7 +111,7 @@ testthat::test_that("post_calc_unify_timecols", {
 
   # expect error when > 1 candidate is matched
   testthat::expect_error(
-    post_calc_unify_timecols(
+    beethoven::post_calc_unify_timecols(
       df = dt_nlcd,
       candidates = c("year", "LDU_TWATR_0_01000"),
       replace = "time"
@@ -155,7 +155,7 @@ testthat::test_that("post_calc_join_yeardate", {
 
   # expect error when data.frame and integer
   testthat::expect_error(
-    post_calc_join_yeardate(
+    beethoven::post_calc_join_yeardate(
       df_year = dt_nlcd,
       df_year = 100
     )
@@ -168,7 +168,7 @@ testthat::test_that("post_calc_join_yeardate", {
 testthat::test_that("post_calc_year_expand", {
   # expect no error
   testthat::expect_no_error(
-    pcye <- post_calc_year_expand(
+    pcye <- beethoven::post_calc_year_expand(
       time_start = 2000,
       time_end = 2025,
       time_unit = "year",
@@ -200,7 +200,7 @@ testthat::test_that("post_calc_df_year_expand", {
 
   # expect error with uneven rows in df
   testthat::expect_error(
-    post_calc_df_year_expand(
+    beethoven::post_calc_df_year_expand(
       df = dt_nlcd_sub,
       locs_id = "site_id",
       time_field = "time",
@@ -228,7 +228,7 @@ testthat::test_that("post_calc_merge_all", {
   
   # expect no error when merging spatial (gmted) to spatiotemporal (narr)
   testthat::expect_no_error(
-    dt_pcma1 <- post_calc_merge_all(
+    dt_pcma1 <- beethoven::post_calc_merge_all(
       locs = locs,
       locs_id = "site_id",
       time_id = "time",
@@ -255,7 +255,7 @@ testthat::test_that("post_calc_merge_all", {
   )
   # expect no error when locs are sf
   testthat::expect_no_error(
-    dt_pcma2 <- post_calc_merge_all(
+    dt_pcma2 <- beethoven::post_calc_merge_all(
       locs = locs_sf,
       locs_id = "site_id",
       time_id = "time",
@@ -347,7 +347,7 @@ testthat::test_that("post_calc_autojoin expands and joins data.frames with diffe
   # will run quietly
   testthat::expect_no_error(
     autojoin_iden <-
-      post_calc_autojoin(
+      beethoven::post_calc_autojoin(
         df_fine = df_fine1, df_coarse = df_fine2,
         field_sp = "site_id", field_t = "time"
       )
@@ -362,14 +362,14 @@ testthat::test_that("post_calc_autojoin expands and joins data.frames with diffe
   # values are year or date. In the current beethoven implementation,
   # there are only two temporal resolutions: daily and yearly.
   testthat::expect_message(
-    autojoin_diff <- post_calc_autojoin(df_fine1, df_coarse0)
+    autojoin_diff <- beethoven::post_calc_autojoin(df_fine1, df_coarse0)
   )
 
   # remove the year column
   df_coarse2 <- df_coarse0[, -2]
   # then it will quietly join two data.frames by site_id
   testthat::expect_no_error(
-    autojoin_diff <- post_calc_autojoin(df_fine1, df_coarse2)
+    autojoin_diff <- beethoven::post_calc_autojoin(df_fine1, df_coarse2)
   )
 
 })
@@ -386,7 +386,7 @@ testthat::test_that("impute_all", {
 
   # expect no errors on imputation (read object)
   testthat::expect_no_error(
-    dt_imputed1 <- impute_all(
+    dt_imputed1 <- beethoven::impute_all(
       dt = dt_full,
       period = c("2018-01-01", "2018-01-10"),
       nthreads_dt = 1L,
@@ -410,7 +410,7 @@ testthat::test_that("impute_all", {
 
   # expect no errors on imputation (file path)
   testthat::expect_no_error(
-    dt_imputed2 <- impute_all(
+    dt_imputed2 <- beethoven::impute_all(
       dt = testthat::test_path(
         "..", "testdata", "postprocessing", "dt_full.qs"
       ),
@@ -435,7 +435,7 @@ testthat::test_that("impute_all", {
 
   # expect error with non-qs file path
   testthat::expect_error(
-    impute_all(
+    beethoven::impute_all(
       dt = testthat::test_path(
         "..", "testdata", "postprocessing", "wRoNgFiLePaTh.rDs"
       ),
@@ -456,7 +456,7 @@ testthat::test_that("append_predecessors", {
 
   # expect no error for imputed data (impute 1)
   testthat::expect_no_error(
-    dt_imputed1 <- impute_all(
+    dt_imputed1 <- beethoven::impute_all(
       dt = testthat::test_path(
         "..", "testdata", "postprocessing", "dt_full.qs"
       ),
@@ -468,7 +468,7 @@ testthat::test_that("append_predecessors", {
   )
   # expect no error for no predecessor
   testthat::expect_no_error(
-    path_append1 <- append_predecessors(
+    path_append1 <- beethoven::append_predecessors(
       path_qs = append_directory,
       period_new = c("2018-01-01", "2018-01-01"),
       input_new = dt_imputed1,
@@ -491,7 +491,7 @@ testthat::test_that("append_predecessors", {
 
   # expect no error for imputed data (impute 2)
   testthat::expect_no_error(
-    dt_imputed2 <- impute_all(
+    dt_imputed2 <- beethoven::impute_all(
       dt = testthat::test_path(
         "..", "testdata", "postprocessing", "dt_append.qs"
       ),
@@ -524,6 +524,6 @@ testthat::test_that("append_predecessors", {
 
   # expect error with NULL `input_new`
   testthat::expect_error(
-    append_predecessors()
+    beethoven::append_predecessors()
   )
 })

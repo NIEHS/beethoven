@@ -41,11 +41,11 @@ target_critical <-
     ##### 4. chr_input_dir is the file path to the input directory. This target
     #####    controls where the raw data files are downloaded to and imported
     #####    from. This file path **MUST** be mounted to the container at run
-    #####    time in the `run_container.sh` script.
+    #####    time in the `run.sh` script.
     targets::tar_target(
       chr_input_dir,
       command = "/input",
-      description = "Input directory"
+      description = "Data directory"
     )
     ,
     ##### 5. chr_dates_split controls the size of temporal splits. Splitting the

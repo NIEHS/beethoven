@@ -4,7 +4,7 @@
 \alias{inject_gmted}
 \title{Injects GMTED data into specified locations}
 \usage{
-inject_gmted(locs, variable, radii, injection, nthreads = 4L, grid = NULL)
+inject_gmted(locs, variable, radii, injection)
 }
 \arguments{
 \item{locs}{A data frame/sf/SpatVector containing the locations
@@ -17,11 +17,6 @@ to be calculated.}
 
 \item{injection}{A list of additional arguments to be passed to
 the \code{calc_gmted_direct} function.}
-
-\item{nthreads}{The number of threads to be used for parallel processing.
-Default is 4.}
-
-\item{grid}{sf object of unpadded unit grid from \code{chopin::par_pad_grid()}}
 }
 \value{
 A data frame containing the merged results of GMTED data

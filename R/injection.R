@@ -81,6 +81,7 @@ set_target_years <-
 
 
 
+
 # calculate over a list
 #' Spatiotemporal covariate calculation
 #' @keywords Calculation
@@ -251,9 +252,9 @@ inject_calculate <- function(
 #' @param locs A data frame containing the locations for which MODIS
 #'   features need to be calculated.
 #' @param injection **List** of dditional parameters to be passed to the
-#'   `calculate_modis_par` function.
+#'   `calculate_modis` function.
 #' @return MODIS/VIIRS feature data.frame.
-#' @seealso [`amadeus::calculate_modis_daily`], [`amadeus::calculate_modis_par`]
+#' @seealso [`amadeus::calculate_modis_daily`], [`amadeus::calculate_modis`]
 #' @importFrom rlang inject
 #' @examples
 #' \dontrun{
@@ -267,13 +268,13 @@ inject_calculate <- function(
 #' inject_modis_par(
 #'   locs = my_locs,
 #'   injection = list(path = files, subdataset = "Cloud_Fraction_Day",
-#'      name_covariates = "MOD_CLCVD_0_", nthreads = 2L,
+#'      name_covariates = "MOD_CLCVD_0_",
 #'      preprocess = amadeus::process_modis_swath, radius = c(1000)))
 #' }
 #' @export
 inject_modis_par <- function(locs, injection) {
   rlang::inject(
-    amadeus::calculate_modis_par(
+    amadeus::calculate_modis(
       locs = locs,
       locs_id = "site_id",
       !!!injection
@@ -307,7 +308,7 @@ inject_modis_par <- function(locs, injection) {
 #' @export
 inject_modis <- function(locs, injection) {
   rlang::inject(
-    calculate_modis(
+    amadeus::calculate_modis(
       locs = locs,
       locs_id = "site_id",
       !!!injection
@@ -356,15 +357,13 @@ inject_geos <- function(locs, injection, ...) {
 #'   to be calculated.
 #' @param injection A list of additional arguments to be passed to
 #'   the `calc_gmted_direct` function.
-#' @param nthreads The number of threads to be used for parallel processing.
-#'  Default is 4.
 #' @param grid sf object of unpadded unit grid from `chopin::par_pad_grid()`
 #' @return A data frame containing the merged results of GMTED data
 #'   for each location within different radii.
 #' @importFrom rlang inject
 #' @export
 inject_gmted <- function(
-  locs, variable, radii, injection, nthreads = 4L, grid = NULL
+  locs, variable, radii, injection, grid = NULL
 ) {
 
   radii_list <- split(radii, seq_along(radii))
@@ -386,14 +385,14 @@ inject_gmted <- function(
             !!!injection
           )
         )
-      },
-      future.seed = TRUE
+      }
     )
 
   radii_rep <- lapply(radii_rep, function(x) as.data.frame(x))
   radii_join <- beethoven::reduce_merge(radii_rep, "site_id")
   return(radii_join)
 }
+
 
 
 #' Reduce and merge a list of data tables
@@ -487,3 +486,4 @@ inject_nlcd <-
     args_ext <- c(args_ext, list(year = year, radius = radius))
     inject_match(amadeus::calculate_nlcd, args_ext)
   }
+

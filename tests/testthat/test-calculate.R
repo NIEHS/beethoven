@@ -28,8 +28,7 @@ testthat::test_that("par_narr (weasd + omega)", {
         "..", "testdata", "calculate", "narr", "weasd"
       ),
       date = c("2018-01-01", "2018-01-01"),
-      locs = loc,
-      nthreads = 1
+      locs = loc
     )
   )
   # expect a list
@@ -58,8 +57,7 @@ testthat::test_that("par_narr (weasd + omega)", {
         "..", "testdata", "calculate", "narr", "omega"
       ),
       date = c("2018-01-01", "2018-01-01"),
-      locs = loc,
-      nthreads = 1
+      locs = loc
     )
   )
   # expect a list

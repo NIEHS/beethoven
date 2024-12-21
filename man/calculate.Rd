@@ -7,7 +7,6 @@
 calculate(
   domain = NULL,
   domain_name = "year",
-  nthreads = 1L,
   process_function = amadeus::process_covariates,
   calc_function = amadeus::calculate_covariates,
   ...
@@ -19,8 +18,6 @@ Depending on temporal resolution of raw datasets.
 Nullable; If \code{NULL}, it will be set to \code{c(1)}.}
 
 \item{domain_name}{character(1). Name of the domain. Default is \code{"year"}.}
-
-\item{nthreads}{integer(1). Number of threads to use.}
 
 \item{process_function}{Raw data processor. Default is
 \code{\link[amadeus:process_covariates]{amadeus::process_covariates}}}

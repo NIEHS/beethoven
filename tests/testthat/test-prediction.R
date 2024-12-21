@@ -10,7 +10,7 @@ testthat::test_that("reduce_list", {
     data.frame(a = 7:9, b = 10:12)
   )
   testthat::expect_no_error(
-    rl1 <- reduce_list(l1)
+    rl1 <- beethoven::reduce_list(l1)
   )
   testthat::expect_true(is.list(rl1))
   testthat::expect_length(rl1, 1)
@@ -19,7 +19,7 @@ testthat::test_that("reduce_list", {
 
   l2 <- append(l1, list(data.frame(c = 13:15, d = 16:18)))
   testthat::expect_no_error(
-    rl2 <- reduce_list(l2)
+    rl2 <- beethoven::reduce_list(l2)
   )
   testthat::expect_true(is.list(rl2))
   testthat::expect_length(rl2, 2)
@@ -32,28 +32,32 @@ testthat::test_that("reduce_list", {
 ##### split_dates
 testthat::test_that("split_dates", {
   testthat::expect_no_error(
-    sd1 <- split_dates(c("2022-01-01", "2022-12-31"), 5, year = TRUE)
+    sd1 <- beethoven::split_dates(c("2022-01-01", "2022-12-31"), 5, year = TRUE)
   )
   testthat::expect_true(is.list(sd1))
   # all lists are 5 because dates are within same year
   testthat::expect_true(unlist(unique(lapply(sd1, length))) == 5)
 
   testthat::expect_no_error(
-    sd2 <- split_dates(c("2022-12-01", "2023-01-31"), 20)
+    sd2 <- beethoven::split_dates(c("2022-12-01", "2023-01-31"), 20)
   )
   testthat::expect_true(is.list(sd2))
   testthat::expect_length(sd2, 4)
   testthat::expect_length(unlist(unique(lapply(sd2, length))), 2)
 
   testthat::expect_no_error(
-    sd3 <- split_dates(c("2022-12-01", "2023-01-29"), 5, year = FALSE)
+    sd3 <- beethoven::split_dates(
+      c("2022-12-01", "2023-01-29"), 5, year = FALSE
+    )
   )
   # all lists are 5 because year = FALSE
   testthat::expect_true(unlist(unique(lapply(sd3, length))) == 5)
 
   # julian dates
   testthat::expect_no_error(
-    sd4 <- split_dates(c("2022-01-01", "2022-01-05"), 5, julian = TRUE)
+    sd4 <- beethoven::split_dates(
+      c("2022-01-01", "2022-01-05"), 5, julian = TRUE
+    )
   )
   testthat::expect_equal(nchar(sd4[[1]][[1]]), 7)
 })
@@ -63,14 +67,11 @@ testthat::test_that("split_dates", {
 ##### fl_dates
 testthat::test_that("fl_dates", {
   testthat::expect_no_error(
-    sd2 <- split_dates(c("2022-01-01", "2022-12-31"), 10)
+    sd2 <- beethoven::split_dates(c("2022-01-01", "2022-12-31"), 10)
   )
   testthat::expect_no_error(
-    fl2 <- fl_dates(sd2[[1]])
+    fl2 <- beethoven::fl_dates(sd2[[1]])
   )
   testthat::expect_length(fl2, 2)
-  testthat::expect_equal(
-    fl2,
-    c(as.Date("2022-01-01"), as.Date("2022-01-10"))
-  )
+  testthat::expect_equal(fl2, c("2022-01-01", "2022-01-10"))
 })

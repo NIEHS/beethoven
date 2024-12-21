@@ -82,12 +82,33 @@ target_calculate_predict <-
     ###########################################################################
     ##### SAMPLE TARGETS FOR DEVELOPMENT #####
     targets::tar_target(
+      sf_pred_calc_split,
+      command = {
+        chopin::par_pad_grid(
+          sf_pred_calc_grid,
+          mode = "grid",
+          nx = 100L,
+          ny = 60L,
+          padding = 100
+        )[[1]]
+      },
+      iteration = "vector",
+      description = "sf split grid polygons"
+    )
+    ,
+    targets::tar_target(
       list_pred_calc_grid_DEV,
-      command = base::split(
-        sf_pred_calc_grid[500001:700000, ],
-        ceiling(seq_len(nrow(sf_pred_calc_grid[500001:700000, ])) / 100000) # sample of 200,000 sites
-      ),
-      description = "Split prediction grid into list (DEV SAMPLE)"
+      command = {
+        sf_pred_calc_grid |> dplyr::sample_frac(0.05) |>
+          _[sf_pred_calc_split, ]
+      },
+      # command = base::split(
+      #   sf_pred_calc_grid[500001:700000, ],
+      #   ceiling(seq_len(nrow(sf_pred_calc_grid[500001:700000, ])) / 100000) # sample of 200,000 sites
+      # ),
+      iteration = "list",
+      pattern = map(sf_pred_calc_split),
+      description = "Split prediction grid into list by chopin grid (DEV SAMPLE)"
     )
     ,
     targets::tar_target(
@@ -108,6 +129,35 @@ target_calculate_predict <-
       description = "Names of split dates lists (DEV SAMPLE)"
     )
     ,
+
+    ###########################         HMS          ###########################
+    targets::tar_target(
+      list_pred_calc_hms,
+      command = {
+        beethoven::inject_calculate(
+          covariate = "hms",
+          locs = list_pred_calc_grid_DEV,
+          injection = list(
+            path = file.path(chr_input_dir, "hms", "data_files"),
+            date = beethoven::fl_dates(unlist(list_dates)),
+            covariate = "hms"
+          ),
+          grid = sf_pred_raw_grid
+        )[[1]] |>
+          dplyr::select(-dplyr::any_of(c("lon", "lat", "geometry", "hms_year")))
+      },
+      pattern = cross(list_pred_calc_grid_DEV, list_dates),
+      iteration = "list",
+      description = "Calculate HMS features | prediction"     
+    )
+    ,
+    targets::tar_target(
+      dt_feat_calc_hms,
+      command = beethoven::reduce_list(list_feat_calc_hms)[[1]],
+      description = "data.table of HMS features | fit"
+    )
+    ,
+
     ###########################################################################
     # # # targets::tar_target(
     # # #   list_pred_split_calc_hms,
