@@ -71,5 +71,6 @@ list(
   target_initiate,
   target_download,
   target_aqs,
-  target_calculate_fit
+  target_calculate_fit,
+  target_calculate_predict
 )
