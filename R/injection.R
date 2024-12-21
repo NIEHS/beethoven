@@ -89,7 +89,6 @@ set_target_years <-
 #' Depending on temporal resolution of raw datasets.
 #' Nullable; If `NULL`, it will be set to `c(1)`.
 #' @param domain_name character(1). Name of the domain. Default is `"year"`.
-#' @param nthreads integer(1). Number of threads to use.
 #' @param process_function Raw data processor. Default is
 #' [`amadeus::process_covariates`]
 #' @param calc_function Function to calculate covariates.
@@ -104,7 +103,6 @@ calculate <-
   function(
     domain = NULL,
     domain_name = "year",
-    nthreads = 1L,
     process_function = amadeus::process_covariates,
     calc_function = amadeus::calculate_covariates,
     ...
@@ -222,7 +220,6 @@ calculate <-
 #' @param locs The locations to be used in the calculation.
 #' @param injection Additional arguments to be injected into
 #'   the calculate function.
-#' @param grid sf object of unpadded unit grid from `chopin::par_pad_grid()`
 #' @return The result of the calculate function with the injected arguments.
 #' @examples
 #' \dontrun{
@@ -233,11 +230,9 @@ calculate <-
 #' }
 #' @export
 inject_calculate <- function(
-  covariate, locs, injection, grid = NULL
+  covariate, locs, injection
 ) {
-  if (!is.null(grid)) {
-    locs <- locs[grid, ]
-  }
+
   rlang::inject(
     calculate(
       locs = locs,
@@ -357,13 +352,12 @@ inject_geos <- function(locs, injection, ...) {
 #'   to be calculated.
 #' @param injection A list of additional arguments to be passed to
 #'   the `calc_gmted_direct` function.
-#' @param grid sf object of unpadded unit grid from `chopin::par_pad_grid()`
 #' @return A data frame containing the merged results of GMTED data
 #'   for each location within different radii.
 #' @importFrom rlang inject
 #' @export
 inject_gmted <- function(
-  locs, variable, radii, injection, grid = NULL
+  locs, variable, radii, injection
 ) {
 
   radii_list <- split(radii, seq_along(radii))
@@ -372,9 +366,6 @@ inject_gmted <- function(
     lapply(
       radii_list,
       function(r) {
-        if (!is.null(grid)) {
-          locs <- locs[grid, ]
-        }
 
         rlang::inject(
           beethoven::calc_gmted_direct(
@@ -467,7 +458,6 @@ inject_match <- function(f, args) {
 #' @keywords Calculation
 #' @param year An integer specifying the year to calculate NLCD data for.
 #' @param radius An integer specifying the radius for the NLCD calculation.
-#' @param grid sf object of unpadded unit grid from `chopin::par_pad_grid()`
 #' @param ... Additional arguments to be passed to the NLCD calculation
 #'  function.
 #' @return data.frame object.
@@ -476,13 +466,9 @@ inject_nlcd <-
   function(
     year = 2019,
     radius = 1000,
-    grid = NULL,
     ...
   ) {
     args_ext <- list(...)
-    if (!is.null(grid)) {
-      args_ext$locs <- args_ext$locs[grid, ]
-    }
     args_ext <- c(args_ext, list(year = year, radius = radius))
     inject_match(amadeus::calculate_nlcd, args_ext)
   }

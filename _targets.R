@@ -67,7 +67,7 @@ targets::tar_option_set(
   garbage_collection = TRUE,
   seed = 202401L,
   controller = crew::crew_controller_group(
-    controller_250, calc_controller
+    controller_250, controller_50, calc_controller
   )
 )
 

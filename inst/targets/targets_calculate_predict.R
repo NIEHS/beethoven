@@ -87,8 +87,8 @@ target_calculate_predict <-
         chopin::par_pad_grid(
           sf_pred_calc_grid,
           mode = "grid",
-          nx = 100L,
-          ny = 60L,
+          nx = 20L,
+          ny = 10L,
           padding = 100
         )[[1]]
       },
@@ -108,7 +108,10 @@ target_calculate_predict <-
       # ),
       iteration = "list",
       pattern = map(sf_pred_calc_split),
-      description = "Split prediction grid into list by chopin grid (DEV SAMPLE)"
+      description = "Split prediction grid into list by chopin grid (DEV SAMPLE)",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "calc_controller")
+      )
     )
     ,
     targets::tar_target(
@@ -141,14 +144,16 @@ target_calculate_predict <-
             path = file.path(chr_input_dir, "hms", "data_files"),
             date = beethoven::fl_dates(unlist(list_dates)),
             covariate = "hms"
-          ),
-          grid = sf_pred_raw_grid
+          )
         )[[1]] |>
           dplyr::select(-dplyr::any_of(c("lon", "lat", "geometry", "hms_year")))
       },
       pattern = cross(list_pred_calc_grid_DEV, list_dates),
       iteration = "list",
-      description = "Calculate HMS features | prediction"     
+      description = "Calculate HMS features | prediction",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_50")
+      )
     )
     ,
     targets::tar_target(
