@@ -53,14 +53,22 @@ target_calculate_predict <-
     )
     ,
     targets::tar_target(
-      list_pred_calc_grid,
-      command = base::split(
-        sf_pred_calc_grid,
-        ceiling(seq_len(nrow(sf_pred_calc_grid)) / 100000)
+      df_pred_calc_gridcoords,
+      command = sf::st_drop_geometry(
+        sf_pred_calc_grid
       ),
-      description = "Split prediction grid into list (SAMPLE)"
+      description = "Prediction grid as tibble (with coordinates)"
     )
     ,
+    # targets::tar_target(
+    #   list_pred_calc_grid,
+    #   command = base::split(
+    #     sf_pred_calc_grid,
+    #     ceiling(seq_len(nrow(sf_pred_calc_grid)) / 100000)
+    #   ),
+    #   description = "Split prediction grid into list (SAMPLE)"
+    # )
+    # ,
     targets::tar_target(
       name = chr_pred_calc_grid,
       command = names(list_pred_calc_grid),
@@ -87,8 +95,8 @@ target_calculate_predict <-
         chopin::par_pad_grid(
           sf_pred_calc_grid,
           mode = "grid",
-          nx = 20L,
-          ny = 10L,
+          nx = 40L,
+          ny = 20L,
           padding = 100
         )[[1]]
       },
@@ -99,8 +107,14 @@ target_calculate_predict <-
     targets::tar_target(
       list_pred_calc_grid_DEV,
       command = {
-        sf_pred_calc_grid |> dplyr::sample_frac(0.05) |>
-          _[sf_pred_calc_split, ]
+        grid_unit <- sf::st_bbox(sf_pred_calc_split)
+        sf::st_as_sf(
+          df_pred_calc_gridcoords |>
+            dplyr::filter((lon <= grid_unit[3] & lon >= grid_unit[1]) & (lat <= grid_unit[4] & lat >= grid_unit[2])),
+          coords = c("lon", "lat"),
+          crs = 4326,
+          remove = FALSE
+        )
       },
       # command = base::split(
       #   sf_pred_calc_grid[500001:700000, ],
