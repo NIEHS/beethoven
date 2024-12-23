@@ -116,16 +116,20 @@ target_calculate_predict <-
           remove = FALSE
         )
       },
-      # command = base::split(
-      #   sf_pred_calc_grid[500001:700000, ],
-      #   ceiling(seq_len(nrow(sf_pred_calc_grid[500001:700000, ])) / 100000) # sample of 200,000 sites
-      # ),
       iteration = "list",
       pattern = map(sf_pred_calc_split),
       description = "Split prediction grid into list by chopin grid (DEV SAMPLE)",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(controller = "calc_controller")
       )
+    )
+    ,
+    targets::tar_target(
+      list_pred_calc_grid_drop_DEV,
+      command = {
+        list_pred_calc_grid_DEV[!sapply(list_pred_calc_grid_DEV, function(x) is.null(x) | nrow(x) == 0)]
+      },
+      description = "Split prediction grid into list by chopin grid (DEV SAMPLE, dropped NULL)"
     )
     ,
     targets::tar_target(
@@ -153,7 +157,7 @@ target_calculate_predict <-
       command = {
         beethoven::inject_calculate(
           covariate = "hms",
-          locs = list_pred_calc_grid_DEV,
+          locs = list_pred_calc_grid_drop_DEV,
           injection = list(
             path = file.path(chr_input_dir, "hms", "data_files"),
             date = beethoven::fl_dates(unlist(list_dates)),
@@ -162,7 +166,7 @@ target_calculate_predict <-
         )[[1]] |>
           dplyr::select(-dplyr::any_of(c("lon", "lat", "geometry", "hms_year")))
       },
-      pattern = cross(list_pred_calc_grid_DEV, list_dates),
+      pattern = cross(list_pred_calc_grid_drop_DEV, list_dates),
       iteration = "list",
       description = "Calculate HMS features | prediction",
       resources = targets::tar_resources(
