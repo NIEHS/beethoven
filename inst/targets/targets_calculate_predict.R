@@ -177,7 +177,10 @@ target_calculate_predict <-
     targets::tar_target(
       dt_pred_calc_hms,
       command = beethoven::reduce_list(list_pred_calc_hms)[[1]],
-      description = "data.table of HMS features | fit"
+      description = "data.table of HMS features | fit",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "calc_controller")
+      )
     )
     ,
 
