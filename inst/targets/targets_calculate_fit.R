@@ -2,13 +2,13 @@
 ##### Calculate covariates at US EPA AQS sites
 target_calculate_fit <-
   list(
-    targets::tar_target(
-      sf_grid_split,
-      command = chopin::par_pad_grid(sf_feat_proc_aqs_sites, mode = "grid", nx = 3L, ny = 2L, padding = 30000)[[1]] |> sf::st_as_sf(),
-      iteration = "vector",
-      description = "unpadded grid for split computation"
-    )
-    ,
+    # targets::tar_target(
+    #   sf_grid_split,
+    #   command = chopin::par_pad_grid(sf_feat_proc_aqs_sites, mode = "grid", nx = 3L, ny = 2L, padding = 30000)[[1]] |> sf::st_as_sf(),
+    #   iteration = "vector",
+    #   description = "unpadded grid for split computation"
+    # )
+    # ,
     ###########################         GEOS         ###########################
     targets::tar_target(
       list_feat_calc_geos_aqc,
