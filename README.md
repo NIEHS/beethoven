@@ -773,5 +773,8 @@ graph TD
 
 
 ## Containerization
+- Note: For containerization in host systems with Ubuntu 23.10+, we recommend users to install Apptainer using the pre-built `.deb` package file. If it should be installed from source, please refer to [Apptainer documentation](https://github.com/apptainer/apptainer/blob/main/INSTALL.md#apparmor-profile-ubuntu-2310) to set Apparmor profile properly to make Apptainer work.
 - TODO: build GPU-enabled Apptainer image
 - TODO: make a new branch to replace `container-engine`
+
+
