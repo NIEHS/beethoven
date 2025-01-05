@@ -345,8 +345,8 @@ process_narr2 <- function(
 #' @param subdataset character. Subdatasets to merge. It is ignored
 #'   when `product_code` is one of `"MOD06_L2"` or `"VNP46A2"`.
 #' @param dest character(1). Directory path to export the result file.
-#' @return NULL. A GeoTIFF file is saved to
-#'   `{dest}/{product_code}_processed_{date}.tif`
+#' @return A GeoTIFF file is saved to
+#'   `{dest}/{product_code}_processed_{date}.tif` and this path is returned.
 #' @importFrom amadeus process_blackmarble process_blackmarble_corners
 #' @importFrom amadeus process_modis_swath process_modis_merge
 #' @importFrom stringi stri_extract_first_regex stri_sub
@@ -441,5 +441,5 @@ export_tif <- function(
   } else {
     message("The target file exists. Proceed to the next target.")
   }
-
+  return(name_head)
 }

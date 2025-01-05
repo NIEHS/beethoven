@@ -19,8 +19,8 @@ when \code{product_code} is one of \code{"MOD06_L2"} or \code{"VNP46A2"}.}
 \item{dest}{character(1). Directory path to export the result file.}
 }
 \value{
-NULL. A GeoTIFF file is saved to
-\verb{\{dest\}/\{product_code\}_processed_\{date\}.tif}
+A GeoTIFF file is saved to
+\verb{\{dest\}/\{product_code\}_processed_\{date\}.tif} and this path is returned.
 }
 \description{
 Export preprocessed GeoTIFF file of one day MODIS product files

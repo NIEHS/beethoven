@@ -221,6 +221,35 @@ target_calculate_fit <-
       description = "Calculate MODIS - MOD06 features | fit"
     )
     ,
+    # modified
+    targets::tar_target(
+      chr_args_calc_mod06_files,
+      command = {
+        export_tif(
+          path_in = chr_args_calc_mod06_files,
+          product_code = "MOD06_L2",
+          pat = "A\\d{7,7}",
+          subdataset = "^Cloud_Fraction",
+          dest = file.path("modis_preprocessed")
+        )
+      },
+      iteration = "vector",
+      pattern = map(chr_daterange),
+      description = "preprocessed MODIS MOD06 files"
+    )
+    ,
+    # TODO: column names, shrink by radii
+    targets::tar_target(
+      list_feat_calc_mod06,
+      command = chopin::extract_at(chr_args_calc_mod06_files, list_feat_proc_aqs_sites[[1]], radius = radii),
+      pattern = cross(chr_args_calc_mod06_files, list_feat_proc_aqs_sites, radii),
+      iteration = "list",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_50")
+      ),
+      description = "Calculate MODIS - MOD06 features | fit -- redo"
+    )
+    ,
     ###########################       MODIS - MOD13       ######################
     targets::tar_target(
       chr_args_calc_mod13_files,
