@@ -31,21 +31,4 @@ cancel <- function() {
 batch <- function(file = "run.sh") {
   system(paste0("sbatch ", file))
 }
-
-clean <- function(path = "./") {
-  system(
-    paste0(
-      "rm -r ",
-      path,
-      "_targets/*"
-    )
-  )
-  system(
-    paste0(
-      "rm ",
-      path,
-      "slurm/*"
-    )
-  )
-}
 # nocov end
