@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SBATCH --job-name=beethoven
-#SBATCH --mail-user=manwareme@nih.gov
+#SBATCH --mail-user=$USER@nih.gov
 #SBATCH --mail-type=END,FAIL
 #SBATCH --partition=geo
 #SBATCH --ntasks=1
