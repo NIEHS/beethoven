@@ -846,4 +846,10 @@ target_calculate_fit <-
       ),
       description = "Imputed features + lags"
     )
+    ,
+    targets::tar_target(
+      name = dt_feat_calc_xyt,
+      beethoven::attach_xy(dt_feat_calc_imputed, sf_feat_proc_aqs_sites),
+      description = "Imputed features + AQS sites (outcome and lat/lon)"
+    )
   )

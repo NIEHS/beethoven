@@ -2,8 +2,9 @@
 target_baselearner <-
   list(
     targets::tar_target(
-      name = dt_feat_calc_xyt,
-      attach_xy(dt_feat_calc_imputed, sf_feat_proc_aqs_sites)
+      list_learner_mlp,
+      command = torch::load_torch("/inst/extdata/list_learner_mlp.pt"),
+      format = "torch"
     )
     ,
     targets::tar_target(

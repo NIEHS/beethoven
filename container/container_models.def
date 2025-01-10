@@ -52,6 +52,7 @@ From: nvidia/cuda:11.8.0-devel-ubuntu22.04
         libharfbuzz-dev \
         libfribidi-dev \
         slurm-client \
+        lmod \
         && rm -rf /var/lib/apt/lists/*
 
     # Manually download and build R 4.4.2
@@ -79,12 +80,14 @@ From: nvidia/cuda:11.8.0-devel-ubuntu22.04
     mkdir /opt/_targets
 
     # Install R packages (mimicking rocker/ml-verse setup)
-    Rscript -e "install.packages(c('pak', 'targets', 'tarchetypes', 'crew', \
-        'crew.cluster', 'testthat', 'tidymodels', 'bonsai', 'qs2', 'mirai', \
-        'torch', 'nanonext', 'tidyverse', 'xgboost', 'brulee', 'glmnet', \
+    Rscript -e "install.packages(c('pak', 'targets', 'tarchetypes', \
+        'testthat', 'tidymodels', 'bonsai', 'qs2', 'mirai', \
+        'torch', 'nanonext', 'tidyverse', 'xgboost', 'glmnet', \
         'lightgbm'))"
     Rscript -e "options(timeout = 1800); torch::install_torch(version = 'latest', type = 'gpu')"
-    Rscript -e "pak::pak('NIEHS/beethoven@dev')"
+    Rscript -e "pak::pak('tidymodels/brulee@gpu')"
+    Rscript -e "pak::pak('wlandau/crew'); pak::pak('wlandau/crew.cluster')"
+    Rscript -e "pak::pak('NIEHS/beethoven@dev-mm-0108')"
 
 %environment
     # Set locale and CUDA environment variables
