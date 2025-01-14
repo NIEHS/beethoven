@@ -849,7 +849,9 @@ target_calculate_fit <-
     ,
     targets::tar_target(
       name = dt_feat_calc_xyt,
-      beethoven::attach_xy(dt_feat_calc_imputed, sf_feat_proc_aqs_sites),
+      command = beethoven::attach_xy(
+        dt_feat_calc_imputed, dplyr::bind_rows(list_feat_proc_aqs_sites)
+      ),
       description = "Imputed features + AQS sites (outcome and lat/lon)"
     )
   )

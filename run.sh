@@ -5,9 +5,8 @@
 #SBATCH --mail-type=END,FAIL
 #SBATCH --partition=geo
 #SBATCH --ntasks=1
-#SBATCH --mem=1000G
-#SBATCH --cpus-per-task=250
-#SBATCH --gres=gpu:4
+#SBATCH --mem=900G
+#SBATCH --cpus-per-task=225
 #SBATCH --error=slurm/beethoven_%j.err
 #SBATCH --output=slurm/beethoven_%j.out
 
@@ -33,23 +32,12 @@ apptainer exec \
   --bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input \
   --bind $PWD/_targets:/opt/_targets \
   container_covariates.sif \
-  Rscript --no-init-file /mnt/inst/targets/targets_start.R
+  /usr/local/lib/R/bin/Rscript --no-init-file /mnt/inst/targets/targets_start.R
 
 #############################        MODELS        #############################
 # Set environmental variable to indicate model fitting targets.
 export BEETHOVEN=models
 
-# Fit models via container_models.sif external to the targets pipeline.
-apptainer exec \
-  --nv \
-  --bind $PWD:/mnt \
-  --bind $PWD/inst:/inst \
-  --bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input \
-  --bind $PWD/_targets:/opt/_targets \
-  container_models.sif \
-  /usr/local/lib/R/bin/Rscript --no-init-file /mnt/inst/exec/model_mlp.R
-
-#############################      POST MODELS     #############################
 # Run post-model targets via container_models.sif.
 apptainer exec \
   --nv \
@@ -57,5 +45,7 @@ apptainer exec \
   --bind $PWD/inst:/inst \
   --bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input \
   --bind $PWD/_targets:/opt/_targets \
+  --bind /run/munge:/run/munge \
+  --bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm \
   container_models.sif \
   /usr/local/lib/R/bin/Rscript --no-init-file /mnt/inst/targets/targets_start.R

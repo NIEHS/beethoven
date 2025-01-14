@@ -456,7 +456,7 @@ assign_learner_cv <-
     cv_rep = 100L,
     num_device = ifelse(torch::cuda_device_count() > 1, 2, 1)
   ) {
-    learner_eligible <- c("lgb", "mlp")
+    learner_eligible <- c("lgb", "mlp", "xgb")
     learner <- sort(learner)
     learner_eligible_flag <- learner %in% learner_eligible
     cuda_devices <- seq_len(sum(learner_eligible_flag)) - 1

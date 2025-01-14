@@ -34,6 +34,31 @@ controller_25 <- crew::crew_controller_local(
   workers = 25,
   seconds_idle = 30
 )
+##### `controller_gpu` uses 4 GPU workers.
+scriptlines_apptainer <- "apptainer"
+scriptlines_basedir <- "$PWD"
+scriptlines_container <- "container_models.sif"
+scriptlines_gpu <- glue::glue(
+  "#SBATCH --job-name=beethovengpu \
+  #SBATCH --partition=geo \
+  #SBATCH --gres=gpu:1 \
+  #SBATCH --output=slurm/beethovengpu_%j.out \
+  #SBATCH --error=slurm/beethovengpu_%j.err \
+  {scriptlines_apptainer} exec --nv --bind {scriptlines_basedir}:/mnt ",
+  "--bind {scriptlines_basedir}/inst:/inst ",
+  "--bind {scriptlines_basedir}/input:/input ",
+  "--bind {scriptlines_basedir}/_targets:/opt/_targets ",
+  "{scriptlines_container} \\"
+)
+controller_gpu <- crew.cluster::crew_controller_slurm(
+  name = "controller_gpu",
+  workers = 4,
+  seconds_idle = 30,
+  options_cluster = crew.cluster::crew_options_slurm(
+    verbose = TRUE,
+    script_lines = scriptlines_gpu
+  )
+)
 
 ##############################        STORE       ##############################
 targets::tar_config_set(store = "/opt/_targets")
@@ -55,8 +80,12 @@ targets::tar_option_set(
   seed = 202401L,
   controller = crew::crew_controller_group(
     controller_250, controller_100, controller_75,
-    controller_50, controller_25
-  )
+    controller_50, controller_25, controller_gpu
+  ),
+  resources = targets::tar_resources(
+    crew = targets::tar_resources_crew(controller = "controller_250")
+  ),
+  retrieval = "worker"
 )
 
 ###########################      SOURCE TARGETS      ###########################
@@ -65,9 +94,9 @@ targets::tar_source("inst/targets/targets_initiate.R")
 targets::tar_source("inst/targets/targets_download.R")
 targets::tar_source("inst/targets/targets_aqs.R")
 targets::tar_source("inst/targets/targets_calculate_fit.R")
-# targets::tar_source("inst/targets/targets_calculate_predict.R")
-# targets::tar_source("inst/targets/targets_baselearner.R")
+targets::tar_source("inst/targets/targets_baselearner.R")
 # targets::tar_source("inst/targets/targets_metalearner.R")
+# targets::tar_source("inst/targets/targets_calculate_predict.R")
 # targets::tar_source("inst/targets/targets_predict.R")
 
 ###########################      SYSTEM SETTINGS      ##########################
@@ -81,9 +110,9 @@ list(
   target_initiate,
   target_download,
   target_aqs,
-  target_calculate_fit
-  # target_calculate_predict,
-  # target_baselearner,
+  target_calculate_fit,
+  target_baselearner
   # target_metalearner,
+  # target_calculate_predict,
   # target_predict
 )
