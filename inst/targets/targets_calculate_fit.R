@@ -175,75 +175,92 @@ target_calculate_fit <-
     ,
     ###########################       MODIS - MOD06       ######################
     targets::tar_target(
+      # what if the user downloaded all files but want to debug the pipeline with limited scope of file paths?
       chr_args_calc_mod06_files,
       command = {
-        download_mod06
+        #download_mod06
         list.files(
           file.path(chr_input_dir, "modis", "raw", "61", "MOD06_L2"),
+          pattern = "*.*A20203([3][5-9]|[4-6][0-9])*.*hdf",
           full.names = TRUE,
           recursive = TRUE
         )
       },
+      iteration = "list",
       description = "MODIS - MOD06 files"
     )
     ,
     targets::tar_target(
-      list_args_calc_mod06,
-      command = list(
-        from = grep(
-          x = chr_args_calc_mod06_files,
-          pattern = paste0(
-            "MOD06_L2.A", unlist(list_dates_julian), collapse = "|"
-          ),
-          value = TRUE
-        ),
-        name_covariates = c("MOD_CLCVD_0_", "MOD_CLCVN_0_"),
-        subdataset = c("Cloud_Fraction_Day", "Cloud_Fraction_Night"),
-        preprocess = amadeus::process_modis_swath,
-        radius = chr_iter_radii
-      ),
-      pattern = map(list_dates_julian),
+      list_args_calc_mod06_files,
+      command = {
+        chr_a7s <- stringi::stri_extract_first_regex(
+          chr_args_calc_mod06_files,
+          pattern = "A2[0-9]{6,6}"
+        )
+        # Split the file paths
+        split(chr_args_calc_mod06_files, chr_a7s)
+      },
       iteration = "list",
-      description = "MODIS - MOD06 arguments"
+      description = "MODIS - MOD06 file paths by day"
     )
     ,
-    targets::tar_target(
-      list_feat_calc_mod06,
-      command = beethoven::inject_modis(
-        locs = list_feat_proc_aqs_sites[[1]],
-        injection = list_args_calc_mod06
-      ),
-      pattern = cross(list_feat_proc_aqs_sites, list_args_calc_mod06),
-      iteration = "list",
-      resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_50")
-      ),
-      description = "Calculate MODIS - MOD06 features | fit"
-    )
-    ,
+    # targets::tar_target(
+    #   list_args_calc_mod06,
+    #   command = list(
+    #     from = grep(
+    #       x = chr_args_calc_mod06_files,
+    #       pattern = paste0(
+    #         "MOD06_L2.A", unlist(list_dates_julian), collapse = "|"
+    #       ),
+    #       value = TRUE
+    #     ),
+    #     name_covariates = c("MOD_CLCVD_0_", "MOD_CLCVN_0_"),
+    #     subdataset = c("Cloud_Fraction_Day", "Cloud_Fraction_Night"),
+    #     preprocess = amadeus::process_modis_swath,
+    #     radius = chr_iter_radii
+    #   ),
+    #   pattern = map(list_dates_julian),
+    #   iteration = "list",
+    #   description = "MODIS - MOD06 arguments"
+    # )
+    # ,
+    # targets::tar_target(
+    #   list_feat_calc_mod06,
+    #   command = beethoven::inject_modis(
+    #     locs = list_feat_proc_aqs_sites[[1]],
+    #     injection = list_args_calc_mod06
+    #   ),
+    #   pattern = cross(list_feat_proc_aqs_sites, list_args_calc_mod06),
+    #   iteration = "list",
+    #   resources = targets::tar_resources(
+    #     crew = targets::tar_resources_crew(controller = "controller_50")
+    #   ),
+    #   description = "Calculate MODIS - MOD06 features | fit"
+    # )
+    # ,
     # modified
     targets::tar_target(
-      chr_args_calc_mod06_files,
+      chr_list_calc_mod06_files,
       command = {
         export_tif(
-          path_in = chr_args_calc_mod06_files,
+          path_in = list_args_calc_mod06_files,
           product_code = "MOD06_L2",
           pat = "A\\d{7,7}",
           subdataset = "^Cloud_Fraction",
-          dest = file.path("modis_preprocessed")
+          dest = file.path(chr_input_dir, "modis_preprocessed", "MOD06_L2")
         )
       },
-      iteration = "vector",
-      pattern = map(chr_daterange),
+      iteration = "list",
+      pattern = map(list_args_calc_mod06_files),
       description = "preprocessed MODIS MOD06 files"
     )
     ,
     # TODO: column names, shrink by radii
     targets::tar_target(
       list_feat_calc_mod06,
-      command = chopin::extract_at(chr_args_calc_mod06_files, list_feat_proc_aqs_sites[[1]], radius = radii),
-      pattern = cross(chr_args_calc_mod06_files, list_feat_proc_aqs_sites, radii),
-      iteration = "list",
+      command = chopin::extract_at(chr_list_calc_mod06_files, list_feat_proc_aqs_sites[[1]], radius = chr_iter_radii),
+      pattern = cross(chr_list_calc_mod06_files, list_feat_proc_aqs_sites, chr_iter_radii),
+      iteration = "vector",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(controller = "controller_50")
       ),

@@ -246,7 +246,7 @@ inject_calculate <- function(
 #' @note Soon to be deprecated per dropping future dependency.
 #' @param locs A data frame containing the locations for which MODIS
 #'   features need to be calculated.
-#' @param injection **List** of dditional parameters to be passed to the
+#' @param injection **List** of additional parameters to be passed to the
 #'   `calculate_modis` function.
 #' @return MODIS/VIIRS feature data.frame.
 #' @seealso [`amadeus::calculate_modis_daily`], [`amadeus::calculate_modis`]

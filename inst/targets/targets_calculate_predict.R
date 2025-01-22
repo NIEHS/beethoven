@@ -478,7 +478,7 @@ target_calculate_predict <-
           SIMPLIFY = FALSE
         ) |>
         beethoven::post_calc_merge_all()
-      }
+      },
       iteration = "list",
       pattern = map(
         list_pred_calc_grid_drop
@@ -616,7 +616,7 @@ target_calculate_predict <-
     # )
     ###########################         GEOS         ###########################
     targets::tar_target(
-      list_feat_calc_geos_aqc,
+      list_pred_calc_geos_aqc,
       command = {
         download_geos_buffer
         beethoven::calc_geos_strict(
@@ -635,7 +635,7 @@ target_calculate_predict <-
     )
     ,
     targets::tar_target(
-      list_feat_calc_geos_chm,
+      list_pred_calc_geos_chm,
       command = {
         download_geos_buffer
         beethoven::calc_geos_strict(
@@ -657,8 +657,8 @@ target_calculate_predict <-
     #   dt_feat_calc_geos,
     #   command = beethoven::reduce_merge(
     #     c(
-    #       beethoven::reduce_list(list_feat_calc_geos_aqc),
-    #       beethoven::reduce_list(list_feat_calc_geos_chm)
+    #       beethoven::reduce_list(list_pred_calc_geos_aqc),
+    #       beethoven::reduce_list(list_pred_calc_geos_chm)
     #     ),
     #     by = c("site_id", "time", "CO", "NO2", "SO2")
     #   ),
@@ -668,7 +668,7 @@ target_calculate_predict <-
     ###########################         NARR         ###########################
     # ????
     targets::tar_target(
-      list_feat_calc_narr,
+      list_pred_calc_narr,
       command = {
         download_narr_buffer
         dt_iter_calc_narr <- amadeus::calculate_narr(
@@ -699,7 +699,7 @@ target_calculate_predict <-
     # targets::tar_target(
     #   dt_feat_calc_narr,
     #   command = beethoven::reduce_merge(
-    #     beethoven::reduce_list(list_feat_calc_narr),
+    #     beethoven::reduce_list(list_pred_calc_narr),
     #     by = c("site_id", "time")
     #   ),
     #   description = "data.table of NARR features | fit"
@@ -740,7 +740,7 @@ target_calculate_predict <-
     )
     ,
     targets::tar_target(
-      list_feat_calc_mod11,
+      list_pred_calc_mod11,
       command = beethoven::inject_modis(
         locs = list_pred_calc_grid_drop,
         injection = list_args_calc_mod11
@@ -788,7 +788,7 @@ target_calculate_predict <-
     )
     ,
     targets::tar_target(
-      list_feat_calc_mod06,
+      list_pred_calc_mod06,
       command = beethoven::inject_modis(
         locs = list_pred_calc_grid_drop,
         injection = list_args_calc_mod06
@@ -835,7 +835,7 @@ target_calculate_predict <-
     )
     ,
     targets::tar_target(
-      list_feat_calc_mod13,
+      list_pred_calc_mod13,
       command = beethoven::inject_modis(
         locs = list_pred_calc_grid_drop,
         injection = list_args_calc_mod13
@@ -882,7 +882,7 @@ target_calculate_predict <-
     )
     ,
     targets::tar_target(
-      list_feat_calc_mcd19_1km,
+      list_pred_calc_mcd19_1km,
       command = beethoven::inject_modis(
         locs = list_pred_calc_grid_drop,
         injection = list_args_calc_mcd19_1km
@@ -919,7 +919,7 @@ target_calculate_predict <-
     )
     ,
     targets::tar_target(
-      list_feat_calc_mcd19_5km,
+      list_pred_calc_mcd19_5km,
       command = beethoven::inject_modis(
         locs = list_pred_calc_grid_drop,
         injection = list_args_calc_mcd19_5km
@@ -969,7 +969,7 @@ target_calculate_predict <-
     )
     ,
     targets::tar_target(
-      list_feat_calc_mod09,
+      list_pred_calc_mod09,
       command = beethoven::inject_modis(
         locs = list_pred_calc_grid_drop,
         injection = list_args_calc_mod09
@@ -1017,7 +1017,7 @@ target_calculate_predict <-
     )
     ,
     targets::tar_target(
-      list_feat_calc_viirs,
+      list_pred_calc_viirs,
       command = beethoven::inject_modis(
         locs = list_pred_calc_grid_drop,
         injection = list_args_calc_viirs
@@ -1036,13 +1036,13 @@ target_calculate_predict <-
     #   command = beethoven::reduce_merge(
     #     lapply(
     #       list(
-    #         list_feat_calc_mod11,
-    #         list_feat_calc_mod06,
-    #         list_feat_calc_mod13,
-    #         list_feat_calc_mcd19_1km,
-    #         list_feat_calc_mcd19_5km,
-    #         list_feat_calc_mod09,
-    #         list_feat_calc_viirs
+    #         list_pred_calc_mod11,
+    #         list_pred_calc_mod06,
+    #         list_pred_calc_mod13,
+    #         list_pred_calc_mcd19_1km,
+    #         list_pred_calc_mcd19_5km,
+    #         list_pred_calc_mod09,
+    #         list_pred_calc_viirs
     #       ),
     #       function(x) data.table::data.table(beethoven::reduce_list(x)[[1]])
     #     ),
@@ -1079,7 +1079,7 @@ target_calculate_predict <-
     ,
     ###########################      POPULATION      ###########################
     targets::tar_target(
-      list_feat_calc_pop,
+      list_pred_calc_pop,
       command = {
         download_population
         amadeus::calculate_population(
@@ -1108,7 +1108,7 @@ target_calculate_predict <-
     # targets::tar_target(
     #   dt_feat_calc_pop,
     #   command = beethoven::reduce_merge(
-    #     beethoven::reduce_list(list_feat_calc_pop)
+    #     beethoven::reduce_list(list_pred_calc_pop)
     #   ),
     #   description = "data.table of population features | fit"
     # )
@@ -1127,7 +1127,7 @@ target_calculate_predict <-
     )
     ,
     targets::tar_target(
-      list_feat_calc_tri,
+      list_pred_calc_tri,
       command = {
         download_tri
         beethoven::inject_calculate(
@@ -1154,7 +1154,7 @@ target_calculate_predict <-
     #   dt_feat_calc_tri,
     #   command = beethoven::reduce_merge(
     #     lapply(
-    #       list_feat_calc_tri,
+    #       list_pred_calc_tri,
     #       function(x) data.table::data.table(beethoven::reduce_list(x)[[1]])
     #     ),
     #     by = NULL
@@ -1164,7 +1164,7 @@ target_calculate_predict <-
     # ,
     ###########################         NEI          ###########################
     targets::tar_target(
-      list_feat_calc_nei,
+      list_pred_calc_nei,
       command = {
         download_nei
         beethoven::inject_calculate(
@@ -1187,7 +1187,7 @@ target_calculate_predict <-
     #   dt_feat_calc_nei,
     #   command = beethoven::reduce_list(
     #     lapply(
-    #       list_feat_calc_nei,
+    #       list_pred_calc_nei,
     #       function(x) data.table::data.table(beethoven::reduce_list(x)[[1]])
     #     )
     #   )[[1]],
@@ -1222,7 +1222,7 @@ target_calculate_predict <-
     ###########################        GROADS        ###########################
     # should be revised
     targets::tar_target(
-      list_feat_calc_groads,
+      list_pred_calc_groads,
       command = {
         download_groads
         amadeus::calculate_groads(
@@ -1244,11 +1244,11 @@ target_calculate_predict <-
       pattern = map(chr_iter_radii),
       description = "Calculate gRoads features | fit"
     )
-    ,
+    #,
     # targets::tar_target(
     #   dt_feat_calc_groads,
     #   command = beethoven::reduce_merge(
-    #     beethoven::reduce_list(list_feat_calc_groads),
+    #     beethoven::reduce_list(list_pred_calc_groads),
     #     by = c("site_id", "description")
     #   ),
     #   description = "data.table of gRoads features | fit"

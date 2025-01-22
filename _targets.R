@@ -54,7 +54,7 @@ targets::tar_option_set(
   packages = c(
     "amadeus", "targets", "tarchetypes", "dplyr", "tidyverse",
     "data.table", "sf", "crew", "crew.cluster", "lubridate", "qs2",
-    "chopin"
+    "chopin", "beethoven"
   ),
   # add
   repository = "local",
@@ -85,6 +85,6 @@ list(
   target_initiate,
   #target_download,
   target_aqs,
-  target_calculate_fit,
-  target_calculate_predict
+  target_calculate_fit#,
+  #target_calculate_predict
 )

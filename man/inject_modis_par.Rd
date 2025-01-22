@@ -10,7 +10,7 @@ inject_modis_par(locs, injection)
 \item{locs}{A data frame containing the locations for which MODIS
 features need to be calculated.}
 
-\item{injection}{\strong{List} of dditional parameters to be passed to the
+\item{injection}{\strong{List} of additional parameters to be passed to the
 \code{calculate_modis} function.}
 }
 \value{
