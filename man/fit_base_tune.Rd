@@ -13,7 +13,8 @@ fit_base_tune(
   iter_bayes = 10L,
   trim_resamples = TRUE,
   return_best = TRUE,
-  data_full = NULL
+  data_full = NULL,
+  metric = "rmse"
 )
 }
 \arguments{
@@ -35,6 +36,9 @@ data.frames in splits column of \code{tune_results} object with NA.}
 \item{return_best}{logical(1). If TRUE, the best tuned model is returned.}
 
 \item{data_full}{The full data frame to be used for prediction.}
+
+\item{metric}{character(1). The metric to be used for selecting the best.
+Must be one of "rmse", "rsq", "mae". Default = "rmse"}
 }
 \value{
 List of 3:

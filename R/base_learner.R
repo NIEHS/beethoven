@@ -169,6 +169,8 @@ switch_model <-
 #' @param trim_resamples logical(1). Default is TRUE, which replaces the actual
 #'   data.frames in splits column of `tune_results` object with NA.
 #' @param return_best logical(1). If TRUE, the best tuned model is returned.
+#' @param metric character(1). The metric to be used for selecting the best.
+#' Must be one of "rmse", "rsq", "mae". Default = "rmse"
 #' @param ... Additional arguments to be passed.
 #'
 #' @return The fitted workflow.
@@ -200,6 +202,7 @@ fit_base_learner <-
     nthreads = 8L,
     trim_resamples = FALSE,
     return_best = TRUE,
+    metric = "rmse",
     ...
   ) {
     learner <- match.arg(learner)
@@ -248,7 +251,7 @@ fit_base_learner <-
         )
 
       # generate row index
-      cv_index <- inject_match(target_fun, args_generate_cv)
+      cv_index <- beethoven::inject_match(target_fun, args_generate_cv)
 
       # using cv_index, restore rset
       base_vfold <-
@@ -291,7 +294,8 @@ fit_base_learner <-
         iter_bayes = tune_bayes_iter,
         trim_resamples = trim_resamples,
         return_best = return_best,
-        data_full = dt_full
+        data_full = dt_full,
+        metric = metric
       )
     if (model_name == "glmnet") {
       future::plan(future::sequential)
@@ -314,6 +318,8 @@ fit_base_learner <-
 #'  data.frames in splits column of `tune_results` object with NA.
 #' @param return_best logical(1). If TRUE, the best tuned model is returned.
 #' @param data_full The full data frame to be used for prediction.
+#' @param metric character(1). The metric to be used for selecting the best.
+#' Must be one of "rmse", "rsq", "mae". Default = "rmse"
 #' @return List of 3:
 #'   * `base_prediction`: `data.frame` of the best model prediction.
 #'   * `base_parameter`: `tune_results` object of the best model.
@@ -336,7 +342,8 @@ fit_base_tune <-
     iter_bayes = 10L,
     trim_resamples = TRUE,
     return_best = TRUE,
-    data_full = NULL
+    data_full = NULL,
+    metric = "rmse"
   ) {
     stopifnot("data_full must be entered." = !is.null(data_full))
     tune_mode <- match.arg(tune_mode)
@@ -396,10 +403,11 @@ fit_base_tune <-
     # }
     if (return_best) {
       # Select the best hyperparameters
+      metric <- match.arg(metric, c("rmse", "rsq", "mae"))
       base_wfparam <-
         tune::select_best(
           base_wftune,
-          metric = c("rmse", "rsq", "mae")
+          metric = metric
         )
       # finalize workflow with the best tuned hyperparameters
       base_wfresult <- tune::finalize_workflow(base_wf, base_wfparam)

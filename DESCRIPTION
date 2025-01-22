@@ -71,7 +71,7 @@ Suggests:
   doRNG,
   furrr,
   quarto
-Remotes: NIEHS/chopin, NIEHS/amadeus, tidymodels/brulee@gpu
+Remotes: NIEHS/chopin, NIEHS/amadeus, tidymodels/brulee@gpu, mitchellmanware/parsnip@beethoven
 SystemRequirements: NetCDF4, CUDA (>= 10.0)
 Encoding: UTF-8
 VignetteBuilder: knitr, rmarkdown
