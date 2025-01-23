@@ -31,4 +31,8 @@ cancel <- function() {
 batch <- function(file = "run.sh") {
   system(paste0("sbatch ", file))
 }
+
+gpu <- function() {
+  system("nvidia-smi")
+}
 # nocov end

@@ -4,7 +4,7 @@
 \alias{make_subdata}
 \title{Make sampled subdataframes for base learners}
 \usage{
-make_subdata(data, n = NULL, p = 0.3)
+make_subdata(data, n = NULL, p = 0.3, ngroup_init = NULL)
 }
 \arguments{
 \item{data}{An object that inherits data.frame.}
@@ -12,6 +12,10 @@ make_subdata(data, n = NULL, p = 0.3)
 \item{n}{The number of rows to be sampled.}
 
 \item{p}{The proportion of rows to be used. Default is 0.3.}
+
+\item{ngroup_init}{integer(1). Initial number of splits for
+pairing groups. Default is NULL. Ensures that subsample is divisible
+by \code{ngroup_init} for \code{generate_cv_index_spt}.}
 }
 \value{
 The row index of the original data. The name of the original

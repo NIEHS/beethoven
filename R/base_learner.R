@@ -10,29 +10,45 @@
 #' @param data An object that inherits data.frame.
 #' @param n The number of rows to be sampled.
 #' @param p The proportion of rows to be used. Default is 0.3.
+#' @param ngroup_init integer(1). Initial number of splits for
+#'  pairing groups. Default is NULL. Ensures that subsample is divisible
+#' by `ngroup_init` for `generate_cv_index_spt`.
 #' @return The row index of the original data. The name of the original
 #'   data object is stored in attribute "object_origin".
-make_subdata <-
-  function(
-    data,
-    n = NULL,
-    p = 0.3
-  ) {
-    if (is.null(n) && is.null(p)) {
-      stop("Please provide either n or p.")
-    }
-    nr <- seq_len(nrow(data))
-    if (!is.null(n)) {
-      nsample <- sample(nr, n)
-    } else {
-      nsample <- sample(nr, ceiling(nrow(data) * p))
-    }
-    # data <- data[nsample, ]
-    rowindex <- nsample
-    data_name <- as.character(substitute(data))
-    attr(rowindex, "object_origin") <- data_name[length(data_name)]
-    return(rowindex)
+make_subdata <- function(
+  data,
+  n = NULL,
+  p = 0.3,
+  ngroup_init = NULL
+) {
+  if (is.null(n) && is.null(p)) {
+    stop("Please provide either n or p.")
   }
+  if (!is.null(ngroup_init) && ngroup_init <= 0) {
+    stop("ngroup_init must be a positive integer.")
+  }
+
+  nr <- seq_len(nrow(data))
+
+  if (!is.null(n)) {
+    if (!is.null(ngroup_init)) {
+      n <- floor(n / ngroup_init) * ngroup_init
+    }
+    nsample <- sample(nr, n)
+  } else {
+    sample_size <- ceiling(nrow(data) * p)
+    if (!is.null(ngroup_init)) {
+      sample_size <- floor(sample_size / ngroup_init) * ngroup_init
+    }
+    nsample <- sample(nr, sample_size)
+  }
+
+  rowindex <- nsample
+  data_name <- as.character(substitute(data))
+  attr(rowindex, "object_origin") <- data_name[length(data_name)]
+
+  return(rowindex)
+}
 
 
 #' Define a base learner model based on parsnip and tune
@@ -210,7 +226,14 @@ fit_base_learner <-
     cv_mode <- match.arg(cv_mode)
     stopifnot("parsnip model must be defined." = !is.null(model))
 
-    dt_sample_rowidx <- make_subdata(dt_full, p = r_subsample)
+    if (cv_mode == "spatiotemporal") {
+      ngroup_init <- args_generate_cv$ngroup_init
+    } else {
+      ngroup_init <- NULL
+    }
+    dt_sample_rowidx <- beethoven:::make_subdata(
+      dt_full, p = r_subsample, ngroup_init = ngroup_init
+    )
     dt_sample <- dt_full[dt_sample_rowidx, ]
 
     # detect model name

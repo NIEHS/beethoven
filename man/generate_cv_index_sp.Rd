@@ -4,12 +4,7 @@
 \alias{generate_cv_index_sp}
 \title{Prepare spatial and spatiotemporal cross validation sets}
 \usage{
-generate_cv_index_sp(
-  data,
-  target_cols = c("lon", "lat"),
-  cv_make_fun = spatialsample::spatial_block_cv,
-  ...
-)
+generate_cv_index_sp(data, target_cols = c("lon", "lat"), ...)
 }
 \arguments{
 \item{data}{data.table with X, Y, and time information.}
@@ -17,14 +12,10 @@ generate_cv_index_sp(
 \item{target_cols}{character(3). Names of columns for X, Y.
 Default is \code{c("lon", "lat")}. It is passed to sf::st_as_sf to
 subsequently generate spatial cross-validation indices using
-\code{spatialsample::spatial_block_cv} and
-\code{spatialsample::spatial_clustering_cv}.}
+\code{spatialsample::spatial_block_cv}.}
 
-\item{cv_make_fun}{function(1). Function to generate spatial
-cross-validation indices.
-Default is \code{spatialsample::spatial_block_cv}.}
-
-\item{...}{Additional arguments to be passed to \code{cv_make_fun}.}
+\item{...}{Additional arguments to be passed to
+\code{patialsample::spatial_block_cv}.}
 }
 \value{
 A list of numeric vectors with in- and out-of-sample row indices or
@@ -34,8 +25,6 @@ a numeric vector with out-of-sample indices.
 Prepare spatial and spatiotemporal cross validation sets
 }
 \seealso{
-\code{\link[spatialsample:spatial_block_cv]{spatialsample::spatial_block_cv}},
-\code{\link[spatialsample:spatial_clustering_cv]{spatialsample::spatial_clustering_cv}},
-\code{\link[spatialsample:spatial_vfold]{spatialsample::spatial_buffer_vfold_cv}}
+\code{\link[spatialsample:spatial_block_cv]{spatialsample::spatial_block_cv}}.
 }
 \keyword{Baselearner}
