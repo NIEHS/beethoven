@@ -241,7 +241,9 @@ fit_base_learner <-
       # the formals() argument used in inject_match does not properly
       # identify the expected arguments in the switched functions
       # identify cv_mode
-      cv_mode_arg <- match.arg(cv_mode)
+      cv_mode_arg <- match.arg(
+        cv_mode, c("spatial", "temporal", "spatiotemporal")
+      )
       target_fun <-
         switch(
           cv_mode_arg,
@@ -255,7 +257,7 @@ fit_base_learner <-
 
       # using cv_index, restore rset
       base_vfold <-
-        convert_cv_index_rset(
+        beethoven::convert_cv_index_rset(
           cv_index, dt_sample, cv_mode = cv_mode
         )
     }
@@ -914,27 +916,30 @@ generate_cv_index_sp <-
         )
       )
 
-    # retrieve in_id
-    data_rowid <- seq_len(nrow(data))
-    newcv <- data_rowid
-    if (
-      !all(
-        !is.na(Reduce(c, Map(function(x) is.na(x$out_id), cv_index$splits)))
-      )
-    ) {
-      newcv <-
-        lapply(
-          cv_index$splits,
-          function(x) list(analysis = x$in_id, assessment = x$out_id)
-        )
-    } else {
-      cv_index <- lapply(cv_index$splits, function(x) x$in_id)
-      for (i in seq_along(cv_index)) {
-        newcv[setdiff(data_rowid, cv_index[[i]])] <- i
-      }
-    }
+    return(cv_index)
 
-    return(newcv)
+    # # retrieve in_id
+    # data_rowid <- seq_len(nrow(data))
+    # newcv <- data_rowid
+
+    # if (
+    #   !all(
+    #     !is.na(Reduce(c, Map(function(x) is.na(x$out_id), cv_index$splits)))
+    #   )
+    # ) {
+    #   newcv <-
+    #     lapply(
+    #       cv_index$splits,
+    #       function(x) list(analysis = x$in_id, assessment = x$out_id)
+    #     )
+    # } else {
+    #   cv_index <- lapply(cv_index$splits, function(x) x$in_id)
+    #   for (i in seq_along(cv_index)) {
+    #     newcv[setdiff(data_rowid, cv_index[[i]])] <- i
+    #   }
+    # }
+
+    # return(newcv)
   }
 
 
