@@ -910,36 +910,34 @@ generate_cv_index_sp <-
     data_sf <- sf::st_as_sf(data, coords = target_cols, remove = FALSE)
     cv_index <-
       rlang::inject(
-        cv_make_fun(
+        spatialsample::spatial_block_cv(
           data_sf,
           !!!list(...)
         )
       )
 
-    return(cv_index)
+    # retrieve in_id
+    data_rowid <- seq_len(nrow(data))
+    newcv <- data_rowid
 
-    # # retrieve in_id
-    # data_rowid <- seq_len(nrow(data))
-    # newcv <- data_rowid
+    if (
+      !all(
+        !is.na(Reduce(c, Map(function(x) is.na(x$out_id), cv_index$splits)))
+      )
+    ) {
+      newcv <-
+        lapply(
+          cv_index$splits,
+          function(x) list(analysis = x$in_id, assessment = x$out_id)
+        )
+    } else {
+      cv_index <- lapply(cv_index$splits, function(x) x$in_id)
+      for (i in seq_along(cv_index)) {
+        newcv[setdiff(data_rowid, cv_index[[i]])] <- i
+      }
+    }
 
-    # if (
-    #   !all(
-    #     !is.na(Reduce(c, Map(function(x) is.na(x$out_id), cv_index$splits)))
-    #   )
-    # ) {
-    #   newcv <-
-    #     lapply(
-    #       cv_index$splits,
-    #       function(x) list(analysis = x$in_id, assessment = x$out_id)
-    #     )
-    # } else {
-    #   cv_index <- lapply(cv_index$splits, function(x) x$in_id)
-    #   for (i in seq_along(cv_index)) {
-    #     newcv[setdiff(data_rowid, cv_index[[i]])] <- i
-    #   }
-    # }
-
-    # return(newcv)
+    return(newcv)
   }
 
 
