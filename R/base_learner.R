@@ -881,15 +881,10 @@ generate_cv_index_ts <-
 #' @param target_cols character(3). Names of columns for X, Y.
 #'   Default is `c("lon", "lat")`. It is passed to sf::st_as_sf to
 #'   subsequently generate spatial cross-validation indices using
-#'   `spatialsample::spatial_block_cv` and
-#'   `spatialsample::spatial_clustering_cv`.
-#' @param cv_make_fun function(1). Function to generate spatial
-#'   cross-validation indices.
-#'   Default is `spatialsample::spatial_block_cv`.
-#' @param ... Additional arguments to be passed to `cv_make_fun`.
-#' @seealso [`spatialsample::spatial_block_cv`],
-#'   [`spatialsample::spatial_clustering_cv`],
-#'   [`spatialsample::spatial_buffer_vfold_cv`]
+#'   `spatialsample::spatial_block_cv`.
+#' @param ... Additional arguments to be passed to
+#' `patialsample::spatial_block_cv`.
+#' @seealso [`spatialsample::spatial_block_cv`].
 #' @return A list of numeric vectors with in- and out-of-sample row indices or
 #'   a numeric vector with out-of-sample indices.
 #' @importFrom rlang inject
@@ -903,7 +898,6 @@ generate_cv_index_sp <-
   function(
     data,
     target_cols = c("lon", "lat"),
-    cv_make_fun = spatialsample::spatial_block_cv,
     ...
   ) {
 
