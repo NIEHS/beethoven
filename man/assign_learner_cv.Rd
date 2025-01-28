@@ -8,7 +8,8 @@ assign_learner_cv(
   learner = c("lgb", "mlp", "elnet"),
   cv_mode = c("spatiotemporal", "spatial", "temporal"),
   cv_rep = 100L,
-  num_device = ifelse(torch::cuda_device_count() > 1, 2, 1)
+  num_device = ifelse(torch::cuda_device_count() > 1, 2, 1),
+  balance = FALSE
 )
 }
 \arguments{
@@ -23,6 +24,9 @@ Default is "spatiotemporal". Available options are "spatiotemporal",
 
 \item{num_device}{integer(1). The number of CUDA devices to be used.
 Each device will be assigned to each eligible learner (i.e., lgb, mlp).}
+
+\item{balance}{logical(1). If TRUE, the number of CUDA devices will be
+equally distributed based on the number of eligible devices.}
 }
 \value{
 A data frame with three columns: learner, cv_mode, and device.

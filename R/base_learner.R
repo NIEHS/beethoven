@@ -480,6 +480,8 @@ fit_base_tune <-
 #' @param cv_rep integer(1). The number of repetitions for each `cv_mode`.
 #' @param num_device integer(1). The number of CUDA devices to be used.
 #'   Each device will be assigned to each eligible learner (i.e., lgb, mlp).
+#' @param balance logical(1). If TRUE, the number of CUDA devices will be
+#' equally distributed based on the number of eligible devices.
 #' @return A data frame with three columns: learner, cv_mode, and device.
 #' @export
 assign_learner_cv <-
@@ -487,7 +489,8 @@ assign_learner_cv <-
     learner = c("lgb", "mlp", "elnet"),
     cv_mode = c("spatiotemporal", "spatial", "temporal"),
     cv_rep = 100L,
-    num_device = ifelse(torch::cuda_device_count() > 1, 2, 1)
+    num_device = ifelse(torch::cuda_device_count() > 1, 2, 1),
+    balance = FALSE
   ) {
     learner_eligible <- c("lgb", "mlp", "xgb")
     learner <- sort(learner)
@@ -517,6 +520,20 @@ assign_learner_cv <-
       learner_l, cuda_get, SIMPLIFY = FALSE
     )
     learner_v <- do.call(rbind, learner_l)
+
+    if (balance) {
+      learner_v_flat <- do.call(rbind, learner_v)
+      learner_v_flat$device <- sprintf(
+        "cuda:%d", (seq_len(nrow(learner_v_flat)) - 1) %% num_device
+      )
+      learner_v_split <- split(
+        learner_v_flat, rownames(learner_v_flat)
+      )
+      learner_v <- learner_v_split[
+        order(as.numeric(names(learner_v_split)))
+      ]
+    }
+
     return(learner_v)
   }
 
