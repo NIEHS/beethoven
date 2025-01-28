@@ -167,6 +167,9 @@ target_baselearner <-
       ),
       pattern = map(df_learner_type_cpu),
       iteration = "list",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_50")
+      ),
       description = "Fit base learner | cpu | base learner"
     )
     ,
