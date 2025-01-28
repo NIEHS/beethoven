@@ -35,7 +35,7 @@ target_aqs <-
         )
         list_feat_state_aqs_sites
       },
-      description = "AQS locations"
+      description = "AQS locations | aqs"
     )
     ,
     targets::tar_target(
@@ -58,6 +58,6 @@ target_aqs <-
           return_format = "data.table"
         )
       },
-      description = "AQS locations with time and data"
+      description = "AQS locations with time and data | aqs"
     )
   )

@@ -42,11 +42,10 @@ scriptlines_gpu <- glue::glue(
   "#SBATCH --job-name=beethovengpu \
   #SBATCH --partition=geo \
   #SBATCH --gres=gpu:1 \
-  #SBATCH --output=slurm/beethovengpu_%j.out \
-  #SBATCH --error=slurm/beethovengpu_%j.err \
+  #SBATCH --error=slurm/beethovengpu_%j.out \
   {scriptlines_apptainer} exec --nv --bind {scriptlines_basedir}:/mnt ",
   "--bind {scriptlines_basedir}/inst:/inst ",
-  "--bind {scriptlines_basedir}/input:/input ",
+  "--bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input ",
   "--bind {scriptlines_basedir}/_targets:/opt/_targets ",
   "{scriptlines_container} \\"
 )
@@ -68,7 +67,7 @@ targets::tar_option_set(
   packages = c(
     "amadeus", "targets", "tarchetypes", "dplyr", "tidyverse",
     "data.table", "sf", "crew", "crew.cluster", "lubridate", "qs2",
-    "torch"
+    "torch", "bonsai", "dials", "lightgbm", "xgboost", "glmnet"
   ),
   repository = "local",
   error = "continue",

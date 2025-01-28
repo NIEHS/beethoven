@@ -844,7 +844,7 @@ target_calculate_fit <-
         nthreads_collapse = 32,
         nthreads_imputation = 32
       ),
-      description = "Imputed features + lags"
+      description = "Imputed features + lags | fit"
     )
     ,
     targets::tar_target(
@@ -852,6 +852,6 @@ target_calculate_fit <-
       command = beethoven::attach_xy(
         dt_feat_calc_imputed, dplyr::bind_rows(list_feat_proc_aqs_sites)
       ),
-      description = "Imputed features + AQS sites (outcome and lat/lon)"
+      description = "Imputed features + AQS sites (outcome and lat/lon) | fit"
     )
   )

@@ -13,7 +13,7 @@ target_critical <-
     targets::tar_target(
       chr_daterange,
       command = c("2018-01-01", "2022-12-31"),
-      description = "Date range"
+      description = "Date range | critical"
     )
     ,
     ##### 2. chr_nasa_token sets the file path to the user's NASA Earthdata
@@ -24,7 +24,7 @@ target_critical <-
     targets::tar_target(
       chr_nasa_token,
       command = readLines("/inst/extdata/nasa_token.txt"),
-      description = "NASA Earthdata token"
+      description = "NASA Earthdata token | critical"
     )
     ,
     ##### 3. chr_mod06_links is the file path to the MOD06 links file. These
@@ -35,7 +35,7 @@ target_critical <-
     targets::tar_target(
       chr_mod06_links,
       command = "/inst/extdata/mod06_links_2018_2022.csv",
-      description = "File of MOD06 links"
+      description = "File of MOD06 links | critical"
     )
     ,
     ##### 4. chr_input_dir is the file path to the input directory. This target
@@ -45,7 +45,7 @@ target_critical <-
     targets::tar_target(
       chr_input_dir,
       command = "/input",
-      description = "Data directory"
+      description = "Data directory | critical"
     )
     ,
     ##### 5. chr_dates_split controls the size of temporal splits. Splitting the
@@ -55,7 +55,7 @@ target_critical <-
     targets::tar_target(
       num_dates_split,
       command = 122,
-      description = "Number of days to include in each temporal split"
+      description = "Number of days in each temporal split | critical"
     )
     ############################################################################
     ############################################################################

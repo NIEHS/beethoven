@@ -5,4 +5,4 @@
 # after the image is built, group write/execution privileges are given
 
 # Recommended to run this script interactively via `sh build_container_covariates.sh`
-apptainer build --fakeroot container_covariates.sif container_covariates.def
+apptainer build --fakeroot ../container_covariates.sif container_covariates.def

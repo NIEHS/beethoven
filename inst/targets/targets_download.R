@@ -10,7 +10,7 @@ target_download <-
         download = TRUE,
         hash = FALSE
       ),
-      description = "Common download arguments"
+      description = "Common download arguments | download"
     )
     ,
     ###########################         AQS          ###########################
@@ -30,14 +30,14 @@ target_download <-
         TRUE
       },
       pattern = map(chr_years),
-      description = "Download AQS data"
+      description = "Download AQS data | download"
     )
     ,
     ###########################         GEOS         ###########################
     targets::tar_target(
       chr_iter_calc_geos,
       command = c("aqc_tavg_1hr_g1440x721_v1", "chm_tavg_1hr_g1440x721_v1"),
-      description = "GEOS-CF features"
+      description = "GEOS-CF features | download"
     )
     ,
     targets::tar_target(
@@ -52,7 +52,7 @@ target_download <-
         hash = list_download_args$hash
       ),
       pattern = cross(chr_iter_calc_geos, list_dates),
-      description = "Download GEOS-CF data"
+      description = "Download GEOS-CF data | download"
     )
     ,
     targets::tar_target(
@@ -61,7 +61,7 @@ target_download <-
         download_geos
         TRUE
       },
-      description = "Download GEOS-CF data | buffer"
+      description = "Download GEOS-CF data | buffer | download"
     )
     ,
     ###########################         NARR         ###########################
@@ -88,7 +88,7 @@ target_download <-
         hash = list_download_args$hash
       ),
       pattern = cross(chr_iter_calc_narr, chr_years),
-      description = "Download NARR data"
+      description = "Download NARR data | download"
     )
     ,
     targets::tar_target(
@@ -97,7 +97,7 @@ target_download <-
         download_narr
         TRUE
       },
-      description = "Download NARR data | buffer"
+      description = "Download NARR data | buffer | download"
     )
     ,
     ###########################         HMS          ###########################
@@ -114,7 +114,7 @@ target_download <-
         hash = list_download_args$hash
       ),
       pattern = map(list_dates),
-      description = "Download HMS data"
+      description = "Download HMS data | download"
     )
     ,
     targets::tar_target(
@@ -123,7 +123,7 @@ target_download <-
         download_hms
         TRUE
       },
-      description = "Download HMS data | buffer"
+      description = "Download HMS data | buffer | download"
     )
     ,
     ###########################       MODIS - MOD11       ######################
@@ -145,7 +145,7 @@ target_download <-
         TRUE
       },
       pattern = map(list_dates),
-      description = "Download MODIS - MOD11 data"
+      description = "Download MODIS - MOD11 data | download"
     )
     ,
     ###########################       MODIS - MOD06       ######################
@@ -168,7 +168,7 @@ target_download <-
         TRUE
       },
       pattern = map(list_dates),
-      description = "Download MODIS - MOD06 data"
+      description = "Download MODIS - MOD06 data | download"
     )
     ,
     ###########################       MODIS - MOD13       ######################
@@ -190,7 +190,7 @@ target_download <-
         TRUE
       },
       pattern = map(list_dates),
-      description = "Download MODIS - MOD13 data"
+      description = "Download MODIS - MOD13 data | download"
     )
     ,
     ###########################       MODIS - MCD19       ######################
@@ -212,7 +212,7 @@ target_download <-
         TRUE
       },
       pattern = map(list_dates),
-      description = "Download MODIS - MCD19 data"
+      description = "Download MODIS - MCD19 data | download"
     )
     ,
     ###########################       MODIS - MOD09       ######################
@@ -234,7 +234,7 @@ target_download <-
         TRUE
       },
       pattern = map(list_dates),
-      description = "Download MODIS - MOD09 data"
+      description = "Download MODIS - MOD09 data | download"
     )
     ,
     ###########################       MODIS - VIIRS       ######################
@@ -257,7 +257,7 @@ target_download <-
         TRUE
       },
       pattern = map(list_dates),
-      description = "Download MODIS - VIIRS data"
+      description = "Download MODIS - VIIRS data | download"
     )
     ,
     ###########################         GMTED        ###########################
@@ -269,7 +269,7 @@ target_download <-
         "Mean Statistic", "Maximum Statistic",
         "Standard Deviation Statistic"
       ),
-      description = "GMTED features"
+      description = "GMTED features | download"
     )
     ,
     targets::tar_target(
@@ -289,14 +289,14 @@ target_download <-
         TRUE
       },
       pattern = map(chr_iter_calc_gmted_vars),
-      description = "Download GMTED data"
+      description = "Download GMTED data | download"
     )
     ,
     ###########################         NLCD         ###########################
     targets::tar_target(
       chr_iter_calc_nlcd,
       command = c(2019, 2021),
-      description = "NLCD years"
+      description = "NLCD years | download"
     )
     ,
     targets::tar_target(
@@ -315,7 +315,7 @@ target_download <-
         TRUE
       },
       pattern = map(chr_iter_calc_nlcd),
-      description = "Download NLCD data"
+      description = "Download NLCD data | download"
     )
     ,
     ###########################        KOPPEN        ###########################
@@ -335,7 +335,7 @@ target_download <-
         )
         TRUE
       },
-      description = "Download Koppen-Geiger data"
+      description = "Download Koppen-Geiger data | download"
     )
     ,
     ###########################      POPULATION      ###########################
@@ -356,7 +356,7 @@ target_download <-
         )
         TRUE
       },
-      description = "Download population data"
+      description = "Download population data | download"
     )
     ,
     ###########################         TRI          ###########################
@@ -371,14 +371,14 @@ target_download <-
         hash = list_download_args$hash
       ),
       pattern = map(chr_years),
-      description = "Download TRI data"
+      description = "Download TRI data | download"
     )
     ,
     ###########################         NEI          ###########################
     targets::tar_target(
       chr_iter_calc_nei,
       command = c(2017, 2020),
-      description = "NEI features"
+      description = "NEI features | download"
     )
     ,
     targets::tar_target(
@@ -396,7 +396,7 @@ target_download <-
         TRUE
       },
       pattern = map(chr_iter_calc_nei),
-      description = "Download NEI data"
+      description = "Download NEI data | download"
     )
     ,
     ###########################      ECOREGIONS      ###########################
@@ -414,7 +414,7 @@ target_download <-
         )
         TRUE
       },
-      description = "Download ecoregions data"
+      description = "Download ecoregions data | download"
     )
     ,
     ###########################        GROADS        ###########################
@@ -434,6 +434,6 @@ target_download <-
         )
         TRUE
       },
-      description = "Download gRoads data"
+      description = "Download gRoads data | download"
     )
   )

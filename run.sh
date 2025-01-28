@@ -38,7 +38,7 @@ apptainer exec \
 # Set environmental variable to indicate model fitting targets.
 export BEETHOVEN=models
 
-# Run post-model targets via container_models.sif.
+# Fit base learner models via container_models.sif.
 apptainer exec \
   --nv \
   --bind $PWD:/mnt \

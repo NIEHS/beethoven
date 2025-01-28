@@ -89,7 +89,7 @@ switch_model <-
           trees = parsnip::tune(),
           learn_rate = parsnip::tune()
         ) %>%
-        parsnip::set_engine("lightgbm", device_type = device) %>%
+        parsnip::set_engine("lightgbm", device = device) %>%
         parsnip::set_mode("regression"),
       xgb =
         parsnip::boost_tree(

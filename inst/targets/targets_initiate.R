@@ -6,14 +6,15 @@ target_initiate <-
       chr_dates,
       command = amadeus::generate_date_sequence(
         chr_daterange[1], chr_daterange[2], sub_hyphen = FALSE
-      )
+      ),
+      description = "Date range as character | initiate"
     )
     ,
     targets::tar_target(
       chr_years,
       command = unique(lubridate::year(chr_dates)),
       iteration = "list",
-      description = "Year range"
+      description = "Year range | initiate"
     )
     ,
     targets::tar_target(
@@ -23,13 +24,13 @@ target_initiate <-
         n = num_dates_split,
         year = TRUE
       ),
-      description = "Dates as list (YYYY-MM-DD)"
+      description = "Dates as list (YYYY-MM-DD) | initiate"
     )
     ,
     targets::tar_target(
       list_dates_julian,
       command = lapply(list_dates, function(x) format(as.Date(x), "%Y%j")),
-      description = "Dates as list (YYYYDDD)"
+      description = "Dates as list (YYYYDDD) | initiate"
     )
     ,
     targets::tar_target(
@@ -39,7 +40,7 @@ target_initiate <-
         n = 10,
         year = TRUE
       ),
-      description = "Dates as list (YYYY-MM-DD) | GEOS-CF"
+      description = "Dates as list (YYYY-MM-DD) | GEOS-CF | initiate"
     )
     ,
     targets::tar_target(
@@ -58,6 +59,6 @@ target_initiate <-
         char_user_email = paste0(Sys.getenv("USER"), "@nih.gov"),
         char_input_dir = chr_input_dir
       ),
-      description = "Calculation arguments"
+      description = "Calculation arguments | initiate"
     )
   )

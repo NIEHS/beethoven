@@ -5,4 +5,4 @@
 # after the image is built, group write/execution privileges are given
 
 # Recommended to run this script interactively via `sh build_container_models.sh`
-apptainer build --fakeroot container_models.sif container_models.def
+apptainer build --fakeroot ../container_models.sif container_models.def
