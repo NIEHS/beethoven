@@ -1,37 +1,31 @@
 # Developer's guide
 
 ## Preamble
-The objective of this document is to provide developers with the current implementation of `beethoven` pipeline as of October 9, 2024 (version 0.4.2)
+The objective of this document is to provide developers with the current implementation of `beethoven` pipeline as of January 28, 2025 (version 0.4.4)
 
 We assume the potential users have basic knowledge of `targets` and `tarchetypes` packages as well as functional programming and metaprogramming. It is recommended to read Advanced R (by Hadley Wickham)'s chapters for these topics.
 
-## Before running the pipeline
-For developing and running the pipeline, users should check several lines across R and shell script files:
+## Initiate
+To develop and run `beethoven`, users should check the following files before running the pipeline.
 
 - Container
-  - `/beethoven_dl_calc.sif`: The container image is not hosted on GitHub due to the large file size, so the image must be built by each. The definition file can be found at `/container/beethoven_dl_calc.sh`, and the container image can be build by running `sh build_dl_calc.sh` **from within the `/container` folder. Once the container image is built, it can be copied or moved to the repository root for running the pipeline (`mv beethoven_dl_calc.sif ../` or `cp beethoven_dl_calc.sif ../`).
+  - The container images, `container_covariates.sif` and `container_models.sif`, are not hosted on GitHub due to the large file size. The images must be built by each user before running the pipeline. Definition files for each images can be found at `container/container_covariates.def` and `container/container_models.def`, respectively. The images can be build by running `sh build_container_[covariates/models].sh` **from within the `container/` folder**, or running `sbatch build_container_[covariates/models].sh`.
 
 - Shell
-  - `/run.sh`: file controls SLURM submission details (ie, `--mem`, `--cpus-per-task`), and **which local directories are mounted to the container**. Local directories which must be explicitly mounted to the container at run time are 1. group data store (line 17) and 2. local targets store (line 18). For ongoing development, a local directory is used for targets store.
+  - The `run.sh` file controls SLURM submission details (ie, `--mem`, `--cpus-per-task`) and container settings (ie. `container_[covariates/models].sif`, mounted directories). Local directories which must be explicitly mounted to the container for covariate and model runs are 1. the group data store (`--bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input`), 2. local targets store (`--bind $PWD/_targets:/opt/_targets`), and 3. the `inst/` folder which has the targets (`--bind $PWD/_targets:/opt/_targets`). The model fitting stage uses the `crew.cluster::crew_controller_slurm` controller, and therefore requires **local installation and settings of** `munge` (`--bind /run/munge:/run/munge`) and `slurm` (`--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm`).
 
 - R
-  - `/_targets.R`: Ensure sum of controller-specific workers (line 9 + line 14) is equal to the total number of workers requested in `/run.R` (line 9).
-  - `/_targets.R`: Ensure targets store (line 18) matches the mount location in `/run.sh` (line 18 **after the semicolon**).
-  - `/inst/targets/targets_critical.R`: Critical targets are those which will require changes between users (`chr_nasa_token`), for development (`num_dates_split`), manual updates (`/inst/extdata/mod06_links_2018_2022.csv` called via `chr_mod06_links`), and mounted data path (`chr_input_dir`). **Most importantly**, critical target `chr_daterange` controls the entire temporal range of the downstream pipeline. Time-related specifications (dates, months, years, julian dates, etc) are defined relative to `chr_daterange`.
+  - `_targets.R`: Ensure each `crew::crew_controller_local` does not specify more workers than the total number workers requested in `run.R` (line 9).
+  - `_targets.R`: Ensure `targets` store (line 63) matches the mount location in `run.sh` (lines 33 and 47 **after the semicolon**).
+  - `inst/targets/targets_critical.R`: Critical targets are those which will require changes between users (`chr_nasa_token`), for development (`num_dates_split`), manual updates (`/inst/extdata/mod06_links_2018_2022.csv` called via `chr_mod06_links`), and mounted data path (`chr_input_dir`). **Most importantly**, critical target `chr_daterange` controls the entire temporal range of the downstream pipeline. Time-related specifications (dates, months, years, julian dates, etc) are defined relative to `chr_daterange`.
 
-## Refactor (October 9, 2024)
-Targets have been refactored to decrease reliance on "injection" functions, which obscured the source-specific inputs and relied on external (non-target) file. Refactoring from generalized injection functions to source-specific functions adds code, but is easier to follow, debug, and develop. To compare original to refactored code, see `/archive/targets_download_DEPRICATED.R` and `/inst/targets/targets_download.R`.
+## Developments (January 28, 2025)
+- Separate container definition files and images for the covariate calculation (`container/container_covariates.def`) and model fitting (`container/container_models.def`) parts of the pipeline.
+- Set and get `BEETHOVEN` environmental variable in `run.sh` and `_targets.R` files, respectively, to skip model fitting targets running on `container_covariate.sif`.
+- Implement `crew.cluster::crew_controller_slurm` controller for GPU-enabled targets.
 
-## Ongoing development
-- `dt_feat_calc_ecoregions`
-  - Calculating ecoregion covariates with `amadeus::process_ecoregion` and `amadeus::calc_ecoregion` function returns errors. See [discussion](https://github.com/orgs/NIEHS/projects/8/views/1?layout=board&pane=issue&itemId=82653782&issue=NIEHS%7Cbeethoven%7C376).
-  - For development purpose, ecoregion covariates have been manually calculated for all AQS sites from 2018 to 2024. Sites are filtered to relevant sites after import.
-  - `/inst/targets/targets_calculate_fit.R` (line 746)
-
-- `download_[modis]`
-  - Current container definition file does not support SSL Certificate verification, which is required for downloading MODIS/VIIRS `.hdf` files. See [discussion](https://github.com/orgs/NIEHS/projects/8/views/1?layout=board&pane=issue&itemId=82627613&issue=NIEHS%7Cbeethoven%7C375).
-  - For development purpose, the `download_modis_clean` target deletes all corruptly downloaded data files to ensure downstream targets complete.
-  - `/inst/targets/targets_download.R` (line 234)
+## Ongoing
+- Debugging GPU-enabled `lightgbm` and `xgboost` models fit with `parsnip` package.
 
 ## Basic structure of branches
 We will call "grand target" as a set of branches if any branching technique is applied at a target.
