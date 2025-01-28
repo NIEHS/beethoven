@@ -135,13 +135,11 @@ graph TD
     style P5 fill:#abf7b1,stroke:#000,stroke-width:2px      
 
 ```
- 
-**Placeholder for up-to-date rendering of targets**
 
 ```r
 tar_visnetwork(targets)
 ```
-    
+![](man/figures/visnetwork_20250128.png)
 
 ## Project Organization
 
