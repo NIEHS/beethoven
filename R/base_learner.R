@@ -15,6 +15,7 @@
 #' by `ngroup_init` for `generate_cv_index_spt`.
 #' @return The row index of the original data. The name of the original
 #'   data object is stored in attribute "object_origin".
+#' @export
 make_subdata <- function(
   data,
   n = NULL,
@@ -522,16 +523,11 @@ assign_learner_cv <-
     learner_v <- do.call(rbind, learner_l)
 
     if (balance) {
-      learner_v_flat <- do.call(rbind, learner_v)
-      learner_v_flat$device <- sprintf(
-        "cuda:%d", (seq_len(nrow(learner_v_flat)) - 1) %% num_device
+      learner_v_cuda <- learner_v[grep("cuda", learner_v$device), ]
+      learner_v_cuda$device <- sprintf(
+        "cuda:%d", (seq_len(nrow(learner_v_cuda)) - 1) %% num_device
       )
-      learner_v_split <- split(
-        learner_v_flat, rownames(learner_v_flat)
-      )
-      learner_v <- learner_v_split[
-        order(as.numeric(names(learner_v_split)))
-      ]
+      learner_v[grep("cuda", learner_v$device), ] <- learner_v_cuda
     }
 
     return(learner_v)
