@@ -35,4 +35,8 @@ batch <- function(file = "run.sh") {
 gpu <- function() {
   system("nvidia-smi")
 }
+
+test <- function() {
+  system("sh tests/test-local.sh")
+}
 # nocov end

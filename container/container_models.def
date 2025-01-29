@@ -112,7 +112,7 @@ From: nvidia/cuda:11.8.0-devel-ubuntu22.04
     Rscript -e "pak::pak('mitchellmanware/parsnip@beethoven')"
     Rscript -e "install.packages(c('tarchetypes', \
         'testthat', 'tidymodels', 'bonsai', 'qs2', \
-        'torch', 'tidyverse', 'glmnet'))"
+        'torch', 'tidyverse', 'glmnet', 'covr'))"
     Rscript -e "options(timeout = 1800); torch::install_torch(version = 'latest', type = 'gpu')"
     Rscript -e "pak::pak('tidymodels/brulee@gpu')"
     Rscript -e "pak::pak('shikokuchuo/nanonext'); pak::pak('shikokuchuo/mirai')"

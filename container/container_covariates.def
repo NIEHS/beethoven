@@ -38,7 +38,7 @@ From: rocker/geospatial:latest
         'bonsai', 'qs2'))"
     Rscript -e "pak::pak('shikokuchuo/nanonext'); pak::pak('shikokuchuo/mirai')"
     Rscript -e "pak::pak('wlandau/crew'); pak::pak('wlandau/crew.cluster')"
-    Rscript -e "pak::pak('NIEHS/amadeus@1.2.3')"
+    Rscript -e "pak::pak('NIEHS/amadeus')"
     Rscript -e "pak::pak('NIEHS/beethoven@dev-mm-0108')"
 
 %environment
