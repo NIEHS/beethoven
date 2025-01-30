@@ -6,6 +6,7 @@
 #' Default is c("02", "15", "60", "66", "68", "69", "72", "78").
 #' @return sf object
 #' @importFrom tigris counties
+#' @export
 process_counties <-
   function(
     year = 2020,

@@ -40,7 +40,9 @@ gpu <- function() {
 #' with the `container_models.sif` container.
 #' @param pattern A regular expression to match the test file name.
 #' @return NULL; Prints the output of the testthat tests.
+#' @importFrom glue glue
 #' @seealso [testthat::test_file()]
+#' @importFrom glue glue
 test <- function(pattern = NULL) {
   if (is.null(pattern)) stop()
   system(
@@ -52,15 +54,16 @@ test <- function(pattern = NULL) {
       "library(dplyr); library(testthat); ",
       "test_file <- list.files('/mnt/tests/testthat', full.names = TRUE, ",
       "pattern = '", pattern, "'); source_files <- list.files('/mnt/R', ",
-      "full.names = TRUE); testthat::test_file(test_file)\""
+      "full.names = TRUE); covr::file_coverage(source_files, test_file)\""
     )
   )
 }
 
-#' Calculate code coverage of the {beethoven} package with the
+#' Calculate code coverage of the `beethoven` package with the
 #' `container_models.sif` container.
 #' @return NULL; Prints the output of the code coverage.
 #' @seealso [covr::package_coverage()]; [covr::coverage_to_list()]
+#' @importFrom glue glue
 cov <- function() {
   system(
     glue::glue(

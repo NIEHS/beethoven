@@ -232,7 +232,7 @@ fit_base_learner <-
     } else {
       ngroup_init <- NULL
     }
-    dt_sample_rowidx <- beethoven:::make_subdata(
+    dt_sample_rowidx <- beethoven::make_subdata(
       dt_full, p = r_subsample, ngroup_init = ngroup_init
     )
     dt_sample <- dt_full[dt_sample_rowidx, ]

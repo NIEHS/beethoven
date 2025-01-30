@@ -2,7 +2,7 @@
 % Please edit documentation in R/helpers.R
 \name{cov}
 \alias{cov}
-\title{Calculate code coverage of the {beethoven} package with the
+\title{Calculate code coverage of the \code{beethoven} package with the
 \code{container_models.sif} container.}
 \usage{
 cov()
@@ -11,7 +11,7 @@ cov()
 NULL; Prints the output of the code coverage.
 }
 \description{
-Calculate code coverage of the {beethoven} package with the
+Calculate code coverage of the \code{beethoven} package with the
 \code{container_models.sif} container.
 }
 \seealso{

@@ -1,6 +1,5 @@
 # Building an Extensible, rEproducible, Test-driven, Harmonized, Open-source, Versioned, ENsemble model for air quality <a href="https://niehs.github.io/beethoven"><img align="right" src="man/figures/beethoven-logo.png" width="168px" alt="two hexagons with distributed tan, orange, and teal with geometric symbols placed. Two hexagons are diagonally placed from the top left to the bottom right" /><a>
 
-
 <p>
  
 [![R-CMD-check](https://github.com/NIEHS/beethoven/actions/workflows/check-standard.yaml/badge.svg)](https://github.com/NIEHS/beethoven/actions/workflows/check-standard.yaml)
@@ -9,21 +8,19 @@
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 
-
 Group Project for the Spatiotemporal Exposures and Toxicology group with help from friends :smiley: :cowboy_hat_face: :earth_americas: 
 
-
 </p>
-    
+
 ## Installation
 
 ```r
 remotes::install_github("NIEHS/beethoven")
 ```
 
-## Overall Project Workflow
+## Workflow
 
-Targets: Make-like Reproducible Analysis Pipeline
+`targets`: Make-like Reproducible Analysis Pipeline
  1) AQS Data
  2) Generate Covariates
  3) Fit Base Learners
@@ -141,41 +138,43 @@ tar_visnetwork(targets)
 ```
 ![](man/figures/visnetwork_20250128.png)
 
-## Project Organization
+## Organization
 
 Here, we describe the structure of the project and the naming conventions used. The most up to date file paths and names are recorded here for reference.
 
-### File Structure
+### Folder Structure
 
-#### Folder Structure
+- `R/` is where the `beethoven` functions are stored. Only ".R" files should be in this folder (ie. `targets` helpers, post-processing, model fitting functions).
+- `inst/` is a directory for arbitrary files outside of the main `R/` directory
+     - `targets/` is a sub-directory within `inst/` which contains the pipeline files (ie. "targets_aqs.R"). These files declare the `targets::tar_target` objects which constitute the `beethoven` pipeline.
+- `tests/` stores unit and integration tests (`testthat/`) and test data (`testdata/`) according to the [testthat](https://testthat.r-lib.org/) package's standard structure. for unit testing.
+    - `testthat.R` is created and maintained by `testthat`, and is not to be edited manually.
+- `man/` contains function documentation files (".Rd") which are by the [roxygen2](https://roxygen2.r-lib.org/) package. These files are not to be edited manually.
+- `vignettes/` contains ".Rmd" narrative text and code files. These are rendered by [pkgdown](https://pkgdown.r-lib.org/) into the [Articles](https://niehs.github.io/beethoven/articles/index.html) section of the `beethoven` webpage.
+- `.github/workflows/` is a hidden directory which stores the GitHub CI/CD "yaml" files.
+- `tools/` is dedicated to educational or demonstration material (e.g. Rshiny), but is not excluded from the package build.
 
-- `R/` This is where the main R code (e.g. .R files) lives. Nothing else but .R files should be in here. i.e. Target helper functions, model fitting and post-processing, plotting and summary functions. 
-- `tests/` This is where the unit and integration tests reside. The structure is based off the standard practices of the [testthat](https://testthat.r-lib.org/) R package for unit testing.
-    - `testthat` Unit and integration tests for CI/CD reside here
-    - `testdata` Small test datasets including our small (in size) complete pipeline testing. 
-    - `testthat.R` Special script created and maintained by testthat
-- `man/` This sub-directory contains .Rd and othe files created by the [roxygen2](https://roxygen2.r-lib.org/) package for assisted documentation of R packages
-- `vignettes/` Rmd (and potentially Qmd) narrative text and code files. These are rendered into the **Articles** for the package website created by [pkgdown](https://pkgdown.r-lib.org/) 
-- `inst/` Is a sub-directory for arbitrary files outside of the main `R/` directory
-     - `targets` which include the important pipeline file `_targets.R`
-- `.github/workflows/` This hidden directory is where the GitHub CI/CD yaml files reside
-
-##### The following sub-directories are not including the package build and included only in the source code here
-- `tools/` This sub-directory is dedicated to educational or demonstration material (e.g. Rshiny).
-  
-#### Relevant files 
-
-- LICENSE
-- DESCRIPTION
-- NAMESPACE 
-- README.md
+### Important Files
+- `_targets.R` configures `targets` settings, creates computational resource controllers, and structures the `beethoven` pipeline.
+  - To run `beethoven`, users must review and update the following parameters for their user profile and computing system:
+    - `controller_*` Ensure the local controllers do not request more CPUs than are available on your machine or high performance system.
+    - `#SBATCH --partition` Utilization of NVIDIA GPUs (within `glue::glue` command)
+    - `--bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input` (within `glue::glue` command)
+- `_targets.yaml` is created and updated by running `targets::tar_make` and is not to be edited manually.
+- `run.sh` allocates computational resources with SLURM and submits the `beethoven` pipeline to run on high performance computing system.
+  - To run `beethoven`, users must review and update the following parameters for their user profile and computing system:
+    - `#SBATCH --mail-user`
+    - `#SBATCH --partition`
+    - `#SBATCH --mem`
+    - `#SBATCH --cpus-per-task`
+    - `--bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input`
+    - `--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm`
 
 ### Naming Conventions
 
 Naming things is hard and somewhat subjective. Nonetheless, consistent naming conventions make for better reproducibility, interpretability, and future extensibility. 
 Here, we provide the `beethoven` naming conventions for objects as used in `targets` and for naming functions within the package (i.e. **R/**). 
 For `tar_target` functions, we use the following naming conventions:
-
 
 Naming conventions for `targets` objects. We are motivated by the [Compositional Forecast](https://cfconventions.org/Data/cf-standard-names/docs/guidelines.html) (CF) model naming conventions:
 
@@ -190,7 +189,6 @@ Here, we use the following naming convention:
 
 Examples: 1) `sf_PM25_log10-fit_AQS_siteid` is an `sf` object for `PM25` data that is log-transformed and ready for base-learner fitting, derived from AQS data and located at the siteid locations. 
 2) `SpatRast_process_MODIS` is a terra `SpatRast` object that has been processed from MODIS.
-
 
 #### Naming section definitions:
 
@@ -243,7 +241,6 @@ are also articulated here. Allowable keywords:
     - daily  [optional YYYYMMDD]
     - annual  [optional YYYY]
 
-
 ### Function Naming Convenctions 
 
 We have adopted naming conventions in functions in this package as well as `amadeus` which is a key input package. 
@@ -262,8 +259,6 @@ We have adopted naming conventions in functions in this package as well as `amad
      - meta_model (meta)
      - feature (feat) 
 
-
- 
 ### To run the pipeline
 #### Post-checkout hook setting
 As safeguard measures, we limit the write permission of `_targets.R` to authorized users. To activate post-checkout hook, run `setup_hook.sh` at the project root.
@@ -288,7 +283,6 @@ tar_config_set(
 ```
 
 Users could comment out the three lines to keep targets in `_targets` directory under the project root. Common arguments are generated in the earlier lines in `_targets.R` file. Details of the function generating the arguments, `set_args_calc`, are described in the following.
-
 
 #### Using `set_args_calc`
 `set_args_calc` function exports or returns common parameters that are used repeatedly throughout the calculation process. The default commands are as below:
@@ -355,17 +349,12 @@ The script will submit a job with effective commands with SLURM level directives
 > [!WARNING]
 > `set_args_*` family for downloading and summarizing prediction outcomes will be added in the future version.
 
-
-
-
 # Developer's guide
-
 
 ## Preamble
 The objective of this document is to provide developers with the current implementation of `beethoven` pipeline for version 0.3.9.
 
 We assume the potential users have basic knowledge of `targets` and `tarchetypes` packages as well as functional and meta-programming. It is recommended to read Advanced R (by Hadley Wickham)'s chapters for these topics.
-
 
 ## Pipeline component and basic implementation
 The pipeline is based on `targets` package. All targets are **stored** in a designated storage, which can be either a directory path or a URL when one uses cloud storage or web servers. Here we classify the components into three groups:
@@ -373,7 +362,6 @@ The pipeline is based on `targets` package. All targets are **stored** in a desi
 1. Pipeline execution components: the highest level script to run the pipeline.
 2. Pipeline configuration components: function arguments that are injected into the  functions in each target.
 3. Pipeline target components: definitions of each target, essentially lists of `targets::tar_target()` call classified by pipeline steps
-
 
 Let's take a moment to be a user. You should consult specific file when:
 
@@ -385,10 +373,8 @@ Let's take a moment to be a user. You should consult specific file when:
 > [!NOTE]
 > Please expand the toggle below to display function trees for `inst/targets/targets_*.R` files. Only functions that are directly called in each file are displayed due to screen real estate and readability concerns.
 
-
 <details>
 <summary>`targets_*.R` file function tree</summary>
-
 
 ```mermaid
 graph LR
@@ -444,11 +430,9 @@ graph LR
 
 </details>
 
-
 ![](man/figures/pipeline-code-relations.svg)
 
 The details of argument injection is illustrated below. The specific arguments to inject are loaded from QS files that are required to be saved in `inst/targets` directory. Each QS file contains a nested list object where function arguments for downloading raw data and calculating features are defined and store.
-
 
 #### `inst/targets/download_spec.qs`
 The file is generated by a `beethoven` function `set_args_download`. In `_targets.R` file, one can skip to generate this file if raw data download is already done or unnecessary.
@@ -465,7 +449,6 @@ arglist_download <-
     path_export = "inst/targets/download_spec.qs"
   )
 ```
-
 
 #### `inst/targets/calc_spec.qs`
 `set_args_calc()` function will generate this file. The file name can be changed (` path_export = "inst/targets/calc_spec.qs" `), but it must start with `calc_` as the file name prefix is used to search QS files to manage different periods. Like `download_spec.qs`, whether or not to run this function can be specified by a logical variable named `generate_list_calc` in `_targets.R` file.
@@ -521,8 +504,6 @@ For the future release and tests on various environments, one should check sever
   - `/targets.R`: `set_args_download` and `set_args_calc` functions, i.e., `char_input_dir` argument and `char_period`.
   - `/targets.R`: `library` argument value in `tar_option_set` to match the current system environment
 
-
-
 ## Basic structure of branches
 We will call "grand target" as a set of branches if any branching technique is applied at a target.
 
@@ -548,7 +529,6 @@ if (Sys.getenv("BTV_DOWNLOAD_PASS") == "TRUE") {
 }
 ```
 
-
 ### `list_feat_calc_base`
 Per `beethoven` targets naming convention, this object will be a list and it has eight elements at the first level. We use "first level" here as the list is nested. It is also related to maintain `list_feat_calc_base_flat` at the following target. Eight elements are defined in a preceding target `chr_iter_calc_features`:
 
@@ -570,24 +550,19 @@ Each element in `chr_iter_calc_features` is iterated as a list then `list_feat_c
 ### `list_feat_calc_nlcd`
 From version 0.3.10, NLCD target is separated from `list_feat_calc_base` from runtime concerns. Here we take nested parallelization strategy, where each `amadeus::calc_nlcd()` run with different year and buffer size is parallelized where each will use 10 threads. In the initial study period, we have six combinations (two NLCD years in 2019 and 2021, and three radii of 1, 10, and 50 kilometers). Thus, the NLCD target will use 60 threads, but not necessarily concurrently. Each combination will get its slot in the resulting list target, therefore the following `dt_feat_calc_nlcd` is created by `data.frame` pivotting.
 
-
-
 ### `list_feat_calc_nasa`
 MODIS-VIIRS product processing is a bit more complex than others since many preprocessing steps are involved in this raw data. Please note that `chr_iter_calc_nasa` divides MOD19A2 product by spatial resolution since difference in spatial resolution of raster layers makes it difficult to stack layers that can be advantageous to improve processing speed. The branching itself is simple to use a character vector of length 7 to iterate the process, but there is a different avenue that might introduce complexity in terms of computational infrastructure and implementation of parallel processing.
 
 We introduced nested parallelization to expedite the MODIS/VIIRS processing, where `tar_make_future` will submit jobs per MODIS/VIIRS product code via SLURM batchtools and multiple threads are used in each job. If one wants to make a transition to `crew` based pipeline operation in the future, this part indeed requires a tremendous amount of refactoring not only in beethoven functions but also amadeus functions considering features of `crew`/`mirai` workers which are different from `future`.
 
-
 ### `list_feat_calc_geoscf`
 We use a character vector of length 2 to distinguish chm from aqc products. A modified version of `amadeus::calc_geos`, `calc_geos_strict` is employed to calculate features. The key modification is to fix the radius argument as zero then to remove the top-level argument radius from the function.
-
 
 ### `list_feat_calc_gmted`
 Here we use custom function `calc_gmted_direct`, which has different logic from what was used in `amadeus::calc_gmted`. `inject_gmted` uses that function to parallelize the calculation by radius length.
 
 ### `list_feat_calc_narr`
 Again, modified functions `process_narr2` and `calc_narr2` are applied and the parallelization for NARR data is done by `par_narr`. Here we did not branch out by NARR variable names since they are a bit long (length of 46) such that each dispatched branch will add up overhead to submit SLURM job for each variable.
-
 
 ## Merge branches
 
@@ -706,15 +681,12 @@ The calculated features contain a fair amount of `NA` or `NaN`s depending on the
 
 - Missing: daily satellite-derived features except for the 16-day NDVI are considered to include missing values. Such missing values are mainly coming from intermittent data transmission disruption or planned maintenance. `NA`s in the 16-day NDVI field are filled by the "last observation carried forward" principle. `NaN` values in others are replaced with `NA` and put into the imputation function.
 
-
-
 ## Base learners
 
 For efficiency, GPU-enabled version is recommended for `xgboost`/`lightgbm` and `brulee`. These packages need to be installed manually with modifications of system environment variables. Developers should consult `lightgbm` official documentation for building the package by hand, `xgboost` GitHub repository release page for installing the CUDA version manually and `brulee` GitHub repository (i.e., in `gpu` branch) to install the proper version of each package with careful consideration on the computing infrastructure. "GPU" here refers to CUDA-enabled devices produced by NVIDIA corporation. This does not necessarily mean that this package as a part of U.S. government work endorses NVIDIA corporation and its products in any sort.
 
 > [!WARNING]
 > As of version 0.3.10, `xgboost` < v2.1.0 should be used due to breaking changes in v2.1.0 in handling additional arguments in `xgb.DMatrix` (cf. [xgboost pull record](https://github.com/dmlc/xgboost/pull/9862)), which leads to break `parsnip::boost_tree()` function call.
-
 
 ### tidymodels infrastructure
 
@@ -731,11 +703,9 @@ We want to actively adopt evolving packages in the `tidymodels` ecosystem while 
 With rigorous branching, we maintain the base learner fitting targets as one node with 900 branches, which include $\texttt{3 (base learners)}\times 
 texttt{3 (CV strategies)}\times \texttt{100 resamples}$. LightGBM and multilayer perceptron models are running on GPUs, while elastic net models are fit on CPUs.
 
-
 ### Cross validation
 
 Due to `rsample` design, each cross-validation fold will include an **actual** `data.frame` (`tibble`) object. It has own good for self-contained modeling practices that easily guarantee reproducibility, however, it also has limitations when used with large data and `targets` pipeline as `targets` **stores** such objects in disk space. Such characteristics lead to inflate the disk space for base and meta learner training. Ten-fold cross-validation sets from 900K*3.2K `data.frame` take $9\texttt{M} \times 3.2\texttt{K} \times 8\texttt{bytes}$=230GB. Randomization schemes for model ensemble will increase that size to 10 times and more, which is equivalent to 2.3TB and more when uncompressed. The current development version modifies the original `rsample`'s `rset` design to store *row indices* of the joined `data.frame` target to reduce data size in disk.
-
 
 #### Use `rset` object in the last resort
 
@@ -768,8 +738,3 @@ graph TD
     bestworkflow ---|parsnip::fit()| fitmodel
     fitmodel ---|predict()| bestfit
 ```
-
-
-## Containerization
-- TODO: build GPU-enabled Apptainer image
-- TODO: make a new branch to replace `container-engine`

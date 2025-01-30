@@ -31,7 +31,6 @@ Imports:
   tidyr,
   tidyselect,
   yardstick,
-  torch,
   workflows,
   recipes,
   missRanger,
@@ -71,7 +70,9 @@ Suggests:
   ggplot2,
   doRNG,
   furrr,
-  quarto
+  quarto,
+  torch,
+  glue
 Remotes: NIEHS/chopin, NIEHS/amadeus, tidymodels/brulee@gpu, mitchellmanware/parsnip@beethoven
 SystemRequirements: NetCDF4, CUDA (>= 10.0)
 Encoding: UTF-8

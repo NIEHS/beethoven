@@ -128,7 +128,7 @@ calculate <-
               any(names(args_process) %in% c("covariate"))
           ) {
             if (args_process$covariate == "nei") {
-              args_process$county <- beethoven:::process_counties()
+              args_process$county <- beethoven::process_counties()
             }
           }
 
