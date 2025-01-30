@@ -25,6 +25,7 @@ process_counties <-
 #' @keywords Miscellaneous
 #' @param x integer(1). A positive integer.
 #' @return A vector of divisors of x.
+#' @export
 divisor <-
   function(x) {
     stopifnot(!is.character(x))

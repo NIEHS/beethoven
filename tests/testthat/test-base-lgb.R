@@ -5,6 +5,7 @@
 ################################################################################
 ##### folds + grid tuning
 testthat::test_that("fit lightgbm (folds + grid)", {
+  withr::local_package("bonsai")
   # import sample data
   # sample inlcudes 2 months data for 3 sites
   # subset to only 50 predictors for light weight
@@ -236,6 +237,7 @@ testthat::test_that("fit lightgbm (folds + grid)", {
 ################################################################################
 ##### args_generate_cv + grid tuning
 testthat::test_that("fit lightgbm (args_generate_cv + grid)", {
+  withr::local_package("bonsai")
   # import sample data
   # sample inlcudes 2 months data for 3 sites
   # subset to only 50 predictors for light weight

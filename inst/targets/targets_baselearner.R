@@ -158,7 +158,7 @@ target_baselearner <-
     )
     ,
     targets::tar_target(
-      workflow_learner_base_cpu,
+      fit_learner_base_cpu,
       command = beethoven::fit_base_learner(
         learner = df_learner_type_cpu$learner,
         dt_full = list_base_params_static$dt_full,
@@ -186,7 +186,7 @@ target_baselearner <-
     )
     ,
     targets::tar_target(
-      workflow_learner_base_gpu,
+      fit_learner_base_gpu,
       command = beethoven::fit_base_learner(
         learner = df_learner_type_gpu$learner,
         dt_full = list_base_params_static$dt_full,
@@ -214,8 +214,8 @@ target_baselearner <-
     )
     ,
     targets::tar_target(
-      workflow_learner_base_best,
-      command = c(workflow_learner_base_cpu, workflow_learner_base_gpu),
+      list_learner_base_best,
+      command = c(fit_learner_base_cpu, fit_learner_base_gpu),
       description = "Fit base learners | base learner"
     )
   )
