@@ -63,7 +63,7 @@ make_subdata <- function(
 #' with CUDA-enabled graphical processing units.
 #' @return A parsnip model object.
 #' @importFrom parsnip mlp set_engine set_mode boost_tree linear_reg
-#' @importFrom dplyr %>%
+#' @importFrom magrittr %>%
 #' @export
 switch_model <-
   function(
@@ -192,7 +192,7 @@ switch_model <-
 #'
 #' @return The fitted workflow.
 #' @importFrom recipes recipe update_role
-#' @importFrom dplyr `%>%`
+#' @importFrom magrittr %>%
 #' @importFrom parsnip mlp set_engine set_mode
 #' @importFrom workflows workflow add_recipe add_model
 #' @importFrom tune tune_grid fit_best
@@ -357,6 +357,7 @@ fit_base_learner <-
 #' @importFrom parsnip fit
 #' @importFrom stats predict
 #' @importFrom rlang quo_get_expr
+#' @importFrom magrittr %>%
 #' @export
 fit_base_tune <-
   function(
@@ -933,7 +934,8 @@ generate_cv_index_ts <-
 #' @importFrom sf st_as_sf
 #' @importFrom spatialsample spatial_block_cv
 #' @importFrom rsample manual_rset
-#' @importFrom dplyr %>% slice_sample
+#' @importFrom dplyr slice_sample
+#' @importFrom magrittr %>%
 #' @importFrom methods getPackageName
 #' @export
 generate_cv_index_sp <-
@@ -1036,6 +1038,6 @@ switch_generate_cv_rset <-
         temporal = generate_cv_index_ts,
         spatiotemporal = generate_cv_index_spt
       )
-    cvindex <- inject_match(target_fun, list(...))
+    cvindex <- beethoven::inject_match(target_fun, list(...))
     return(cvindex)
   }

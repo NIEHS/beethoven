@@ -36,6 +36,11 @@ gpu <- function() {
   system("nvidia-smi")
 }
 
+#' Run all tests within a single file from `tests/testthat/` directory
+#' with the `container_models.sif` container.
+#' @param pattern A regular expression to match the test file name.
+#' @return NULL; Prints the output of the testthat tests.
+#' @seealso [testthat::test_file()]
 test <- function(pattern = NULL) {
   if (is.null(pattern)) stop()
   system(
@@ -52,6 +57,10 @@ test <- function(pattern = NULL) {
   )
 }
 
+#' Calculate code coverage of the {beethoven} package with the
+#' `container_models.sif` container.
+#' @return NULL; Prints the output of the code coverage.
+#' @seealso [covr::package_coverage()]; [covr::coverage_to_list()]
 cov <- function() {
   system(
     glue::glue(

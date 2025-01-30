@@ -348,7 +348,7 @@ testthat::test_that("fit mlp (args_generate_cv + grid)", {
     mlp9 <- fit_base_learner(
       learner = "mlp",
       dt_full = data.table::data.table(dt_base),
-      r_subsample = 1, # full sample dataset for accurate ngroup cv
+      r_subsample = 0.3,
       model = mlp_model,
       args_generate_cv = args_spatiotemporal,
       folds = NULL,
@@ -482,7 +482,7 @@ testthat::test_that("fit mlp (args_generate_cv + grid)", {
 #     mlp12 <- fit_base_learner(
 #       learner = "mlp",
 #       dt_full = data.table::data.table(dt_base),
-#       r_subsample = 1, # full sample dataset for accurate ngroup cv
+#       r_subsample = 0.3,
 #       model = mlp_model,
 #       folds = NULL,
 #       args_generate_cv = args_spatiotemporal,

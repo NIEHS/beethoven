@@ -261,7 +261,7 @@ testthat::test_that("generate_cv_index_sp", {
     index_sp <- generate_cv_index_sp(
       data = dt_attach,
       target_cols = c("lon", "lat"),
-      # cv_make_fun = spatialsample::spatial_block_cv,
+      cv_make_fun = spatialsample::spatial_block_cv,
       v = 4
     )
   )
@@ -287,7 +287,7 @@ testthat::test_that("vis_spt_rset", {
     index_sp <- generate_cv_index_sp(
       data = dt_attach,
       target_cols = c("lon", "lat"),
-      # cv_make_fun = spatialsample::spatial_block_cv,
+      cv_make_fun = spatialsample::spatial_block_cv,
       v = 4
     )
   )
@@ -350,7 +350,7 @@ testthat::test_that("switch_generate_cv_rset", {
     index_sp_direct <- generate_cv_index_sp(
       data = dt_attach,
       target_cols = c("lon", "lat"),
-      # cv_make_fun = spatialsample::spatial_block_cv,
+      cv_make_fun = spatialsample::spatial_block_cv,
       v = 4
     )
   )
@@ -360,7 +360,7 @@ testthat::test_that("switch_generate_cv_rset", {
       learner = "spatial",
       data = dt_attach,
       target_cols = c("lon", "lat"),
-      # cv_make_fun = spatialsample::spatial_block_cv,
+      cv_make_fun = spatialsample::spatial_block_cv,
       v = 4
     )
   )
@@ -438,7 +438,7 @@ testthat::test_that("convert_cv_index_rset", {
     index_sp <- generate_cv_index_sp(
       data = dt_attach,
       target_cols = c("lon", "lat"),
-      # cv_make_fun = spatialsample::spatial_block_cv,
+      cv_make_fun = spatialsample::spatial_block_cv,
       v = 4
     )
   )

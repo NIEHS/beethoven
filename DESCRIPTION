@@ -46,7 +46,8 @@ Imports:
   graphics,
   scatterplot3d,
   amadeus,
-  parallelly
+  parallelly,
+  magrittr
 Suggests:
   testthat (>= 3.0.0),
   covr,

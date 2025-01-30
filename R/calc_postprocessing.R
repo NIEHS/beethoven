@@ -98,6 +98,7 @@ post_calc_unify_timecols <-
 #' @note This function takes preprocessed data.table with
 #'   a column named `"time"`.
 #' @importFrom data.table as.data.table copy
+#' @importFrom data.table `:=`
 #' @export
 post_calc_convert_time <-
   function(

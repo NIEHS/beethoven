@@ -21,7 +21,7 @@ feature_raw_download <-
     if (!endsWith(path, ".qs")) {
       stop("The file should be in QS format.")
     }
-    args_check <- loadargs(path, dataset = dataset_name)
+    args_check <- beethoven::loadargs(path, dataset = dataset_name)
 
     # run amadeus::download_data
     tryCatch(
@@ -74,8 +74,9 @@ set_target_years <-
         period <- as.integer(substr(period, 1, 4))
       }
     }
-    assigned <-
-      post_calc_year_expand(period[1], period[2], time_available = available)
+    assigned <- beethoven::post_calc_year_expand(
+      period[1], period[2], time_available = available
+    )
     return(assigned)
   }
 
@@ -127,7 +128,7 @@ calculate <-
               any(names(args_process) %in% c("covariate"))
           ) {
             if (args_process$covariate == "nei") {
-              args_process$county <- process_counties()
+              args_process$county <- beethoven::process_counties()
             }
           }
 
@@ -158,7 +159,7 @@ calculate <-
                 # data year and covariate year
                 if (!is.null(domain) && domain_name == "year") {
                   res <-
-                    add_time_col(
+                    beethoven::add_time_col(
                       res, domain_each,
                       sprintf("%s_year", unname(args_process$covariate))
                     )
@@ -324,7 +325,7 @@ inject_modis <- function(locs, injection) {
 #' @export
 inject_geos <- function(locs, injection, ...) {
   rlang::inject(
-    calc_geos_strict(
+    beethoven::calc_geos_strict(
       locs = locs,
       locs_id = "site_id",
       win = c(-126, -62, 22, 52),
