@@ -63,12 +63,20 @@ controller_gpu <- crew.cluster::crew_controller_slurm(
 targets::tar_config_set(store = "/opt/_targets")
 
 ##############################       OPTIONS      ##############################
-targets::tar_option_set(
-  packages = c(
+if (Sys.getenv("BEETHOVEN") == "covariates") {
+  beethoven_packages <- c(
+    "amadeus", "targets", "tarchetypes", "dplyr", "tidyverse",
+    "data.table", "sf", "crew", "crew.cluster", "lubridate", "qs2"
+  )
+} else {
+  beethoven_packages <- c(
     "amadeus", "targets", "tarchetypes", "dplyr", "tidyverse",
     "data.table", "sf", "crew", "crew.cluster", "lubridate", "qs2",
     "torch", "bonsai", "dials", "lightgbm", "xgboost", "glmnet"
-  ),
+  )
+}
+targets::tar_option_set(
+  packages = beethoven_packages,
   repository = "local",
   error = "continue",
   memory = "transient",

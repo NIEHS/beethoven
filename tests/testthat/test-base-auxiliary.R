@@ -11,7 +11,7 @@ testthat::test_that("make_subdata", {
 
   # expect no error for rows to be sampled
   testthat::expect_no_error(
-    make_rows <- make_subdata(data = dt_base, n = 50)
+    make_rows <- beethoven:::make_subdata(data = dt_base, n = 50)
   )
   # expect 50 rows
   testthat::expect_length(make_rows, 50)
@@ -54,10 +54,10 @@ testthat::test_that("assign_learner_cv", {
   # expect no error when assigning learners
   testthat::expect_no_error(
     alc <- assign_learner_cv(
-        learner = learners,
-        cv_mode = modes,
-        cv_rep = 2L,
-        num_device = 1
+      learner = learners,
+      cv_mode = modes,
+      cv_rep = 2L,
+      num_device = 1
     )
   )
   # expect data.frame
@@ -69,7 +69,6 @@ testthat::test_that("assign_learner_cv", {
   # expect all modes represented
   testthat::expect_true(all(modes %in% alc[, 2]))
   
-  
   # CUDA expectatinos
   # expect CUDA for mlp
   testthat::expect_length(
@@ -79,10 +78,25 @@ testthat::test_that("assign_learner_cv", {
   testthat::expect_length(
     grep("cuda", alc[alc$learner == "lgb", 3]), 6
   )
-  # expect CUDA for elnet
+  # expect NULL for elnet
   testthat::expect_length(
     grep("cuda", alc[alc$learner == "elnet", 3]), 0
   )
+
+  # expect no error when blanacing learners
+  testthat::expect_no_error(
+    alcb <- assign_learner_cv(
+      learner = learners,
+      cv_mode = modes,
+      cv_rep = 2L,
+      num_device = 4,
+      balance = TRUE
+    )
+  )
+  alcb_devices <- grep("cuda", alcb$device, value = TRUE)
+  alcb_devicenum <- unique(as.numeric(gsub("cuda:", "", unlist(alcb_devices))))
+  testthat::expect_length(alcb_devicenum, 4)
+
 })
 
 
@@ -93,7 +107,6 @@ testthat::test_that("generate_cv_index_spt", {
   dt_attach <- readRDS(
     testthat::test_path("..", "testdata", "base", "dt_wide.rds")
   )
-
 
   # expect no error with cv_pairs = NULL + pairing = 1
   testthat::expect_no_error(
@@ -248,7 +261,7 @@ testthat::test_that("generate_cv_index_sp", {
     index_sp <- generate_cv_index_sp(
       data = dt_attach,
       target_cols = c("lon", "lat"),
-      cv_make_fun = spatialsample::spatial_block_cv,
+      # cv_make_fun = spatialsample::spatial_block_cv,
       v = 4
     )
   )
@@ -274,7 +287,7 @@ testthat::test_that("vis_spt_rset", {
     index_sp <- generate_cv_index_sp(
       data = dt_attach,
       target_cols = c("lon", "lat"),
-      cv_make_fun = spatialsample::spatial_block_cv,
+      # cv_make_fun = spatialsample::spatial_block_cv,
       v = 4
     )
   )
@@ -337,7 +350,7 @@ testthat::test_that("switch_generate_cv_rset", {
     index_sp_direct <- generate_cv_index_sp(
       data = dt_attach,
       target_cols = c("lon", "lat"),
-      cv_make_fun = spatialsample::spatial_block_cv,
+      # cv_make_fun = spatialsample::spatial_block_cv,
       v = 4
     )
   )
@@ -347,7 +360,7 @@ testthat::test_that("switch_generate_cv_rset", {
       learner = "spatial",
       data = dt_attach,
       target_cols = c("lon", "lat"),
-      cv_make_fun = spatialsample::spatial_block_cv,
+      # cv_make_fun = spatialsample::spatial_block_cv,
       v = 4
     )
   )
@@ -425,7 +438,7 @@ testthat::test_that("convert_cv_index_rset", {
     index_sp <- generate_cv_index_sp(
       data = dt_attach,
       target_cols = c("lon", "lat"),
-      cv_make_fun = spatialsample::spatial_block_cv,
+      # cv_make_fun = spatialsample::spatial_block_cv,
       v = 4
     )
   )

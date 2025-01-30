@@ -4,130 +4,128 @@
 
 ################################################################################
 ##### folds + grid tuning
-# testthat::test_that("fit mlp (folds + grid))", {
-#   # import sample data
-#   # sample inlcudes 2 months data for 3 sites
-#   # subset to only 50 predictors for light weight
-#   dt_base <- readRDS(
-#     testthat::test_path("..", "testdata", "base", "dt_base.rds")
-#   )
+testthat::test_that("fit mlp (folds + grid))", {
+  # import sample data
+  # sample inlcudes 2 months data for 3 sites
+  # subset to only 50 predictors for light weight
+  dt_base <- readRDS(
+    testthat::test_path("..", "testdata", "base", "dt_base.rds")
+  )
 
-#   # set model
-#   mlp_model <- switch_model("mlp")
-#   # set grid
-#   mlp_grid <- expand.grid(
-#     hidden_units = list(16, c(8, 8), c(8, 16, 32)),
-#     dropout = c(0.2, 0.3333333),
-#     activation = c("relu"),
-#     learn_rate = c(0.1)
-#    )
+  # set model
+  mlp_device <- ifelse(torch::cuda_is_available(), "cuda", "cpu")
+  mlp_model <- switch_model("mlp", device = mlp_device)
+  # set grid
+  mlp_grid <- expand.grid(
+    hidden_units = list(c(8, 8)),
+    dropout = c(0.2),
+    activation = c("relu"),
+    learn_rate = c(0.05)
+   )
 
-#   # temporal
-#   # warning is due to 3 metrics (rmse, rsq, mae)
-#   testthat::expect_warning(
-#     mlp1 <- fit_base_learner(
-#       learner = "mlp",
-#       dt_full = dt_base,
-#       r_subsample = 0.3,
-#       model = mlp_model,
-#       folds = 5L,
-#       cv_mode = "temporal",
-#       tune_mode = "grid",
-#       tune_grid_in = mlp_grid,
-#       tune_grid_size = 2,
-#       learn_rate = 0.1,
-#       yvar = "Arithmetic.Mean",
-#       xvar = seq(5, ncol(dt_base)),
-#       nthreads = 1,
-#       trim_resamples = FALSE,
-#       return_best = TRUE
-#     )
-#   )
-#   # expect a list
-#   testthat::expect_true(is.list(mlp1))
-#   # expect length 3
-#   testthat::expect_length(mlp1, 3)
-#   # expect sub-items are tibble data.frames
-#   testthat::expect_equal(
-#     unlist(lapply(1:3, function(x) methods::is(mlp1[[x]], "tbl_df"))),
-#     c(TRUE, TRUE, TRUE)
-#   )
-#   # expect base predictions are numeric
-#   testthat::expect_true(is.numeric(mlp1$base_prediction$.pred))
-
-
-#   # spatial
-#   # warning is due to 3 metrics (rmse, rsq, mae)
-#   testthat::expect_warning(
-#     mlp2 <- fit_base_learner(
-#       learner = "mlp",
-#       dt_full = dt_base,
-#       r_subsample = 0.3,
-#       model = mlp_model,
-#       folds = 5L,
-#       cv_mode = "spatial",
-#       tune_mode = "grid",
-#       tune_grid_in = mlp_grid,
-#       tune_grid_size = 2,
-#       learn_rate = 0.1,
-#       yvar = "Arithmetic.Mean",
-#       xvar = seq(5, ncol(dt_base)),
-#       nthreads = 1,
-#       trim_resamples = FALSE,
-#       return_best = TRUE
-#     )
-#   )
-#   # expect a list
-#   testthat::expect_true(is.list(mlp2))
-#   # expect length 3
-#   testthat::expect_length(mlp2, 3)
-#   # expect sub-items are tibble data.frames
-#   testthat::expect_equal(
-#     unlist(lapply(1:3, function(x) methods::is(mlp2[[x]], "tbl_df"))),
-#     c(TRUE, TRUE, TRUE)
-#   )
-#   # expect base predictions are numeric
-#   testthat::expect_true(is.numeric(mlp2$base_prediction$.pred))
+  # temporal
+  testthat::expect_no_error(
+    mlp1 <- fit_base_learner(
+      learner = "mlp",
+      dt_full = dt_base,
+      r_subsample = 0.3,
+      model = mlp_model,
+      folds = 5L,
+      cv_mode = "temporal",
+      tune_mode = "grid",
+      tune_grid_in = mlp_grid,
+      tune_grid_size = 1,
+      learn_rate = 0.1,
+      yvar = "Arithmetic.Mean",
+      xvar = seq(5, ncol(dt_base)),
+      nthreads = 1,
+      trim_resamples = FALSE,
+      return_best = TRUE
+    )
+  )
+  # expect a list
+  testthat::expect_true(is.list(mlp1))
+  # expect length 3
+  testthat::expect_length(mlp1, 3)
+  # expect sub-items are tibble data.frames
+  testthat::expect_equal(
+    unlist(lapply(1:3, function(x) methods::is(mlp1[[x]], "tbl_df"))),
+    c(TRUE, TRUE, TRUE)
+  )
+  # expect base predictions are numeric
+  testthat::expect_true(is.numeric(mlp1$base_prediction$.pred))
 
 
-#   # spatiotemporal
-#   # warning is due to 3 metrics (rmse, rsq, mae)
-#   testthat::expect_warning(
-#     mlp3 <- fit_base_learner(
-#       learner = "mlp",
-#       dt_full = dt_base,
-#       r_subsample = 0.3,
-#       model = mlp_model,
-#       folds = 5L,
-#       cv_mode = "spatiotemporal",
-#       tune_mode = "grid",
-#       tune_grid_in = mlp_grid,
-#       tune_grid_size = 2,
-#       learn_rate = 0.1,
-#       yvar = "Arithmetic.Mean",
-#       xvar = seq(5, ncol(dt_base)),
-#       nthreads = 1,
-#       trim_resamples = FALSE,
-#       return_best = TRUE
-#     )
-#   )
-#   # expect a list
-#   testthat::expect_true(is.list(mlp3))
-#   # expect length 3
-#   testthat::expect_length(mlp3, 3)
-#   # expect sub-items are tibble data.frames
-#   testthat::expect_equal(
-#     unlist(lapply(1:3, function(x) methods::is(mlp3[[x]], "tbl_df"))),
-#     c(TRUE, TRUE, TRUE)
-#   )
-#   # expect base predictions are numeric
-#   testthat::expect_true(is.numeric(mlp3$base_prediction$.pred))
-
-# })
+  # spatial
+  testthat::expect_no_error(
+    mlp2 <- fit_base_learner(
+      learner = "mlp",
+      dt_full = dt_base,
+      r_subsample = 0.3,
+      model = mlp_model,
+      folds = 5L,
+      cv_mode = "spatial",
+      tune_mode = "grid",
+      tune_grid_in = mlp_grid,
+      tune_grid_size = 1,
+      learn_rate = 0.1,
+      yvar = "Arithmetic.Mean",
+      xvar = seq(5, ncol(dt_base)),
+      nthreads = 1,
+      trim_resamples = FALSE,
+      return_best = TRUE
+    )
+  )
+  # expect a list
+  testthat::expect_true(is.list(mlp2))
+  # expect length 3
+  testthat::expect_length(mlp2, 3)
+  # expect sub-items are tibble data.frames
+  testthat::expect_equal(
+    unlist(lapply(1:3, function(x) methods::is(mlp2[[x]], "tbl_df"))),
+    c(TRUE, TRUE, TRUE)
+  )
+  # expect base predictions are numeric
+  testthat::expect_true(is.numeric(mlp2$base_prediction$.pred))
 
 
-# ################################################################################
-# ##### folds + bayes tuning
+  # spatiotemporal
+  testthat::expect_no_error(
+    mlp3 <- fit_base_learner(
+      learner = "mlp",
+      dt_full = dt_base,
+      r_subsample = 0.3,
+      model = mlp_model,
+      folds = 5L,
+      cv_mode = "spatiotemporal",
+      tune_mode = "grid",
+      tune_grid_in = mlp_grid,
+      tune_grid_size = 1,
+      learn_rate = 0.1,
+      yvar = "Arithmetic.Mean",
+      xvar = seq(5, ncol(dt_base)),
+      nthreads = 1,
+      trim_resamples = FALSE,
+      return_best = TRUE
+    )
+  )
+  # expect a list
+  testthat::expect_true(is.list(mlp3))
+  # expect length 3
+  testthat::expect_length(mlp3, 3)
+  # expect sub-items are tibble data.frames
+  testthat::expect_equal(
+    unlist(lapply(1:3, function(x) methods::is(mlp3[[x]], "tbl_df"))),
+    c(TRUE, TRUE, TRUE)
+  )
+  # expect base predictions are numeric
+  testthat::expect_true(is.numeric(mlp3$base_prediction$.pred))
+
+})
+
+
+################################################################################
+##### folds + bayes tuning
 # testthat::test_that("fit mlp (folds + bayes)", {
 #   # import sample data
 #   # sample inlcudes 2 months data for 3 sites
@@ -137,11 +135,11 @@
 #   )
 
 #   # set model
-#   mlp_model <- switch_model("mlp")
+#   mlp_device <- ifelse(torch::cuda_is_available(), "cuda", "cpu")
+#   mlp_model <- switch_model("mlp", device = mlp_device)
 
 #   # temporal
-#   # warning is due to 3 metrics (rmse, rsq, mae)
-#   testthat::expect_warning(
+#   testthat::expect_no_error(
 #     mlp4 <- fit_base_learner(
 #       learner = "mlp",
 #       dt_full = dt_base,
@@ -173,8 +171,7 @@
 
 
 #   # spatial
-#   # warning is due to 3 metrics (rmse, rsq, mae)
-#   testthat::expect_warning(
+#   testthat::expect_no_error(
 #     mlp5 <- fit_base_learner(
 #       learner = "mlp",
 #       dt_full = dt_base,
@@ -206,8 +203,7 @@
 
 
 #   # spatiotemporal
-#   # warning is due to 3 metrics (rmse, rsq, mae)
-#   testthat::expect_warning(
+#   testthat::expect_no_error(
 #     mlp6 <- fit_base_learner(
 #       learner = "mlp",
 #       dt_full = dt_base,
@@ -240,152 +236,151 @@
 # })
 
 
-# ################################################################################
-# ##### args_generate_cv + grid tuning
-# testthat::test_that("fit mlp (args_generate_cv + grid)", {
-#   # import sample data
-#   # sample inlcudes 2 months data for 3 sites
-#   # subset to only 50 predictors for light weight
-#   dt_base <- readRDS(
-#     testthat::test_path("..", "testdata", "base", "dt_base.rds")
-#   )
+################################################################################
+###### args_generate_cv + grid tuning
+testthat::test_that("fit mlp (args_generate_cv + grid)", {
+  # import sample data
+  # sample inlcudes 2 months data for 3 sites
+  # subset to only 50 predictors for light weight
+  dt_base <- readRDS(
+    testthat::test_path("..", "testdata", "base", "dt_base.rds")
+  )
 
-#   # set model
-#   mlp_model <- switch_model("mlp")
-#   # set grid
-#   mlp_grid <- expand.grid(
-#     hidden_units = list(16, c(8, 8), c(8, 16, 32)),
-#     dropout = c(0.2, 0.3333333),
-#     activation = c("relu"),
-#     learn_rate = c(0.1)
-#    )
+  # set model
+  mlp_device <- ifelse(torch::cuda_is_available(), "cuda", "cpu")
+  mlp_model <- switch_model("mlp", device = mlp_device)
+  # set grid
+  mlp_grid <- expand.grid(
+    hidden_units = list(c(8, 8)),
+    dropout = c(0.2),
+    activation = c("relu"),
+    learn_rate = c(0.05)
+   )
 
-#   # temporal
-#   # warning is due to 3 metrics (rmse, rsq, mae)
-#   args_temp <- list(
-#     time_col = "time",
-#     cv_fold = 10L,
-#     window = 5L
-#   )
-#   testthat::expect_warning(
-#     mlp7 <- fit_base_learner(
-#       learner = "mlp",
-#       dt_full = dt_base,
-#       r_subsample = 0.3,
-#       model = mlp_model,
-#       args_generate_cv = args_temp,
-#       folds = NULL,
-#       cv_mode = "temporal",
-#       tune_mode = "grid",
-#       tune_grid_in = mlp_grid,
-#       tune_grid_size = 2,
-#       learn_rate = 0.1,
-#       yvar = "Arithmetic.Mean",
-#       xvar = seq(5, ncol(dt_base)),
-#       nthreads = 1,
-#       trim_resamples = FALSE,
-#       return_best = TRUE
-#     )
-#   )
-#   # expect a list
-#   testthat::expect_true(is.list(mlp7))
-#   # expect length 3
-#   testthat::expect_length(mlp7, 3)
-#   # expect sub-items are tibble data.frames
-#   testthat::expect_equal(
-#     unlist(lapply(1:3, function(x) methods::is(mlp7[[x]], "tbl_df"))),
-#     c(TRUE, TRUE, TRUE)
-#   )
-#   # expect base predictions are numeric
-#   testthat::expect_true(is.numeric(mlp7$base_prediction$.pred))
-
-
-#   # spatial
-#   # warning is due to 3 metrics (rmse, rsq, mae)
-#   args_spatial = list(
-#     target_cols = c("lon", "lat"),
-#     cv_make_fun = spatialsample::spatial_block_cv,
-#     v = 4
-#   )
-#   testthat::expect_warning(
-#     mlp8 <- fit_base_learner(
-#       learner = "mlp",
-#       dt_full = data.table::data.table(dt_base),
-#       r_subsample = 0.3,
-#       model = mlp_model,
-#       args_generate_cv = args_spatial,
-#       folds = NULL,
-#       cv_mode = "spatial",
-#       tune_mode = "grid",
-#       tune_grid_in = mlp_grid,
-#       tune_grid_size = 2,
-#       learn_rate = 0.1,
-#       yvar = "Arithmetic.Mean",
-#       xvar = seq(5, ncol(dt_base)),
-#       nthreads = 1,
-#       trim_resamples = FALSE,
-#       return_best = TRUE
-#     )
-#   )
-#   # expect a list
-#   testthat::expect_true(is.list(mlp8))
-#   # expect length 3
-#   testthat::expect_length(mlp8, 3)
-#   # expect sub-items are tibble data.frames
-#   testthat::expect_equal(
-#     unlist(lapply(1:3, function(x) methods::is(mlp8[[x]], "tbl_df"))),
-#     c(TRUE, TRUE, TRUE)
-#   )
-#   # expect base predictions are numeric
-#   testthat::expect_true(is.numeric(mlp8$base_prediction$.pred))
+  # temporal
+  args_temp <- list(
+    time_col = "time",
+    cv_fold = 10L,
+    window = 5L
+  )
+  testthat::expect_no_error(
+    mlp7 <- fit_base_learner(
+      learner = "mlp",
+      dt_full = dt_base,
+      r_subsample = 0.3,
+      model = mlp_model,
+      args_generate_cv = args_temp,
+      folds = NULL,
+      cv_mode = "temporal",
+      tune_mode = "grid",
+      tune_grid_in = mlp_grid,
+      tune_grid_size = 1,
+      learn_rate = 0.1,
+      yvar = "Arithmetic.Mean",
+      xvar = seq(5, ncol(dt_base)),
+      nthreads = 1,
+      trim_resamples = FALSE,
+      return_best = TRUE
+    )
+  )
+  # expect a list
+  testthat::expect_true(is.list(mlp7))
+  # expect length 3
+  testthat::expect_length(mlp7, 3)
+  # expect sub-items are tibble data.frames
+  testthat::expect_equal(
+    unlist(lapply(1:3, function(x) methods::is(mlp7[[x]], "tbl_df"))),
+    c(TRUE, TRUE, TRUE)
+  )
+  # expect base predictions are numeric
+  testthat::expect_true(is.numeric(mlp7$base_prediction$.pred))
 
 
-#   # spatiotemporal
-#   # warning is due to 3 metrics (rmse, rsq, mae)
-#   args_spatiotemporal <- list(
-#     target_cols = c("lon", "lat", "time"),
-#     preprocessing = "none",
-#     ngroup_init = 2L,
-#     cv_pairs = NULL,
-#     pairing = "1"
-#   )
-#   testthat::expect_warning(
-#     mlp9 <- fit_base_learner(
-#       learner = "mlp",
-#       dt_full = data.table::data.table(dt_base),
-#       r_subsample = 1, # full sample dataset for accurate ngroup cv
-#       model = mlp_model,
-#       args_generate_cv = args_spatiotemporal,
-#       folds = NULL,
-#       cv_mode = "spatiotemporal",
-#       tune_mode = "grid",
-#       tune_grid_in = mlp_grid,
-#       tune_grid_size = 2,
-#       learn_rate = 0.1,
-#       yvar = "Arithmetic.Mean",
-#       xvar = seq(5, ncol(dt_base)),
-#       nthreads = 1,
-#       trim_resamples = FALSE,
-#       return_best = TRUE
-#     )
-#   )
-#   # expect a list
-#   testthat::expect_true(is.list(mlp9))
-#   # expect length 3
-#   testthat::expect_length(mlp9, 3)
-#   # expect sub-items are tibble data.frames
-#   testthat::expect_equal(
-#     unlist(lapply(1:3, function(x) methods::is(mlp9[[x]], "tbl_df"))),
-#     c(TRUE, TRUE, TRUE)
-#   )
-#   # expect base predictions are numeric
-#   testthat::expect_true(is.numeric(mlp9$base_prediction$.pred))
-
-# })
+  # spatial
+  args_spatial = list(
+    target_cols = c("lon", "lat"),
+    cv_make_fun = spatialsample::spatial_block_cv,
+    v = 4
+  )
+  # warning is due to dt_base not having CRS
+  testthat::expect_warning(
+    mlp8 <- fit_base_learner(
+      learner = "mlp",
+      dt_full = data.table::data.table(dt_base),
+      r_subsample = 0.3,
+      model = mlp_model,
+      args_generate_cv = args_spatial,
+      folds = NULL,
+      cv_mode = "spatial",
+      tune_mode = "grid",
+      tune_grid_in = mlp_grid,
+      tune_grid_size = 1,
+      learn_rate = 0.1,
+      yvar = "Arithmetic.Mean",
+      xvar = seq(5, ncol(dt_base)),
+      nthreads = 1,
+      trim_resamples = FALSE,
+      return_best = TRUE
+    )
+  )
+  # expect a list
+  testthat::expect_true(is.list(mlp8))
+  # expect length 3
+  testthat::expect_length(mlp8, 3)
+  # expect sub-items are tibble data.frames
+  testthat::expect_equal(
+    unlist(lapply(1:3, function(x) methods::is(mlp8[[x]], "tbl_df"))),
+    c(TRUE, TRUE, TRUE)
+  )
+  # expect base predictions are numeric
+  testthat::expect_true(is.numeric(mlp8$base_prediction$.pred))
 
 
-# ################################################################################
-# ##### args_generate_cv + bayes tuning
+  # spatiotemporal
+  args_spatiotemporal <- list(
+    target_cols = c("lon", "lat", "time"),
+    preprocessing = "none",
+    ngroup_init = 2L,
+    cv_pairs = NULL,
+    pairing = "1"
+  )
+  testthat::expect_no_error(
+    mlp9 <- fit_base_learner(
+      learner = "mlp",
+      dt_full = data.table::data.table(dt_base),
+      r_subsample = 1, # full sample dataset for accurate ngroup cv
+      model = mlp_model,
+      args_generate_cv = args_spatiotemporal,
+      folds = NULL,
+      cv_mode = "spatiotemporal",
+      tune_mode = "grid",
+      tune_grid_in = mlp_grid,
+      tune_grid_size = 1,
+      learn_rate = 0.1,
+      yvar = "Arithmetic.Mean",
+      xvar = seq(5, ncol(dt_base)),
+      nthreads = 1,
+      trim_resamples = FALSE,
+      return_best = TRUE
+    )
+  )
+  # expect a list
+  testthat::expect_true(is.list(mlp9))
+  # expect length 3
+  testthat::expect_length(mlp9, 3)
+  # expect sub-items are tibble data.frames
+  testthat::expect_equal(
+    unlist(lapply(1:3, function(x) methods::is(mlp9[[x]], "tbl_df"))),
+    c(TRUE, TRUE, TRUE)
+  )
+  # expect base predictions are numeric
+  testthat::expect_true(is.numeric(mlp9$base_prediction$.pred))
+
+})
+
+
+################################################################################
+###### args_generate_cv + bayes tuning
 # testthat::test_that("fit mlp (args_generate_cv + bayes)", {
 #   # import sample data
 #   # sample inlcudes 2 months data for 3 sites
@@ -395,16 +390,16 @@
 #   )
 
 #   # set model
-#   mlp_model <- switch_model("mlp")
+#   mlp_device <- ifelse(torch::cuda_is_available(), "cuda", "cpu")
+#   mlp_model <- switch_model("mlp", device = mlp_device)
 
 #   # temporal
-#   # warning is due to 3 metrics (rmse, rsq, mae)
 #   args_temp <- list(
 #     time_col = "time",
 #     cv_fold = 10L,
 #     window = 5L
 #   )
-#   testthat::expect_warning(
+#   testthat::expect_no_error(
 #     mlp10 <- fit_base_learner(
 #       learner = "mlp",
 #       dt_full = dt_base,
@@ -437,12 +432,12 @@
 
 
 #   # spatial
-#   # warning is due to 3 metrics (rmse, rsq, mae)
 #   args_spatial = list(
 #     target_cols = c("lon", "lat"),
 #     cv_make_fun = spatialsample::spatial_block_cv,
 #     v = 4
 #   )
+#   # warning is due to dt_base not having CRS
 #   testthat::expect_warning(
 #     mlp11 <- fit_base_learner(
 #       learner = "mlp",
@@ -476,7 +471,6 @@
 
 
 #   # spatiotemporal
-#   # warning is due to 3 metrics (rmse, rsq, mae)
 #   args_spatiotemporal <- list(
 #     target_cols = c("lon", "lat", "time"),
 #     preprocessing = "none",
@@ -484,7 +478,7 @@
 #     cv_pairs = NULL,
 #     pairing = "1"
 #   )
-#   testthat::expect_warning(
+#   testthat::expect_no_error(
 #     mlp12 <- fit_base_learner(
 #       learner = "mlp",
 #       dt_full = data.table::data.table(dt_base),

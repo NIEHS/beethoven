@@ -36,7 +36,33 @@ gpu <- function() {
   system("nvidia-smi")
 }
 
-test <- function() {
-  system("sh tests/test-local.sh")
+test <- function(pattern = NULL) {
+  if (is.null(pattern)) stop()
+  system(
+    glue::glue(
+      "apptainer exec --nv --bind $PWD:/mnt --bind /tmp:/opt/tmp ",
+      "container_models.sif Rscript --no-init-file -e \"",
+      ".libPaths(grep(paste0('biotools|', Sys.getenv('USER')), .libPaths(), ",
+      "value = TRUE, invert = TRUE)); library(beethoven); library(bonsai); ",
+      "library(dplyr); library(testthat); ",
+      "test_file <- list.files('/mnt/tests/testthat', full.names = TRUE, ",
+      "pattern = '", pattern, "'); source_files <- list.files('/mnt/R', ",
+      "full.names = TRUE); testthat::test_file(test_file)\""
+    )
+  )
+}
+
+cov <- function() {
+  system(
+    glue::glue(
+      "apptainer exec --nv --bind $PWD:/mnt --bind /tmp:/opt/tmp ",
+      "container_models.sif Rscript --no-init-file -e \"",
+      ".libPaths(grep(paste0('biotools|', Sys.getenv('USER')), .libPaths(), ",
+      "value = TRUE, invert = TRUE)); library(beethoven); library(bonsai); ",
+      "library(dplyr); library(testthat); ",
+      "cov <- covr::package_coverage(install_path = '/tmp/cov', ",
+      "clean = FALSE); covr::coverage_to_list(cov)\""
+    )
+  )
 }
 # nocov end

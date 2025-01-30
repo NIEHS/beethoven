@@ -232,7 +232,7 @@ testthat::test_that("inject_modis_par (MOD11A1)", {
   )
 
   # expect no error with MOD11A1 files
-  testthat::expect_no_error(
+  testthat::expect_warning(
     modis_injected <- beethoven::inject_modis_par(
       locs = loc,
       injection = list(
