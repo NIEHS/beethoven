@@ -145,6 +145,7 @@ Here, we describe the structure of the repository, important files, and the `tar
      - `targets/` is a sub-directory within `inst/` which contains the pipeline files (ie. "targets_aqs.R"). These files declare the `targets::tar_target` objects which constitute the `beethoven` pipeline.
 - `tests/` stores unit and integration tests (`testthat/`) and test data (`testdata/`) according to the [testthat](https://testthat.r-lib.org/) package's standard structure. for unit testing.
     - `testthat.R` is created and maintained by `testthat`, and is not to be edited manually.
+- `container/` stores definition files and build scripts to build covariate- and model-specific Apptainer container images (`container_covariates.def` and `container_models.def`).
 - `man/` contains function documentation files (".Rd") which are by the [roxygen2](https://roxygen2.r-lib.org/) package. These files are not to be edited manually.
 - `vignettes/` contains ".Rmd" narrative text and code files. These are rendered by [pkgdown](https://pkgdown.r-lib.org/) into the [Articles](https://niehs.github.io/beethoven/articles/index.html) section of the `beethoven` webpage.
 - `.github/workflows/` is a hidden directory which stores the GitHub CI/CD "yaml" files.
@@ -599,19 +600,6 @@ post_calc_autojoin <-
     }
     return(joined)
   }
-```
-
-### Managing calculated features
-
-The calculation configuration files can be multiple, which means the calculated feature targets can also be multiple. The `dt_feat_calc_cumulative` target operates differently depending on the existence of a *.qs file in the `output/qs` directory. If there is any *.qs file in the `output/qs` directory, the `dt_feat_calc_design` target will be appended (i.e., `rbind()`-ed) to the contents of the `*.qs` files. The first run will assign a file name string to `dt_feat_calc_cumulative`.
-
-```r
-append_predecessors(
-  path_qs = "output/qs",
-  period_new = arglist_common$char_period,
-  input_new = dt_feat_calc_design,
-  nthreads = arglist_common$nthreads_append
-)
 ```
 
 ### Imputation
