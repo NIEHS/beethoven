@@ -11,7 +11,7 @@ test(pattern = NULL)
 \item{pattern}{A regular expression to match the test file name.}
 }
 \value{
-NULL; Prints the output of the testthat tests.
+NULL; Prints the output of the \code{testthat} tests.
 }
 \description{
 Run all tests within a single file from \verb{tests/testthat/} directory
@@ -20,3 +20,4 @@ with the \code{container_models.sif} container.
 \seealso{
 \code{\link[testthat:test_file]{testthat::test_file()}}
 }
+\keyword{Miscellaneous}

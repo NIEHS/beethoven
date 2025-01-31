@@ -25,7 +25,6 @@ reference:
   contents:
   - has_keyword("Post-calculation")
 
-
 - subtitle: Base learner
   desc: Fitting base learner and helper functions
   contents:
@@ -40,7 +39,6 @@ reference:
   desc: Miscellaneous functions for general use
   contents:
   - has_keyword("Miscellaneous")
-
 
 articles:
 - title: List of features
