@@ -175,6 +175,7 @@ Here, we use the following naming convention:
 Each section is in the brackets [] and appears in this order. For some objects, not all naming sections are required. If two keywords in a section apply, then they are appended with a `-`
 
 Examples:
+
 `dt_feat_calc_geos`
   - class: `dt` <- `data.table`
   - role: `feat` <- features
