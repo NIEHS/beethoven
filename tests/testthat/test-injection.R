@@ -233,7 +233,51 @@ testthat::test_that("inject_modis_par (MOD11A1)", {
 
   # expect no error with MOD11A1 files
   testthat::expect_warning(
-    modis_injected <- beethoven::inject_modis_par(
+    modis_injected_par <- beethoven::inject_modis_par(
+      locs = loc,
+      injection = list(
+        from = mod11a1_files,
+        subdataset = "(LST_)",
+        name_covariates = c("MOD_LSTNT_0_", "MOD_LSTDY_0_"),
+        preprocess = amadeus::process_modis_merge,
+        radius = c(100)
+      )
+    )
+  )
+  # expect a data.frame
+  testthat::expect_s3_class(modis_injected_par, "data.frame")
+  # expect 1 row and 4 columns
+  testthat::expect_equal(dim(modis_injected_par), c(1, 4))
+  # expect no NA values in any column
+  testthat::expect_false("TRUE" %in% any(is.na(modis_injected_par)))
+  # expect "time" column
+  testthat::expect_true("time" %in% names(modis_injected_par))
+
+})
+
+
+################################################################################
+##### inject_modis
+testthat::test_that("inject_modis (MOD11A1)", {
+  
+  withr::local_package("rlang")
+
+  # sample location
+  loc <- sf::st_as_sf(
+    data.frame(lon = -90, lat = 39.5, site_id = "site_id"),
+    coords = c("lon", "lat"),
+    crs = "EPSG:4326"
+  )
+
+  # identify MOD11A1 files
+  mod11a1_files <- list.files(
+    testthat::test_path("..", "testdata", "injection", "modis", "mod11a1"),
+    full.names = TRUE
+  )
+
+  # expect no error with MOD11A1 files
+  testthat::expect_warning(
+    modis_injected <- beethoven::inject_modis(
       locs = loc,
       injection = list(
         from = mod11a1_files,

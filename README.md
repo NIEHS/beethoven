@@ -20,13 +20,7 @@ remotes::install_github("NIEHS/beethoven")
 
 ## Workflow
 
-`targets`: Make-like Reproducible Analysis Pipeline
- 1) AQS Data
- 2) Generate Covariates
- 3) Fit Base Learners
- 4) Fit Meta Learners
- 5) Predictions
- 6) Summary Stats
+`beethoven` is a [targets](https://books.ropensci.org/targets/) reproducible analysis pipeline
 
 ```mermaid
 graph TD
@@ -134,13 +128,13 @@ graph TD
 ```
 
 ```r
-tar_visnetwork(targets)
+targets::tar_visnetwork()
 ```
 ![](man/figures/visnetwork_20250128.png)
 
 ## Organization
 
-Here, we describe the structure of the project and the naming conventions used. The most up to date file paths and names are recorded here for reference.
+Here, we describe the structure of the repository, important files, and the `targets` object naming conventions.
 
 ### Folder Structure
 
@@ -172,30 +166,45 @@ Here, we describe the structure of the project and the naming conventions used. 
 
 ### Naming Conventions
 
-Naming things is hard and somewhat subjective. Nonetheless, consistent naming conventions make for better reproducibility, interpretability, and future extensibility. 
-Here, we provide the `beethoven` naming conventions for objects as used in `targets` and for naming functions within the package (i.e. **R/**). 
-For `tar_target` functions, we use the following naming conventions:
-
-Naming conventions for `targets` objects. We are motivated by the [Compositional Forecast](https://cfconventions.org/Data/cf-standard-names/docs/guidelines.html) (CF) model naming conventions:
-
-e.g. [surface] [component] standard_name [at surface] [in medium] [due to process] [assuming condition]
-In CF, the entire process can be known from the required and optional naming pieces. 
+Naming conventions for `targets` objects are motivated by the [Compositional Forecast](https://cfconventions.org/Data/cf-standard-names/docs/guidelines.html) (CF) model naming conventions. By adopting the this convention, the name of each `targets` object communicates important information about its class, role, stage, and source.
 
 Here, we use the following naming convention:
 
-**[R object type]\_[role-suffix]\_[stage]\_[source]\_[spacetime]**
+**[class]\_[role-suffix]\_[stage]\_[source/description]\_[spacetime]**
 
- Each section is in the brackets [] and appears in this order. For some objects, not all naming sections are required. If two keywords in a section apply, then they are appended with a `-`
+Each section is in the brackets [] and appears in this order. For some objects, not all naming sections are required. If two keywords in a section apply, then they are appended with a `-`
 
-Examples: 1) `sf_PM25_log10-fit_AQS_siteid` is an `sf` object for `PM25` data that is log-transformed and ready for base-learner fitting, derived from AQS data and located at the siteid locations. 
-2) `SpatRast_process_MODIS` is a terra `SpatRast` object that has been processed from MODIS.
+Examples:
+`dt_feat_calc_geos`
+  - class: `dt` <- `data.table`
+  - role: `feat` <- features
+  - stage: `calc` <- calculated
+  - source: `geos` <- [NASA GEOS Composition Forecasting (GEOS-CF)](https://gmao.gsfc.nasa.gov/weather_prediction/GEOS-CF/)
+
+`list_base_params_candidates`
+  - class: `list`
+  - role: `base` <- base learners
+  - description: `params` <- hyperparameters
+  - description: `candidates` <- `tune`-able parameters
+
+`list_base_fit_gpu`
+  - class: `list`
+  - role: `base` <- base learners
+  - stage: `fit`
+  - description: `gpu`
 
 #### Naming section definitions:
 
-- **R object type**: chr (character), list, sf, dt (datatable), tibble, SpatRaster, SpatVector
+- **R object type**:
+  - `chr` (character)
+  - `list`
+  - `sf`
+  - `dt` <- `data.table`
+  - `tbl` <- `tibble`
+  - `rast` <- `SpatRaster`
+  - `vect` <- `SpatVector`
 
 - **role:** Detailed description of the role of the object in the pipeline. Allowable keywords:
-
   - PM25
   - feat (feature) (i.e. geographic covariate) 
   - base_model
@@ -207,16 +216,15 @@ Examples: 1) `sf_PM25_log10-fit_AQS_siteid` is an `sf` object for `PM25` data th
   
 - **stage**: the stage of the pipeline the object is used in. Object transformations
 are also articulated here. Allowable keywords: 
-
-  - raw
+  - download: raw downloaded data
+  - proc: processed data
   - calc: results from processing-calculation chains
-  - fit: Ready for base/meta learner fitting
+  - fit: fit models
   - result: Final result
   - log
   - log10 
 
 - **source:** the original data source
-
   - AQS
   - MODIS
   - GMTED 
@@ -231,8 +239,13 @@ are also articulated here. Allowable keywords:
   - POPULATION
   - [Note, we can add and/or update these sources as needed] 
 
-- **spacetime:** relevant spatial or temporal information 
+- **description:** additional descriptors
+  - params: hyperparameters
+  - args: arguments
+  - cpu: CPU-enabled base/meta learner
+  - gpu: GPU-enabled base/meta learner
 
+- **spacetime:** relevant spatial or temporal information 
   - spatial: 
     - siteid
     - censustract
@@ -241,25 +254,7 @@ are also articulated here. Allowable keywords:
     - daily  [optional YYYYMMDD]
     - annual  [optional YYYY]
 
-### Function Naming Convenctions 
-
-We have adopted naming conventions in functions in this package as well as `amadeus` which is a key input package. 
-
-**[High-Level-Process]\_[Source]\_[Object]**
-
-- **High-Level-Process**
-     - download
-     - process
-     - calc
-
-- **source:** the original data source. Same as source section for tar objects
-
-- **Object** An object that the function may be acting on
-     - base_model (base)
-     - meta_model (meta)
-     - feature (feat) 
-
-### To run the pipeline
+### Running `beethoven` Pipeline
 #### Post-checkout hook setting
 As safeguard measures, we limit the write permission of `_targets.R` to authorized users. To activate post-checkout hook, run `setup_hook.sh` at the project root.
 
@@ -270,7 +265,7 @@ As safeguard measures, we limit the write permission of `_targets.R` to authoriz
 The write privilege lock is applied immediately. Users will be able to run the pipeline with the static `_targets.R` file to (re-)generate outputs from the pipeline.
 
 #### User settings
-`beethoven` pipeline is configured for SLURM with defaults for NIEHS HPC settings. For adapting the settings to users' environment, consult with the documentation of your platform and edit the `_targets.R` and `inst/targets/targets_calculate.R` (i.e., resource management) accordingly.
+`beethoven` pipeline is configured for SLURM with defaults for NIEHS HPC settings. For adapting the settings to users' environment, consult with the documentation of your platform and edit the requested resources in `run.sh` (lines 3-11) and `_targets.R` (lines 41-45; individual `crew` and `crew.cluster` controller workers).
 
 #### Setting `_targets.R`
 For general users, all `targets` objects and `meta` information can be saved in a directory other than the pipeline default by changing `store` value in `tar_config_set()` at `_targets.R` in project root.
@@ -282,72 +277,63 @@ tar_config_set(
 )
 ```
 
-Users could comment out the three lines to keep targets in `_targets` directory under the project root. Common arguments are generated in the earlier lines in `_targets.R` file. Details of the function generating the arguments, `set_args_calc`, are described in the following.
+Users could comment out the three lines to keep targets in `_targets` directory under the project root. Common arguments are generated in the earlier lines in `_targets.R` file.
 
-#### Using `set_args_calc`
-`set_args_calc` function exports or returns common parameters that are used repeatedly throughout the calculation process. The default commands are as below:
+#### Critical `targets`
+There are 5 "critical" `targets` that users may want to change to run `beethoven`.
 
-```r
-set_args_calc(
-  char_siteid = "site_id",
-  char_timeid = "time",
-  char_period = c("2018-01-01", "2022-12-31"),
-  num_extent = c(-126, -62, 22, 52),
-  char_user_email = paste0(Sys.getenv("USER"), "@nih.gov"),
-  export = FALSE,
-  path_export = "inst/targets/calc_spec.qs",
-  path_input = "input",
-  nthreads_nasa = 14L,
-  nthreads_tri = 5L,
-  nthreads_geoscf = 10L,
-  nthreads_gmted = 4L,
-  nthreads_narr = 24L,
-  nthreads_groads = 3L,
-  nthreads_population = 3L
-)
+  - `chr_daterange`
+    - Controls all time-related targets for the entire pipeline. This is the only `target` that needs to be changed to update the pipeline with a new temopral range. Month and year specific arguments are derived from the time range defined by `chr_daterange`.
+  - `chr_nasa_token`
+    - Sets the file path to the user's NASA Earthdata account credentials. These credentials expire at ~90 day intervals and therefore must be updated regularly.
+  - `chr_mod06_links`
+    - The file path to the MOD06 links file. These links must be manually downloaded per the `amadeus::download_modis` function. The links are then stored in a CSV file that is read by the function. The new file with links must be updated to match the new date range.
+  - `chr_input_dir`
+    - The file path to the input directory. This target controls where the raw data files are downloaded to and imported from. This file path must be mounted to the container at run time in the `run.sh` script.
+  - `num_dates_split`
+    - Controls the size of temporal splits. Splitting the temporal range into smaller chunks allows for parallel processing across multiple workers. It also allows for dispatching new dynamic branches when the temporal range is updated.
+
+#### `Apptainer`
+Current implementation of `beethoven` utilizes `Apptainer` images to run the pipeline with consistent package versions and custom installations. Users must build these images before runnning beethoven.
+
+```sh
+cd container/ # must be working in the `container/` directory
+sh build_container_covariates.sh # build "covariates" stage image
+sh build_container_models.sh # build "models" image
+mv *sif ../ # move images to `beethoven/` root directory
 ```
-
-All arguments except for `char_siteid` and `char_timeid` should be carefully set to match users' environment. `export = TRUE` is recommended if there is no pre-generated qs file for calculation parameters. For more details, consult `?set_args_calc` after loading `beethoven` in your R interactive session.
-
-#### Running the pipeline
-After switching to the project root directory (in terminal, `cd [project_root]`, replace `[project_root]` with the proper path), users can run the pipeline.
 
 > [!NOTE]
-> With `export = TRUE`, it will take some time to proceed to the next because it will recursively search hdf file paths. The time is affected by the number of files to search or the length of the period (`char_period`).
+> `.sif` files are omitted from GitHub due to size (>5 Gb each)
 
-> [!WARNING]
-> Please make sure that you are at the project root before proceeding to the following. The HPC example requires additional edits related to SBATCH directives and project root directory.
+#### Run
+After switching back to the project root directory, users can run the pipeline with the `run.sh` shell script. The following lines of `run.sh` must be updated with user-specific settings before running the pipeline
 
-```shell
-Rscript inst/targets/targets_start.R &
+```sh
+#SBATCH --mail-user=[USER_EMAIL]      # email address for job notifications
+#SBATCH --partition=[PARTITION_NAME]  # HPC partition to run on
+#SBATCH --mem=[###G]                  # Total memory for the job
+#SBATCH --cpus-per-task=[###]         # Total CPUs for the job
+...
+  --bind [USER_INPUT_DIRECTORY]/input:/input \
+...
+  --bind [USER_SYSTEM_PATH/munge]:/run/munge \
+  --bind [USER_SYSTEM_PATH/slurm]:[USER_SYSTEM_PATH/slurm] \
 ```
 
-Or in NIEHS HPC, modify several lines to match your user environment:
+Once configured, the pipeline can be run with a `SLRUM` batch job.
 
-```shell
-# ...
-#SBATCH --output=YOUR_PATH/pipeline_out.out
-#SBATCH --error=YOUR_PATH/pipeline_err.err
-# ...
-# The --mail-user flag is optional
-#SBATCH --mail-user=MYACCOUNT@nih.gov
-# ...
-USER_PROJDIR=/YOUR/PROJECT/ROOT
-nohup nice -4 Rscript $USER_PROJDIR/inst/targets/targets_start.R
+```sh
+cd ../ # assuming still in the `container/` directory
+sbatch run.sh
 ```
 
-`YOUR_PATH`, `MYACCOUNT` and `/YOUR_PROJECT_ROOT` should be changed. In the end, you can run the following command:
+The SLURM batch job can also be submitted `R` session with the `batch` helper function.
 
-```shell
-sbatch inst/targets/run.sh
+```r
+source("R/helpers.R")
+batch()
 ```
-
-The script will submit a job with effective commands with SLURM level directives defined by lines starting `#SBATCH`, which allocate CPU threads and memory from the specified partition.
-
-`inst/targets/run.sh` includes several lines exporting environment variables to bind GDAL/GEOS/PROJ versions newer than system default, geospatial packages built upon these libraries, and the user library location where required packages are installed. The environment variables need to be changed following NIEHS HPC system changes in the future.
-
-> [!WARNING]
-> `set_args_*` family for downloading and summarizing prediction outcomes will be added in the future version.
 
 # Developer's guide
 

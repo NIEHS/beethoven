@@ -35,6 +35,7 @@ batch <- function(file = "run.sh") {
 gpu <- function() {
   system("nvidia-smi")
 }
+# nocov end
 
 #' Run all tests within a single file from `tests/testthat/` directory
 #' with the `container_models.sif` container.
@@ -50,8 +51,8 @@ test <- function(pattern = NULL) {
       "apptainer exec --nv --bind $PWD:/mnt --bind /tmp:/opt/tmp ",
       "container_models.sif Rscript --no-init-file -e \"",
       ".libPaths(grep(paste0('biotools|', Sys.getenv('USER')), .libPaths(), ",
-      "value = TRUE, invert = TRUE)); library(beethoven); library(bonsai); ",
-      "library(dplyr); library(testthat); ",
+      "value = TRUE, invert = TRUE)); devtools::load_all('/mnt'); ",
+      "library(bonsai); library(dplyr); library(testthat); ",
       "test_file <- list.files('/mnt/tests/testthat', full.names = TRUE, ",
       "pattern = '", pattern, "'); source_files <- list.files('/mnt/R', ",
       "full.names = TRUE); covr::file_coverage(source_files, test_file)\""
@@ -70,11 +71,11 @@ cov <- function() {
       "apptainer exec --nv --bind $PWD:/mnt --bind /tmp:/opt/tmp ",
       "container_models.sif Rscript --no-init-file -e \"",
       ".libPaths(grep(paste0('biotools|', Sys.getenv('USER')), .libPaths(), ",
-      "value = TRUE, invert = TRUE)); library(beethoven); library(bonsai); ",
-      "library(dplyr); library(testthat); ",
+      "value = TRUE, invert = TRUE)); devtools::load_all('/mnt'); ",
+      "library(bonsai); library(dplyr); library(testthat); ",
       "cov <- covr::package_coverage(install_path = '/tmp/cov', ",
-      "clean = FALSE); covr::coverage_to_list(cov)\""
+      "clean = FALSE); ",
+      "saveRDS(cov, '/mnt/cov_0131.rds'); covr::coverage_to_list(cov)\""
     )
   )
 }
-# nocov end

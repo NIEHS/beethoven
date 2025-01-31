@@ -14,7 +14,7 @@ testthat::test_that("divisor", {
 
   # expect error with character
   testthat::expect_error(
-    beethoven:::divisor("abc")
+    beethoven::divisor("abc")
   )
 })
 

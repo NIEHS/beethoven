@@ -114,3 +114,111 @@ testthat::test_that("query_modis_files", {
   # expect 23 files
   testthat::expect_length(files2, 23)
 })
+
+################################################################################
+##### calculate_modis
+testthat::test_that("calculate_modis (MOD11A1)", {
+  
+  withr::local_package("rlang")
+
+  # sample location
+  loc <- sf::st_as_sf(
+    data.frame(lon = -90, lat = 39.5, site_id = "site_id"),
+    coords = c("lon", "lat"),
+    crs = "EPSG:4326"
+  )
+
+  # identify MOD11A1 files
+  mod11a1_files <- list.files(
+    testthat::test_path("..", "testdata", "injection", "modis", "mod11a1"),
+    full.names = TRUE
+  )
+
+  # expect no error with MOD11A1 files
+  testthat::expect_no_error(
+    modis_calculate_df <- beethoven::calculate_modis(
+      from = mod11a1_files,
+      locs = loc,
+      subdataset = "(LST_)",
+      name_covariates = c("MOD_LSTNT_0_", "MOD_LSTDY_0_"),
+      preprocess = amadeus::process_modis_merge,
+      radius = c(100),
+      package_list_add = c("terra"),
+      export_list_add = c("terra")
+    )
+  )
+  # expect a data.frame
+  testthat::expect_s3_class(modis_calculate_df, "data.frame")
+  # expect 1 row and 4 columns
+  testthat::expect_equal(dim(modis_calculate_df), c(1, 4))
+  # expect no NA values in any column
+  testthat::expect_false("TRUE" %in% any(is.na(modis_calculate_df)))
+  # expect "time" column
+  testthat::expect_true("time" %in% names(modis_calculate_df))
+
+  testthat::expect_warning(
+    modis_calculate_sf <- beethoven::calculate_modis(
+      from = mod11a1_files,
+      locs = loc,
+      subdataset = "(LST_)",
+      name_covariates = c("MOD_LSTNT_0_", "MOD_LSTDY_0_"),
+      preprocess = amadeus::process_modis_merge,
+      radius = c(100),
+      geom = "sf"
+    )
+  )
+  # expect an sf
+  testthat::expect_true(methods::is(modis_calculate_sf, "sf"))
+
+  # testthat::expect_warning(
+  #   modis_calculate_terra <- beethoven::calculate_modis(
+  #     from = mod11a1_files,
+  #     locs = loc,
+  #     subdataset = "(LST_)",
+  #     name_covariates = c("MOD_LSTNT_0_", "MOD_LSTDY_0_"),
+  #     preprocess = amadeus::process_modis_merge,
+  #     radius = c(100),
+  #     geom = "terra"
+  #   )
+  # )
+  # # expect a terra
+  # testthat::expect_true(methods::is(modis_calculate_terra, "SpatVector"))
+
+
+  # expect error with non-function preprocessor
+  testthat::expect_error(
+    beethoven::calculate_modis(
+      from = mod11a1_files,
+      locs = loc,
+      subdataset = "(LST_)",
+      name_covariates = c("MOD_LSTNT_0_", "MOD_LSTDY_0_"),
+      preprocess = 100L,
+      radius = c(100)
+    )
+  )
+
+  # expect error with non-location loc
+  testthat::expect_error(
+    beethoven::calculate_modis(
+      from = mod11a1_files,
+      locs = 4,
+      subdataset = "(LST_)",
+      name_covariates = c("MOD_LSTNT_0_", "MOD_LSTDY_0_"),
+      preprocess = amadeus::process_modis_merge,
+      radius = c(100)
+    )
+  )
+
+  # expect message with extra covariate names
+  testthat::expect_warning(
+    beethoven::calculate_modis(
+      from = mod11a1_files,
+      locs = loc,
+      subdataset = "(LST_)",
+      name_covariates = c("MOD_LSTNT_0_", "MOD_LSTDY_0_", "extra1", "extra2"),
+      preprocess = amadeus::process_modis_merge,
+      radius = c(100)
+    )
+  )
+
+})
