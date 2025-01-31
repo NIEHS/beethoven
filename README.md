@@ -153,7 +153,7 @@ Here, we describe the structure of the repository, important files, and the `tar
   - To run `beethoven`, users must review and update the following parameters for their user profile and computing system:
     - `controller_*` Ensure the local controllers do not request more CPUs than are available on your machine or high performance system.
     - `#SBATCH --partition` Utilization of NVIDIA GPUs (within `glue::glue` command)
-    - `--bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input` (within `glue::glue` command)
+    - `--bind /USER_PATH_TO_INPUT/input:/input` (within `glue::glue` command)
 - `_targets.yaml` is created and updated by running `targets::tar_make` and is not to be edited manually.
 - `run.sh` allocates computational resources with SLURM and submits the `beethoven` pipeline to run on high performance computing system.
   - To run `beethoven`, users must review and update the following parameters for their user profile and computing system:
@@ -161,8 +161,8 @@ Here, we describe the structure of the repository, important files, and the `tar
     - `#SBATCH --partition`
     - `#SBATCH --mem`
     - `#SBATCH --cpus-per-task`
-    - `--bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input`
-    - `--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm`
+    - `--bind /USER_PATH_TO_INPUT/input:/input`
+    - `--bind /USER_PATH_TO_SLURM/slurm:/USER_PATH_TO_SLURM/slurm`
 
 ### Naming Conventions
 
@@ -452,7 +452,7 @@ arglist_common <-
     char_user_email = paste0(Sys.getenv("USER"), "@nih.gov"),
     export = generate_list_calc,
     path_export = "inst/targets/calc_spec.qs",
-    char_input_dir = "/ddn/gs1/group/set/Projects/NRT-AP-Model/input"
+    char_input_dir = "/input"
   )
 ```
 QUESTION: Where (which function calls) and when is `inst/targets/init_target.sh` used?
@@ -482,7 +482,7 @@ For the future release and tests on various environments, one should check sever
 ```
       # modify it into the proper directory path. and output/error paths in the
       # # SBATCH directives
-      USER_PROJDIR=/ddn/gs1/home/$USER/projects
+      USER_PROJDIR=home/$USER/projects
 
       nohup nice -4 Rscript $USER_PROJDIR/beethoven/inst/targets/targets_start.R
 ```
