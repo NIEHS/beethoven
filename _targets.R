@@ -38,6 +38,7 @@ controller_25 <- crew::crew_controller_local(
 scriptlines_apptainer <- "apptainer"
 scriptlines_basedir <- "$PWD"
 scriptlines_container <- "container_models.sif"
+scriptlines_inputdir <- "/ddn/gs1/group/set/Projects/NRT-AP-Model/input"
 scriptlines_gpu <- glue::glue(
   "#SBATCH --job-name=beethovengpu \
   #SBATCH --partition=geo \
@@ -45,7 +46,7 @@ scriptlines_gpu <- glue::glue(
   #SBATCH --error=slurm/beethovengpu_%j.out \
   {scriptlines_apptainer} exec --nv --bind {scriptlines_basedir}:/mnt ",
   "--bind {scriptlines_basedir}/inst:/inst ",
-  "--bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input ",
+  "--bind {scriptlines_inputdir}:/input ",
   "--bind {scriptlines_basedir}/_targets:/opt/_targets ",
   "{scriptlines_container} \\"
 )
