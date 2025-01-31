@@ -303,8 +303,7 @@ testthat::test_that("fit mlp (performance)", {
   )
 
   # set model
-  mlp_device <- ifelse(torch::cuda_is_available(), "cuda", "cpu")
-  mlp_model <- switch_model("mlp", device = mlp_device)
+  mlp_model <- switch_model("mlp", device = "cpu")
   # set grid
   mlp_grid <- expand.grid(
     hidden_units = list(c(16, 16)),

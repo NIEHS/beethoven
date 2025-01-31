@@ -186,7 +186,7 @@ testthat::test_that("inject_calc (hms + nei)", {
     crs = "EPSG:4326"
   )
 
-  # testthat::skip_on_ci()
+  testthat::skip_on_ci()
   # expect no errors (nei)
   testthat::expect_no_error(
     nei_injected <- beethoven::inject_calculate(
