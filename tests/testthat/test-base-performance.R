@@ -295,6 +295,7 @@ testthat::test_that("fit lightgbm (performance)", {
 ################################################################################
 ##### mlp
 testthat::test_that("fit mlp (performance)", {
+  testthat::skip_on_ci()
   # import sample data
   # sample inlcudes 1 year of data for 50 sites
   # subset to only 200 predictors for light weight

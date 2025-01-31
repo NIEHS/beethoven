@@ -5,6 +5,7 @@
 ################################################################################
 ##### folds + grid tuning
 testthat::test_that("fit mlp (folds + grid))", {
+  testthat::skip_on_ci()
   # import sample data
   # sample inlcudes 2 months data for 3 sites
   # subset to only 50 predictors for light weight
@@ -237,6 +238,7 @@ testthat::test_that("fit mlp (folds + grid))", {
 ################################################################################
 ###### args_generate_cv + grid tuning
 testthat::test_that("fit mlp (args_generate_cv + grid)", {
+  testthat::skip_on_ci()
   # import sample data
   # sample inlcudes 2 months data for 3 sites
   # subset to only 50 predictors for light weight

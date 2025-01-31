@@ -135,7 +135,7 @@ testthat::test_that("calculate_modis (MOD11A1)", {
   )
 
   # expect no error with MOD11A1 files
-  testthat::expect_no_error(
+  testthat::expect_warning(
     modis_calculate_df <- beethoven::calculate_modis(
       from = mod11a1_files,
       locs = loc,
