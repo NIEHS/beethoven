@@ -40,13 +40,15 @@ scriptlines_basedir <- "$PWD"
 scriptlines_container <- "container_models.sif"
 scriptlines_inputdir <- "/ddn/gs1/group/set/Projects/NRT-AP-Model/input"
 scriptlines_gpu <- glue::glue(
-  "#SBATCH --job-name=beethovengpu \
+  "#SBATCH --job-name=targets_gpu \
   #SBATCH --partition=geo \
   #SBATCH --gres=gpu:1 \
-  #SBATCH --error=slurm/beethovengpu_%j.out \
-  {scriptlines_apptainer} exec --nv --bind {scriptlines_basedir}:/mnt ",
+  #SBATCH --error=slurm/targets_gpu_%j.out \
+  {scriptlines_apptainer} exec --nv --env ",
+  "CUDA_VISIBLE_DEVICES=${{GPU_DEVICE_ORDINAL}} ",
+  "--bind {scriptlines_basedir}:/mnt ",
   "--bind {scriptlines_basedir}/inst:/inst ",
-  "--bind {scriptlines_inputdir}:/input ",
+  "--bind {scriptlines_inputdir}/input:/input ",
   "--bind {scriptlines_basedir}/_targets:/opt/_targets ",
   "{scriptlines_container} \\"
 )

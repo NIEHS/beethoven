@@ -21,7 +21,8 @@ target_baselearner_cpu <-
         learner = c("elnet"),
         # learner = c("elnet", "lgb"),
         cv_mode = c("spatial", "temporal", "spatiotemporal"),
-        cv_rep = 100L,
+        cv_rep = 10L,
+        # cv_rep = 100L,
         num_device = 1L
       ) %>%
         split(seq_len(nrow(.))),
@@ -157,7 +158,8 @@ target_baselearner_gpu <-
       command = beethoven::assign_learner_cv(
         learner = c("mlp"),
         cv_mode = c("spatial", "temporal", "spatiotemporal"),
-        cv_rep = 100L,
+        cv_rep = 10L,
+        # cv_rep = 100L,
         num_device = 4L,
         balance = TRUE
       ) %>%
