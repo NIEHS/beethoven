@@ -130,7 +130,7 @@ testthat::test_that("post_calc_convert_time", {
 
   # expect no error converting to character
   testthat::expect_no_error(
-    dt_pcct <- post_calc_convert_time(dt_geos)
+    dt_pcct <- beethoven::post_calc_convert_time(dt_geos)
   )
   # expect "time" is a character
   testthat::expect_true(is.character(dt_pcct$time))
@@ -139,7 +139,7 @@ testthat::test_that("post_calc_convert_time", {
   # expect error without time column
   dt_notime <- dt_geos[, -c("time")]
   testthat::expect_error(
-    post_calc_convert_time(dt_notime)
+    beethoven::post_calc_convert_time(dt_notime)
   )
 })
 
@@ -293,7 +293,7 @@ testthat::test_that("post_calc_drop_cols", {
   
   # expect no error with strict = FALSE
   testthat::expect_no_error(
-    dt_weak <- post_calc_drop_cols(
+    dt_weak <- beethoven::post_calc_drop_cols(
       df = data.table::data.table(dt_sample),
       candidates = "geoid|year",
       strict = FALSE
@@ -305,7 +305,7 @@ testthat::test_that("post_calc_drop_cols", {
 
   # expect no error with strict = TRUE
   testthat::expect_no_error(
-    dt_strict <- post_calc_drop_cols(
+    dt_strict <- beethoven::post_calc_drop_cols(
       df = data.table::data.table(dt_sample),
       strict = TRUE
     )

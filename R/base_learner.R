@@ -10,29 +10,46 @@
 #' @param data An object that inherits data.frame.
 #' @param n The number of rows to be sampled.
 #' @param p The proportion of rows to be used. Default is 0.3.
+#' @param ngroup_init integer(1). Initial number of splits for
+#'  pairing groups. Default is NULL. Ensures that subsample is divisible
+#' by `ngroup_init` for `generate_cv_index_spt`.
 #' @return The row index of the original data. The name of the original
 #'   data object is stored in attribute "object_origin".
-make_subdata <-
-  function(
-    data,
-    n = NULL,
-    p = 0.3
-  ) {
-    if (is.null(n) && is.null(p)) {
-      stop("Please provide either n or p.")
-    }
-    nr <- seq_len(nrow(data))
-    if (!is.null(n)) {
-      nsample <- sample(nr, n)
-    } else {
-      nsample <- sample(nr, ceiling(nrow(data) * p))
-    }
-    # data <- data[nsample, ]
-    rowindex <- nsample
-    data_name <- as.character(substitute(data))
-    attr(rowindex, "object_origin") <- data_name[length(data_name)]
-    return(rowindex)
+#' @export
+make_subdata <- function(
+  data,
+  n = NULL,
+  p = 0.3,
+  ngroup_init = NULL
+) {
+  if (is.null(n) && is.null(p)) {
+    stop("Please provide either n or p.")
   }
+  if (!is.null(ngroup_init) && ngroup_init <= 0) {
+    stop("ngroup_init must be a positive integer.")
+  }
+
+  nr <- seq_len(nrow(data))
+
+  if (!is.null(n)) {
+    if (!is.null(ngroup_init)) {
+      n <- floor(n / ngroup_init) * ngroup_init
+    }
+    nsample <- sample(nr, n)
+  } else {
+    sample_size <- ceiling(nrow(data) * p)
+    if (!is.null(ngroup_init)) {
+      sample_size <- floor(sample_size / ngroup_init) * ngroup_init
+    }
+    nsample <- sample(nr, sample_size)
+  }
+
+  rowindex <- nsample
+  data_name <- as.character(substitute(data))
+  attr(rowindex, "object_origin") <- data_name[length(data_name)]
+
+  return(rowindex)
+}
 
 
 #' Define a base learner model based on parsnip and tune
@@ -46,7 +63,7 @@ make_subdata <-
 #' with CUDA-enabled graphical processing units.
 #' @return A parsnip model object.
 #' @importFrom parsnip mlp set_engine set_mode boost_tree linear_reg
-#' @importFrom dplyr %>%
+#' @importFrom magrittr %>%
 #' @export
 switch_model <-
   function(
@@ -73,7 +90,7 @@ switch_model <-
           trees = parsnip::tune(),
           learn_rate = parsnip::tune()
         ) %>%
-        parsnip::set_engine("lightgbm", device_type = device) %>%
+        parsnip::set_engine("lightgbm", device = device) %>%
         parsnip::set_mode("regression"),
       xgb =
         parsnip::boost_tree(
@@ -169,11 +186,13 @@ switch_model <-
 #' @param trim_resamples logical(1). Default is TRUE, which replaces the actual
 #'   data.frames in splits column of `tune_results` object with NA.
 #' @param return_best logical(1). If TRUE, the best tuned model is returned.
+#' @param metric character(1). The metric to be used for selecting the best.
+#' Must be one of "rmse", "rsq", "mae". Default = "rmse"
 #' @param ... Additional arguments to be passed.
 #'
 #' @return The fitted workflow.
 #' @importFrom recipes recipe update_role
-#' @importFrom dplyr `%>%`
+#' @importFrom magrittr %>%
 #' @importFrom parsnip mlp set_engine set_mode
 #' @importFrom workflows workflow add_recipe add_model
 #' @importFrom tune tune_grid fit_best
@@ -200,6 +219,7 @@ fit_base_learner <-
     nthreads = 8L,
     trim_resamples = FALSE,
     return_best = TRUE,
+    metric = "rmse",
     ...
   ) {
     learner <- match.arg(learner)
@@ -207,7 +227,14 @@ fit_base_learner <-
     cv_mode <- match.arg(cv_mode)
     stopifnot("parsnip model must be defined." = !is.null(model))
 
-    dt_sample_rowidx <- make_subdata(dt_full, p = r_subsample)
+    if (cv_mode == "spatiotemporal") {
+      ngroup_init <- args_generate_cv$ngroup_init
+    } else {
+      ngroup_init <- NULL
+    }
+    dt_sample_rowidx <- beethoven::make_subdata(
+      dt_full, p = r_subsample, ngroup_init = ngroup_init
+    )
     dt_sample <- dt_full[dt_sample_rowidx, ]
 
     # detect model name
@@ -238,7 +265,9 @@ fit_base_learner <-
       # the formals() argument used in inject_match does not properly
       # identify the expected arguments in the switched functions
       # identify cv_mode
-      cv_mode_arg <- match.arg(cv_mode)
+      cv_mode_arg <- match.arg(
+        cv_mode, c("spatial", "temporal", "spatiotemporal")
+      )
       target_fun <-
         switch(
           cv_mode_arg,
@@ -248,11 +277,11 @@ fit_base_learner <-
         )
 
       # generate row index
-      cv_index <- inject_match(target_fun, args_generate_cv)
+      cv_index <- beethoven::inject_match(target_fun, args_generate_cv)
 
       # using cv_index, restore rset
       base_vfold <-
-        convert_cv_index_rset(
+        beethoven::convert_cv_index_rset(
           cv_index, dt_sample, cv_mode = cv_mode
         )
     }
@@ -291,7 +320,8 @@ fit_base_learner <-
         iter_bayes = tune_bayes_iter,
         trim_resamples = trim_resamples,
         return_best = return_best,
-        data_full = dt_full
+        data_full = dt_full,
+        metric = metric
       )
     if (model_name == "glmnet") {
       future::plan(future::sequential)
@@ -314,6 +344,8 @@ fit_base_learner <-
 #'  data.frames in splits column of `tune_results` object with NA.
 #' @param return_best logical(1). If TRUE, the best tuned model is returned.
 #' @param data_full The full data frame to be used for prediction.
+#' @param metric character(1). The metric to be used for selecting the best.
+#' Must be one of "rmse", "rsq", "mae". Default = "rmse"
 #' @return List of 3:
 #'   * `base_prediction`: `data.frame` of the best model prediction.
 #'   * `base_parameter`: `tune_results` object of the best model.
@@ -325,6 +357,7 @@ fit_base_learner <-
 #' @importFrom parsnip fit
 #' @importFrom stats predict
 #' @importFrom rlang quo_get_expr
+#' @importFrom magrittr %>%
 #' @export
 fit_base_tune <-
   function(
@@ -336,7 +369,8 @@ fit_base_tune <-
     iter_bayes = 10L,
     trim_resamples = TRUE,
     return_best = TRUE,
-    data_full = NULL
+    data_full = NULL,
+    metric = "rmse"
   ) {
     stopifnot("data_full must be entered." = !is.null(data_full))
     tune_mode <- match.arg(tune_mode)
@@ -396,10 +430,11 @@ fit_base_tune <-
     # }
     if (return_best) {
       # Select the best hyperparameters
+      metric <- match.arg(metric, c("rmse", "rsq", "mae"))
       base_wfparam <-
         tune::select_best(
           base_wftune,
-          metric = c("rmse", "rsq", "mae")
+          metric = metric
         )
       # finalize workflow with the best tuned hyperparameters
       base_wfresult <- tune::finalize_workflow(base_wf, base_wfparam)
@@ -447,6 +482,8 @@ fit_base_tune <-
 #' @param cv_rep integer(1). The number of repetitions for each `cv_mode`.
 #' @param num_device integer(1). The number of CUDA devices to be used.
 #'   Each device will be assigned to each eligible learner (i.e., lgb, mlp).
+#' @param balance logical(1). If TRUE, the number of CUDA devices will be
+#' equally distributed based on the number of eligible devices.
 #' @return A data frame with three columns: learner, cv_mode, and device.
 #' @export
 assign_learner_cv <-
@@ -454,9 +491,10 @@ assign_learner_cv <-
     learner = c("lgb", "mlp", "elnet"),
     cv_mode = c("spatiotemporal", "spatial", "temporal"),
     cv_rep = 100L,
-    num_device = ifelse(torch::cuda_device_count() > 1, 2, 1)
+    num_device = ifelse(torch::cuda_device_count() > 1, 2, 1),
+    balance = FALSE
   ) {
-    learner_eligible <- c("lgb", "mlp")
+    learner_eligible <- c("lgb", "mlp", "xgb")
     learner <- sort(learner)
     learner_eligible_flag <- learner %in% learner_eligible
     cuda_devices <- seq_len(sum(learner_eligible_flag)) - 1
@@ -484,6 +522,15 @@ assign_learner_cv <-
       learner_l, cuda_get, SIMPLIFY = FALSE
     )
     learner_v <- do.call(rbind, learner_l)
+
+    if (balance) {
+      learner_v_cuda <- learner_v[grep("cuda", learner_v$device), ]
+      learner_v_cuda$device <- sprintf(
+        "cuda:%d", (seq_len(nrow(learner_v_cuda)) - 1) %% num_device
+      )
+      learner_v[grep("cuda", learner_v$device), ] <- learner_v_cuda
+    }
+
     return(learner_v)
   }
 
@@ -871,22 +918,24 @@ generate_cv_index_ts <-
 #' @param target_cols character(3). Names of columns for X, Y.
 #'   Default is `c("lon", "lat")`. It is passed to sf::st_as_sf to
 #'   subsequently generate spatial cross-validation indices using
-#'   `spatialsample::spatial_block_cv` and
-#'   `spatialsample::spatial_clustering_cv`.
+#'   `spatialsample::spatial_block_cv`.
 #' @param cv_make_fun function(1). Function to generate spatial
 #'   cross-validation indices.
 #'   Default is `spatialsample::spatial_block_cv`.
-#' @param ... Additional arguments to be passed to `cv_make_fun`.
+#' @param ... Additional arguments to be passed to
+#' `patialsample::spatial_block_cv`.
 #' @seealso [`spatialsample::spatial_block_cv`],
 #'   [`spatialsample::spatial_clustering_cv`],
 #'   [`spatialsample::spatial_buffer_vfold_cv`]
+#' @seealso [`spatialsample::spatial_block_cv`].
 #' @return A list of numeric vectors with in- and out-of-sample row indices or
 #'   a numeric vector with out-of-sample indices.
 #' @importFrom rlang inject
 #' @importFrom sf st_as_sf
 #' @importFrom spatialsample spatial_block_cv
 #' @importFrom rsample manual_rset
-#' @importFrom dplyr %>% slice_sample
+#' @importFrom dplyr slice_sample
+#' @importFrom magrittr %>%
 #' @importFrom methods getPackageName
 #' @export
 generate_cv_index_sp <-
@@ -909,6 +958,7 @@ generate_cv_index_sp <-
     # retrieve in_id
     data_rowid <- seq_len(nrow(data))
     newcv <- data_rowid
+
     if (
       !all(
         !is.na(Reduce(c, Map(function(x) is.na(x$out_id), cv_index$splits)))
@@ -988,6 +1038,6 @@ switch_generate_cv_rset <-
         temporal = generate_cv_index_ts,
         spatiotemporal = generate_cv_index_spt
       )
-    cvindex <- inject_match(target_fun, list(...))
+    cvindex <- beethoven::inject_match(target_fun, list(...))
     return(cvindex)
   }

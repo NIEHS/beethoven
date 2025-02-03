@@ -441,7 +441,9 @@ calc_narr2 <- function(
       },
       time_split
     )
-    sites_extracted <- reduce_merge(sites_extracted, by = c("site_id"))
+    sites_extracted <- beethoven::reduce_merge(
+      sites_extracted, by = c("site_id")
+    )
   } else {
     sites_extracted <-
       terra::extract(
@@ -518,12 +520,12 @@ par_narr <- function(domain, path, date, locs) {
     lapply(
       domain,
       function(x) {
-        from <- process_narr2(
+        from <- beethoven::process_narr2(
           path = path,
           variable = x,
           date = date
         )
-        calc_narr2(
+        beethoven::calc_narr2(
           from = from,
           locs = locs,
           locs_id = "site_id"

@@ -2,7 +2,6 @@
 ##### unit and integration tests for argument setting functions
 ##### main files: R/set_arguments.R
 
-
 ################################################################################
 ##### set_args_download
 testthat::test_that("set_args_download exports qs or rds file", {
@@ -195,4 +194,21 @@ testthat::test_that("set_args_calc exports qs or rds file", {
 
   unlink(tmpdir, recursive = TRUE)
 
+})
+
+################################################################################
+##### sys_beethoven
+testthat::test_that("sys_beethoven sets environmental variables", {
+  testthat::expect_no_error(
+    beethoven::sys_beethoven()
+  )
+  testthat::expect_false("biotools" %in% .libPaths())
+  testthat::expect_false("biotools" %in% Sys.getenv("PATH"))
+  testthat::expect_false("biotools" %in% Sys.getenv("CUDA_HOME"))
+  testthat::expect_false("biotools" %in% Sys.getenv("LD_LIBRARY_PATH"))
+
+  testthat::expect_no_error(
+    beethoven::sys_beethoven(cuda_home = "this_is_cuda_home")
+  )
+  testthat::expect_true(identical(Sys.getenv("CUDA_HOME"), "this_is_cuda_home"))
 })

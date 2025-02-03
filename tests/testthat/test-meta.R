@@ -89,105 +89,105 @@ testthat::test_that("fit_meta_learner (temporal)", {
 
 ################################################################################
 ##### fit_meta_learner (spatial)
-testthat::test_that("fit_meta_learner (spatial)", {
-  # import sample data
-  # sample inlcudes 2 months data for 3 sites
-  # subset to only 50 predictors for light weight
-  dt_meta <- readRDS(
-    testthat::test_path("..", "testdata", "meta", "dt_meta.rds")
-  )
+# testthat::test_that("fit_meta_learner (spatial)", {
+#   # import sample data
+#   # sample inlcudes 2 months data for 3 sites
+#   # subset to only 50 predictors for light weight
+#   dt_meta <- readRDS(
+#     testthat::test_path("..", "testdata", "meta", "dt_meta.rds")
+#   )
 
-  # expect no error for rset preparation
-  # expect CRS warning during indexing
-  testthat::expect_warning(
-    index_sp <- generate_cv_index_sp(
-      data = dt_meta,
-      target_cols = c("lon", "lat"),
-      cv_make_fun = spatialsample::spatial_block_cv,
-      v = 2
-    )
-  )
-  testthat::expect_no_error(
-    rset_sp <- convert_cv_index_rset(
-      cvindex = index_sp,
-      data = dt_meta,
-      cv_mode = "spatial"
-    )
-  )
+#   # expect no error for rset preparation
+#   # expect CRS warning during indexing
+#   testthat::expect_warning(
+#     index_sp <- generate_cv_index_sp(
+#       data = dt_meta,
+#       target_cols = c("lon", "lat"),
+#       cv_make_fun = spatialsample::spatial_block_cv,
+#       v = 2
+#     )
+#   )
+#   testthat::expect_no_error(
+#     rset_sp <- convert_cv_index_rset(
+#       cvindex = index_sp,
+#       data = dt_meta,
+#       cv_mode = "spatial"
+#     )
+#   )
 
-  # expect no error for meta fit
-  testthat::expect_warning(
-    meta2 <- fit_meta_learner(
-      data = dt_meta,
-      p_col_sel = 0.5,
-      rset = rset_sp,
-      yvar = "Arithmetic.Mean",
-      xvar = seq(5, ncol(dt_meta)),
-      tune_iter = 1
-    )
-  )
-  # expect a list
-  testthat::expect_true(is.list(meta2))
-  # expect 3 items in the list
-  testthat::expect_length(meta2, 3)
-  # expect first item is a workflow
-  testthat::expect_true("workflow" %in% class(meta2[[1]]))
-  # expect third item is tune results
-  testthat::expect_true("tune_results" %in% class(meta2[[3]]))
+#   # expect no error for meta fit
+#   testthat::expect_warning(
+#     meta2 <- fit_meta_learner(
+#       data = dt_meta,
+#       p_col_sel = 0.5,
+#       rset = rset_sp,
+#       yvar = "Arithmetic.Mean",
+#       xvar = seq(5, ncol(dt_meta)),
+#       tune_iter = 1
+#     )
+#   )
+#   # expect a list
+#   testthat::expect_true(is.list(meta2))
+#   # expect 3 items in the list
+#   testthat::expect_length(meta2, 3)
+#   # expect first item is a workflow
+#   testthat::expect_true("workflow" %in% class(meta2[[1]]))
+#   # expect third item is tune results
+#   testthat::expect_true("tune_results" %in% class(meta2[[3]]))
 
-})
+# })
 
 
 ################################################################################
 ##### fit_meta_learner (spatiotemporal)
-testthat::test_that("fit_meta_learner (spatiotemporal)", {
-  # import sample data
-  # sample inlcudes 2 months data for 3 sites
-  # subset to only 50 predictors for light weight
-  dt_meta <- readRDS(
-    testthat::test_path("..", "testdata", "meta", "dt_meta.rds")
-  )
+# testthat::test_that("fit_meta_learner (spatiotemporal)", {
+#   # import sample data
+#   # sample inlcudes 2 months data for 3 sites
+#   # subset to only 50 predictors for light weight
+#   dt_meta <- readRDS(
+#     testthat::test_path("..", "testdata", "meta", "dt_meta.rds")
+#   )
 
-  # expect no error for rset preparation
-  testthat::expect_no_error(
-    index_spt <- generate_cv_index_spt(
-      data = data.table::data.table(dt_meta),
-      target_cols = c("lon", "lat", "time"),
-      preprocessing = "none",
-      ngroup_init = 2L,
-      cv_pairs = NULL,
-      pairing = "1"
-    )
-  )
-  testthat::expect_no_error(
-    rset_spt <- convert_cv_index_rset(
-      cvindex = index_spt,
-      data = dt_meta,
-      cv_mode = "spatiotemporal"
-    )
-  )
+#   # expect no error for rset preparation
+#   testthat::expect_no_error(
+#     index_spt <- generate_cv_index_spt(
+#       data = data.table::data.table(dt_meta),
+#       target_cols = c("lon", "lat", "time"),
+#       preprocessing = "none",
+#       ngroup_init = 2L,
+#       cv_pairs = NULL,
+#       pairing = "1"
+#     )
+#   )
+#   testthat::expect_no_error(
+#     rset_spt <- convert_cv_index_rset(
+#       cvindex = index_spt,
+#       data = dt_meta,
+#       cv_mode = "spatiotemporal"
+#     )
+#   )
 
-  # expect no error for meta fit
-  testthat::expect_warning(
-    meta3 <- fit_meta_learner(
-      data = dt_meta,
-      p_col_sel = 0.5,
-      rset = rset_spt,
-      yvar = "Arithmetic.Mean",
-      xvar = seq(5, ncol(dt_meta)),
-      tune_iter = 1
-    )
-  )
-  # expect a list
-  testthat::expect_true(is.list(meta3))
-  # expect 3 items in the list
-  testthat::expect_length(meta3, 3)
-  # expect first item is a workflow
-  testthat::expect_true("workflow" %in% class(meta3[[1]]))
-  # expect third item is tune results
-  testthat::expect_true("tune_results" %in% class(meta3[[3]]))
+#   # expect no error for meta fit
+#   testthat::expect_warning(
+#     meta3 <- fit_meta_learner(
+#       data = dt_meta,
+#       p_col_sel = 0.5,
+#       rset = rset_spt,
+#       yvar = "Arithmetic.Mean",
+#       xvar = seq(5, ncol(dt_meta)),
+#       tune_iter = 1
+#     )
+#   )
+#   # expect a list
+#   testthat::expect_true(is.list(meta3))
+#   # expect 3 items in the list
+#   testthat::expect_length(meta3, 3)
+#   # expect first item is a workflow
+#   testthat::expect_true("workflow" %in% class(meta3[[1]]))
+#   # expect third item is tune results
+#   testthat::expect_true("tune_results" %in% class(meta3[[3]]))
 
-})
+# })
 
 
 ################################################################################

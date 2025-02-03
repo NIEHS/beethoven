@@ -70,9 +70,6 @@ po/*~
 # RStudio Connect folder
 rsconnect/
 
-
-#Mitchell test folder
-code/mitchell_tests/
 # Generic open or temporary files
 ._.*
 ._.gitignore
@@ -119,6 +116,8 @@ inst/extdata/nasa_token.txt
 debug/
 debug*.sh
 
-
 # dev
 lib-flex/**
+
+# local coverage RDS files
+covr/

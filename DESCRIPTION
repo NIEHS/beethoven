@@ -31,7 +31,6 @@ Imports:
   tidyr,
   tidyselect,
   yardstick,
-  torch,
   workflows,
   recipes,
   missRanger,
@@ -46,7 +45,8 @@ Imports:
   graphics,
   scatterplot3d,
   amadeus,
-  parallelly
+  parallelly,
+  magrittr
 Suggests:
   testthat (>= 3.0.0),
   covr,
@@ -70,8 +70,9 @@ Suggests:
   ggplot2,
   doRNG,
   furrr,
-  quarto
-Remotes: ropensci/chopin, NIEHS/amadeus@1.2.1
+  quarto,
+  torch
+Remotes: ropensci/chopin, NIEHS/amadeus, tidymodels/brulee@gpu, mitchellmanware/parsnip@beethoven
 SystemRequirements: NetCDF4, CUDA (>= 10.0)
 Encoding: UTF-8
 VignetteBuilder: knitr, rmarkdown

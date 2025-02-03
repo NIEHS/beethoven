@@ -22,6 +22,7 @@ fit_base_learner(
   nthreads = 8L,
   trim_resamples = FALSE,
   return_best = TRUE,
+  metric = "rmse",
   ...
 )
 }
@@ -74,6 +75,9 @@ threads in \code{\link[future:multicore]{future::multicore()}} plan.}
 data.frames in splits column of \code{tune_results} object with NA.}
 
 \item{return_best}{logical(1). If TRUE, the best tuned model is returned.}
+
+\item{metric}{character(1). The metric to be used for selecting the best.
+Must be one of "rmse", "rsq", "mae". Default = "rmse"}
 
 \item{...}{Additional arguments to be passed.}
 }
