@@ -33,9 +33,9 @@ batch <- function(file = "run.sh") {
 }
 
 clean <- function(pattern = NULL) {
+  system(paste0("rm slurm/*"))
   stopifnot(!is.null(pattern))
   system(paste0("rm _targets/objects/", pattern))
-  system(paste0("rm slurm/*"))
 }
 
 gpu <- function() {

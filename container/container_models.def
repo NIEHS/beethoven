@@ -117,7 +117,7 @@ From: nvidia/cuda:11.8.0-devel-ubuntu22.04
     Rscript -e "pak::pak('tidymodels/brulee@gpu')"
     Rscript -e "pak::pak('shikokuchuo/nanonext'); pak::pak('shikokuchuo/mirai')"
     Rscript -e "pak::pak('wlandau/crew'); pak::pak('wlandau/crew.cluster')"
-    Rscript -e "pak::pak('NIEHS/beethoven@dev-mm-0108')"
+    Rscript -e "pak::pak('NIEHS/beethoven@mm-0203')"
 
 %environment
     # Set locale and CUDA environment variables
