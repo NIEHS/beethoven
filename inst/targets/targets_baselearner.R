@@ -1,25 +1,25 @@
 ################################################################################
-##### Fit {brulee}, {lightgbm}, and {elnet} models for base learners.
-target_baselearner <-
+##### Fit CPU-enabled {elnet} and {lightgbm} base learners.
+target_baselearner_cpu <-
   list(
     ############################################################################
     #########################             DEV             ######################
-    # targets::tar_target(
-    #   dt_feat_calc_xyt_devsubset,
-    #   command = data.table::data.table(dt_feat_calc_xyt[
-    #     grep("2018|2019", dt_feat_calc_xyt$time),
-    #     c(1:5, grep("lon|lat", names(dt_feat_calc_xyt)), 2065:2165)
-    #   ]),
-    #   description = "Imputed features + AQS sites | dev"
-    # )
-    # ,
+    targets::tar_target(
+      dt_feat_calc_xyt_devsubset,
+      command = data.table::data.table(dt_feat_calc_xyt[
+        grep("2018|2019", dt_feat_calc_xyt$time),
+        c(1:5, grep("lon|lat", names(dt_feat_calc_xyt)), 2065:2165)
+      ]),
+      description = "Imputed features + AQS sites | dev"
+    )
+    ,
     ############################################################################
     ############################################################################
     targets::tar_target(
       df_learner_type_cpu,
       command = beethoven::assign_learner_cv(
-        # learner = c("elnet"),
-        learner = c("elnet", "lgb"),
+        learner = c("elnet"),
+        # learner = c("elnet", "lgb"),
         cv_mode = c("spatial", "temporal", "spatiotemporal"),
         cv_rep = 100L,
         num_device = 1L
@@ -27,33 +27,6 @@ target_baselearner <-
         split(seq_len(nrow(.))),
       iteration = "list",
       description = "Engines and CV modes | cpu | base learner"
-    )
-    ,
-    targets::tar_target(
-      df_learner_type_gpu,
-      command = {
-        df_learner_type_assigned <- beethoven::assign_learner_cv(
-          learner = c("mlp"),
-          # learner = c("mlp", "xgb"),
-          cv_mode = c("spatial", "temporal", "spatiotemporal"),
-          cv_rep = 100L,
-          num_device = 4L
-        ) %>%
-          split(seq_len(nrow(.)))
-        df_learner_type_flat <- do.call(rbind, df_learner_type_assigned)
-        df_learner_type_flat$device <- sprintf(
-          "cuda:%d", (seq_len(nrow(df_learner_type_flat)) - 1) %% 4L
-        )
-        df_learner_type_split <- split(
-          df_learner_type_flat, rownames(df_learner_type_flat)
-        )
-        df_learner_type_order <- df_learner_type_split[
-          order(as.numeric(names(df_learner_type_split)))
-        ]
-        df_learner_type_order
-      },
-      iteration = "list",
-      description = "Engines and CV modes | gpu | base learner"
     )
     ,
     targets::tar_target(
@@ -101,18 +74,11 @@ target_baselearner <-
         ),
         lgb = expand.grid(
           mtry = floor(
-            c(0.025, seq(0.05, 0.2, 0.05)) * ncol(dt_feat_calc_xyt)
+            c(0.025, seq(0.05, 0.2, 0.05)) * ncol(dt_feat_calc_xyt_devsubset)
           ),
           trees = seq(1000, 3000, 1000),
           learn_rate = c(0.1, 0.05, 0.01, 0.005)
         )
-        # xgb = expand.grid(
-        #   mtry = floor(
-        #     c(0.025, seq(0.05, 0.2, 0.05)) * ncol(dt_feat_calc_xyt)
-        #   ),
-        #   trees = seq(1000, 3000, 1000),
-        #   learn_rate = c(0.1, 0.05, 0.01, 0.005)
-        # )
       ),
       description = "Parameter tuning grid | base learner"
     )
@@ -130,12 +96,8 @@ target_baselearner <-
         ),
         lgb = beethoven::switch_model(
           model_type = "lgb",
-          device = "gpu"
+          device = "cpu"
         )
-        # xgb = beethoven::switch_model(
-        #   model_type = "xgb",
-        #   device = "cuda"
-        # )
       ),
       description = "Engines and devices | base learner"
     )
@@ -143,13 +105,13 @@ target_baselearner <-
     targets::tar_target(
       list_base_params_static,
       command = list(
-        dt_full = dt_feat_calc_xyt,
+        dt_full = dt_feat_calc_xyt_devsubset,
         r_subsample = 0.3,
         folds = NULL,
         tune_mode = "grid",
         tune_grid_size = 20L,
         yvar = "Arithmetic.Mean",
-        xvar = seq(5, ncol(dt_feat_calc_xyt)),
+        xvar = seq(5, ncol(dt_feat_calc_xyt_devsubset)),
         nthreads = 2L,
         trim_resamples = TRUE,
         return_best = TRUE
@@ -180,9 +142,28 @@ target_baselearner <-
       pattern = map(df_learner_type_cpu),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_25")
+        crew = targets::tar_resources_crew(controller = "controller_100")
       ),
       description = "Fit base learner | cpu | base learner"
+    )
+  )
+
+################################################################################
+##### Fit GPU-enabled {brulee} base learners.
+target_baselearner_gpu <-
+  list(
+    targets::tar_target(
+      df_learner_type_gpu,
+      command = beethoven::assign_learner_cv(
+        learner = c("mlp"),
+        cv_mode = c("spatial", "temporal", "spatiotemporal"),
+        cv_rep = 100L,
+        num_device = 4L,
+        balance = TRUE
+      ) %>%
+        split(seq_len(nrow(.))),
+      iteration = "list",
+      description = "Engines and CV modes | gpu | base learner"
     )
     ,
     targets::tar_target(
