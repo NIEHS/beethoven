@@ -18,6 +18,7 @@
 <url><loc>https://niehs.github.io/beethoven/reference/calculate.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/calculate_modis.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/convert_cv_index_rset.html</loc></url>
+<url><loc>https://niehs.github.io/beethoven/reference/cov.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/divisor.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/feature_raw_download.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/fit_base_learner.html</loc></url>
@@ -66,6 +67,8 @@
 <url><loc>https://niehs.github.io/beethoven/reference/split_dates.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/switch_generate_cv_rset.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/switch_model.html</loc></url>
+<url><loc>https://niehs.github.io/beethoven/reference/sys_beethoven.html</loc></url>
+<url><loc>https://niehs.github.io/beethoven/reference/test.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/unmarshal_function.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/vis_spt_rset.html</loc></url>
 </urlset>

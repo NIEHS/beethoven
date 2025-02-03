@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">beethoven</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,7 +43,8 @@
 <span>  learner <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"lgb"</span>, <span class="st">"mlp"</span>, <span class="st">"elnet"</span><span class="op">)</span>,</span>
 <span>  cv_mode <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"spatiotemporal"</span>, <span class="st">"spatial"</span>, <span class="st">"temporal"</span><span class="op">)</span>,</span>
 <span>  cv_rep <span class="op">=</span> <span class="fl">100L</span>,</span>
-<span>  num_device <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/torch/man/cuda_device_count.html" class="external-link">cuda_device_count</a></span><span class="op">(</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span>  num_device <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/cuda_device_count.html" class="external-link">cuda_device_count</a></span><span class="op">(</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  balance <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -69,6 +70,11 @@ Default is "spatiotemporal". Available options are "spatiotemporal",
 <dt id="arg-num-device">num_device<a class="anchor" aria-label="anchor" href="#arg-num-device"></a></dt>
 <dd><p>integer(1). The number of CUDA devices to be used.
 Each device will be assigned to each eligible learner (i.e., lgb, mlp).</p></dd>
+
+
+<dt id="arg-balance">balance<a class="anchor" aria-label="anchor" href="#arg-balance"></a></dt>
+<dd><p>logical(1). If TRUE, the number of CUDA devices will be
+equally distributed based on the number of eligible devices.</p></dd>
 
 </dl></div>
     <div class="section level2">

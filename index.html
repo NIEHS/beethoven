@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">beethoven</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -62,9 +62,9 @@
 <code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"NIEHS/beethoven"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="overall-project-workflow">Overall Project Workflow<a class="anchor" aria-label="anchor" href="#overall-project-workflow"></a>
+<h2 id="workflow">Workflow<a class="anchor" aria-label="anchor" href="#workflow"></a>
 </h2>
-<p>Targets: Make-like Reproducible Analysis Pipeline 1) AQS Data 2) Generate Covariates 3) Fit Base Learners 4) Fit Meta Learners 5) Predictions 6) Summary Stats</p>
+<p><code>beethoven</code> is a <a href="https://books.ropensci.org/targets/" class="external-link">targets</a> reproducible analysis pipeline with the following workflow.</p>
 <pre class="mermaid"><code>graph TD
 
     subgraph AQS data with `amadeus`
@@ -167,87 +167,123 @@
     style P2 fill:#abf7b1,stroke:#000,stroke-width:2px
     style P5 fill:#abf7b1,stroke:#000,stroke-width:2px
 </code></pre>
-<p><strong>Placeholder for up-to-date rendering of targets</strong></p>
+<p>Version 0.4.4 of <code>beethoven</code> has stable <code>targets</code> for downloading data files, calculating features at AQS sites, and merging to a base learner-ready <code>data.table</code> (<code>dt_feat_calc_xyt</code>). Ongoing changes relate to calculating features for the prediction grid, computationally managing prediction grid, base learner hyperparameter tuning, and meta learner function development.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">tar_visnetwork</span><span class="op">(</span><span class="va">targets</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">targets</span><span class="fu">::</span><span class="fu"><a href="https://docs.ropensci.org/targets/reference/tar_visnetwork.html" class="external-link">tar_visnetwork</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/visnetwork_20250128.png"></p>
 </div>
 <div class="section level2">
-<h2 id="project-organization">Project Organization<a class="anchor" aria-label="anchor" href="#project-organization"></a>
+<h2 id="organization">Organization<a class="anchor" aria-label="anchor" href="#organization"></a>
 </h2>
-<p>Here, we describe the structure of the project and the naming conventions used. The most up to date file paths and names are recorded here for reference.</p>
+<p>Here, we describe the structure of the repository, important files, and the <code>targets</code> object naming conventions.</p>
 <div class="section level3">
-<h3 id="file-structure">File Structure<a class="anchor" aria-label="anchor" href="#file-structure"></a>
+<h3 id="folder-structure">Folder Structure<a class="anchor" aria-label="anchor" href="#folder-structure"></a>
 </h3>
-<div class="section level4">
-<h4 id="folder-structure">Folder Structure<a class="anchor" aria-label="anchor" href="#folder-structure"></a>
-</h4>
 <ul>
 <li>
-<code>R/</code> This is where the main R code (e.g. .R files) lives. Nothing else but .R files should be in here. i.e. Target helper functions, model fitting and post-processing, plotting and summary functions.</li>
+<code>R/</code> is where the <code>beethoven</code> functions are stored. Only “.R” files should be in this folder (ie. <code>targets</code> helpers, post-processing, model fitting functions).</li>
 <li>
-<code>tests/</code> This is where the unit and integration tests reside. The structure is based off the standard practices of the <a href="https://testthat.r-lib.org/" class="external-link">testthat</a> R package for unit testing.
+<code>inst/</code> is a directory for arbitrary files outside of the main <code>R/</code> directory
 <ul>
 <li>
-<code>testthat</code> Unit and integration tests for CI/CD reside here</li>
-<li>
-<code>testdata</code> Small test datasets including our small (in size) complete pipeline testing.</li>
-<li>
-<code>testthat.R</code> Special script created and maintained by testthat</li>
+<code>targets/</code> is a sub-directory within <code>inst/</code> which contains the pipeline files (ie. “targets_aqs.R”). These files declare the <code><a href="https://docs.ropensci.org/targets/reference/tar_target.html" class="external-link">targets::tar_target</a></code> objects which constitute the <code>beethoven</code> pipeline.</li>
 </ul>
 </li>
 <li>
-<code>man/</code> This sub-directory contains .Rd and othe files created by the <a href="https://roxygen2.r-lib.org/" class="external-link">roxygen2</a> package for assisted documentation of R packages</li>
-<li>
-<code>vignettes/</code> Rmd (and potentially Qmd) narrative text and code files. These are rendered into the <strong>Articles</strong> for the package website created by <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-</li>
-<li>
-<code>inst/</code> Is a sub-directory for arbitrary files outside of the main <code>R/</code> directory
+<code>tests/</code> stores unit and integration tests (<code>testthat/</code>) and test data (<code>testdata/</code>) according to the <a href="https://testthat.r-lib.org/" class="external-link">testthat</a> package’s standard structure. for unit testing.
 <ul>
 <li>
-<code>targets</code> which include the important pipeline file <code>_targets.R</code>
-</li>
+<code>testthat.R</code> is created and maintained by <code>testthat</code>, and is not to be edited manually.</li>
 </ul>
 </li>
 <li>
-<code>.github/workflows/</code> This hidden directory is where the GitHub CI/CD yaml files reside</li>
-</ul>
-<div class="section level5">
-<h5 id="the-following-sub-directories-are-not-including-the-package-build-and-included-only-in-the-source-code-here">The following sub-directories are not including the package build and included only in the source code here<a class="anchor" aria-label="anchor" href="#the-following-sub-directories-are-not-including-the-package-build-and-included-only-in-the-source-code-here"></a>
-</h5>
-<ul>
+<code>container/</code> stores definition files and build scripts to build covariate- and model-specific Apptainer container images (<code>container_covariates.def</code> and <code>container_models.def</code>).</li>
 <li>
-<code>tools/</code> This sub-directory is dedicated to educational or demonstration material (e.g. Rshiny).</li>
+<code>man/</code> contains function documentation files (“.Rd”) which are by the <a href="https://roxygen2.r-lib.org/" class="external-link">roxygen2</a> package. These files are not to be edited manually.</li>
+<li>
+<code>vignettes/</code> contains “.Rmd” narrative text and code files. These are rendered by <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> into the <a href="https://niehs.github.io/beethoven/articles/index.html">Articles</a> section of the <code>beethoven</code> webpage.</li>
+<li>
+<code>.github/workflows/</code> is a hidden directory which stores the GitHub CI/CD “yaml” files.</li>
+<li>
+<code>tools/</code> is dedicated to educational or demonstration material (e.g. Rshiny), but is not excluded from the package build.</li>
 </ul>
 </div>
-</div>
-<div class="section level4">
-<h4 id="relevant-files">Relevant files<a class="anchor" aria-label="anchor" href="#relevant-files"></a>
-</h4>
+<div class="section level3">
+<h3 id="important-files">Important Files<a class="anchor" aria-label="anchor" href="#important-files"></a>
+</h3>
 <ul>
-<li>LICENSE</li>
-<li>DESCRIPTION</li>
-<li>NAMESPACE</li>
-<li>README.md</li>
+<li>
+<code>_targets.R</code> configures <code>targets</code> settings, creates computational resource controllers, and structures the <code>beethoven</code> pipeline.
+<ul>
+<li>To run <code>beethoven</code>, users must review and update the following parameters for their user profile and computing system:
+<ul>
+<li>
+<code>controller_*</code> Ensure the local controllers do not request more CPUs than are available on your machine or high performance system.</li>
+<li>
+<code>#SBATCH --partition</code> Utilization of NVIDIA GPUs (within <code><a href="https://glue.tidyverse.org/reference/glue.html" class="external-link">glue::glue</a></code> command)</li>
+<li>
+<code>--bind /USER_PATH_TO_INPUT/input:/input</code> (within <code><a href="https://glue.tidyverse.org/reference/glue.html" class="external-link">glue::glue</a></code> command)</li>
 </ul>
-</div>
+</li>
+</ul>
+</li>
+<li>
+<code>_targets.yaml</code> is created and updated by running <code><a href="https://docs.ropensci.org/targets/reference/tar_make.html" class="external-link">targets::tar_make</a></code> and is not to be edited manually.</li>
+<li>
+<code>run.sh</code> allocates computational resources with SLURM and submits the <code>beethoven</code> pipeline to run on high performance computing system.
+<ul>
+<li>To run <code>beethoven</code>, users must review and update the following parameters for their user profile and computing system:
+<ul>
+<li><code>#SBATCH --mail-user</code></li>
+<li><code>#SBATCH --partition</code></li>
+<li><code>#SBATCH --mem</code></li>
+<li><code>#SBATCH --cpus-per-task</code></li>
+<li><code>--bind /USER_PATH_TO_INPUT/input:/input</code></li>
+<li><code>--bind /USER_PATH_TO_SLURM/slurm:/USER_PATH_TO_SLURM/slurm</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
 </div>
 <div class="section level3">
 <h3 id="naming-conventions">Naming Conventions<a class="anchor" aria-label="anchor" href="#naming-conventions"></a>
 </h3>
-<p>Naming things is hard and somewhat subjective. Nonetheless, consistent naming conventions make for better reproducibility, interpretability, and future extensibility. Here, we provide the <code>beethoven</code> naming conventions for objects as used in <code>targets</code> and for naming functions within the package (i.e. <strong>R/</strong>). For <code>tar_target</code> functions, we use the following naming conventions:</p>
-<p>Naming conventions for <code>targets</code> objects. We are motivated by the <a href="https://cfconventions.org/Data/cf-standard-names/docs/guidelines.html" class="external-link">Compositional Forecast</a> (CF) model naming conventions:</p>
-<p>e.g. [surface] [component] standard_name [at surface] [in medium] [due to process] [assuming condition] In CF, the entire process can be known from the required and optional naming pieces.</p>
+<p>Naming conventions for <code>targets</code> objects are motivated by the <a href="https://cfconventions.org/Data/cf-standard-names/docs/guidelines.html" class="external-link">Compositional Forecast</a> (CF) model naming conventions. By adopting the this convention, the name of each <code>targets</code> object communicates important information about its class, role, stage, and source.</p>
 <p>Here, we use the following naming convention:</p>
-<p><strong>[R object type]_[role-suffix]_[stage]_[source]_[spacetime]</strong></p>
+<p><strong>[class]_[role-suffix]_[stage]_[source/description]_[spacetime]</strong></p>
 <p>Each section is in the brackets [] and appears in this order. For some objects, not all naming sections are required. If two keywords in a section apply, then they are appended with a <code>-</code></p>
-<p>Examples: 1) <code>sf_PM25_log10-fit_AQS_siteid</code> is an <code>sf</code> object for <code>PM25</code> data that is log-transformed and ready for base-learner fitting, derived from AQS data and located at the siteid locations. 2) <code>SpatRast_process_MODIS</code> is a terra <code>SpatRast</code> object that has been processed from MODIS.</p>
+<p>Examples:</p>
+<p><code>dt_feat_calc_geos</code> - class: <code>dt</code> &lt;- <code>data.table</code> - role: <code>feat</code> &lt;- features - stage: <code>calc</code> &lt;- calculated - source: <code>geos</code> &lt;- <a href="https://gmao.gsfc.nasa.gov/weather_prediction/GEOS-CF/" class="external-link">NASA GEOS Composition Forecasting (GEOS-CF)</a></p>
+<p><code>list_base_params_candidates</code> - class: <code>list</code> - role: <code>base</code> &lt;- base learners - description: <code>params</code> &lt;- hyperparameters - description: <code>candidates</code> &lt;- <code>tune</code>-able parameters</p>
+<p><code>list_base_fit_gpu</code> - class: <code>list</code> - role: <code>base</code> &lt;- base learners - stage: <code>fit</code> - description: <code>gpu</code></p>
 <div class="section level4">
 <h4 id="naming-section-definitions">Naming section definitions:<a class="anchor" aria-label="anchor" href="#naming-section-definitions"></a>
 </h4>
 <ul>
-<li><p><strong>R object type</strong>: chr (character), list, sf, dt (datatable), tibble, SpatRaster, SpatVector</p></li>
 <li>
-<p><strong>role:</strong> Detailed description of the role of the object in the pipeline. Allowable keywords:</p>
+<strong>R object type</strong>:
+<ul>
+<li>
+<code>chr</code> (character)</li>
+<li><code>list</code></li>
+<li><code>sf</code></li>
+<li>
+<code>dt</code> &lt;- <code>data.table</code>
+</li>
+<li>
+<code>tbl</code> &lt;- <code>tibble</code>
+</li>
+<li>
+<code>rast</code> &lt;- <code>SpatRaster</code>
+</li>
+<li>
+<code>vect</code> &lt;- <code>SpatVector</code>
+</li>
+</ul>
+</li>
+<li>
+<strong>role:</strong> Detailed description of the role of the object in the pipeline. Allowable keywords:
 <ul>
 <li>PM25</li>
 <li>feat (feature) (i.e. geographic covariate)</li>
@@ -262,18 +298,19 @@
 </ul>
 </li>
 <li>
-<p><strong>stage</strong>: the stage of the pipeline the object is used in. Object transformations are also articulated here. Allowable keywords:</p>
+<strong>stage</strong>: the stage of the pipeline the object is used in. Object transformations are also articulated here. Allowable keywords:
 <ul>
-<li>raw</li>
+<li>download: raw downloaded data</li>
+<li>proc: processed data</li>
 <li>calc: results from processing-calculation chains</li>
-<li>fit: Ready for base/meta learner fitting</li>
+<li>fit: fit models</li>
 <li>result: Final result</li>
 <li>log</li>
 <li>log10</li>
 </ul>
 </li>
 <li>
-<p><strong>source:</strong> the original data source</p>
+<strong>source:</strong> the original data source
 <ul>
 <li>AQS</li>
 <li>MODIS</li>
@@ -291,7 +328,16 @@
 </ul>
 </li>
 <li>
-<p><strong>spacetime:</strong> relevant spatial or temporal information</p>
+<strong>description:</strong> additional descriptors
+<ul>
+<li>params: hyperparameters</li>
+<li>args: arguments</li>
+<li>cpu: CPU-enabled base/meta learner</li>
+<li>gpu: GPU-enabled base/meta learner</li>
+</ul>
+</li>
+<li>
+<strong>spacetime:</strong> relevant spatial or temporal information
 <ul>
 <li>spatial:
 <ul>
@@ -312,32 +358,7 @@
 </div>
 </div>
 <div class="section level3">
-<h3 id="function-naming-convenctions">Function Naming Convenctions<a class="anchor" aria-label="anchor" href="#function-naming-convenctions"></a>
-</h3>
-<p>We have adopted naming conventions in functions in this package as well as <code>amadeus</code> which is a key input package.</p>
-<p><strong>[High-Level-Process]_[Source]_[Object]</strong></p>
-<ul>
-<li>
-<p><strong>High-Level-Process</strong></p>
-<ul>
-<li>download</li>
-<li>process</li>
-<li>calc</li>
-</ul>
-</li>
-<li><p><strong>source:</strong> the original data source. Same as source section for tar objects</p></li>
-<li>
-<p><strong>Object</strong> An object that the function may be acting on</p>
-<ul>
-<li>base_model (base)</li>
-<li>meta_model (meta)</li>
-<li>feature (feat)</li>
-</ul>
-</li>
-</ul>
-</div>
-<div class="section level3">
-<h3 id="to-run-the-pipeline">To run the pipeline<a class="anchor" aria-label="anchor" href="#to-run-the-pipeline"></a>
+<h3 id="running-beethoven-pipeline">Running <code>beethoven</code> Pipeline<a class="anchor" aria-label="anchor" href="#running-beethoven-pipeline"></a>
 </h3>
 <div class="section level4">
 <h4 id="post-checkout-hook-setting">Post-checkout hook setting<a class="anchor" aria-label="anchor" href="#post-checkout-hook-setting"></a>
@@ -349,7 +370,7 @@
 <div class="section level4">
 <h4 id="user-settings">User settings<a class="anchor" aria-label="anchor" href="#user-settings"></a>
 </h4>
-<p><code>beethoven</code> pipeline is configured for SLURM with defaults for NIEHS HPC settings. For adapting the settings to users’ environment, consult with the documentation of your platform and edit the <code>_targets.R</code> and <code>inst/targets/targets_calculate.R</code> (i.e., resource management) accordingly.</p>
+<p><code>beethoven</code> pipeline is configured for SLURM with defaults for NIEHS HPC settings. For adapting the settings to users’ environment, consult with the documentation of your platform and edit the requested resources in <code>run.sh</code> (lines 3-11) and <code>_targets.R</code> (lines 41-45; individual <code>crew</code> and <code>crew.cluster</code> controller workers).</p>
 </div>
 <div class="section level4">
 <h4 id="setting-_targetsr">Setting <code>_targets.R</code>
@@ -361,61 +382,79 @@
 <span><span class="fu">tar_config_set</span><span class="op">(</span></span>
 <span>  store <span class="op">=</span> <span class="st">"__your_directory__"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>Users could comment out the three lines to keep targets in <code>_targets</code> directory under the project root. Common arguments are generated in the earlier lines in <code>_targets.R</code> file. Details of the function generating the arguments, <code>set_args_calc</code>, are described in the following.</p>
+<p>Users could comment out the three lines to keep targets in <code>_targets</code> directory under the project root. Common arguments are generated in the earlier lines in <code>_targets.R</code> file.</p>
 </div>
 <div class="section level4">
-<h4 id="using-set_args_calc">Using <code>set_args_calc</code>
-<a class="anchor" aria-label="anchor" href="#using-set_args_calc"></a>
+<h4 id="critical-targets">Critical <code>targets</code>
+<a class="anchor" aria-label="anchor" href="#critical-targets"></a>
 </h4>
-<p><code>set_args_calc</code> function exports or returns common parameters that are used repeatedly throughout the calculation process. The default commands are as below:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/set_args_calc.html">set_args_calc</a></span><span class="op">(</span></span>
-<span>  char_siteid <span class="op">=</span> <span class="st">"site_id"</span>,</span>
-<span>  char_timeid <span class="op">=</span> <span class="st">"time"</span>,</span>
-<span>  char_period <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2018-01-01"</span>, <span class="st">"2022-12-31"</span><span class="op">)</span>,</span>
-<span>  num_extent <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">126</span>, <span class="op">-</span><span class="fl">62</span>, <span class="fl">22</span>, <span class="fl">52</span><span class="op">)</span>,</span>
-<span>  char_user_email <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"USER"</span><span class="op">)</span>, <span class="st">"@nih.gov"</span><span class="op">)</span>,</span>
-<span>  export <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  path_export <span class="op">=</span> <span class="st">"inst/targets/calc_spec.qs"</span>,</span>
-<span>  path_input <span class="op">=</span> <span class="st">"input"</span>,</span>
-<span>  nthreads_nasa <span class="op">=</span> <span class="fl">14L</span>,</span>
-<span>  nthreads_tri <span class="op">=</span> <span class="fl">5L</span>,</span>
-<span>  nthreads_geoscf <span class="op">=</span> <span class="fl">10L</span>,</span>
-<span>  nthreads_gmted <span class="op">=</span> <span class="fl">4L</span>,</span>
-<span>  nthreads_narr <span class="op">=</span> <span class="fl">24L</span>,</span>
-<span>  nthreads_groads <span class="op">=</span> <span class="fl">3L</span>,</span>
-<span>  nthreads_population <span class="op">=</span> <span class="fl">3L</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p>All arguments except for <code>char_siteid</code> and <code>char_timeid</code> should be carefully set to match users’ environment. <code>export = TRUE</code> is recommended if there is no pre-generated qs file for calculation parameters. For more details, consult <code><a href="reference/set_args_calc.html">?set_args_calc</a></code> after loading <code>beethoven</code> in your R interactive session.</p>
+<p>There are 5 “critical” <code>targets</code> that users may want to change to run <code>beethoven</code>.</p>
+<ul>
+<li>
+<code>chr_daterange</code>
+<ul>
+<li>Controls all time-related targets for the entire pipeline. This is the only <code>target</code> that needs to be changed to update the pipeline with a new temopral range. Month and year specific arguments are derived from the time range defined by <code>chr_daterange</code>.</li>
+</ul>
+</li>
+<li>
+<code>chr_nasa_token</code>
+<ul>
+<li>Sets the file path to the user’s NASA Earthdata account credentials. These credentials expire at ~90 day intervals and therefore must be updated regularly.</li>
+</ul>
+</li>
+<li>
+<code>chr_mod06_links</code>
+<ul>
+<li>The file path to the MOD06 links file. These links must be manually downloaded per the <code><a href="https://niehs.github.io/amadeus/reference/download_modis.html" class="external-link">amadeus::download_modis</a></code> function. The links are then stored in a CSV file that is read by the function. The new file with links must be updated to match the new date range.</li>
+</ul>
+</li>
+<li>
+<code>chr_input_dir</code>
+<ul>
+<li>The file path to the input directory. This target controls where the raw data files are downloaded to and imported from. This file path must be mounted to the container at run time in the <code>run.sh</code> script.</li>
+</ul>
+</li>
+<li>
+<code>num_dates_split</code>
+<ul>
+<li>Controls the size of temporal splits. Splitting the temporal range into smaller chunks allows for parallel processing across multiple workers. It also allows for dispatching new dynamic branches when the temporal range is updated.</li>
+</ul>
+</li>
+</ul>
 </div>
 <div class="section level4">
-<h4 id="running-the-pipeline">Running the pipeline<a class="anchor" aria-label="anchor" href="#running-the-pipeline"></a>
+<h4 id="apptainer">
+<code>Apptainer</code><a class="anchor" aria-label="anchor" href="#apptainer"></a>
 </h4>
-<p>After switching to the project root directory (in terminal, <code>cd [project_root]</code>, replace <code>[project_root]</code> with the proper path), users can run the pipeline.</p>
+<p>Current implementation of <code>beethoven</code> utilizes <code>Apptainer</code> images to run the pipeline with consistent package versions and custom installations. Users must build these images before runnning beethoven.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="bu">cd</span> container/ <span class="co"># must be working in the `container/` directory</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="fu">sh</span> build_container_covariates.sh <span class="co"># build "covariates" stage image</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="fu">sh</span> build_container_models.sh <span class="co"># build "models" image</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="fu">mv</span> <span class="pp">*</span>sif ../ <span class="co"># move images to `beethoven/` root directory</span></span></code></pre></div>
 <blockquote>
-<p>[!NOTE] With <code>export = TRUE</code>, it will take some time to proceed to the next because it will recursively search hdf file paths. The time is affected by the number of files to search or the length of the period (<code>char_period</code>).</p>
+<p>[!NOTE] <code>.sif</code> files are omitted from GitHub due to size (&gt;5 Gb each)</p>
 </blockquote>
-<blockquote>
-<p>[!WARNING] Please make sure that you are at the project root before proceeding to the following. The HPC example requires additional edits related to SBATCH directives and project root directory.</p>
-</blockquote>
-<pre class="shell"><code>Rscript inst/targets/targets_start.R &amp;</code></pre>
-<p>Or in NIEHS HPC, modify several lines to match your user environment:</p>
-<pre class="shell"><code># ...
-#SBATCH --output=YOUR_PATH/pipeline_out.out
-#SBATCH --error=YOUR_PATH/pipeline_err.err
-# ...
-# The --mail-user flag is optional
-#SBATCH --mail-user=MYACCOUNT@nih.gov
-# ...
-USER_PROJDIR=/YOUR/PROJECT/ROOT
-nohup nice -4 Rscript $USER_PROJDIR/inst/targets/targets_start.R</code></pre>
-<p><code>YOUR_PATH</code>, <code>MYACCOUNT</code> and <code>/YOUR_PROJECT_ROOT</code> should be changed. In the end, you can run the following command:</p>
-<pre class="shell"><code>sbatch inst/targets/run.sh</code></pre>
-<p>The script will submit a job with effective commands with SLURM level directives defined by lines starting <code>#SBATCH</code>, which allocate CPU threads and memory from the specified partition.</p>
-<p><code>inst/targets/run.sh</code> includes several lines exporting environment variables to bind GDAL/GEOS/PROJ versions newer than system default, geospatial packages built upon these libraries, and the user library location where required packages are installed. The environment variables need to be changed following NIEHS HPC system changes in the future.</p>
-<blockquote>
-<p>[!WARNING] <code>set_args_*</code> family for downloading and summarizing prediction outcomes will be added in the future version.</p>
-</blockquote>
+</div>
+<div class="section level4">
+<h4 id="run">Run<a class="anchor" aria-label="anchor" href="#run"></a>
+</h4>
+<p>After switching back to the project root directory, users can run the pipeline with the <code>run.sh</code> shell script. The following lines of <code>run.sh</code> must be updated with user-specific settings before running the pipeline</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co">#SBATCH --mail-user=[USER_EMAIL]      # email address for job notifications</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="co">#SBATCH --partition=[PARTITION_NAME]  # HPC partition to run on</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co">#SBATCH --mem=[###G]                  # Total memory for the job</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co">#SBATCH --cpus-per-task=[</span><span class="al">###</span><span class="co">]         # Total CPUs for the job</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="ex">...</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>  <span class="ex">--bind</span> <span class="pp">[</span><span class="ss">USER_INPUT_DIRECTORY</span><span class="pp">]</span>/input:/input <span class="dt">\</span></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>...</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>  <span class="ex">--bind</span> <span class="pp">[</span><span class="ss">USER_SYSTEM_PATH/munge</span><span class="pp">]</span>:/run/munge <span class="dt">\</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>  <span class="at">--bind</span> <span class="pp">[</span><span class="ss">USER_SYSTEM_PATH/slurm</span><span class="pp">]</span>:<span class="pp">[</span><span class="ss">USER_SYSTEM_PATH/slurm</span><span class="pp">]</span> <span class="dt">\</span></span></code></pre></div>
+<p>Once configured, the pipeline can be run with a <code>SLRUM</code> batch job.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="bu">cd</span> ../ <span class="co"># assuming still in the `container/` directory</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="ex">sbatch</span> run.sh</span></code></pre></div>
+<p>The SLURM batch job can also be submitted <code>R</code> session with the <code>batch</code> helper function.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="st">"R/helpers.R"</span><span class="op">)</span></span>
+<span><span class="fu">batch</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 </div>
@@ -426,7 +465,7 @@ nohup nice -4 Rscript $USER_PROJDIR/inst/targets/targets_start.R</code></pre>
 <div class="section level2">
 <h2 id="preamble">Preamble<a class="anchor" aria-label="anchor" href="#preamble"></a>
 </h2>
-<p>The objective of this document is to provide developers with the current implementation of <code>beethoven</code> pipeline for version 0.3.9.</p>
+<p>The objective of this document is to provide developers with the current implementation of <code>beethoven</code> pipeline for version 0.4.4.</p>
 <p>We assume the potential users have basic knowledge of <code>targets</code> and <code>tarchetypes</code> packages as well as functional and meta-programming. It is recommended to read Advanced R (by Hadley Wickham)’s chapters for these topics.</p>
 </div>
 <div class="section level2">
@@ -434,23 +473,11 @@ nohup nice -4 Rscript $USER_PROJDIR/inst/targets/targets_start.R</code></pre>
 </h2>
 <p>The pipeline is based on <code>targets</code> package. All targets are <strong>stored</strong> in a designated storage, which can be either a directory path or a URL when one uses cloud storage or web servers. Here we classify the components into three groups:</p>
 <ol style="list-style-type: decimal">
-<li>Pipeline execution components: the highest level script to run the pipeline.</li>
-<li>Pipeline configuration components: function arguments that are injected into the functions in each target.</li>
-<li>Pipeline target components: definitions of each target, essentially lists of <code><a href="https://docs.ropensci.org/targets/reference/tar_target.html" class="external-link">targets::tar_target()</a></code> call classified by pipeline steps</li>
+<li>Execution: high level script to run the pipeline.</li>
+<li>Critical: common/critical arguments that are injected into functions.</li>
+<li>Objects: definitions of each <code>target</code> object.</li>
 </ol>
-<p>Let’s take a moment to be a user. You should consult specific file when:</p>
-<ul>
-<li>
-<code>_targets.R</code>: you need to modify or saw errors on library locations, targets storage locations, required libraries
-<ul>
-<li>Check <code>set_args_*()</code> function parts when you encounter “file or directory not found” error</li>
-</ul>
-</li>
-<li>
-<code>run_slurm.sh</code>: “the pipeline status is not reported to my email address.”</li>
-<li>
-<code>inst/targets/targets_*.R</code> files: any errors related to running targets except for lower level issues in <code>beethoven</code> or <code>amadeus</code> functions</li>
-</ul>
+<p>Let’s take a moment to be a user. You should consult specific file when: - You need to modify library dependencies, <code>target</code> storage location, or controller settings: <code>_targets.R</code>. - You get an error <code>File or directory not found</code>: <code>run.sh</code> (Lines 32 and 49), <code>_targets.R</code> (Line 41), <code>inst/targets/targets_critical.R</code> (Line 47) - You do not get SLURM job notifications via email: <code>run.sh</code>(Line 4) - Failed dispatched <code>target</code> objects: <code>inst/targets/targets_*.R</code> (error will report failed <code>target</code>)</p>
 <blockquote>
 <p>[!NOTE] Please expand the toggle below to display function trees for <code>inst/targets/targets_*.R</code> files. Only functions that are directly called in each file are displayed due to screen real estate and readability concerns.</p>
 </blockquote>
@@ -504,129 +531,83 @@ nohup nice -4 Rscript $USER_PROJDIR/inst/targets/targets_start.R</code></pre>
     %% Apply thin solid dark grey lines to the branches
     classDef branchStyle stroke-width:1px,stroke:#333333
     class fargdown,fargcalc,fraw,readlocs,fitbase,switchmodel,makesub,covindexrset,attach,gencvsp,gencvts,gencvspt,switchrset,fcalc,fcalcinj,fcalcinjmod,fcalcinjgmted,fcalcinjmatch,fcalcgeos,fcalcgmted,fcalcnarr2,fparnarr,fmetalearn,G branchStyle</code></pre>
-</details><p><img src="reference/figures/pipeline-code-relations.svg"></p>
+</details><p><img src="reference/figures/pipeline-code-relations-20250131.png"></p>
 <p>The details of argument injection is illustrated below. The specific arguments to inject are loaded from QS files that are required to be saved in <code>inst/targets</code> directory. Each QS file contains a nested list object where function arguments for downloading raw data and calculating features are defined and store.</p>
-<div class="section level4">
-<h4 id="insttargetsdownload_specqs">
-<code>inst/targets/download_spec.qs</code><a class="anchor" aria-label="anchor" href="#insttargetsdownload_specqs"></a>
-</h4>
-<p>The file is generated by a <code>beethoven</code> function <code>set_args_download</code>. In <code>_targets.R</code> file, one can skip to generate this file if raw data download is already done or unnecessary.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">generate_list_download</span> <span class="op">&lt;-</span> <span class="cn">FALSE</span></span>
-<span></span>
-<span><span class="va">arglist_download</span> <span class="op">&lt;-</span></span>
-<span>  <span class="fu"><a href="reference/set_args_download.html">set_args_download</a></span><span class="op">(</span></span>
-<span>    char_period <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2018-01-01"</span>, <span class="st">"2022-12-31"</span><span class="op">)</span>,</span>
-<span>    char_input_dir <span class="op">=</span> <span class="st">"input"</span>,</span>
-<span>    nasa_earth_data_token <span class="op">=</span> <span class="cn">NULL</span>,<span class="co">#Sys.getenv("NASA_EARTHDATA_TOKEN"),</span></span>
-<span>    export <span class="op">=</span> <span class="va">generate_list_download</span>,</span>
-<span>    path_export <span class="op">=</span> <span class="st">"inst/targets/download_spec.qs"</span></span>
-<span>  <span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level4">
-<h4 id="insttargetscalc_specqs">
-<code>inst/targets/calc_spec.qs</code><a class="anchor" aria-label="anchor" href="#insttargetscalc_specqs"></a>
-</h4>
-<p><code><a href="reference/set_args_calc.html">set_args_calc()</a></code> function will generate this file. The file name can be changed (<code>path_export = "inst/targets/calc_spec.qs"</code>), but it must start with <code>calc_</code> as the file name prefix is used to search QS files to manage different periods. Like <code>download_spec.qs</code>, whether or not to run this function can be specified by a logical variable named <code>generate_list_calc</code> in <code>_targets.R</code> file.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">generate_list_calc</span> <span class="op">&lt;-</span> <span class="cn">FALSE</span></span>
-<span></span>
-<span><span class="va">arglist_common</span> <span class="op">&lt;-</span></span>
-<span>  <span class="fu"><a href="reference/set_args_calc.html">set_args_calc</a></span><span class="op">(</span></span>
-<span>    char_siteid <span class="op">=</span> <span class="st">"site_id"</span>,</span>
-<span>    char_timeid <span class="op">=</span> <span class="st">"time"</span>,</span>
-<span>    char_period <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2018-01-01"</span>, <span class="st">"2022-12-31"</span><span class="op">)</span>,</span>
-<span>    num_extent <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">126</span>, <span class="op">-</span><span class="fl">62</span>, <span class="fl">22</span>, <span class="fl">52</span><span class="op">)</span>,</span>
-<span>    char_user_email <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"USER"</span><span class="op">)</span>, <span class="st">"@nih.gov"</span><span class="op">)</span>,</span>
-<span>    export <span class="op">=</span> <span class="va">generate_list_calc</span>,</span>
-<span>    path_export <span class="op">=</span> <span class="st">"inst/targets/calc_spec.qs"</span>,</span>
-<span>    char_input_dir <span class="op">=</span> <span class="st">"/ddn/gs1/group/set/Projects/NRT-AP-Model/input"</span></span>
-<span>  <span class="op">)</span></span></code></pre></div>
-<p>QUESTION: Where (which function calls) and when is <code>inst/targets/init_target.sh</code> used?</p>
 <p><img src="reference/figures/pipeline-schema.svg"></p>
-<p>As a compromise between the layouts for standard R packages and <code>targets</code> pipelines, we mainly keep <code>tar_target()</code> definitions in <code>inst/targets/</code>, whereas the <code>targets</code> required components are stored in the project root. All targets are recorded in <code>_targets/</code> directory by default, and it can be changed to somewhere else by defining an external directory at <code>store</code> argument in <code>tar_config_set()</code> in <code>_targets.R</code>. If you change that part in <code>_targets.R</code>, you should run <code>init_targets_storage.sh</code> <strong>in the project root</strong> to create the specified directory.</p>
-<pre class="shell"><code>. init_targets_storage.sh</code></pre>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># replacing yaml file.</span></span>
-<span><span class="fu">tar_config_set</span><span class="op">(</span></span>
-<span>  store <span class="op">=</span> <span class="st">"/__your__desired__location__"</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-</div>
+<p>As a compromise between the layouts for standard R packages and <code>targets</code> pipelines, we mainly keep <code>tar_target()</code> definitions in <code>inst/targets/</code>, whereas the <code>targets</code> required components are stored in the project root. All targets are recorded in <code>_targets/</code> directory by default, and it can be changed to somewhere else by defining an external directory at <code>store</code> argument in <code>tar_config_set()</code> in <code>_targets.R</code>.</p>
 </div>
 <div class="section level2">
 <h2 id="before-running-the-pipeline">Before running the pipeline<a class="anchor" aria-label="anchor" href="#before-running-the-pipeline"></a>
 </h2>
-<p>For the future release and tests on various environments, one should check several lines across R and shell script files:</p>
 <ul>
-<li>Shell script
+<li>Container
 <ul>
-<li>
-<code>/run_interactive.sh</code>: this file is for running the host <code>targets</code> process <strong>in an interactive session</strong>. All system variables including <code>PATH</code> and <code>LD_LIBRARY_PATH</code> to align with the current development system environment. The lines in the provided file are set for NIEHS HPC. Note that it may stall if there are too many other processes running on the interactive node.</li>
-<li>
-<code>/run_slurm.sh</code>: this file is for running the host <code>targets</code> process <strong>on SLURM by SBATCH script</strong>, meaning that one should run <code>sbatch run_slurm.sh</code>. The working directory is set in this bash script to the root of your project (i.e. <code>beethoven</code> clone root) :</li>
+<li>The container images, <code>container_covariates.sif</code> and <code>container_models.sif</code>, are not hosted on GitHub due to the large file size. The images must be built by each user before running the pipeline. Definition files for each images can be found at <code>container/container_covariates.def</code> and <code>container/container_models.def</code>, respectively. The images can be build by running <code>sh build_container_[covariates/models].sh</code> <strong>from within the <code>container/</code> folder</strong>, or running <code>sbatch build_container_[covariates/models].sh</code>.</li>
 </ul>
 </li>
+<li>Shell
+<ul>
+<li>The <code>run.sh</code> file controls SLURM submission details (ie, <code>--mem</code>, <code>--cpus-per-task</code>) and container settings (ie. <code>container_[covariates/models].sif</code>, mounted directories). Local directories which must be explicitly mounted to the container for covariate and model runs are 1. the group data store (<code>--bind USER_PATH_TO_INPUT/input:/input</code>), 2. local targets store (<code>--bind $PWD/_targets:/opt/_targets</code>), and 3. the <code>inst/</code> folder which has the targets (<code>--bind $PWD/_targets:/opt/_targets</code>). The model fitting stage uses the <code>crew.cluster::crew_controller_slurm</code> controller, and therefore requires <strong>local installation and settings of</strong> <code>munge</code> (<code>--bind /run/munge:/run/munge</code>) and <code>slurm</code> (<code>--bind /USER_PATH_TO_SLURM/slurm:/USER_PATH_TO_SLURM/slurm</code>).</li>
 </ul>
-<pre><code>      # modify it into the proper directory path. and output/error paths in the
-      # # SBATCH directives
-      USER_PROJDIR=/ddn/gs1/home/$USER/projects
-
-      nohup nice -4 Rscript $USER_PROJDIR/beethoven/inst/targets/targets_start.R</code></pre>
-<ul>
-<li>R script
+</li>
+<li>R
 <ul>
 <li>
-<code>/targets.R</code>: Lines 10-12, <code>tar_config_set(store = ...)</code> should be reviewed if it is set properly not to overwrite successfully run targets.</li>
+<code>_targets.R</code>: Ensure each <code>crew::crew_controller_local</code> does not specify more workers than the total number workers requested in <code>run.R</code> (line 9).</li>
 <li>
-<code>/targets.R</code>: <code>set_args_download</code> and <code>set_args_calc</code> functions, i.e., <code>char_input_dir</code> argument and <code>char_period</code>.</li>
+<code>_targets.R</code>: Ensure <code>targets</code> store (line 63) matches the mount location in <code>run.sh</code> (lines 33 and 47 <strong>after the semicolon</strong>).</li>
 <li>
-<code>/targets.R</code>: <code>library</code> argument value in <code>tar_option_set</code> to match the current system environment</li>
+<code>inst/targets/targets_critical.R</code>: Critical targets are those which will require changes between users (<code>chr_nasa_token</code>), for development (<code>num_dates_split</code>), manual updates (<code>/inst/extdata/mod06_links_2018_2022.csv</code> called via <code>chr_mod06_links</code>), and mounted data path (<code>chr_input_dir</code>). <strong>Most importantly</strong>, critical target <code>chr_daterange</code> controls the entire temporal range of the downstream pipeline. Time-related specifications (dates, months, years, julian dates, etc) are defined relative to <code>chr_daterange</code>.</li>
 </ul>
 </li>
 </ul>
 </div>
 <div class="section level2">
-<h2 id="basic-structure-of-branches">Basic structure of branches<a class="anchor" aria-label="anchor" href="#basic-structure-of-branches"></a>
+<h2 id="dynamic-branching-with-targets">Dynamic branching with <code>targets</code>
+<a class="anchor" aria-label="anchor" href="#dynamic-branching-with-targets"></a>
 </h2>
-<p>We will call “grand target” as a set of branches if any branching technique is applied at a target.</p>
-<p>When one target is branched out, the grand target should be a list, either being a nested or a plain list, depending on the context or the command run inside each branch. Branch names include automatic hash after the grand target name as a suffix. Users may use their own suffixes for legibility. Branches have their own good to provide succinct network layout (i.e., an interactive plot generated by <code>tar_visnetwork(targets_only = TRUE)</code>), while they add complication to debug. It is strongly advised that the unit function that is applied to each branch should be fully tested.</p>
+<p><code>beethoven</code> implements <a href="https://books.ropensci.org/targets/dynamic.html" class="external-link"><code>targets</code> dynamic branching</a> to iterate function calls over a series of parameter inputs. When dynamic branching is used, the “grand target” is the <code>tar_target</code>, and should be a list, either being a nested or a plain list, depending on the context or the command run inside each branch.</p>
+<p>The following example shows <code>download_geos</code>, a dynamically branched target. <code>download_geos</code> is the “grand target”, and is a <code>list</code> consisting of 30 hash values returned from <code>download_geos</code> function call. The 30 values stem from 2 GEOS-CF collections (<code>c("aqc_tavg_1hr_g1440x721_v1", "chm_tavg_1hr_g1440x721_v1")</code>) and 15 temporal breaks (365 days * 5 years / 122 days).</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">...</span></span>
+<span>    <span class="fu">targets</span><span class="fu">::</span><span class="fu"><a href="https://docs.ropensci.org/targets/reference/tar_target.html" class="external-link">tar_target</a></span><span class="op">(</span></span>
+<span>      <span class="va">download_geos</span>,</span>
+<span>      command <span class="op">=</span> <span class="fu">amadeus</span><span class="fu">::</span><span class="fu"><a href="https://niehs.github.io/amadeus/reference/download_geos.html" class="external-link">download_geos</a></span><span class="op">(</span></span>
+<span>        collection <span class="op">=</span> <span class="va">chr_iter_calc_geos</span>,</span>
+<span>        directory_to_save <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">chr_input_dir</span>, <span class="st">"geos"</span><span class="op">)</span>,</span>
+<span>        date <span class="op">=</span> <span class="fu">beethoven</span><span class="fu">::</span><span class="fu"><a href="reference/fl_dates.html">fl_dates</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">list_dates</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>        remove_command <span class="op">=</span> <span class="va">list_download_args</span><span class="op">$</span><span class="va">remove_command</span>,</span>
+<span>        acknowledgement <span class="op">=</span> <span class="va">list_download_args</span><span class="op">$</span><span class="va">acknowledgement</span>,</span>
+<span>        download <span class="op">=</span> <span class="va">list_download_args</span><span class="op">$</span><span class="va">download</span>,</span>
+<span>        hash <span class="op">=</span> <span class="va">list_download_args</span><span class="op">$</span><span class="va">hash</span></span>
+<span>      <span class="op">)</span>,</span>
+<span>      pattern <span class="op">=</span> <span class="fu">cross</span><span class="op">(</span><span class="va">chr_iter_calc_geos</span>, <span class="va">list_dates</span><span class="op">)</span>,</span>
+<span>      description <span class="op">=</span> <span class="st">"Download GEOS-CF data | download"</span></span>
+<span>    <span class="op">)</span></span>
+<span><span class="va">...</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="branching-in-beethoven">Branching in beethoven<a class="anchor" aria-label="anchor" href="#branching-in-beethoven"></a>
+<h2 id="sysgetenvbeethoven">
+<code>Sys.getenv("BEETHOVEN")</code><a class="anchor" aria-label="anchor" href="#sysgetenvbeethoven"></a>
 </h2>
-<p>Branching is actively employed in most parts in <code>beethoven</code>. Here we will navigate which targets are branched out and rationales for branching in each target.</p>
-<div class="section level3">
-<h3 id="downloading-raw-data-from-the-source">Downloading raw data from the source<a class="anchor" aria-label="anchor" href="#downloading-raw-data-from-the-source"></a>
-</h3>
-<p>Download targets are separated from the calculation-model fitting sequence and operate a bit different from other targets. Arguments stored in a QS file or QS files (<code>inst/targets/download_*.qs</code>) are injected to <code><a href="https://niehs.github.io/amadeus/reference/download_data.html" class="external-link">amadeus::download_data()</a></code> and it will initiate building raw data download targets. The target is rigorous branched out thus is represented as one square node when one runs <code><a href="https://docs.ropensci.org/targets/reference/tar_visnetwork.html" class="external-link">targets::tar_visnetwork()</a></code>. Building the target named ‘lgl_rawdir_download’ will download the raw data from the internet and it will be performed <strong>sequentially</strong> under the current setting.</p>
-<p>Users may bypass the downloading targets by setting a temporary system variable with <code>Sys.setenv("BTV_DOWNLOAD_PASS" = "FALSE")</code>, which is included in <code>_targets.R</code>.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># bypass option</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Sys.setenv.html" class="external-link">Sys.setenv</a></span><span class="op">(</span><span class="st">"BTV_DOWNLOAD_PASS"</span> <span class="op">=</span> <span class="st">"FALSE"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># abridged for display...</span></span>
-<span></span>
-<span><span class="co"># # nullify download target if bypass option is set</span></span>
-<span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"BTV_DOWNLOAD_PASS"</span><span class="op">)</span> <span class="op">==</span> <span class="st">"TRUE"</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">target_download</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
+<p>As previously mentioned, the <code>beethoven</code> pipeline is run through <code>Apptainer</code> image. More specifically, it has two stages, “covariates” and “models”, which are run through separate container images, <code>container_covariates.sif</code> and <code>container_models.sif</code>, respectively. These two separate images are used to avoid discrepancies between spatial- and machine learning-oriented R packages, which may utilize different versions of the same underlying dependencies.</p>
+<p>The “covariates” stage of the pipeline downloads raw data files to the <code>input/</code> directory, calculates features from these data at AQS sites and prediction point locations (in development), and combines and imputes the data. Relevant <code>targets</code> files (from the <code>inst/targets/</code> directory) include <code>targets_initiate.R</code>, <code>targets_download.R</code>, <code>targets_aqs.R</code>, <code>targets_calculate_fit.R</code>, and <code>targets_calculate_predict.R</code>. The <code>container_covariates.sif</code> image is built from the <code>rocker/geospatial:latest</code> base <a href="https://github.com/rocker-org/rocker-versioned2/blob/master/dockerfiles/geospatial_4.4.2.Dockerfile" class="external-link">image</a>.</p>
+<p>The “models” stage of the pipline fits the base and meta learner models, predicts values at prediction point locations, and computes summary statistics (all in development). Relevant <code>targets</code> files include <code>targets_initiate.R</code>, <code>targets_baselearner.R</code>, <code>targets_metalearner.R</code>, <code>targets_predict.R</code>. The <code>container_models.sif</code> image is built from <code>nvidia/cuda:11.8.0-devel-ubuntu22.04</code> with GPU-enabled versions of <code>torch</code>, <code>brulee</code>, <code>xgboost</code>, and <code>lightGBM</code> installed from GitHub or built from source. The R packages included in the <code>container_models.def</code> file are derived from those included in <code>rocker/ml-verse:lastest</code> base <a href="https://github.com/rocker-org/rocker-versioned2/blob/master/dockerfiles/ml-verse_4.4.2.Dockerfile" class="external-link">image</a>. <code>container_models.def</code> installs development version of CUDA 11.8 to include toolkit (<code>nvcc</code>).</p>
+<p>The <code>run.sh</code> and <code>_targets.R</code> files manage the pipeline stages. In the <code>run.sh</code> script, the environmental variable <code>BEETHOVEN</code> is set before the container run to identify the stage. This environmental variable is then read in the <code>_targets.R</code> file. If the <code>_targets.R</code> file identifes the “covariates” stage, the base and meta learner and prediction <code>targets</code> are set to <code>NULL</code> to skip. If “models” stage, these <code>targets</code> are dispatched.</p>
+<p><code>run.sh</code> (Lines 24-26)</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="co"># Set environmental variable to indicate download and covariate</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="co"># calculation targets.</span></span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="bu">export</span> <span class="va">BEETHOVEN</span><span class="op">=</span>covariates</span></code></pre></div>
+<p><code>_targets.R</code> (Lines 111-113)</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"BEETHOVEN"</span><span class="op">)</span> <span class="op">==</span> <span class="st">"covariates"</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">target_baselearner</span> <span class="op">&lt;-</span> <span class="va">target_metalearner</span> <span class="op">&lt;-</span> <span class="va">target_predict</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
 <span><span class="op">}</span></span></code></pre></div>
 </div>
-<div class="section level3">
-<h3 id="list_feat_calc_base">
-<code>list_feat_calc_base</code><a class="anchor" aria-label="anchor" href="#list_feat_calc_base"></a>
-</h3>
-<p>Per <code>beethoven</code> targets naming convention, this object will be a list and it has eight elements at the first level. We use “first level” here as the list is nested. It is also related to maintain <code>list_feat_calc_base_flat</code> at the following target. Eight elements are defined in a preceding target <code>chr_iter_calc_features</code>:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span>    <span class="fu">tar_target</span><span class="op">(</span></span>
-<span>      <span class="va">chr_iter_calc_features</span>,</span>
-<span>      command <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"hms"</span>, <span class="st">"tri"</span>, <span class="st">"nei"</span>,</span>
-<span>                  <span class="st">"ecoregions"</span>, <span class="st">"koppen"</span>, <span class="st">"population"</span>, <span class="st">"groads"</span><span class="op">)</span>,</span>
-<span>      iteration <span class="op">=</span> <span class="st">"list"</span>,</span>
-<span>      description <span class="op">=</span> <span class="st">"Feature calculation"</span></span>
-<span>    <span class="op">)</span></span></code></pre></div>
-<p>Using <code>inject_calculate</code> function and argument lists generated by <code>set_args_calc</code> function, <code>chr_iter_calc_features</code> are passed to <code>amadeus</code> functions for calculation. Please note that the pattern of <code>list_feat_calc_base</code> is not simply <code>map(chr_iter_calc_features)</code>, rather <code>cross(file_prep_calc_args, chr_iter_calc_features)</code>, for potential expansion to keep multiple argument files in the future.</p>
-<p>Each element in <code>chr_iter_calc_features</code> is iterated as a list then <code>list_feat_calc_base</code> will be a nested list. <code>list_feat_calc_base</code> will merge nested elements into one <code>data.frame</code> (<code>data.table</code> actually), resulting in a non-nested <code>list</code>, which means each element in this <code>list</code> object is a <code>data.frame</code>.</p>
-</div>
+<div class="section level2">
+<h2 id="beethoven-objects">
+<code>beethoven</code> objects<a class="anchor" aria-label="anchor" href="#beethoven-objects"></a>
+</h2>
 <div class="section level3">
 <h3 id="list_feat_calc_nlcd">
 <code>list_feat_calc_nlcd</code><a class="anchor" aria-label="anchor" href="#list_feat_calc_nlcd"></a>
@@ -683,7 +664,7 @@ nohup nice -4 Rscript $USER_PROJDIR/inst/targets/targets_start.R</code></pre>
 <h3 id="autojoin-functions">Autojoin functions<a class="anchor" aria-label="anchor" href="#autojoin-functions"></a>
 </h3>
 <p>Automatic join function <code>post_calc_autojoin</code> is one of the most complex function in <code>beethoven</code> codebase, which encapsulates the efforts to resolve all sorts of space-time discrepancies across targets. Full and coarse site-date combinations and full and coarse site-year combinations are automatically resolved in the function. The coarse site-year combination is a challenge since some years are out of the study period and such <em>anchor</em> years should be repeated to fill in for no gaps in the joined data. Another <code>post_calc_df_year_expand</code> and its upstream <code>post_calc_year_expand</code> function repeat coarse site-year <code>data.frame</code>s properly to ensure that there will be no years with missing values.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">post_calc_autojoin</span> <span class="op">&lt;-</span></span>
 <span>  <span class="kw">function</span><span class="op">(</span></span>
 <span>    <span class="va">df_fine</span>,</span>
@@ -759,18 +740,6 @@ nohup nice -4 Rscript $USER_PROJDIR/inst/targets/targets_start.R</code></pre>
 <span>  <span class="op">}</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="managing-calculated-features">Managing calculated features<a class="anchor" aria-label="anchor" href="#managing-calculated-features"></a>
-</h3>
-<p>The calculation configuration files can be multiple, which means the calculated feature targets can also be multiple. The <code>dt_feat_calc_cumulative</code> target operates differently depending on the existence of a <em>.qs file in the <code>output/qs</code> directory. If there is any </em>.qs file in the <code>output/qs</code> directory, the <code>dt_feat_calc_design</code> target will be appended (i.e., <code><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind()</a></code>-ed) to the contents of the <code>*.qs</code> files. The first run will assign a file name string to <code>dt_feat_calc_cumulative</code>.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/append_predecessors.html">append_predecessors</a></span><span class="op">(</span></span>
-<span>  path_qs <span class="op">=</span> <span class="st">"output/qs"</span>,</span>
-<span>  period_new <span class="op">=</span> <span class="va">arglist_common</span><span class="op">$</span><span class="va">char_period</span>,</span>
-<span>  input_new <span class="op">=</span> <span class="va">dt_feat_calc_design</span>,</span>
-<span>  nthreads <span class="op">=</span> <span class="va">arglist_common</span><span class="op">$</span><span class="va">nthreads_append</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
 <h3 id="imputation">Imputation<a class="anchor" aria-label="anchor" href="#imputation"></a>
 </h3>
 <p>The calculated features contain a fair amount of <code>NA</code> or <code>NaN</code>s depending on the raw dataset. We distinguish these into “true zeros” and “true missing” for the subsequent imputation process. For imputation, <code>missRanger</code> is used. The <code>missRanger</code> arguments can be adjusted in the <code><a href="reference/impute_all.html">impute_all()</a></code> function.</p>
@@ -844,15 +813,6 @@ texttt{3 (CV strategies)}\times \texttt{100 resamples}</annotation></semantics><
     fitmodel ---|predict()| bestfit</code></pre>
 </div>
 </div>
-</div>
-<div class="section level2">
-<h2 id="containerization">Containerization<a class="anchor" aria-label="anchor" href="#containerization"></a>
-</h2>
-<ul>
-<li>TODO: build GPU-enabled Apptainer image</li>
-<li>TODO: make a new branch to replace <code>container-engine</code>
-</li>
-</ul>
 </div>
 </div>
 

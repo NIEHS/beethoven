@@ -11,7 +11,7 @@ saves the row index in .rowindex field."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">beethoven</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -45,7 +45,7 @@ saves the row index in .rowindex field.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">make_subdata</span><span class="op">(</span><span class="va">data</span>, n <span class="op">=</span> <span class="cn">NULL</span>, p <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">make_subdata</span><span class="op">(</span><span class="va">data</span>, n <span class="op">=</span> <span class="cn">NULL</span>, p <span class="op">=</span> <span class="fl">0.3</span>, ngroup_init <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -62,6 +62,12 @@ saves the row index in .rowindex field.</p>
 
 <dt id="arg-p">p<a class="anchor" aria-label="anchor" href="#arg-p"></a></dt>
 <dd><p>The proportion of rows to be used. Default is 0.3.</p></dd>
+
+
+<dt id="arg-ngroup-init">ngroup_init<a class="anchor" aria-label="anchor" href="#arg-ngroup-init"></a></dt>
+<dd><p>integer(1). Initial number of splits for
+pairing groups. Default is NULL. Ensures that subsample is divisible
+by <code>ngroup_init</code> for <code>generate_cv_index_spt</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

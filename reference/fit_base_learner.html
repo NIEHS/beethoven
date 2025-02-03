@@ -13,7 +13,7 @@ processing units (GPU) to speed up the training process."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">beethoven</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -66,6 +66,7 @@ processing units (GPU) to speed up the training process.</p>
 <span>  nthreads <span class="op">=</span> <span class="fl">8L</span>,</span>
 <span>  trim_resamples <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  return_best <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  metric <span class="op">=</span> <span class="st">"rmse"</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -155,6 +156,11 @@ data.frames in splits column of <code>tune_results</code> object with NA.</p></d
 
 <dt id="arg-return-best">return_best<a class="anchor" aria-label="anchor" href="#arg-return-best"></a></dt>
 <dd><p>logical(1). If TRUE, the best tuned model is returned.</p></dd>
+
+
+<dt id="arg-metric">metric<a class="anchor" aria-label="anchor" href="#arg-metric"></a></dt>
+<dd><p>character(1). The metric to be used for selecting the best.
+Must be one of "rmse", "rsq", "mae". Default = "rmse"</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
