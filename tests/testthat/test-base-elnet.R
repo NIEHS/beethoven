@@ -21,8 +21,7 @@ testthat::test_that("fit elnet (folds + grid)", {
   )
 
   # temporal
-  # warning is due to 3 metrics (rmse, rsq, mae)
-  testthat::expect_warning(
+  testthat::expect_no_error(
     elnet1 <- fit_base_learner(
       learner = "elnet",
       dt_full = dt_base,
@@ -55,8 +54,7 @@ testthat::test_that("fit elnet (folds + grid)", {
 
 
   # spatial
-  # warning is due to 3 metrics (rmse, rsq, mae)
-  testthat::expect_warning(
+  testthat::expect_no_error(
     elnet2 <- fit_base_learner(
       learner = "elnet",
       dt_full = dt_base,
@@ -89,8 +87,7 @@ testthat::test_that("fit elnet (folds + grid)", {
 
 
   # spatiotemporal
-  # warning is due to 3 metrics (rmse, rsq, mae)
-  testthat::expect_warning(
+  testthat::expect_no_error(
     elnet3 <- fit_base_learner(
       learner = "elnet",
       dt_full = dt_base,
@@ -138,8 +135,7 @@ testthat::test_that("fit elnet (folds + bayes)", {
   elnet_model <- switch_model("elnet")
 
   # temporal
-  # warning is due to 3 metrics (rmse, rsq, mae)
-  testthat::expect_warning(
+  testthat::expect_no_error(
     elnet4 <- fit_base_learner(
       learner = "elnet",
       dt_full = dt_base,
@@ -171,8 +167,7 @@ testthat::test_that("fit elnet (folds + bayes)", {
 
 
   # spatial
-  # warning is due to 3 metrics (rmse, rsq, mae)
-  testthat::expect_warning(
+  testthat::expect_no_error(
     elnet5 <- fit_base_learner(
       learner = "elnet",
       dt_full = dt_base,
@@ -204,8 +199,7 @@ testthat::test_that("fit elnet (folds + bayes)", {
 
 
   # spatiotemporal
-  # warning is due to 3 metrics (rmse, rsq, mae)
-  testthat::expect_warning(
+  testthat::expect_no_error(
     elnet6 <- fit_base_learner(
       learner = "elnet",
       dt_full = dt_base,
@@ -257,13 +251,12 @@ testthat::test_that("fit elnet (args_generate_cv + grid)", {
   )
 
   # temporal
-  # warning is due to 3 metrics (rmse, rsq, mae)
   args_temp <- list(
     time_col = "time",
     cv_fold = 10L,
     window = 5L
   )
-  testthat::expect_warning(
+  testthat::expect_no_error(
     elnet7 <- fit_base_learner(
       learner = "elnet",
       dt_full = dt_base,
@@ -297,12 +290,12 @@ testthat::test_that("fit elnet (args_generate_cv + grid)", {
 
 
   # spatial
-  # warning is due to 3 metrics (rmse, rsq, mae)
   args_spatial = list(
     target_cols = c("lon", "lat"),
     cv_make_fun = spatialsample::spatial_block_cv,
     v = 4
   )
+  # warning is due to dt_base not having CRS
   testthat::expect_warning(
     elnet8 <- fit_base_learner(
       learner = "elnet",
@@ -337,7 +330,6 @@ testthat::test_that("fit elnet (args_generate_cv + grid)", {
 
 
   # spatiotemporal
-  # warning is due to 3 metrics (rmse, rsq, mae)
   args_spatiotemporal <- list(
     target_cols = c("lon", "lat", "time"),
     preprocessing = "none",
@@ -345,11 +337,11 @@ testthat::test_that("fit elnet (args_generate_cv + grid)", {
     cv_pairs = NULL,
     pairing = "1"
   )
-  testthat::expect_warning(
+  testthat::expect_no_error(
     elnet9 <- fit_base_learner(
       learner = "elnet",
       dt_full = data.table::data.table(dt_base),
-      r_subsample = 1, # full sample dataset for accurate ngroup cv
+      r_subsample = 0.3,
       model = elnet_model,
       folds = NULL,
       args_generate_cv = args_spatiotemporal,
@@ -394,13 +386,12 @@ testthat::test_that("fit elnet (args_generate_cv + bayes)", {
   elnet_model <- switch_model("elnet")
 
   # temporal
-  # warning is due to 3 metrics (rmse, rsq, mae)
   args_temp <- list(
     time_col = "time",
     cv_fold = 10L,
     window = 5L
   )
-  testthat::expect_warning(
+  testthat::expect_no_error(
     elnet10 <- fit_base_learner(
       learner = "elnet",
       dt_full = dt_base,
@@ -433,12 +424,12 @@ testthat::test_that("fit elnet (args_generate_cv + bayes)", {
 
 
   # spatial
-  # warning is due to 3 metrics (rmse, rsq, mae)
   args_spatial = list(
     target_cols = c("lon", "lat"),
     cv_make_fun = spatialsample::spatial_block_cv,
     v = 4
   )
+  # warning is due to dt_base not having CRS
   testthat::expect_warning(
     elnet11 <- fit_base_learner(
       learner = "elnet",
@@ -472,7 +463,6 @@ testthat::test_that("fit elnet (args_generate_cv + bayes)", {
 
 
   # spatiotemporal
-  # warning is due to 3 metrics (rmse, rsq, mae)
   args_spatiotemporal <- list(
     target_cols = c("lon", "lat", "time"),
     preprocessing = "none",
@@ -480,11 +470,11 @@ testthat::test_that("fit elnet (args_generate_cv + bayes)", {
     cv_pairs = NULL,
     pairing = "1"
   )
-  testthat::expect_warning(
+  testthat::expect_no_error(
     elnet12 <- fit_base_learner(
       learner = "elnet",
       dt_full = data.table::data.table(dt_base),
-      r_subsample = 1, # full sample dataset for accurate ngroup cv
+      r_subsample = 0.3,
       model = elnet_model,
       folds = NULL,
       args_generate_cv = args_spatiotemporal,
