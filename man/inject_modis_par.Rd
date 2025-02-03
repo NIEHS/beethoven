@@ -11,13 +11,16 @@ inject_modis_par(locs, injection)
 features need to be calculated.}
 
 \item{injection}{\strong{List} of dditional parameters to be passed to the
-\code{calc_modis_par} function.}
+\code{calculate_modis} function.}
 }
 \value{
 MODIS/VIIRS feature data.frame.
 }
 \description{
 Injects arguments to parallelize MODIS/VIIRS data processing
+}
+\note{
+Soon to be deprecated per dropping future dependency.
 }
 \examples{
 \dontrun{
@@ -31,11 +34,11 @@ my_locs <- sf::st_as_sf(my_locs, coords = c("lon", "lat"))
 inject_modis_par(
   locs = my_locs,
   injection = list(path = files, subdataset = "Cloud_Fraction_Day",
-     name_covariates = "MOD_CLCVD_0_", nthreads = 2L,
+     name_covariates = "MOD_CLCVD_0_",
      preprocess = amadeus::process_modis_swath, radius = c(1000)))
 }
 }
 \seealso{
-\code{\link[amadeus:calc_modis_daily]{amadeus::calc_modis_daily}}, \code{\link[amadeus:calc_modis_par]{amadeus::calc_modis_par}}
+\code{\link[amadeus:calculate_modis_daily]{amadeus::calculate_modis_daily}}, \code{\link[amadeus:calculate_modis]{amadeus::calculate_modis}}
 }
 \keyword{Calculation}

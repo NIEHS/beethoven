@@ -42,7 +42,7 @@ error.file = fs::path_expand(resources$error.file)
 ## this line can be ignored if users' environments are not restricted
 ## such that GDAL 3.3.3+ is equipped as default
 # the profile below includes environment variables to link custom build GDAL 3.8.5
-. /ddn/gs1/home/songi2/.profile
+# custom build GDAL now in /ddn/gs1/tools/set/R432/lib64/R/lib
 
 ## Export value of DEBUGME environemnt var to slave
 # export DEBUGME=<%= Sys.getenv("DEBUGME") %>
@@ -53,5 +53,4 @@ error.file = fs::path_expand(resources$error.file)
 
 ## Run R:
 ## we merge R output with stdout from SLURM, which gets then logged via --output option
-# Rscript -e '.libPaths(c("/ddn/gs1/biotools/R/lib64/R/custompkg", "/ddn/gs1/home/songi2/r-libs", .libPaths()));batchtools::doJobCollection("<%= uri %>")'
-Rscript -e '.libPaths(c("/ddn/gs1/biotools/R/lib64/R/custompkg", "/ddn/gs1/home/manwareme/R/x86_64-pc-linux-gnu-library/4.3", "/ddn/gs1/home/songi2/r-libs", .libPaths()));batchtools::doJobCollection("<%= uri %>")'
+/ddn/gs1/tools/set/R432/bin/Rscript -e '.libPaths(c("/ddn/gs1/tools/set/R432/lib64/R/library"));batchtools::doJobCollection("<%= uri %>")'

@@ -32,7 +32,7 @@ corners_ext <- terra::ext(corners_re)
 #      resolution = c(1000L, 1000L),
 #      crs = "EPSG:5070"
 #    )
-#  
+#
 #  terra::values(corners_ras) <- 1L
 #  corners_ras_sub <-
 #    terra::crop(
@@ -41,13 +41,13 @@ corners_ext <- terra::ext(corners_re)
 #      snap = "out",
 #      mask = TRUE
 #    )
-#  
+#
 #  corners_pnts <- terra::as.points(corners_ras_sub)
 #  corners_pnts_df <- as.data.frame(corners_pnts, geom = "XY")
 #  corners_pnts_df$site_id <- seq(1, nrow(corners_pnts_df))
 #  names(corners_pnts_df)[2:3] <- c("lon", "lat")
 #  corners_pnts_df <- corners_pnts_df[, c("site_id", "lon", "lat")]
-#  
+#
 
 ## ----save-rds, eval = FALSE---------------------------------------------------
 #  saveRDS(
@@ -55,9 +55,11 @@ corners_ext <- terra::ext(corners_re)
 #    file = "./input/prediction_grid.rds",
 #    compress = "xz"
 #  )
-#  
+#
 
+# nolint start
 ## ----gen-grid-10km, echo = FALSE, message = FALSE, error = FALSE, fig.width = 8, fig.height = 4.8----
+# nolint end
 corners_ras10 <-
   terra::rast(
     corners_ext,
@@ -82,4 +84,3 @@ plot(
   cex = 0.1,
   main = "10-km grid points in the mainland US"
 )
-

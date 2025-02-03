@@ -30,3 +30,9 @@ _targets.yaml
 R/reserved.R
 ^doc$
 ^Meta$
+^archive/
+^beethoven.Rproj
+^container/
+^inst/extdata/mod06_links_2018_2022.csv
+^inst/extdata/prediction_grid.qs
+^inst/extdata/qs_feat_calc_ecoregions.qs

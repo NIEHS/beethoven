@@ -7,6 +7,14 @@
 target_calculate_predict <-
   list(
     targets::tar_target(
+      library,
+      command = .Library
+    ),
+    targets::tar_target(
+      libPaths,
+      command = .libPaths()
+    ),
+    targets::tar_target(
       df_pred_calc_grid,
       command = qs::qread(
         list.files(
@@ -133,12 +141,12 @@ target_calculate_predict <-
     # # #   description = "List of HMS features"
     # # # )
     # # # ,
-    targets::tar_target(
-      chr_iter_pred_features,
-      command = chr_iter_calc_features |> base::setdiff(c("hms", "ecoregions")),
-      description = "Drop HMS and ecoregions from base features"
-    )
-    ,
+    # targets::tar_target(
+    #   chr_iter_pred_features,
+    #   command = chr_iter_calc_features |> base::setdiff(c("hms", "ecoregions")),
+    #   description = "Drop HMS and ecoregions from base features"
+    # )
+    # ,
     # targets::tar_target(
     #   list_pred_split_calc_base,
     #   command =
@@ -271,24 +279,24 @@ target_calculate_predict <-
     #   description = "NLCD feature list (all dt) (pred)"
     # )
     # ,
-    targets::tar_target(
-      list_pred_split_calc_nasa,
-      command =
-        inject_modis_par(
-          locs = list_pred_calc_grid_DEV[[chr_pred_calc_grid_DEV]],
-          injection = loadargs(file_prep_calc_args, chr_iter_calc_nasa)
-        ),
-      pattern = cross(
-        file_prep_calc_args,
-        chr_iter_calc_nasa,
-        chr_pred_calc_grid_DEV
-      ),
-      resources = set_slurm_resource(
-            ntasks = 1, ncpus = arglist_common$nthreads_nasa, memory = 8
-          ),
-      iteration = "list",
-      description = "Calculate MODIS/VIIRS features with branched sublists (pred)"
-    )
+    # targets::tar_target(
+    #   list_pred_split_calc_nasa,
+    #   command =
+    #     inject_modis_par(
+    #       locs = list_pred_calc_grid_DEV[[chr_pred_calc_grid_DEV]],
+    #       injection = loadargs(file_prep_calc_args, chr_iter_calc_nasa)
+    #     ),
+    #   pattern = cross(
+    #     file_prep_calc_args,
+    #     chr_iter_calc_nasa,
+    #     chr_pred_calc_grid_DEV
+    #   ),
+    #   resources = set_slurm_resource(
+    #         ntasks = 1, ncpus = arglist_common$nthreads_nasa, memory = 8
+    #       ),
+    #   iteration = "list",
+    #   description = "Calculate MODIS/VIIRS features with branched sublists (pred)"
+    # )
     # ,
     # targets::tar_target(
     #   name = list_pred_calc_nasa,
@@ -360,43 +368,44 @@ target_calculate_predict <-
     #   description = "data.table of GEOS-CF features (pred)"
     # )
     # ,
-    # # # targets::tar_target(
-    # # #   chr_pred_calc_gmted_radii,
-    # # #   command = c(0, 1e3, 1e4, 5e4),
-    # # #   description = "Radii for GMTED features"
-    # # # )
-    # # # ,
-    # # # targets::tar_target(
-    # # #   name = list_pred_split_calc_gmted,
-    # # #   command = inject_gmted(
-    # # #     locs = list_pred_calc_grid[[chr_pred_calc_grid]],
-    # # #     variable = chr_iter_calc_gmted_vars,
-    # # #     radii = chr_pred_calc_gmted_radii,
-    # # #     injection = loadargs(file_prep_calc_args, "gmted")
-    # # #   ),
-    # # #   iteration = "list",
-    # # #   pattern = cross(
-    # # #     file_prep_calc_args,
-    # # #     chr_iter_calc_gmted_vars,
-    # # #     chr_pred_calc_grid,
-    # # #     chr_pred_calc_gmted_radii
-    # # #   ),
-    # # #   resources = set_slurm_resource(
-    # # #     ntasks = 1,
-    # # #     ncpus = arglist_common$nthreads_gmted,
-    # # #     memory = 8
-    # # #   ),
-    # # #   description = "Calculate GMTED features with branched sublists (pred)"
-    # # # )
-    # # # ,
-    # # # targets::tar_target(
-    # # #   dt_pred_calc_gmted,
-    # # #   command = reduce_merge(
-    # # #     reduce_list(list_pred_split_calc_gmted),
-    # # #     "site_id"
-    # # #   ),
-    # # #   description = "data.table of GMTED features (pred)"
-    # # # )
+    targets::tar_target(
+      chr_pred_calc_gmted_radii,
+      # command = c(0, 1e3, 1e4, 5e4),
+      command = c(200),
+      description = "Radii for GMTED features"
+    )
+    ,
+    targets::tar_target(
+      name = list_pred_split_calc_gmted,
+      command = inject_gmted(
+        locs = list_pred_calc_grid_DEV[[chr_pred_calc_grid_DEV]],
+        variable = chr_iter_calc_gmted_vars,
+        radii = chr_pred_calc_gmted_radii,
+        injection = loadargs(file_prep_calc_args, "gmted")
+      ),
+      iteration = "list",
+      pattern = cross(
+        file_prep_calc_args,
+        chr_iter_calc_gmted_vars,
+        chr_pred_calc_grid_DEV,
+        chr_pred_calc_gmted_radii
+      ),
+      resources = set_slurm_resource(
+        ntasks = 1,
+        ncpus = arglist_common$nthreads_gmted,
+        memory = 8
+      ),
+      description = "Calculate GMTED features with branched sublists (pred)"
+    )
+    ,
+    targets::tar_target(
+      dt_pred_calc_gmted,
+      command = reduce_merge(
+        reduce_list(list_pred_split_calc_gmted),
+        "site_id"
+      ),
+      description = "data.table of GMTED features (pred)"
+    )
     # # # ,
     # # # targets::tar_target(
     # # #   chr_pred_calc_narrmono,

@@ -1,30 +1,22 @@
-# load targets
-library(
-  beethoven,
-  lib.loc = "/ddn/gs1/home/manwareme/R/x86_64-pc-linux-gnu-library/4.3"
-)
-library(targets)
-# assume that the working directory is beethoven git repository directory
-# only runs after package deployment
-# file.copy(
-#   from = system.file("targets", "_targets.R", package = "beethoven"),
-#   to = "_targets.R"
-# )
+################################################################################
+############################         STAGE          ############################
+cat("Running {beethoven}", Sys.getenv("BEETHOVEN"), "targets ...\n")
 
-tar_make_future(
-  workers = 16
-)
-# TODO: should find a way of auto-invalidate feat_calc_(modis|viirs|geoscf)
-#     when the date range changes in the configuration.
-# manual example includes:
-# targets::tar_invalidate(
-#   matches("feat_calc_(modis|viirs|geoscf)")
-# )
+############################        SETTINGS        ############################
+# Set paths for R, CUDA, and LD_LIBRARY_PATH, and check for CUDA availability.
+beethoven:::sys_beethoven()
 
-# selective execution, mix with time components
-# status saving with timestamp? editable log/config file?
-# tar_make_future(
-#   names = contains("download")
-# )
+# Check .libPaths().
+cat("Active library paths:\n")
+.libPaths()
 
-# tar_visnetwork(targets_only = TRUE)
+# Check PATH.
+cat("Active PATH:\n")
+Sys.getenv("PATH")
+
+# Check LD_LIBRARY_PATH
+cat("Active LD_LIBRARY_PATH:\n")
+Sys.getenv("LD_LIBRARY_PATH")
+
+############################      RUN PIPELINE      ############################
+targets::tar_make(reporter = "verbose_positives")

@@ -70,9 +70,6 @@ po/*~
 # RStudio Connect folder
 rsconnect/
 
-
-#Mitchell test folder
-code/mitchell_tests/
 # Generic open or temporary files
 ._.*
 ._.gitignore
@@ -95,6 +92,7 @@ _targets
 # future batchtools outputs
 .future
 slurm_error.log
+slurm/
 
 # SLURM messages and logs
 **/*.err
@@ -111,3 +109,15 @@ targets_start.Rout
 .netrc
 .urs_cookies
 beethoven_branching_notes.txt
+
+# NASA Earthdata login credentials
+inst/extdata/nasa_token.txt
+
+debug/
+debug*.sh
+
+# dev
+lib-flex/**
+
+# local coverage RDS files
+covr/

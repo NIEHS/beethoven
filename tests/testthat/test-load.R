@@ -7,11 +7,11 @@
 testthat::test_that("load_args (download)", {
   # expect error with .csv
   testthat::expect_error(
-    loadargs("error_file.csv", dataset = "hms")
+    beethoven::loadargs("error_file.csv", dataset = "hms")
   )
   # expect no error with .rds
   testthat::expect_no_error(
-    args_rds <- loadargs(
+    args_rds <- beethoven::loadargs(
       testthat::test_path("..", "testdata", "load", "download_args.rds"),
       dataset = "hms"
     )
@@ -23,7 +23,7 @@ testthat::test_that("load_args (download)", {
 
   # expect no error with .qs
   testthat::expect_no_error(
-    args_qs <- loadargs(
+    args_qs <- beethoven::loadargs(
       testthat::test_path("..", "testdata", "load", "download_args.qs"),
       dataset = "hms"
     )
@@ -35,7 +35,7 @@ testthat::test_that("load_args (download)", {
 
   # expect no error with two datasets
   testthat::expect_no_error(
-    args_2 <- loadargs(
+    args_2 <- beethoven::loadargs(
       testthat::test_path("..", "testdata", "load", "download_args.qs"),
       dataset = c("hms", "narr_monolevel")
     )
@@ -51,7 +51,7 @@ testthat::test_that("load_args (download)", {
 testthat::test_that("load_args (calc)", {
   # expect no error with .qs (calc)
   testthat::expect_no_error(
-    args_narr <- loadargs(
+    args_narr <- beethoven::loadargs(
       testthat::test_path("..", "testdata", "load", "calc_args.qs"),
       dataset = "narr"
     )
@@ -68,7 +68,7 @@ testthat::test_that("load_args (calc)", {
 testthat::test_that("load_modis_files", {
   # expect no error
   testthat::expect_no_error(
-    files <- load_modis_files(
+    files <- beethoven::load_modis_files(
       path = testthat::test_path("..", "testdata", "load", "modis"),
       pattern = "hdf$",
       date = c("2018-01-01", "2018-01-01")
@@ -90,7 +90,7 @@ testthat::test_that("unmarshal_function", {
   withr::local_package("qs")
   # expect no error for function name
   testthat::expect_no_error(
-    unmarshal_example <- unmarshal_function("qs::qread")
+    unmarshal_example <- beethoven::unmarshal_function("qs::qread")
   )
   # expect the output to be a function
   testthat::expect_true(is.function(unmarshal_example))
@@ -102,7 +102,7 @@ testthat::test_that("unmarshal_function", {
 testthat::test_that("read_paths", {
   # expect no error
   testthat::expect_no_error(
-    files_date <- read_paths(
+    files_date <- beethoven::read_paths(
       path = testthat::test_path("..", "testdata", "load", "modis"),
       extension = ".hdf",
       target_dates = c("2018-01-01", "2018-01-01"),
@@ -116,7 +116,7 @@ testthat::test_that("read_paths", {
 
   # expect no error
   testthat::expect_no_error(
-    files_nodate <- read_paths(
+    files_nodate <- beethoven::read_paths(
       path = testthat::test_path("..", "testdata", "load", "modis"),
       extension = ".hdf",
       target_dates = c("2018-01-01", "2018-01-02"),

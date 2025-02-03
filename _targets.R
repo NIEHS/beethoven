@@ -1,159 +1,126 @@
-library(targets)
-library(tarchetypes)
-library(future)
-library(future.batchtools)
-library(dplyr)
-library(
-  beethoven,
-  lib.loc = "/ddn/gs1/home/manwareme/R/x86_64-pc-linux-gnu-library/4.3"
+################################################################################
+##############################      BEETHOVEN      #############################
+##### Main file controlling the settings, options, and sourcing of targets
+##### for the beethoven analysis pipeline.
+
+#############################      CONTROLLER      #############################
+##### `controller_250` uses full allocation of workers (~4.0 Gb per worker).
+controller_250 <- crew::crew_controller_local(
+  name = "controller_250",
+  workers = 250,
+  seconds_idle = 30
 )
-library(tidymodels)
-library(bonsai)
-# library(
-#   torch,
-#   lib.loc = "/ddn/gs1/biotools/R/lib64/R/library"
-# )
-
-Sys.setenv("LD_LIBRARY_PATH" = paste("/ddn/gs1/biotools/R/lib64/R/customlib", Sys.getenv("LD_LIBRARY_PATH"), sep = ":"))
-
-# replacing yaml file.
-tar_config_set(
-  store = "/ddn/gs1/home/manwareme/beethoven/beethoven_targets"
+##### `controller_100` uses 100 workers (~10.0 Gb per worker).
+controller_100 <- crew::crew_controller_local(
+  name = "controller_100",
+  workers = 100,
+  seconds_idle = 30
 )
-
-# maximum future exportable object size is set 50GB
-# TODO: the maximum size error did not appear until recently
-#       and suddenly appeared. Need to investigate the cause.
-#       Should be removed after the investigation.
-# options(future.globals.maxSize = 50 * 2^30)
-options(future.globals.maxSize = 60 * 1024^3)  # 60 GiB
-
-
-generate_list_download <- FALSE
-
-arglist_download <-
-  set_args_download(
-    char_period = c("2018-01-01", "2022-12-31"),
-    char_input_dir = "input",
-    nasa_earth_data_token = NULL,#Sys.getenv("NASA_EARTHDATA_TOKEN"),
-    mod06_filelist = "inst/targets/mod06_links_2018_2022.csv",
-    export = generate_list_download,
-    path_export = "inst/targets/download_spec.qs"
-  )
-
-generate_list_calc <- FALSE
-
-arglist_common <-
-  set_args_calc(
-    char_siteid = "site_id",
-    char_timeid = "time",
-    char_period = c("2018-01-01", "2022-12-31"),
-    num_extent = c(-126, -62, 22, 52),
-    char_user_email = paste0(Sys.getenv("USER"), "@nih.gov"),
-    export = generate_list_calc,
-    path_export = "inst/targets/calc_spec.qs",
-    char_input_dir = "/ddn/gs1/group/set/Projects/NRT-AP-Model/input"
-  )
-
-tar_source("inst/targets/targets_initialize.R")
-tar_source("inst/targets/targets_download.R")
-tar_source("inst/targets/targets_calculate_fit.R")
-tar_source("inst/targets/targets_calculate_predict.R")
-tar_source("inst/targets/targets_baselearner.R")
-tar_source("inst/targets/targets_metalearner.R")
-tar_source("inst/targets/targets_predict.R")
-
-
-# bypass option
-Sys.setenv("BTV_DOWNLOAD_PASS" = "TRUE")
-
-#
-# bind custom built GDAL
-# Users should export the right path to the GDAL library
-# by export LD_LIBRARY_PATH=.... command.
-
-# arglist_common is generated above
-plan(
-  list(
-    tweak(
-      future.batchtools::batchtools_slurm,
-      template = "inst/targets/template_slurm.tmpl",
-      resources =
-        list(
-          memory = 8,
-          log.file = "slurm_run.log",
-          ncpus = 1, partition = "geo", ntasks = 1,
-          email = arglist_common$char_user_email,
-          error.file = "slurm_error.log"
-        )
-    ),
-    multicore
+##### `controller_75` uses 75 workers (~13.33 Gb per worker).
+controller_75 <- crew::crew_controller_local(
+  name = "controller_75",
+  workers = 75,
+  seconds_idle = 30
+)
+##### `controller_50` uses 50 workers (~20.0 Gb per worker).
+controller_50 <- crew::crew_controller_local(
+  name = "controller_50",
+  workers = 50,
+  seconds_idle = 30
+)
+##### `controller_25` uses 25 workers (~40.0 Gb per worker).
+controller_25 <- crew::crew_controller_local(
+  name = "controller_25",
+  workers = 25,
+  seconds_idle = 30
+)
+##### `controller_gpu` uses 4 GPU workers.
+scriptlines_apptainer <- "apptainer"
+scriptlines_basedir <- "$PWD"
+scriptlines_container <- "container_models.sif"
+scriptlines_inputdir <- "/ddn/gs1/group/set/Projects/NRT-AP-Model/input"
+scriptlines_gpu <- glue::glue(
+  "#SBATCH --job-name=beethovengpu \
+  #SBATCH --partition=geo \
+  #SBATCH --gres=gpu:1 \
+  #SBATCH --error=slurm/beethovengpu_%j.out \
+  {scriptlines_apptainer} exec --nv --bind {scriptlines_basedir}:/mnt ",
+  "--bind {scriptlines_basedir}/inst:/inst ",
+  "--bind {scriptlines_inputdir}:/input ",
+  "--bind {scriptlines_basedir}/_targets:/opt/_targets ",
+  "{scriptlines_container} \\"
+)
+controller_gpu <- crew.cluster::crew_controller_slurm(
+  name = "controller_gpu",
+  workers = 4,
+  seconds_idle = 30,
+  options_cluster = crew.cluster::crew_options_slurm(
+    verbose = TRUE,
+    script_lines = scriptlines_gpu
   )
 )
 
-# # invalidate any nodes older than 180 days: force running the pipeline
-# tar_invalidate(any_of(tar_older(Sys.time() - as.difftime(180, units = "days"))))
+##############################        STORE       ##############################
+targets::tar_config_set(store = "/opt/_targets")
 
-
-# # nullify download target if bypass option is set
-if (Sys.getenv("BTV_DOWNLOAD_PASS") == "TRUE") {
-  target_download <- NULL
+##############################       OPTIONS      ##############################
+if (Sys.getenv("BEETHOVEN") == "covariates") {
+  beethoven_packages <- c(
+    "amadeus", "targets", "tarchetypes", "dplyr", "tidyverse",
+    "data.table", "sf", "crew", "crew.cluster", "lubridate", "qs2"
+  )
+} else {
+  beethoven_packages <- c(
+    "amadeus", "targets", "tarchetypes", "dplyr", "tidyverse",
+    "data.table", "sf", "crew", "crew.cluster", "lubridate", "qs2",
+    "torch", "bonsai", "dials", "lightgbm", "xgboost", "glmnet"
+  )
 }
-
-# targets options
-# For GPU support, users should be aware of setting environment
-# variables and GPU versions of the packages.
-# TODO: check if the controller and resources setting are required
-tar_option_set(
-  packages = c(
-    "beethoven", "amadeus", "chopin", "targets", "tarchetypes",
-    "data.table", "sf", "terra", "exactextractr",
-    #"crew", "crew.cluster", 
-    "tigris", "dplyr",
-    "future.batchtools", "qs", "collapse", "bonsai",
-    "tidymodels", "tune", "rsample", "torch", "brulee",
-    "glmnet", "xgboost",
-    "future", "future.apply", "future.callr", "callr",
-    "stars", "rlang", "parallelly"
-  ),
-  library = c("/ddn/gs1/group/set/isong-archive/r-libs"),
+targets::tar_option_set(
+  packages = beethoven_packages,
   repository = "local",
-  error = "abridge",
+  error = "continue",
   memory = "transient",
   format = "qs",
   storage = "worker",
   deployment = "worker",
   garbage_collection = TRUE,
-  seed = 202401L
+  seed = 202401L,
+  controller = crew::crew_controller_group(
+    controller_250, controller_100, controller_75,
+    controller_50, controller_25, controller_gpu
+  ),
+  resources = targets::tar_resources(
+    crew = targets::tar_resources_crew(controller = "controller_250")
+  ),
+  retrieval = "worker"
 )
 
-# should run tar_make_future()
+###########################      SOURCE TARGETS      ###########################
+targets::tar_source("inst/targets/targets_critical.R")
+targets::tar_source("inst/targets/targets_initiate.R")
+targets::tar_source("inst/targets/targets_download.R")
+targets::tar_source("inst/targets/targets_aqs.R")
+targets::tar_source("inst/targets/targets_calculate_fit.R")
+targets::tar_source("inst/targets/targets_baselearner.R")
+# targets::tar_source("inst/targets/targets_metalearner.R")
+# targets::tar_source("inst/targets/targets_calculate_predict.R")
+# targets::tar_source("inst/targets/targets_predict.R")
 
+###########################      SYSTEM SETTINGS      ##########################
+if (Sys.getenv("BEETHOVEN") == "covariates") {
+  target_baselearner <- target_metalearner <- target_predict <- NULL
+}
+
+##############################      PIPELINE      ##############################
 list(
-  target_init,
+  target_critical,
+  target_initiate,
   target_download,
+  target_aqs,
   target_calculate_fit,
-  target_baselearner,
-  target_metalearner,
-  target_calculate_predict#,
-  # target_predict,
-  # # documents and summary statistics
-  # targets::tar_target(
-  #   summary_urban_rural,
-  #   summary_prediction(
-  #     grid_filled,
-  #     level = "point",
-  #     contrast = "urbanrural"))
-  # ,
-  # targets::tar_target(
-  #   summary_state,
-  #   summary_prediction(
-  #     grid_filled,
-  #     level = "point",
-  #     contrast = "state"
-  #   )
-  # )
+  target_baselearner
+  # target_metalearner,
+  # target_calculate_predict,
+  # target_predict
 )
-
-# targets::tar_visnetwork(targets_only = TRUE)
-# END OF FILE

@@ -98,6 +98,8 @@ post_calc_unify_timecols <-
 #' @note This function takes preprocessed data.table with
 #'   a column named `"time"`.
 #' @importFrom data.table as.data.table copy
+#' @importFrom data.table `:=`
+#' @export
 post_calc_convert_time <-
   function(
     df
@@ -286,7 +288,7 @@ post_calc_df_year_expand <- function(
 #' @note This version assumes the time_id contains Date-like strings.
 #' @return data.frame
 #' @importFrom data.table merge.data.table
-#' @importFrom amadeus calc_temporal_dummies
+#' @importFrom amadeus calculate_temporal_dummies
 #' @export
 post_calc_merge_all <-
   function(
@@ -314,7 +316,7 @@ post_calc_merge_all <-
     # need POSIXt class for amadeus function
     locs_merged[[time_id]] <- as.POSIXct(locs_merged[[time_id]])
     locs_merged <-
-      amadeus::calc_temporal_dummies(
+      amadeus::calculate_temporal_dummies(
         locs = locs_merged,
         locs_id = locs_id,
         year = target_years
@@ -348,6 +350,7 @@ post_calc_merge_all <-
 #'                  description = letters[1:5], other = 16:20)
 #' post_calc_drop_cols(df)
 #' }
+#' @export
 post_calc_drop_cols <-
   function(
     df,
@@ -659,7 +662,7 @@ impute_all <-
         sample.fraction = 0.1
       )
 
-    imputed <- amadeus::calc_temporal_dummies(imputed, "time")
+    imputed <- amadeus::calculate_temporal_dummies(imputed, "time")
     return(imputed)
     # lagged features: changing period (period[1] + 1 day)
     # period <- as.Date(period)
@@ -670,7 +673,7 @@ impute_all <-
     # index_lag <- grep(paste(index_lag, collapse = "|"), names(dt))
     # target_lag <- imputed[, index_lag, with = FALSE]
 
-    # output <- amadeus::calc_lagged(target_lag, period, 1, "site_id")
+    # output <- amadeus::calculate_lagged(target_lag, period, 1, "site_id")
     # return(output)
   }
 

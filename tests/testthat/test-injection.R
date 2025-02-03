@@ -11,7 +11,7 @@ testthat::test_that("feature_raw_download", {
 
   # expect error for non-existent file path
   testthat::expect_error(
-    feature_raw_download(
+    beethoven::feature_raw_download(
       path = "does/not/exist.qs",
       dataset_name = "smoke"
     )
@@ -21,7 +21,7 @@ testthat::test_that("feature_raw_download", {
   frd_error_file <- file.path(tempdir(), "frd_error_file.csv")
   file.create(frd_error_file)
   testthat::expect_error(
-    feature_raw_download(
+    beethoven::feature_raw_download(
       path = frd_error_file,
       dataset_name = "smoke"
     )
@@ -33,7 +33,7 @@ testthat::test_that("feature_raw_download", {
 
   # set download arguments
   testthat::expect_no_error(
-    set_args_download(
+    beethoven::set_args_download(
       char_period = c("2018-01-01", "2018-01-01"),
       char_input_dir = input_dir,
       nasa_earth_data_token = "token",
@@ -45,7 +45,7 @@ testthat::test_that("feature_raw_download", {
 
   # download hms features
   testthat::expect_no_error(
-    feature_raw_download(
+    beethoven::feature_raw_download(
       path = file.path(input_dir, "download_args.qs"),
       dataset_name = "hms"
     )
@@ -58,7 +58,7 @@ testthat::test_that("feature_raw_download", {
 
   # download hms and population features
   testthat::expect_no_error(
-    feature_raw_download(
+    beethoven::feature_raw_download(
       path = file.path(input_dir, "download_args.qs"),
       dataset_name = c("hms", "aqs")
     )
@@ -74,7 +74,7 @@ testthat::test_that("feature_raw_download", {
   
   # expect error when qs file does not contain proper arguments
   testthat::expect_error(
-    feature_raw_download(
+    beethoven::feature_raw_download(
       path = testthat::test_path(
         "..", "testdata", "injection", "error_args.qs"
       ),
@@ -91,7 +91,7 @@ testthat::test_that("feature_raw_download", {
 testthat::test_that("set_target_years", {
   # expect no errors for integer years
   testthat::expect_no_error(
-    years_integer <- set_target_years(
+    years_integer <- beethoven::set_target_years(
       period = c(2018, 2022),
       available = c(2018, 2022)
     )
@@ -101,7 +101,7 @@ testthat::test_that("set_target_years", {
 
   # expect no errors for character years
   testthat::expect_no_error(
-    years_char <- set_target_years(
+    years_char <- beethoven::set_target_years(
       period = c("2018", "2022"),
       available = c(2018, 2022)
     )
@@ -111,7 +111,7 @@ testthat::test_that("set_target_years", {
 
   # expect no errors for dates
   testthat::expect_no_error(
-    years_date <- set_target_years(
+    years_date <- beethoven::set_target_years(
       period = c("2018-01-01", "2022-12-31"),
       available = c(2018, 2022)
     )
@@ -132,7 +132,7 @@ testthat::test_that("inject_calc (hms + nei)", {
 
   # expect no errors (hms + 1 radius; 1 thread)
   testthat::expect_no_error(
-    hms_injected1 <- inject_calculate(
+    hms_injected1 <- beethoven::inject_calculate(
       covariate = "hms",
       locs = loc,
       injection = list(
@@ -140,8 +140,7 @@ testthat::test_that("inject_calc (hms + nei)", {
           "..", "testdata", "injection", "hms", "data_files"
         ),
         date = c("2018-01-01", "2018-01-01"),
-        covariate = "hms",
-        nthreads = 1
+        covariate = "hms"
       )
     )
   )
@@ -157,7 +156,7 @@ testthat::test_that("inject_calc (hms + nei)", {
 
   # expect no errors (hms + 2 radii; 2 threads)
   testthat::expect_no_error(
-    hms_injected2 <- inject_calculate(
+    hms_injected2 <- beethoven::inject_calculate(
       covariate = "hms",
       locs = loc,
       injection = list(
@@ -166,8 +165,7 @@ testthat::test_that("inject_calc (hms + nei)", {
         ),
         date = c("2018-01-01", "2018-01-01"),
         covariate = "hms",
-        radius = c(0, 100),
-        nthreads = 2
+        radius = c(0, 100)
       )
     )
   )
@@ -191,7 +189,7 @@ testthat::test_that("inject_calc (hms + nei)", {
   testthat::skip_on_ci()
   # expect no errors (nei)
   testthat::expect_no_error(
-    nei_injected <- inject_calculate(
+    nei_injected <- beethoven::inject_calculate(
       covariate = "nei",
       locs = loc_sf,
       injection = list(
@@ -234,14 +232,57 @@ testthat::test_that("inject_modis_par (MOD11A1)", {
   )
 
   # expect no error with MOD11A1 files
-  testthat::expect_no_error(
-    modis_injected <- inject_modis_par(
+  testthat::expect_warning(
+    modis_injected_par <- beethoven::inject_modis_par(
       locs = loc,
       injection = list(
         from = mod11a1_files,
         subdataset = "(LST_)",
         name_covariates = c("MOD_LSTNT_0_", "MOD_LSTDY_0_"),
-        nthreads = 1,
+        preprocess = amadeus::process_modis_merge,
+        radius = c(100)
+      )
+    )
+  )
+  # expect a data.frame
+  testthat::expect_s3_class(modis_injected_par, "data.frame")
+  # expect 1 row and 4 columns
+  testthat::expect_equal(dim(modis_injected_par), c(1, 4))
+  # expect no NA values in any column
+  testthat::expect_false("TRUE" %in% any(is.na(modis_injected_par)))
+  # expect "time" column
+  testthat::expect_true("time" %in% names(modis_injected_par))
+
+})
+
+
+################################################################################
+##### inject_modis
+testthat::test_that("inject_modis (MOD11A1)", {
+  
+  withr::local_package("rlang")
+
+  # sample location
+  loc <- sf::st_as_sf(
+    data.frame(lon = -90, lat = 39.5, site_id = "site_id"),
+    coords = c("lon", "lat"),
+    crs = "EPSG:4326"
+  )
+
+  # identify MOD11A1 files
+  mod11a1_files <- list.files(
+    testthat::test_path("..", "testdata", "injection", "modis", "mod11a1"),
+    full.names = TRUE
+  )
+
+  # expect no error with MOD11A1 files
+  testthat::expect_warning(
+    modis_injected <- beethoven::inject_modis(
+      locs = loc,
+      injection = list(
+        from = mod11a1_files,
+        subdataset = "(LST_)",
+        name_covariates = c("MOD_LSTNT_0_", "MOD_LSTDY_0_"),
         preprocess = amadeus::process_modis_merge,
         radius = c(100)
       )
@@ -278,7 +319,7 @@ testthat::test_that("inject_geos (chm, aqc, and combined)", {
   )
   # expected warning due to less than 24 data files
   testthat::expect_warning(
-    calc_aqc <- inject_geos(
+    calc_aqc <- beethoven::inject_geos(
       locs = loc,
       injection = aqc_injection
     )
@@ -297,7 +338,7 @@ testthat::test_that("inject_geos (chm, aqc, and combined)", {
   )
   # expected warning due to less than 24 data files
   testthat::expect_warning(
-    calc_chm <- inject_geos(
+    calc_chm <- beethoven::inject_geos(
       locs = loc,
       injection = chm_injection
     )
@@ -319,7 +360,7 @@ testthat::test_that("inject_geos (chm, aqc, and combined)", {
   )
   # expected warning due to less than 24 data files
   testthat::expect_warning(
-    calc_direct <- inject_geos(
+    calc_direct <- beethoven::inject_geos(
       locs = loc,
       injection = aqc_direct
     )
@@ -333,7 +374,7 @@ testthat::test_that("inject_geos (chm, aqc, and combined)", {
 
   # expect error when two collections are in the same folder
   testthat::expect_error(
-    inject_geos(
+    beethoven::inject_geos(
       locs = loc,
       injection = list(
         path = testthat::test_path(
@@ -363,12 +404,11 @@ testthat::test_that("inject_gmted (breakline emphasis)", {
   )
   # expect no error with breakline emphasis data
   testthat::expect_no_error(
-    calc_be <- inject_gmted(
+    calc_be <- beethoven::inject_gmted(
       locs = loc,
       variable = "Breakline Emphasis",
       radii = c(10, 100),
-      injection = gmted_injection,
-      nthreads = 1
+      injection = gmted_injection
     )
   )
   # expect a data.frame
@@ -382,7 +422,7 @@ testthat::test_that("inject_gmted (breakline emphasis)", {
   # expect error with missing variable
   # NOTE: direct test of calc_gmted_direct
   testthat::expect_error(
-    calc_gmted_direct(
+    beethoven::calc_gmted_direct(
       locs = loc,
       locs_id = "site_id",
       radii = c(10, 100),
@@ -406,9 +446,9 @@ testthat::test_that("reduce_merge joins all relevant data.frames", {
   # Merge the data tables
   # by = NULL will automatically detect the common column names
   testthat::expect_no_error(
-    reduce_merge(list(dt1, dt2, dt3), by = NULL)
+    beethoven::reduce_merge(list(dt1, dt2, dt3), by = NULL)
   )
-  rmerged <- reduce_merge(list(dt1, dt2, dt3), by = "a")
+  rmerged <- beethoven::reduce_merge(list(dt1, dt2, dt3), by = "a")
   testthat::expect_s3_class(rmerged, "data.frame")
   testthat::expect_equal(ncol(rmerged), 4)
 })
@@ -424,9 +464,9 @@ testthat::test_that("reduce_merge handles different number of rows", {
   # Merge the data tables
   # by = NULL will automatically detect the common column names
   testthat::expect_no_error(
-    reduce_merge(list(dt4, dt5), by = NULL)
+    beethoven::reduce_merge(list(dt4, dt5), by = NULL)
   )
-  rmerged <- reduce_merge(list(dt4, dt5), by = "a")
+  rmerged <- beethoven::reduce_merge(list(dt4, dt5), by = "a")
   testthat::expect_s3_class(rmerged, "data.frame")
   testthat::expect_equal(ncol(rmerged), 3)
 })
@@ -463,7 +503,7 @@ testthat::test_that("inject_match only passes the matching arguments", {
   )
 
   testthat::expect_no_error(
-    imatched <- inject_match(
+    imatched <- beethoven::inject_match(
       f = terra::intersect,
       args = push_args
     )
@@ -487,7 +527,7 @@ testthat::test_that("inject_nlcd (2019 and 2021)", {
 
   # expect no error with year 2019
   testthat::expect_no_error(
-    nlcd_2019 <- inject_nlcd(
+    nlcd_2019 <- beethoven::inject_nlcd(
       year = 2019,
       radius = 100,
       from = amadeus::process_nlcd(
@@ -505,7 +545,7 @@ testthat::test_that("inject_nlcd (2019 and 2021)", {
 
     # expect no error with year 2019
   testthat::expect_no_error(
-    nlcd_2021 <- inject_nlcd(
+    nlcd_2021 <- beethoven::inject_nlcd(
       year = 2021,
       radius = 100,
       from = amadeus::process_nlcd(

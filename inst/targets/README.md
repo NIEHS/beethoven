@@ -1,23 +1,31 @@
 # Developer's guide
 
 ## Preamble
-The objective of this document is to provide developers with the current implementation of `beethoven` pipeline as of July 20, 2024 (version 0.3.7)
+The objective of this document is to provide developers with the current implementation of `beethoven` pipeline as of January 28, 2025 (version 0.4.4)
 
 We assume the potential users have basic knowledge of `targets` and `tarchetypes` packages as well as functional programming and metaprogramming. It is recommended to read Advanced R (by Hadley Wickham)'s chapters for these topics.
 
-## Before running the pipeline
-For the future release and tests on various environments, one should check several lines across R and shell script files:
+## Initiate
+To develop and run `beethoven`, users should check the following files before running the pipeline.
 
-- Shell script
-  - `/tar_run.sh`: all system variables including `PATH` and `LD_LIBRARY_PATH` to align with the current system environment. The lines in the provided file are set for NIEHS HPC.
-  - `inst/targets/run.sh`: project directory path
-  - `inst/targets/run_impute.sh` (if necessary when the imputation target is dispatched separately): project directory path
-- R script
-  - `/targets.R`: Lines 10-12, `tar_config_set(store = ...)` should be reviewed if it is set properly not to overwrite successfully run targets.
-  - `/targets.R`: `set_args_download` and `set_args_calc` functions, i.e., `char_input_dir` argument and `char_period`.
-  - `/targets.R`: `library` argument value in `tar_option_set` to match the current system environment
+- Container
+  - The container images, `container_covariates.sif` and `container_models.sif`, are not hosted on GitHub due to the large file size. The images must be built by each user before running the pipeline. Definition files for each images can be found at `container/container_covariates.def` and `container/container_models.def`, respectively. The images can be build by running `sh build_container_[covariates/models].sh` **from within the `container/` folder**, or running `sbatch build_container_[covariates/models].sh`.
 
+- Shell
+  - The `run.sh` file controls SLURM submission details (ie, `--mem`, `--cpus-per-task`) and container settings (ie. `container_[covariates/models].sif`, mounted directories). Local directories which must be explicitly mounted to the container for covariate and model runs are 1. the group data store (`--bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input`), 2. local targets store (`--bind $PWD/_targets:/opt/_targets`), and 3. the `inst/` folder which has the targets (`--bind $PWD/_targets:/opt/_targets`). The model fitting stage uses the `crew.cluster::crew_controller_slurm` controller, and therefore requires **local installation and settings of** `munge` (`--bind /run/munge:/run/munge`) and `slurm` (`--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm`).
 
+- R
+  - `_targets.R`: Ensure each `crew::crew_controller_local` does not specify more workers than the total number workers requested in `run.R` (line 9).
+  - `_targets.R`: Ensure `targets` store (line 63) matches the mount location in `run.sh` (lines 33 and 47 **after the semicolon**).
+  - `inst/targets/targets_critical.R`: Critical targets are those which will require changes between users (`chr_nasa_token`), for development (`num_dates_split`), manual updates (`/inst/extdata/mod06_links_2018_2022.csv` called via `chr_mod06_links`), and mounted data path (`chr_input_dir`). **Most importantly**, critical target `chr_daterange` controls the entire temporal range of the downstream pipeline. Time-related specifications (dates, months, years, julian dates, etc) are defined relative to `chr_daterange`.
+
+## Developments (January 28, 2025)
+- Separate container definition files and images for the covariate calculation (`container/container_covariates.def`) and model fitting (`container/container_models.def`) parts of the pipeline.
+- Set and get `BEETHOVEN` environmental variable in `run.sh` and `_targets.R` files, respectively, to skip model fitting targets running on `container_covariate.sif`.
+- Implement `crew.cluster::crew_controller_slurm` controller for GPU-enabled targets.
+
+## Ongoing
+- Debugging GPU-enabled `lightgbm` and `xgboost` models fit with `parsnip` package.
 
 ## Basic structure of branches
 We will call "grand target" as a set of branches if any branching technique is applied at a target.
