@@ -5,6 +5,8 @@
 #' @keywords meta_learner
 #' @param data data.frame(1). Full data.
 #' @param pred list(1). List with base learner prediction values.
+#' @param position numeric(1). Position of the prediction values in the list
+#' `pred`. Default is 1.
 #' @param target_cols characters(1). Columns to retain from the full
 #' data.frame.
 #' @param yvar character(1). Outcome variable name.
@@ -16,19 +18,24 @@ attach_pred <-
   function(
     data,
     pred,
+    position = 1,
     target_cols = c("site_id", "time", "Event.Type", "lon", "lat"),
     yvar = "Arithmetic.Mean"
   ) {
     stopifnot(!is.null(data))
     stopifnot(!is.null(target_cols))
     stopifnot(!is.null(yvar))
+    if ("data.table" %in% class(data)) data <- data.frame(data)
     if (!(yvar %in% target_cols)) {
       target_cols <- c(target_cols, yvar)
     }
     data_targets <- data[, which(names(data) %in% target_cols)]
 
-    pred_merge <- do.call(cbind, (lapply(pred, function(x) x[[1]][, 1])))
-    colnames(pred_merge) <- unlist(lapply(pred, pred_colname))
+    pred_merge <- do.call(
+      cbind,
+      (lapply(pred, function(x) x[[position]][, 1]))
+    )
+    colnames(pred_merge) <- names(pred)
 
     stopifnot(nrow(data_targets) == nrow(pred_merge))
     data_pred <- cbind(data_targets, pred_merge)

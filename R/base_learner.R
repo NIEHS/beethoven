@@ -56,11 +56,12 @@ make_subdata <- function(
 #' @keywords Baselearner
 #' @param model_type character(1). Model type to be used.
 #'  Default is "mlp". Available options are "mlp", "xgb", "lgb", "elnet".
-#' @param learn_rate numeric(1). The learning rate for the model.
-#' Default is 0.1.
 #' @param device character(1). The device to be used for training.
-#' Default is "cuda:0". Make sure that your system is equipped
-#' with CUDA-enabled graphical processing units.
+#' GPU acceleration is possible for `brulee`-engine multi-layer
+#' perceptron (`model_type = "mlp"`;`device = "cuda"`) and for `lightgbm`-engine
+#' boosted tree (`model_type = "lgb"; device = "gpu"`). Ensure your system is
+#' equipped with CUDA-enabled graphical processing units if utilizing `cuda` or
+#' `gpu`.
 #' @return A parsnip model object.
 #' @importFrom parsnip mlp set_engine set_mode boost_tree linear_reg
 #' @importFrom magrittr %>%
@@ -68,17 +69,16 @@ make_subdata <- function(
 switch_model <-
   function(
     model_type = c("mlp", "xgb", "lgb", "elnet"),
-    learn_rate = 0.1,
-    device = "cuda:0"
+    device = c("cpu", "cuda", "gpu")
   ) {
-
+    device <- match.arg(device)
     switch(
       model_type,
       mlp =
         parsnip::mlp(
           hidden_units = parsnip::tune(),
           dropout = parsnip::tune(),
-          epochs = 500,
+          epochs = parsnip::tune(),
           activation = parsnip::tune(),
           learn_rate = parsnip::tune()
         ) %>%
