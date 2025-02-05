@@ -21,7 +21,7 @@ target_metalearner <-
     ,
     targets::tar_target(
       name = fit_learner_meta_cpu,
-      command = fit_meta_learner_dev(
+      command = beethoven::fit_meta_learner(
         data = dt_feat_base_xyt,
         yvar = list_base_params_static$yvar,
         target_cols = chr_learner_meta_cols,
