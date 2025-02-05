@@ -29,7 +29,7 @@ Version 0.4.4 of `beethoven` has stable `targets` for downloading data files, ca
 ```r
 targets::tar_visnetwork()
 ```
-![`beethoven` targets::tar_visnetwork()](man/figures/visnetwork.html)
+![`beethoven` targets::tar_visnetwork()](man/figures/visnetwork_20250128.png)
 
 ## Organization
 
