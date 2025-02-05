@@ -29,6 +29,11 @@ controller_25 <- crew::crew_controller_local(
   name = "controller_25",
   workers = 25
 )
+##### `controller_10` uses 10 workers (~90.0 Gb per worker).
+controller_10 <- crew::crew_controller_local(
+  name = "controller_10",
+  workers = 10
+)
 ##### `controller_gpu` uses 4 GPU workers (undefined memory allocation).
 scriptlines_apptainer <- "apptainer"
 scriptlines_basedir <- "$PWD"
@@ -84,7 +89,8 @@ targets::tar_option_set(
   seed = 202401L,
   controller = crew::crew_controller_group(
     controller_250, controller_100, controller_75,
-    controller_50, controller_25, controller_gpu
+    controller_50, controller_25, controller_10,
+    controller_gpu
   ),
   resources = targets::tar_resources(
     crew = targets::tar_resources_crew(controller = "controller_250")
