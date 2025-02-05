@@ -44,42 +44,39 @@ attach_pred <-
   }
 
 
-#' Assign column name to base learner prediction based on hyperparameters.
-#' @keywords meta_learner
-#' @param pred Base learner outcomes.
-#' @return a character for column name.
-#' @keywords Utility
-#' @export
-pred_colname <-
-  function(
-    pred
-  ) {
-    id <- substr(setdiff(names(pred[[2]]), ".config"), 1, 3)
-    value <- as.character(pred[[2]][1, 1:(ncol(pred[[2]]) - 1)])
-    pred_colname <- paste(paste0(id, value), collapse = "_")
-    # random value appended to hyperparameter in case multiple models
-    # use same hyperparameter combinations
-    pred_colname_randomid <-
-      paste(pred_colname, sample(1e4:1e5 - 1, 1), sep = "_")
-    return(pred_colname_randomid)
-  }
-
-
 #' Fit meta learner
 #'
 #' This function subsets the full data by column subsamples (rate=50%)
-#' The optimal hyperparameter search is performed based on spatial,
-#' temporal, and spatiotemporal cross-validation schemes.
-#' As of version 0.4.0, the function relies on RMSE to select the
-#' best hyperparameter set.
+#' The optimal hyperparameter search is performed based on spatiotemporal
+#' cross-validation schemes. As of version 0.4.5, users can define metric
+#' used for selecting best hyperparameter set (default = "rmse").
 #' @keywords meta_learner
-#' @param data data.frame. Full data.
-#' @param p_col_sel numeric(1). Rate of column resampling. Default is 0.5.
-#' @param rset rset object. Specification of training/test sets.
+#' @param data data.frame. Full data.frame of base learner predictions and AQS
+#' spatiotemporal identifiers. [`attach_pred`].
+#' @param c_subsample numeric(1). Rate of column resampling. Default is 0.5.
+#' @param r_subsample numeric(1). The proportion of rows to be used. Default is
+#' 1.0, which uses full dataset but setting is required to balance groups
+#' generated with [`make_subdata`]
 #' @param yvar character(1). Outcome variable name
-#' @param xvar character. Feature names.
+#' @param target_cols characters(1). Columns from `data` to be retained during
+#' column resampling. Default is c("site_id", "time", "Event.Type", "lon",
+#' "lat").
+#' @param args_generate_cv List of arguments to be passed to
+#' `switch_generate_cv_rset` function.
 #' @param tune_iter integer(1). Bayesian optimization iterations.
 #' Default is 50.
+#' @param nthreads integer(1). The number of threads to be used for
+#' tuning. Default is 8L. `learner = "elnet"` will utilize the multiple
+#' threads in [future::multicore()] plan. Passed to [`fit_base_tune`].
+#' @param trim_resamples logical(1). Default is TRUE, which replaces the actual
+#' data.frames in splits column of `tune_results` object with NA.
+#' Passed to [`fit_base_tune`].
+#' @param return_best logical(1). If TRUE, the best tuned model is returned.
+#' Passed to [`fit_base_tune`].
+#' @param metric character(1). The metric to be used for selecting the best.
+#' Must be one of "rmse", "rsq", "mae". Default = "rmse".
+#' Passed to [`fit_base_tune`].
+#' @seealso [`fit_base_tune`] [`make_subdata`]
 #' @importFrom parsnip linear_reg
 #' @importFrom workflows workflow add_variables add_model
 #' @importFrom yardstick metric_set rmse mae
@@ -92,73 +89,90 @@ pred_colname <-
 fit_meta_learner <-
   function(
     data,
-    p_col_sel = 0.5,
-    rset = NULL,
+    c_subsample = 0.5,
+    r_subssample = 1.0,
     yvar = "Arithmetic.Mean",
-    xvar = character(0),
-    tune_iter = 50L
+    target_cols = c("site_id", "time", "Event.Type", "lon", "lat"),
+    args_generate_cv = list(),
+    tune_iter = 50L,
+    nthreads = 2L,
+    trim_resamples = FALSE,
+    return_best = TRUE,
+    metric = "rmse"
   ) {
 
     # define model
-    meta_model <-
-      parsnip::linear_reg(
-        engine = "glmnet",
-        mode = "regression",
-        penalty = tune::tune(),
-        mixture = tune::tune()
+    meta_model <- beethoven::switch_model(
+      model_type = "elnet", device = "cpu"
+    )
+
+    # subset data to c_subsample proportion of columns
+    meta_id_columns <- unique(c(target_cols, yvar))
+    data_nonid_columns <- names(data[, !names(data) %in% meta_id_columns])
+    data_sample_cidx <- sample(
+      data_nonid_columns, floor(c_subsample * length(data_nonid_columns))
+    )
+    data_sample_c <- data[, c(meta_id_columns, data_sample_cidx)]
+
+    # subset data to r_subsample proportion of rows
+    # default is 1.0, so all rows are included but running `make_subdata`
+    # for all rows ensures ngroups have equal sizes
+    dt_sample_rowidx <- beethoven::make_subdata(
+      data_sample_c,
+      p = r_subssample,
+      ngroup_init = args_generate_cv$ngroup_init
+    )
+
+    data_sample_r <- data.table::data.table(
+      data_sample_c[dt_sample_rowidx, ]
+    )
+
+    # define spatiotemporal folds
+    args_generate_cv <-
+      c(
+        list(data = data_sample_r, cv_mode = "spatiotemporal"),
+        args_generate_cv
+      )
+
+    # generate row index
+    cv_index <- beethoven::inject_match(
+      beethoven::generate_cv_index_spt, args_generate_cv
+    )
+
+    # using cv_index, restore rset
+    meta_vfold <-
+      beethoven::convert_cv_index_rset(
+        cv_index, data_sample_r, cv_mode = "spatiotemporal"
       )
 
     # define recipe
     meta_recipe <-
       recipes::recipe(
-        data[1, ]
+        data_sample_r[1, ]
       ) %>%
-      recipes::update_role(!!xvar) %>%
+      recipes::update_role(!!seq(5, ncol(data_sample_r))) %>%
       recipes::update_role(!!yvar, new_role = "outcome")
 
-    # define workflow from recipe and model
-    meta_workflow <-
-      workflows::workflow() %>%
-      workflows::add_recipe(
-        meta_recipe
-      ) %>%
-      workflows::add_model(meta_model)
-
-    # tune hyperparameters per Bayesian optimization
-    meta_tuned <-
-      tune::tune_bayes(
-        object = meta_workflow,
-        resamples = rset,
-        iter = tune_iter,
-        control = tune::control_bayes(
-          verbose = TRUE,
-          save_pred = FALSE,
-          save_workflow = TRUE
-        ),
-        metrics = yardstick::metric_set(
-          yardstick::rmse, yardstick::mae, yardstick::rsq
-        )
-      )
-
-    meta_wfparam <-
-      tune::select_best(
-        meta_tuned,
-        metric = c("rmse", "rsq", "mae")
-      )
-
-    # finalize workflow with the best tuned hyperparameters
-    meta_wfresult <- tune::finalize_workflow(meta_workflow, meta_wfparam)
-    # Best-fit model
-    meta_wf_fit_best <- parsnip::fit(meta_wfresult, data = data)
-
+    # fit glmnet meta learner with `fit_base_tune`
+    future::plan(future::multicore, workers = nthreads)
     meta_wflist <-
-      list(
-        meta_fitted = meta_wf_fit_best,
-        meta_parameter = meta_wfparam,
-        best_performance = meta_tuned
+      beethoven::fit_base_tune(
+        data_full = data.table::data.table(data_sample_c),
+        recipe = meta_recipe,
+        model = meta_model,
+        resample = meta_vfold,
+        tune_mode = "bayes",
+        grid = NULL,
+        iter_bayes = tune_iter,
+        trim_resamples = trim_resamples,
+        return_best = return_best,
+        metric = metric
       )
+    future::plan(future::sequential)
+
     return(meta_wflist)
   }
+
 
 #' Predict meta learner
 #' @keywords meta_learner

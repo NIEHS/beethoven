@@ -422,12 +422,7 @@ fit_base_tune <-
           control = wf_config
         )
     }
-    # DEVELOPMENT CHANGE
-    # mm-0904 Drop base_wftune from return when trim_resamples = TRUE
-    # due to large data size. 1 iter > 25Gb
-    # if (trim_resamples) {
-    #   base_wftune$splits <- NA
-    # }
+
     if (return_best) {
       # Select the best hyperparameters
       metric <- match.arg(metric, c("rmse", "rsq", "mae"))
@@ -439,8 +434,7 @@ fit_base_tune <-
       # finalize workflow with the best tuned hyperparameters
       base_wfresult <- tune::finalize_workflow(base_wf, base_wfparam)
 
-      # DEVELOPMENT CHANGE
-      # mm-0904 unlist multi-layered hidden units if mlp model
+      # unlist multi-layered hidden units if mlp model
       if (model$engine == "brulee" && is.list(grid$hidden_units)) {
         base_wfresult$fit$actions$model$spec$args$hidden_units <-
           unlist(
@@ -463,11 +457,11 @@ fit_base_tune <-
           best_performance = base_wftune
         )
     }
-    # DEVELOPMENT CHANGE
-    # mm-0904 see above
+
     if (trim_resamples) {
       base_wflist <- base_wflist[-3]
     }
+
     return(base_wflist)
   }
 
