@@ -658,6 +658,7 @@ attach_xy <-
 #' @importFrom magrittr %>%
 #' @importFrom spatialsample spatial_block_cv
 #' @seealso [`spatialsample::spatial_block_cv`]
+#' @export
 generate_cv_index_spt <- function(
   data,
   locs_id = "site_id",
@@ -693,14 +694,13 @@ generate_cv_index_spt <- function(
       !is.na(Reduce(c, Map(function(x) is.na(x$out_id), sp_index$splits)))
     )
   ) {
-    cat("Warning: some splits have missing values in `out_id`...\n")
+    warning("Some splits have missing values in `out_id`...\n")
     spatial_cv <-
       lapply(
         sp_index$splits,
         function(x) list(analysis = x$in_id, assessment = x$out_id)
       )
   } else {
-    cat("No missing values in `out_id`...\n")
     sp_index <- lapply(sp_index$splits, function(x) x$in_id)
     for (i in seq_along(sp_index)) {
       spatial_cv[setdiff(data_rowid, sp_index[[i]])] <- i
@@ -733,7 +733,8 @@ generate_cv_index_spt <- function(
   sp_indices <- sort(unique(data_sp$cv))
 
   # identify number of years and temporal folds
-  t_fold <- year_vec_split <- sort(unique(substr(data_sp[[time_id]], 1, 4)))
+  year_vec_split <- sort(unique(substr(data_sp[[time_id]], 1, 4)))
+  t_fold <- as.integer(length(year_vec_split))
   time_vec_split <- as.Date(paste0(year_vec_split, "-01-01"))
   time_vec_split <- c(
     time_vec_split,
