@@ -18,7 +18,7 @@ apptainer exec \
   --bind $PWD/inst:/inst \
   --bind /ddn:/input \
   --bind $PWD/_targets:/opt/_targets \
-  beethoven_dl_calc.sif \
+  container/container_covariates.sif \
   Rscript --no-init-file -e "targets::tar_read('$DEBUG_TARGET')"
   # Rscript --no-init-file -e "targets::tar_meta(fields = error, complete_only = TRUE)"
   # Rscript --no-init-file -e "sf::st_write(targets::tar_read('$DEBUG_TARGET'), '/mnt/sf_base.gpkg')"

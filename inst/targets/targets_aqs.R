@@ -6,7 +6,7 @@ target_aqs <-
     targets::tar_target(
       list_feat_proc_aqs_sites,
       command = {
-        download_aqs
+        # download_aqs
         sf_feat_proc_aqs_sites_date <- amadeus::process_aqs(
           path = file.path(chr_input_dir, "aqs", "data_files"),
           date = chr_daterange,
@@ -14,26 +14,28 @@ target_aqs <-
           data_field = "Arithmetic.Mean",
           return_format = "sf"
         )
-        list_feat_split_aqs_sites <- lapply(
-          split(
-            sf_feat_proc_aqs_sites_date,
-            sf_feat_proc_aqs_sites_date$site_id
-          ),
-          function(x) {
-            rownames(x) <- NULL
-            x
-          }
-        )
-        list_feat_state_aqs_sites <- lapply(
-          lapply(
-            split(
-              names(list_feat_split_aqs_sites),
-              substr(names(list_feat_split_aqs_sites), 1, 2)
-            ), function(x) list_feat_split_aqs_sites[x]
-          ),
-          function(x) dplyr::bind_rows(x)
-        )
-        list_feat_state_aqs_sites
+        # list_feat_split_aqs_sites <- lapply(
+        #   split(
+        #     sf_feat_proc_aqs_sites_date,
+        #     sf_feat_proc_aqs_sites_date$site_id
+        #   ),
+        #   function(x) {
+        #     rownames(x) <- NULL
+        #     x
+        #   }
+        # )
+        # list_feat_state_aqs_sites <- lapply(
+        #   lapply(
+        #     split(
+        #       names(list_feat_split_aqs_sites),
+        #       substr(names(list_feat_split_aqs_sites), 1, 2)
+        #     ), function(x) list_feat_split_aqs_sites[x]
+        #   ),
+        #   function(x) dplyr::bind_rows(x)
+        # )
+        # # list_feat_state_aqs_sites
+        # list_feat_split_aqs_sites
+        sf_feat_proc_aqs_sites_date
       },
       description = "AQS locations | aqs"
     )

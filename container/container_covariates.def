@@ -39,7 +39,7 @@ From: rocker/geospatial:latest
     Rscript -e "pak::pak('shikokuchuo/nanonext'); pak::pak('shikokuchuo/mirai')"
     Rscript -e "pak::pak('wlandau/crew'); pak::pak('wlandau/crew.cluster')"
     Rscript -e "pak::pak('NIEHS/amadeus')"
-    Rscript -e "pak::pak('NIEHS/beethoven@dev-mm-0108')"
+    Rscript -e "pak::pak('NIEHS/beethoven@mm-0203')"
 
 %environment
     # Set locale for the container environment

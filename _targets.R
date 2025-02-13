@@ -10,32 +10,32 @@
 ##### `controller_250` uses full allocation of workers (~4.0 Gb per worker).
 controller_250 <- crew::crew_controller_local(
   name = "controller_250",
-  workers = 250,
-  seconds_idle = 30
+  workers = 250#,
+  # seconds_idle = 30
 )
 ##### `controller_100` uses 100 workers (~10.0 Gb per worker).
 controller_100 <- crew::crew_controller_local(
   name = "controller_100",
-  workers = 100,
-  seconds_idle = 30
+  workers = 100#,
+  # seconds_idle = 30
 )
 ##### `controller_75` uses 75 workers (~13.33 Gb per worker).
 controller_75 <- crew::crew_controller_local(
   name = "controller_75",
-  workers = 75,
-  seconds_idle = 30
+  workers = 75#,
+  # seconds_idle = 30
 )
 ##### `controller_50` uses 50 workers (~20.0 Gb per worker).
 controller_50 <- crew::crew_controller_local(
   name = "controller_50",
-  workers = 50,
-  seconds_idle = 30
+  workers = 50#,
+  # seconds_idle = 30
 )
 ##### `controller_25` uses 25 workers (~40.0 Gb per worker).
 controller_25 <- crew::crew_controller_local(
   name = "controller_25",
-  workers = 25,
-  seconds_idle = 30
+  workers = 25#,
+  # seconds_idle = 30
 )
 ##### `controller_gpu` uses 4 GPU workers.
 scriptlines_apptainer <- "apptainer"
@@ -56,7 +56,7 @@ scriptlines_gpu <- glue::glue(
 controller_gpu <- crew.cluster::crew_controller_slurm(
   name = "controller_gpu",
   workers = 4,
-  seconds_idle = 30,
+  # seconds_idle = 30,
   options_cluster = crew.cluster::crew_options_slurm(
     verbose = TRUE,
     script_lines = scriptlines_gpu
@@ -70,13 +70,15 @@ targets::tar_config_set(store = "/opt/_targets")
 if (Sys.getenv("BEETHOVEN") == "covariates") {
   beethoven_packages <- c(
     "amadeus", "targets", "tarchetypes", "dplyr", "tidyverse",
-    "data.table", "sf", "crew", "crew.cluster", "lubridate", "qs2"
+    "data.table", "sf", "crew", "crew.cluster", "lubridate", "qs2",
+    "beethoven", "chopin"
   )
 } else {
   beethoven_packages <- c(
     "amadeus", "targets", "tarchetypes", "dplyr", "tidyverse",
     "data.table", "sf", "crew", "crew.cluster", "lubridate", "qs2",
-    "torch", "bonsai", "dials", "lightgbm", "xgboost", "glmnet"
+    "torch", "bonsai", "dials", "lightgbm", "xgboost", "glmnet",
+    "beethoven", "chopin"
   )
 }
 targets::tar_option_set(
@@ -92,10 +94,10 @@ targets::tar_option_set(
   seed = 202401L,
   controller = crew::crew_controller_group(
     controller_250, controller_100, controller_75,
-    controller_50, controller_25, controller_gpu
+    controller_50, controller_25#, controller_gpu
   ),
   resources = targets::tar_resources(
-    crew = targets::tar_resources_crew(controller = "controller_250")
+    crew = targets::tar_resources_crew(controller = "controller_50")
   ),
   retrieval = "worker"
 )
@@ -122,8 +124,8 @@ list(
   target_initiate,
   #target_download,
   target_aqs,
-  target_calculate_fit,
-  target_baselearner
+  target_calculate_fit#,
+  # target_baselearner
   # target_metalearner,
   # target_calculate_predict,
   # target_predict

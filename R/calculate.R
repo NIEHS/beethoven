@@ -835,3 +835,65 @@ process_modis_swath, or process_blackmarble.")
     Sys.sleep(1L)
     return(calc_results_return)
   }
+
+
+
+#' Calculate MODIS from preprocessed file
+#' @param file character(1). File path of preprocessed GeoTIFF file.
+#' @param site data.frame/sf. AQS sites. data.frame will be converted to sf.
+#' @param site_id character(1). Unique identifier of `site`
+#' @param radius numeric(1). Circular buffer radius. Distance unit is inherited
+#'   from the sites' coordinate system.
+#' @param colheader character. Column name header.
+#' @param mark logical(1). Mark zero-padded (length of 5) radius in the column name.
+#' @importFrom chopin extract_at
+#' @importFrom sf st_as_sf
+#' @importFrom stats setNames
+#' @importFrom stringi stri_extract_first_regex
+#' @export 
+calculate_modis_direct <-
+  function(
+    file,
+    site,
+    site_id,
+    radius,
+    colheader,
+    mark = TRUE
+  ) {
+    radius <- as.integer(unlist(radius))
+    chr_padr <- sprintf("%05d", radius)
+    chr_coln <- if (mark) {
+      sprintf("%s%s", colheader, chr_padr)
+    } else {
+      colheader
+    }
+    print(chr_coln)
+    stopifnot(inherits(site, "data.frame"))
+
+    if (inherits(site, "SpatVector")) {
+      site <- try(sf::st_as_sf(site))
+    }
+    if (!inherits(site, "sf")) {
+      site <- try(sf::st_as_sf(site, sf_column_name = "geometry"))
+    }
+
+    # time info
+    chr_file1 <- file[1]
+    dateinfo <-
+      stringi::stri_extract_first_regex(chr_file1, pattern = "2[0-9]{3,3}\\-[0-1][0-9]\\-[0-3][0-9]")
+    dateinfo <- as.Date(dateinfo, format = "%Y-%m-%d")
+
+    extracted <-
+      chopin::extract_at(
+        x = file,
+        y = site,
+        id = site_id,
+        radius = radius
+      )
+    coln <- names(extracted)
+    coln_replace <- grep("(mean|median|min|max)", coln)
+    coln[coln_replace] <- chr_coln
+    extracted <- setNames(extracted, coln)
+    extracted[["time"]] <- dateinfo
+    return(extracted)
+  }
