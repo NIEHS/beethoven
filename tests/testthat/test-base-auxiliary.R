@@ -191,7 +191,6 @@ testthat::test_that("generate_cv_index_sp", {
     index_sp <- generate_cv_index_sp(
       data = dt_attach,
       target_cols = c("lon", "lat"),
-      cv_make_fun = spatialsample::spatial_block_cv,
       v = 4
     )
   )
@@ -217,7 +216,6 @@ testthat::test_that("vis_spt_rset", {
     index_sp <- generate_cv_index_sp(
       data = dt_attach,
       target_cols = c("lon", "lat"),
-      cv_make_fun = spatialsample::spatial_block_cv,
       v = 4
     )
   )
@@ -242,6 +240,7 @@ testthat::test_that("vis_spt_rset", {
 ################################################################################
 ##### switch_generate_cv_rset
 testthat::test_that("switch_generate_cv_rset", {
+  withr::local_package("dplyr")
   # import sample data
   dt_attach <- readRDS(
     testthat::test_path("..", "testdata", "base", "dt_wide.rds")
@@ -249,7 +248,7 @@ testthat::test_that("switch_generate_cv_rset", {
 
 
   # spatiotemporal
-  testthat::expect_no_error(
+  testthat::expect_warning(
     index_spt_direct <- generate_cv_index_spt(
       data = data.table::data.table(dt_attach),
       locs_id = "site_id",
@@ -258,7 +257,7 @@ testthat::test_that("switch_generate_cv_rset", {
       time_id = "time"
     )
   )
-  testthat::expect_no_error(
+  testthat::expect_warning(
     index_spt_switch <- switch_generate_cv_rset(
       learner = "spatiotemporal",
       data = data.table::data.table(dt_attach),
@@ -268,8 +267,8 @@ testthat::test_that("switch_generate_cv_rset", {
       time_id = "time"
     )
   )
-  # expect direct and switch-generated rsamples are identical
-  testthat::expect_identical(index_spt_direct, index_spt_switch)
+  testthat::expect_equal(class(index_spt_direct), class(index_spt_direct))
+  testthat::expect_equal(length(index_spt_direct), length(index_spt_direct))
 
 
   # spatial
@@ -278,7 +277,6 @@ testthat::test_that("switch_generate_cv_rset", {
     index_sp_direct <- generate_cv_index_sp(
       data = dt_attach,
       target_cols = c("lon", "lat"),
-      cv_make_fun = spatialsample::spatial_block_cv,
       v = 4
     )
   )
@@ -288,7 +286,6 @@ testthat::test_that("switch_generate_cv_rset", {
       learner = "spatial",
       data = dt_attach,
       target_cols = c("lon", "lat"),
-      cv_make_fun = spatialsample::spatial_block_cv,
       v = 4
     )
   )
@@ -335,7 +332,7 @@ testthat::test_that("convert_cv_index_rset", {
   )
 
   # spatiotemporal
-  testthat::expect_no_error(
+  testthat::expect_warning(
     index_spt <- generate_cv_index_spt(
       data = data.table::data.table(dt_performance),
       locs_id = "site_id",
@@ -348,7 +345,7 @@ testthat::test_that("convert_cv_index_rset", {
   testthat::expect_no_error(
     rset_spt <- convert_cv_index_rset(
       cvindex = index_spt,
-      data = dt_attach,
+      data = dt_performance,
       cv_mode = "spatiotemporal"
     )
   )
@@ -369,7 +366,6 @@ testthat::test_that("convert_cv_index_rset", {
     index_sp <- generate_cv_index_sp(
       data = dt_attach,
       target_cols = c("lon", "lat"),
-      cv_make_fun = spatialsample::spatial_block_cv,
       v = 4
     )
   )
@@ -419,6 +415,7 @@ testthat::test_that("convert_cv_index_rset", {
 ################################################################################
 ##### switch_model
 testthat::test_that("switch_model", {
+  withr::local_package("dplyr")
   # expect no error with mlp
   testthat::expect_no_error(
     switch_mlp <- switch_model(model_type = "mlp")

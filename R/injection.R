@@ -426,7 +426,54 @@ reduce_merge <-
       },
       list_in
     )
+
   }
+
+#' Reduce and merge a list of data tables
+#' @description
+#' This function iteratively runs `reduce_merge` on a list of `data.table`
+#' objects for merging large `data.tables` that may not fit into memory
+#' with `reduce_merge` directly.
+#' @param list_in A list of data tables to be merged.
+#' @param by The columns to merge the data tables on.
+#'   If `NULL`, the function will automatically detect the common column names.
+#' @param all.x logical(1). Keeping all rows from the first input.
+#' @param all.y logical(1). Keeping all rows from the second input.
+#' @return A merged data table.
+#' @keywords Post-calculation
+#' @importFrom data.table as.data.table merge.data.table
+#' @seealso [`beethoven::reduce_merge`]
+#' @export
+reduce_merge_iter <- function(
+  list_in,
+  by = c("site_id", "time"),
+  all.x = TRUE,
+  all.y = FALSE
+) {
+
+  for (i in seq_len(length(list_in) - 1)) {
+    list2 <- list_in[[i + 1]][[1]]
+    if (i == 1) {
+      list1 <- list_in[[1]][[1]]
+      dt_return <- beethoven::reduce_merge(
+        list(list1, list2),
+        by = by,
+        all.x = all.x,
+        all.y = all.y
+      )
+    } else {
+      dt_return <- beethoven::reduce_merge(
+        list(dt_return, list2),
+        by = by,
+        all.x = all.x,
+        all.y = all.y
+      )
+    }
+  }
+
+  return(dt_return)
+
+}
 
 
 #' Injects the calculate function with matched arguments.
