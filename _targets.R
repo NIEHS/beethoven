@@ -110,7 +110,7 @@ targets::tar_source("inst/targets/targets_aqs.R")
 targets::tar_source("inst/targets/targets_calculate_fit.R")
 targets::tar_source("inst/targets/targets_baselearner.R")
 # targets::tar_source("inst/targets/targets_metalearner.R")
-# targets::tar_source("inst/targets/targets_calculate_predict.R")
+targets::tar_source("inst/targets/targets_calculate_predict.R")
 # targets::tar_source("inst/targets/targets_predict.R")
 
 ###########################      SYSTEM SETTINGS      ##########################
@@ -124,9 +124,9 @@ list(
   target_initiate,
   #target_download,
   target_aqs,
-  target_calculate_fit#,
+  target_calculate_fit,
   # target_baselearner
   # target_metalearner,
-  # target_calculate_predict,
+  target_calculate_predict
   # target_predict
 )

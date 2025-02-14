@@ -455,7 +455,6 @@ target_calculate_fit <-
       description = "preprocessed MODIS MCD19_5km files"
     )
     ,
-    # TODO: column names, shrink by radii
     targets::tar_target(
       list_feat_calc_mcd19_5km,
       command = {
@@ -611,7 +610,6 @@ target_calculate_fit <-
       description = "preprocessed MODIS VIIRS files"
     )
     ,
-    # name_covariates = "MOD_LGHTN_0_",
     targets::tar_target(
       list_feat_calc_viirs,
       command = {
@@ -639,27 +637,27 @@ target_calculate_fit <-
         beethoven::reduce_merge(
           list(
             # branching by radii requires another way to merge
-            collapse::rowbind(list_feat_calc_mod11[length(list_feat_calc_mod11) %% 3 == 1], fill = TRUE),
-            collapse::rowbind(list_feat_calc_mod11[length(list_feat_calc_mod11) %% 3 == 2], fill = TRUE),
-            collapse::rowbind(list_feat_calc_mod11[length(list_feat_calc_mod11) %% 3 == 0], fill = TRUE),
-            collapse::rowbind(list_feat_calc_mod06[length(list_feat_calc_mod06) %% 3 == 1], fill = TRUE),
-            collapse::rowbind(list_feat_calc_mod06[length(list_feat_calc_mod06) %% 3 == 2], fill = TRUE),
-            collapse::rowbind(list_feat_calc_mod06[length(list_feat_calc_mod06) %% 3 == 0], fill = TRUE),
-            collapse::rowbind(list_feat_calc_mod13[length(list_feat_calc_mod13) %% 3 == 1], fill = TRUE),
-            collapse::rowbind(list_feat_calc_mod13[length(list_feat_calc_mod13) %% 3 == 2], fill = TRUE),
-            collapse::rowbind(list_feat_calc_mod13[length(list_feat_calc_mcd19_1km) %% 3 == 0], fill = TRUE),
-            collapse::rowbind(list_feat_calc_mcd19_1km[length(list_feat_calc_mcd19_1km) %% 3 == 1], fill = TRUE),
-            collapse::rowbind(list_feat_calc_mcd19_1km[length(list_feat_calc_mcd19_1km) %% 3 == 2], fill = TRUE),
-            collapse::rowbind(list_feat_calc_mcd19_1km[length(list_feat_calc_mcd19_1km) %% 3 == 0], fill = TRUE),
-            collapse::rowbind(list_feat_calc_mcd19_5km[length(list_feat_calc_mcd19_5km) %% 3 == 1], fill = TRUE),
-            collapse::rowbind(list_feat_calc_mcd19_5km[length(list_feat_calc_mcd19_5km) %% 3 == 2], fill = TRUE),
-            collapse::rowbind(list_feat_calc_mcd19_5km[length(list_feat_calc_mcd19_5km) %% 3 == 0], fill = TRUE),
-            collapse::rowbind(list_feat_calc_mod09[length(list_feat_calc_mod09) %% 3 == 1], fill = TRUE),
-            collapse::rowbind(list_feat_calc_mod09[length(list_feat_calc_mod09) %% 3 == 2], fill = TRUE),
-            collapse::rowbind(list_feat_calc_mod09[length(list_feat_calc_mod09) %% 3 == 0], fill = TRUE),
-            collapse::rowbind(list_feat_calc_viirs[length(list_feat_calc_viirs) %% 3 == 1], fill = TRUE),
-            collapse::rowbind(list_feat_calc_viirs[length(list_feat_calc_viirs) %% 3 == 2], fill = TRUE),
-            collapse::rowbind(list_feat_calc_viirs[length(list_feat_calc_viirs) %% 3 == 0], fill = TRUE)
+            collapse::rowbind(list_feat_calc_mod11[seq_len(length(list_feat_calc_mod11)) %% 3 == 1], fill = TRUE),
+            collapse::rowbind(list_feat_calc_mod11[seq_len(length(list_feat_calc_mod11)) %% 3 == 2], fill = TRUE),
+            collapse::rowbind(list_feat_calc_mod11[seq_len(length(list_feat_calc_mod11)) %% 3 == 0], fill = TRUE),
+            collapse::rowbind(list_feat_calc_mod06[seq_len(length(list_feat_calc_mod06)) %% 3 == 1], fill = TRUE),
+            collapse::rowbind(list_feat_calc_mod06[seq_len(length(list_feat_calc_mod06)) %% 3 == 2], fill = TRUE),
+            collapse::rowbind(list_feat_calc_mod06[seq_len(length(list_feat_calc_mod06)) %% 3 == 0], fill = TRUE),
+            collapse::rowbind(list_feat_calc_mod13[seq_len(length(list_feat_calc_mod13)) %% 3 == 1], fill = TRUE),
+            collapse::rowbind(list_feat_calc_mod13[seq_len(length(list_feat_calc_mod13)) %% 3 == 2], fill = TRUE),
+            collapse::rowbind(list_feat_calc_mod13[seq_len(length(list_feat_calc_mcd19_1km)) %% 3 == 0], fill = TRUE),
+            collapse::rowbind(list_feat_calc_mcd19_1km[seq_len(length(list_feat_calc_mcd19_1km)) %% 3 == 1], fill = TRUE),
+            collapse::rowbind(list_feat_calc_mcd19_1km[seq_len(length(list_feat_calc_mcd19_1km)) %% 3 == 2], fill = TRUE),
+            collapse::rowbind(list_feat_calc_mcd19_1km[seq_len(length(list_feat_calc_mcd19_1km)) %% 3 == 0], fill = TRUE),
+            collapse::rowbind(list_feat_calc_mcd19_5km[seq_len(length(list_feat_calc_mcd19_5km)) %% 3 == 1], fill = TRUE),
+            collapse::rowbind(list_feat_calc_mcd19_5km[seq_len(length(list_feat_calc_mcd19_5km)) %% 3 == 2], fill = TRUE),
+            collapse::rowbind(list_feat_calc_mcd19_5km[seq_len(length(list_feat_calc_mcd19_5km)) %% 3 == 0], fill = TRUE),
+            collapse::rowbind(list_feat_calc_mod09[seq_len(length(list_feat_calc_mod09)) %% 3 == 1], fill = TRUE),
+            collapse::rowbind(list_feat_calc_mod09[seq_len(length(list_feat_calc_mod09)) %% 3 == 2], fill = TRUE),
+            collapse::rowbind(list_feat_calc_mod09[seq_len(length(list_feat_calc_mod09)) %% 3 == 0], fill = TRUE),
+            collapse::rowbind(list_feat_calc_viirs[seq_len(length(list_feat_calc_viirs)) %% 3 == 1], fill = TRUE),
+            collapse::rowbind(list_feat_calc_viirs[seq_len(length(list_feat_calc_viirs)) %% 3 == 2], fill = TRUE),
+            collapse::rowbind(list_feat_calc_viirs[seq_len(length(list_feat_calc_viirs)) %% 3 == 0], fill = TRUE)
           )
           ,
           by = NULL
