@@ -8,6 +8,7 @@ fit_base_learner(
   learner = c("mlp", "xgb", "lgb", "elnet"),
   dt_full,
   r_subsample = 0.3,
+  c_subsample = 1,
   model = NULL,
   folds = 5L,
   cv_mode = c("spatiotemporal", "spatial", "temporal"),
@@ -18,7 +19,7 @@ fit_base_learner(
   tune_grid_size = 10L,
   learn_rate = 0.1,
   yvar = "Arithmetic.Mean",
-  xvar = seq(5, ncol(dt_sample)),
+  xvar = seq(5, ncol(dt_full)),
   nthreads = 8L,
   trim_resamples = FALSE,
   return_best = TRUE,
@@ -33,6 +34,8 @@ Default is "mlp". Available options are "mlp", "xgb", "lgb", "elnet".}
 \item{dt_full}{The full data table to be used for prediction.}
 
 \item{r_subsample}{numeric(1). The proportion of rows to be used.}
+
+\item{c_subsample}{numeric(1). The proportion of predictors to be used.}
 
 \item{model}{The parsnip model object. Preferably generated from
 \code{switch_model}.}

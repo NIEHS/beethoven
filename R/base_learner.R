@@ -158,6 +158,7 @@ switch_model <-
 #'   Default is "mlp". Available options are "mlp", "xgb", "lgb", "elnet".
 #' @param dt_full The full data table to be used for prediction.
 #' @param r_subsample numeric(1). The proportion of rows to be used.
+#' @param c_subsample numeric(1). The proportion of predictors to be used.
 #' @param model The parsnip model object. Preferably generated from
 #'   `switch_model`.
 #' @param folds integer(1). Number of cross-validation folds.
@@ -205,6 +206,7 @@ fit_base_learner <-
     learner = c("mlp", "xgb", "lgb", "elnet"),
     dt_full,
     r_subsample = 0.3,
+    c_subsample = 1.0,
     model = NULL,
     folds = 5L,
     cv_mode  = c("spatiotemporal", "spatial", "temporal"),
@@ -215,7 +217,7 @@ fit_base_learner <-
     tune_grid_size = 10L,
     learn_rate = 0.1,
     yvar = "Arithmetic.Mean",
-    xvar = seq(5, ncol(dt_sample)),
+    xvar = seq(5, ncol(dt_full)),
     nthreads = 8L,
     trim_resamples = FALSE,
     return_best = TRUE,
@@ -232,10 +234,26 @@ fit_base_learner <-
     } else {
       ngroup_init <- NULL
     }
-    dt_sample_rowidx <- beethoven::make_subdata(
+
+    # apply r_subsample % row subsampling
+    chr_rowidx <- beethoven::make_subdata(
       dt_full, p = r_subsample, ngroup_init = ngroup_init
     )
-    dt_sample <- dt_full[dt_sample_rowidx, ]
+
+    # apply c_subsample % column subsampling with lat/lon
+    chr_llidx <- which(names(dt_full) %in% c("lon", "lat"))
+    chr_xvar <- sample(
+      setdiff(xvar, chr_llidx),
+      (length(xvar) - 2) * c_subsample
+    )
+    chr_colidx <- c(1:4, chr_llidx, chr_xvar)
+
+    # sample of data with r_subsample rows, c_subsample columns, and lat/lon
+    dt_sample <- dt_full[chr_rowidx, chr_colidx]
+
+    # ensure required columsn are retained in data sample
+    chr_requiredcols <- c(yvar, "site_id", "time", "lon", "lat")
+    stopifnot(all(chr_requiredcols %in% names(dt_sample)))
 
     # detect model name
     model_name <- model$engine
@@ -316,7 +334,7 @@ fit_base_learner <-
         iter_bayes = tune_bayes_iter,
         trim_resamples = trim_resamples,
         return_best = return_best,
-        data_full = dt_full,
+        data_full = dt_full[, chr_colidx],
         metric = metric
       )
     if (model_name == "glmnet") {
