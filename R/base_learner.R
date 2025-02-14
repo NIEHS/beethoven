@@ -241,18 +241,23 @@ fit_base_learner <-
     )
 
     # apply c_subsample % column subsampling with lat/lon
-    chr_llidx <- which(names(dt_full) %in% c("lon", "lat"))
-    chr_xvar <- sample(
-      setdiff(xvar, chr_llidx),
-      (length(xvar) - 2) * c_subsample
+    chr_latlon <- which(names(dt_full) %in% c("lon", "lat"))
+    # update `xvar` for subset of predictors
+    chr_xvar <- c(
+      sample(
+        setdiff(xvar, chr_latlon),
+        (length(xvar) - 2) * c_subsample
+      ),
+      chr_latlon
     )
-    chr_colidx <- c(1:4, chr_llidx, chr_xvar)
+    chr_colidx <- c(1:4, chr_xvar)
+    xvar <- seq(5, length(chr_colidx))
 
     # sample of data with r_subsample rows, c_subsample columns, and lat/lon
-    dt_sample <- dt_full[chr_rowidx, chr_colidx]
+    dt_sample <- dt_full[chr_rowidx, ..chr_colidx]
 
-    # ensure required columsn are retained in data sample
-    chr_requiredcols <- c(yvar, "site_id", "time", "lon", "lat")
+    # ensure required columns are retained in data sample
+    chr_requiredcols <- c(yvar, "site_id", "Event.Type", "time", "lon", "lat")
     stopifnot(all(chr_requiredcols %in% names(dt_sample)))
 
     # detect model name
@@ -320,7 +325,6 @@ fit_base_learner <-
       }
     }
 
-
     if (model_name == "glmnet") {
       future::plan(future::multicore, workers = nthreads)
     }
@@ -334,7 +338,7 @@ fit_base_learner <-
         iter_bayes = tune_bayes_iter,
         trim_resamples = trim_resamples,
         return_best = return_best,
-        data_full = dt_full[, chr_colidx],
+        data_full = dt_full[, ..chr_colidx],
         metric = metric
       )
     if (model_name == "glmnet") {
