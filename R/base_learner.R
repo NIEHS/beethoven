@@ -1041,3 +1041,190 @@ switch_generate_cv_rset <-
     cvindex <- beethoven::inject_match(target_fun, list(...))
     return(cvindex)
   }
+
+
+#' Cut a vector into groups based on numeric or time data
+#'
+#' This function divides a numeric vector or a vector of dates/times (of class
+#' \code{POSIXt} or \code{Date}) into a specified number of groups.
+#' For time data, the grouping is performed using semantic time arithmetic
+#' provided by the \code{lubridate} package.
+#' For numeric data, a simple even split is performed.
+#'
+#' When processing time data,
+#' the function calculates intervals in months based on
+#' the specified semantic unit (e.g., "year", "halfyear", "quarter", "month").
+#' It then determines cutpoints that divide the range of times into
+#' \code{ngroup} intervals. If \code{cutpoint = TRUE}, the function returns
+#' the calculated cutpoints; otherwise, it returns a factor (or integer if
+#' \code{toint = TRUE}) that indicates the group for each element in \code{nu}.
+#'
+#' For numeric input, the maximum value of \code{nu} is used to create
+#' evenly sized intervals. If \code{cutpoint = TRUE}, the function returns
+#' the numeric cutpoints; otherwise, it returns a factor
+#' (or integer if \code{toint = TRUE}) indicating the group.
+#'
+#' @param nu numeric[POSIXt or Date]. Vector to be cut into groups.
+#' @param ngroup integer(1). Specifying the number of groups into
+#' which \code{nu} should be divided.
+#' @param cutpoint logical(1). if \code{TRUE}, the function returns
+#' the cutpoints defining the groups.
+#'   Default is \code{FALSE}.
+#' @param toint logical(1). if \code{TRUE}, the resulting factor
+#' (if \code{cutpoint = FALSE}) is converted to integer indices.
+#' Default is \code{FALSE}.
+#' @param unit character(1). The semantic time unit for processing time data.
+#'   Supported units are \code{"year"}, \code{"halfyear"}, \code{"quarter"},
+#'   and \code{"month"}. This parameter is required if \code{nu} is
+#'   a vector of dates/times.
+#'
+#' @details
+#' For time inputs, the function computes the total duration (in months) between
+#' the minimum and maximum time points. It then divides this duration into
+#' \code{ngroup} intervals, snapping the base interval to the nearest multiple
+#' of the semantic unit's length. Any remaining months are distributed
+#' in full chunks (of length equal to the semantic unit) starting from
+#' the last group.
+#'
+#' For numeric inputs, the function computes evenly spaced intervals based on
+#' the maximum value of \code{nu}.
+#'
+#' @return Depending on the parameters:
+#' \itemize{
+#'   \item If \code{cutpoint = TRUE}, a vector of cutpoints
+#'         (numeric for numeric input, or of class \code{POSIXct} /
+#'         \code{Date} for time input) is returned.
+#'   \item Otherwise, a factor (or integer if \code{toint = TRUE})
+#'         indicating the group assignment for each element in \code{nu}.
+#' }
+#'
+#' @note For time data, the \code{lubridate} package must be installed
+#' and available.
+#'
+#' @examples
+#' \dontrun{
+#' # Example with POSIXct time data
+#' times <-
+#'   seq(as.POSIXct("2020-01-01"), as.POSIXct("2021-01-01"), by = "month")
+#' # Cut into 4 groups by month-based intervals
+#' groups <- divide_periods(times, ngroup = 4, unit = "month")
+#'
+#' # Return cutpoints instead of group assignments
+#' cutpts <- divide_periods(times, ngroup = 4, unit = "month", cutpoint = TRUE)
+#'
+#' # Example with numeric data
+#' nums <- 1:100
+#' groups_num <- divide_periods(nums, ngroup = 5)
+#' }
+#'
+#' @importFrom lubridate time_length interval `%m+%`
+#' @export
+divide_periods <-
+  function(
+    nu, ngroup,
+    unit = NULL,
+    cutpoint = FALSE,
+    toint = FALSE
+  ) {
+    # Process POSIXt/Date input using semantic time arithmetic via lubridate
+    if (inherits(nu, "POSIXt") || inherits(nu, "Date")) {
+      if (is.null(unit)) {
+        stop(
+          paste(
+            "For POSIXt input, please specify a semantic unit",
+            "(e.g., 'year', 'halfyear', 'quarter', 'month', 'week', 'day')."
+          )
+        )
+      }
+
+      if (!requireNamespace("lubridate", quietly = TRUE)) {
+        stop("The 'lubridate' package is required for time handling.")
+      }
+
+      # Define semantic unit lengths in months
+      unit_length <- switch(unit,
+        "year"     = 12,
+        "halfyear" = 6,
+        "quarter"  = 3,
+        "month"    = 1,
+        stop(
+          paste(
+            "Unsupported unit.",
+            "Supported units are 'year', 'halfyear', 'quarter', 'month'."
+          )
+        )
+      )
+
+      # Determine the start and end times
+      start_time <- min(nu)
+      end_time <- max(nu)
+
+      # Compute total duration in months (rounded to the nearest whole month)
+      total_months <-
+        round(
+          lubridate::time_length(
+            lubridate::interval(start_time, end_time), "month"
+          )
+        )
+
+      # Compute the raw even division (in months)
+      raw_base <- floor(total_months / ngroup)
+      # Snap the raw base down to the nearest multiple
+      # of the semantic unit length.
+      base <- raw_base - (raw_base %% unit_length)
+      if (base < 1) base <- raw_base # fallback if snapping leads to 0
+
+      # Calculate the remaining months after allocating the base to every group.
+      remainder <- total_months - base * ngroup
+
+      # Distribute the remainder in chunks of the semantic unit,
+      # starting from the last group and moving backward.
+      extra <- rep(0, ngroup)
+      for (i in seq(ngroup, 1, by = -1)) {
+        if (remainder <= 0) break
+        # Allocate a full chunk if possible; otherwise allocate what's left.
+        add_i <- min(unit_length, remainder)
+        extra[i] <- add_i
+        remainder <- remainder - add_i
+      }
+
+      # Compute the increments for each group (in months)
+      increments <- rep(base, ngroup) + extra
+
+      # Build the cumulative cutpoints starting from start_time
+      cutpoints <- vector("list", length = ngroup + 1)
+      cutpoints[[1]] <- start_time
+      current_time <- start_time
+      for (i in 1:ngroup) {
+        # Add i-th increment (in months) using lubridate's %m+% operator
+        current_time <- current_time %m+% months(increments[i])
+        cutpoints[[i + 1]] <- current_time
+      }
+      # Convert list to vector (POSIXct or Date)
+      cutpoints <- do.call(c, cutpoints)
+
+      if (cutpoint) {
+        return(cutpoints)
+      }
+
+      # Use cut() to assign each time value to its interval.
+      nucut <- cut(nu, breaks = cutpoints, include.lowest = TRUE, right = FALSE)
+      if (toint) nucut <- as.integer(as.factor(nucut))
+      return(nucut)
+    } else {
+      # Fallback: process numeric input as in the original function
+      numax <- max(nu)
+      sizes <- rep(numax %/% ngroup, ngroup)
+      remainder <- numax %% ngroup
+      add <- c(rep(1, remainder), rep(0, ngroup - remainder))
+      sizes <- sizes + add
+      sizes <- c(0, sizes)
+      sizesc <- cumsum(sizes)
+      if (cutpoint) {
+        return(sizesc)
+      }
+      nucut <- cut(nu, sizesc)
+      if (toint) nucut <- as.integer(as.factor(nucut))
+      return(nucut)
+    }
+  }

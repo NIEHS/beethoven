@@ -16,7 +16,7 @@ calculate_modis_direct(file, site, site_id, radius, colheader, mark = TRUE)
 \item{radius}{numeric(1). Circular buffer radius. Distance unit is inherited
 from the sites' coordinate system.}
 
-\item{colheader}{character(1). Column name header.}
+\item{colheader}{character. Column name header.}
 
 \item{mark}{logical(1). Mark zero-padded (length of 5) radius in the column name.}
 }

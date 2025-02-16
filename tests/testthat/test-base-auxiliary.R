@@ -527,3 +527,79 @@ testthat::test_that("switch_model", {
   # expect glmnet engine
   testthat::expect_true(switch_elnet$engine == "glmnet")
 })
+
+
+################################################################################
+##### divide_periods
+testthat::test_that("Numeric input returns factor groups and integer groups when requested", {
+  withr::local_package("lubridate")
+  nums <- 1:100
+  
+  # Test default behavior: groups as factor
+  groups <- divide_periods(nums, ngroup = 5)
+  testthat::expect_equal(length(groups), length(nums))
+  testthat::expect_true(is.factor(groups))
+  
+  # Test integer conversion with toint = TRUE
+  groups_int <- divide_periods(nums, ngroup = 5, toint = TRUE)
+  testthat::expect_true(is.integer(groups_int))
+})
+
+testthat::test_that("Numeric input returns cutpoints when cutpoint = TRUE", {
+  nums <- 1:100
+  
+  cps <- divide_periods(nums, ngroup = 5, cutpoint = TRUE)
+  testthat::expect_true(is.numeric(cps))
+})
+
+testthat::test_that("POSIXt input returns proper factor groups", {
+  # Create a sequence of monthly time points using POSIXct
+  times <- seq(as.POSIXct("2020-01-01", tz = "UTC"),
+               as.POSIXct("2020-12-31", tz = "UTC"),
+               by = "month")
+  
+  groups <- divide_periods(times, ngroup = 4, unit = "month")
+  testthat::expect_equal(length(groups), length(times))
+  testthat::expect_true(is.factor(groups))
+})
+
+testthat::test_that("POSIXt input returns cutpoints when cutpoint = TRUE", {
+  times <- seq(as.POSIXct("2020-01-01", tz = "UTC"),
+               as.POSIXct("2020-12-31", tz = "UTC"),
+               by = "month")
+  
+  cps <- divide_periods(times, ngroup = 4, unit = "month", cutpoint = TRUE)
+  # Check that the returned cutpoints inherit from POSIXct
+  testthat::expect_true(inherits(cps, "POSIXct"))
+})
+
+testthat::test_that("POSIXt input returns integer groups when toint = TRUE", {
+  times <- seq(as.POSIXct("2020-01-01", tz = "UTC"),
+               as.POSIXct("2020-12-31", tz = "UTC"),
+               by = "month")
+  
+  groups_int <- divide_periods(times, ngroup = 4, unit = "month", toint = TRUE)
+  testthat::expect_true(is.integer(groups_int))
+})
+
+testthat::test_that("Error is thrown when unit is NULL for POSIXt input", {
+  times <- seq(as.POSIXct("2020-01-01", tz = "UTC"),
+               as.POSIXct("2020-12-31", tz = "UTC"),
+               by = "month")
+  
+  testthat::expect_error(
+    divide_periods(times, ngroup = 4),
+    "For POSIXt input, please specify a semantic unit"
+  )
+})
+
+testthat::test_that("Error is thrown for unsupported semantic unit", {
+  times <- seq(as.POSIXct("2020-01-01", tz = "UTC"),
+               as.POSIXct("2020-12-31", tz = "UTC"),
+               by = "month")
+  
+  testthat::expect_error(
+    divide_periods(times, ngroup = 4, unit = "week"),
+    "Unsupported unit"
+  )
+})

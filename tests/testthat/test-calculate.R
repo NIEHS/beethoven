@@ -222,3 +222,183 @@ testthat::test_that("calculate_modis (MOD11A1)", {
   )
 
 })
+
+
+# Helper function to create a temporary raster file
+create_temp_raster <- function() {
+  r <- terra::rast(nrows = 1000, ncols = 1000, xmin = -100, xmax = -90, ymin = 30, ymax = 40)
+  terra::values(r) <- runif(terra::ncell(r), min = 0, max = 100)  # Random values
+  temp_file <- tempfile(fileext = ".tif")
+  terra::writeRaster(r, temp_file, overwrite = TRUE)
+  return(temp_file)
+}
+
+testthat::test_that("calculate_modis_direct handles valid input", {
+  site_df <- data.frame(
+    site_id = c("A", "B"),
+    longitude = c(-95, -96),
+    latitude = c(35, 36)
+  )
+  site_sf <- sf::st_as_sf(site_df, coords = c("longitude", "latitude"), crs = 4326)
+  
+  temp_tif <- create_temp_raster()
+
+  testthat::expect_silent({
+    result <- calculate_modis_direct(
+      file = temp_tif,
+      site = site_sf,
+      site_id = "site_id",
+      radius = 1000,
+      colheader = "MODIS_",
+      mark = TRUE
+    )
+  })
+})
+
+testthat::test_that("calculate_modis_direct extracts correct time information", {
+  temp_tif <- create_temp_raster()
+  mock_tif <- gsub(".tif", "_2025-02-10.tif", temp_tif)  # Rename to include date
+  file.rename(temp_tif, mock_tif)
+  
+  site_df <- data.frame(
+    site_id = c("A"),
+    longitude = c(-95),
+    latitude = c(35)
+  )
+  site_sf <- sf::st_as_sf(site_df, coords = c("longitude", "latitude"), crs = 4326)
+  
+  result <- calculate_modis_direct(
+    file = mock_tif,
+    site = site_sf,
+    site_id = "site_id",
+    radius = 1000,
+    colheader = "MODIS_",
+    mark = TRUE
+  )
+  
+  testthat::expect_equal(result$time, as.Date("2025-02-10"))
+})
+
+testthat::test_that("calculate_modis_direct correctly formats column names", {
+  site_df <- data.frame(
+    site_id = c("A"),
+    longitude = c(-95),
+    latitude = c(35)
+  )
+  site_sf <- sf::st_as_sf(site_df, coords = c("longitude", "latitude"), crs = 4326)
+  
+  temp_tif <- create_temp_raster()
+
+  result <- calculate_modis_direct(
+    file = temp_tif,
+    site = site_sf,
+    site_id = "site_id",
+    radius = 1000,
+    colheader = "MODIS_",
+    mark = TRUE
+  )
+  
+  expected_colname <- "MODIS_01000"
+  testthat::expect_true(any(names(result) == expected_colname))
+})
+
+testthat::test_that("calculate_modis_direct handles different radius values", {
+  site_df <- data.frame(
+    site_id = c("A"),
+    longitude = c(-95),
+    latitude = c(35)
+  )
+  site_sf <- sf::st_as_sf(site_df, coords = c("longitude", "latitude"), crs = 4326)
+  
+  temp_tif <- create_temp_raster()
+
+  result1 <- calculate_modis_direct(
+    file = temp_tif,
+    site = site_sf,
+    site_id = "site_id",
+    radius = 500,
+    colheader = "MODIS_",
+    mark = TRUE
+  )
+  
+  result2 <- calculate_modis_direct(
+    file = temp_tif,
+    site = site_sf,
+    site_id = "site_id",
+    radius = 2000,
+    colheader = "MODIS_",
+    mark = TRUE
+  )
+  
+  testthat::expect_true(any(names(result1) == "MODIS_00500"))
+  testthat::expect_true(any(names(result2) == "MODIS_02000"))
+})
+
+testthat::test_that("calculate_modis_direct handles site data.frame correctly", {
+  site_df <- data.frame(
+    site_id = c("A"),
+    longitude = c(-95),
+    latitude = c(35)
+  )
+  
+  temp_tif <- create_temp_raster()
+
+  testthat::expect_silent({
+    result <- calculate_modis_direct(
+      file = temp_tif,
+      site = site_df,  # Not sf, should be converted internally
+      site_id = "site_id",
+      radius = 1000,
+      colheader = "MODIS_",
+      mark = TRUE
+    )
+  })
+  
+  testthat::expect_s3_class(result, "data.frame")
+})
+
+testthat::test_that("calculate_modis_direct fails with incorrect input types", {
+  site_sf <- sf::st_as_sf(
+    data.frame(site_id = "A", longitude = -95, latitude = 35),
+    coords = c("longitude", "latitude"),
+    crs = 4326
+  )
+  
+  temp_tif <- create_temp_raster()
+
+  testthat::expect_error(
+    calculate_modis_direct(
+      file = 123,  # Invalid file type
+      site = site_sf,
+      site_id = "site_id",
+      radius = 1000,
+      colheader = "MODIS_",
+      mark = TRUE
+    ),
+    "character"
+  )
+
+  testthat::expect_error(
+    calculate_modis_direct(
+      file = temp_tif,
+      site = list(1, 2, 3),  # Invalid site type
+      site_id = "site_id",
+      radius = 1000,
+      colheader = "MODIS_",
+      mark = TRUE
+    ),
+    "data.frame"
+  )
+
+  testthat::expect_error(
+    calculate_modis_direct(
+      file = temp_tif,
+      site = site_sf,
+      site_id = "site_id",
+      radius = "not_a_number",  # Invalid radius
+      colheader = "MODIS_",
+      mark = TRUE
+    ),
+    "numeric"
+  )
+})
