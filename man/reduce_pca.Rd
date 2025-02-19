@@ -4,10 +4,13 @@
 \alias{reduce_pca}
 \title{Perform Principal Component Analysis}
 \usage{
-reduce_pca(data, threshold = 0.99)
+reduce_pca(data, num_comp = 5, threshold = NA)
 }
 \arguments{
 \item{data}{data.frame or data.table}
+
+\item{num_comp}{integer(1). The number of components to retain as new
+predictors. If \code{threshold} is defined, \code{num_comp} will be overridden.}
 
 \item{threshold}{numeric(1). A fraction of the total variance that should
 be covered by the components.}

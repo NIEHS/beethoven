@@ -765,6 +765,8 @@ append_predecessors <-
 #' Perform Principal Component Analysis
 #' @keywords internal
 #' @param data data.frame or data.table
+#' @param num_comp integer(1). The number of components to retain as new
+#' predictors. If `threshold` is defined, `num_comp` will be overridden.
 #' @param threshold numeric(1). A fraction of the total variance that should
 #' be covered by the components.
 #' @seealso [`recipes::step_pca()`]
@@ -774,16 +776,21 @@ append_predecessors <-
 #' @export
 reduce_pca <- function(
   data,
-  threshold = 0.99
+  num_comp = 5,
+  threshold = NA
 ) {
 
   stopifnot("data.frame" %in% class(data))
-  stopifnot(is.numeric(threshold))
+  if (!is.na(threshold)) stopifnot(is.numeric(threshold))
 
   data_rec <- recipes::recipe(~., data = data)
   data_pca <- data_rec %>%
     recipes::step_normalize(recipes::all_numeric()) %>%
-    recipes::step_pca(recipes::all_numeric(), threshold = threshold)
+    recipes::step_pca(
+      recipes::all_numeric(),
+      threshold = threshold,
+      num_comp = num_comp
+    )
 
   data_prep <- recipes::prep(data_pca, data = data)
   data_pca <- recipes::bake(data_prep, new_data = data)
@@ -802,6 +809,8 @@ reduce_pca <- function(
 #' @param yvar The target variable.
 #' @param coords The column names that represent the XY coordinates. Default
 #' is `c("lon", "lat")`.
+#' @param num_comp integer(1). The number of components to retain as new
+#' predictors.  If `threshold` is defined, `num_comp` will be overridden.
 #' @param threshold numeric(1). A fraction of the total variance that should
 #' be covered by the components.
 #' @param pattern character(1). A regular expression pattern to match the
@@ -811,6 +820,7 @@ reduce_pca <- function(
 #' that should be included in the PCA. Default is `NULL`.
 #' @param prefix character(1). A prefix to be added to the column names of the
 #' Principal Components. Default is `NULL`.
+#' @note  If `threshold` is defined, `num_comp` will be overridden.
 #' @seealso [`reduce_pca()`] [`recipes::step_pca()`]
 #' @importFrom data.table data.table
 #' @return data.table with Principal Components sufficient to satisfy the
@@ -821,7 +831,8 @@ post_calc_pca <- function(
   time_id = "time",
   yvar = "Arithmetic.Mean",
   coords = c("lon", "lat"),
-  threshold = 0.99,
+  num_comp = 5,
+  threshold = NA,
   pattern = "FUGITIVE|STACK",
   groups = NULL,
   prefix = "PCA"

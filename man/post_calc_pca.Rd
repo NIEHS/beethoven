@@ -10,7 +10,8 @@ post_calc_pca(
   time_id = "time",
   yvar = "Arithmetic.Mean",
   coords = c("lon", "lat"),
-  threshold = 0.99,
+  num_comp = 5,
+  threshold = NA,
   pattern = "FUGITIVE|STACK",
   groups = NULL,
   prefix = "PCA"
@@ -29,6 +30,9 @@ identifier.}
 
 \item{coords}{The column names that represent the XY coordinates. Default
 is \code{c("lon", "lat")}.}
+
+\item{num_comp}{integer(1). The number of components to retain as new
+predictors.  If \code{threshold} is defined, \code{num_comp} will be overridden.}
 
 \item{threshold}{numeric(1). A fraction of the total variance that should
 be covered by the components.}
@@ -50,6 +54,9 @@ data.table with Principal Components sufficient to satisfy the
 \description{
 This function performs PCA on the input data frame to reduce
 number of predictors.
+}
+\note{
+If \code{threshold} is defined, \code{num_comp} will be overridden.
 }
 \seealso{
 \code{\link[=reduce_pca]{reduce_pca()}} \code{\link[recipes:step_pca]{recipes::step_pca()}}
