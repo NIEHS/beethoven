@@ -780,8 +780,11 @@ reduce_pca <- function(
   threshold = NA
 ) {
 
-  stopifnot("data.frame" %in% class(data))
-  if (!is.na(threshold)) stopifnot(is.numeric(threshold))
+  stopifnot(inherits(data, "data.frame"))
+
+  if (!is.na(threshold) && !is.null(num_comp)) {
+    stop("Specify either `num_comp` or `threshold`, not both.")
+  }
 
   data_rec <- recipes::recipe(~., data = data)
   data_pca <- data_rec %>%

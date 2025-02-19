@@ -581,7 +581,7 @@ testthat::test_that("post_calc_pca", {
       time_id = "time",
       yvar = "Arithmetic.Mean",
       coords = c("lon", "lat"),
-      num_comp = 5,
+      num_comp = NULL,
       threshold = .9,
       pattern = "FUGITIVE|STACK",
       prefix = "TRI"
@@ -598,7 +598,7 @@ testthat::test_that("post_calc_pca", {
       time_id = "time",
       yvar = "Arithmetic.Mean",
       coords = c("lon", "lat"),
-      num_comp = 5,
+      num_comp = NULL,
       threshold = .9,
       pattern = "FUGITIVE|STACK",
       groups = c("01000", "10000", "50000"),
@@ -607,5 +607,21 @@ testthat::test_that("post_calc_pca", {
   )
   testthat::expect_true("data.frame" %in% class(dt_pca4))
   testthat::expect_equal(nrow(dt_wide), nrow(dt_pca4))
+
+  # eror with threshold and num_comp
+  testthat::expect_error(
+    beethoven::post_calc_pca(
+      data = dt_wide,
+      locs_id = "site_id",
+      time_id = "time",
+      yvar = "Arithmetic.Mean",
+      coords = c("lon", "lat"),
+      num_comp = 5,
+      threshold = .9,
+      pattern = "FUGITIVE|STACK",
+      groups = c("01000", "10000", "50000"),
+      prefix = "TRI"
+    )
+  )
 
 })
