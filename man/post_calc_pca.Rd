@@ -14,7 +14,8 @@ post_calc_pca(
   threshold = NA,
   pattern = "FUGITIVE|STACK",
   groups = NULL,
-  prefix = "PCA"
+  prefix = "PCA",
+  kernel = FALSE
 )
 }
 \arguments{
@@ -46,6 +47,9 @@ that should be included in the PCA. Default is \code{NULL}.}
 
 \item{prefix}{character(1). A prefix to be added to the column names of the
 Principal Components. Default is \code{NULL}.}
+
+\item{kernel}{logical(1). Whether to use a kernel PCA with
+\code{\link[recipes:step_kpca]{recipes::step_kpca()}}. Default is \code{FALSE}.}
 }
 \value{
 data.table with Principal Components sufficient to satisfy the
@@ -59,5 +63,5 @@ number of predictors.
 If \code{threshold} is defined, \code{num_comp} will be overridden.
 }
 \seealso{
-\code{\link[=reduce_pca]{reduce_pca()}} \code{\link[recipes:step_pca]{recipes::step_pca()}}
+\code{\link[=reduce_pca]{reduce_pca()}} \code{\link[recipes:step_pca]{recipes::step_pca()}} \code{\link[recipes:step_kpca]{recipes::step_kpca()}}
 }

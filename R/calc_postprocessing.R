@@ -769,31 +769,42 @@ append_predecessors <-
 #' predictors. If `threshold` is defined, `num_comp` will be overridden.
 #' @param threshold numeric(1). A fraction of the total variance that should
 #' be covered by the components.
-#' @seealso [`recipes::step_pca()`]
-#' @importFrom recipes recipe bake prep step_normalize step_pca
+#' @param kernel logical(1). Whether to use a kernel PCA with
+#' [`recipes::step_kpca()`]. Default is `FALSE`.
+#' @seealso [`recipes::step_pca()`] [`recipes::step_kpca()`]
+#' @importFrom recipes recipe bake prep step_normalize step_pca step_kpca
+#' @importFrom magrittr %>%
 #' @return data.table with Principal Components sufficient to satisfy the
 #' `threshold`.`
 #' @export
 reduce_pca <- function(
   data,
   num_comp = 5,
-  threshold = NA
+  threshold = NA,
+  kernel = FALSE
 ) {
 
   stopifnot(inherits(data, "data.frame"))
-
-  if (!is.na(threshold) && !is.null(num_comp)) {
-    stop("Specify either `num_comp` or `threshold`, not both.")
-  }
+  stopifnot(is.numeric(num_comp))
 
   data_rec <- recipes::recipe(~., data = data)
   data_pca <- data_rec %>%
-    recipes::step_normalize(recipes::all_numeric()) %>%
-    recipes::step_pca(
-      recipes::all_numeric(),
-      threshold = threshold,
-      num_comp = num_comp
-    )
+    recipes::step_normalize(recipes::all_numeric())
+
+  if (kernel) {
+    data_pca <- data_pca  %>%
+      recipes::step_kpca(
+        recipes::all_numeric(),
+        num_comp = num_comp
+      )
+  } else {
+    data_pca <- data_pca  %>%
+      recipes::step_pca(
+        recipes::all_numeric(),
+        threshold = threshold,
+        num_comp = num_comp
+      )
+  }
 
   data_prep <- recipes::prep(data_pca, data = data)
   data_pca <- recipes::bake(data_prep, new_data = data)
@@ -823,11 +834,14 @@ reduce_pca <- function(
 #' that should be included in the PCA. Default is `NULL`.
 #' @param prefix character(1). A prefix to be added to the column names of the
 #' Principal Components. Default is `NULL`.
+#' @param kernel logical(1). Whether to use a kernel PCA with
+#' [`recipes::step_kpca()`]. Default is `FALSE`.
 #' @note  If `threshold` is defined, `num_comp` will be overridden.
-#' @seealso [`reduce_pca()`] [`recipes::step_pca()`]
+#' @seealso [`reduce_pca()`] [`recipes::step_pca()`] [`recipes::step_kpca()`]
 #' @importFrom data.table data.table
 #' @return data.table with Principal Components sufficient to satisfy the
 #' `threshold`, merged with `*_id` and `yvar` columns from original `data`.
+#' @export
 post_calc_pca <- function(
   data,
   locs_id = "site_id",
@@ -838,7 +852,8 @@ post_calc_pca <- function(
   threshold = NA,
   pattern = "FUGITIVE|STACK",
   groups = NULL,
-  prefix = "PCA"
+  prefix = "PCA",
+  kernel = FALSE
 ) {
 
   data <- data.table::data.table(data)
@@ -852,7 +867,9 @@ post_calc_pca <- function(
   if (is.null(groups)) {
     return_pca <- beethoven::reduce_pca(
       data = data_pca,
-      threshold = threshold
+      threshold = threshold,
+      num_comp = num_comp,
+      kernel = kernel
     )
     names(return_pca) <- paste0(prefix, "_", names(return_pca))
   } else {
@@ -863,7 +880,9 @@ post_calc_pca <- function(
       ]
       group_pca <- beethoven::reduce_pca(
         data = data_group,
-        threshold = threshold
+        threshold = threshold,
+        num_comp = num_comp,
+        kernel = kernel
       )
       names(group_pca) <- paste0(
         prefix, "_", names(group_pca), "_", groups[g]
