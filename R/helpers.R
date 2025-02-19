@@ -84,7 +84,8 @@ cov <- function() {
         "library(bonsai); library(dplyr); library(testthat); ",
         "cov <- covr::package_coverage(install_path = '/tmp/cov', ",
         "clean = FALSE); ",
-        "saveRDS(cov, '/mnt/cov/cov_0212.rds'); covr::coverage_to_list(cov)\""
+        "saveRDS(cov, '/mnt/cov/cov_", format(Sys.time(), "%m%d_%H%M"),
+        ".rds'); covr::coverage_to_list(cov)\""
       ),
       collapse = ""
     )

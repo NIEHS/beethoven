@@ -265,7 +265,7 @@ fit_base_learner <-
 
     base_recipe <-
       recipes::recipe(
-        dt_sample[1, ]
+        dt_sample
       ) %>%
       # do we want to normalize the predictors?
       # if so, an additional definition of truly continuous variables is needed
