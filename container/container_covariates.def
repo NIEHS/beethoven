@@ -35,7 +35,7 @@ From: rocker/geospatial:latest
     Rscript -e "install.packages(c('pak', 'devtools'))"
     Rscript -e "devtools::install_version('targets', version = '1.10.0')"
     Rscript -e "install.packages(c('tarchetypes', 'testthat', 'tidymodels', \
-        'bonsai', 'qs2'))"
+        'bonsai', 'qs2', 'kernlab'))"
     Rscript -e "pak::pak('shikokuchuo/nanonext'); pak::pak('shikokuchuo/mirai')"
     Rscript -e "pak::pak('wlandau/crew'); pak::pak('wlandau/crew.cluster')"
     Rscript -e "pak::pak('NIEHS/amadeus')"

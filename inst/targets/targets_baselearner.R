@@ -122,30 +122,65 @@ target_baselearner_cpu <-
     targets::tar_target(
       fit_learner_base_cpu,
       command = beethoven::fit_base_learner(
-        learner = df_learner_type_cpu$learner,
-        dt_full = list_base_params_static$dt_full,
-        r_subsample = list_base_params_static$r_subsample,
-        model = list_base_switch_model[[df_learner_type_cpu$learner]],
-        folds = list_base_params_static$folds,
-        cv_mode = df_learner_type_cpu$cv_mode,
-        args_generate_cv = list_base_args_cv[[df_learner_type_cpu$cv_mode]],
-        tune_mode = list_base_params_static$tune_mode,
-        tune_grid_in =
-          list_base_params_candidates[[df_learner_type_cpu$learner]],
-        tune_grid_size = list_base_params_static$tune_grid_size,
-        yvar = list_base_params_static$yvar,
-        xvar = list_base_params_static$xvar,
-        nthreads = list_base_params_static$nthreads,
-        trim_resamples = list_base_params_static$trim_resamples,
-        return_best = list_base_params_static$return_best
+        learner = "lgb",
+        dt_full = dt_feat_calc_xyt,
+        r_subsample = 0.3,
+        c_subsample = 0.25,
+        model = beethoven::switch_model(
+          model_type = "lgb",
+          device = "cpu"
+        ),
+        folds = NULL,
+        cv_mode = "spatiotemporal",
+        args_generate_cv = list(v = 3L),
+        tune_mode = "grid",
+        tune_grid_in = expand.grid(
+          mtry = floor(
+            c(0.025, seq(0.05, 0.2, 0.05)) *
+              ((ncol(dt_feat_calc_xyt) - 4) * 0.25)
+          ),
+          trees = seq(1000, 3000, 1000),
+          learn_rate = c(0.1, 0.05, 0.01, 0.005)
+        ),
+        tune_grid_size = 2L,
+        yvar = "Arithmetic.Mean",
+        xvar = seq(5, ncol(dt_feat_calc_xyt)),
+        nthreads = 2L,
+        trim_resamples = TRUE,
+        return_best = TRUE
       ),
-      pattern = map(df_learner_type_cpu),
-      iteration = "list",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(controller = "controller_10")
       ),
-      description = "Fit base learner | cpu | base learner"
+      description = "Dev base learner | cpu | base learner | dev"
     )
+    # targets::tar_target(
+    #   fit_learner_base_cpu,
+    #   command = beethoven::fit_base_learner(
+    #     learner = df_learner_type_cpu$learner,
+    #     dt_full = list_base_params_static$dt_full,
+    #     r_subsample = list_base_params_static$r_subsample,
+    #     model = list_base_switch_model[[df_learner_type_cpu$learner]],
+    #     folds = list_base_params_static$folds,
+    #     cv_mode = df_learner_type_cpu$cv_mode,
+    #     args_generate_cv = list_base_args_cv[[df_learner_type_cpu$cv_mode]],
+    #     tune_mode = list_base_params_static$tune_mode,
+    #     tune_grid_in =
+    #       list_base_params_candidates[[df_learner_type_cpu$learner]],
+    #     tune_grid_size = list_base_params_static$tune_grid_size,
+    #     yvar = list_base_params_static$yvar,
+    #     xvar = list_base_params_static$xvar,
+    #     nthreads = list_base_params_static$nthreads,
+    #     trim_resamples = list_base_params_static$trim_resamples,
+    #     return_best = list_base_params_static$return_best
+    #   ),
+    #   pattern = map(df_learner_type_cpu),
+    #   iteration = "list",
+    #   resources = targets::tar_resources(
+    #     crew = targets::tar_resources_crew(controller = "controller_10")
+    #   ),
+    #   description = "Fit base learner | cpu | base learner"
+    # )
   )
 
 ################################################################################
@@ -168,32 +203,68 @@ target_baselearner_gpu <-
     targets::tar_target(
       fit_learner_base_gpu,
       command = beethoven::fit_base_learner(
-        learner = df_learner_type_gpu$learner,
-        dt_full = list_base_params_static$dt_full,
-        r_subsample = list_base_params_static$r_subsample,
-        model = list_base_switch_model[[df_learner_type_gpu$learner]],
-        folds = list_base_params_static$folds,
-        cv_mode = df_learner_type_gpu$cv_mode,
-        args_generate_cv = list_base_args_cv[[df_learner_type_gpu$cv_mode]],
-        tune_mode = list_base_params_static$tune_mode,
-        tune_grid_in =
-          list_base_params_candidates[[df_learner_type_gpu$learner]],
-        tune_grid_size = 50L,
-        # tune_grid_size = list_base_params_static$tune_grid_size,
-        yvar = list_base_params_static$yvar,
-        xvar = list_base_params_static$xvar,
-        nthreads = list_base_params_static$nthreads,
-        trim_resamples = list_base_params_static$trim_resamples,
-        return_best = list_base_params_static$return_best
+        learner = "lgb",
+        dt_full = dt_feat_calc_xyt,
+        r_subsample = 0.3,
+        c_subsample = 0.25,
+        model = beethoven::switch_model(
+          model_type = "lgb",
+          device = "gpu"
+        ),
+        folds = NULL,
+        cv_mode = "spatiotemporal",
+        args_generate_cv = list(v = 3L),
+        tune_mode = "grid",
+        tune_grid_in = expand.grid(
+          mtry = floor(
+            c(0.025, seq(0.05, 0.2, 0.05)) *
+              ((ncol(dt_feat_calc_xyt) - 4) * 0.25)
+          ),
+          trees = seq(1000, 3000, 1000),
+          learn_rate = c(0.1, 0.05, 0.01, 0.005)
+        ),
+        tune_grid_size = 2L,
+        yvar = "Arithmetic.Mean",
+        xvar = seq(5, ncol(dt_feat_calc_xyt)),
+        nthreads = 2L,
+        trim_resamples = TRUE,
+        return_best = TRUE
       ),
-      pattern = map(df_learner_type_gpu),
-      iteration = "list",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(controller = "controller_gpu")
       ),
-      description = "Fit base learner | gpu | base learner"
+      description = "Dev base learner | gpu | base learner | dev"
     )
     ,
+    # targets::tar_target(
+    #   fit_learner_base_gpu,
+    #   command = beethoven::fit_base_learner(
+    #     learner = df_learner_type_gpu$learner,
+    #     dt_full = list_base_params_static$dt_full,
+    #     r_subsample = list_base_params_static$r_subsample,
+    #     model = list_base_switch_model[[df_learner_type_gpu$learner]],
+    #     folds = list_base_params_static$folds,
+    #     cv_mode = df_learner_type_gpu$cv_mode,
+    #     args_generate_cv = list_base_args_cv[[df_learner_type_gpu$cv_mode]],
+    #     tune_mode = list_base_params_static$tune_mode,
+    #     tune_grid_in =
+    #       list_base_params_candidates[[df_learner_type_gpu$learner]],
+    #     tune_grid_size = 50L,
+    #     # tune_grid_size = list_base_params_static$tune_grid_size,
+    #     yvar = list_base_params_static$yvar,
+    #     xvar = list_base_params_static$xvar,
+    #     nthreads = list_base_params_static$nthreads,
+    #     trim_resamples = list_base_params_static$trim_resamples,
+    #     return_best = list_base_params_static$return_best
+    #   ),
+    #   pattern = map(df_learner_type_gpu),
+    #   iteration = "list",
+    #   resources = targets::tar_resources(
+    #     crew = targets::tar_resources_crew(controller = "controller_gpu")
+    #   ),
+    #   description = "Fit base learner | gpu | base learner"
+    # )
+    # ,
     targets::tar_target(
       list_learner_base_best,
       command = c(fit_learner_base_cpu, fit_learner_base_gpu),

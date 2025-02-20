@@ -29,7 +29,4 @@ This function iteratively runs \code{reduce_merge} on a list of \code{data.table
 objects for merging large \code{data.tables} that may not fit into memory
 with \code{reduce_merge} directly.
 }
-\seealso{
-\code{\link{reduce_merge}}
-}
 \keyword{Post-calculation}

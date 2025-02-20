@@ -25,11 +25,14 @@ export CUDA_VISIBLE_DEVICES=$(echo $(seq 0 $((SLURM_GPUS_ON_NODE-1))) | tr ' ' '
 # calculation targets.
 export BEETHOVEN=covariates
 
+# Set stack size limit for large merge of TRI covariates.
+ulimit -s 20000
+
 # Download and calculate covariates via container_covariates.sif
 apptainer exec \
   --bind $PWD:/mnt \
   --bind $PWD/inst:/inst \
-  --bind $PWD/input:/input \
+  --bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input \
   --bind $PWD/_targets:/opt/_targets \
   container_covariates.sif \
   /usr/local/lib/R/bin/Rscript --no-init-file /mnt/inst/targets/targets_start.R

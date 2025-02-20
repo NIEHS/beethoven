@@ -67,8 +67,8 @@ targets::tar_config_set(store = "/opt/_targets")
 ##############################       OPTIONS      ##############################
 if (Sys.getenv("BEETHOVEN") == "covariates") {
   beethoven_packages <- c(
-    "amadeus", "targets", "tarchetypes", "dplyr", "tidyverse",
-    "data.table", "sf", "crew", "crew.cluster", "lubridate", "qs2"
+    "amadeus", "targets", "tarchetypes", "dplyr", "tidyverse", "data.table",
+    "sf", "crew", "crew.cluster", "lubridate", "qs2", "kernlab"
   )
 } else {
   beethoven_packages <- c(

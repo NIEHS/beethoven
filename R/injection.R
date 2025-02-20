@@ -442,7 +442,6 @@ reduce_merge <-
 #' @return A merged data table.
 #' @keywords Post-calculation
 #' @importFrom data.table as.data.table merge.data.table
-#' @seealso [`beethoven::reduce_merge`]
 #' @export
 reduce_merge_iter <- function(
   list_in,
@@ -451,27 +450,31 @@ reduce_merge_iter <- function(
   all.y = FALSE
 ) {
 
-  for (i in seq_len(length(list_in) - 1)) {
-    list2 <- list_in[[i + 1]][[1]]
-    if (i == 1) {
-      list1 <- list_in[[1]][[1]]
-      dt_return <- beethoven::reduce_merge(
-        list(list1, list2),
-        by = by,
-        all.x = all.x,
-        all.y = all.y
-      )
-    } else {
-      dt_return <- beethoven::reduce_merge(
-        list(dt_return, list2),
-        by = by,
-        all.x = all.x,
-        all.y = all.y
-      )
-    }
+  list_check <- sapply(list_in, nrow)
+  list_checkdiff <- diff(list_check)
+  if (any(list_checkdiff > 0)) all.y <- TRUE
+  for (i in seq_len(length(list_in))) {
+    list_in[[i]] <- data.table::setDT(list_in[[i]])
   }
 
-  return(dt_return)
+  dt_merge <- list_in[[1]]
+
+  for (l in seq(2, length(list_in))) {
+    if (is.null(by)) {
+      merge_by <- intersect(names(dt_merge), names(list_in[[l]]))
+    } else {
+      merge_by <- by
+    }
+    dt_merge <- data.table::merge.data.table(
+      dt_merge,
+      list_in[[l]],
+      by = merge_by,
+      all.x = all.x,
+      all.y = all.y
+    )
+  }
+
+  return(dt_merge)
 
 }
 
