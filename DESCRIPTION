@@ -73,7 +73,7 @@ Suggests:
   quarto,
   torch,
   kernlab
-Remotes: ropensci/chopin, NIEHS/amadeus, tidymodels/brulee@gpu, mitchellmanware/parsnip@beethoven
+Remotes: ropensci/chopin
 SystemRequirements: NetCDF4, CUDA (>= 10.0)
 Encoding: UTF-8
 VignetteBuilder: knitr, rmarkdown
