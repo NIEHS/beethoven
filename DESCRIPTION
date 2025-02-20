@@ -34,7 +34,6 @@ Imports:
   workflows,
   recipes,
   missRanger,
-  parsnip,
   future.batchtools,
   anticlust,
   qs,
@@ -73,7 +72,7 @@ Suggests:
   quarto,
   torch,
   kernlab
-Remotes: ropensci/chopin, tidymodels/brulee@gpu, mitchellmanware/parsnip@beethove
+Remotes: ropensci/chopin, tidymodels/brulee@gpu, mitchellmanware/parsnip@beethoven
 SystemRequirements: NetCDF4, CUDA (>= 10.0)
 Encoding: UTF-8
 VignetteBuilder: knitr, rmarkdown
