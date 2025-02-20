@@ -85,13 +85,18 @@ target_calculate_predict <-
     targets::tar_target(
       sf_pred_calc_split,
       command = {
-        chopin::par_pad_grid(
-          sf_pred_calc_grid,
-          mode = "grid",
-          nx = 40L,
-          ny = 20L,
-          padding = 100
-        )[[1]]
+        init_grid <-
+          chopin::par_pad_grid(
+            sf_pred_calc_grid,
+            mode = "grid",
+            nx = 10L,
+            ny = 5L,
+            padding = 100
+          )[[1]]
+        grid_sample <- dplyr::sample_frac(sf_pred_raw_grid, 0.01)
+        init_grid_intersect <-
+          init_grid[grid_sample, ]
+        init_grid_intersect
       },
       iteration = "vector",
       description = "sf split grid polygons"
@@ -141,6 +146,13 @@ target_calculate_predict <-
     )
     ,
     ##############################   NLCD    #############################
+    # Added for test
+    targets::tar_target(
+      chr_iter_calc_nlcd,
+      command = c(2019, 2021),
+      description = "NLCD years | download"
+    )
+    ,
     targets::tar_target(
       name = list_pred_split_calc_nlcd,
       command =
@@ -163,12 +175,12 @@ target_calculate_predict <-
         },
         df_feat_calc_nlcd_params$year,
         df_feat_calc_nlcd_params$radius,
-        SIMPLIFY = FALSE) |>
-        beethoven::post_calc_merge_all()
+        SIMPLIFY = FALSE)# |>
+        #beethoven::post_calc_merge_all()
       }
       ,
-      pattern = map(
-        list_pred_calc_grid,
+      pattern = cross(
+        list_pred_calc_grid, df_feat_calc_nlcd_params
       ),
       iteration = "list",
       description = "Calculate NLCD features with branched sublists (pred)",

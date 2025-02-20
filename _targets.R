@@ -37,6 +37,13 @@ controller_25 <- crew::crew_controller_local(
   workers = 25#,
   # seconds_idle = 30
 )
+
+##### `controller_15` uses 15 workers (50~66.0 GB per worker).
+controller_25 <- crew::crew_controller_local(
+  name = "controller_15",
+  workers = 15
+)
+
 ##### `controller_gpu` uses 4 GPU workers.
 scriptlines_apptainer <- "apptainer"
 scriptlines_basedir <- "$PWD"
