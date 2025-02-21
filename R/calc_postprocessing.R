@@ -898,3 +898,40 @@ post_calc_pca <- function(
   return(data_return)
 
 }
+
+#' Post-calculation column renaming
+#' @description This function renames the columns of the input `data` based on
+#' the `prefix` and original column names.
+#' @param data data.frame(1)
+#' @param prefix character(1). The prefix to be added to the column names.
+#' @param skip character. The column names to be skipped from renaming.
+#' Default is `c("site_id", "time")`.
+#' @return data.frame with renamed columns.
+#' @export
+post_calc_cols <- function(
+  data,
+  prefix = NULL,
+  skip = c("site_id", "time")
+) {
+  stopifnot(inherits(data, "data.frame"))
+
+  chr_names <- names(data)
+  chr_edit <- chr_names[!chr_names %in% skip]
+
+  list_split <- strsplit(chr_edit, "_")
+  list_update <- lapply(
+    list_split,
+    function(x) {
+      paste0(
+        prefix,
+        toupper(x[[1]]),
+        "_",
+        sprintf("%05d", as.integer(x[[length(x)]]))
+      )
+    }
+  )
+  chr_update <- unlist(list_update)
+  names(data)[match(chr_edit, chr_names)] <- chr_update
+  return(data)
+
+}

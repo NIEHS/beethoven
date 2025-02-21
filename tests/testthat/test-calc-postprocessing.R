@@ -629,3 +629,22 @@ testthat::test_that("post_calc_pca", {
   testthat::expect_equal(ncol(dt_pca5), 20)
 
 })
+
+################################################################################
+##### post_calc_cols
+testthat::test_that("post_calc_cols", {
+  data <- data.frame(
+    site_id = sprintf("L%s", 1:3),
+    time = rep("2018-01-01", 3),
+    data_01000 = 1:3,
+    data_10000 = 4:6,
+    data_50000 = 7:9
+  )
+
+  testthat::expect_no_error(
+    data2 <- beethoven::post_calc_cols(data, "TEST_")
+  )
+  testthat::expect_identical(dim(data), dim(data2))
+  testthat::expect_true(any(grepl("TEST_", names(data2))))
+  testthat::expect_false(any(grepl("data_", names(data2))))
+})

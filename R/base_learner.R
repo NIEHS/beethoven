@@ -78,7 +78,7 @@ switch_model <-
         parsnip::mlp(
           hidden_units = parsnip::tune(),
           dropout = parsnip::tune(),
-          epochs = parsnip::tune(),
+          epochs = 1000,
           activation = parsnip::tune(),
           learn_rate = parsnip::tune()
         ) %>%
