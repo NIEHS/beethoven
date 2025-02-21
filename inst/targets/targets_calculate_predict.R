@@ -185,7 +185,7 @@ target_calculate_predict <-
       iteration = "list",
       description = "Calculate NLCD features with branched sublists (pred)",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_50")
+        crew = targets::tar_resources_crew(controller = "controller_15")
       )
     )
     ,
