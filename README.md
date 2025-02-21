@@ -55,8 +55,7 @@ Here, we describe the structure of the repository, important files, and the `tar
     - `#SBATCH --partition` Utilization of NVIDIA GPUs (within `glue::glue` command)
     - `--bind /USER_PATH_TO_INPUT/input:/input` (within `glue::glue` command)
 - `_targets.yaml` is created and updated by running `targets::tar_make` and is not to be edited manually.
-- `run.sh` allocates computational resources with SLURM and submits the `beethoven` pipeline to run on high performance computing system.
-  - To run `beethoven`, users must review and update the following parameters for their user profile and computing system:
+- `run.sh` submits separate `SBATCH` jobs for the covariate, cpu- and gpu-enabled base learner, and the meta learner `targets` (see `/inst/scripts/`). This setup ensures that each stage utilizes the proper container image and computational resources. To run `beethoven`, users must review and update the following parameters for their user profile and computing system in each of the `inst/scripts/run_*` files.:
     - `#SBATCH --mail-user`
     - `#SBATCH --partition`
     - `#SBATCH --mem`
@@ -67,7 +66,7 @@ Here, we describe the structure of the repository, important files, and the `tar
 ### Running `beethoven` Pipeline
 
 #### User settings
-`beethoven` pipeline is configured for SLURM with defaults for NIEHS HPC settings. For adapting the settings to users' environment, consult with the documentation of your platform and edit the requested resources in `run.sh` (lines 3-11) and `_targets.R` (lines 41-45; individual `crew` and `crew.cluster` controller workers).
+`beethoven` pipeline is configured for SLURM with defaults for NIEHS HPC settings. For adapting the settings to users' environment, consult with the documentation of your platform and edit the requested resources in the stage-specific run files (`/inst/scripts/`) (lines 3-11) and `_targets.R` (lines 41-45; individual `crew` and `crew.cluster` controller workers).
 
 #### Critical `targets`
 There are 5 "critical" `targets` that users may want to change to run `beethoven`.
@@ -97,7 +96,7 @@ mv *sif ../ # move images to `beethoven/` root directory
 > `.sif` files are omitted from GitHub due to size (>5 Gb each)
 
 #### Run
-After switching back to the project root directory, users can run the pipeline with the `run.sh` shell script. The following lines of `run.sh` must be updated with user-specific settings before running the pipeline
+After switching back to the project root directory, users can run the pipeline with the `run.sh` shell script. The following lines of `/inst/scripts/run_*.sh` must be updated with user-specific settings before running the pipeline
 
 ```sh
 #SBATCH --mail-user=[USER_EMAIL]      # email address for job notifications

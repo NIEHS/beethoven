@@ -1,5 +1,11 @@
 # Developer's guide
 
+## 0.4.5 Developments (February 21, 2025)
+- Multi-stage `run.sh` to have separate stages and resource allocations for covariates, cpu- and gpu-enabled base learners, and meta learners.
+- Spatial block + year-based cross validation for `generate_cv_index_spt`. Utilize only spatiotemporal cross validation method.
+- Develop and implement `post_calc_pca` for Principal Component Analysis dimensionality reduction of EPA Toxic Release Inventory (TRI) covariates.
+- Column-wise subsampling in `fit_base_learner`.
+
 ## 0.4.4 Developments (January 28, 2025)
 - Separate container definition files and images for the covariate calculation (`container/container_covariates.def`) and model fitting (`container/container_models.def`) parts of the pipeline.
 - Set and get `BEETHOVEN` environmental variable in `run.sh` and `_targets.R` files, respectively, to skip model fitting targets running on `container_covariate.sif`.
