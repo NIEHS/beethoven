@@ -699,7 +699,7 @@ target_calculate_fit <-
           kernel = TRUE
         )
       },
-      description = "data.table of TRI features | fit"
+      description = "data.table of TRI PCA-reduced features | fit"
     )
     ,
     ###########################         NEI          ###########################
@@ -887,9 +887,25 @@ target_calculate_fit <-
       name = dt_feat_calc_xyt,
       command = data.table::data.table(
         beethoven::attach_xy(
-          dt_feat_calc_imputed, dplyr::bind_rows(list_feat_proc_aqs_sites)
+          dt_feat_calc_imputed,
+          dplyr::bind_rows(list_feat_proc_aqs_sites)
         )
       ),
       description = "Imputed features + AQS sites (outcome and lat/lon) | fit"
     )
+    # ,
+    # targets::tar_target(
+    #   dt_feat_calc_imputed2,
+    #   command = beethoven::impute_all(
+    #     dt_feat_calc_design,
+    #     period = chr_daterange,
+    #     nthreads_dt = 32,
+    #     nthreads_collapse = 32,
+    #     nthreads_imputation = 32
+    #   ),
+    #   resources = targets::tar_resources(
+    #     crew = targets::tar_resources_crew(controller = "controller_impute")
+    #   ),
+    #   description = "Imputed features + lags | fit"
+    # )
   )

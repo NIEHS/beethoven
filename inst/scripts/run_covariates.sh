@@ -16,10 +16,6 @@
 export CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 
-###############################      GPU SETUP     #############################
-# Ensure all allocated GPUs are visible
-export CUDA_VISIBLE_DEVICES=$(echo $(seq 0 $((SLURM_GPUS_ON_NODE-1))) | tr ' ' ',')
-
 #############################      COVARIATES      #############################
 # Set environmental variable to indicate download and covariate
 # calculation targets.
@@ -34,5 +30,7 @@ apptainer exec \
   --bind $PWD/inst:/inst \
   --bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input \
   --bind $PWD/_targets:/opt/_targets \
+  --bind /run/munge:/run/munge \
+  --bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm \
   container_covariates.sif \
   /usr/local/lib/R/bin/Rscript --no-init-file /mnt/inst/targets/targets_start.R

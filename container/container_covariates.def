@@ -18,7 +18,8 @@ From: rocker/geospatial:latest
       libcurl4-openssl-dev \
       libssl-dev \
       ca-certificates \
-      curl
+      curl \
+      slurm-client \
 
     # Set locale for the environment
     echo "LANG=en_US.UTF-8" >> /etc/default/locale
