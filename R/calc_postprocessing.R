@@ -813,6 +813,7 @@ reduce_pca <- function(
 }
 
 #' Post-calculation Principal Component Analysis
+#' @keywords Post-calculation
 #' @description This function performs PCA on the input data frame to reduce
 #' number of predictors.
 #' @param data data.frame or data.table
@@ -900,6 +901,7 @@ post_calc_pca <- function(
 }
 
 #' Post-calculation column renaming
+#' @keywords Post-calculation
 #' @description This function renames the columns of the input `data` based on
 #' the `prefix` and original column names.
 #' @param data data.frame(1)

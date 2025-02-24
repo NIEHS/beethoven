@@ -64,7 +64,7 @@ target_baselearner <-
         yvar = "Arithmetic.Mean",
         xvar = seq(5, ncol(dt_feat_calc_xyt)),
         nthreads = 2L,
-        trim_resamples = TRUE,
+        trim_resamples = FALSE,
         return_best = TRUE,
         cv_rep = 100L
       ),

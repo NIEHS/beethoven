@@ -21,3 +21,4 @@ data.frame with renamed columns.
 This function renames the columns of the input \code{data} based on
 the \code{prefix} and original column names.
 }
+\keyword{Post-calculation}

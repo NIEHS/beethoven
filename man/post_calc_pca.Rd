@@ -65,3 +65,4 @@ If \code{threshold} is defined, \code{num_comp} will be overridden.
 \seealso{
 \code{\link[=reduce_pca]{reduce_pca()}} \code{\link[recipes:step_pca]{recipes::step_pca()}} \code{\link[recipes:step_kpca]{recipes::step_kpca()}}
 }
+\keyword{Post-calculation}
