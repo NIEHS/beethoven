@@ -7,9 +7,9 @@
 fit_meta_learner(
   data,
   c_subsample = 0.5,
-  r_subssample = 1,
+  r_subsample = 1,
   yvar = "Arithmetic.Mean",
-  target_cols = c("site_id", "time", "Event.Type", "lon", "lat"),
+  target_cols = c("site_id", "time", "lon", "lat", "Event.Type"),
   args_generate_cv = list(),
   tune_iter = 50L,
   nthreads = 2L,
@@ -23,6 +23,10 @@ fit_meta_learner(
 spatiotemporal identifiers. \code{\link{attach_pred}}.}
 
 \item{c_subsample}{numeric(1). Rate of column resampling. Default is 0.5.}
+
+\item{r_subsample}{numeric(1). The proportion of rows to be used. Default is
+1.0, which uses full dataset but setting is required to balance groups
+generated with \code{\link{make_subdata}}}
 
 \item{yvar}{character(1). Outcome variable name}
 
@@ -50,10 +54,6 @@ Passed to \code{\link{fit_base_tune}}.}
 \item{metric}{character(1). The metric to be used for selecting the best.
 Must be one of "rmse", "rsq", "mae". Default = "rmse".
 Passed to \code{\link{fit_base_tune}}.}
-
-\item{r_subsample}{numeric(1). The proportion of rows to be used. Default is
-1.0, which uses full dataset but setting is required to balance groups
-generated with \code{\link{make_subdata}}}
 }
 \value{
 List of 3, including the best-fit model, the best hyperparameters,

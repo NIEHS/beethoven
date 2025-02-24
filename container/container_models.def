@@ -117,6 +117,8 @@ From: nvidia/cuda:11.8.0-devel-ubuntu22.04
     Rscript -e "pak::pak('tidymodels/brulee@gpu')"
     Rscript -e "pak::pak('shikokuchuo/nanonext'); pak::pak('shikokuchuo/mirai')"
     Rscript -e "pak::pak('wlandau/crew'); pak::pak('wlandau/crew.cluster')"
+    Rscript -e "install.packages(c('scoringRules', 'future.mirai', 'vetiver', \
+        'lwgeom', 'doRNG', 'quarto', 'kernlab'))"
     Rscript -e "pak::pak('NIEHS/beethoven@mm-0203')"
 
 %environment

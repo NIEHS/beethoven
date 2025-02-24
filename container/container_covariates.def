@@ -40,6 +40,8 @@ From: rocker/geospatial:latest
     Rscript -e "pak::pak('shikokuchuo/nanonext'); pak::pak('shikokuchuo/mirai')"
     Rscript -e "pak::pak('wlandau/crew'); pak::pak('wlandau/crew.cluster')"
     Rscript -e "pak::pak('NIEHS/amadeus')"
+    Rscript -e "install.packages(c('scoringRules', 'future.mirai', 'vetiver', \
+        'lwgeom', 'doRNG', 'quarto', 'kernlab'))"
     Rscript -e "pak::pak('NIEHS/beethoven@mm-0203')"
 
 %environment

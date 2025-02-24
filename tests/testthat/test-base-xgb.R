@@ -340,13 +340,7 @@
 
 #   # spatiotemporal
 #   # warning is due to 3 metrics (rmse, rsq, mae)
-#   args_spatiotemporal <- list(
-#     target_cols = c("lon", "lat", "time"),
-#     preprocessing = "none",
-#     ngroup_init = 2L,
-#     cv_pairs = NULL,
-#     pairing = "1"
-#   )
+#   args_spatiotemporal <- list(v = 3)
 #   testthat::expect_warning(
 #     xgb9 <- fit_base_learner(
 #       learner = "xgb",
@@ -475,13 +469,7 @@
 
 #   # spatiotemporal
 #   # warning is due to 3 metrics (rmse, rsq, mae)
-#   args_spatiotemporal <- list(
-#     target_cols = c("lon", "lat", "time"),
-#     preprocessing = "none",
-#     ngroup_init = 2L,
-#     cv_pairs = NULL,
-#     pairing = "1"
-#   )
+#   args_spatiotemporal <- list(v = 3)
 #   testthat::expect_warning(
 #     xgb12 <- fit_base_learner(
 #       learner = "xgb",

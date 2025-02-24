@@ -90,9 +90,9 @@ fit_meta_learner <-
   function(
     data,
     c_subsample = 0.5,
-    r_subssample = 1.0,
+    r_subsample = 1.0,
     yvar = "Arithmetic.Mean",
-    target_cols = c("site_id", "time", "Event.Type", "lon", "lat"),
+    target_cols = c("site_id", "time", "lon", "lat", "Event.Type"),
     args_generate_cv = list(),
     tune_iter = 50L,
     nthreads = 2L,
@@ -101,36 +101,37 @@ fit_meta_learner <-
     metric = "rmse"
   ) {
 
+    stopifnot(!is.null(data))
+    stopifnot(!is.null(yvar))
+    stopifnot(!is.null(target_cols))
+
     # define model
     meta_model <- beethoven::switch_model(
       model_type = "elnet", device = "cpu"
     )
 
+    # apply r_subsample % row subsampling
+    chr_rowidx <- beethoven::make_subdata(
+      data, p = r_subsample, ngroup_init = NULL
+    )
+
     # subset data to c_subsample proportion of columns
-    meta_id_columns <- unique(c(target_cols, yvar))
-    data_nonid_columns <- names(data[, !names(data) %in% meta_id_columns])
-    data_sample_cidx <- sample(
-      data_nonid_columns, floor(c_subsample * length(data_nonid_columns))
+    chr_id_names <- unique(c(target_cols, yvar))
+    chr_meta_names <- setdiff(names(data), chr_id_names)
+    chr_sample_cidx <- sample(
+      chr_meta_names, floor(c_subsample * length(chr_meta_names))
     )
-    data_sample_c <- data[, c(meta_id_columns, data_sample_cidx)]
+    chr_colidx <- c(chr_id_names, chr_sample_cidx)
 
-    # subset data to r_subsample proportion of rows
-    # default is 1.0, so all rows are included but running `make_subdata`
-    # for all rows ensures ngroups have equal sizes
-    dt_sample_rowidx <- beethoven::make_subdata(
-      data_sample_c,
-      p = r_subssample,
-      ngroup_init = args_generate_cv$ngroup_init
-    )
-
-    data_sample_r <- data.table::data.table(
-      data_sample_c[dt_sample_rowidx, ]
-    )
+    # sample of data with r_subsample rows, c_subsample columns
+    dt_sample <- data.table::data.table(data)[
+      chr_rowidx, chr_colidx, with = FALSE
+    ]
 
     # define spatiotemporal folds
     args_generate_cv <-
       c(
-        list(data = data_sample_r, cv_mode = "spatiotemporal"),
+        list(data = dt_sample, cv_mode = "spatiotemporal"),
         args_generate_cv
       )
 
@@ -142,22 +143,24 @@ fit_meta_learner <-
     # using cv_index, restore rset
     meta_vfold <-
       beethoven::convert_cv_index_rset(
-        cv_index, data_sample_r, cv_mode = "spatiotemporal"
+        cv_index, dt_sample, cv_mode = "spatiotemporal"
       )
 
     # define recipe
     meta_recipe <-
       recipes::recipe(
-        data_sample_r[1, ]
+        dt_sample[1, ]
       ) %>%
-      recipes::update_role(!!seq(5, ncol(data_sample_r))) %>%
+      recipes::update_role(
+        !!seq(length(chr_id_names), ncol(dt_sample))
+      ) %>%
       recipes::update_role(!!yvar, new_role = "outcome")
 
     # fit glmnet meta learner with `fit_base_tune`
     future::plan(future::multicore, workers = nthreads)
     meta_wflist <-
       beethoven::fit_base_tune(
-        data_full = data.table::data.table(data_sample_c),
+        data_full = data.table::data.table(dt_sample),
         recipe = meta_recipe,
         model = meta_model,
         resample = meta_vfold,

@@ -254,7 +254,9 @@ fit_base_learner <-
     xvar <- seq(5, length(chr_colidx))
 
     # sample of data with r_subsample rows, c_subsample columns, and lat/lon
-    dt_sample <- dt_full[chr_rowidx, ..chr_colidx]
+    dt_sample <- data.table::data.table(dt_full)[
+      chr_rowidx, chr_colidx, with = FALSE
+    ]
 
     # ensure required columns are retained in data sample
     chr_requiredcols <- c(yvar, "site_id", "Event.Type", "time", "lon", "lat")
@@ -338,7 +340,7 @@ fit_base_learner <-
         iter_bayes = tune_bayes_iter,
         trim_resamples = trim_resamples,
         return_best = return_best,
-        data_full = dt_full[, ..chr_colidx],
+        data_full = data.table::data.table(dt_full)[, chr_colidx, with = FALSE],
         metric = metric
       )
     if (model_name == "glmnet") {

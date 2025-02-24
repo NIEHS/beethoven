@@ -3,21 +3,6 @@
 ##### hyperparameters.
 target_baselearner <-
   list(
-    # targets::tar_target(
-    #   dt_feat_calc_imputed2,
-    #   command = beethoven::impute_all(
-    #     dt_feat_calc_design,
-    #     period = chr_daterange,
-    #     nthreads_dt = 32,
-    #     nthreads_collapse = 32,
-    #     nthreads_imputation = 32
-    #   ),
-    #   resources = targets::tar_resources(
-    #     crew = targets::tar_resources_crew(controller = "controller_impute")
-    #   ),
-    #   description = "Imputed features + lags | fit"
-    # )
-    # ,
     targets::tar_target(
       list_base_args_cv,
       command = list(
@@ -30,21 +15,19 @@ target_baselearner <-
       list_base_params_candidates,
       command = list(
         mlp = expand.grid(
-          hidden_units = c(1024, 512, 256, 128, 64),
-          dropout = 1 / seq(5, 2, -1),
-          activation = c("relu", "leaky_relu"),
-          learn_rate = c(0.01, 0.005, 0.001, 0.0005)
+          hidden_units = 512,
+          dropout = 0.3,
+          activation = "relu",
+          learn_rate = 0.001
         ),
         elnet = expand.grid(
-          mixture = seq(0, 1, length.out = 21),
-          penalty = 10 ^ seq(-3, 5, 1)
+          mixture = 0.5,
+          penalty = 0.01
         ),
         lgb = expand.grid(
-          mtry = floor(
-            c(0.025, seq(0.05, 0.2, 0.05)) * ncol(dt_feat_calc_xyt)
-          ),
-          trees = seq(1000, 3000, 1000),
-          learn_rate = c(0.1, 0.05, 0.01, 0.005)
+          mtry = 0.75,
+          trees = 500,
+          learn_rate = 0.05
         )
       ),
       description = "Parameter tuning grid | base learner"
@@ -77,7 +60,7 @@ target_baselearner <-
         c_subsample = 1.0,
         folds = NULL,
         tune_mode = "grid",
-        tune_grid_size = 20L,
+        tune_grid_size = 1L,
         yvar = "Arithmetic.Mean",
         xvar = seq(5, ncol(dt_feat_calc_xyt)),
         nthreads = 2L,
