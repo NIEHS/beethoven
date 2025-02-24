@@ -20,6 +20,9 @@ From: rocker/geospatial:latest
       ca-certificates \
       curl \
       slurm-client \
+    
+    # Install git-lfs for debug
+    apt-get update && apt-get install -y git-lfs && git lfs install
 
     # Set locale for the environment
     echo "LANG=en_US.UTF-8" >> /etc/default/locale
