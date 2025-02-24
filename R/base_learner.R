@@ -258,9 +258,13 @@ fit_base_learner <-
       chr_rowidx, chr_colidx, with = FALSE
     ]
 
+    # full rows with c_subsample columns and lat/lon
+    dt_full_cols <- data.table::data.table(dt_full)[, chr_colidx, with = FALSE]
+
     # ensure required columns are retained in data sample
     chr_requiredcols <- c(yvar, "site_id", "Event.Type", "time", "lon", "lat")
     stopifnot(all(chr_requiredcols %in% names(dt_sample)))
+    stopifnot(all(chr_requiredcols %in% names(dt_full_cols)))
 
     # detect model name
     model_name <- model$engine
@@ -340,7 +344,7 @@ fit_base_learner <-
         iter_bayes = tune_bayes_iter,
         trim_resamples = trim_resamples,
         return_best = return_best,
-        data_full = data.table::data.table(dt_full)[, chr_colidx, with = FALSE],
+        data_full = dt_full_cols,
         metric = metric
       )
     if (model_name == "glmnet") {

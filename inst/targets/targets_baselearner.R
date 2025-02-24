@@ -66,7 +66,7 @@ target_baselearner <-
         nthreads = 2L,
         trim_resamples = FALSE,
         return_best = TRUE,
-        cv_rep = 100L
+        cv_rep = 5L
       ),
       description = "Static parameters | base learner"
     )
