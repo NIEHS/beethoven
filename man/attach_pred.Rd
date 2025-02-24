@@ -7,6 +7,7 @@
 attach_pred(
   data,
   pred,
+  position = 1,
   target_cols = c("site_id", "time", "Event.Type", "lon", "lat"),
   yvar = "Arithmetic.Mean"
 )
@@ -15,6 +16,9 @@ attach_pred(
 \item{data}{data.frame(1). Full data.}
 
 \item{pred}{list(1). List with base learner prediction values.}
+
+\item{position}{numeric(1). Position of the prediction values in the list
+\code{pred}. Default is 1.}
 
 \item{target_cols}{characters(1). Columns to retain from the full
 data.frame.}

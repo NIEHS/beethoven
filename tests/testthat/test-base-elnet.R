@@ -330,14 +330,8 @@ testthat::test_that("fit elnet (args_generate_cv + grid)", {
 
 
   # spatiotemporal
-  args_spatiotemporal <- list(
-    target_cols = c("lon", "lat", "time"),
-    preprocessing = "none",
-    ngroup_init = 2L,
-    cv_pairs = NULL,
-    pairing = "1"
-  )
-  testthat::expect_no_error(
+  args_spatiotemporal <- list(v = 3)
+  testthat::expect_warning(
     elnet9 <- fit_base_learner(
       learner = "elnet",
       dt_full = data.table::data.table(dt_base),
@@ -463,14 +457,8 @@ testthat::test_that("fit elnet (args_generate_cv + bayes)", {
 
 
   # spatiotemporal
-  args_spatiotemporal <- list(
-    target_cols = c("lon", "lat", "time"),
-    preprocessing = "none",
-    ngroup_init = 2L,
-    cv_pairs = NULL,
-    pairing = "1"
-  )
-  testthat::expect_no_error(
+  args_spatiotemporal <- list(v = 3)
+  testthat::expect_warning(
     elnet12 <- fit_base_learner(
       learner = "elnet",
       dt_full = data.table::data.table(dt_base),

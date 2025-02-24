@@ -798,3 +798,197 @@ inject_nlcd(year = df_feat_calc_nlcd_params$year,
                             mode = "exact",
                             max_cells = 3e7
                             )
+
+#' Generate spatio-temporal cross-validation index with anticlust
+#'
+#' This function generates a spatio-temporal cross-validation index
+#' based on the anticlust package. The function first calculates the
+#' spatial clustering index using the [anticlust::balanced_clustering()]
+#' function as default, and if `cv_pairs` is provided, it generates rank-based
+#' pairs based on the proximity between cluster centroids.
+#' `cv_pairs` can be NULL, in which case only the spatial clustering index
+#' is generated. `ngroup_init` should be lower than `cv_pairs`, while
+#' it imposes a condition that `nrow(data) %% ngroup_init` should be 0
+#' and `cv_pairs` should be less than the number of 2-combinations of
+#' `ngroup_init`. Each training set will get 50% overlap
+#' with adjacent training sets. "Pairs (combinations)" are selected
+#' based on the rank of centroids of `ngroup_init` number of initial
+#' clusters, where users have two options.
+#'
+#'  * Mode "1" assigns at least one pair for each
+#'    initial cluster, meaning that `ngroup_init` pairs are assigned for each
+#'    initial cluster, then the remaining pairs will be ranked to finalize
+#'    the `cv_pairs` sets.
+#'  * Mode "2" will rank the pairwise distances
+#'    directly, which may ignore some overly large initial clusters for pairing.
+#'
+#' Of course, mode "2" is faster than mode "1", thus users are advised
+#' to use mode "2" when they are sure that the initial clusters are
+#' spatially uniformly distributed.
+#' @keywords Baselearner
+#' @param data data.table with X, Y, and time information.
+#' @param target_cols character(3). Names of columns for X, Y, and time.
+#'   Default is c("lon", "lat", "time"). Order insensitive.
+#' @param preprocessing character(1). Preprocessing method for the fields
+#'   defined in `target_cols`. This serves to homogenize the scale of
+#'   the data. Default is "none".
+#'   * "none": no preprocessing.
+#'   * "normalize": normalize the data.
+#'   * "standardize": standardize the data.
+#' @param ngroup_init integer(1). Initial number of splits for
+#'  pairing groups. Default is 5L.
+#' @param cv_pairs integer(1). Number of pairs for cross-validation.
+#'   This value will be used to generate a rank-based pairs
+#'   based on `target_cols` values.
+#' @param pairing character(1) Pair selection method.
+#'   * "1": search the nearest for each cluster then others
+#'    are selected based on the rank.
+#'   * "2": rank the pairwise distances directly
+#' @param ... Additional arguments to be passed.
+#' @note `nrow(data) %% ngroup_init` should be 0. This is a required
+#'  condition for the anticlust::balanced_clustering().
+#' @return List of numeric vectors with balanced cluster numbers and
+#'   reference lists of assessment set pair numbers in attributes.
+#' @author Insang Song
+#' @importFrom rsample manual_rset
+#' @importFrom anticlust balanced_clustering
+#' @importFrom dplyr group_by summarize across ungroup all_of
+#' @importFrom stats dist
+#' @importFrom utils combn
+#' @export
+#' @examples
+#' library(data.table)
+#' data <- data.table(
+#'   lon = runif(100),
+#'   lat = runif(100),
+#'   time =
+#'   rep(
+#'     seq.Date(from = as.Date("2021-01-01"), to = as.Date("2021-01-05"),
+#'              by = "day"),
+#'     20
+#'   )
+#' )
+#' rset_spt <-
+#'   generate_cv_index_spt(
+#'     data, preprocessing = "normalize",
+#'     ngroup_init = 5L, cv_pairs = 6L
+#'   )
+#' rset_spt
+generate_cv_index_spt <-
+  function(
+    data,
+    target_cols = c("lon", "lat", "time"),
+    preprocessing = c("none", "normalize", "standardize"),
+    ngroup_init = 5L,
+    cv_pairs = NULL,
+    pairing = c("1", "2"),
+    ...
+  ) {
+    if (length(target_cols) != 3) {
+      stop("Please provide three target columns.")
+    }
+    if (!is.null(cv_pairs)) {
+      # ngroup_init check
+      if (ngroup_init >= cv_pairs) {
+        stop("ngroup_init should be less than cv_pairs.")
+      }
+      # 2-combinations of ngroup_init check
+      if (ncol(utils::combn(seq_len(ngroup_init), 2)) < cv_pairs) {
+        stop(
+          paste0(
+            "cv_pairs cannot be larger than ",
+            "the number of 2-combinations of ngroup_init."
+          )
+        )
+      }
+    }
+    # data_orig <- data
+    data <- data[, target_cols, with = FALSE]
+    data$time <- as.numeric(data$time)
+
+    # select preprocessing plan
+    # Yes, normalize/standardize spatiotemporal coordinates
+    # may make little sense, but it would homogenize the scale of drastically
+    # different value ranges of the coordinates (i.e., seconds in POSIXct)
+    data_proc <-
+      switch(
+        preprocessing,
+        none = data,
+        normalize = (data + abs(apply(data, 2, min))) /
+          (apply(data, 2, max) + abs(apply(data, 2, min))),
+        standardize = collapse::fscale(data)
+      )
+
+    # !!! ngroup_init should be a divisor of nrow(data_proc) !!!
+    index_cv <- anticlust::balanced_clustering(data_proc, ngroup_init)
+    cv_index <- NULL
+    # ref_list <- NULL
+    if (!is.null(cv_pairs)) {
+      pairing <- match.arg(pairing)
+      data_ex <- data_proc
+      data_ex$cv_index <- index_cv
+
+      data_exs <- data_ex |>
+        dplyr::group_by(cv_index) |>
+        dplyr::summarize(
+          dplyr::across(dplyr::all_of(target_cols), ~mean(as.numeric(.x)))
+        ) |>
+        dplyr::ungroup()
+
+      data_exs$cv_index <- NULL
+      data_exm <- stats::dist(data_exs)
+      data_exd <- as.vector(data_exm)
+      data_exmfull <- as.matrix(data_exm)
+      # index searching in dist matrix out of dist
+      data_exd_colid <-
+        unlist(Map(seq_len, seq_len(max(index_cv) - 1)))
+      # rep(seq_len(max(index_cv) - 1), seq(max(index_cv) - 1, 1, -1))
+      data_exd_rowid <- rep(seq(2, max(index_cv)), seq_len(max(index_cv) - 1))
+
+      if (pairing == "2") {
+        search_idx <- which(rank(-data_exd) <= cv_pairs)
+        ref_list <- NULL
+      } else {
+        # min rank element index per each cluster centroid
+        search_each1 <-
+          apply(data_exmfull, 1, \(x) which.min(replace(x, which.min(x), Inf)))
+        # sort the index
+        search_each1sort <-
+          Map(c, seq_along(search_each1), search_each1)
+        # keep the distinct pairs
+        search_each1sort <-
+          unique(Map(sort, search_each1sort))
+        # return(list(data_exd_colid, data_exd_rowid, search_each1sort))
+        search_idx_each1 <-
+          which(
+            Reduce(
+              `|`,
+              Map(
+                \(x) data_exd_colid %in% x[1] & data_exd_rowid %in% x[2],
+                search_each1sort
+              )
+            )
+          )
+
+        # replace the nearest pairs' distance to Inf
+        search_idx_others <-
+          which(rank(-replace(data_exd, search_idx_each1, Inf)) <= cv_pairs)
+        # remove the nearest pairs
+        # sort the distance of the remaining pairs
+        search_idx_others <-
+          search_idx_others[1:(cv_pairs - length(search_idx_each1))]
+        search_idx <- c(search_idx_each1, search_idx_others)
+      }
+
+      # ref_list contains the index of the group pairs
+      ref_list <-
+        Map(c, data_exd_rowid[search_idx], data_exd_colid[search_idx])
+    } else {
+      ref_list <- NULL
+    }
+    attr(index_cv, "ref_list") <- ref_list
+    # generate row index for restoring rset
+    # 0.3.9: ref_list is added to an attribute of index_cv
+
+    return(index_cv)
+  }

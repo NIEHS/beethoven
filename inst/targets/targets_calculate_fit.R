@@ -655,15 +655,51 @@ target_calculate_fit <-
     )
     ,
     targets::tar_target(
-      dt_feat_calc_tri,
-      command = beethoven::reduce_merge(
-        lapply(
+      list_feat_reduce_tri,
+      command = {
+        list_feat_calc_tri_unnest <- lapply(
           list_feat_calc_tri,
-          function(x) data.table::data.table(beethoven::reduce_list(x)[[1]])
-        ),
-        by = NULL
-      ),
-      description = "data.table of TRI features | fit"
+          function(x) x[[1]]
+        )
+        chr_tri_radii_index <- sapply(
+          list_feat_calc_tri_unnest,
+          function(x) {
+            any(grepl(sprintf("_%05d", chr_iter_radii), names(x)))
+          }
+        )
+        beethoven::reduce_merge(
+          list_feat_calc_tri_unnest[chr_tri_radii_index],
+          by = NULL,
+          all.x = TRUE,
+          all.y = TRUE
+        )
+      },
+      iteration = "list",
+      pattern = map(chr_iter_radii),
+      description = "Reduce TRI features based on radii | fit"
+    )
+    ,
+    targets::tar_target(
+      dt_feat_calc_tri,
+      command = {
+        dt_feat_merge_tri <- beethoven::reduce_merge(
+          list_feat_reduce_tri,
+          by = c("site_id", "time", "lon", "lat", "tri_year"),
+          all.x = TRUE,
+          all.y = TRUE
+        )
+        dt_feat_merge_tri[is.na(dt_feat_merge_tri)] <- 0
+        dt_feat_pca_tri <- beethoven::post_calc_pca(
+          data = dt_feat_merge_tri,
+          yvar = NULL,
+          num_comp = 5,
+          pattern = "FUGITIVE|STACK",
+          groups = sprintf("%05d", chr_iter_radii),
+          prefix = "TRI",
+          kernel = TRUE
+        )
+      },
+      description = "data.table of TRI PCA-reduced features | fit"
     )
     ,
     ###########################         NEI          ###########################
@@ -851,9 +887,25 @@ target_calculate_fit <-
       name = dt_feat_calc_xyt,
       command = data.table::data.table(
         beethoven::attach_xy(
-          dt_feat_calc_imputed, dplyr::bind_rows(list_feat_proc_aqs_sites)
+          dt_feat_calc_imputed,
+          dplyr::bind_rows(list_feat_proc_aqs_sites)
         )
       ),
       description = "Imputed features + AQS sites (outcome and lat/lon) | fit"
     )
+    # ,
+    # targets::tar_target(
+    #   dt_feat_calc_imputed2,
+    #   command = beethoven::impute_all(
+    #     dt_feat_calc_design,
+    #     period = chr_daterange,
+    #     nthreads_dt = 32,
+    #     nthreads_collapse = 32,
+    #     nthreads_imputation = 32
+    #   ),
+    #   resources = targets::tar_resources(
+    #     crew = targets::tar_resources_crew(controller = "controller_impute")
+    #   ),
+    #   description = "Imputed features + lags | fit"
+    # )
   )

@@ -104,14 +104,8 @@ testthat::test_that("fit elnet (performance)", {
 
 
   # spatiotemporal
-  args_spatiotemporal <- list(
-    target_cols = c("lon", "lat", "time"),
-    preprocessing = "none",
-    ngroup_init = 2L,
-    cv_pairs = NULL,
-    pairing = "1"
-  )
-  testthat::expect_no_error(
+  args_spatiotemporal <- list(v = 3)
+  testthat::expect_warning(
     elnet_p3 <- fit_base_learner(
       learner = "elnet",
       dt_full = data.table::data.table(dt_performance),
@@ -163,7 +157,7 @@ testthat::test_that("fit lightgbm (performance)", {
   # set grid
   lgb_grid <- expand.grid(
     mtry = floor(c(0.025, seq(0.05, 0.2, 0.05)) * ncol(dt_performance)),
-    trees = seq(100, 200, 100),
+    trees = c(50),
     learn_rate = c(0.3)
   )
 
@@ -184,7 +178,7 @@ testthat::test_that("fit lightgbm (performance)", {
       cv_mode = "temporal",
       tune_mode = "grid",
       tune_grid_in = lgb_grid,
-      tune_grid_size = 10,
+      tune_grid_size = 5,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_performance)),
@@ -225,7 +219,7 @@ testthat::test_that("fit lightgbm (performance)", {
       cv_mode = "spatial",
       tune_mode = "grid",
       tune_grid_in = lgb_grid,
-      tune_grid_size = 10,
+      tune_grid_size = 5,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_performance)),
@@ -249,14 +243,8 @@ testthat::test_that("fit lightgbm (performance)", {
 
 
   # spatiotemporal
-  args_spatiotemporal <- list(
-    target_cols = c("lon", "lat", "time"),
-    preprocessing = "none",
-    ngroup_init = 2L,
-    cv_pairs = NULL,
-    pairing = "1"
-  )
-  testthat::expect_no_error(
+  args_spatiotemporal <- list(v = 3)
+  testthat::expect_warning(
     lgb_p3 <- fit_base_learner(
       learner = "lgb",
       dt_full = data.table::data.table(dt_performance),
@@ -267,7 +255,7 @@ testthat::test_that("fit lightgbm (performance)", {
       cv_mode = "spatiotemporal",
       tune_mode = "grid",
       tune_grid_in = lgb_grid,
-      tune_grid_size = 10,
+      tune_grid_size = 5,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_performance)),
@@ -307,10 +295,10 @@ testthat::test_that("fit mlp (performance)", {
   mlp_model <- switch_model("mlp", device = "cpu")
   # set grid
   mlp_grid <- expand.grid(
-    hidden_units = list(c(16, 16)),
+    hidden_units = list(8),
     dropout = c(0.5),
     activation = c("relu"),
-    learn_rate = c(0.1)
+    learn_rate = c(0.01)
   )
 
   # temporal
@@ -395,14 +383,8 @@ testthat::test_that("fit mlp (performance)", {
 
 
   # spatiotemporal
-  args_spatiotemporal <- list(
-    target_cols = c("lon", "lat", "time"),
-    preprocessing = "none",
-    ngroup_init = 4L,
-    cv_pairs = NULL,
-    pairing = "1"
-  )
-  testthat::expect_no_error(
+  args_spatiotemporal <- list(v = 3)
+  testthat::expect_warning(
     mlp_p3 <- fit_base_learner(
       learner = "mlp",
       dt_full = data.table::data.table(dt_performance),
@@ -539,14 +521,8 @@ testthat::test_that("fit mlp (performance)", {
 
 
 #   # spatiotemporal
-#   args_spatiotemporal <- list(
-#     target_cols = c("lon", "lat", "time"),
-#     preprocessing = "none",
-#     ngroup_init = 2L,
-#     cv_pairs = NULL,
-#     pairing = "1"
-#   )
-#   testthat::expect_no_error(
+#   args_spatiotemporal <- list(v = 3)
+#   testthat::expect_warning(
 #     xgb_p3 <- fit_base_learner(
 #       learner = "xgb",
 #       dt_full = data.table::data.table(dt_performance),

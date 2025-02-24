@@ -17,10 +17,10 @@ testthat::test_that("fit mlp (folds + grid))", {
   mlp_model <- switch_model("mlp", device = "cpu")
   # set grid
   mlp_grid <- expand.grid(
-    hidden_units = list(c(8, 8)),
+    hidden_units = list(8),
     dropout = c(0.2),
     activation = c("relu"),
-    learn_rate = c(0.05)
+    learn_rate = c(0.01)
    )
 
   # temporal
@@ -250,10 +250,10 @@ testthat::test_that("fit mlp (args_generate_cv + grid)", {
   mlp_model <- switch_model("mlp", device = "cpu")
   # set grid
   mlp_grid <- expand.grid(
-    hidden_units = list(c(8, 8)),
+    hidden_units = list(8),
     dropout = c(0.2),
     activation = c("relu"),
-    learn_rate = c(0.05)
+    learn_rate = c(0.01)
    )
 
   # temporal
@@ -336,14 +336,8 @@ testthat::test_that("fit mlp (args_generate_cv + grid)", {
 
 
   # spatiotemporal
-  args_spatiotemporal <- list(
-    target_cols = c("lon", "lat", "time"),
-    preprocessing = "none",
-    ngroup_init = 2L,
-    cv_pairs = NULL,
-    pairing = "1"
-  )
-  testthat::expect_no_error(
+  args_spatiotemporal <- list(v = 3)
+  testthat::expect_warning(
     mlp9 <- fit_base_learner(
       learner = "mlp",
       dt_full = data.table::data.table(dt_base),
@@ -469,14 +463,8 @@ testthat::test_that("fit mlp (args_generate_cv + grid)", {
 
 
 #   # spatiotemporal
-#   args_spatiotemporal <- list(
-#     target_cols = c("lon", "lat", "time"),
-#     preprocessing = "none",
-#     ngroup_init = 2L,
-#     cv_pairs = NULL,
-#     pairing = "1"
-#   )
-#   testthat::expect_no_error(
+#   args_spatiotemporal <- list(v = 3)
+#   testthat::expect_warning(
 #     mlp12 <- fit_base_learner(
 #       learner = "mlp",
 #       dt_full = data.table::data.table(dt_base),

@@ -1,6 +1,6 @@
 Package: beethoven
 Title: Building an Extensible, rEproducible, Test-driven, Harmonized, Open-source, Versioned, ENsemble model for air quality
-Version: 0.4.4
+Version: 0.4.5
 Authors@R: c(
     person("Kyle", "Messier", , "kyle.messier@nih.gov", role = c("aut", "cre"), comment = c(ORCID = "0000-0001-9508-9623")),
     person("Insang", "Song", role = c("aut", "ctb"), comment = c(ORCID = "0000-0001-8732-3256")),
@@ -26,6 +26,7 @@ Imports:
   targets,
   tune (>= 1.2.1),
   rlang,
+  parsnip,
   rsample,
   spatialsample,
   tidyr,
@@ -34,9 +35,7 @@ Imports:
   workflows,
   recipes,
   missRanger,
-  parsnip,
   future.batchtools,
-  anticlust,
   qs,
   stringi,
   tibble,
@@ -44,7 +43,7 @@ Imports:
   tigris,
   graphics,
   scatterplot3d,
-  amadeus,
+  amadeus (>= 1.2.3),
   parallelly,
   magrittr
 Suggests:
@@ -71,8 +70,9 @@ Suggests:
   doRNG,
   furrr,
   quarto,
-  torch
-Remotes: NIEHS/chopin, NIEHS/amadeus, tidymodels/brulee@gpu, mitchellmanware/parsnip@beethoven
+  torch,
+  kernlab
+Remotes: ropensci/chopin, tidymodels/brulee@gpu, mitchellmanware/parsnip@beethoven
 SystemRequirements: NetCDF4, CUDA (>= 10.0)
 Encoding: UTF-8
 VignetteBuilder: knitr, rmarkdown

@@ -32,6 +32,12 @@ batch <- function(file = "run.sh") {
   system(paste0("sbatch ", file))
 }
 
+clean <- function(pattern = NULL) {
+  system(paste0("rm slurm/*"))
+  stopifnot(!is.null(pattern))
+  system(paste0("rm _targets/objects/", pattern))
+}
+
 gpu <- function() {
   system("nvidia-smi")
 }
@@ -78,7 +84,8 @@ cov <- function() {
         "library(bonsai); library(dplyr); library(testthat); ",
         "cov <- covr::package_coverage(install_path = '/tmp/cov', ",
         "clean = FALSE); ",
-        "saveRDS(cov, '/mnt/cov_0131.rds'); covr::coverage_to_list(cov)\""
+        "saveRDS(cov, '/mnt/cov/cov_", format(Sys.time(), "%m%d_%H%M"),
+        ".rds'); covr::coverage_to_list(cov)\""
       ),
       collapse = ""
     )

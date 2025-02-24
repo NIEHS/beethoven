@@ -18,7 +18,11 @@ From: rocker/geospatial:latest
       libcurl4-openssl-dev \
       libssl-dev \
       ca-certificates \
-      curl
+      curl \
+      slurm-client \
+    
+    # Install git-lfs for debug
+    apt-get update && apt-get install -y git-lfs && git lfs install
 
     # Set locale for the environment
     echo "LANG=en_US.UTF-8" >> /etc/default/locale
@@ -35,11 +39,13 @@ From: rocker/geospatial:latest
     Rscript -e "install.packages(c('pak', 'devtools'))"
     Rscript -e "devtools::install_version('targets', version = '1.10.0')"
     Rscript -e "install.packages(c('tarchetypes', 'testthat', 'tidymodels', \
-        'bonsai', 'qs2'))"
+        'bonsai', 'qs2', 'kernlab'))"
     Rscript -e "pak::pak('shikokuchuo/nanonext'); pak::pak('shikokuchuo/mirai')"
     Rscript -e "pak::pak('wlandau/crew'); pak::pak('wlandau/crew.cluster')"
     Rscript -e "pak::pak('NIEHS/amadeus')"
-    Rscript -e "pak::pak('NIEHS/beethoven@dev-mm-0108')"
+    Rscript -e "install.packages(c('scoringRules', 'future.mirai', 'vetiver', \
+        'lwgeom', 'doRNG', 'quarto', 'kernlab'))"
+    Rscript -e "pak::pak('NIEHS/beethoven@mm-0203')"
 
 %environment
     # Set locale for the container environment
