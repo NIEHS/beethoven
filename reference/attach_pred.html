@@ -9,7 +9,7 @@ values from each base learner."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">beethoven</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,7 +31,7 @@ values from each base learner."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Combine prediction values from base learners</h1>
-      <small class="dont-index">Source: <a href="https://github.com/NIEHS/beethoven/blob/main/R/meta_learner.R" class="external-link"><code>R/meta_learner.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/NIEHS/beethoven/blob/dev/R/meta_learner.R" class="external-link"><code>R/meta_learner.R</code></a></small>
       <div class="d-none name"><code>attach_pred.Rd</code></div>
     </div>
 
@@ -45,6 +45,7 @@ values from each base learner.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">attach_pred</span><span class="op">(</span></span>
 <span>  <span class="va">data</span>,</span>
 <span>  <span class="va">pred</span>,</span>
+<span>  position <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  target_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"site_id"</span>, <span class="st">"time"</span>, <span class="st">"Event.Type"</span>, <span class="st">"lon"</span>, <span class="st">"lat"</span><span class="op">)</span>,</span>
 <span>  yvar <span class="op">=</span> <span class="st">"Arithmetic.Mean"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -60,6 +61,11 @@ values from each base learner.</p>
 
 <dt id="arg-pred">pred<a class="anchor" aria-label="anchor" href="#arg-pred"></a></dt>
 <dd><p>list(1). List with base learner prediction values.</p></dd>
+
+
+<dt id="arg-position">position<a class="anchor" aria-label="anchor" href="#arg-position"></a></dt>
+<dd><p>numeric(1). Position of the prediction values in the list
+<code>pred</code>. Default is 1.</p></dd>
 
 
 <dt id="arg-target-cols">target_cols<a class="anchor" aria-label="anchor" href="#arg-target-cols"></a></dt>

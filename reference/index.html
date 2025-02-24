@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">beethoven</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -78,12 +78,6 @@
 
         </dt>
         <dd>Load arguments from the formatted argument list file</dd>
-      </dl><dl><dt>
-
-          <code><a href="pred_colname.html">pred_colname()</a></code>
-
-        </dt>
-        <dd>Assign column name to base learner prediction based on hyperparameters.</dd>
       </dl><dl><dt>
 
           <code><a href="read_locs.html">read_locs()</a></code>
@@ -294,6 +288,12 @@
         <dd>Automatic joining by the time and spatial identifiers</dd>
       </dl><dl><dt>
 
+          <code><a href="post_calc_cols.html">post_calc_cols()</a></code>
+
+        </dt>
+        <dd>Post-calculation column renaming</dd>
+      </dl><dl><dt>
+
           <code><a href="post_calc_convert_time.html">post_calc_convert_time()</a></code>
 
         </dt>
@@ -330,6 +330,12 @@
         <dd>Merge input data.frame objects</dd>
       </dl><dl><dt>
 
+          <code><a href="post_calc_pca.html">post_calc_pca()</a></code>
+
+        </dt>
+        <dd>Post-calculation Principal Component Analysis</dd>
+      </dl><dl><dt>
+
           <code><a href="post_calc_unify_timecols.html">post_calc_unify_timecols()</a></code>
 
         </dt>
@@ -343,6 +349,12 @@
       </dl><dl><dt>
 
           <code><a href="reduce_merge.html">reduce_merge()</a></code>
+
+        </dt>
+        <dd>Reduce and merge a list of data tables</dd>
+      </dl><dl><dt>
+
+          <code><a href="reduce_merge_iter.html">reduce_merge_iter()</a></code>
 
         </dt>
         <dd>Reduce and merge a list of data tables</dd>
@@ -392,7 +404,7 @@
           <code><a href="generate_cv_index_spt.html">generate_cv_index_spt()</a></code>
 
         </dt>
-        <dd>Generate spatio-temporal cross-validation index with anticlust</dd>
+        <dd>Generate spatio-temporal cross-validation index with <code><a href="https://spatialsample.tidymodels.org/reference/spatial_block_cv.html" class="external-link">spatialsample::spatial_block_cv</a></code> and year-based temporal folds</dd>
       </dl><dl><dt>
 
           <code><a href="generate_cv_index_ts.html">generate_cv_index_ts()</a></code>

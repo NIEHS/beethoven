@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">beethoven</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,112 +65,17 @@
 <h2 id="workflow">Workflow<a class="anchor" aria-label="anchor" href="#workflow"></a>
 </h2>
 <p><code>beethoven</code> is a <a href="https://books.ropensci.org/targets/" class="external-link">targets</a> reproducible analysis pipeline with the following workflow.</p>
-<pre class="mermaid"><code>graph TD
-
-    subgraph AQS data with `amadeus`
-        AQS[PM2.5 download]--&gt;AQS2[PM2.5 Process]
-    end
-
-    AQS2 --&gt; Cov1
-    AQS2 --&gt; Cov2
-    AQS2 --&gt; Cov3
-    AQS2 --&gt; Cov4
-    subgraph Covariate Calculation with `amadeus`
-        Cov1[Meterology]
-        Cov2[NLCD]
-        Cov3[...]
-        Cov4[MERRA2]
-    end
-
-    subgraph Processed Covariates
-        PC[Baselearner Input]
-    end
-
-    Cov1 --&gt; PC
-    Cov2 --&gt; PC
-    Cov3 --&gt; PC
-    Cov4 --&gt; PC
-
-    PC --&gt; A1
-    PC --&gt; A2
-    PC --&gt; A3
-    subgraph MLP Baselearner
-        A1[ M_i is a 30% random sample of N] --&gt; B1A[Spatial CV]
-        A1[ M_i is a 30% random sample of N] --&gt; B1B[Temporal CV]
-        A1[ M_i is a 30% random sample of N] --&gt; B1C[Space/Time CV]
-        B1A --&gt; C1[3. M_i is fit with a MLP model]
-        B1B --&gt; C1
-        B1C --&gt; C1
-    end
-
-    subgraph LightGBM Baselearner
-        A2[ M_i is a 30% random sample of N] --&gt; B2A[Spatial CV]
-        A2[ M_i is a 30% random sample of N] --&gt; B2B[Temporal CV]
-        A2[ M_i is a 30% random sample of N] --&gt; B2C[Space/Time CV]
-        B2A --&gt; C2[3. M_i is fit with a LightGBM model]
-        B2B --&gt; C2
-        B2C --&gt; C2
-    end
-    subgraph Elastic-Net Baselearner
-        A3[ M_i is a 30% random sample of N] --&gt; B3A[Spatial CV]
-        A3[ M_i is a 30% random sample of N] --&gt; B3B[Temporal CV]
-        A3[ M_i is a 30% random sample of N] --&gt; B3C[Space/Time CV]
-        B3A --&gt; C3[3. M_i is fit with a glmnet model]
-        B3B --&gt; C3
-        B3C --&gt; C3
-    end
-    C1 --&gt; D1[Elastic-Net Meta-Learner]
-    C2 --&gt; D1[Elastic-Net Meta-Learner]
-    C3 --&gt; D1[Elastic-Net Meta-Learner]
-
-    subgraph Meta-Learner Phase
-        D1 --&gt; E1[Perform 50% column-wise subsampling K times]
-        E1 --&gt; E1b[Proper Scoring CRPS CV with 1 of 3 categories with equal probability, Spatial, Temporal, or Space/Time]
-        E1b --&gt; M1[Elastic-Net Model 1]
-        E1b --&gt; M2[Elastic-Net Model 2]
-        E1b --&gt; M3[Elastic-Net Model 3]
-        E1b --&gt; M4[Elastic-Net Model K-1]
-        E1b --&gt; M5[Elastic-Net Model K]
-    end
-
-
-    subgraph Posterior Summary
-        M1 --&gt; P1[Complete Posterior Summary at daily, 1-km]
-        M2 --&gt; P1
-        M3 --&gt; P1
-        M4 --&gt; P1
-        M5 --&gt; P1
-        P1 --&gt; P5[Version and Deploy with Vetiver]
-        P1 --&gt; P2[Spatial and Temporal Average Summaries]
-        P2 --&gt; P5
-    end
-
-   style A1 fill:#d3d3d3,stroke:#000,stroke-width:2px
-    style B1A fill:#d3d3d3,stroke:#000,stroke-width:2px
-    style B1B fill:#d3d3d3,stroke:#000,stroke-width:2px
-    style B1C fill:#d3d3d3,stroke:#000,stroke-width:2px
-    style C1 fill:#d3d3d3,stroke:#000,stroke-width:2px
-
-    style A2 fill:#62C6F2,stroke:#000,stroke-width:2px
-    style B2A fill:#62C6F2,stroke:#000,stroke-width:2px
-    style B2B fill:#62C6F2,stroke:#000,stroke-width:2px
-    style B2C fill:#62C6F2,stroke:#000,stroke-width:2px
-    style C2 fill:#62C6F2,stroke:#000,stroke-width:2px
-
-    style A3 fill:#ffb09c,stroke:#000,stroke-width:2px
-    style B3A fill:#ffb09c,stroke:#000,stroke-width:2px
-    style B3B fill:#ffb09c,stroke:#000,stroke-width:2px
-    style B3C fill:#ffb09c,stroke:#000,stroke-width:2px
-    style C3 fill:#ffb09c,stroke:#000,stroke-width:2px
-
-    style P1 fill:#abf7b1,stroke:#000,stroke-width:2px
-    style P2 fill:#abf7b1,stroke:#000,stroke-width:2px
-    style P5 fill:#abf7b1,stroke:#000,stroke-width:2px
-</code></pre>
+<div class="float">
+<img src="reference/figures/pipeline-outline.png" alt="beethoven workflow"><div class="figcaption">
+<code>beethoven</code> workflow</div>
+</div>
 <p>Version 0.4.4 of <code>beethoven</code> has stable <code>targets</code> for downloading data files, calculating features at AQS sites, and merging to a base learner-ready <code>data.table</code> (<code>dt_feat_calc_xyt</code>). Ongoing changes relate to calculating features for the prediction grid, computationally managing prediction grid, base learner hyperparameter tuning, and meta learner function development.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">targets</span><span class="fu">::</span><span class="fu"><a href="https://docs.ropensci.org/targets/reference/tar_visnetwork.html" class="external-link">tar_visnetwork</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/visnetwork_20250128.png"></p>
+<div class="float">
+<img src="reference/figures/visnetwork_20250128.png" alt="beethoven targets::tar_visnetwork()"><div class="figcaption">
+<code>beethoven</code> targets::tar_visnetwork()</div>
+</div>
 </div>
 <div class="section level2">
 <h2 id="organization">Organization<a class="anchor" aria-label="anchor" href="#organization"></a>
@@ -230,9 +135,7 @@
 <li>
 <code>_targets.yaml</code> is created and updated by running <code><a href="https://docs.ropensci.org/targets/reference/tar_make.html" class="external-link">targets::tar_make</a></code> and is not to be edited manually.</li>
 <li>
-<code>run.sh</code> allocates computational resources with SLURM and submits the <code>beethoven</code> pipeline to run on high performance computing system.
-<ul>
-<li>To run <code>beethoven</code>, users must review and update the following parameters for their user profile and computing system:
+<code>run.sh</code> submits separate <code>SBATCH</code> jobs for the covariate, cpu- and gpu-enabled base learner, and the meta learner <code>targets</code> (see <code>/inst/scripts/</code>). This setup ensures that each stage utilizes the proper container image and computational resources. To run <code>beethoven</code>, users must review and update the following parameters for their user profile and computing system in each of the <code>inst/scripts/run_*</code> files.:
 <ul>
 <li><code>#SBATCH --mail-user</code></li>
 <li><code>#SBATCH --partition</code></li>
@@ -243,146 +146,14 @@
 </ul>
 </li>
 </ul>
-</li>
-</ul>
-</div>
-<div class="section level3">
-<h3 id="naming-conventions">Naming Conventions<a class="anchor" aria-label="anchor" href="#naming-conventions"></a>
-</h3>
-<p>Naming conventions for <code>targets</code> objects are motivated by the <a href="https://cfconventions.org/Data/cf-standard-names/docs/guidelines.html" class="external-link">Compositional Forecast</a> (CF) model naming conventions. By adopting the this convention, the name of each <code>targets</code> object communicates important information about its class, role, stage, and source.</p>
-<p>Here, we use the following naming convention:</p>
-<p><strong>[class]_[role-suffix]_[stage]_[source/description]_[spacetime]</strong></p>
-<p>Each section is in the brackets [] and appears in this order. For some objects, not all naming sections are required. If two keywords in a section apply, then they are appended with a <code>-</code></p>
-<p>Examples:</p>
-<p><code>dt_feat_calc_geos</code> - class: <code>dt</code> &lt;- <code>data.table</code> - role: <code>feat</code> &lt;- features - stage: <code>calc</code> &lt;- calculated - source: <code>geos</code> &lt;- <a href="https://gmao.gsfc.nasa.gov/weather_prediction/GEOS-CF/" class="external-link">NASA GEOS Composition Forecasting (GEOS-CF)</a></p>
-<p><code>list_base_params_candidates</code> - class: <code>list</code> - role: <code>base</code> &lt;- base learners - description: <code>params</code> &lt;- hyperparameters - description: <code>candidates</code> &lt;- <code>tune</code>-able parameters</p>
-<p><code>list_base_fit_gpu</code> - class: <code>list</code> - role: <code>base</code> &lt;- base learners - stage: <code>fit</code> - description: <code>gpu</code></p>
-<div class="section level4">
-<h4 id="naming-section-definitions">Naming section definitions:<a class="anchor" aria-label="anchor" href="#naming-section-definitions"></a>
-</h4>
-<ul>
-<li>
-<strong>R object type</strong>:
-<ul>
-<li>
-<code>chr</code> (character)</li>
-<li><code>list</code></li>
-<li><code>sf</code></li>
-<li>
-<code>dt</code> &lt;- <code>data.table</code>
-</li>
-<li>
-<code>tbl</code> &lt;- <code>tibble</code>
-</li>
-<li>
-<code>rast</code> &lt;- <code>SpatRaster</code>
-</li>
-<li>
-<code>vect</code> &lt;- <code>SpatVector</code>
-</li>
-</ul>
-</li>
-<li>
-<strong>role:</strong> Detailed description of the role of the object in the pipeline. Allowable keywords:
-<ul>
-<li>PM25</li>
-<li>feat (feature) (i.e. geographic covariate)</li>
-<li>base_model
-<ul>
-<li>base_model suffix types: linear, random_forest, lgb (lightGBM), xgb (xgboost), mlp (neural network, multilayer perceptron) etc.</li>
-</ul>
-</li>
-<li>meta_model</li>
-<li>prediction</li>
-<li>plot -plot suffix types: scatter, map, time_series, histogram, density etc.</li>
-</ul>
-</li>
-<li>
-<strong>stage</strong>: the stage of the pipeline the object is used in. Object transformations are also articulated here. Allowable keywords:
-<ul>
-<li>download: raw downloaded data</li>
-<li>proc: processed data</li>
-<li>calc: results from processing-calculation chains</li>
-<li>fit: fit models</li>
-<li>result: Final result</li>
-<li>log</li>
-<li>log10</li>
-</ul>
-</li>
-<li>
-<strong>source:</strong> the original data source
-<ul>
-<li>AQS</li>
-<li>MODIS</li>
-<li>GMTED</li>
-<li>NLCD</li>
-<li>NARR</li>
-<li>GEOSCF</li>
-<li>TRI</li>
-<li>NEI</li>
-<li>KOPPENGEIGER</li>
-<li>HMS</li>
-<li>gROADS</li>
-<li>POPULATION</li>
-<li>[Note, we can add and/or update these sources as needed]</li>
-</ul>
-</li>
-<li>
-<strong>description:</strong> additional descriptors
-<ul>
-<li>params: hyperparameters</li>
-<li>args: arguments</li>
-<li>cpu: CPU-enabled base/meta learner</li>
-<li>gpu: GPU-enabled base/meta learner</li>
-</ul>
-</li>
-<li>
-<strong>spacetime:</strong> relevant spatial or temporal information
-<ul>
-<li>spatial:
-<ul>
-<li>siteid</li>
-<li>censustract</li>
-<li>grid</li>
-</ul>
-</li>
-<li>time:
-<ul>
-<li>daily [optional YYYYMMDD]</li>
-<li>annual [optional YYYY]</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</div>
 </div>
 <div class="section level3">
 <h3 id="running-beethoven-pipeline">Running <code>beethoven</code> Pipeline<a class="anchor" aria-label="anchor" href="#running-beethoven-pipeline"></a>
 </h3>
 <div class="section level4">
-<h4 id="post-checkout-hook-setting">Post-checkout hook setting<a class="anchor" aria-label="anchor" href="#post-checkout-hook-setting"></a>
-</h4>
-<p>As safeguard measures, we limit the write permission of <code>_targets.R</code> to authorized users. To activate post-checkout hook, run <code>setup_hook.sh</code> at the project root.</p>
-<pre class="shell"><code>. setup_hook.sh</code></pre>
-<p>The write privilege lock is applied immediately. Users will be able to run the pipeline with the static <code>_targets.R</code> file to (re-)generate outputs from the pipeline.</p>
-</div>
-<div class="section level4">
 <h4 id="user-settings">User settings<a class="anchor" aria-label="anchor" href="#user-settings"></a>
 </h4>
-<p><code>beethoven</code> pipeline is configured for SLURM with defaults for NIEHS HPC settings. For adapting the settings to users’ environment, consult with the documentation of your platform and edit the requested resources in <code>run.sh</code> (lines 3-11) and <code>_targets.R</code> (lines 41-45; individual <code>crew</code> and <code>crew.cluster</code> controller workers).</p>
-</div>
-<div class="section level4">
-<h4 id="setting-_targetsr">Setting <code>_targets.R</code>
-<a class="anchor" aria-label="anchor" href="#setting-_targetsr"></a>
-</h4>
-<p>For general users, all <code>targets</code> objects and <code>meta</code> information can be saved in a directory other than the pipeline default by changing <code>store</code> value in <code>tar_config_set()</code> at <code>_targets.R</code> in project root.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># replacing yaml file.</span></span>
-<span><span class="fu">tar_config_set</span><span class="op">(</span></span>
-<span>  store <span class="op">=</span> <span class="st">"__your_directory__"</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p>Users could comment out the three lines to keep targets in <code>_targets</code> directory under the project root. Common arguments are generated in the earlier lines in <code>_targets.R</code> file.</p>
+<p><code>beethoven</code> pipeline is configured for SLURM with defaults for NIEHS HPC settings. For adapting the settings to users’ environment, consult with the documentation of your platform and edit the requested resources in the stage-specific run files (<code>/inst/scripts/</code>) (lines 3-11) and <code>_targets.R</code> (lines 41-45; individual <code>crew</code> and <code>crew.cluster</code> controller workers).</p>
 </div>
 <div class="section level4">
 <h4 id="critical-targets">Critical <code>targets</code>
@@ -427,10 +198,10 @@
 <code>Apptainer</code><a class="anchor" aria-label="anchor" href="#apptainer"></a>
 </h4>
 <p>Current implementation of <code>beethoven</code> utilizes <code>Apptainer</code> images to run the pipeline with consistent package versions and custom installations. Users must build these images before runnning beethoven.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="bu">cd</span> container/ <span class="co"># must be working in the `container/` directory</span></span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="fu">sh</span> build_container_covariates.sh <span class="co"># build "covariates" stage image</span></span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="fu">sh</span> build_container_models.sh <span class="co"># build "models" image</span></span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="fu">mv</span> <span class="pp">*</span>sif ../ <span class="co"># move images to `beethoven/` root directory</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="bu">cd</span> container/ <span class="co"># must be working in the `container/` directory</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">sh</span> build_container_covariates.sh <span class="co"># build "covariates" stage image</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="fu">sh</span> build_container_models.sh <span class="co"># build "models" image</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="fu">mv</span> <span class="pp">*</span>sif ../ <span class="co"># move images to `beethoven/` root directory</span></span></code></pre></div>
 <blockquote>
 <p>[!NOTE] <code>.sif</code> files are omitted from GitHub due to size (&gt;5 Gb each)</p>
 </blockquote>
@@ -438,21 +209,21 @@
 <div class="section level4">
 <h4 id="run">Run<a class="anchor" aria-label="anchor" href="#run"></a>
 </h4>
-<p>After switching back to the project root directory, users can run the pipeline with the <code>run.sh</code> shell script. The following lines of <code>run.sh</code> must be updated with user-specific settings before running the pipeline</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co">#SBATCH --mail-user=[USER_EMAIL]      # email address for job notifications</span></span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="co">#SBATCH --partition=[PARTITION_NAME]  # HPC partition to run on</span></span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co">#SBATCH --mem=[###G]                  # Total memory for the job</span></span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co">#SBATCH --cpus-per-task=[</span><span class="al">###</span><span class="co">]         # Total CPUs for the job</span></span>
-<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="ex">...</span></span>
-<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>  <span class="ex">--bind</span> <span class="pp">[</span><span class="ss">USER_INPUT_DIRECTORY</span><span class="pp">]</span>/input:/input <span class="dt">\</span></span>
-<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>...</span>
-<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>  <span class="ex">--bind</span> <span class="pp">[</span><span class="ss">USER_SYSTEM_PATH/munge</span><span class="pp">]</span>:/run/munge <span class="dt">\</span></span>
-<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>  <span class="at">--bind</span> <span class="pp">[</span><span class="ss">USER_SYSTEM_PATH/slurm</span><span class="pp">]</span>:<span class="pp">[</span><span class="ss">USER_SYSTEM_PATH/slurm</span><span class="pp">]</span> <span class="dt">\</span></span></code></pre></div>
+<p>After switching back to the project root directory, users can run the pipeline with the <code>run.sh</code> shell script. The following lines of <code>/inst/scripts/run_*.sh</code> must be updated with user-specific settings before running the pipeline</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co">#SBATCH --mail-user=[USER_EMAIL]      # email address for job notifications</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="co">#SBATCH --partition=[PARTITION_NAME]  # HPC partition to run on</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="co">#SBATCH --mem=[###G]                  # Total memory for the job</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co">#SBATCH --cpus-per-task=[</span><span class="al">###</span><span class="co">]         # Total CPUs for the job</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="ex">...</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>  <span class="ex">--bind</span> <span class="pp">[</span><span class="ss">USER_INPUT_DIRECTORY</span><span class="pp">]</span>/input:/input <span class="dt">\</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>...</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>  <span class="ex">--bind</span> <span class="pp">[</span><span class="ss">USER_SYSTEM_PATH/munge</span><span class="pp">]</span>:/run/munge <span class="dt">\</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>  <span class="at">--bind</span> <span class="pp">[</span><span class="ss">USER_SYSTEM_PATH/slurm</span><span class="pp">]</span>:<span class="pp">[</span><span class="ss">USER_SYSTEM_PATH/slurm</span><span class="pp">]</span> <span class="dt">\</span></span></code></pre></div>
 <p>Once configured, the pipeline can be run with a <code>SLRUM</code> batch job.</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="bu">cd</span> ../ <span class="co"># assuming still in the `container/` directory</span></span>
-<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="ex">sbatch</span> run.sh</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="bu">cd</span> ../ <span class="co"># assuming still in the `container/` directory</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="ex">sbatch</span> run.sh</span></code></pre></div>
 <p>The SLURM batch job can also be submitted <code>R</code> session with the <code>batch</code> helper function.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="st">"R/helpers.R"</span><span class="op">)</span></span>
 <span><span class="fu">batch</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -460,360 +231,11 @@
 </div>
 </div>
 <div class="section level1">
-<h1 id="developers-guide">Developer’s guide<a class="anchor" aria-label="anchor" href="#developers-guide"></a>
+<h1 id="contribution">Contribution<a class="anchor" aria-label="anchor" href="#contribution"></a>
 </h1>
-<div class="section level2">
-<h2 id="preamble">Preamble<a class="anchor" aria-label="anchor" href="#preamble"></a>
-</h2>
-<p>The objective of this document is to provide developers with the current implementation of <code>beethoven</code> pipeline for version 0.4.4.</p>
-<p>We assume the potential users have basic knowledge of <code>targets</code> and <code>tarchetypes</code> packages as well as functional and meta-programming. It is recommended to read Advanced R (by Hadley Wickham)’s chapters for these topics.</p>
-</div>
-<div class="section level2">
-<h2 id="pipeline-component-and-basic-implementation">Pipeline component and basic implementation<a class="anchor" aria-label="anchor" href="#pipeline-component-and-basic-implementation"></a>
-</h2>
-<p>The pipeline is based on <code>targets</code> package. All targets are <strong>stored</strong> in a designated storage, which can be either a directory path or a URL when one uses cloud storage or web servers. Here we classify the components into three groups:</p>
-<ol style="list-style-type: decimal">
-<li>Execution: high level script to run the pipeline.</li>
-<li>Critical: common/critical arguments that are injected into functions.</li>
-<li>Objects: definitions of each <code>target</code> object.</li>
-</ol>
-<p>Let’s take a moment to be a user. You should consult specific file when: - You need to modify library dependencies, <code>target</code> storage location, or controller settings: <code>_targets.R</code>. - You get an error <code>File or directory not found</code>: <code>run.sh</code> (Lines 32 and 49), <code>_targets.R</code> (Line 41), <code>inst/targets/targets_critical.R</code> (Line 47) - You do not get SLURM job notifications via email: <code>run.sh</code>(Line 4) - Failed dispatched <code>target</code> objects: <code>inst/targets/targets_*.R</code> (error will report failed <code>target</code>)</p>
-<blockquote>
-<p>[!NOTE] Please expand the toggle below to display function trees for <code>inst/targets/targets_*.R</code> files. Only functions that are directly called in each file are displayed due to screen real estate and readability concerns.</p>
-</blockquote>
-<details><summary><code>targets_*.R</code> file function tree
-</summary><pre class="mermaid"><code>graph LR
-
-    %% Define styles for the target files
-    style arglist fill:#ffcccc,stroke-width:2px,stroke:#000000,opacity:0.5
-    style baselearner fill:#ccffcc,stroke-width:2px,stroke:#000000,opacity:0.5
-    style calculateF fill:#ccccff,stroke-width:2px,stroke:#000000,opacity:0.5
-    style download fill:#ffccff,stroke-width:2px,stroke:#000000,opacity:0.5
-    style initialize fill:#ccffff,stroke-width:2px,stroke:#000000,opacity:0.5
-    style metalearner fill:#ffffcc,stroke-width:2px,stroke:#000000,opacity:0.5
-    style predict fill:#ffcc99,stroke-width:2px,stroke:#000000,opacity:0.5
-
-    %% Define the target files as nodes
-    arglist["**inst/targets/targets_arglist.R**"]
-    baselearner["**inst/targets/targets_baselearner.R**"]
-    calculateF["**inst/targets/targets_calculate.R**"]
-    download["**inst/targets/targets_download.R**"]
-    initialize["**inst/targets/targets_initialize.R**"]
-    metalearner["**inst/targets/targets_metalearner.R**"]
-    predict["**inst/targets/targets_predict.R**"]
-
-    %% Define the branches with arrowhead connections
-    fargdown["`set_args_download`"] ---|`set_args_download`| arglist
-    fargcalc["`set_args_calc`"] ---|`set_args_calc`| arglist
-    fraw["`feature_raw_download`"] ---|`feature_raw_download`| download
-    readlocs["`read_locs`"] ---|`read_locs`| initialize
-    fitbase["`fit_base_learner`"] ---|`fit_base_learner`| baselearner
-    switchmodel["`switch_model`"] ---|`switch_model`| baselearner
-    makesub["`make_subdata`"] ---|`make_subdata`| baselearner
-    covindexrset["`convert_cv_index_rset`"] ---|`convert_cv_index_rset`| baselearner
-    attach["`attach_xy`"] ---|`attach_xy`| baselearner
-    gencvsp["`generate_cv_index_sp`"] ---|`generate_cv_index_sp`| baselearner
-    gencvts["`generate_cv_index_ts`"] ---|`generate_cv_index_ts`| baselearner
-    gencvspt["`generate_cv_index_spt`"] ---|`generate_cv_index_spt`| baselearner
-    switchrset["`switch_generate_cv_rset`"] ---|`switch_generate_cv_rset`| baselearner
-    fcalc["`calculate`"] ---|`calculate`| calculateF
-    fcalcinj["`inject_calculate`"] ---|`inject_calculate`| calculateF
-    fcalcinjmod["`inject_modis_par`"] ---|`inject_modis_par`| calculateF
-    fcalcinjgmted["`inject_gmted`"] ---|`inject_gmted`| calculateF
-    fcalcinjmatch["`inject_match`"] ---|`inject_match`| calculateF
-    fcalcgeos["`calc_geos_strict`"] ---|`calc_geos_strict`| calculateF
-    fcalcgmted["`calc_gmted_direct`"] ---|`calc_gmted_direct`| calculateF
-    fcalcnarr2["`calc_narr2`"] ---|`calc_narr2`| calculateF
-    fparnarr["`par_narr`"] ---|`par_narr`| calculateF
-    fmetalearn["`fit_meta_learner`"] ---|`fit_meta_learner`| metalearner
-    G["`pred`"] ---|`pred`| predict
-
-    %% Apply thin solid dark grey lines to the branches
-    classDef branchStyle stroke-width:1px,stroke:#333333
-    class fargdown,fargcalc,fraw,readlocs,fitbase,switchmodel,makesub,covindexrset,attach,gencvsp,gencvts,gencvspt,switchrset,fcalc,fcalcinj,fcalcinjmod,fcalcinjgmted,fcalcinjmatch,fcalcgeos,fcalcgmted,fcalcnarr2,fparnarr,fmetalearn,G branchStyle</code></pre>
-</details><p><img src="reference/figures/pipeline-code-relations-20250131.png"></p>
-<p>The details of argument injection is illustrated below. The specific arguments to inject are loaded from QS files that are required to be saved in <code>inst/targets</code> directory. Each QS file contains a nested list object where function arguments for downloading raw data and calculating features are defined and store.</p>
-<p><img src="reference/figures/pipeline-schema.svg"></p>
-<p>As a compromise between the layouts for standard R packages and <code>targets</code> pipelines, we mainly keep <code>tar_target()</code> definitions in <code>inst/targets/</code>, whereas the <code>targets</code> required components are stored in the project root. All targets are recorded in <code>_targets/</code> directory by default, and it can be changed to somewhere else by defining an external directory at <code>store</code> argument in <code>tar_config_set()</code> in <code>_targets.R</code>.</p>
-</div>
-<div class="section level2">
-<h2 id="before-running-the-pipeline">Before running the pipeline<a class="anchor" aria-label="anchor" href="#before-running-the-pipeline"></a>
-</h2>
-<ul>
-<li>Container
-<ul>
-<li>The container images, <code>container_covariates.sif</code> and <code>container_models.sif</code>, are not hosted on GitHub due to the large file size. The images must be built by each user before running the pipeline. Definition files for each images can be found at <code>container/container_covariates.def</code> and <code>container/container_models.def</code>, respectively. The images can be build by running <code>sh build_container_[covariates/models].sh</code> <strong>from within the <code>container/</code> folder</strong>, or running <code>sbatch build_container_[covariates/models].sh</code>.</li>
-</ul>
-</li>
-<li>Shell
-<ul>
-<li>The <code>run.sh</code> file controls SLURM submission details (ie, <code>--mem</code>, <code>--cpus-per-task</code>) and container settings (ie. <code>container_[covariates/models].sif</code>, mounted directories). Local directories which must be explicitly mounted to the container for covariate and model runs are 1. the group data store (<code>--bind USER_PATH_TO_INPUT/input:/input</code>), 2. local targets store (<code>--bind $PWD/_targets:/opt/_targets</code>), and 3. the <code>inst/</code> folder which has the targets (<code>--bind $PWD/_targets:/opt/_targets</code>). The model fitting stage uses the <code>crew.cluster::crew_controller_slurm</code> controller, and therefore requires <strong>local installation and settings of</strong> <code>munge</code> (<code>--bind /run/munge:/run/munge</code>) and <code>slurm</code> (<code>--bind /USER_PATH_TO_SLURM/slurm:/USER_PATH_TO_SLURM/slurm</code>).</li>
-</ul>
-</li>
-<li>R
-<ul>
-<li>
-<code>_targets.R</code>: Ensure each <code>crew::crew_controller_local</code> does not specify more workers than the total number workers requested in <code>run.R</code> (line 9).</li>
-<li>
-<code>_targets.R</code>: Ensure <code>targets</code> store (line 63) matches the mount location in <code>run.sh</code> (lines 33 and 47 <strong>after the semicolon</strong>).</li>
-<li>
-<code>inst/targets/targets_critical.R</code>: Critical targets are those which will require changes between users (<code>chr_nasa_token</code>), for development (<code>num_dates_split</code>), manual updates (<code>/inst/extdata/mod06_links_2018_2022.csv</code> called via <code>chr_mod06_links</code>), and mounted data path (<code>chr_input_dir</code>). <strong>Most importantly</strong>, critical target <code>chr_daterange</code> controls the entire temporal range of the downstream pipeline. Time-related specifications (dates, months, years, julian dates, etc) are defined relative to <code>chr_daterange</code>.</li>
-</ul>
-</li>
-</ul>
-</div>
-<div class="section level2">
-<h2 id="dynamic-branching-with-targets">Dynamic branching with <code>targets</code>
-<a class="anchor" aria-label="anchor" href="#dynamic-branching-with-targets"></a>
-</h2>
-<p><code>beethoven</code> implements <a href="https://books.ropensci.org/targets/dynamic.html" class="external-link"><code>targets</code> dynamic branching</a> to iterate function calls over a series of parameter inputs. When dynamic branching is used, the “grand target” is the <code>tar_target</code>, and should be a list, either being a nested or a plain list, depending on the context or the command run inside each branch.</p>
-<p>The following example shows <code>download_geos</code>, a dynamically branched target. <code>download_geos</code> is the “grand target”, and is a <code>list</code> consisting of 30 hash values returned from <code>download_geos</code> function call. The 30 values stem from 2 GEOS-CF collections (<code>c("aqc_tavg_1hr_g1440x721_v1", "chm_tavg_1hr_g1440x721_v1")</code>) and 15 temporal breaks (365 days * 5 years / 122 days).</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">...</span></span>
-<span>    <span class="fu">targets</span><span class="fu">::</span><span class="fu"><a href="https://docs.ropensci.org/targets/reference/tar_target.html" class="external-link">tar_target</a></span><span class="op">(</span></span>
-<span>      <span class="va">download_geos</span>,</span>
-<span>      command <span class="op">=</span> <span class="fu">amadeus</span><span class="fu">::</span><span class="fu"><a href="https://niehs.github.io/amadeus/reference/download_geos.html" class="external-link">download_geos</a></span><span class="op">(</span></span>
-<span>        collection <span class="op">=</span> <span class="va">chr_iter_calc_geos</span>,</span>
-<span>        directory_to_save <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">chr_input_dir</span>, <span class="st">"geos"</span><span class="op">)</span>,</span>
-<span>        date <span class="op">=</span> <span class="fu">beethoven</span><span class="fu">::</span><span class="fu"><a href="reference/fl_dates.html">fl_dates</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">list_dates</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>        remove_command <span class="op">=</span> <span class="va">list_download_args</span><span class="op">$</span><span class="va">remove_command</span>,</span>
-<span>        acknowledgement <span class="op">=</span> <span class="va">list_download_args</span><span class="op">$</span><span class="va">acknowledgement</span>,</span>
-<span>        download <span class="op">=</span> <span class="va">list_download_args</span><span class="op">$</span><span class="va">download</span>,</span>
-<span>        hash <span class="op">=</span> <span class="va">list_download_args</span><span class="op">$</span><span class="va">hash</span></span>
-<span>      <span class="op">)</span>,</span>
-<span>      pattern <span class="op">=</span> <span class="fu">cross</span><span class="op">(</span><span class="va">chr_iter_calc_geos</span>, <span class="va">list_dates</span><span class="op">)</span>,</span>
-<span>      description <span class="op">=</span> <span class="st">"Download GEOS-CF data | download"</span></span>
-<span>    <span class="op">)</span></span>
-<span><span class="va">...</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="sysgetenvbeethoven">
-<code>Sys.getenv("BEETHOVEN")</code><a class="anchor" aria-label="anchor" href="#sysgetenvbeethoven"></a>
-</h2>
-<p>As previously mentioned, the <code>beethoven</code> pipeline is run through <code>Apptainer</code> image. More specifically, it has two stages, “covariates” and “models”, which are run through separate container images, <code>container_covariates.sif</code> and <code>container_models.sif</code>, respectively. These two separate images are used to avoid discrepancies between spatial- and machine learning-oriented R packages, which may utilize different versions of the same underlying dependencies.</p>
-<p>The “covariates” stage of the pipeline downloads raw data files to the <code>input/</code> directory, calculates features from these data at AQS sites and prediction point locations (in development), and combines and imputes the data. Relevant <code>targets</code> files (from the <code>inst/targets/</code> directory) include <code>targets_initiate.R</code>, <code>targets_download.R</code>, <code>targets_aqs.R</code>, <code>targets_calculate_fit.R</code>, and <code>targets_calculate_predict.R</code>. The <code>container_covariates.sif</code> image is built from the <code>rocker/geospatial:latest</code> base <a href="https://github.com/rocker-org/rocker-versioned2/blob/master/dockerfiles/geospatial_4.4.2.Dockerfile" class="external-link">image</a>.</p>
-<p>The “models” stage of the pipline fits the base and meta learner models, predicts values at prediction point locations, and computes summary statistics (all in development). Relevant <code>targets</code> files include <code>targets_initiate.R</code>, <code>targets_baselearner.R</code>, <code>targets_metalearner.R</code>, <code>targets_predict.R</code>. The <code>container_models.sif</code> image is built from <code>nvidia/cuda:11.8.0-devel-ubuntu22.04</code> with GPU-enabled versions of <code>torch</code>, <code>brulee</code>, <code>xgboost</code>, and <code>lightGBM</code> installed from GitHub or built from source. The R packages included in the <code>container_models.def</code> file are derived from those included in <code>rocker/ml-verse:lastest</code> base <a href="https://github.com/rocker-org/rocker-versioned2/blob/master/dockerfiles/ml-verse_4.4.2.Dockerfile" class="external-link">image</a>. <code>container_models.def</code> installs development version of CUDA 11.8 to include toolkit (<code>nvcc</code>).</p>
-<p>The <code>run.sh</code> and <code>_targets.R</code> files manage the pipeline stages. In the <code>run.sh</code> script, the environmental variable <code>BEETHOVEN</code> is set before the container run to identify the stage. This environmental variable is then read in the <code>_targets.R</code> file. If the <code>_targets.R</code> file identifes the “covariates” stage, the base and meta learner and prediction <code>targets</code> are set to <code>NULL</code> to skip. If “models” stage, these <code>targets</code> are dispatched.</p>
-<p><code>run.sh</code> (Lines 24-26)</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="co"># Set environmental variable to indicate download and covariate</span></span>
-<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="co"># calculation targets.</span></span>
-<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="bu">export</span> <span class="va">BEETHOVEN</span><span class="op">=</span>covariates</span></code></pre></div>
-<p><code>_targets.R</code> (Lines 111-113)</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"BEETHOVEN"</span><span class="op">)</span> <span class="op">==</span> <span class="st">"covariates"</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">target_baselearner</span> <span class="op">&lt;-</span> <span class="va">target_metalearner</span> <span class="op">&lt;-</span> <span class="va">target_predict</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
-<span><span class="op">}</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="beethoven-objects">
-<code>beethoven</code> objects<a class="anchor" aria-label="anchor" href="#beethoven-objects"></a>
-</h2>
-<div class="section level3">
-<h3 id="list_feat_calc_nlcd">
-<code>list_feat_calc_nlcd</code><a class="anchor" aria-label="anchor" href="#list_feat_calc_nlcd"></a>
-</h3>
-<p>From version 0.3.10, NLCD target is separated from <code>list_feat_calc_base</code> from runtime concerns. Here we take nested parallelization strategy, where each <code>amadeus::calc_nlcd()</code> run with different year and buffer size is parallelized where each will use 10 threads. In the initial study period, we have six combinations (two NLCD years in 2019 and 2021, and three radii of 1, 10, and 50 kilometers). Thus, the NLCD target will use 60 threads, but not necessarily concurrently. Each combination will get its slot in the resulting list target, therefore the following <code>dt_feat_calc_nlcd</code> is created by <code>data.frame</code> pivotting.</p>
-</div>
-<div class="section level3">
-<h3 id="list_feat_calc_nasa">
-<code>list_feat_calc_nasa</code><a class="anchor" aria-label="anchor" href="#list_feat_calc_nasa"></a>
-</h3>
-<p>MODIS-VIIRS product processing is a bit more complex than others since many preprocessing steps are involved in this raw data. Please note that <code>chr_iter_calc_nasa</code> divides MOD19A2 product by spatial resolution since difference in spatial resolution of raster layers makes it difficult to stack layers that can be advantageous to improve processing speed. The branching itself is simple to use a character vector of length 7 to iterate the process, but there is a different avenue that might introduce complexity in terms of computational infrastructure and implementation of parallel processing.</p>
-<p>We introduced nested parallelization to expedite the MODIS/VIIRS processing, where <code>tar_make_future</code> will submit jobs per MODIS/VIIRS product code via SLURM batchtools and multiple threads are used in each job. If one wants to make a transition to <code>crew</code> based pipeline operation in the future, this part indeed requires a tremendous amount of refactoring not only in beethoven functions but also amadeus functions considering features of <code>crew</code>/<code>mirai</code> workers which are different from <code>future</code>.</p>
-</div>
-<div class="section level3">
-<h3 id="list_feat_calc_geoscf">
-<code>list_feat_calc_geoscf</code><a class="anchor" aria-label="anchor" href="#list_feat_calc_geoscf"></a>
-</h3>
-<p>We use a character vector of length 2 to distinguish chm from aqc products. A modified version of <code>amadeus::calc_geos</code>, <code>calc_geos_strict</code> is employed to calculate features. The key modification is to fix the radius argument as zero then to remove the top-level argument radius from the function.</p>
-</div>
-<div class="section level3">
-<h3 id="list_feat_calc_gmted">
-<code>list_feat_calc_gmted</code><a class="anchor" aria-label="anchor" href="#list_feat_calc_gmted"></a>
-</h3>
-<p>Here we use custom function <code>calc_gmted_direct</code>, which has different logic from what was used in <code>amadeus::calc_gmted</code>. <code>inject_gmted</code> uses that function to parallelize the calculation by radius length.</p>
-</div>
-<div class="section level3">
-<h3 id="list_feat_calc_narr">
-<code>list_feat_calc_narr</code><a class="anchor" aria-label="anchor" href="#list_feat_calc_narr"></a>
-</h3>
-<p>Again, modified functions <code>process_narr2</code> and <code>calc_narr2</code> are applied and the parallelization for NARR data is done by <code>par_narr</code>. Here we did not branch out by NARR variable names since they are a bit long (length of 46) such that each dispatched branch will add up overhead to submit SLURM job for each variable.</p>
-</div>
-</div>
-<div class="section level2">
-<h2 id="merge-branches">Merge branches<a class="anchor" aria-label="anchor" href="#merge-branches"></a>
-</h2>
-<p>Functions with prefix <code>post_calc_</code> merge branches, which contain various internal structures. Most of the branches are list of depth 1, which means <code>data.frame</code> or <code>data.table</code> objects are in each list element. Others are list of depth 2.</p>
-<div class="section level3">
-<h3 id="tackling-space-time-discrepancy">Tackling space-time discrepancy<a class="anchor" aria-label="anchor" href="#tackling-space-time-discrepancy"></a>
-</h3>
-<p>Each source data have different temporal resolution and update frequency. This leads to the different dimensions across targets due to the measures to save time for computation. For example, NLCD targets will get N (number of sites) times 2 (2019 and 2021 per initial study period as of August 2024), whereas NARR targets will get N times <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">|</mo><mi>D</mi><mo stretchy="true" form="postfix">|</mo></mrow><annotation encoding="application/x-tex">|D|</annotation></semantics></math> (where <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>D</mi><annotation encoding="application/x-tex">D</annotation></semantics></math> is the set of dates), which equals to the full site-date combinations during the study period. To tackle the discrepancy across calculated targets, automatic expansion strategy is implemented by inferring temporal resolution from targets. Automatic expansion starts from resolving native temporal resolution from each target then proceeds to adding a provisional field year from date, which is removed after all required join operations will be completed. Most of the time, date-to-year conversion is performed internally in <code>expand</code> functions in <code>beethoven</code> and full space-time <code>data.frame</code> is prioritized to left join the multiple targets.</p>
-</div>
-<div class="section level3">
-<h3 id="value-filling-strategies">Value filling strategies<a class="anchor" aria-label="anchor" href="#value-filling-strategies"></a>
-</h3>
-<p>Temporal resolution discrepancy makes <code>NA</code> values in joined <code>data.frame</code>s. In MODIS/VIIRS targets, NDVI (a subdataset of MOD13A1 product) is based on a 16-day cycle, differing from other products on a daily cycle. We consider the reported date of “16-day cycle” as the <strong>last day</strong> of the cycle.</p>
-<ul>
-<li>
-<strong>MODIS/VIIRS</strong>: Therefore, the <code>NA</code> values introduced by joining <code>data.frame</code>s by date field are filled in <code>impute_all</code> using <code><a href="https://rdrr.io/pkg/data.table/man/nafill.html" class="external-link">data.table::setnafill</a></code> with next observation carried forward (<code>type = "nocb"</code>) option.</li>
-<li>MODIS/VIIRS targets may have <code>NaN</code> values where nonexisting values are assigned as replacements. These values are replaced with <code>NA</code> at first, then with zeros.</li>
-<li>Other nonignorable <code>NA</code>s in the joined target will be imputed by missForest (name of the original method used; actually using <code>missRanger</code> package for efficiency).</li>
-</ul>
-</div>
-<div class="section level3">
-<h3 id="autojoin-functions">Autojoin functions<a class="anchor" aria-label="anchor" href="#autojoin-functions"></a>
-</h3>
-<p>Automatic join function <code>post_calc_autojoin</code> is one of the most complex function in <code>beethoven</code> codebase, which encapsulates the efforts to resolve all sorts of space-time discrepancies across targets. Full and coarse site-date combinations and full and coarse site-year combinations are automatically resolved in the function. The coarse site-year combination is a challenge since some years are out of the study period and such <em>anchor</em> years should be repeated to fill in for no gaps in the joined data. Another <code>post_calc_df_year_expand</code> and its upstream <code>post_calc_year_expand</code> function repeat coarse site-year <code>data.frame</code>s properly to ensure that there will be no years with missing values.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">post_calc_autojoin</span> <span class="op">&lt;-</span></span>
-<span>  <span class="kw">function</span><span class="op">(</span></span>
-<span>    <span class="va">df_fine</span>,</span>
-<span>    <span class="va">df_coarse</span>,</span>
-<span>    <span class="va">field_sp</span> <span class="op">=</span> <span class="st">"site_id"</span>,</span>
-<span>    <span class="va">field_t</span> <span class="op">=</span> <span class="st">"time"</span>,</span>
-<span>    <span class="va">year_start</span> <span class="op">=</span> <span class="fl">2018L</span>,</span>
-<span>    <span class="va">year_end</span> <span class="op">=</span> <span class="fl">2022L</span></span>
-<span>  <span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="co"># Dataset specific preprocessing</span></span>
-<span>    <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/any.html" class="external-link">any</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"population"</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">df_coarse</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>      <span class="va">df_coarse</span> <span class="op">&lt;-</span> <span class="va">df_coarse</span><span class="op">[</span>, <span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"time"</span><span class="op">)</span>, with <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span></span>
-<span>    <span class="op">}</span></span>
-<span></span>
-<span>    <span class="co"># Detect common field names</span></span>
-<span>    <span class="va">common_field</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sets.html" class="external-link">intersect</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">df_fine</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">df_coarse</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span>    <span class="co"># Clean inputs to retain necessary fields</span></span>
-<span>    <span class="va">df_fine</span> <span class="op">&lt;-</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/data.table/man/as.data.table.html" class="external-link">as.data.table</a></span><span class="op">(</span><span class="va">df_fine</span><span class="op">)</span></span>
-<span>    <span class="va">df_coarse</span> <span class="op">&lt;-</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/data.table/man/as.data.table.html" class="external-link">as.data.table</a></span><span class="op">(</span><span class="va">df_coarse</span><span class="op">)</span></span>
-<span>    <span class="va">df_fine</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/post_calc_drop_cols.html">post_calc_drop_cols</a></span><span class="op">(</span><span class="va">df_fine</span><span class="op">)</span></span>
-<span>    <span class="va">df_coarse</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/post_calc_drop_cols.html">post_calc_drop_cols</a></span><span class="op">(</span><span class="va">df_coarse</span><span class="op">)</span></span>
-<span></span>
-<span>    <span class="co"># Take strategy depending on the length of common field names</span></span>
-<span>    <span class="co"># Length 1 means that `site_id` is the only intersecting field</span></span>
-<span>    <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">common_field</span><span class="op">)</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="op">{</span></span>
-<span>      <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">common_field</span><span class="op">)</span></span>
-<span>      <span class="kw">if</span> <span class="op">(</span><span class="va">common_field</span> <span class="op">==</span> <span class="va">field_sp</span><span class="op">)</span> <span class="op">{</span></span>
-<span>        <span class="va">joined</span> <span class="op">&lt;-</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/data.table/man/merge.html" class="external-link">merge.data.table</a></span><span class="op">(</span></span>
-<span>          <span class="va">df_fine</span>, <span class="va">df_coarse</span>,</span>
-<span>          by <span class="op">=</span> <span class="va">field_sp</span>,</span>
-<span>          all.x <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span>        <span class="op">)</span></span>
-<span>      <span class="op">}</span></span>
-<span>    <span class="op">}</span></span>
-<span>    <span class="co"># When space-time join is requested,</span></span>
-<span>    <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">common_field</span><span class="op">)</span> <span class="op">==</span> <span class="fl">2</span><span class="op">)</span> <span class="op">{</span></span>
-<span>      <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="va">common_field</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">field_sp</span>, <span class="va">field_t</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>        <span class="co"># Type check to characters</span></span>
-<span>        <span class="va">df_fine</span><span class="op">[[</span><span class="va">field_t</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">df_fine</span><span class="op">[[</span><span class="va">field_t</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
-<span>        <span class="va">df_coarse</span><span class="op">[[</span><span class="va">field_t</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">df_coarse</span><span class="op">[[</span><span class="va">field_t</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
-<span>        </span>
-<span>        <span class="co"># When `time` field contains years, `as.Date` call will return error(s)</span></span>
-<span>        <span class="va">t_coarse</span> <span class="op">&lt;-</span> <span class="kw"><a href="https://rdrr.io/r/base/try.html" class="external-link">try</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="va">df_coarse</span><span class="op">[[</span><span class="va">field_t</span><span class="op">]</span><span class="op">]</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
-<span>        <span class="co"># If an error is detected, print information</span></span>
-<span>        <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">inherits</a></span><span class="op">(</span><span class="va">t_coarse</span>, <span class="st">"try-error"</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>          <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span></span>
-<span>            <span class="st">"The time field includes years. Trying different join strategy."</span></span>
-<span>          <span class="op">)</span></span>
-<span>          <span class="va">coarse_years</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">df_coarse</span><span class="op">[[</span><span class="va">field_t</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span>          </span>
-<span>          <span class="co"># coarse site-year combination is expanded</span></span>
-<span>          <span class="va">df_coarse2</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/post_calc_df_year_expand.html">post_calc_df_year_expand</a></span><span class="op">(</span></span>
-<span>            <span class="va">df_coarse</span>,</span>
-<span>            time_start <span class="op">=</span> <span class="va">year_start</span>,</span>
-<span>            time_end <span class="op">=</span> <span class="va">year_end</span>,</span>
-<span>            time_available <span class="op">=</span> <span class="va">coarse_years</span></span>
-<span>          <span class="op">)</span></span>
-<span>          <span class="va">joined</span> <span class="op">&lt;-</span></span>
-<span>            <span class="fu"><a href="reference/post_calc_join_yeardate.html">post_calc_join_yeardate</a></span><span class="op">(</span><span class="va">df_coarse2</span>, <span class="va">df_fine</span>, <span class="va">field_t</span>, <span class="va">field_t</span><span class="op">)</span></span>
-<span>        <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
-<span>          <span class="co"># site-date combination data.frames are joined as they are regardless of coarseness</span></span>
-<span>          <span class="co"># Left join is enforced</span></span>
-<span>          <span class="va">joined</span> <span class="op">&lt;-</span> <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/data.table/man/merge.html" class="external-link">merge.data.table</a></span><span class="op">(</span></span>
-<span>            <span class="va">df_fine</span>, <span class="va">df_coarse</span>,</span>
-<span>            by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">field_sp</span>, <span class="va">field_t</span><span class="op">)</span>,</span>
-<span>            all.x <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span>          <span class="op">)</span></span>
-<span>        <span class="op">}</span></span>
-<span>      <span class="op">}</span></span>
-<span>    <span class="op">}</span></span>
-<span>    <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">joined</span><span class="op">)</span></span>
-<span>  <span class="op">}</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="imputation">Imputation<a class="anchor" aria-label="anchor" href="#imputation"></a>
-</h3>
-<p>The calculated features contain a fair amount of <code>NA</code> or <code>NaN</code>s depending on the raw dataset. We distinguish these into “true zeros” and “true missing” for the subsequent imputation process. For imputation, <code>missRanger</code> is used. The <code>missRanger</code> arguments can be adjusted in the <code><a href="reference/impute_all.html">impute_all()</a></code> function.</p>
-<ul>
-<li><p>True zeros: TRI features include many <code>NA</code>s as the raw data is a long <code>data.frame</code> with source location-chemicals pair keys. This structure requires long-to-wide pivoting, resulting in a sparse <code>data.frame</code> with <code>NA</code>s where no chemicals were reported in certain locations. Therefore, these <code>NA</code>s are considered true zeros.</p></li>
-<li><p>Missing: daily satellite-derived features except for the 16-day NDVI are considered to include missing values. Such missing values are mainly coming from intermittent data transmission disruption or planned maintenance. <code>NA</code>s in the 16-day NDVI field are filled by the “last observation carried forward” principle. <code>NaN</code> values in others are replaced with <code>NA</code> and put into the imputation function.</p></li>
-</ul>
-</div>
-</div>
-<div class="section level2">
-<h2 id="base-learners">Base learners<a class="anchor" aria-label="anchor" href="#base-learners"></a>
-</h2>
-<p>For efficiency, GPU-enabled version is recommended for <code>xgboost</code>/<code>lightgbm</code> and <code>brulee</code>. These packages need to be installed manually with modifications of system environment variables. Developers should consult <code>lightgbm</code> official documentation for building the package by hand, <code>xgboost</code> GitHub repository release page for installing the CUDA version manually and <code>brulee</code> GitHub repository (i.e., in <code>gpu</code> branch) to install the proper version of each package with careful consideration on the computing infrastructure. “GPU” here refers to CUDA-enabled devices produced by NVIDIA corporation. This does not necessarily mean that this package as a part of U.S. government work endorses NVIDIA corporation and its products in any sort.</p>
-<blockquote>
-<p>[!WARNING] As of version 0.3.10, <code>xgboost</code> &lt; v2.1.0 should be used due to breaking changes in v2.1.0 in handling additional arguments in <code>xgb.DMatrix</code> (cf. <a href="https://github.com/dmlc/xgboost/pull/9862" class="external-link">xgboost pull record</a>), which leads to break <code><a href="https://parsnip.tidymodels.org/reference/boost_tree.html" class="external-link">parsnip::boost_tree()</a></code> function call.</p>
-</blockquote>
-<div class="section level3">
-<h3 id="tidymodels-infrastructure">tidymodels infrastructure<a class="anchor" aria-label="anchor" href="#tidymodels-infrastructure"></a>
-</h3>
-<p>We want to actively adopt evolving packages in the <code>tidymodels</code> ecosystem while keeping as minimal dependency tree as possible. In this package, major <code>tidymodels</code> packages that are used in base and meta learners include–</p>
-<ul>
-<li><code>parsnip</code></li>
-<li><code>recipe</code></li>
-<li><code>rsample</code></li>
-<li><code>spatialsample</code></li>
-<li><code>tune</code></li>
-<li><code>workflow</code></li>
-</ul>
-</div>
-<div class="section level3">
-<h3 id="branching">Branching<a class="anchor" aria-label="anchor" href="#branching"></a>
-</h3>
-<p>With rigorous branching, we maintain the base learner fitting targets as one node with 900 branches, which include <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="monospace">𝟹 (𝚋𝚊𝚜𝚎 𝚕𝚎𝚊𝚛𝚗𝚎𝚛𝚜)</mtext><mo>×</mo><mi>t</mi><mi>e</mi><mi>x</mi><mi>t</mi><mi>t</mi><mi>t</mi><mrow><mn>3</mn><mrow><mo stretchy="true" form="prefix">(</mo><mi>C</mi><mi>V</mi><mi>s</mi><mi>t</mi><mi>r</mi><mi>a</mi><mi>t</mi><mi>e</mi><mi>g</mi><mi>i</mi><mi>e</mi><mi>s</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mo>×</mo><mtext mathvariant="monospace">𝟷𝟶𝟶 𝚛𝚎𝚜𝚊𝚖𝚙𝚕𝚎𝚜</mtext></mrow><annotation encoding="application/x-tex">\texttt{3 (base learners)}\times
-texttt{3 (CV strategies)}\times \texttt{100 resamples}</annotation></semantics></math>. LightGBM and multilayer perceptron models are running on GPUs, while elastic net models are fit on CPUs.</p>
-</div>
-<div class="section level3">
-<h3 id="cross-validation">Cross validation<a class="anchor" aria-label="anchor" href="#cross-validation"></a>
-</h3>
-<p>Due to <code>rsample</code> design, each cross-validation fold will include an <strong>actual</strong> <code>data.frame</code> (<code>tibble</code>) object. It has own good for self-contained modeling practices that easily guarantee reproducibility, however, it also has limitations when used with large data and <code>targets</code> pipeline as <code>targets</code> <strong>stores</strong> such objects in disk space. Such characteristics lead to inflate the disk space for base and meta learner training. Ten-fold cross-validation sets from 900K<em>3.2K <code>data.frame</code> take <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>9</mn><mtext mathvariant="monospace">𝙼</mtext><mo>×</mo><mn>3.2</mn><mtext mathvariant="monospace">𝙺</mtext><mo>×</mo><mn>8</mn><mtext mathvariant="monospace">𝚋𝚢𝚝𝚎𝚜</mtext></mrow><annotation encoding="application/x-tex">9\texttt{M} \times 3.2\texttt{K} \times 8\texttt{bytes}</annotation></semantics></math>=230GB. Randomization schemes for model ensemble will increase that size to 10 times and more, which is equivalent to 2.3TB and more when uncompressed. The current development version modifies the original <code>rsample</code>’s <code>rset</code> design to store </em>row indices* of the joined <code>data.frame</code> target to reduce data size in disk.</p>
-<div class="section level4">
-<h4 id="use-rset-object-in-the-last-resort">Use <code>rset</code> object in the last resort<a class="anchor" aria-label="anchor" href="#use-rset-object-in-the-last-resort"></a>
-</h4>
-<p><code>rset</code> object is a powerful tool to ensure that all cross-validation sets “flow” through the modeling process, but has a limitation in large-scale modeling with <code>target</code>: storage issues. When one stores <code>rset</code> objects in the pipeline even with a mild randomization (e.g., 30% row sampling in the base learner step in <code>beethoven</code> pipeline), the total disk space required to keep <code>rset</code> object easily exceed several times of the original <code>data.frame</code> object. Thus, we prefer to keep <em>row indices</em> to restore <code>rset</code> object <em>inside</em> each base learner fitting function. Row indices here are derived from the row subsamples for base learners. <code>targets</code> will only store row indices bound with each subsample, such that the total usage of storage will be reduced significantly. Besides the disk space concerns, it has its own good to reduce the overhead or I/O for compressing massive <code>data.frame</code> (actually, <code>tibble</code>) objects.</p>
-<ul>
-<li>
-<code>restore_*</code> functions restore <code>rset</code> object from row indices and their upstream <code>data.frame</code>
-</li>
-<li>
-<code>generate_*</code> functions generate row indices from input <code>data.frame</code> by the user-defined cross-validation strategy.</li>
-</ul>
-<p><code><a href="reference/fit_base_learner.html">fit_base_learner()</a></code> is a quite long and versatile function that accepts a dozen arguments, therefore developers should be aware of each component in the function. The current implementation separated <code>parsnip</code> and <code>tune</code> parts from <code><a href="reference/fit_base_learner.html">fit_base_learner()</a></code>. The flowchart of <code><a href="reference/fit_base_learner.html">fit_base_learner()</a></code> is displayed below.</p>
-<pre class="mermaid"><code>graph TD
-    %% Define the target files as nodes
-    frecipe["minimal data"]
-    fittune["tuning results"]
-    fmodel["parsnip model definition"]
-    ftune["tuning functions"]
-    bestmodel["best model from tuning"]
-    bestworkflow["workflow of the best model"]
-    fitmodel["fitted best model with full data"]
-    bestfit["predicted values from one base learner"]
-
-
-    %% Define the branches with arrowhead connections
-    frecipe ---|recipes::recipe()| fittune
-    fmodel ---|`switch_model()`| fittune
-    ftune ---|`tune_*()`| fittune
-    fittune ---|tune::select_best()| bestmodel
-    bestmodel ---|tune::finalize_workflow()| bestworkflow
-    bestworkflow ---|parsnip::fit()| fitmodel
-    fitmodel ---|predict()| bestfit</code></pre>
-</div>
-</div>
-</div>
+<p>The <a href="https://github.com/NIEHS/beethoven/tree/main/inst/targets#developers-guide" class="external-link">Developer’s Guide</a> provides detailed instructions for how to develop or update <code>beethoven</code> settings or individual <code>targets</code> objecdts</p>
+<p>To contribute developments or modifications, open a <a href="https://github.com/NIEHS/beethoven/pulls" class="external-link">Pull request</a> into the <code>dev</code> branch with a detailed description of the proposed changes. Pull requests must pass all status checks, and then will be approved or rejected by <code>beethoven</code>’s authors.</p>
+<p>Utilize <a href="https://github.com/NIEHS/beethoven/issues" class="external-link">Issues</a> to notify the authors of bugs, questions, or recommendations. Identify each issue with the appropriate label to help ensure a timely response.</p>
 </div>
 
   </main><aside class="col-md-3"><div class="links">

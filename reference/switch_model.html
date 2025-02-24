@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">beethoven</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -29,7 +29,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Define a base learner model based on parsnip and tune</h1>
-      <small class="dont-index">Source: <a href="https://github.com/NIEHS/beethoven/blob/main/R/base_learner.R" class="external-link"><code>R/base_learner.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/NIEHS/beethoven/blob/dev/R/base_learner.R" class="external-link"><code>R/base_learner.R</code></a></small>
       <div class="d-none name"><code>switch_model.Rd</code></div>
     </div>
 
@@ -41,8 +41,7 @@
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">switch_model</span><span class="op">(</span></span>
 <span>  model_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mlp"</span>, <span class="st">"xgb"</span>, <span class="st">"lgb"</span>, <span class="st">"elnet"</span><span class="op">)</span>,</span>
-<span>  learn_rate <span class="op">=</span> <span class="fl">0.1</span>,</span>
-<span>  device <span class="op">=</span> <span class="st">"cuda:0"</span></span>
+<span>  device <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cpu"</span>, <span class="st">"cuda"</span>, <span class="st">"gpu"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -55,15 +54,13 @@
 Default is "mlp". Available options are "mlp", "xgb", "lgb", "elnet".</p></dd>
 
 
-<dt id="arg-learn-rate">learn_rate<a class="anchor" aria-label="anchor" href="#arg-learn-rate"></a></dt>
-<dd><p>numeric(1). The learning rate for the model.
-Default is 0.1.</p></dd>
-
-
 <dt id="arg-device">device<a class="anchor" aria-label="anchor" href="#arg-device"></a></dt>
 <dd><p>character(1). The device to be used for training.
-Default is "cuda:0". Make sure that your system is equipped
-with CUDA-enabled graphical processing units.</p></dd>
+GPU acceleration is possible for <code>brulee</code>-engine multi-layer
+perceptron (<code>model_type = "mlp"</code>;<code>device = "cuda"</code>) and for <code>lightgbm</code>-engine
+boosted tree (<code>model_type = "lgb"; device = "gpu"</code>). Ensure your system is
+equipped with CUDA-enabled graphical processing units if utilizing <code>cuda</code> or
+<code>gpu</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
