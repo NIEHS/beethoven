@@ -26,7 +26,7 @@ Imports:
   targets,
   tune (>= 1.2.1),
   rlang,
-  parsnip (1.2.1.9004),
+  parsnip,
   rsample,
   spatialsample,
   tidyr,
