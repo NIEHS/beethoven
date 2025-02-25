@@ -685,13 +685,14 @@ attach_xy <-
 #' @importFrom dplyr left_join select
 #' @importFrom magrittr %>%
 #' @importFrom spatialsample spatial_block_cv
+#' @importFrom lubridate year week
 #' @seealso [`spatialsample::spatial_block_cv`]
 #' @export
 generate_cv_index_spt <- function(
   data,
   locs_id = "site_id",
   coords = c("lon", "lat"),
-  v = 5L,
+  v = 10L,
   time_id = "time",
   ...
 ) {
@@ -755,41 +756,40 @@ generate_cv_index_spt <- function(
   data_sp[[time_id]] <- as.Date(data_sp[[time_id]])
   data_sp$cv <- as.integer(data_sp$cv)
 
-  # # unique time points
-  # time_vec <- sort(unique(data_sp[[time_id]]))
   # unique spatial indices
   sp_indices <- sort(unique(data_sp$cv))
 
-  # identify number of years and temporal folds
-  year_vec_split <- sort(unique(substr(data_sp[[time_id]], 1, 4)))
-  t_fold <- as.integer(length(year_vec_split))
-  time_vec_split <- as.Date(paste0(year_vec_split, "-01-01"))
-  time_vec_split <- c(
-    time_vec_split,
-    as.Date(paste0(as.numeric(max(year_vec_split)) + 1, "-01-01"))
+  # identify site's unique year + week combination
+  data_sp$yw <- paste0(
+    lubridate::year(data_sp[[time_id]]),
+    sprintf("%02d", lubridate::week(data_sp[[time_id]]))
+  )
+  # randomize unique year + week combinations
+  yearweek_random <- sample(unique(data_sp$yw))
+  # Split into ~equal sized chunks
+  yearweek_split <- split(
+    yearweek_random,
+    cut(seq_along(yearweek_random), v, labels = FALSE)
   )
 
-  stopifnot(length(time_vec_split) == t_fold + 1)
-  stopifnot(class(time_vec_split) == class(data_sp[[time_id]]))
+  # since both based on v, they should have the same length
+  stopifnot(length(yearweek_split) == length(sp_indices))
 
   # list to store temporal cv index
   spt_index_list <- list()
 
-  for (i in seq_along(sp_indices)) {
-    for (j in seq(t_fold)) {
-      # test data are within spatial fold `i` and time fold `j`
-      out_id <- which(
-        data_sp[[time_id]] >= time_vec_split[j] &
-          data_sp[[time_id]] < time_vec_split[j + 1] &
-          data_sp$cv == sp_indices[i]
-      )
-      # training data are all other data
-      in_id <- setdiff(seq_len(nrow(data_sp)), out_id)
-      spt_index_list <- c(
-        spt_index_list,
-        list(list(analysis = in_id, assessment = out_id))
-      )
-    }
+  for (i in seq(v)) {
+    # test data are within spatial and temporal fold `i`
+    out_id <- which(
+      data_sp$cv == sp_indices[i] &
+        data_sp$yw %in% yearweek_split[[i]]
+    )
+    # training data are all other data
+    in_id <- setdiff(seq_len(nrow(data_sp)), out_id)
+    spt_index_list <- c(
+      spt_index_list,
+      list(list(analysis = in_id, assessment = out_id))
+    )
   }
 
   return(spt_index_list)

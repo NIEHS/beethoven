@@ -9,7 +9,7 @@ generate_cv_index_spt(
   data,
   locs_id = "site_id",
   coords = c("lon", "lat"),
-  v = 5L,
+  v = 10L,
   time_id = "time",
   ...
 )

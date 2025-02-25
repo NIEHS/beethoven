@@ -18,14 +18,14 @@ target_baselearner <-
           hidden_units = 512,
           dropout = 0.3,
           activation = "relu",
-          learn_rate = 0.001
+          learn_rate = 0.0001
         ),
         elnet = expand.grid(
           mixture = 0.5,
           penalty = 0.01
         ),
         lgb = expand.grid(
-          mtry = 0.75,
+          mtry = floor(0.75 * (ncol(dt_feat_calc_xyt) - 4)),
           trees = 500,
           learn_rate = 0.05
         )
@@ -63,10 +63,10 @@ target_baselearner <-
         tune_grid_size = 1L,
         yvar = "Arithmetic.Mean",
         xvar = seq(5, ncol(dt_feat_calc_xyt)),
-        nthreads = 2L,
-        trim_resamples = FALSE,
+        nthreads = 1L,
+        trim_resamples = TRUE,
         return_best = TRUE,
-        cv_rep = 5L
+        cv_rep = 100L
       ),
       description = "Static parameters | base learner"
     )
@@ -80,6 +80,7 @@ target_baselearner_cpu <-
       df_learner_type_cpu,
       command = beethoven::assign_learner_cv(
         learner = c("elnet", "lgb"),
+        ##### NOTE: {elnet} max ~14.8 Gb memory, {lgb} max ~13.2 Gb memory.
         cv_mode = "spatiotemporal",
         cv_rep = list_base_params_static$cv_rep,
         num_device = 1L
@@ -113,7 +114,7 @@ target_baselearner_cpu <-
       pattern = map(df_learner_type_cpu),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_10")
+        crew = targets::tar_resources_crew(controller = "controller_50")
       ),
       description = "Fit base learner | cpu | base learner"
     )
