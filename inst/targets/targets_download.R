@@ -77,6 +77,13 @@ target_download <-
     )
     ,
     targets::tar_target(
+      chr_iter_calc_narr_lag,
+      command = c(
+        "air.sfc", "apcp", "pres.sfc", "shum", "uwnd.10m", "vwnd.10m"
+      ),
+      description = "NARR features | lag"
+    )
+    targets::tar_target(
       download_narr,
       command = amadeus::download_narr(
         variables = chr_iter_calc_narr,
@@ -92,9 +99,24 @@ target_download <-
     )
     ,
     targets::tar_target(
+      download_narr_lag,
+      command = amadeus::download_narr(
+        variables = chr_iter_calc_narr_lag,
+        directory_to_save = file.path(chr_input_dir, "narr"),
+        year = chr_years[1] - 1,
+        remove_command = list_download_args$remove_command,
+        acknowledgement = list_download_args$acknowledgement,
+        download = list_download_args$download,
+        hash = list_download_args$hash
+      ),
+      pattern = cross(chr_iter_calc_narr_lag),
+      description = "Download NARR data | lag | download"
+    )
+    targets::tar_target(
       download_narr_buffer,
       command = {
         download_narr
+        download_narr_lag
         TRUE
       },
       description = "Download NARR data | buffer | download"

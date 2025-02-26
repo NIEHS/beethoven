@@ -24,8 +24,9 @@ queue <- function() {
   system("squeue -u $USER")
 }
 
-cancel <- function() {
-  system("scancel -u $USER")
+cancel <- function(job = NULL) {
+  stopifnot(!is.null(job))
+  system(paste0("scancel ", job))
 }
 
 batch <- function(file = "run.sh") {
