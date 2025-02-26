@@ -37,7 +37,6 @@
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
-#       nthreads = 1,
 #       trim_resamples = FALSE,
 #       return_best = TRUE
 #     )
@@ -71,7 +70,6 @@
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
-#       nthreads = 1,
 #       trim_resamples = FALSE,
 #       return_best = TRUE
 #     )
@@ -105,7 +103,6 @@
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
-#       nthreads = 1,
 #       trim_resamples = FALSE,
 #       return_best = TRUE
 #     )
@@ -153,7 +150,6 @@
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
-#       nthreads = 1,
 #       trim_resamples = FALSE,
 #       return_best = TRUE
 #     )
@@ -186,7 +182,6 @@
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
-#       nthreads = 1,
 #       trim_resamples = FALSE,
 #       return_best = TRUE
 #     )
@@ -219,7 +214,6 @@
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
-#       nthreads = 1,
 #       trim_resamples = FALSE,
 #       return_best = TRUE
 #     )
@@ -280,7 +274,6 @@
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
-#       nthreads = 1,
 #       trim_resamples = FALSE,
 #       return_best = TRUE
 #     )
@@ -320,7 +313,6 @@
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
-#       nthreads = 1,
 #       trim_resamples = FALSE,
 #       return_best = TRUE
 #     )
@@ -356,7 +348,6 @@
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
-#       nthreads = 1,
 #       trim_resamples = FALSE,
 #       return_best = TRUE
 #     )
@@ -410,7 +401,6 @@
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
-#       nthreads = 1,
 #       trim_resamples = FALSE,
 #       return_best = TRUE
 #     )
@@ -449,7 +439,6 @@
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
-#       nthreads = 1,
 #       trim_resamples = FALSE,
 #       return_best = TRUE
 #     )
@@ -484,7 +473,6 @@
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
-#       nthreads = 1,
 #       trim_resamples = TRUE, # trim samples
 #       return_best = TRUE
 #     )
