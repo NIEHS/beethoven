@@ -6,26 +6,49 @@
 \usage{
 fit_meta_learner(
   data,
-  p_col_sel = 0.5,
-  rset = NULL,
+  c_subsample = 0.5,
+  r_subsample = 1,
   yvar = "Arithmetic.Mean",
-  xvar = character(0),
-  tune_iter = 50L
+  target_cols = c("site_id", "time", "lon", "lat", "Event.Type"),
+  args_generate_cv = list(),
+  tune_iter = 50L,
+  trim_resamples = FALSE,
+  return_best = TRUE,
+  metric = "rmse"
 )
 }
 \arguments{
-\item{data}{data.frame. Full data.}
+\item{data}{data.frame. Full data.frame of base learner predictions and AQS
+spatiotemporal identifiers. \code{\link{attach_pred}}.}
 
-\item{p_col_sel}{numeric(1). Rate of column resampling. Default is 0.5.}
+\item{c_subsample}{numeric(1). Rate of column resampling. Default is 0.5.}
 
-\item{rset}{rset object. Specification of training/test sets.}
+\item{r_subsample}{numeric(1). The proportion of rows to be used. Default is
+1.0, which uses full dataset but setting is required to balance groups
+generated with \code{\link{make_subdata}}}
 
 \item{yvar}{character(1). Outcome variable name}
 
-\item{xvar}{character. Feature names.}
+\item{target_cols}{characters(1). Columns from \code{data} to be retained during
+column resampling. Default is c("site_id", "time", "Event.Type", "lon",
+"lat").}
+
+\item{args_generate_cv}{List of arguments to be passed to
+\code{switch_generate_cv_rset} function.}
 
 \item{tune_iter}{integer(1). Bayesian optimization iterations.
 Default is 50.}
+
+\item{trim_resamples}{logical(1). Default is TRUE, which replaces the actual
+data.frames in splits column of \code{tune_results} object with NA.
+Passed to \code{\link{fit_base_tune}}.}
+
+\item{return_best}{logical(1). If TRUE, the best tuned model is returned.
+Passed to \code{\link{fit_base_tune}}.}
+
+\item{metric}{character(1). The metric to be used for selecting the best.
+Must be one of "rmse", "rsq", "mae". Default = "rmse".
+Passed to \code{\link{fit_base_tune}}.}
 }
 \value{
 List of 3, including the best-fit model, the best hyperparameters,
@@ -35,9 +58,11 @@ not predicted values.
 }
 \description{
 This function subsets the full data by column subsamples (rate=50\%)
-The optimal hyperparameter search is performed based on spatial,
-temporal, and spatiotemporal cross-validation schemes.
-As of version 0.4.0, the function relies on RMSE to select the
-best hyperparameter set.
+The optimal hyperparameter search is performed based on spatiotemporal
+cross-validation schemes. As of version 0.4.5, users can define metric
+used for selecting best hyperparameter set (default = "rmse").
+}
+\seealso{
+\code{\link{fit_base_tune}} \code{\link{make_subdata}}
 }
 \keyword{meta_learner}

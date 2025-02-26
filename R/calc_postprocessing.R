@@ -760,3 +760,180 @@ append_predecessors <-
       return(bound_large)
     }
   }
+
+
+#' Perform Principal Component Analysis
+#' @keywords internal
+#' @param data data.frame or data.table
+#' @param num_comp integer(1). The number of components to retain as new
+#' predictors. If `threshold` is defined, `num_comp` will be overridden.
+#' @param threshold numeric(1). A fraction of the total variance that should
+#' be covered by the components.
+#' @param kernel logical(1). Whether to use a kernel PCA with
+#' [`recipes::step_kpca()`]. Default is `FALSE`.
+#' @seealso [`recipes::step_pca()`] [`recipes::step_kpca()`]
+#' @importFrom recipes recipe bake prep step_normalize step_pca step_kpca
+#' @importFrom magrittr %>%
+#' @return data.table with Principal Components sufficient to satisfy the
+#' `threshold`.`
+#' @export
+reduce_pca <- function(
+  data,
+  num_comp = 5,
+  threshold = NA,
+  kernel = FALSE
+) {
+
+  stopifnot(inherits(data, "data.frame"))
+  stopifnot(is.numeric(num_comp))
+
+  data_rec <- recipes::recipe(~., data = data)
+  data_pca <- data_rec %>%
+    recipes::step_normalize(recipes::all_numeric())
+
+  if (kernel) {
+    data_pca <- data_pca  %>%
+      recipes::step_kpca(
+        recipes::all_numeric(),
+        num_comp = num_comp
+      )
+  } else {
+    data_pca <- data_pca  %>%
+      recipes::step_pca(
+        recipes::all_numeric(),
+        threshold = threshold,
+        num_comp = num_comp
+      )
+  }
+
+  data_prep <- recipes::prep(data_pca, data = data)
+  data_pca <- recipes::bake(data_prep, new_data = data)
+
+  return(data_pca)
+}
+
+#' Post-calculation Principal Component Analysis
+#' @keywords Post-calculation
+#' @description This function performs PCA on the input data frame to reduce
+#' number of predictors.
+#' @param data data.frame or data.table
+#' @param locs_id The column name in the spatial object that represents the
+#'   location identifier.
+#' @param time_id The column name in the data frame that represents the time
+#'   identifier.
+#' @param yvar The target variable.
+#' @param coords The column names that represent the XY coordinates. Default
+#' is `c("lon", "lat")`.
+#' @param num_comp integer(1). The number of components to retain as new
+#' predictors.  If `threshold` is defined, `num_comp` will be overridden.
+#' @param threshold numeric(1). A fraction of the total variance that should
+#' be covered by the components.
+#' @param pattern character(1). A regular expression pattern to match the
+#' columns that should be included in the PCA.
+#' @param groups character. A character vector of groups to perform PCA on.
+#' Each character should be a regular expression pattern to match the columns
+#' that should be included in the PCA. Default is `NULL`.
+#' @param prefix character(1). A prefix to be added to the column names of the
+#' Principal Components. Default is `NULL`.
+#' @param kernel logical(1). Whether to use a kernel PCA with
+#' [`recipes::step_kpca()`]. Default is `FALSE`.
+#' @note  If `threshold` is defined, `num_comp` will be overridden.
+#' @seealso [`reduce_pca()`] [`recipes::step_pca()`] [`recipes::step_kpca()`]
+#' @importFrom data.table data.table
+#' @return data.table with Principal Components sufficient to satisfy the
+#' `threshold`, merged with `*_id` and `yvar` columns from original `data`.
+#' @export
+post_calc_pca <- function(
+  data,
+  locs_id = "site_id",
+  time_id = "time",
+  yvar = "Arithmetic.Mean",
+  coords = c("lon", "lat"),
+  num_comp = 5,
+  threshold = NA,
+  pattern = "FUGITIVE|STACK",
+  groups = NULL,
+  prefix = "PCA",
+  kernel = FALSE
+) {
+
+  data <- data.table::data.table(data)
+  chr_retaincols <- c(locs_id, time_id, yvar, coords)
+  data_trim <- data[, chr_retaincols, with = FALSE]
+
+  data_pca <- data[
+    , grep(pattern, names(data)), with = FALSE
+  ]
+
+  if (is.null(groups)) {
+    return_pca <- beethoven::reduce_pca(
+      data = data_pca,
+      threshold = threshold,
+      num_comp = num_comp,
+      kernel = kernel
+    )
+    names(return_pca) <- paste0(prefix, "_", names(return_pca))
+  } else {
+    list_pca <- list()
+    for (g in seq_along(groups)) {
+      data_group <- data_pca[
+        , grep(groups[g], names(data_pca)), with = FALSE
+      ]
+      group_pca <- beethoven::reduce_pca(
+        data = data_group,
+        threshold = threshold,
+        num_comp = num_comp,
+        kernel = kernel
+      )
+      names(group_pca) <- paste0(
+        prefix, "_", names(group_pca), "_", groups[g]
+      )
+      list_pca <- c(list_pca, group_pca)
+    }
+    return_pca <- do.call(cbind, list_pca)
+  }
+
+  stopifnot(nrow(data_trim) == nrow(return_pca))
+  data_return <- data.table::data.table(cbind(data_trim, return_pca))
+
+  return(data_return)
+
+}
+
+#' Post-calculation column renaming
+#' @keywords Post-calculation
+#' @description This function renames the columns of the input `data` based on
+#' the `prefix` and original column names.
+#' @param data data.frame(1)
+#' @param prefix character(1). The prefix to be added to the column names.
+#' @param skip character. The column names to be skipped from renaming.
+#' Default is `c("site_id", "time")`.
+#' @return data.frame with renamed columns.
+#' @export
+post_calc_cols <- function(
+  data,
+  prefix = NULL,
+  skip = c("site_id", "time")
+) {
+  stopifnot(inherits(data, "data.frame"))
+
+  chr_names <- names(data)
+  chr_edit <- chr_names[!chr_names %in% skip]
+
+  list_split <- strsplit(chr_edit, "_")
+  list_update <- lapply(
+    list_split,
+    function(x) {
+      paste0(
+        prefix,
+        toupper(x[[1]]),
+        "_",
+        sprintf("%05d", as.integer(x[[length(x)]]))
+      )
+    }
+  )
+  chr_update <- unlist(list_update)
+  names(data)[match(chr_edit, chr_names)] <- chr_update
+  return(data)
+
+}

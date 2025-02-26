@@ -527,3 +527,124 @@ testthat::test_that("append_predecessors", {
     beethoven::append_predecessors()
   )
 })
+
+################################################################################
+##### post_calc_pca
+testthat::test_that("post_calc_pca", {
+
+  dt_wide <- readRDS(
+    testthat::test_path("..", "testdata", "base", "dt_wide.rds")
+  )
+
+  # one PCA for all predictors | manual num_comp
+  testthat::expect_warning(
+    dt_pca1 <- beethoven::post_calc_pca(
+      data = dt_wide,
+      locs_id = "site_id",
+      time_id = "time",
+      yvar = "Arithmetic.Mean",
+      coords = c("lon", "lat"),
+      num_comp = 5,
+      threshold = NA,
+      pattern = "FUGITIVE|STACK",
+      prefix = "TRI"
+    )
+  )
+  testthat::expect_true("data.frame" %in% class(dt_pca1))
+  testthat::expect_equal(nrow(dt_wide), nrow(dt_pca1))
+  testthat::expect_equal(ncol(dt_pca1), 10)
+
+  # 3 PCA for grouped predictors | manual num_comp
+  testthat::expect_warning(
+    dt_pca2 <- beethoven::post_calc_pca(
+      data = dt_wide,
+      locs_id = "site_id",
+      time_id = "time",
+      yvar = "Arithmetic.Mean",
+      coords = c("lon", "lat"),
+      num_comp = 5,
+      threshold = NA,
+      pattern = "FUGITIVE|STACK",
+      groups = c("01000", "10000", "50000"),
+      prefix = "TRI"
+    )
+  )
+  testthat::expect_true("data.frame" %in% class(dt_pca2))
+  testthat::expect_equal(nrow(dt_wide), nrow(dt_pca2))
+  testthat::expect_equal(ncol(dt_pca2), 20)
+
+  # one PCA for all predictors | flexible threshold
+  testthat::expect_warning(
+    dt_pca3 <- beethoven::post_calc_pca(
+      data = dt_wide,
+      locs_id = "site_id",
+      time_id = "time",
+      yvar = "Arithmetic.Mean",
+      coords = c("lon", "lat"),
+      num_comp = 5,
+      threshold = .9,
+      pattern = "FUGITIVE|STACK",
+      prefix = "TRI"
+    )
+  )
+  testthat::expect_true("data.frame" %in% class(dt_pca3))
+  testthat::expect_equal(nrow(dt_wide), nrow(dt_pca3))
+
+  # 3 PCA for grouped predictors | flexible threshold
+  testthat::expect_warning(
+    dt_pca4 <- beethoven::post_calc_pca(
+      data = dt_wide,
+      locs_id = "site_id",
+      time_id = "time",
+      yvar = "Arithmetic.Mean",
+      coords = c("lon", "lat"),
+      num_comp = 5,
+      threshold = .9,
+      pattern = "FUGITIVE|STACK",
+      groups = c("01000", "10000", "50000"),
+      prefix = "TRI"
+    )
+  )
+  testthat::expect_true("data.frame" %in% class(dt_pca4))
+  testthat::expect_equal(nrow(dt_wide), nrow(dt_pca4))
+
+  # 3 PCA for grouped predictors | manual num_comp | kernel pca
+  testthat::expect_warning(
+    dt_pca5 <- beethoven::post_calc_pca(
+      data = dt_wide,
+      locs_id = "site_id",
+      time_id = "time",
+      yvar = "Arithmetic.Mean",
+      coords = c("lon", "lat"),
+      num_comp = 5,
+      threshold = NA,
+      pattern = "FUGITIVE|STACK",
+      groups = c("01000", "10000", "50000"),
+      prefix = "TRI",
+      kernel = TRUE
+    )
+  )
+  testthat::expect_true("data.frame" %in% class(dt_pca5))
+  testthat::expect_equal(nrow(dt_wide), nrow(dt_pca5))
+  testthat::expect_equal(ncol(dt_pca5), 20)
+
+})
+
+################################################################################
+##### post_calc_cols
+testthat::test_that("post_calc_cols", {
+  data <- data.frame(
+    site_id = sprintf("L%s", 1:3),
+    time = rep("2018-01-01", 3),
+    data_01000 = 1:3,
+    data_10000 = 4:6,
+    data_50000 = 7:9
+  )
+
+  testthat::expect_no_error(
+    data2 <- beethoven::post_calc_cols(data, "TEST_")
+  )
+  testthat::expect_identical(dim(data), dim(data2))
+  testthat::expect_true(any(grepl("TEST_", names(data2))))
+  testthat::expect_false(any(grepl("data_", names(data2))))
+})

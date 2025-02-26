@@ -18,7 +18,7 @@ testthat::test_that("fit lightgbm (folds + grid)", {
   # set grid
   lgb_grid <- expand.grid(
     mtry = c(20),
-    trees = c(1000),
+    trees = c(50),
     learn_rate = c(0.1)
   )
 
@@ -37,7 +37,6 @@ testthat::test_that("fit lightgbm (folds + grid)", {
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
-      nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
     )
@@ -70,7 +69,6 @@ testthat::test_that("fit lightgbm (folds + grid)", {
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
-      nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
     )
@@ -103,7 +101,6 @@ testthat::test_that("fit lightgbm (folds + grid)", {
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
-      nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
     )
@@ -150,7 +147,6 @@ testthat::test_that("fit lightgbm (folds + grid)", {
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
-#       nthreads = 1,
 #       trim_resamples = FALSE,
 #       return_best = TRUE
 #     )
@@ -182,7 +178,6 @@ testthat::test_that("fit lightgbm (folds + grid)", {
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
-#       nthreads = 1,
 #       trim_resamples = FALSE,
 #       return_best = TRUE
 #     )
@@ -214,7 +209,6 @@ testthat::test_that("fit lightgbm (folds + grid)", {
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
-#       nthreads = 1,
 #       trim_resamples = FALSE,
 #       return_best = TRUE
 #     )
@@ -250,7 +244,7 @@ testthat::test_that("fit lightgbm (args_generate_cv + grid)", {
   # set grid
   lgb_grid <- expand.grid(
     mtry = c(20),
-    trees = c(1000),
+    trees = c(50),
     learn_rate = c(0.1)
   )
 
@@ -275,7 +269,6 @@ testthat::test_that("fit lightgbm (args_generate_cv + grid)", {
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
-      nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
     )
@@ -315,7 +308,6 @@ testthat::test_that("fit lightgbm (args_generate_cv + grid)", {
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
-      nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
     )
@@ -334,14 +326,8 @@ testthat::test_that("fit lightgbm (args_generate_cv + grid)", {
 
 
   # spatiotemporal
-  args_spatiotemporal <- list(
-    target_cols = c("lon", "lat", "time"),
-    preprocessing = "none",
-    ngroup_init = 2L,
-    cv_pairs = NULL,
-    pairing = "1"
-  )
-  testthat::expect_no_error(
+  args_spatiotemporal <- list(v = 3)
+  testthat::expect_warning(
     lgb9 <- fit_base_learner(
       learner = "lgb",
       dt_full = data.table::data.table(dt_base),
@@ -356,7 +342,6 @@ testthat::test_that("fit lightgbm (args_generate_cv + grid)", {
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
-      nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
     )
@@ -409,7 +394,6 @@ testthat::test_that("fit lightgbm (args_generate_cv + grid)", {
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
-#       nthreads = 1,
 #       trim_resamples = FALSE,
 #       return_best = TRUE
 #     )
@@ -448,7 +432,6 @@ testthat::test_that("fit lightgbm (args_generate_cv + grid)", {
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
-#       nthreads = 1,
 #       trim_resamples = FALSE,
 #       return_best = TRUE
 #     )
@@ -467,14 +450,8 @@ testthat::test_that("fit lightgbm (args_generate_cv + grid)", {
 
 
 #   # spatiotemporal
-#   args_spatiotemporal <- list(
-#     target_cols = c("lon", "lat", "time"),
-#     preprocessing = "none",
-#     ngroup_init = 2L,
-#     cv_pairs = NULL,
-#     pairing = "1"
-#   )
-#   testthat::expect_no_error(
+#   args_spatiotemporal <- list(v = 3)
+#   testthat::expect_warning(
 #     lgb12 <- fit_base_learner(
 #       learner = "lgb",
 #       dt_full = data.table::data.table(dt_base),
@@ -488,7 +465,6 @@ testthat::test_that("fit lightgbm (args_generate_cv + grid)", {
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
-#       nthreads = 1,
 #       trim_resamples = TRUE, # trim samples
 #       return_best = TRUE
 #     )

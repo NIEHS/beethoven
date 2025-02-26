@@ -6,20 +6,19 @@
 \usage{
 switch_model(
   model_type = c("mlp", "xgb", "lgb", "elnet"),
-  learn_rate = 0.1,
-  device = "cuda:0"
+  device = c("cpu", "cuda", "gpu")
 )
 }
 \arguments{
 \item{model_type}{character(1). Model type to be used.
 Default is "mlp". Available options are "mlp", "xgb", "lgb", "elnet".}
 
-\item{learn_rate}{numeric(1). The learning rate for the model.
-Default is 0.1.}
-
 \item{device}{character(1). The device to be used for training.
-Default is "cuda:0". Make sure that your system is equipped
-with CUDA-enabled graphical processing units.}
+GPU acceleration is possible for \code{brulee}-engine multi-layer
+perceptron (\code{model_type = "mlp"};\code{device = "cuda"}) and for \code{lightgbm}-engine
+boosted tree (\verb{model_type = "lgb"; device = "gpu"}). Ensure your system is
+equipped with CUDA-enabled graphical processing units if utilizing \code{cuda} or
+\code{gpu}.}
 }
 \value{
 A parsnip model object.

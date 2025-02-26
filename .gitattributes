@@ -1,4 +1,1 @@
-*.csv filter=lfs diff=lfs merge=lfs -text
-*.nc filter=lfs diff=lfs merge=lfs -text
 input/** linguist-generated
-inst/extdata/aqs_88101_2022.qs filter=lfs diff=lfs merge=lfs -text

@@ -56,11 +56,12 @@ make_subdata <- function(
 #' @keywords Baselearner
 #' @param model_type character(1). Model type to be used.
 #'  Default is "mlp". Available options are "mlp", "xgb", "lgb", "elnet".
-#' @param learn_rate numeric(1). The learning rate for the model.
-#' Default is 0.1.
 #' @param device character(1). The device to be used for training.
-#' Default is "cuda:0". Make sure that your system is equipped
-#' with CUDA-enabled graphical processing units.
+#' GPU acceleration is possible for `brulee`-engine multi-layer
+#' perceptron (`model_type = "mlp"`;`device = "cuda"`) and for `lightgbm`-engine
+#' boosted tree (`model_type = "lgb"; device = "gpu"`). Ensure your system is
+#' equipped with CUDA-enabled graphical processing units if utilizing `cuda` or
+#' `gpu`.
 #' @return A parsnip model object.
 #' @importFrom parsnip mlp set_engine set_mode boost_tree linear_reg
 #' @importFrom magrittr %>%
@@ -68,17 +69,16 @@ make_subdata <- function(
 switch_model <-
   function(
     model_type = c("mlp", "xgb", "lgb", "elnet"),
-    learn_rate = 0.1,
-    device = "cuda:0"
+    device = c("cpu", "cuda", "gpu")
   ) {
-
+    device <- match.arg(device)
     switch(
       model_type,
       mlp =
         parsnip::mlp(
           hidden_units = parsnip::tune(),
           dropout = parsnip::tune(),
-          epochs = 500,
+          epochs = 1000,
           activation = parsnip::tune(),
           learn_rate = parsnip::tune()
         ) %>%
@@ -158,6 +158,7 @@ switch_model <-
 #'   Default is "mlp". Available options are "mlp", "xgb", "lgb", "elnet".
 #' @param dt_full The full data table to be used for prediction.
 #' @param r_subsample numeric(1). The proportion of rows to be used.
+#' @param c_subsample numeric(1). The proportion of predictors to be used.
 #' @param model The parsnip model object. Preferably generated from
 #'   `switch_model`.
 #' @param folds integer(1). Number of cross-validation folds.
@@ -180,9 +181,6 @@ switch_model <-
 #'   Default is 0.1.
 #' @param yvar The target variable.
 #' @param xvar The predictor variables.
-#' @param nthreads integer(1). The number of threads to be used for
-#'  tuning. Default is 8L. `learner = "elnet"` will utilize the multiple
-#'  threads in [future::multicore()] plan.
 #' @param trim_resamples logical(1). Default is TRUE, which replaces the actual
 #'   data.frames in splits column of `tune_results` object with NA.
 #' @param return_best logical(1). If TRUE, the best tuned model is returned.
@@ -205,6 +203,7 @@ fit_base_learner <-
     learner = c("mlp", "xgb", "lgb", "elnet"),
     dt_full,
     r_subsample = 0.3,
+    c_subsample = 1.0,
     model = NULL,
     folds = 5L,
     cv_mode  = c("spatiotemporal", "spatial", "temporal"),
@@ -215,8 +214,7 @@ fit_base_learner <-
     tune_grid_size = 10L,
     learn_rate = 0.1,
     yvar = "Arithmetic.Mean",
-    xvar = seq(5, ncol(dt_sample)),
-    nthreads = 8L,
+    xvar = seq(5, ncol(dt_full)),
     trim_resamples = FALSE,
     return_best = TRUE,
     metric = "rmse",
@@ -232,10 +230,35 @@ fit_base_learner <-
     } else {
       ngroup_init <- NULL
     }
-    dt_sample_rowidx <- beethoven::make_subdata(
+
+    # apply r_subsample % row subsampling
+    chr_rowidx <- beethoven::make_subdata(
       dt_full, p = r_subsample, ngroup_init = ngroup_init
     )
-    dt_sample <- dt_full[dt_sample_rowidx, ]
+
+    # apply c_subsample % column subsampling with lat/lon
+    chr_latlon <- which(names(dt_full) %in% c("lon", "lat"))
+    # update `xvar` for subset of predictors
+    chr_xvar <- c(
+      sample(
+        setdiff(xvar, chr_latlon),
+        (length(xvar) - 2) * c_subsample
+      ),
+      chr_latlon
+    )
+    chr_colidx <- c(1:4, chr_xvar)
+    xvar <- seq(5, length(chr_colidx))
+
+    # sample of data with r_subsample rows, c_subsample columns, and lat/lon
+    dt_sample <- data.table::data.table(dt_full)[
+      chr_rowidx,
+      chr_colidx,
+      with = FALSE
+    ]
+
+    # ensure required columns are retained in data sample
+    chr_requiredcols <- c(yvar, "site_id", "Event.Type", "time", "lon", "lat")
+    stopifnot(all(chr_requiredcols %in% names(dt_sample)))
 
     # detect model name
     model_name <- model$engine
@@ -258,8 +281,6 @@ fit_base_learner <-
           list(data = dt_sample, cv_mode = cv_mode),
           args_generate_cv
         )
-      # generate row index
-      # cv_index <- inject_match(switch_generate_cv_rset, args_generate_cv)
 
       # manually replicate switch_generate_cv_rset function
       # the formals() argument used in inject_match does not properly
@@ -291,25 +312,24 @@ fit_base_learner <-
     # we already declared tuning hyperparameters with tune(),
     # which is not compatible with dials approach to limit
     # possible value ranges per hyperparameter.
-    # model_params <- tune::extract_parameter_set_dials(model)
-    # grid_params <- dials::grid_random(model_params, size = tune_grid_size)
     if (tune_mode == "grid") {
       grid_row_idx <-
-        sample(nrow(tune_grid_in), tune_grid_size, replace = FALSE)
+        sample(
+          nrow(tune_grid_in),
+          tune_grid_size,
+          replace = FALSE
+        )
       grid_params <- tune_grid_in[grid_row_idx, ]
     } else {
       grid_params <- NULL
       # drop mtry from model arguments if using baysian tuning
       # for xgboost
       if (model$engine %in% c("xgboost", "lightgbm")) {
-        model <- model %>% parsnip::set_args(mtry = NULL)
+        model <- model %>%
+          parsnip::set_args(mtry = NULL)
       }
     }
 
-
-    if (model_name == "glmnet") {
-      future::plan(future::multicore, workers = nthreads)
-    }
     base_wftune <-
       fit_base_tune(
         recipe = base_recipe,
@@ -320,12 +340,9 @@ fit_base_learner <-
         iter_bayes = tune_bayes_iter,
         trim_resamples = trim_resamples,
         return_best = return_best,
-        data_full = dt_full,
+        data_full = data.table::data.table(dt_full)[, chr_colidx, with = FALSE],
         metric = metric
       )
-    if (model_name == "glmnet") {
-      future::plan(future::sequential)
-    }
 
     return(base_wftune)
   }
@@ -422,12 +439,7 @@ fit_base_tune <-
           control = wf_config
         )
     }
-    # DEVELOPMENT CHANGE
-    # mm-0904 Drop base_wftune from return when trim_resamples = TRUE
-    # due to large data size. 1 iter > 25Gb
-    # if (trim_resamples) {
-    #   base_wftune$splits <- NA
-    # }
+
     if (return_best) {
       # Select the best hyperparameters
       metric <- match.arg(metric, c("rmse", "rsq", "mae"))
@@ -439,8 +451,7 @@ fit_base_tune <-
       # finalize workflow with the best tuned hyperparameters
       base_wfresult <- tune::finalize_workflow(base_wf, base_wfparam)
 
-      # DEVELOPMENT CHANGE
-      # mm-0904 unlist multi-layered hidden units if mlp model
+      # unlist multi-layered hidden units if mlp model
       if (model$engine == "brulee" && is.list(grid$hidden_units)) {
         base_wfresult$fit$actions$model$spec$args$hidden_units <-
           unlist(
@@ -463,11 +474,11 @@ fit_base_tune <-
           best_performance = base_wftune
         )
     }
-    # DEVELOPMENT CHANGE
-    # mm-0904 see above
+
     if (trim_resamples) {
       base_wflist <- base_wflist[-3]
     }
+
     return(base_wflist)
   }
 
@@ -599,7 +610,10 @@ convert_cv_index_rset <-
     }
 
     modename <- sprintf("cvfold_%s_%03d", cv_mode, len_cvi)
-    rset_stcv <- rsample::manual_rset(list_split_dfs, modename)
+    rset_stcv <- rsample::manual_rset(
+      list_split_dfs,
+      modename
+    )
     return(rset_stcv)
   }
 
@@ -645,201 +659,145 @@ attach_xy <-
   }
 
 
-
-#' Generate spatio-temporal cross-validation index with anticlust
-#'
-#' This function generates a spatio-temporal cross-validation index
-#' based on the anticlust package. The function first calculates the
-#' spatial clustering index using the [anticlust::balanced_clustering()]
-#' function as default, and if `cv_pairs` is provided, it generates rank-based
-#' pairs based on the proximity between cluster centroids.
-#' `cv_pairs` can be NULL, in which case only the spatial clustering index
-#' is generated. `ngroup_init` should be lower than `cv_pairs`, while
-#' it imposes a condition that `nrow(data) %% ngroup_init` should be 0
-#' and `cv_pairs` should be less than the number of 2-combinations of
-#' `ngroup_init`. Each training set will get 50% overlap
-#' with adjacent training sets. "Pairs (combinations)" are selected
-#' based on the rank of centroids of `ngroup_init` number of initial
-#' clusters, where users have two options.
-#'
-#'  * Mode "1" assigns at least one pair for each
-#'    initial cluster, meaning that `ngroup_init` pairs are assigned for each
-#'    initial cluster, then the remaining pairs will be ranked to finalize
-#'    the `cv_pairs` sets.
-#'  * Mode "2" will rank the pairwise distances
-#'    directly, which may ignore some overly large initial clusters for pairing.
-#'
-#' Of course, mode "2" is faster than mode "1", thus users are advised
-#' to use mode "2" when they are sure that the initial clusters are
-#' spatially uniformly distributed.
+#' Generate spatio-temporal cross-validation index with
+#' `spatialsample::spatial_block_cv` and year-based temporal folds
+#' @description
+#' This function generates spatio-temporal cross-validation indices with
+#' `v` spatial blocks and year-based temporal folds. The spatial blocks
+#' are generated with `spatialsample::spatial_block_cv` function, and the
+#' temporal folds are generated based on the years availble in `data$time`.
+#' Total number of folds is equal to
+#' `v * length(unique(substr(data$time, 1, 4)))`.
 #' @keywords Baselearner
-#' @param data data.table with X, Y, and time information.
-#' @param target_cols character(3). Names of columns for X, Y, and time.
-#'   Default is c("lon", "lat", "time"). Order insensitive.
-#' @param preprocessing character(1). Preprocessing method for the fields
-#'   defined in `target_cols`. This serves to homogenize the scale of
-#'   the data. Default is "none".
-#'   * "none": no preprocessing.
-#'   * "normalize": normalize the data.
-#'   * "standardize": standardize the data.
-#' @param ngroup_init integer(1). Initial number of splits for
-#'  pairing groups. Default is 5L.
-#' @param cv_pairs integer(1). Number of pairs for cross-validation.
-#'   This value will be used to generate a rank-based pairs
-#'   based on `target_cols` values.
-#' @param pairing character(1) Pair selection method.
-#'   * "1": search the nearest for each cluster then others
-#'    are selected based on the rank.
-#'   * "2": rank the pairwise distances directly
-#' @param ... Additional arguments to be passed.
-#' @note `nrow(data) %% ngroup_init` should be 0. This is a required
-#'  condition for the anticlust::balanced_clustering().
-#' @return List of numeric vectors with balanced cluster numbers and
-#'   reference lists of assessment set pair numbers in attributes.
-#' @author Insang Song
-#' @importFrom rsample manual_rset
-#' @importFrom anticlust balanced_clustering
-#' @importFrom dplyr group_by summarize across ungroup all_of
-#' @importFrom stats dist
-#' @importFrom utils combn
+#' @param data data.table or data.frame with `id`, `coords`, and `time` columns.
+#' @param locs_id The column name in `data` that represents the
+#' location identifier.
+#' @param coords The column names in the spatial object that represent the
+#' XY coordinates. Default is `c("lon", "lat")`.
+#' @param v integer(1). The number of partitions for the resampling.
+#' @param time_id The column name in `data` that represents the time values.
+#' @param ... Additional arguments to be passed to
+#' `spatialsample::spatial_block_cv`.
+#' @importFrom dplyr left_join select
+#' @importFrom magrittr %>%
+#' @importFrom spatialsample spatial_block_cv
+#' @seealso [`spatialsample::spatial_block_cv`]
 #' @export
-#' @examples
-#' library(data.table)
-#' data <- data.table(
-#'   lon = runif(100),
-#'   lat = runif(100),
-#'   time =
-#'   rep(
-#'     seq.Date(from = as.Date("2021-01-01"), to = as.Date("2021-01-05"),
-#'              by = "day"),
-#'     20
-#'   )
-#' )
-#' rset_spt <-
-#'   generate_cv_index_spt(
-#'     data, preprocessing = "normalize",
-#'     ngroup_init = 5L, cv_pairs = 6L
-#'   )
-#' rset_spt
-generate_cv_index_spt <-
-  function(
-    data,
-    target_cols = c("lon", "lat", "time"),
-    preprocessing = c("none", "normalize", "standardize"),
-    ngroup_init = 5L,
-    cv_pairs = NULL,
-    pairing = c("1", "2"),
-    ...
-  ) {
-    if (length(target_cols) != 3) {
-      stop("Please provide three target columns.")
-    }
-    if (!is.null(cv_pairs)) {
-      # ngroup_init check
-      if (ngroup_init >= cv_pairs) {
-        stop("ngroup_init should be less than cv_pairs.")
-      }
-      # 2-combinations of ngroup_init check
-      if (ncol(utils::combn(seq_len(ngroup_init), 2)) < cv_pairs) {
-        stop(
-          paste0(
-            "cv_pairs cannot be larger than ",
-            "the number of 2-combinations of ngroup_init."
-          )
-        )
-      }
-    }
-    # data_orig <- data
-    data <- data[, target_cols, with = FALSE]
-    data$time <- as.numeric(data$time)
+generate_cv_index_spt <- function(
+  data,
+  locs_id = "site_id",
+  coords = c("lon", "lat"),
+  v = 5L,
+  time_id = "time",
+  ...
+) {
 
-    # select preprocessing plan
-    # Yes, normalize/standardize spatiotemporal coordinates
-    # may make little sense, but it would homogenize the scale of drastically
-    # different value ranges of the coordinates (i.e., seconds in POSIXct)
-    data_proc <-
-      switch(
-        preprocessing,
-        none = data,
-        normalize = (data + abs(apply(data, 2, min))) /
-          (apply(data, 2, max) + abs(apply(data, 2, min))),
-        standardize = collapse::fscale(data)
+  #########################       SPATIAL FOLDS       ##########################
+  stopifnot(c(locs_id, coords, time_id) %in% names(data))
+
+  # new `data.frame`and `sf` with onle `id` and lat/lon coordinates
+  data_trim <- unique(data.frame(data)[, c(locs_id, coords)])
+  data_sf <- sf::st_as_sf(
+    data_trim, coords = coords, remove = FALSE
+  )
+
+  # generate spatial splits with `spatialsample::spatial_block_cv`
+  sp_index <-
+    rlang::inject(
+      spatialsample::spatial_block_cv(
+        data_sf,
+        v = v,
+        !!!list(...)
       )
+    )
 
-    # !!! ngroup_init should be a divisor of nrow(data_proc) !!!
-    index_cv <- anticlust::balanced_clustering(data_proc, ngroup_init)
-    cv_index <- NULL
-    # ref_list <- NULL
-    if (!is.null(cv_pairs)) {
-      pairing <- match.arg(pairing)
-      data_ex <- data_proc
-      data_ex$cv_index <- index_cv
+  # retrieve in_id
+  data_rowid <- seq_len(nrow(data_trim))
+  spatial_cv <- data_rowid
 
-      data_exs <- data_ex |>
-        dplyr::group_by(cv_index) |>
-        dplyr::summarize(
-          dplyr::across(dplyr::all_of(target_cols), ~mean(as.numeric(.x)))
-        ) |>
-        dplyr::ungroup()
-
-      data_exs$cv_index <- NULL
-      data_exm <- stats::dist(data_exs)
-      data_exd <- as.vector(data_exm)
-      data_exmfull <- as.matrix(data_exm)
-      # index searching in dist matrix out of dist
-      data_exd_colid <-
-        unlist(Map(seq_len, seq_len(max(index_cv) - 1)))
-      # rep(seq_len(max(index_cv) - 1), seq(max(index_cv) - 1, 1, -1))
-      data_exd_rowid <- rep(seq(2, max(index_cv)), seq_len(max(index_cv) - 1))
-
-      if (pairing == "2") {
-        search_idx <- which(rank(-data_exd) <= cv_pairs)
-        ref_list <- NULL
-      } else {
-        # min rank element index per each cluster centroid
-        search_each1 <-
-          apply(data_exmfull, 1, \(x) which.min(replace(x, which.min(x), Inf)))
-        # sort the index
-        search_each1sort <-
-          Map(c, seq_along(search_each1), search_each1)
-        # keep the distinct pairs
-        search_each1sort <-
-          unique(Map(sort, search_each1sort))
-        # return(list(data_exd_colid, data_exd_rowid, search_each1sort))
-        search_idx_each1 <-
-          which(
-            Reduce(
-              `|`,
-              Map(
-                \(x) data_exd_colid %in% x[1] & data_exd_rowid %in% x[2],
-                search_each1sort
-              )
-            )
-          )
-
-        # replace the nearest pairs' distance to Inf
-        search_idx_others <-
-          which(rank(-replace(data_exd, search_idx_each1, Inf)) <= cv_pairs)
-        # remove the nearest pairs
-        # sort the distance of the remaining pairs
-        search_idx_others <-
-          search_idx_others[1:(cv_pairs - length(search_idx_each1))]
-        search_idx <- c(search_idx_each1, search_idx_others)
-      }
-
-      # ref_list contains the index of the group pairs
-      ref_list <-
-        Map(c, data_exd_rowid[search_idx], data_exd_colid[search_idx])
-    } else {
-      ref_list <- NULL
+  if (
+    !all(
+      !is.na(Reduce(c, Map(function(x) is.na(x$out_id), sp_index$splits)))
+    )
+  ) {
+    warning("Some splits have missing values in `out_id`...\n")
+    spatial_cv <-
+      lapply(
+        sp_index$splits,
+        function(x) list(analysis = x$in_id, assessment = x$out_id)
+      )
+  } else {
+    sp_index <- lapply(sp_index$splits, function(x) x$in_id)
+    for (i in seq_along(sp_index)) {
+      spatial_cv[setdiff(data_rowid, sp_index[[i]])] <- i
     }
-    attr(index_cv, "ref_list") <- ref_list
-    # generate row index for restoring rset
-    # 0.3.9: ref_list is added to an attribute of index_cv
-
-    return(index_cv)
   }
 
+  # merge spatial cross validation index with full data
+  data_trim$cv <- spatial_cv
+  data_sp <- data %>%
+    dplyr::left_join(
+      dplyr::select(data_trim, locs_id, coords[1], coords[2], cv),
+      by = c(locs_id, coords[1], coords[2])
+    )
+
+  # check spatial cross validation index is in the data
+  stopifnot("cv" %in% names(data_sp))
+  # check data with spatial cv has same rows as raw data
+  stopifnot(nrow(data_sp) == nrow(data))
+  # check data with spatial cv has one more column than raw data
+  stopifnot(ncol(data_sp) == ncol(data) + 1)
+
+  #########################       TEMPORAL FOLDS       #########################
+  # coerce class of time and cv index
+  data_sp[[time_id]] <- as.Date(data_sp[[time_id]])
+  data_sp$cv <- as.integer(data_sp$cv)
+
+  # # unique time points
+  # time_vec <- sort(unique(data_sp[[time_id]]))
+  # unique spatial indices
+  sp_indices <- sort(unique(data_sp$cv))
+
+  # identify number of years and temporal folds
+  year_vec_split <- sort(unique(substr(data_sp[[time_id]], 1, 4)))
+  t_fold <- as.integer(length(year_vec_split))
+  time_vec_split <- as.Date(paste0(year_vec_split, "-01-01"))
+  time_vec_split <- c(
+    time_vec_split,
+    as.Date(paste0(as.numeric(max(year_vec_split)) + 1, "-01-01"))
+  )
+
+  stopifnot(length(time_vec_split) == t_fold + 1)
+  stopifnot(class(time_vec_split) == class(data_sp[[time_id]]))
+
+  # list to store temporal cv index
+  spt_index_list <- list()
+
+  for (i in seq_along(sp_indices)) {
+    for (j in seq(t_fold)) {
+      # test data are within spatial fold `i` and time fold `j`
+      out_id <- which(
+        data_sp[[time_id]] >= time_vec_split[j] &
+          data_sp[[time_id]] < time_vec_split[j + 1] &
+          data_sp$cv == sp_indices[i]
+      )
+      # training data are all other data
+      in_id <- setdiff(seq_len(nrow(data_sp)), out_id)
+      spt_index_list <- c(
+        spt_index_list,
+        list(
+          list(
+            analysis = in_id,
+            assessment = out_id
+          )
+        )
+      )
+    }
+  }
+
+  return(spt_index_list)
+
+}
 
 
 # non site-wise; just using temporal information
@@ -919,20 +877,13 @@ generate_cv_index_ts <-
 #'   Default is `c("lon", "lat")`. It is passed to sf::st_as_sf to
 #'   subsequently generate spatial cross-validation indices using
 #'   `spatialsample::spatial_block_cv`.
-#' @param cv_make_fun function(1). Function to generate spatial
-#'   cross-validation indices.
-#'   Default is `spatialsample::spatial_block_cv`.
 #' @param ... Additional arguments to be passed to
 #' `patialsample::spatial_block_cv`.
-#' @seealso [`spatialsample::spatial_block_cv`],
-#'   [`spatialsample::spatial_clustering_cv`],
-#'   [`spatialsample::spatial_buffer_vfold_cv`]
 #' @seealso [`spatialsample::spatial_block_cv`].
 #' @return A list of numeric vectors with in- and out-of-sample row indices or
 #'   a numeric vector with out-of-sample indices.
 #' @importFrom rlang inject
 #' @importFrom sf st_as_sf
-#' @importFrom spatialsample spatial_block_cv
 #' @importFrom rsample manual_rset
 #' @importFrom dplyr slice_sample
 #' @importFrom magrittr %>%
@@ -942,14 +893,13 @@ generate_cv_index_sp <-
   function(
     data,
     target_cols = c("lon", "lat"),
-    cv_make_fun = spatialsample::spatial_block_cv,
     ...
   ) {
 
     data_sf <- sf::st_as_sf(data, coords = target_cols, remove = FALSE)
     cv_index <-
       rlang::inject(
-        cv_make_fun(
+        spatialsample::spatial_block_cv(
           data_sf,
           !!!list(...)
         )

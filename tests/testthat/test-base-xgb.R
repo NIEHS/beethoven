@@ -37,7 +37,6 @@
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
-#       nthreads = 1,
 #       trim_resamples = FALSE,
 #       return_best = TRUE
 #     )
@@ -71,7 +70,6 @@
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
-#       nthreads = 1,
 #       trim_resamples = FALSE,
 #       return_best = TRUE
 #     )
@@ -105,7 +103,6 @@
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
-#       nthreads = 1,
 #       trim_resamples = FALSE,
 #       return_best = TRUE
 #     )
@@ -153,7 +150,6 @@
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
-#       nthreads = 1,
 #       trim_resamples = FALSE,
 #       return_best = TRUE
 #     )
@@ -186,7 +182,6 @@
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
-#       nthreads = 1,
 #       trim_resamples = FALSE,
 #       return_best = TRUE
 #     )
@@ -219,7 +214,6 @@
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
-#       nthreads = 1,
 #       trim_resamples = FALSE,
 #       return_best = TRUE
 #     )
@@ -280,7 +274,6 @@
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
-#       nthreads = 1,
 #       trim_resamples = FALSE,
 #       return_best = TRUE
 #     )
@@ -320,7 +313,6 @@
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
-#       nthreads = 1,
 #       trim_resamples = FALSE,
 #       return_best = TRUE
 #     )
@@ -340,13 +332,7 @@
 
 #   # spatiotemporal
 #   # warning is due to 3 metrics (rmse, rsq, mae)
-#   args_spatiotemporal <- list(
-#     target_cols = c("lon", "lat", "time"),
-#     preprocessing = "none",
-#     ngroup_init = 2L,
-#     cv_pairs = NULL,
-#     pairing = "1"
-#   )
+#   args_spatiotemporal <- list(v = 3)
 #   testthat::expect_warning(
 #     xgb9 <- fit_base_learner(
 #       learner = "xgb",
@@ -362,7 +348,6 @@
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
-#       nthreads = 1,
 #       trim_resamples = FALSE,
 #       return_best = TRUE
 #     )
@@ -416,7 +401,6 @@
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
-#       nthreads = 1,
 #       trim_resamples = FALSE,
 #       return_best = TRUE
 #     )
@@ -455,7 +439,6 @@
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
-#       nthreads = 1,
 #       trim_resamples = FALSE,
 #       return_best = TRUE
 #     )
@@ -475,13 +458,7 @@
 
 #   # spatiotemporal
 #   # warning is due to 3 metrics (rmse, rsq, mae)
-#   args_spatiotemporal <- list(
-#     target_cols = c("lon", "lat", "time"),
-#     preprocessing = "none",
-#     ngroup_init = 2L,
-#     cv_pairs = NULL,
-#     pairing = "1"
-#   )
+#   args_spatiotemporal <- list(v = 3)
 #   testthat::expect_warning(
 #     xgb12 <- fit_base_learner(
 #       learner = "xgb",
@@ -496,7 +473,6 @@
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
-#       nthreads = 1,
 #       trim_resamples = TRUE, # trim samples
 #       return_best = TRUE
 #     )

@@ -426,7 +426,57 @@ reduce_merge <-
       },
       list_in
     )
+
   }
+
+#' Reduce and merge a list of data tables
+#' @description
+#' This function iteratively runs `reduce_merge` on a list of `data.table`
+#' objects for merging large `data.tables` that may not fit into memory
+#' with `reduce_merge` directly.
+#' @param list_in A list of data tables to be merged.
+#' @param by The columns to merge the data tables on.
+#'   If `NULL`, the function will automatically detect the common column names.
+#' @param all.x logical(1). Keeping all rows from the first input.
+#' @param all.y logical(1). Keeping all rows from the second input.
+#' @return A merged data table.
+#' @keywords Post-calculation
+#' @importFrom data.table as.data.table merge.data.table
+#' @export
+reduce_merge_iter <- function(
+  list_in,
+  by = c("site_id", "time"),
+  all.x = TRUE,
+  all.y = FALSE
+) {
+
+  list_check <- sapply(list_in, nrow)
+  list_checkdiff <- diff(list_check)
+  if (any(list_checkdiff > 0)) all.y <- TRUE
+  for (i in seq_len(length(list_in))) {
+    list_in[[i]] <- data.table::setDT(list_in[[i]])
+  }
+
+  dt_merge <- list_in[[1]]
+
+  for (l in seq(2, length(list_in))) {
+    if (is.null(by)) {
+      merge_by <- intersect(names(dt_merge), names(list_in[[l]]))
+    } else {
+      merge_by <- by
+    }
+    dt_merge <- data.table::merge.data.table(
+      dt_merge,
+      list_in[[l]],
+      by = merge_by,
+      all.x = all.x,
+      all.y = all.y
+    )
+  }
+
+  return(dt_merge)
+
+}
 
 
 #' Injects the calculate function with matched arguments.

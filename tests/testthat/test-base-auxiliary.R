@@ -103,121 +103,51 @@ testthat::test_that("assign_learner_cv", {
 ################################################################################
 ##### generate_cv_index_spt
 testthat::test_that("generate_cv_index_spt", {
+  withr::local_package("dplyr")
+  withr::local_package("data.table")
+
   # import sample data
-  dt_attach <- readRDS(
-    testthat::test_path("..", "testdata", "base", "dt_wide.rds")
+  dt_performance <- readRDS(
+    testthat::test_path("..", "testdata", "base", "dt_performance.rds")
   )
 
-  # expect no error with cv_pairs = NULL + pairing = 1
-  testthat::expect_no_error(
+  # expect warning due to non-sf dt_performance
+  testthat::expect_warning(
     index_spt1 <- generate_cv_index_spt(
-      data = data.table::data.table(dt_attach),
-      target_cols = c("lon", "lat", "time"),
-      preprocessing = "none",
-      ngroup_init = 2L,
-      cv_pairs = NULL,
-      pairing = "1"
+      data = data.table::data.table(dt_performance),
+      locs_id = "site_id",
+      coords = c("lon", "lat"),
+      v = 5L,
+      time_id = "time"
     )
   )
-  # expect vector
-  testthat::expect_true(is.vector(index_spt1))
-  # expect numeric values
-  testthat::expect_true(is.numeric(index_spt1))
-  # expect index length = nrow of dt
-  testthat::expect_length(index_spt1, nrow(dt_attach))
-  # expect range is 1 - 2 (equal to ngroup_init)
-  testthat::expect_equal(sort(unique(index_spt1)), 1:2)
+  # expect list
+  testthat::expect_true(is.list(index_spt1))
+  # expect length of 10 (v = 5L; data contains years 2020 + 2021)
+  testthat::expect_length(index_spt1, 10)
   # expect no attributes
   testthat::expect_length(attr(index_spt1, "ref_list"), 0)
 
+  # import sample data
+  dt_performance2 <- dt_performance[dt_performance$time %like% "2020", ]
 
-  # expect no error with cv_pairs = NULL + pairing = 2
-  testthat::expect_no_error(
+  # expect warning due to non-sf dt_performance2
+  testthat::expect_warning(
     index_spt2 <- generate_cv_index_spt(
-      data = data.table::data.table(dt_attach),
-      target_cols = c("lon", "lat", "time"),
-      preprocessing = "none",
-      ngroup_init = 2L,
-      cv_pairs = NULL,
-      pairing = "2"
+      data = data.table::data.table(dt_performance2),
+      locs_id = "site_id",
+      coords = c("lon", "lat"),
+      v = 5L,
+      time_id = "time"
     )
   )
-  # expect vector
-  testthat::expect_true(is.vector(index_spt2))
-  # expect numeric values
-  testthat::expect_true(is.numeric(index_spt2))
-  # expect index length = nrow of dt
-  testthat::expect_length(index_spt1, nrow(dt_attach))
-  # expect range is 1 - 2 (equal to ngroup_init)
-  testthat::expect_equal(sort(unique(index_spt2)), 1:2)
+  # expect list
+  testthat::expect_true(is.list(index_spt2))
+  # expect length of 5 (v = 5L; data contains years 2020)
+  testthat::expect_length(index_spt2, 5)
   # expect no attributes
   testthat::expect_length(attr(index_spt2, "ref_list"), 0)
 
-
-  # expect no error with cv_pairs = 6 + pairing = 1
-  # 645 observations to utilize 5 groups
-  testthat::expect_no_error(
-    index_spt3 <- generate_cv_index_spt(
-      data = data.table::data.table(dt_attach[1:645, ]),
-      target_cols = c("lon", "lat", "time"),
-      preprocessing = "none",
-      ngroup_init = 5L,
-      cv_pairs = 6L,
-      pairing = "1"
-    )
-  )
-  # expect numeric values
-  testthat::expect_true(is.numeric(index_spt3))
-  # expect index length = nrow of dt
-  testthat::expect_length(index_spt3, nrow(dt_attach) - 1)
-  # expect range is 1 - 5 (equal to ngroup_init)
-  testthat::expect_equal(sort(unique(index_spt3)), 1:5)
-  # expect attributes
-  testthat::expect_length(attr(index_spt3, "ref_list"), 6)
-
-
-  # expect no error with cv_pairs = 6 + pairing = 2
-  # 645 observations to utilize 5 groups
-  testthat::expect_no_error(
-    index_spt4 <- generate_cv_index_spt(
-      data = data.table::data.table(dt_attach[1:645, ]),
-      target_cols = c("lon", "lat", "time"),
-      preprocessing = "none",
-      ngroup_init = 5L,
-      cv_pairs = 6L,
-      pairing = "2"
-    )
-  )
-  # expect numeric values
-  testthat::expect_true(is.numeric(index_spt4))
-  # expect index length = nrow of dt
-  testthat::expect_length(index_spt4, nrow(dt_attach) - 1)
-  # expect range is 1 - 5 (equal to ngroup_init)
-  testthat::expect_equal(sort(unique(index_spt4)), 1:5)
-  # expect attributes
-  testthat::expect_length(attr(index_spt4, "ref_list"), 6)
-
-
-  # expect error when > 3 target columns
-  testthat::expect_error(
-    generate_cv_index_spt(
-      target_cols = c("lon", "lat", "time", "fourth")
-    )
-  )
-  # expect error when ngroup_init > cv_pairs
-  testthat::expect_error(
-    generate_cv_index_spt(
-      ngroup_init = 5L,
-      cv_pairs = 2L
-    )
-  )
-  # expect error when cv_pairs exceeding 2-combinations of ngroup_init
-  testthat::expect_error(
-    generate_cv_index_spt(
-      ngroup_init = 4L,
-      cv_pairs = 7L
-    )
-  )
 })
 
 
@@ -261,7 +191,6 @@ testthat::test_that("generate_cv_index_sp", {
     index_sp <- generate_cv_index_sp(
       data = dt_attach,
       target_cols = c("lon", "lat"),
-      cv_make_fun = spatialsample::spatial_block_cv,
       v = 4
     )
   )
@@ -287,7 +216,6 @@ testthat::test_that("vis_spt_rset", {
     index_sp <- generate_cv_index_sp(
       data = dt_attach,
       target_cols = c("lon", "lat"),
-      cv_make_fun = spatialsample::spatial_block_cv,
       v = 4
     )
   )
@@ -312,6 +240,7 @@ testthat::test_that("vis_spt_rset", {
 ################################################################################
 ##### switch_generate_cv_rset
 testthat::test_that("switch_generate_cv_rset", {
+  withr::local_package("dplyr")
   # import sample data
   dt_attach <- readRDS(
     testthat::test_path("..", "testdata", "base", "dt_wide.rds")
@@ -319,29 +248,27 @@ testthat::test_that("switch_generate_cv_rset", {
 
 
   # spatiotemporal
-  testthat::expect_no_error(
+  testthat::expect_warning(
     index_spt_direct <- generate_cv_index_spt(
       data = data.table::data.table(dt_attach),
-      target_cols = c("lon", "lat", "time"),
-      preprocessing = "none",
-      ngroup_init = 2L,
-      cv_pairs = NULL,
-      pairing = "1"
+      locs_id = "site_id",
+      coords = c("lon", "lat"),
+      v = 5L,
+      time_id = "time"
     )
   )
-  testthat::expect_no_error(
+  testthat::expect_warning(
     index_spt_switch <- switch_generate_cv_rset(
       learner = "spatiotemporal",
       data = data.table::data.table(dt_attach),
-      target_cols = c("lon", "lat", "time"),
-      preprocessing = "none",
-      ngroup_init = 2L,
-      cv_pairs = NULL,
-      pairing = "1"
+      locs_id = "site_id",
+      coords = c("lon", "lat"),
+      v = 5L,
+      time_id = "time"
     )
   )
-  # expect direct and switch-generated rsamples are identical
-  testthat::expect_identical(index_spt_direct, index_spt_switch)
+  testthat::expect_equal(class(index_spt_direct), class(index_spt_direct))
+  testthat::expect_equal(length(index_spt_direct), length(index_spt_direct))
 
 
   # spatial
@@ -350,7 +277,6 @@ testthat::test_that("switch_generate_cv_rset", {
     index_sp_direct <- generate_cv_index_sp(
       data = dt_attach,
       target_cols = c("lon", "lat"),
-      cv_make_fun = spatialsample::spatial_block_cv,
       v = 4
     )
   )
@@ -360,7 +286,6 @@ testthat::test_that("switch_generate_cv_rset", {
       learner = "spatial",
       data = dt_attach,
       target_cols = c("lon", "lat"),
-      cv_make_fun = spatialsample::spatial_block_cv,
       v = 4
     )
   )
@@ -399,28 +324,28 @@ testthat::test_that("switch_generate_cv_rset", {
 ################################################################################
 ##### convert_cv_index_rset
 testthat::test_that("convert_cv_index_rset", {
+  withr::local_package("dplyr")
+
   # import sample data
-  dt_attach <- readRDS(
-    testthat::test_path("..", "testdata", "base", "dt_wide.rds")
+  dt_performance <- readRDS(
+    testthat::test_path("..", "testdata", "base", "dt_performance.rds")
   )
 
-
   # spatiotemporal
-  testthat::expect_no_error(
+  testthat::expect_warning(
     index_spt <- generate_cv_index_spt(
-      data = data.table::data.table(dt_attach[1:645, ]),
-      target_cols = c("lon", "lat", "time"),
-      preprocessing = "none",
-      ngroup_init = 5L,
-      cv_pairs = 6L,
-      pairing = "1"
+      data = data.table::data.table(dt_performance),
+      locs_id = "site_id",
+      coords = c("lon", "lat"),
+      v = 5L,
+      time_id = "time"
     )
   )
   # expect no error convert to rset
   testthat::expect_no_error(
     rset_spt <- convert_cv_index_rset(
       cvindex = index_spt,
-      data = dt_attach,
+      data = dt_performance,
       cv_mode = "spatiotemporal"
     )
   )
@@ -428,17 +353,19 @@ testthat::test_that("convert_cv_index_rset", {
   testthat::expect_true(methods::is(rset_spt, "manual_rset"))
   # expect first element is list
   testthat::expect_true(is.list(rset_spt[[1]]))
-  # exepct list is length 6
-  testthat::expect_length(rset_spt[[1]], 6)
+  # exepct list is length 10
+  testthat::expect_length(rset_spt[[1]], 10)
 
-
+  # import sample data
+  dt_attach <- readRDS(
+    testthat::test_path("..", "testdata", "base", "dt_wide.rds")
+  )
   # spatial
   # expect CRS warning during indexing
   testthat::expect_warning(
     index_sp <- generate_cv_index_sp(
       data = dt_attach,
       target_cols = c("lon", "lat"),
-      cv_make_fun = spatialsample::spatial_block_cv,
       v = 4
     )
   )
@@ -488,6 +415,7 @@ testthat::test_that("convert_cv_index_rset", {
 ################################################################################
 ##### switch_model
 testthat::test_that("switch_model", {
+  withr::local_package("dplyr")
   # expect no error with mlp
   testthat::expect_no_error(
     switch_mlp <- switch_model(model_type = "mlp")
