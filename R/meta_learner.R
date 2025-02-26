@@ -65,9 +65,6 @@ attach_pred <-
 #' `switch_generate_cv_rset` function.
 #' @param tune_iter integer(1). Bayesian optimization iterations.
 #' Default is 50.
-#' @param nthreads integer(1). The number of threads to be used for
-#' tuning. Default is 8L. `learner = "elnet"` will utilize the multiple
-#' threads in [future::multicore()] plan. Passed to [`fit_base_tune`].
 #' @param trim_resamples logical(1). Default is TRUE, which replaces the actual
 #' data.frames in splits column of `tune_results` object with NA.
 #' Passed to [`fit_base_tune`].
@@ -95,7 +92,6 @@ fit_meta_learner <-
     target_cols = c("site_id", "time", "lon", "lat", "Event.Type"),
     args_generate_cv = list(),
     tune_iter = 50L,
-    nthreads = 2L,
     trim_resamples = FALSE,
     return_best = TRUE,
     metric = "rmse"
@@ -157,7 +153,6 @@ fit_meta_learner <-
       recipes::update_role(!!yvar, new_role = "outcome")
 
     # fit glmnet meta learner with `fit_base_tune`
-    future::plan(future::multicore, workers = nthreads)
     meta_wflist <-
       beethoven::fit_base_tune(
         data_full = data.table::data.table(dt_sample),
@@ -171,7 +166,6 @@ fit_meta_learner <-
         return_best = return_best,
         metric = metric
       )
-    future::plan(future::sequential)
 
     return(meta_wflist)
   }

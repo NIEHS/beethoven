@@ -20,7 +20,6 @@ fit_base_learner(
   learn_rate = 0.1,
   yvar = "Arithmetic.Mean",
   xvar = seq(5, ncol(dt_full)),
-  nthreads = 8L,
   trim_resamples = FALSE,
   return_best = TRUE,
   metric = "rmse",
@@ -69,10 +68,6 @@ Default is 0.1.}
 \item{yvar}{The target variable.}
 
 \item{xvar}{The predictor variables.}
-
-\item{nthreads}{integer(1). The number of threads to be used for
-tuning. Default is 8L. \code{learner = "elnet"} will utilize the multiple
-threads in \code{\link[future:multicore]{future::multicore()}} plan.}
 
 \item{trim_resamples}{logical(1). Default is TRUE, which replaces the actual
 data.frames in splits column of \code{tune_results} object with NA.}

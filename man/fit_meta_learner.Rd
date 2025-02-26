@@ -12,7 +12,6 @@ fit_meta_learner(
   target_cols = c("site_id", "time", "lon", "lat", "Event.Type"),
   args_generate_cv = list(),
   tune_iter = 50L,
-  nthreads = 2L,
   trim_resamples = FALSE,
   return_best = TRUE,
   metric = "rmse"
@@ -39,10 +38,6 @@ column resampling. Default is c("site_id", "time", "Event.Type", "lon",
 
 \item{tune_iter}{integer(1). Bayesian optimization iterations.
 Default is 50.}
-
-\item{nthreads}{integer(1). The number of threads to be used for
-tuning. Default is 8L. \code{learner = "elnet"} will utilize the multiple
-threads in \code{\link[future:multicore]{future::multicore()}} plan. Passed to \code{\link{fit_base_tune}}.}
 
 \item{trim_resamples}{logical(1). Default is TRUE, which replaces the actual
 data.frames in splits column of \code{tune_results} object with NA.
