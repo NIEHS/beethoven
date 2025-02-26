@@ -63,7 +63,6 @@ target_baselearner <-
         tune_grid_size = 1L,
         yvar = "Arithmetic.Mean",
         xvar = seq(5, ncol(dt_feat_calc_xyt)),
-        nthreads = 1L,
         trim_resamples = TRUE,
         return_best = TRUE,
         cv_rep = 100L
@@ -107,7 +106,6 @@ target_baselearner_cpu <-
         tune_grid_size = list_base_params_static$tune_grid_size,
         yvar = list_base_params_static$yvar,
         xvar = list_base_params_static$xvar,
-        nthreads = list_base_params_static$nthreads,
         trim_resamples = list_base_params_static$trim_resamples,
         return_best = list_base_params_static$return_best
       ),
@@ -154,7 +152,6 @@ target_baselearner_gpu <-
         tune_grid_size = list_base_params_static$tune_grid_size,
         yvar = list_base_params_static$yvar,
         xvar = list_base_params_static$xvar,
-        nthreads = list_base_params_static$nthreads,
         trim_resamples = list_base_params_static$trim_resamples,
         return_best = list_base_params_static$return_best
       ),

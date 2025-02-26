@@ -35,7 +35,6 @@ target_metalearner <-
     #     c_subsample = 0.5,
     #     args_generate_cv = list_base_args_cv$spatiotemporal,
     #     tune_iter = 50L,
-    #     nthreads = 2L,
     #     trim_resamples = TRUE,
     #     return_best = TRUE,
     #     metric = "rmse"
