@@ -181,9 +181,6 @@ switch_model <-
 #'   Default is 0.1.
 #' @param yvar The target variable.
 #' @param xvar The predictor variables.
-#' @param nthreads integer(1). The number of threads to be used for
-#'  tuning. Default is 8L. `learner = "elnet"` will utilize the multiple
-#'  threads in [future::multicore()] plan.
 #' @param trim_resamples logical(1). Default is TRUE, which replaces the actual
 #'   data.frames in splits column of `tune_results` object with NA.
 #' @param return_best logical(1). If TRUE, the best tuned model is returned.
@@ -218,7 +215,6 @@ fit_base_learner <-
     learn_rate = 0.1,
     yvar = "Arithmetic.Mean",
     xvar = seq(5, ncol(dt_full)),
-    nthreads = 8L,
     trim_resamples = FALSE,
     return_best = TRUE,
     metric = "rmse",
@@ -327,9 +323,6 @@ fit_base_learner <-
       }
     }
 
-    if (model_name == "glmnet") {
-      future::plan(future::multicore, workers = nthreads)
-    }
     base_wftune <-
       fit_base_tune(
         recipe = base_recipe,
@@ -343,9 +336,6 @@ fit_base_learner <-
         data_full = data.table::data.table(dt_full)[, chr_colidx, with = FALSE],
         metric = metric
       )
-    if (model_name == "glmnet") {
-      future::plan(future::sequential)
-    }
 
     return(base_wftune)
   }
