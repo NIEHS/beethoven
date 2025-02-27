@@ -251,7 +251,9 @@ fit_base_learner <-
 
     # sample of data with r_subsample rows, c_subsample columns, and lat/lon
     dt_sample <- data.table::data.table(dt_full)[
-      chr_rowidx, chr_colidx, with = FALSE
+      chr_rowidx,
+      chr_colidx,
+      with = FALSE
     ]
 
     # full rows with c_subsample columns and lat/lon
@@ -316,14 +318,19 @@ fit_base_learner <-
     # possible value ranges per hyperparameter.
     if (tune_mode == "grid") {
       grid_row_idx <-
-        sample(nrow(tune_grid_in), tune_grid_size, replace = FALSE)
+        sample(
+          nrow(tune_grid_in),
+          tune_grid_size,
+          replace = FALSE
+        )
       grid_params <- tune_grid_in[grid_row_idx, ]
     } else {
       grid_params <- NULL
       # drop mtry from model arguments if using baysian tuning
       # for xgboost
       if (model$engine %in% c("xgboost", "lightgbm")) {
-        model <- model %>% parsnip::set_args(mtry = NULL)
+        model <- model %>%
+          parsnip::set_args(mtry = NULL)
       }
     }
 
@@ -607,7 +614,10 @@ convert_cv_index_rset <-
     }
 
     modename <- sprintf("cvfold_%s_%03d", cv_mode, len_cvi)
-    rset_stcv <- rsample::manual_rset(list_split_dfs, modename)
+    rset_stcv <- rsample::manual_rset(
+      list_split_dfs,
+      modename
+    )
     return(rset_stcv)
   }
 
@@ -692,7 +702,9 @@ generate_cv_index_spt <- function(
 
   # new `data.frame`and `sf` with onle `id` and lat/lon coordinates
   data_trim <- unique(data.frame(data)[, c(locs_id, coords)])
-  data_sf <- sf::st_as_sf(data_trim, coords = coords, remove = FALSE)
+  data_sf <- sf::st_as_sf(
+    data_trim, coords = coords, remove = FALSE
+  )
 
   # generate spatial splits with `spatialsample::spatial_block_cv`
   sp_index <-
@@ -768,18 +780,26 @@ generate_cv_index_spt <- function(
   # list to store temporal cv index
   spt_index_list <- list()
 
-  for (i in seq(v)) {
-    # test data are within spatial and temporal fold `i`
-    out_id <- which(
-      data_sp$cv == sp_indices[i] &
-        data_sp$yw %in% yearweek_split[[i]]
-    )
-    # training data are all other data
-    in_id <- setdiff(seq_len(nrow(data_sp)), out_id)
-    spt_index_list <- c(
-      spt_index_list,
-      list(list(analysis = in_id, assessment = out_id))
-    )
+  for (i in seq_along(sp_indices)) {
+    for (j in seq(t_fold)) {
+      # test data are within spatial fold `i` and time fold `j`
+      out_id <- which(
+        data_sp[[time_id]] >= time_vec_split[j] &
+          data_sp[[time_id]] < time_vec_split[j + 1] &
+          data_sp$cv == sp_indices[i]
+      )
+      # training data are all other data
+      in_id <- setdiff(seq_len(nrow(data_sp)), out_id)
+      spt_index_list <- c(
+        spt_index_list,
+        list(
+          list(
+            analysis = in_id,
+            assessment = out_id
+          )
+        )
+      )
+    }
   }
 
   return(spt_index_list)

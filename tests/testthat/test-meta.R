@@ -57,7 +57,6 @@ testthat::test_that("fit_meta_learner (spatiotemporal)", {
       target_cols = c("site_id", "time", "Event.Type", "lon", "lat"),
       args_generate_cv = list(v = 3),
       tune_iter = 1L,
-      nthreads = 2L,
       trim_resamples = FALSE,
       return_best = TRUE,
       metric = "rmse"
@@ -95,7 +94,6 @@ testthat::test_that("fit_meta_learner (errors)", {
       target_cols = c("site_id", "time", "lon", "lat", "Event.Type"),
       args_generate_cv = list(),
       tune_iter = 50L,
-      nthreads = 2L,
       trim_resamples = FALSE,
       return_best = TRUE,
       metric = "rmse"
@@ -112,7 +110,6 @@ testthat::test_that("fit_meta_learner (errors)", {
       target_cols = c("site_id", "time", "lon", "lat", "Event.Type"),
       args_generate_cv = list(),
       tune_iter = 50L,
-      nthreads = 2L,
       trim_resamples = FALSE,
       return_best = TRUE,
       metric = "rmse"
@@ -129,7 +126,6 @@ testthat::test_that("fit_meta_learner (errors)", {
       target_cols = NULL,
       args_generate_cv = list(),
       tune_iter = 50L,
-      nthreads = 2L,
       trim_resamples = FALSE,
       return_best = TRUE,
       metric = "rmse"
@@ -159,7 +155,6 @@ testthat::test_that("predict_meta_learner", {
       target_cols = c("site_id", "time", "Event.Type", "lon", "lat"),
       args_generate_cv = list(v = 3),
       tune_iter = 1L,
-      nthreads = 2L,
       trim_resamples = FALSE,
       return_best = TRUE,
       metric = "rmse"

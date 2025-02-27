@@ -108,14 +108,17 @@ fit_meta_learner <-
 
     # apply r_subsample % row subsampling
     chr_rowidx <- beethoven::make_subdata(
-      data, p = r_subsample, ngroup_init = NULL
+      data,
+      p = r_subsample,
+      ngroup_init = NULL
     )
 
     # subset data to c_subsample proportion of columns
     chr_id_names <- unique(c(target_cols, yvar))
     chr_meta_names <- setdiff(names(data), chr_id_names)
     chr_sample_cidx <- sample(
-      chr_meta_names, floor(c_subsample * length(chr_meta_names))
+      chr_meta_names,
+      floor(c_subsample * length(chr_meta_names))
     )
     chr_colidx <- c(chr_id_names, chr_sample_cidx)
 
@@ -133,13 +136,16 @@ fit_meta_learner <-
 
     # generate row index
     cv_index <- beethoven::inject_match(
-      beethoven::generate_cv_index_spt, args_generate_cv
+      beethoven::generate_cv_index_spt,
+      args_generate_cv
     )
 
     # using cv_index, restore rset
     meta_vfold <-
       beethoven::convert_cv_index_rset(
-        cv_index, dt_sample, cv_mode = "spatiotemporal"
+        cv_index,
+        dt_sample,
+        cv_mode = "spatiotemporal"
       )
 
     # define recipe

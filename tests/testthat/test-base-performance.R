@@ -43,7 +43,6 @@ testthat::test_that("fit elnet (performance)", {
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_performance)),
-      nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
     )
@@ -84,7 +83,6 @@ testthat::test_that("fit elnet (performance)", {
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_performance)),
-      nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
     )
@@ -120,7 +118,6 @@ testthat::test_that("fit elnet (performance)", {
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_performance)),
-      nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
     )
@@ -182,7 +179,6 @@ testthat::test_that("fit lightgbm (performance)", {
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_performance)),
-      nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
     )
@@ -223,7 +219,6 @@ testthat::test_that("fit lightgbm (performance)", {
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_performance)),
-      nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
     )
@@ -259,7 +254,6 @@ testthat::test_that("fit lightgbm (performance)", {
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_performance)),
-      nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
     )
@@ -322,7 +316,6 @@ testthat::test_that("fit mlp (performance)", {
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_performance)),
-      nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
     )
@@ -363,7 +356,6 @@ testthat::test_that("fit mlp (performance)", {
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_performance)),
-      nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
     )
@@ -399,7 +391,6 @@ testthat::test_that("fit mlp (performance)", {
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_performance)),
-      nthreads = 1,
       trim_resamples = FALSE,
       return_best = TRUE
     )
@@ -460,7 +451,6 @@ testthat::test_that("fit mlp (performance)", {
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_performance)),
-#       nthreads = 1,
 #       trim_resamples = FALSE,
 #       return_best = TRUE
 #     )
@@ -501,7 +491,6 @@ testthat::test_that("fit mlp (performance)", {
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_performance)),
-#       nthreads = 1,
 #       trim_resamples = FALSE,
 #       return_best = TRUE
 #     )
@@ -537,7 +526,6 @@ testthat::test_that("fit mlp (performance)", {
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_performance)),
-#       nthreads = 1,
 #       trim_resamples = FALSE,
 #       return_best = TRUE
 #     )
