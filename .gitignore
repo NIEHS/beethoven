@@ -120,4 +120,4 @@ debug*.sh
 lib-flex/**
 
 # local coverage RDS files
-covr/
+cov/

@@ -102,7 +102,7 @@ testthat::test_that("fit elnet (performance)", {
 
 
   # spatiotemporal
-  args_spatiotemporal <- list(v = 3)
+  args_spatiotemporal <- list(v = 2)
   testthat::expect_warning(
     elnet_p3 <- fit_base_learner(
       learner = "elnet",
@@ -238,7 +238,7 @@ testthat::test_that("fit lightgbm (performance)", {
 
 
   # spatiotemporal
-  args_spatiotemporal <- list(v = 3)
+  args_spatiotemporal <- list(v = 2)
   testthat::expect_warning(
     lgb_p3 <- fit_base_learner(
       learner = "lgb",
@@ -375,7 +375,7 @@ testthat::test_that("fit mlp (performance)", {
 
 
   # spatiotemporal
-  args_spatiotemporal <- list(v = 3)
+  args_spatiotemporal <- list(v = 2)
   testthat::expect_warning(
     mlp_p3 <- fit_base_learner(
       learner = "mlp",
@@ -510,7 +510,7 @@ testthat::test_that("fit mlp (performance)", {
 
 
 #   # spatiotemporal
-#   args_spatiotemporal <- list(v = 3)
+#   args_spatiotemporal <- list(v = 2)
 #   testthat::expect_warning(
 #     xgb_p3 <- fit_base_learner(
 #       learner = "xgb",

@@ -780,26 +780,23 @@ generate_cv_index_spt <- function(
   # list to store temporal cv index
   spt_index_list <- list()
 
-  for (i in seq_along(sp_indices)) {
-    for (j in seq(t_fold)) {
-      # test data are within spatial fold `i` and time fold `j`
-      out_id <- which(
-        data_sp[[time_id]] >= time_vec_split[j] &
-          data_sp[[time_id]] < time_vec_split[j + 1] &
-          data_sp$cv == sp_indices[i]
-      )
-      # training data are all other data
-      in_id <- setdiff(seq_len(nrow(data_sp)), out_id)
-      spt_index_list <- c(
-        spt_index_list,
+  for (i in seq(v)) {
+    # test data are within spatial and temporal fold `i`
+    out_id <- which(
+      data_sp$cv == sp_indices[i] &
+        data_sp$yw %in% yearweek_split[[i]]
+    )
+    # training data are all other data
+    in_id <- setdiff(seq_len(nrow(data_sp)), out_id)
+    spt_index_list <- c(
+      spt_index_list,
+      list(
         list(
-          list(
-            analysis = in_id,
-            assessment = out_id
-          )
+          analysis = in_id,
+          assessment = out_id
         )
       )
-    }
+    )
   }
 
   return(spt_index_list)

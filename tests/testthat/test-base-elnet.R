@@ -141,7 +141,7 @@ testthat::test_that("fit elnet (folds + bayes)", {
       folds = 5L,
       cv_mode = "temporal",
       tune_mode = "bayes",
-      tune_bayes_iter = 2,
+      tune_bayes_iter = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
@@ -172,7 +172,7 @@ testthat::test_that("fit elnet (folds + bayes)", {
       folds = 5L,
       cv_mode = "spatial",
       tune_mode = "bayes",
-      tune_bayes_iter = 2,
+      tune_bayes_iter = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
@@ -203,7 +203,7 @@ testthat::test_that("fit elnet (folds + bayes)", {
       folds = 5L,
       cv_mode = "spatiotemporal",
       tune_mode = "bayes",
-      tune_bayes_iter = 2,
+      tune_bayes_iter = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
@@ -322,7 +322,7 @@ testthat::test_that("fit elnet (args_generate_cv + grid)", {
 
 
   # spatiotemporal
-  args_spatiotemporal <- list(v = 3)
+  args_spatiotemporal <- list(v = 2)
   testthat::expect_warning(
     elnet9 <- fit_base_learner(
       learner = "elnet",
@@ -386,7 +386,7 @@ testthat::test_that("fit elnet (args_generate_cv + bayes)", {
       args_generate_cv = args_temp,
       cv_mode = "temporal",
       tune_mode = "bayes",
-      tune_bayes_iter = 2,
+      tune_bayes_iter = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
@@ -424,7 +424,7 @@ testthat::test_that("fit elnet (args_generate_cv + bayes)", {
       args_generate_cv = args_spatial,
       cv_mode = "spatial",
       tune_mode = "bayes",
-      tune_bayes_iter = 2,
+      tune_bayes_iter = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
@@ -446,7 +446,7 @@ testthat::test_that("fit elnet (args_generate_cv + bayes)", {
 
 
   # spatiotemporal
-  args_spatiotemporal <- list(v = 3)
+  args_spatiotemporal <- list(v = 2)
   testthat::expect_warning(
     elnet12 <- fit_base_learner(
       learner = "elnet",
@@ -457,7 +457,7 @@ testthat::test_that("fit elnet (args_generate_cv + bayes)", {
       args_generate_cv = args_spatiotemporal,
       cv_mode = "spatiotemporal",
       tune_mode = "bayes",
-      tune_bayes_iter = 2,
+      tune_bayes_iter = 1,
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
