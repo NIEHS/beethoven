@@ -5,9 +5,7 @@ target_baselearner <-
   list(
     targets::tar_target(
       list_base_args_cv,
-      command = list(
-        spatiotemporal = list(v = 3L)
-      ),
+      command = list(spatiotemporal = list(v = 10L)),
       description = "CV method arguments | base learner"
     )
     ,
@@ -25,7 +23,7 @@ target_baselearner <-
           penalty = 0.01
         ),
         lgb = expand.grid(
-          mtry = floor(0.75 * (ncol(dt_feat_calc_xyt) - 4)),
+          mtry = floor(0.25 * (ncol(dt_feat_calc_xyt) - 4)),
           trees = 500,
           learn_rate = 0.05
         )
@@ -65,7 +63,7 @@ target_baselearner <-
         xvar = seq(5, ncol(dt_feat_calc_xyt)),
         trim_resamples = TRUE,
         return_best = TRUE,
-        cv_rep = 100L
+        cv_rep = 1L
       ),
       description = "Static parameters | base learner"
     )

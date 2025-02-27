@@ -83,6 +83,7 @@ target_download <-
       ),
       description = "NARR features | lag"
     )
+    ,
     targets::tar_target(
       download_narr,
       command = amadeus::download_narr(
@@ -112,6 +113,7 @@ target_download <-
       pattern = cross(chr_iter_calc_narr_lag),
       description = "Download NARR data | lag | download"
     )
+    ,
     targets::tar_target(
       download_narr_buffer,
       command = {

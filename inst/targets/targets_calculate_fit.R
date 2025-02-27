@@ -62,7 +62,7 @@ target_calculate_fit <-
           from = amadeus::process_narr(
             path = file.path(chr_input_dir, "narr", chr_iter_calc_narr),
             variable = chr_iter_calc_narr,
-            date = beethoven::fl_dates(unlist(list_date))
+            date = beethoven::fl_dates(unlist(list_dates))
           ),
           locs = list_feat_proc_aqs_sites[[1]],
           locs_id = "site_id",
@@ -83,16 +83,16 @@ target_calculate_fit <-
       },
       pattern = cross(list_feat_proc_aqs_sites, list_dates, chr_iter_calc_narr),
       iteration = "list",
-      description = "Calculate NARR features | fit"
+      description = "Calculate NARR features | nolag | fit"
     )
     ,
     targets::tar_target(
-      dt_feat_calc_narr,
+      dt_feat_calc_narr_nolag,
       command = beethoven::reduce_merge(
         beethoven::reduce_list(list_feat_calc_narr),
         by = c("site_id", "time")
       ),
-      description = "data.table of NARR features | fit"
+      description = "data.table of NARR features | nolag | fit"
     )
     ,
     targets::tar_target(
@@ -103,7 +103,7 @@ target_calculate_fit <-
           from = amadeus::process_narr(
             path = file.path(chr_input_dir, "narr", chr_iter_calc_narr_lag),
             variable = chr_iter_calc_narr_lag,
-            date = "2017-12-31"
+            date = as.character(chr_dates[1] - 1)
           ),
           locs = dplyr::bind_rows(list_feat_proc_aqs_sites),
           locs_id = "site_id",
@@ -122,27 +122,35 @@ target_calculate_fit <-
           prefix = "NARR_0_"
         )
         int_narr_cols <- which(
-          names(dt_feat_calc_narr) %in% names(dt_iter_calc_narr_nolag)
+          names(dt_feat_calc_narr_nolag) %in% names(dt_lag_calc_narr)
         )
         dt_iter_calc_narr_bind <- rbind(
-          dt_iter_calc_narr_nolag,
-          dt_feat_calc_narr[, int_narr_cols, with = FALSE]
+          dt_lag_calc_narr,
+          dt_feat_calc_narr_nolag[, int_narr_cols, with = FALSE]
         )
         amadeus::calculate_lagged(
-          from = dt_lag_calc_narr,
-          date = chr_dates,
+          from = dt_iter_calc_narr_bind,
+          date = chr_daterange,
           lag = 1,
           locs_id = "site_id"
         )
       },
-      pattern = cross(chr_iter_calc_narr_lag),
+      pattern = map(chr_iter_calc_narr_lag),
       iteration = "list",
       description = "Calculate NARR features | lag | fit"
     )
     ,
-    #####
-    ##### ADD MERGE OF dt_feat_calc_narr and dt_feat_calc_narr_lag
-    #####
+    targets::tar_target(
+      dt_feat_calc_narr,
+      command = beethoven::reduce_merge(
+        beethoven::reduce_list(
+          c(list(dt_feat_calc_narr_nolag), list_feat_calc_narr_lag)
+        ),
+        by = c("site_id", "time")
+      ),
+      description = "data.table of NARR features | fit"
+    )
+    ,
     ###########################         HMS          ###########################
     targets::tar_target(
       list_feat_calc_hms,
@@ -948,19 +956,4 @@ target_calculate_fit <-
       ),
       description = "Imputed features + AQS sites (outcome and lat/lon) | fit"
     )
-    # ,
-    # targets::tar_target(
-    #   dt_feat_calc_imputed2,
-    #   command = beethoven::impute_all(
-    #     dt_feat_calc_design,
-    #     period = chr_daterange,
-    #     nthreads_dt = 32,
-    #     nthreads_collapse = 32,
-    #     nthreads_imputation = 32
-    #   ),
-    #   resources = targets::tar_resources(
-    #     crew = targets::tar_resources_crew(controller = "controller_impute")
-    #   ),
-    #   description = "Imputed features + lags | fit"
-    # )
   )

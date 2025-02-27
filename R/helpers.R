@@ -26,7 +26,11 @@ queue <- function() {
 
 cancel <- function(job = NULL) {
   stopifnot(!is.null(job))
-  system(paste0("scancel ", job))
+  if (job == "full") {
+    system("scancel -u $USER")
+  } else {
+    system(paste0("scancel ", job))
+  }
 }
 
 batch <- function(file = "run.sh") {

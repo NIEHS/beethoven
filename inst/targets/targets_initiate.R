@@ -28,16 +28,6 @@ target_initiate <-
     )
     ,
     targets::tar_target(
-      list_dates_lag,
-      command = beethoven::split_dates(
-        dates = c("2017-12-31", chr_daterange[2]),
-        n = num_dates_split,
-        year = TRUE
-      ),
-      description = "Dates as list (YYYY-MM-DD) | initiate | lag"
-    )
-    ,
-    targets::tar_target(
       list_dates_julian,
       command = lapply(list_dates, function(x) format(as.Date(x), "%Y%j")),
       description = "Dates as list (YYYYDDD) | initiate"
