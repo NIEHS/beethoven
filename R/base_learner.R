@@ -186,6 +186,7 @@ switch_model <-
 #' @param trim_resamples logical(1). Default is TRUE, which replaces the actual
 #'   data.frames in splits column of `tune_results` object with NA.
 #' @param return_best logical(1). If TRUE, the best tuned model is returned.
+#' @param workflow logical(1). If TRUE, the best fit model workflow is returned.
 #' @param metric character(1). The metric to be used for selecting the best.
 #' Must be one of "rmse", "rsq", "mae". Default = "rmse"
 #' @param ... Additional arguments to be passed.
@@ -220,6 +221,7 @@ fit_base_learner <-
     normalize = FALSE,
     trim_resamples = FALSE,
     return_best = TRUE,
+    workflow = TRUE,
     metric = "rmse",
     ...
   ) {
@@ -352,6 +354,7 @@ fit_base_learner <-
         iter_bayes = tune_bayes_iter,
         trim_resamples = trim_resamples,
         return_best = return_best,
+        workflow = workflow,
         data_full = dt_full_cols,
         metric = metric
       )
@@ -372,6 +375,7 @@ fit_base_learner <-
 #' @param trim_resamples logical(1). Default is TRUE, which replaces the actual
 #'  data.frames in splits column of `tune_results` object with NA.
 #' @param return_best logical(1). If TRUE, the best tuned model is returned.
+#' @param workflow logical(1). If TRUE, the best fit model workflow is returned.
 #' @param data_full The full data frame to be used for prediction.
 #' @param metric character(1). The metric to be used for selecting the best.
 #' Must be one of "rmse", "rsq", "mae". Default = "rmse"
@@ -398,6 +402,7 @@ fit_base_tune <-
     iter_bayes = 10L,
     trim_resamples = TRUE,
     return_best = TRUE,
+    workflow = TRUE,
     data_full = NULL,
     metric = "rmse"
   ) {
@@ -483,10 +488,14 @@ fit_base_tune <-
         list(
           base_prediction = base_wf_pred_best,
           base_parameter = base_wfparam,
-          best_performance = base_wftune
+          best_performance = base_wftune,
+          fit_workflow = base_wf_fit_best
         )
     }
 
+    if (!workflow) {
+      base_wflist <- base_wflist[-4]
+    }
     if (trim_resamples) {
       base_wflist <- base_wflist[-3]
     }

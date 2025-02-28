@@ -13,6 +13,7 @@ fit_base_tune(
   iter_bayes = 10L,
   trim_resamples = TRUE,
   return_best = TRUE,
+  workflow = TRUE,
   data_full = NULL,
   metric = "rmse"
 )
@@ -34,6 +35,8 @@ Default is "bayes", "grid" is acceptable.}
 data.frames in splits column of \code{tune_results} object with NA.}
 
 \item{return_best}{logical(1). If TRUE, the best tuned model is returned.}
+
+\item{workflow}{logical(1). If TRUE, the best fit model workflow is returned.}
 
 \item{data_full}{The full data frame to be used for prediction.}
 
