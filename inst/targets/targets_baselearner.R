@@ -3,21 +3,6 @@
 ##### hyperparameters.
 target_baselearner <-
   list(
-    # targets::tar_target(
-    #   dt_feat_calc_imputed2,
-    #   command = beethoven::impute_all(
-    #     dt_feat_calc_design,
-    #     period = chr_daterange,
-    #     nthreads_dt = 32,
-    #     nthreads_collapse = 32,
-    #     nthreads_imputation = 32
-    #   ),
-    #   resources = targets::tar_resources(
-    #     crew = targets::tar_resources_crew(controller = "controller_impute")
-    #   ),
-    #   description = "Imputed features + lags | fit | DEV"
-    # )
-    # ,
     targets::tar_target(
       list_base_args_cv,
       command = list(spatiotemporal = list(v = 10L)),
@@ -51,10 +36,10 @@ target_baselearner <-
       list_base_params_mlp,
       command = list(
         mlp = expand.grid(
-          hidden_units = 512,
-          dropout = 0.1,
+          hidden_units = list(64, 128),
+          dropout = c(0.1, 0.2),
           activation = "relu",
-          learn_rate = 0.00001
+          learn_rate = c(0.001, 0.005)
         )
       ),
       description = "tuning grid | mlp | base learner"
@@ -128,8 +113,7 @@ target_baselearner_cpu <-
         cv_mode = df_learner_type_elnet$cv_mode,
         args_generate_cv = list_base_args_cv[[df_learner_type_elnet$cv_mode]],
         tune_mode = list_base_params_static$tune_mode,
-        tune_grid_in =
-          list_base_params_elnet[[df_learner_type_elnet$learner]],
+        tune_grid_in = list_base_params_elnet[[df_learner_type_elnet$learner]],
         tune_grid_size = list_base_params_static$tune_grid_size,
         yvar = list_base_params_static$yvar,
         xvar = list_base_params_static$xvar,
@@ -170,8 +154,7 @@ target_baselearner_cpu <-
         cv_mode = df_learner_type_lgb$cv_mode,
         args_generate_cv = list_base_args_cv[[df_learner_type_lgb$cv_mode]],
         tune_mode = list_base_params_static$tune_mode,
-        tune_grid_in =
-          list_base_params_lgb[[df_learner_type_lgb$learner]],
+        tune_grid_in = list_base_params_lgb[[df_learner_type_lgb$learner]],
         tune_grid_size = list_base_params_static$tune_grid_size,
         yvar = list_base_params_static$yvar,
         xvar = list_base_params_static$xvar,
@@ -216,9 +199,9 @@ target_baselearner_gpu <-
         cv_mode = df_learner_type_mlp$cv_mode,
         args_generate_cv = list_base_args_cv[[df_learner_type_mlp$cv_mode]],
         tune_mode = list_base_params_static$tune_mode,
-        tune_grid_in =
-          list_base_params_mlp[[df_learner_type_mlp$learner]],
-        tune_grid_size = list_base_params_static$tune_grid_size,
+        tune_grid_in = list_base_params_mlp[[df_learner_type_mlp$learner]],
+        tune_grid_size = nrow(list_base_params_mlp$mlp),
+        # tune_grid_size = list_base_params_static$tune_grid_size,
         yvar = list_base_params_static$yvar,
         xvar = list_base_params_static$xvar,
         trim_resamples = list_base_params_static$trim_resamples,

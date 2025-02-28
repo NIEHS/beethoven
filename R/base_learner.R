@@ -181,6 +181,8 @@ switch_model <-
 #'   Default is 0.1.
 #' @param yvar The target variable.
 #' @param xvar The predictor variables.
+#' @param normalize logical(1). If `TRUE`, all numeric predictors are
+#' normalized. Default is `FALSE`.
 #' @param trim_resamples logical(1). Default is TRUE, which replaces the actual
 #'   data.frames in splits column of `tune_results` object with NA.
 #' @param return_best logical(1). If TRUE, the best tuned model is returned.
@@ -215,6 +217,7 @@ fit_base_learner <-
     learn_rate = 0.1,
     yvar = "Arithmetic.Mean",
     xvar = seq(5, ncol(dt_full)),
+    normalize = FALSE,
     trim_resamples = FALSE,
     return_best = TRUE,
     metric = "rmse",
@@ -271,11 +274,16 @@ fit_base_learner <-
       recipes::recipe(
         dt_sample[1, ]
       ) %>%
-      # do we want to normalize the predictors?
-      # if so, an additional definition of truly continuous variables is needed
-      # recipes::step_normalize(recipes::all_numeric_predictors()) %>%
       recipes::update_role(!!xvar) %>%
       recipes::update_role(!!yvar, new_role = "outcome")
+
+    if (normalize) {
+      base_recipe <-
+        base_recipe %>%
+        recipes::step_normalize(
+          recipes::all_numeric_predictors(), -recipes::all_integer_predictors()
+        )
+    }
 
     if (!is.null(folds)) {
       base_vfold <- rsample::vfold_cv(dt_sample, v = folds)

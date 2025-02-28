@@ -38,6 +38,7 @@ testthat::test_that("fit mlp (folds + grid))", {
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
+      normalize = TRUE,
       trim_resamples = FALSE,
       return_best = TRUE
     )
