@@ -29,7 +29,7 @@ apptainer exec \
   --bind $PWD:/mnt \
   --bind $PWD/inst:/inst \
   --bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input \
-  --bind $PWD/_targets:/opt/_targets \
+  --bind /ddn/gs1/group/set/Projects/beethoven/targets:/opt/_targets \
   --bind /run/munge:/run/munge \
   --bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm \
   container_covariates.sif \

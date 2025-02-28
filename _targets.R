@@ -37,6 +37,7 @@ controller_10 <- crew::crew_controller_local(
 ##### `controller_gpu` uses 4 GPU workers (undefined memory allocation).
 scriptlines_apptainer <- "apptainer"
 scriptlines_basedir <- "$PWD"
+scriptlines_targetdir <- "/ddn/gs1/group/set/Projects/beethoven"
 scriptlines_inputdir <- "/ddn/gs1/group/set/Projects/NRT-AP-Model/input"
 scriptlines_container <- "container_models.sif"
 scriptlines_gpu <- glue::glue(
@@ -49,7 +50,7 @@ scriptlines_gpu <- glue::glue(
   "--bind {scriptlines_basedir}:/mnt ",
   "--bind {scriptlines_basedir}/inst:/inst ",
   "--bind {scriptlines_inputdir}:/input ",
-  "--bind {scriptlines_basedir}/_targets:/opt/_targets ",
+  "--bind {scriptlines_targetdir}/targets:/opt/_targets ",
   "{scriptlines_container} \\"
 )
 controller_gpu <- crew.cluster::crew_controller_slurm(
@@ -58,30 +59,6 @@ controller_gpu <- crew.cluster::crew_controller_slurm(
   options_cluster = crew.cluster::crew_options_slurm(
     verbose = TRUE,
     script_lines = scriptlines_gpu
-  )
-)
-##### `controller_impute` uses separate workers for multi-threaded imputation
-##### with `missRanger` via `impute_all` function.
-scriptlines_impute <- glue::glue(
-  "#SBATCH --job-name=impute \
-  #SBATCH --partition=geo \
-  #SBATCH --cpus-per-task=32 \
-  #SBATCH --mem=25G \
-  #SBATCH --error=slurm/impute_%j.out \
-  {scriptlines_apptainer} exec --env ",
-  "OMP_NUM_THREADS=${{SLURM_CPUS_PER_TASK}} ",
-  "--bind {scriptlines_basedir}:/mnt ",
-  "--bind {scriptlines_basedir}/inst:/inst ",
-  "--bind {scriptlines_inputdir}:/input ",
-  "--bind {scriptlines_basedir}/_targets:/opt/_targets ",
-  "{scriptlines_container} \\"
-)
-controller_impute <- crew.cluster::crew_controller_slurm(
-  name = "controller_impute",
-  workers = 1,
-  options_cluster = crew.cluster::crew_options_slurm(
-    verbose = TRUE,
-    script_lines = scriptlines_impute
   )
 )
 
@@ -114,7 +91,7 @@ targets::tar_option_set(
   controller = crew::crew_controller_group(
     controller_250, controller_100, controller_75,
     controller_50, controller_25, controller_10,
-    controller_gpu, controller_impute
+    controller_gpu
   ),
   resources = targets::tar_resources(
     crew = targets::tar_resources_crew(controller = "controller_250")

@@ -36,10 +36,10 @@ target_baselearner <-
       list_base_params_mlp,
       command = list(
         mlp = expand.grid(
-          hidden_units = list(64, 128),
-          dropout = c(0.1, 0.2),
+          hidden_units = list(128),
+          dropout = c(0.1),
           activation = "relu",
-          learn_rate = c(0.001, 0.005)
+          learn_rate = c(0.001)
         )
       ),
       description = "tuning grid | mlp | base learner"
@@ -93,7 +93,9 @@ target_baselearner_cpu <-
         learner = c("elnet"),
         ##### NOTE: {elnet} max ~14.8 Gb memory
         cv_mode = "spatiotemporal",
-        cv_rep = list_base_params_static$cv_rep,
+        # cv_rep = list_base_params_static$cv_rep,
+        cv_rep = 50L,
+        ##### DEV: repeat {elnet} for meta learner debug
         num_device = 1L
       ) %>%
         split(seq_len(nrow(.))),
@@ -179,7 +181,8 @@ target_baselearner_gpu <-
       command = beethoven::assign_learner_cv(
         learner = c("mlp"),
         cv_mode = "spatiotemporal",
-        cv_rep = list_base_params_static$cv_rep,
+        # cv_rep = list_base_params_static$cv_rep,
+        cv_rep = 1L,
         num_device = 4L
       ) %>%
         split(seq_len(nrow(.))),
@@ -204,6 +207,7 @@ target_baselearner_gpu <-
         # tune_grid_size = list_base_params_static$tune_grid_size,
         yvar = list_base_params_static$yvar,
         xvar = list_base_params_static$xvar,
+        normalize = TRUE,
         trim_resamples = list_base_params_static$trim_resamples,
         return_best = list_base_params_static$return_best
       ),
