@@ -77,7 +77,7 @@ target_baselearner <-
         xvar = seq(5, ncol(dt_feat_calc_xyt)),
         trim_resamples = TRUE,
         return_best = TRUE,
-        cv_rep = 1L
+        cv_rep = 50L
       ),
       description = "Static parameters | base learner"
     )
@@ -93,9 +93,7 @@ target_baselearner_cpu <-
         learner = c("elnet"),
         ##### NOTE: {elnet} max ~14.8 Gb memory
         cv_mode = "spatiotemporal",
-        # cv_rep = list_base_params_static$cv_rep,
-        cv_rep = 50L,
-        ##### DEV: repeat {elnet} for meta learner debug
+        cv_rep = list_base_params_static$cv_rep,
         num_device = 1L
       ) %>%
         split(seq_len(nrow(.))),
@@ -181,8 +179,7 @@ target_baselearner_gpu <-
       command = beethoven::assign_learner_cv(
         learner = c("mlp"),
         cv_mode = "spatiotemporal",
-        # cv_rep = list_base_params_static$cv_rep,
-        cv_rep = 1L,
+        cv_rep = list_base_params_static$cv_rep,
         num_device = 4L
       ) %>%
         split(seq_len(nrow(.))),
@@ -203,8 +200,7 @@ target_baselearner_gpu <-
         args_generate_cv = list_base_args_cv[[df_learner_type_mlp$cv_mode]],
         tune_mode = list_base_params_static$tune_mode,
         tune_grid_in = list_base_params_mlp[[df_learner_type_mlp$learner]],
-        tune_grid_size = nrow(list_base_params_mlp$mlp),
-        # tune_grid_size = list_base_params_static$tune_grid_size,
+        tune_grid_size = list_base_params_static$tune_grid_size,
         yvar = list_base_params_static$yvar,
         xvar = list_base_params_static$xvar,
         normalize = TRUE,
