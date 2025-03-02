@@ -1,7 +1,5 @@
 
 ## Targets for prediction grid features ####
-## FIXME: align with the "_fit" targets
-## TODO: chopin's gridset implementation
 ## TODO: prospective or retrospective, or both?
 # strategy: no all-merged data.frame (data.table)
 #           in-branch processing (using the branched target then pass it to targets_predict)
@@ -241,7 +239,7 @@ target_calculate_predict <-
       },
       pattern = cross(list_pred_calc_grid, list_dates),
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_100")
+        crew = targets::tar_resources_crew(controller = "controller_50")
       ),
       iteration = "list",
       description = "Calculate GEOS-CF features | aqc | prediction"
@@ -250,7 +248,7 @@ target_calculate_predict <-
     targets::tar_target(
       list_pred_calc_geos_chm,
       command = {
-        download_geos_buffer
+        # download_geos_buffer
         beethoven::calc_geos_strict(
           path = file.path(chr_input_dir, "geos", chr_iter_calc_geos[2]),
           date = beethoven::fl_dates(unlist(list_dates)),
@@ -260,7 +258,7 @@ target_calculate_predict <-
       },
       pattern = cross(list_pred_calc_grid, list_dates),
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_100")
+        crew = targets::tar_resources_crew(controller = "controller_50")
       ),
       iteration = "list",
       description = "Calculate GEOS-CF features | chm | prediction"
@@ -320,38 +318,6 @@ target_calculate_predict <-
     # ,
 
     ###########################       MODIS - MOD11       ######################
-    # targets::tar_target(
-    #   chr_args_calc_mod11_files,
-    #   command = {
-    #     download_mod11
-    #     list.files(
-    #       file.path(chr_input_dir, "modis", "raw", "61", "MOD11A1"),
-    #       full.names = TRUE,
-    #       recursive = TRUE
-    #     )
-    #   },
-    #   description = "MODIS - MOD11 files"
-    # )
-    # ,
-    # targets::tar_target(
-    #   list_args_calc_mod11,
-    #   command = list(
-    #     from = grep(
-    #       x = chr_args_calc_mod11_files,
-    #       pattern = paste0(
-    #         "MOD11A1.A", unlist(list_dates_julian), collapse = "|"
-    #       ),
-    #       value = TRUE
-    #     ),
-    #     name_covariates = c("MOD_SFCTD_0_", "MOD_SFCTN_0_"),
-    #     subdataset = "^LST_",
-    #     radius = chr_iter_radii
-    #   ),
-    #   pattern = map(list_dates_julian),
-    #   iteration = "list",
-    #   description = "MODIS - MOD11 arguments"
-    # )
-    # ,
     targets::tar_target(
       list_pred_calc_mod11,
       command = {
@@ -407,53 +373,6 @@ target_calculate_predict <-
       description = "Calculate MODIS - MOD06 features | prediction"
     )
     ,
-    # targets::tar_target(
-    #   chr_args_calc_mod06_files,
-    #   command = {
-    #     download_mod06
-    #     list.files(
-    #       file.path(chr_input_dir, "modis", "raw", "61", "MOD06_L2"),
-    #       full.names = TRUE,
-    #       recursive = TRUE
-    #     )
-    #   },
-    #   description = "MODIS - MOD06 files"
-    # )
-    # ,
-    # targets::tar_target(
-    #   list_args_calc_mod06,
-    #   command = list(
-    #     from = grep(
-    #       x = chr_args_calc_mod06_files,
-    #       pattern = paste0(
-    #         "MOD06_L2.A", unlist(list_dates_julian), collapse = "|"
-    #       ),
-    #       value = TRUE
-    #     ),
-    #     name_covariates = c("MOD_CLCVD_0_", "MOD_CLCVN_0_"),
-    #     subdataset = c("Cloud_Fraction_Day", "Cloud_Fraction_Night"),
-    #     preprocess = amadeus::process_modis_swath,
-    #     radius = chr_iter_radii
-    #   ),
-    #   pattern = map(list_dates_julian),
-    #   iteration = "list",
-    #   description = "MODIS - MOD06 arguments"
-    # )
-    # ,
-    # targets::tar_target(
-    #   list_pred_calc_mod06,
-    #   command = beethoven::inject_modis(
-    #     locs = list_pred_calc_grid,
-    #     injection = list_args_calc_mod06
-    #   ),
-    #   pattern = cross(list_pred_calc_grid, list_args_calc_mod06),
-    #   iteration = "list",
-    #   resources = targets::tar_resources(
-    #     crew = targets::tar_resources_crew(controller = "controller_50")
-    #   ),
-    #   description = "Calculate MODIS - MOD06 features | fit"
-    # )
-    # ,
     ###########################       MODIS - MOD13       ######################
     targets::tar_target(
       list_pred_calc_mod13,
@@ -466,13 +385,6 @@ target_calculate_predict <-
           colheader = "MOD_NDVIV_0_",
           mark = TRUE
         )
-        # chopin::extract_at(
-        #   chr_list_calc_mod13_files,
-        #   sf::st_as_sf(
-        #     list_feat_proc_aqs_sites,
-        #     sf_column_name = "geometry"),
-        #   radius = chr_iter_radii
-        # )
       },
       pattern = cross(chr_list_calc_mod13_files, list_pred_calc_grid, chr_iter_radii),
       iteration = "list",
@@ -482,52 +394,6 @@ target_calculate_predict <-
       description = "Calculate MODIS - MOD13 features | prediction"
     )
     ,
-    # targets::tar_target(
-    #   chr_args_calc_mod13_files,
-    #   command = {
-    #     download_mod13
-    #     list.files(
-    #       file.path(chr_input_dir, "modis", "raw", "61", "MOD13A2"),
-    #       full.names = TRUE,
-    #       recursive = TRUE
-    #     )
-    #   },
-    #   description = "MODIS - MOD13 files"
-    # )
-    # ,
-    # targets::tar_target(
-    #   list_args_calc_mod13,
-    #   command = list(
-    #     from = grep(
-    #       x = chr_args_calc_mod13_files,
-    #       pattern = paste0(
-    #         "MOD13A2.A", unlist(list_dates_julian), collapse = "|"
-    #       ),
-    #       value = TRUE
-    #     ),
-    #     name_covariates = "MOD_NDVIV_0_",
-    #     subdataset = "(NDVI)",
-    #     radius = chr_iter_radii
-    #   ),
-    #   pattern = map(list_dates_julian),
-    #   iteration = "list",
-    #   description = "MODIS - MOD13 arguments"
-    # )
-    # ,
-    # targets::tar_target(
-    #   list_pred_calc_mod13,
-    #   command = beethoven::inject_modis(
-    #     locs = list_pred_calc_grid,
-    #     injection = list_args_calc_mod13
-    #   ),
-    #   pattern = cross(list_pred_calc_grid, list_args_calc_mod13),
-    #   iteration = "list",
-    #   resources = targets::tar_resources(
-    #     crew = targets::tar_resources_crew(controller = "controller_100")
-    #   ),
-    #   description = "Calculate MODIS - MOD13 features | fit"
-    # )
-    # ,
     ###########################     MODIS - MCD19_1km     ######################
     targets::tar_target(
       list_pred_calc_mcd19_1km,
@@ -540,13 +406,6 @@ target_calculate_predict <-
           colheader = c("MOD_AD4TA_0_", "MOD_AD5TA_0_"),
           mark = TRUE
         )
-        # chopin::extract_at(
-        #   chr_list_calc_mcd19_files,
-        #   sf::st_as_sf(
-        #     list_feat_proc_aqs_sites,
-        #     sf_column_name = "geometry"),
-        #   radius = chr_iter_radii
-        # )
       },
       pattern = cross(chr_list_calc_mcd19_1km_files, list_pred_calc_grid, chr_iter_radii),
       iteration = "list",
@@ -556,52 +415,6 @@ target_calculate_predict <-
       description = "Calculate MODIS - MCD19_1km features | prediction"
     )
     ,
-    # targets::tar_target(
-    #   chr_args_calc_mcd19_files,
-    #   command = {
-    #     download_mcd19
-    #     list.files(
-    #       file.path(chr_input_dir, "modis", "raw", "61", "MCD19A2"),
-    #       full.names = TRUE,
-    #       recursive = TRUE
-    #     )
-    #   },
-    #   description = "MODIS - MCD19_*km files"
-    # )
-    # ,
-    # targets::tar_target(
-    #   list_args_calc_mcd19_1km,
-    #   command = list(
-    #     from = grep(
-    #       x = chr_args_calc_mcd19_files,
-    #       pattern = paste0(
-    #         "MCD19A2.A", unlist(list_dates_julian), collapse = "|"
-    #       ),
-    #       value = TRUE
-    #     ),
-    #     name_covariates = c("MOD_AD4TA_0_", "MOD_AD5TA_0_"),
-    #     subdataset = "^Optical_Depth",
-    #     radius = chr_iter_radii
-    #   ),
-    #   pattern = map(list_dates_julian),
-    #   iteration = "list",
-    #   description = "MODIS - MCD19_1km arguments"
-    # )
-    # ,
-    # targets::tar_target(
-    #   list_pred_calc_mcd19_1km,
-    #   command = beethoven::inject_modis(
-    #     locs = list_pred_calc_grid,
-    #     injection = list_args_calc_mcd19_1km
-    #   ),
-    #   pattern = cross(list_pred_calc_grid, list_args_calc_mcd19_1km),
-    #   iteration = "list",
-    #   resources = targets::tar_resources(
-    #     crew = targets::tar_resources_crew(controller = "controller_250")
-    #   ),
-    #   description = "Calculate MODIS - MCD19_1km features | fit"
-    # )
-    # ,
     ###########################     MODIS - MCD19_5km     ######################
     targets::tar_target(
       list_pred_calc_mcd19_5km,
@@ -626,42 +439,6 @@ target_calculate_predict <-
       description = "Calculate MODIS - MCD19_5km features | prediction"
     )
     ,
-    # targets::tar_target(
-    #   list_args_calc_mcd19_5km,
-    #   command = list(
-    #     from = grep(
-    #       x = chr_args_calc_mcd19_files,
-    #       pattern = paste0(
-    #         "MCD19A2.A", unlist(list_dates_julian), collapse = "|"
-    #       ),
-    #       value = TRUE
-    #     ),
-    #     name_covariates = c(
-    #       "MOD_CSZAN_0_", "MOD_CVZAN_0_", "MOD_RAZAN_0_",
-    #       "MOD_SCTAN_0_", "MOD_GLNAN_0_"
-    #     ),
-    #     subdataset = "cos|RelAZ|Angle",
-    #     radius = chr_iter_radii
-    #   ),
-    #   pattern = map(list_dates_julian),
-    #   iteration = "list",
-    #   description = "MODIS - MCD19_5km arguments"
-    # )
-    # ,
-    # targets::tar_target(
-    #   list_pred_calc_mcd19_5km,
-    #   command = beethoven::inject_modis(
-    #     locs = list_pred_calc_grid,
-    #     injection = list_args_calc_mcd19_5km
-    #   ),
-    #   pattern = cross(list_pred_calc_grid, list_args_calc_mcd19_5km),
-    #   iteration = "list",
-    #   resources = targets::tar_resources(
-    #     crew = targets::tar_resources_crew(controller = "controller_250")
-    #   ),
-    #   description = "Calculate MODIS - MCD19_5km features | fit"
-    # )
-    # ,
     ###########################       MODIS - MOD09       ######################
     targets::tar_target(
       list_pred_calc_mod09,
@@ -685,55 +462,7 @@ target_calculate_predict <-
       ),
       description = "Calculate MODIS - MOD09GA features | prediction"
     )
-    ,    # targets::tar_target(
-    #   chr_args_calc_mod09_files,
-    #   command = {
-    #     download_mod09
-    #     list.files(
-    #       file.path(chr_input_dir, "modis", "raw", "61", "MOD09GA"),
-    #       full.names = TRUE,
-    #       recursive = TRUE
-    #     )
-    #   },
-    #   description = "MODIS - MOD09 files"
-    # )
-    # ,
-    # targets::tar_target(
-    #   list_args_calc_mod09,
-    #   command = list(
-    #     from = grep(
-    #       x = chr_args_calc_mod09_files,
-    #       pattern = paste0(
-    #         "MOD09GA.A", unlist(list_dates_julian), collapse = "|"
-    #       ),
-    #       value = TRUE
-    #     ),
-    #     name_covariates = c(
-    #       "MOD_SFCRF_1_", "MOD_SFCRF_2_", "MOD_SFCRF_3_", "MOD_SFCRF_4_",
-    #       "MOD_SFCRF_5_", "MOD_SFCRF_6_", "MOD_SFCRF_7_"
-    #     ),
-    #     subdataset = "^sur_refl_",
-    #     radius = chr_iter_radii
-    #   ),
-    #   pattern = map(list_dates_julian),
-    #   iteration = "list",
-    #   description = "MODIS - MOD09 arguments"
-    # )
-    # ,
-    # targets::tar_target(
-    #   list_pred_calc_mod09,
-    #   command = beethoven::inject_modis(
-    #     locs = list_pred_calc_grid,
-    #     injection = list_args_calc_mod09
-    #   ),
-    #   pattern = cross(list_pred_calc_grid, list_args_calc_mod09),
-    #   iteration = "list",
-    #   resources = targets::tar_resources(
-    #     crew = targets::tar_resources_crew(controller = "controller_25")
-    #   ),
-    #   description = "Calculate MODIS - MOD09 features | fit"
-    # )
-    # ,
+    ,
     ###########################       MODIS - VIIRS       ######################
     targets::tar_target(
       list_pred_calc_viirs,
@@ -755,53 +484,6 @@ target_calculate_predict <-
       description = "Calculate MODIS - VIIRS features | prediction"
     )
     ,
-    # targets::tar_target(
-    #   chr_args_calc_viirs_files,
-    #   command = {
-    #     download_viirs
-    #     list.files(
-    #       file.path(chr_input_dir, "modis", "raw", "5000", "VNP46A2"),
-    #       full.names = TRUE,
-    #       recursive = TRUE
-    #     )
-    #   },
-    #   description = "MODIS - VIIRS files"
-    # )
-    # ,
-    # targets::tar_target(
-    #   list_args_calc_viirs,
-    #   command = list(
-    #     from = grep(
-    #       x = chr_args_calc_viirs_files,
-    #       pattern = paste0(
-    #         "VNP46A2.A", unlist(list_dates_julian), collapse = "|"
-    #       ),
-    #       value = TRUE
-    #     ),
-    #     name_covariates = "MOD_LGHTN_0_",
-    #     subdataset = 3,
-    #     preprocess = amadeus::process_blackmarble,
-    #     radius = chr_iter_radii
-    #   ),
-    #   pattern = map(list_dates_julian),
-    #   iteration = "list",
-    #   description = "MODIS - VIIRS arguments"
-    # )
-    # ,
-    # targets::tar_target(
-    #   list_pred_calc_viirs,
-    #   command = beethoven::inject_modis(
-    #     locs = list_pred_calc_grid,
-    #     injection = list_args_calc_viirs
-    #   ),
-    #   pattern = cross(list_pred_calc_grid, list_args_calc_viirs),
-    #   iteration = "list",
-    #   resources = targets::tar_resources(
-    #     crew = targets::tar_resources_crew(controller = "controller_100")
-    #   ),
-    #   description = "Calculate MODIS - VIIRS features | fit"
-    # )
-    # ,
     ###########################        MODIS/VIIRS        ######################
     # targets::tar_target(
     #   dt_feat_calc_nasa,
@@ -828,7 +510,7 @@ target_calculate_predict <-
     targets::tar_target(
       dt_pred_calc_koppen,
       command = {
-        download_koppen
+        # download_koppen
         data.table::data.table(
           amadeus::calculate_koppen_geiger(
             from = amadeus::process_koppen_geiger(
@@ -936,12 +618,18 @@ target_calculate_predict <-
     # ,
     ###########################         NEI          ###########################
     targets::tar_target(
+      chr_iter_calc_nei,
+      command = c(2017, 2020),
+      description = "NEI features | download"
+    )
+    ,
+    targets::tar_target(
       list_pred_calc_nei,
       command = {
         download_nei
         beethoven::inject_calculate(
           covariate = "nei",
-          locs = list_pred_calc_grid_drop,
+          locs = list_pred_calc_grid,
           injection = list(
             domain = chr_iter_calc_nei,
             domain_name = "year",
@@ -951,7 +639,7 @@ target_calculate_predict <-
         )
       },
       iteration = "list",
-      pattern = cross(list_pred_calc_grid_drop, chr_iter_calc_nei),
+      pattern = cross(list_pred_calc_grid, chr_iter_calc_nei),
       description = "Calculate NEI features | fit"
     )
     ,
@@ -971,7 +659,7 @@ target_calculate_predict <-
     targets::tar_target(
       dt_pred_calc_ecoregions,
       command = {
-        download_ecoregions
+        # download_ecoregions
         data.table::data.table(
           amadeus::calculate_ecoregion(
             from = amadeus::process_ecoregion(
@@ -982,7 +670,10 @@ target_calculate_predict <-
                 "us_eco_l3_state_boundaries.shp"
               )
             ),
-            locs = dplyr::bind_rows(list_pred_calc_grid_drop),
+            locs = dplyr::bind_rows(list_pred_calc_grid),
+            resources = targets::tar_resources(
+              crew = targets::tar_resources_crew(controller = "controller_25")
+            ),
             # NOTE: locs are all AQS sites for computational efficiency
             locs_id = "site_id"
           )
@@ -1006,14 +697,17 @@ target_calculate_predict <-
               "gROADS-v1-americas.gdb"
             )
           ),
-          locs = dplyr::bind_rows(list_pred_calc_grid_drop),
+          locs = list_pred_calc_grid,
           # NOTE: locs are all AQS sites for computational efficiency
           locs_id = "site_id",
           radius = chr_iter_radii
         )
       },
       iteration = "list",
-      pattern = map(chr_iter_radii),
+      pattern = cross(list_pred_calc_grid, chr_iter_radii),
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_25")
+      ),
       description = "Calculate gRoads features | fit"
     )
     #,
