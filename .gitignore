@@ -114,7 +114,7 @@ beethoven_branching_notes.txt
 inst/extdata/nasa_token.txt
 
 debug/
-debug*.sh
+debug*
 
 # dev
 lib-flex/**

@@ -8,7 +8,7 @@
 #SBATCH --output=slurm/beethoven_%j.out
 
 #############################      COVARIATES      #############################
-# Download and calculate covariates via container_covariates.sif
+# Download and calculate AQS sites covariates via container_covariates.sif
 echo "Submitting {beethoven} covariates targets ..."
 sbatch --wait inst/scripts/run_covariates.sh
 
@@ -24,3 +24,8 @@ sbatch --wait inst/scripts/run_models_gpu.sh
 # Fit CPU-enbaled meta learner models via container_models.sif.
 echo "Submitting {beethoven} CPU-enabled meta models targets ..."
 sbatch --wait inst/scripts/run_models_meta.sh
+
+#############################      PREDICTION      #############################
+# Calculate rediction grid covariates and predict via container_covariates.sif
+# echo "Submitting {beethoven} prediction targets ..."
+# sbatch --wait inst/scripts/run_predict.sh

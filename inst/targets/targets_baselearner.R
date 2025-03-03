@@ -10,6 +10,15 @@ target_baselearner <-
     )
     ,
     targets::tar_target(
+      engine_base_elnet,
+      command = beethoven::switch_model(
+        model_type = "elnet",
+        device = "cpu"
+      ),
+      description = "Engine and device | elnet | base learner"
+    )
+    ,
+    targets::tar_target(
       list_base_params_elnet,
       command = list(
         elnet = expand.grid(
@@ -18,6 +27,15 @@ target_baselearner <-
         )
       ),
       description = "tuning grid | elnet | base learner"
+    )
+    ,
+    targets::tar_target(
+      engine_base_lgb,
+      command = beethoven::switch_model(
+        model_type = "lgb",
+        device = "cpu"
+      ),
+      description = "Engine and device | lgb | base learner"
     )
     ,
     targets::tar_target(
@@ -30,6 +48,15 @@ target_baselearner <-
         )
       ),
       description = "tuning grid | lgb | base learner"
+    )
+    ,
+    targets::tar_target(
+      engine_base_mlp,
+      command = beethoven::switch_model(
+        model_type = "mlp",
+        device = "cuda"
+      ),
+      description = "Engine and device | mlp | base learner"
     )
     ,
     targets::tar_target(
@@ -46,25 +73,6 @@ target_baselearner <-
     )
     ,
     targets::tar_target(
-      list_base_switch_model,
-      command = list(
-        mlp = beethoven::switch_model(
-          model_type = "mlp",
-          device = "cuda"
-        ),
-        elnet = beethoven::switch_model(
-          model_type = "elnet",
-          device = "cpu"
-        ),
-        lgb = beethoven::switch_model(
-          model_type = "lgb",
-          device = "cpu"
-        )
-      ),
-      description = "Engines and devices | base learner"
-    )
-    ,
-    targets::tar_target(
       list_base_params_static,
       command = list(
         dt_full = dt_feat_calc_xyt,
@@ -78,6 +86,10 @@ target_baselearner <-
         normalize = TRUE,
         trim_resamples = TRUE,
         return_best = TRUE,
+        workflow = FALSE,
+        ##### NOTE: exclude workflow for base to meta learner dev.
+        ##### will need to be included to predict base learner values
+        ##### on prediction grid.
         cv_rep = 50L
       ),
       description = "Static parameters | base learner"
@@ -109,7 +121,7 @@ target_baselearner_cpu <-
         dt_full = list_base_params_static$dt_full,
         r_subsample = list_base_params_static$r_subsample,
         c_subsample = list_base_params_static$c_subsample,
-        model = list_base_switch_model[[df_learner_type_elnet$learner]],
+        model = engine_base_elnet,
         folds = list_base_params_static$folds,
         cv_mode = df_learner_type_elnet$cv_mode,
         args_generate_cv = list_base_args_cv[[df_learner_type_elnet$cv_mode]],
@@ -120,7 +132,8 @@ target_baselearner_cpu <-
         xvar = list_base_params_static$xvar,
         normalize = list_base_params_static$normalize,
         trim_resamples = list_base_params_static$trim_resamples,
-        return_best = list_base_params_static$return_best
+        return_best = list_base_params_static$return_best,
+        workflow = list_base_params_static$workflow
       ),
       pattern = map(df_learner_type_elnet),
       iteration = "list",
@@ -136,7 +149,8 @@ target_baselearner_cpu <-
         learner = c("lgb"),
         ##### NOTE: {lgb} max ~13.2 Gb memory.
         cv_mode = "spatiotemporal",
-        cv_rep = list_base_params_static$cv_rep,
+        # cv_rep = list_base_params_static$cv_rep,
+        cv_rep = 5L,
         num_device = 1L
       ) %>%
         split(seq_len(nrow(.))),
@@ -151,7 +165,7 @@ target_baselearner_cpu <-
         dt_full = list_base_params_static$dt_full,
         r_subsample = list_base_params_static$r_subsample,
         c_subsample = list_base_params_static$c_subsample,
-        model = list_base_switch_model[[df_learner_type_lgb$learner]],
+        model = engine_base_lgb,
         folds = list_base_params_static$folds,
         cv_mode = df_learner_type_lgb$cv_mode,
         args_generate_cv = list_base_args_cv[[df_learner_type_lgb$cv_mode]],
@@ -162,7 +176,8 @@ target_baselearner_cpu <-
         xvar = list_base_params_static$xvar,
         normalize = list_base_params_static$normalize,
         trim_resamples = list_base_params_static$trim_resamples,
-        return_best = list_base_params_static$return_best
+        return_best = list_base_params_static$return_best,
+        workflow = list_base_params_static$workflow
       ),
       pattern = map(df_learner_type_lgb),
       iteration = "list",
@@ -197,7 +212,7 @@ target_baselearner_gpu <-
         dt_full = list_base_params_static$dt_full,
         r_subsample = list_base_params_static$r_subsample,
         c_subsample = list_base_params_static$c_subsample,
-        model = list_base_switch_model[[df_learner_type_mlp$learner]],
+        model = engine_base_mlp,
         folds = list_base_params_static$folds,
         cv_mode = df_learner_type_mlp$cv_mode,
         args_generate_cv = list_base_args_cv[[df_learner_type_mlp$cv_mode]],
@@ -208,7 +223,8 @@ target_baselearner_gpu <-
         xvar = list_base_params_static$xvar,
         normalize = list_base_params_static$normalize,
         trim_resamples = list_base_params_static$trim_resamples,
-        return_best = list_base_params_static$return_best
+        return_best = list_base_params_static$return_best,
+        workflow = list_base_params_static$workflow
       ),
       pattern = map(df_learner_type_mlp),
       iteration = "list",

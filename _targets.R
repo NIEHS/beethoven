@@ -14,11 +14,6 @@ controller_100 <- crew::crew_controller_local(
   name = "controller_100",
   workers = 100
 )
-##### `controller_75` uses 75 workers (~13.33 Gb per worker).
-controller_75 <- crew::crew_controller_local(
-  name = "controller_75",
-  workers = 75
-)
 ##### `controller_50` uses 50 workers (~20.0 Gb per worker).
 controller_50 <- crew::crew_controller_local(
   name = "controller_50",
@@ -75,7 +70,7 @@ if (Sys.getenv("BEETHOVEN") == "covariates") {
   beethoven_packages <- c(
     "amadeus", "targets", "tarchetypes", "dplyr", "tidyverse",
     "data.table", "sf", "crew", "crew.cluster", "lubridate", "qs2",
-    "torch", "bonsai", "dials", "lightgbm", "xgboost", "glmnet"
+    "torch", "bonsai", "dials", "lightgbm", "glmnet"#, "xgboost"
   )
 }
 targets::tar_option_set(
@@ -89,9 +84,8 @@ targets::tar_option_set(
   garbage_collection = TRUE,
   seed = 202401L,
   controller = crew::crew_controller_group(
-    controller_250, controller_100, controller_75,
-    controller_50, controller_25, controller_10,
-    controller_gpu
+    controller_250, controller_100, controller_50,
+    controller_25, controller_10, controller_gpu
   ),
   resources = targets::tar_resources(
     crew = targets::tar_resources_crew(controller = "controller_250")
@@ -110,16 +104,26 @@ targets::tar_source("inst/targets/targets_metalearner.R")
 # targets::tar_source("inst/targets/targets_calculate_predict.R")
 # targets::tar_source("inst/targets/targets_predict.R")
 
-###########################      SYSTEM SETTINGS      ##########################
+###########################           STAGES          ##########################
 if (Sys.getenv("BEETHOVEN") == "covariates") {
-  target_baselearner_gpu <-
+  target_baselearner <-
     target_baselearner_cpu <-
-      target_baselearner <-
-        target_metalearner <- list()
+      target_baselearner_gpu <-
+        target_metalearner <-
+          target_calculate_predict <-
+            target_predict <- list()
 } else if (Sys.getenv("BEETHOVEN") == "cpu") {
-  target_baselearner_gpu <- target_metalearner <- list()
+  target_baselearner_gpu <-
+    target_metalearner <-
+      target_calculate_predict <-
+        target_predict <- list()
 } else if (Sys.getenv("BEETHOVEN") == "gpu") {
-  target_metalearner <- list()
+  target_metalearner <-
+    target_calculate_predict <-
+      target_predict <- list()
+} else if (Sys.getenv("BEETHOVEN") == "meta") {
+  target_calculate_predict <-
+    target_predict <- list()
 }
 
 ##############################      PIPELINE      ##############################
@@ -132,7 +136,7 @@ list(
   target_baselearner,
   target_baselearner_cpu,
   target_baselearner_gpu,
-  target_metalearner
-  # target_calculate_predict,
+  target_metalearner# ,
+  # target_calculate_predict
   # target_predict
 )

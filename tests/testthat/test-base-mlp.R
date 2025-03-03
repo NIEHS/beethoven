@@ -40,18 +40,21 @@ testthat::test_that("fit mlp (folds + grid))", {
       xvar = seq(5, ncol(dt_base)),
       normalize = TRUE,
       trim_resamples = FALSE,
+      workflow = TRUE,
       return_best = TRUE
     )
   )
   # expect a list
   testthat::expect_true(is.list(mlp1))
-  # expect length 3
-  testthat::expect_length(mlp1, 3)
+  # expect length 4
+  testthat::expect_length(mlp1, 4)
   # expect sub-items are tibble data.frames
   testthat::expect_equal(
     unlist(lapply(1:3, function(x) methods::is(mlp1[[x]], "tbl_df"))),
     c(TRUE, TRUE, TRUE)
   )
+  # expect fourth item is a workflow
+  testthat::expect_true("workflow" %in% class(mlp1[[4]]))
   # expect base predictions are numeric
   testthat::expect_true(is.numeric(mlp1$base_prediction$.pred))
 
@@ -72,6 +75,7 @@ testthat::test_that("fit mlp (folds + grid))", {
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
       trim_resamples = FALSE,
+      workflow = FALSE,
       return_best = TRUE
     )
   )
@@ -104,6 +108,7 @@ testthat::test_that("fit mlp (folds + grid))", {
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
       trim_resamples = FALSE,
+      workflow = FALSE,
       return_best = TRUE
     )
   )
@@ -150,6 +155,7 @@ testthat::test_that("fit mlp (folds + bayes)", {
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
       trim_resamples = FALSE,
+      workflow = FALSE,
       return_best = TRUE
     )
   )
@@ -212,6 +218,7 @@ testthat::test_that("fit mlp (folds + bayes)", {
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
       trim_resamples = FALSE,
+      workflow = FALSE,
       return_best = TRUE
     )
   )
@@ -273,6 +280,7 @@ testthat::test_that("fit mlp (args_generate_cv + grid)", {
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
       trim_resamples = FALSE,
+      workflow = FALSE,
       return_best = TRUE
     )
   )
@@ -312,6 +320,7 @@ testthat::test_that("fit mlp (args_generate_cv + grid)", {
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
       trim_resamples = FALSE,
+      workflow = FALSE,
       return_best = TRUE
     )
   )
@@ -346,6 +355,7 @@ testthat::test_that("fit mlp (args_generate_cv + grid)", {
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
       trim_resamples = FALSE,
+      workflow = FALSE,
       return_best = TRUE
     )
   )
@@ -398,6 +408,7 @@ testthat::test_that("fit mlp (args_generate_cv + bayes)", {
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
       trim_resamples = FALSE,
+      workflow = FALSE,
       return_best = TRUE
     )
   )
@@ -436,6 +447,7 @@ testthat::test_that("fit mlp (args_generate_cv + bayes)", {
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
       trim_resamples = FALSE,
+      workflow = FALSE,
       return_best = TRUE
     )
   )
@@ -469,6 +481,7 @@ testthat::test_that("fit mlp (args_generate_cv + bayes)", {
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
       trim_resamples = TRUE, # trim samples
+      workflow = FALSE,
       return_best = TRUE
     )
   )
