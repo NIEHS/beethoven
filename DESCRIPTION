@@ -45,7 +45,8 @@ Imports:
   scatterplot3d,
   amadeus (>= 1.2.3),
   parallelly,
-  magrittr
+  magrittr,
+  lubridate
 Suggests:
   testthat (>= 3.0.0),
   covr,
