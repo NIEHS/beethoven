@@ -12,12 +12,13 @@ testthat::test_that("fit lightgbm (folds + grid)", {
   dt_base <- readRDS(
     testthat::test_path("..", "testdata", "base", "dt_base.rds")
   )
+  dt_base <- dt_base[, grep("STACK|FUGITIVE", names(dt_base), invert = TRUE)]
 
   # set model
   lgb_model <- switch_model("lgb", device = "cpu")
   # set grid
   lgb_grid <- expand.grid(
-    mtry = c(20),
+    mtry = c(8),
     trees = c(50),
     learn_rate = c(0.1)
   )
@@ -38,6 +39,7 @@ testthat::test_that("fit lightgbm (folds + grid)", {
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
       trim_resamples = FALSE,
+      normalize = TRUE,
       workflow = TRUE,
       return_best = TRUE
     )
@@ -73,6 +75,7 @@ testthat::test_that("fit lightgbm (folds + grid)", {
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
       trim_resamples = FALSE,
+      normalize = TRUE,
       workflow = FALSE,
       return_best = TRUE
     )
@@ -106,6 +109,7 @@ testthat::test_that("fit lightgbm (folds + grid)", {
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
       trim_resamples = FALSE,
+      normalize = TRUE,
       workflow = FALSE,
       return_best = TRUE
     )
@@ -243,12 +247,13 @@ testthat::test_that("fit lightgbm (args_generate_cv + grid)", {
   dt_base <- readRDS(
     testthat::test_path("..", "testdata", "base", "dt_base.rds")
   )
+  dt_base <- dt_base[, grep("STACK|FUGITIVE", names(dt_base), invert = TRUE)]
 
   # set model
   lgb_model <- switch_model("lgb", device = "cpu")
   # set grid
   lgb_grid <- expand.grid(
-    mtry = c(20),
+    mtry = c(8),
     trees = c(50),
     learn_rate = c(0.1)
   )
@@ -275,6 +280,7 @@ testthat::test_that("fit lightgbm (args_generate_cv + grid)", {
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
       trim_resamples = FALSE,
+      normalize = TRUE,
       workflow = FALSE,
       return_best = TRUE
     )
@@ -315,6 +321,7 @@ testthat::test_that("fit lightgbm (args_generate_cv + grid)", {
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
       trim_resamples = FALSE,
+      normalize = TRUE,
       workflow = FALSE,
       return_best = TRUE
     )
@@ -350,6 +357,7 @@ testthat::test_that("fit lightgbm (args_generate_cv + grid)", {
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
       trim_resamples = FALSE,
+      normalize = TRUE,
       workflow = FALSE,
       return_best = TRUE
     )

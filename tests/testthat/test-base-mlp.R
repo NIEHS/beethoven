@@ -12,6 +12,7 @@ testthat::test_that("fit mlp (folds + grid))", {
   dt_base <- readRDS(
     testthat::test_path("..", "testdata", "base", "dt_base.rds")
   )
+  dt_base <- dt_base[, grep("STACK|FUGITIVE", names(dt_base), invert = TRUE)]
 
   # set model
   mlp_model <- switch_model("mlp", device = "cpu")
@@ -74,6 +75,7 @@ testthat::test_that("fit mlp (folds + grid))", {
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
+      normalize = TRUE,
       trim_resamples = FALSE,
       workflow = FALSE,
       return_best = TRUE
@@ -107,6 +109,7 @@ testthat::test_that("fit mlp (folds + grid))", {
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
+      normalize = TRUE,
       trim_resamples = FALSE,
       workflow = FALSE,
       return_best = TRUE
@@ -136,6 +139,7 @@ testthat::test_that("fit mlp (folds + bayes)", {
   dt_base <- readRDS(
     testthat::test_path("..", "testdata", "base", "dt_performance.rds")
   )
+  dt_base <- dt_base[, grep("STACK|FUGITIVE", names(dt_base), invert = TRUE)]
 
   # set model
   mlp_model <- switch_model("mlp", device = "cpu")
@@ -154,6 +158,7 @@ testthat::test_that("fit mlp (folds + bayes)", {
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
+      normalize = TRUE,
       trim_resamples = FALSE,
       workflow = FALSE,
       return_best = TRUE
@@ -186,7 +191,9 @@ testthat::test_that("fit mlp (folds + bayes)", {
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
+      normalize = TRUE,
       trim_resamples = FALSE,
+      workflow = FALSE,
       return_best = TRUE
     )
   )
@@ -217,6 +224,7 @@ testthat::test_that("fit mlp (folds + bayes)", {
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
+      normalize = TRUE,
       trim_resamples = FALSE,
       workflow = FALSE,
       return_best = TRUE
@@ -247,6 +255,7 @@ testthat::test_that("fit mlp (args_generate_cv + grid)", {
   dt_base <- readRDS(
     testthat::test_path("..", "testdata", "base", "dt_base.rds")
   )
+  dt_base <- dt_base[, grep("STACK|FUGITIVE", names(dt_base), invert = TRUE)]
 
   # set model
   mlp_model <- switch_model("mlp", device = "cpu")
@@ -279,6 +288,7 @@ testthat::test_that("fit mlp (args_generate_cv + grid)", {
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
+      normalize = TRUE,
       trim_resamples = FALSE,
       workflow = FALSE,
       return_best = TRUE
@@ -319,6 +329,7 @@ testthat::test_that("fit mlp (args_generate_cv + grid)", {
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
+      normalize = TRUE,
       trim_resamples = FALSE,
       workflow = FALSE,
       return_best = TRUE
@@ -354,6 +365,7 @@ testthat::test_that("fit mlp (args_generate_cv + grid)", {
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
+      normalize = TRUE,
       trim_resamples = FALSE,
       workflow = FALSE,
       return_best = TRUE
@@ -383,6 +395,7 @@ testthat::test_that("fit mlp (args_generate_cv + bayes)", {
   dt_base <- readRDS(
     testthat::test_path("..", "testdata", "base", "dt_performance.rds")
   )
+  dt_base <- dt_base[, grep("STACK|FUGITIVE", names(dt_base), invert = TRUE)]
 
   # set model
   mlp_model <- switch_model("mlp", device = "cpu")
@@ -407,6 +420,7 @@ testthat::test_that("fit mlp (args_generate_cv + bayes)", {
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
+      normalize = TRUE,
       trim_resamples = FALSE,
       workflow = FALSE,
       return_best = TRUE
@@ -446,6 +460,7 @@ testthat::test_that("fit mlp (args_generate_cv + bayes)", {
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
+      normalize = TRUE,
       trim_resamples = FALSE,
       workflow = FALSE,
       return_best = TRUE
@@ -480,6 +495,7 @@ testthat::test_that("fit mlp (args_generate_cv + bayes)", {
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
+      normalize = TRUE,
       trim_resamples = TRUE, # trim samples
       workflow = FALSE,
       return_best = TRUE

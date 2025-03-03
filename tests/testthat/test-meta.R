@@ -6,9 +6,9 @@
 ##### attach_pred
 testthat::test_that("attach_pred", {
   # import sample data
-  mlp <- readRDS(testthat::test_path("..", "testdata", "meta", "mlp.rds"))
-  xgb <- readRDS(testthat::test_path("..", "testdata", "meta", "xgb.rds"))
-  elnet <- readRDS(testthat::test_path("..", "testdata", "meta", "elnet.rds"))
+  fit_learner_base_mlp <- readRDS(testthat::test_path("..", "testdata", "meta", "mlp.rds"))
+  fit_learner_base_xgb <- readRDS(testthat::test_path("..", "testdata", "meta", "xgb.rds"))
+  fit_learner_base_elnet <- readRDS(testthat::test_path("..", "testdata", "meta", "elnet.rds"))
   dt_base <- readRDS(
     testthat::test_path("..", "testdata", "base", "dt_base.rds")
   )
@@ -18,7 +18,11 @@ testthat::test_that("attach_pred", {
   testthat::expect_no_error(
     dt_meta <- attach_pred(
       data = dt_base,
-      pred = list(mlp, xgb, elnet),
+      pred = list(
+        fit_learner_base_mlp = fit_learner_base_mlp,
+        fit_learner_base_xgb = fit_learner_base_mlp,
+        fit_learner_base_elnet = fit_learner_base_mlp
+      ),
       target_cols = target_cols,
       yvar = "Arithmetic.Mean"
     )
@@ -64,12 +68,14 @@ testthat::test_that("fit_meta_learner (spatiotemporal)", {
   )
   # expect a list
   testthat::expect_true(is.list(meta1))
-  # expect 3 items in the list
-  testthat::expect_length(meta1, 3)
+  # expect 4 items in the list
+  testthat::expect_length(meta1, 4)
   # expect first item is a tibble data.frame
   testthat::expect_true("tbl_df" %in% class(meta1[[1]]))
   # expect third item is tune results
   testthat::expect_true("tune_results" %in% class(meta1[[3]]))
+  # expect fourth item is workflow
+  testthat::expect_true("workflow" %in% class(meta1[[4]]))
 
 })
 
