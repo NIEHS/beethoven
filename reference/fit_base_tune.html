@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">beethoven</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,6 +48,7 @@
 <span>  iter_bayes <span class="op">=</span> <span class="fl">10L</span>,</span>
 <span>  trim_resamples <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  return_best <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  workflow <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  data_full <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  metric <span class="op">=</span> <span class="st">"rmse"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -86,6 +87,10 @@ data.frames in splits column of <code>tune_results</code> object with NA.</p></d
 
 <dt id="arg-return-best">return_best<a class="anchor" aria-label="anchor" href="#arg-return-best"></a></dt>
 <dd><p>logical(1). If TRUE, the best tuned model is returned.</p></dd>
+
+
+<dt id="arg-workflow">workflow<a class="anchor" aria-label="anchor" href="#arg-workflow"></a></dt>
+<dd><p>logical(1). If TRUE, the best fit model workflow is returned.</p></dd>
 
 
 <dt id="arg-data-full">data_full<a class="anchor" aria-label="anchor" href="#arg-data-full"></a></dt>
