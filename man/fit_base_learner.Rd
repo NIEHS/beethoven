@@ -20,8 +20,10 @@ fit_base_learner(
   learn_rate = 0.1,
   yvar = "Arithmetic.Mean",
   xvar = seq(5, ncol(dt_full)),
+  normalize = FALSE,
   trim_resamples = FALSE,
   return_best = TRUE,
+  workflow = TRUE,
   metric = "rmse",
   ...
 )
@@ -69,10 +71,15 @@ Default is 0.1.}
 
 \item{xvar}{The predictor variables.}
 
+\item{normalize}{logical(1). If \code{TRUE}, all numeric predictors are
+normalized. Default is \code{FALSE}.}
+
 \item{trim_resamples}{logical(1). Default is TRUE, which replaces the actual
 data.frames in splits column of \code{tune_results} object with NA.}
 
 \item{return_best}{logical(1). If TRUE, the best tuned model is returned.}
+
+\item{workflow}{logical(1). If TRUE, the best fit model workflow is returned.}
 
 \item{metric}{character(1). The metric to be used for selecting the best.
 Must be one of "rmse", "rsq", "mae". Default = "rmse"}

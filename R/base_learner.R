@@ -181,9 +181,12 @@ switch_model <-
 #'   Default is 0.1.
 #' @param yvar The target variable.
 #' @param xvar The predictor variables.
+#' @param normalize logical(1). If `TRUE`, all numeric predictors are
+#' normalized. Default is `FALSE`.
 #' @param trim_resamples logical(1). Default is TRUE, which replaces the actual
 #'   data.frames in splits column of `tune_results` object with NA.
 #' @param return_best logical(1). If TRUE, the best tuned model is returned.
+#' @param workflow logical(1). If TRUE, the best fit model workflow is returned.
 #' @param metric character(1). The metric to be used for selecting the best.
 #' Must be one of "rmse", "rsq", "mae". Default = "rmse"
 #' @param ... Additional arguments to be passed.
@@ -215,8 +218,10 @@ fit_base_learner <-
     learn_rate = 0.1,
     yvar = "Arithmetic.Mean",
     xvar = seq(5, ncol(dt_full)),
+    normalize = FALSE,
     trim_resamples = FALSE,
     return_best = TRUE,
+    workflow = TRUE,
     metric = "rmse",
     ...
   ) {
@@ -256,9 +261,13 @@ fit_base_learner <-
       with = FALSE
     ]
 
+    # full rows with c_subsample columns and lat/lon
+    dt_full_cols <- data.table::data.table(dt_full)[, chr_colidx, with = FALSE]
+
     # ensure required columns are retained in data sample
     chr_requiredcols <- c(yvar, "site_id", "Event.Type", "time", "lon", "lat")
     stopifnot(all(chr_requiredcols %in% names(dt_sample)))
+    stopifnot(all(chr_requiredcols %in% names(dt_full_cols)))
 
     # detect model name
     model_name <- model$engine
@@ -267,11 +276,16 @@ fit_base_learner <-
       recipes::recipe(
         dt_sample[1, ]
       ) %>%
-      # do we want to normalize the predictors?
-      # if so, an additional definition of truly continuous variables is needed
-      # recipes::step_normalize(recipes::all_numeric_predictors()) %>%
       recipes::update_role(!!xvar) %>%
       recipes::update_role(!!yvar, new_role = "outcome")
+
+    if (normalize) {
+      base_recipe <-
+        base_recipe %>%
+        recipes::step_normalize(
+          recipes::all_numeric_predictors(), -recipes::all_integer_predictors()
+        )
+    }
 
     if (!is.null(folds)) {
       base_vfold <- rsample::vfold_cv(dt_sample, v = folds)
@@ -340,7 +354,8 @@ fit_base_learner <-
         iter_bayes = tune_bayes_iter,
         trim_resamples = trim_resamples,
         return_best = return_best,
-        data_full = data.table::data.table(dt_full)[, chr_colidx, with = FALSE],
+        workflow = workflow,
+        data_full = dt_full_cols,
         metric = metric
       )
 
@@ -360,6 +375,7 @@ fit_base_learner <-
 #' @param trim_resamples logical(1). Default is TRUE, which replaces the actual
 #'  data.frames in splits column of `tune_results` object with NA.
 #' @param return_best logical(1). If TRUE, the best tuned model is returned.
+#' @param workflow logical(1). If TRUE, the best fit model workflow is returned.
 #' @param data_full The full data frame to be used for prediction.
 #' @param metric character(1). The metric to be used for selecting the best.
 #' Must be one of "rmse", "rsq", "mae". Default = "rmse"
@@ -386,6 +402,7 @@ fit_base_tune <-
     iter_bayes = 10L,
     trim_resamples = TRUE,
     return_best = TRUE,
+    workflow = TRUE,
     data_full = NULL,
     metric = "rmse"
   ) {
@@ -471,10 +488,14 @@ fit_base_tune <-
         list(
           base_prediction = base_wf_pred_best,
           base_parameter = base_wfparam,
-          best_performance = base_wftune
+          best_performance = base_wftune,
+          fit_workflow = base_wf_fit_best
         )
     }
 
+    if (!workflow) {
+      base_wflist <- base_wflist[-4]
+    }
     if (trim_resamples) {
       base_wflist <- base_wflist[-3]
     }
@@ -681,13 +702,14 @@ attach_xy <-
 #' @importFrom dplyr left_join select
 #' @importFrom magrittr %>%
 #' @importFrom spatialsample spatial_block_cv
+#' @importFrom lubridate year week
 #' @seealso [`spatialsample::spatial_block_cv`]
 #' @export
 generate_cv_index_spt <- function(
   data,
   locs_id = "site_id",
   coords = c("lon", "lat"),
-  v = 5L,
+  v = 10L,
   time_id = "time",
   ...
 ) {
@@ -753,46 +775,45 @@ generate_cv_index_spt <- function(
   data_sp[[time_id]] <- as.Date(data_sp[[time_id]])
   data_sp$cv <- as.integer(data_sp$cv)
 
-  # # unique time points
-  # time_vec <- sort(unique(data_sp[[time_id]]))
   # unique spatial indices
   sp_indices <- sort(unique(data_sp$cv))
 
-  # identify number of years and temporal folds
-  year_vec_split <- sort(unique(substr(data_sp[[time_id]], 1, 4)))
-  t_fold <- as.integer(length(year_vec_split))
-  time_vec_split <- as.Date(paste0(year_vec_split, "-01-01"))
-  time_vec_split <- c(
-    time_vec_split,
-    as.Date(paste0(as.numeric(max(year_vec_split)) + 1, "-01-01"))
+  # identify site's unique year + week combination
+  data_sp$yw <- paste0(
+    lubridate::year(data_sp[[time_id]]),
+    sprintf("%02d", lubridate::week(data_sp[[time_id]]))
+  )
+  # randomize unique year + week combinations
+  yearweek_random <- sample(unique(data_sp$yw))
+  # Split into ~equal sized chunks
+  yearweek_split <- split(
+    yearweek_random,
+    cut(seq_along(yearweek_random), v, labels = FALSE)
   )
 
-  stopifnot(length(time_vec_split) == t_fold + 1)
-  stopifnot(class(time_vec_split) == class(data_sp[[time_id]]))
+  # since both based on v, they should have the same length
+  stopifnot(length(yearweek_split) == length(sp_indices))
 
   # list to store temporal cv index
   spt_index_list <- list()
 
-  for (i in seq_along(sp_indices)) {
-    for (j in seq(t_fold)) {
-      # test data are within spatial fold `i` and time fold `j`
-      out_id <- which(
-        data_sp[[time_id]] >= time_vec_split[j] &
-          data_sp[[time_id]] < time_vec_split[j + 1] &
-          data_sp$cv == sp_indices[i]
-      )
-      # training data are all other data
-      in_id <- setdiff(seq_len(nrow(data_sp)), out_id)
-      spt_index_list <- c(
-        spt_index_list,
+  for (i in seq(v)) {
+    # test data are within spatial and temporal fold `i`
+    out_id <- which(
+      data_sp$cv == sp_indices[i] &
+        data_sp$yw %in% yearweek_split[[i]]
+    )
+    # training data are all other data
+    in_id <- setdiff(seq_len(nrow(data_sp)), out_id)
+    spt_index_list <- c(
+      spt_index_list,
+      list(
         list(
-          list(
-            analysis = in_id,
-            assessment = out_id
-          )
+          analysis = in_id,
+          assessment = out_id
         )
       )
-    }
+    )
   }
 
   return(spt_index_list)

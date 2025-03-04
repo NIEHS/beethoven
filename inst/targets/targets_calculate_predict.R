@@ -1,526 +1,745 @@
-
-## Targets for prediction grid features ####
-## FIXME: align with the "_fit" targets
-## TODO: chopin's gridset implementation
-## TODO: prospective or retrospective, or both?
-
+################################################################################
+##### Calculate covariates at prediction grid
 target_calculate_predict <-
   list(
+    ############################################################################
     targets::tar_target(
-      library,
-      command = .Library
-    ),
+      list_feat_pred_sites,
+      command = {
+        sf_feat_pred_random <- sf::st_sample(tigris::states(), 10)
+        sf_feat_pred_sites <- sf::st_as_sf(
+          data.frame(
+            site_id = sprintf("P%05d", 1:10),
+            lon = sf::st_coordinates(sf_feat_pred_random)[, 1],
+            lat = sf::st_coordinates(sf_feat_pred_random)[, 2]
+          ),
+          coords = c("lon", "lat"),
+          crs = "EPSG:4326"
+        )
+        sf_feat_pred_sites$lon <- sf::st_coordinates(sf_feat_pred_random)[, 1]
+        sf_feat_pred_sites$lat <- sf::st_coordinates(sf_feat_pred_random)[, 2]
+        sf_feat_pred_sites <- sf_feat_pred_sites[, c("site_id", "lon", "lat")]
+        list(sf_feat_pred_sites)
+      },
+      description = "Prediction locations | pred | DEV"
+    )
+    ,
     targets::tar_target(
-      libPaths,
-      command = .libPaths()
-    ),
+      dt_feat_pred_sites,
+      command = sf_feat_pred_sites %>%
+        sf::st_drop_geometry() %>%
+        tidyr::crossing(chr_dates) %>%
+        dplyr::rename(time = chr_dates) %>%
+        data.table::data.table(),
+      description = "Prediction locations with time | pred"
+    )
+    ,
+    ############################################################################
+    ###########################         GEOS         ###########################
     targets::tar_target(
-      df_pred_calc_grid,
-      command = qs::qread(
-        list.files(
-          path = file.path("inst", "targets"),
-          pattern = "prediction_grid.qs",
-          full.names = TRUE
+      list_feat_pred_geos_aqc,
+      command = {
+        download_geos_buffer
+        beethoven::calc_geos_strict(
+          path = file.path(chr_input_dir, "geos", chr_iter_calc_geos[1]),
+          date = beethoven::fl_dates(unlist(list_dates)),
+          locs = list_feat_pred_sites[[1]],
+          locs_id = "site_id"
+        )
+      },
+      pattern = cross(list_feat_pred_sites, list_dates),
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_100")
+      ),
+      iteration = "list",
+      description = "Calculate GEOS-CF features | aqc | pred"
+    )
+    ,
+    targets::tar_target(
+      list_feat_pred_geos_chm,
+      command = {
+        download_geos_buffer
+        beethoven::calc_geos_strict(
+          path = file.path(chr_input_dir, "geos", chr_iter_calc_geos[2]),
+          date = beethoven::fl_dates(unlist(list_dates)),
+          locs = list_feat_pred_sites[[1]],
+          locs_id = "site_id"
+        )
+      },
+      pattern = cross(list_feat_pred_sites, list_dates),
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_100")
+      ),
+      iteration = "list",
+      description = "Calculate GEOS-CF features | chm | pred"
+    )
+    ,
+    targets::tar_target(
+      dt_feat_pred_geos,
+      command = beethoven::reduce_merge(
+        c(
+          beethoven::reduce_list(list_feat_pred_geos_aqc),
+          beethoven::reduce_list(list_feat_pred_geos_chm)
+        ),
+        by = c("site_id", "time", "CO", "NO2", "SO2")
+      ),
+      description = "data.table of GEOS-CF features | pred"
+    )
+    ,
+    ###########################         NARR         ###########################
+    targets::tar_target(
+      list_feat_pred_narr,
+      command = {
+        download_narr_buffer
+        dt_iter_pred_narr <- amadeus::calculate_narr(
+          from = amadeus::process_narr(
+            path = file.path(chr_input_dir, "narr", chr_iter_calc_narr),
+            variable = chr_iter_calc_narr,
+            date = beethoven::fl_dates(unlist(list_dates))
+          ),
+          locs = list_feat_pred_sites[[1]],
+          locs_id = "site_id",
+          radius = 0,
+          fun = "mean",
+          geom = FALSE
+        )
+        if (length(grep("level", names(dt_iter_pred_narr))) == 1) {
+          dt_iter_pred_narr <-
+            dt_iter_pred_narr[dt_iter_pred_narr$level == 1000, ]
+          dt_iter_pred_narr <-
+            dt_iter_pred_narr[, -grep("level", names(dt_iter_pred_narr))]
+        }
+        beethoven::post_calc_cols(
+          dt_iter_pred_narr,
+          prefix = "NARR_0_"
+        )
+      },
+      pattern = cross(list_feat_pred_sites, list_dates, chr_iter_calc_narr),
+      iteration = "list",
+      description = "Calculate NARR features | nolag | pred"
+    )
+    ,
+    targets::tar_target(
+      dt_feat_pred_narr_nolag,
+      command = beethoven::reduce_merge(
+        beethoven::reduce_list(list_feat_pred_narr),
+        by = c("site_id", "time")
+      ),
+      description = "data.table of NARR features | nolag | pred"
+    )
+    ,
+    targets::tar_target(
+      list_feat_pred_narr_lag,
+      command = {
+        download_narr_buffer
+        dt_lag_pred_narr <- amadeus::calculate_narr(
+          from = amadeus::process_narr(
+            path = file.path(chr_input_dir, "narr", chr_iter_calc_narr_lag),
+            variable = chr_iter_calc_narr_lag,
+            date = as.character(chr_dates[1] - 1)
+          ),
+          locs = dplyr::bind_rows(list_feat_pred_sites),
+          locs_id = "site_id",
+          radius = 0,
+          fun = "mean",
+          geom = FALSE
+        )
+        if (length(grep("level", names(dt_lag_pred_narr))) == 1) {
+          dt_lag_pred_narr <-
+            dt_lag_pred_narr[dt_lag_pred_narr$level == 1000, ]
+          dt_lag_pred_narr <-
+            dt_lag_pred_narr[, -grep("level", names(dt_lag_pred_narr))]
+        }
+        dt_lag_pred_narr <- beethoven::post_calc_cols(
+          dt_lag_pred_narr,
+          prefix = "NARR_0_"
+        )
+        int_narr_cols <- which(
+          names(dt_feat_pred_narr_nolag) %in% names(dt_lag_pred_narr)
+        )
+        dt_iter_pred_narr_bind <- rbind(
+          dt_lag_pred_narr,
+          dt_feat_pred_narr_nolag[, int_narr_cols, with = FALSE]
+        )
+        amadeus::calculate_lagged(
+          from = dt_iter_pred_narr_bind,
+          date = chr_daterange,
+          lag = 1,
+          locs_id = "site_id"
+        )
+      },
+      pattern = map(chr_iter_calc_narr_lag),
+      iteration = "list",
+      description = "Calculate NARR features | lag | pred"
+    )
+    ,
+    targets::tar_target(
+      dt_feat_calc_narr,
+      command = beethoven::reduce_merge(
+        beethoven::reduce_list(
+          c(list(dt_feat_calc_narr_nolag), list_feat_calc_narr_lag)
+        ),
+        by = c("site_id", "time")
+      ),
+      description = "data.table of NARR features | pred"
+    )
+    ,
+    ###########################         HMS          ###########################
+    targets::tar_target(
+      list_feat_pred_hms,
+      command = {
+        download_hms_buffer
+        dt_iter_pred_hms <- beethoven::inject_calculate(
+          covariate = "hms",
+          locs = list_feat_pred_sites[[1]],
+          injection = list(
+            path = file.path(chr_input_dir, "hms", "data_files"),
+            date = beethoven::fl_dates(unlist(list_dates)),
+            covariate = "hms"
+          )
+        )[[1]] |>
+          dplyr::select(-dplyr::any_of(c("lon", "lat", "geometry", "hms_year")))
+        beethoven::post_calc_cols(
+          dt_iter_pred_hms,
+          prefix = "HMS_"
+        )
+      },
+      pattern = cross(list_feat_pred_sites, list_dates),
+      iteration = "list",
+      description = "Calculate HMS features | pred"     
+    )
+    ,
+    targets::tar_target(
+      dt_feat_pred_hms,
+      command = beethoven::reduce_list(list_feat_pred_hms)[[1]],
+      description = "data.table of HMS features | pred"
+    )
+    ,
+    ###########################       MODIS - MOD11       ######################
+    targets::tar_target(
+      list_feat_pred_mod11,
+      command = beethoven::inject_modis(
+        locs = list_feat_pred_sites[[1]],
+        injection = list_args_calc_mod11
+      ),
+      pattern = cross(list_feat_pred_sites, list_args_calc_mod11),
+      iteration = "list",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_50")
+      ),
+      description = "Calculate MODIS - MOD11 features | pred"
+    )
+    ,
+    ###########################       MODIS - MOD06       ######################
+    targets::tar_target(
+      list_feat_pred_mod06,
+      command = beethoven::inject_modis(
+        locs = list_feat_pred_sites[[1]],
+        injection = list_args_calc_mod06
+      ),
+      pattern = cross(list_feat_pred_sites, list_args_calc_mod06),
+      iteration = "list",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_50")
+      ),
+      description = "Calculate MODIS - MOD06 features | pred"
+    )
+    ,
+    ###########################       MODIS - MOD13       ######################
+    targets::tar_target(
+      list_feat_pred_mod13,
+      command = beethoven::inject_modis(
+        locs = list_feat_pred_sites[[1]],
+        injection = list_args_calc_mod13
+      ),
+      pattern = cross(list_feat_pred_sites, list_args_calc_mod13),
+      iteration = "list",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_100")
+      ),
+      description = "Calculate MODIS - MOD13 features | pred"
+    )
+    ,
+    ###########################     MODIS - MCD19_1km     ######################
+    targets::tar_target(
+      list_feat_pred_mcd19_1km,
+      command = beethoven::inject_modis(
+        locs = list_feat_pred_sites[[1]],
+        injection = list_args_calc_mcd19_1km
+      ),
+      pattern = cross(list_feat_pred_sites, list_args_calc_mcd19_1km),
+      iteration = "list",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_250")
+      ),
+      description = "Calculate MODIS - MCD19_1km features | pred"
+    )
+    ,
+    ###########################     MODIS - MCD19_5km     ######################
+    targets::tar_target(
+      list_feat_pred_mcd19_5km,
+      command = beethoven::inject_modis(
+        locs = list_feat_pred_sites[[1]],
+        injection = list_args_calc_mcd19_5km
+      ),
+      pattern = cross(list_feat_pred_sites, list_args_calc_mcd19_5km),
+      iteration = "list",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_250")
+      ),
+      description = "Calculate MODIS - MCD19_5km features | pred"
+    )
+    ,
+    ###########################       MODIS - MOD09       ######################
+    targets::tar_target(
+      list_feat_pred_mod09,
+      command = beethoven::inject_modis(
+        locs = list_feat_pred_sites[[1]],
+        injection = list_args_calc_mod09
+      ),
+      pattern = cross(list_feat_pred_sites, list_args_calc_mod09),
+      iteration = "list",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_25")
+      ),
+      description = "Calculate MODIS - MOD09 features | pred"
+    )
+    ,
+    ###########################       MODIS - VIIRS       ######################
+    targets::tar_target(
+      list_feat_pred_viirs,
+      command = beethoven::inject_modis(
+        locs = list_feat_pred_sites[[1]],
+        injection = list_args_calc_viirs
+      ),
+      pattern = cross(list_feat_pred_sites, list_args_calc_viirs),
+      iteration = "list",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_100")
+      ),
+      description = "Calculate MODIS - VIIRS features | pred"
+    )
+    ,
+    ###########################        MODIS/VIIRS        ######################
+    targets::tar_target(
+      dt_feat_pred_nasa,
+      command = beethoven::reduce_merge(
+        lapply(
+          list(
+            list_feat_pred_mod11,
+            list_feat_pred_mod06,
+            list_feat_pred_mod13,
+            list_feat_pred_mcd19_1km,
+            list_feat_pred_mcd19_5km,
+            list_feat_pred_mod09,
+            list_feat_pred_viirs
+          ),
+          function(x) data.table::data.table(beethoven::reduce_list(x)[[1]])
+        ),
+        by = NULL
+      ),
+      description = "data.table of MODIS/VIIRS features | pred"
+    )
+    ,
+    ###########################         GMTED        ###########################
+    targets::tar_target(
+      list_feat_pred_gmted,
+      command = {
+        download_gmted
+        beethoven::calc_gmted_direct(
+          variable = c(chr_iter_calc_gmted_vars, "7.5 arc-seconds"),
+          path = file.path(chr_input_dir, "gmted", "data_files"),
+          locs = list_feat_pred_sites[[1]],
+          locs_id = "site_id",
+          radius = chr_iter_calc_gmted_radii
+        )
+      },
+      iteration = "list",
+      pattern = cross(
+        list_feat_pred_sites,
+        chr_iter_calc_gmted_vars,
+        chr_iter_calc_gmted_radii
+      ),
+      description = "Calculate GMTED features | pred"
+    )
+    ,
+    targets::tar_target(
+      dt_feat_pred_gmted,
+      command = beethoven::reduce_merge(
+        beethoven::reduce_list(list_feat_pred_gmted), by = "site_id"
+      ),
+      description = "data.table of GMTED features | pred"
+    )
+    ,
+    ###########################         NLCD         ###########################
+    targets::tar_target(
+      list_feat_pred_nlcd,
+      command = {
+        download_nlcd
+        beethoven::inject_nlcd(
+          locs = dplyr::bind_rows(list_feat_pred_sites),
+          # NOTE: locs are all AQS sites for computational efficiency
+          locs_id = "site_id",
+          year = df_feat_calc_nlcd_params$year,
+          radius = df_feat_calc_nlcd_params$radius,
+          from = amadeus::process_nlcd(
+            path = file.path(chr_input_dir, "nlcd", "data_files"),
+            year = df_feat_calc_nlcd_params$year
+          ),
+          nthreads = 1,
+          mode = "exact",
+          max_cells = 3e7
+        )
+      },
+      iteration = "list",
+      pattern = map(df_feat_calc_nlcd_params),
+      description = "Calculate NLCD features | pred"
+    )
+    ,
+    targets::tar_target(
+      name = dt_feat_pred_nlcd,
+      command = list_feat_pred_nlcd %>%
+        collapse::rowbind(fill = TRUE) %>%
+        collapse::funique() %>%
+        collapse::pivot(
+          ids = c("site_id", "time"),
+          values = names(.)[!names(.) %in% c(
+            "site_id",
+            "time"
+          )]
+        ) %>%
+        .[!is.na(.[["value"]]),] %>%
+        collapse::pivot(
+          ids = c("site_id", "time"),
+          values = c("value"),
+          how = "wider"
+        ),
+      description = "NLCD feature list (all dt) | pred"
+    )
+    ,
+    ###########################        KOPPEN        ###########################
+    targets::tar_target(
+      dt_feat_pred_koppen,
+      command = {
+        download_koppen
+        data.table::data.table(
+          amadeus::calculate_koppen_geiger(
+            from = amadeus::process_koppen_geiger(
+              path = file.path(
+                chr_input_dir,
+                "koppen_geiger",
+                "data_files",
+                "Beck_KG_V1_present_0p0083.tif"
+              )
+            ),
+            locs = dplyr::bind_rows(list_feat_pred_sites),
+            # NOTE: locs are all AQS sites for computational efficiency
+            locs_id = "site_id",
+            geom = FALSE
+          )
+        )
+      },
+      description = "data.table of Koppen Geiger features | pred"
+    )
+    ,
+    ###########################      POPULATION      ###########################
+    targets::tar_target(
+      list_feat_pred_pop,
+      command = {
+        download_population
+        amadeus::calculate_population(
+          from = amadeus::process_population(
+            path = file.path(
+              chr_input_dir,
+              "population",
+              "data_files",
+              paste0(
+                "gpw_v4_population_density_adjusted_to_",
+                "2015_unwpp_country_totals_rev11_2020_30_sec.tif"
+              )
+            )
+          ),
+          locs = list_feat_pred_sites[[1]],
+          locs_id = "site_id",
+          geom = FALSE,
+          radius = chr_iter_radii
+        )
+      },
+      pattern = cross(list_feat_pred_sites, chr_iter_radii),
+      iteration = "list",
+      description = "Calculate population features | pred"
+    )
+    ,
+    targets::tar_target(
+      dt_feat_pred_pop,
+      command = beethoven::reduce_merge(
+        beethoven::reduce_list(list_feat_pred_pop)
+      ),
+      description = "data.table of population features | pred"
+    )
+    ,
+    ###########################         TRI          ###########################
+    targets::tar_target(
+      list_feat_pred_tri,
+      command = {
+        download_tri
+        beethoven::inject_calculate(
+          covariate = "tri",
+          locs = dplyr::bind_rows(list_feat_pred_sites),
+          # NOTE: locs are all AQS sites for computational efficiency
+          injection = list(
+            domain = df_feat_calc_tri_params$year,
+            domain_name = "year",
+            path = file.path(chr_input_dir, "tri"),
+            variables = c(1, 13, 12, 14, 20, 34, 36, 47, 48, 49),
+            radius = df_feat_calc_tri_params$radius,
+            nthreads = 1,
+            covariate = "tri"
+          )
+        )
+      },
+      iteration = "list",
+      pattern = map(df_feat_calc_tri_params),
+      description = "Calculate TRI features | pred"
+    )
+    ,
+    targets::tar_target(
+      list_feat_pred_reduce_tri,
+      command = {
+        list_feat_pred_tri_unnest <- lapply(
+          list_feat_pred_tri,
+          function(x) x[[1]]
+        )
+        chr_tri_radii_index <- sapply(
+          list_feat_pred_tri_unnest,
+          function(x) {
+            any(grepl(sprintf("_%05d", chr_iter_radii), names(x)))
+          }
+        )
+        beethoven::reduce_merge(
+          list_feat_pred_tri_unnest[chr_tri_radii_index],
+          by = NULL,
+          all.x = TRUE,
+          all.y = TRUE
+        )
+      },
+      iteration = "list",
+      pattern = map(chr_iter_radii),
+      description = "Reduce TRI features based on radii | pred"
+    )
+    ,
+    targets::tar_target(
+      dt_feat_pred_tri,
+      command = {
+        dt_feat_merge_tri <- beethoven::reduce_merge(
+          list_feat_pred_reduce_tri,
+          by = c("site_id", "time", "lon", "lat", "tri_year"),
+          all.x = TRUE,
+          all.y = TRUE
+        )
+        dt_feat_merge_tri[is.na(dt_feat_merge_tri)] <- 0
+        dt_feat_pca_tri <- beethoven::post_calc_pca(
+          data = dt_feat_merge_tri,
+          yvar = NULL,
+          num_comp = 5,
+          pattern = "FUGITIVE|STACK",
+          groups = sprintf("%05d", chr_iter_radii),
+          prefix = "TRI",
+          kernel = TRUE
+        )
+      },
+      description = "data.table of TRI PCA-reduced features | pred"
+    )
+    ,
+    ###########################         NEI          ###########################
+    targets::tar_target(
+      list_feat_pred_nei,
+      command = {
+        download_nei
+        beethoven::inject_calculate(
+          covariate = "nei",
+          locs = list_feat_pred_sites[[1]],
+          injection = list(
+            domain = chr_iter_calc_nei,
+            domain_name = "year",
+            path = file.path(chr_input_dir, "nei", "data_files"),
+            covariate = "nei"
+          )
+        )
+      },
+      iteration = "list",
+      pattern = cross(list_feat_pred_sites, chr_iter_calc_nei),
+      description = "Calculate NEI features | pred"
+    )
+    ,
+    targets::tar_target(
+      dt_feat_pred_nei,
+      command = beethoven::reduce_list(
+        lapply(
+          list_feat_pred_nei,
+          function(x) data.table::data.table(beethoven::reduce_list(x)[[1]])
+        )
+      )[[1]],
+      description = "data.table of NEI features | pred"
+    )
+    ,
+    ###########################      ECOREGIONS      ###########################
+    targets::tar_target(
+      dt_feat_pred_ecoregions,
+      command = {
+        download_ecoregions
+        data.table::data.table(
+          amadeus::calculate_ecoregion(
+            from = amadeus::process_ecoregion(
+              path = file.path(
+                chr_input_dir,
+                "ecoregions",
+                "data_files",
+                "us_eco_l3_state_boundaries.shp"
+              )
+            ),
+            locs = dplyr::bind_rows(list_feat_pred_sites),
+            # NOTE: locs are all AQS sites for computational efficiency
+            locs_id = "site_id"
+          )
+        )
+      },
+      description = "data.table of Ecoregions features | pred"
+    )
+    ,
+    ###########################        GROADS        ###########################
+    targets::tar_target(
+      list_feat_pred_groads,
+      command = {
+        download_groads
+        amadeus::calculate_groads(
+          from = amadeus::process_groads(
+            path = file.path(
+              chr_input_dir,
+              "groads",
+              "data_files",
+              "gROADS-v1-americas.gdb"
+            )
+          ),
+          locs = dplyr::bind_rows(list_feat_pred_sites),
+          # NOTE: locs are all AQS sites for computational efficiency
+          locs_id = "site_id",
+          radius = chr_iter_radii
+        )
+      },
+      iteration = "list",
+      pattern = map(chr_iter_radii),
+      description = "Calculate gRoads features | pred"
+    )
+    ,
+    targets::tar_target(
+      dt_feat_pred_groads,
+      command = beethoven::reduce_merge(
+        beethoven::reduce_list(list_feat_pred_groads),
+        by = c("site_id", "description")
+      ),
+      description = "data.table of gRoads features | pred"
+    )
+    ,
+    ########################       DATE FEATURES       #########################
+    targets::tar_target(
+      dt_feat_pred_date,
+      command = Reduce(
+        beethoven::post_calc_autojoin,
+        list(
+          dt_feat_pred_geos,
+          dt_feat_pred_narr,
+          dt_feat_pred_nasa
         )
       ),
-      description = "Import prediction grid"
-    ),
+      description = "data.table of all features | pred"
+    )
+    ,
+    ########################       BASE FEATURES       #########################
     targets::tar_target(
-      sf_pred_raw_grid,
-      command = sf::st_transform(
-        sf::st_as_sf(
-          df_pred_calc_grid,
-          coords = c("lon", "lat"),
-          crs = 5070
+      list_feat_pred_base_flat,
+      command = lapply(
+        list(
+          list(dt_feat_pred_hms),
+          list(dt_feat_pred_tri),
+          list(dt_feat_pred_nei),
+          list(dt_feat_pred_ecoregions),
+          list(dt_feat_pred_koppen),
+          list(dt_feat_pred_pop),
+          list(dt_feat_pred_groads)
         ),
-        crs = 4326
+        function(x) {
+          if (length(x) == 1) {
+            x[[1]]
+          } else if (
+            sum(grepl("light|medium|heavy", sapply(x, \(t) names(t)))) == 3
+          ) {
+            xr <- lapply(x, \(dt) {
+              dta <- data.table::copy(dt)
+              dta <- dta[, time := as.character(time)]
+              return(dta)
+            })
+            xrr <- Reduce(
+              function(x, y) {
+                collapse::join(x, y, on = c("site_id", "time"), how = "full")
+              },
+              xr
+            )
+            return(xrr)
+          } else {
+            collapse::rowbind(x, use.names = TRUE, fill = TRUE)
+          }
+        }
       ),
-      description = "Prediction grid as sf (no coordinates)"
-    ),
+      description = "Calculated base feature list (all dt) | pred"
+    )
+    ,
     targets::tar_target(
-      df_pred_raw_grid,
-      command = sf::st_coordinates(sf_pred_raw_grid),
-      description = "Prediction grid coordinates as df"
-    ),
-    targets::tar_target(
-      sf_pred_calc_grid,
-      command = cbind(
-        sf_pred_raw_grid,
-        lon = df_pred_raw_grid[, 1],
-        lat = df_pred_raw_grid[, 2]
+      dt_feat_pred_base,
+      command = Reduce(
+        beethoven::post_calc_autojoin,
+        c(
+          list(dt_feat_pred_sites),
+          list_feat_pred_base_flat,
+          list(dt_feat_pred_gmted),
+          list(data.table::data.table(dt_feat_pred_nlcd))
+        )
       ),
-      description = "Prediction grid as sf (with coordinates)"
+      description = "Base features with full temporal range | pred"
     )
     ,
+    #######################     CUMULATIVE FEATURES      #######################
     targets::tar_target(
-      list_pred_calc_grid,
-      command = base::split(
-        sf_pred_calc_grid,
-        ceiling(seq_len(nrow(sf_pred_calc_grid)) / 100000)
+      dt_feat_pred_design,
+      command = beethoven::post_pred_autojoin(
+        dt_feat_pred_base,
+        dt_feat_pred_date,
+        year_start = as.integer(substr(chr_daterange[1], 1, 4)),
+        year_end = as.integer(substr(chr_daterange[2], 1, 4))
       ),
-      description = "Split prediction grid into list (SAMPLE)"
+      description = "data.table of all features with PM2.5 | pred"
     )
     ,
     targets::tar_target(
-      name = chr_pred_calc_grid,
-      command = names(list_pred_calc_grid),
-      description = "Names of prediction grid sf objects (SAMPLE)"
-    )
-    ,
-    targets::tar_target(
-      list_pred_split_dates,
-      command = split_dates(arglist_common$char_period, 50),
-      description = "Split period into list of dates"
-    )
-    ,
-    targets::tar_target(
-      chr_pred_split_dates,
-      command = names(list_pred_split_dates),
-      description = "Names of split dates lists"
-    )
-    ,
-    ###########################################################################
-    ##### SAMPLE TARGETS FOR DEVELOPMENT #####
-    targets::tar_target(
-      list_pred_calc_grid_DEV,
-      command = base::split(
-        sf_pred_calc_grid[500001:700000, ],
-        ceiling(seq_len(nrow(sf_pred_calc_grid[500001:700000, ])) / 100000) # sample of 200,000 sites
+      dt_feat_pred_imputed,
+      command = beethoven::impute_all(
+        dt_feat_pred_design,
+        period = chr_daterange,
+        nthreads_dt = 32,
+        nthreads_collapse = 32,
+        nthreads_imputation = 32
       ),
-      description = "Split prediction grid into list (DEV SAMPLE)"
+      description = "Imputed features + lags | pred"
     )
     ,
     targets::tar_target(
-      name = chr_pred_calc_grid_DEV,
-      command = names(list_pred_calc_grid_DEV),
-      description = "Names of prediction grid sf objects (DEV SAMPLE)"
-    )
-    ,
-    targets::tar_target(
-      list_pred_split_dates_DEV,
-      command = list_pred_split_dates[1:2], # sample of 100 days
-      description = "Split period into list of dates (DEV SAMPLE)"
-    )
-    ,
-    targets::tar_target(
-      chr_pred_split_dates_DEV,
-      command = names(list_pred_split_dates_DEV),
-      description = "Names of split dates lists (DEV SAMPLE)"
-    )
-    ,
-    ###########################################################################
-    # # # targets::tar_target(
-    # # #   list_pred_split_calc_hms,
-    # # #   command = inject_calculate(
-    # # #     covariate = "hms",
-    # # #     locs = list_pred_calc_grid[[chr_pred_calc_grid]],
-    # # #     injection = list(
-    # # #       path = loadargs(file_prep_calc_args, "hms")$path,
-    # # #       date = fl_dates(list_pred_split_dates[[chr_pred_split_dates]]),
-    # # #       covariate = "hms"
-    # # #     )
-    # # #   ),
-    # # #   pattern = cross(
-    # # #     chr_pred_split_dates,
-    # # #     chr_pred_calc_grid
-    # # #   ),
-    # # #   iteration = "list",
-    # # #   description = "Calculate HMS features with branched sublists",
-    # # #   resources = set_slurm_resource(
-    # # #     ntasks = 1,
-    # # #     ncpus = 4,
-    # # #     memory = 8
-    # # #   )
-    # # # )
-    # # # ,
-    # # # targets::tar_target(
-    # # #   dt_pred_calc_hms,
-    # # #   command = reduce_merge(
-    # # #     reduce_list(lapply(list_pred_split_calc_hms, function(x) x[[1]]))
-    # # #   ),
-    # # #   description = "List of HMS features"
-    # # # )
-    # # # ,
-    # targets::tar_target(
-    #   chr_iter_pred_features,
-    #   command = chr_iter_calc_features |> base::setdiff(c("hms", "ecoregions")),
-    #   description = "Drop HMS and ecoregions from base features"
-    # )
-    # ,
-    # targets::tar_target(
-    #   list_pred_split_calc_base,
-    #   command =
-    #     inject_calculate(
-    #       covariate = chr_iter_pred_features,
-    #       locs = sf_pred_calc_grid,
-    #       injection = loadargs(file_prep_calc_args, chr_iter_pred_features)),
-    #   pattern = cross(
-    #     file_prep_calc_args,
-    #     chr_iter_pred_features
-    #   ),
-    #   iteration = "list",
-    #   description = "Calculate base features (pred)",
-    #   priority = 1,
-    #   resources = set_slurm_resource(
-    #     ntasks = 1,
-    #     ncpus = 4,
-    #     memory = 8
-    #   )
-    # )
-    # ,
-    # targets::tar_target(
-    #   list_pred_calc_eco,
-    #   command = inject_calculate(
-    #     covariate = "ecoregions",
-    #     locs = sf_pred_calc_grid,
-    #     injection = loadargs(file_prep_calc_args, "ecoregions")
-    #   ),
-    #   description = "Calculate ecoregions features (pred)",
-    #   resources = set_slurm_resource(
-    #     ntasks = 1,
-    #     ncpus = 4,
-    #     memory = 32
-    #   )
-    # )
-    # ,
-    # targets::tar_target(
-    #   list_pred_calc_base,
-    #   command = list(
-    #     lapply(
-    #       list(
-    #         lapply(list_pred_split_calc_base, function(x) x[[1]]),
-    #         list_pred_calc_eco[[1]],
-    #         reduce_list(lapply(list_pred_split_calc_hms, function(x) x[[1]]))
-    #       ),
-    #       function(x) x[[1]]
-    #     )
-    #   ),
-    #   description = "Append HMS to base features (pred)"
-    # )
-    # ,
-    # targets::tar_target(
-    #   list_pred_calc_base_flat,
-    #   command = lapply(list_pred_calc_base,
-    #     function(x) {
-    #       if (length(x) == 1) {
-    #         x[[1]]
-    #       } else if (
-    #         sum(grepl("light|medium|heavy",
-    #               sapply(x, \(t) names(t)))) == 3) {
-    #         xr <- lapply(x, \(dt) {
-    #                 dta <- data.table::copy(dt)
-    #                 dta <- dta[, time := as.character(time)]
-    #                 return(dta)
-    #               })
-    #         xrr <- Reduce(
-    #           function(x, y) {
-    #             collapse::join(x, y, on = c("site_id", "time"), how = "full") },
-    #           xr)
-    #         return(xrr)
-    #       } else {
-    #         collapse::rowbind(x, use.names = TRUE, fill = TRUE)
-    #       }
-    #       }),
-    #   description = "Calculated base feature list (all dt) (pred)"
-    # )
-    # ,
-    targets::tar_target(
-      name = list_pred_split_calc_nlcd,
-      command = inject_nlcd(
-        year = df_feat_calc_nlcd_params$year,
-        radius = df_feat_calc_nlcd_params$radius,
-        from = amadeus::process_nlcd(
-          path = loadargs(file_prep_calc_args, "nlcd")$path,
-          year = df_feat_calc_nlcd_params$year
-        ),
-        locs = list_pred_calc_grid_DEV[[chr_pred_calc_grid_DEV]],
-        locs_id = arglist_common$char_siteid,
-        nthreads = 16L,
-        mode = "exact",
-        max_cells = 3e7
+      name = dt_feat_pred_xyt,
+      command = data.table::data.table(
+        beethoven::attach_xy(
+          dt_feat_pred_imputed,
+          dplyr::bind_rows(list_feat_pred_sites)
+        )
       ),
-      pattern = cross(
-        file_prep_calc_args,
-        df_feat_calc_nlcd_params,
-        chr_pred_calc_grid_DEV
-      ),
-      iteration = "list",
-      description = "Calculate NLCD features with branched sublists (pred)",
-      resources = set_slurm_resource(
-        ntasks = 1,
-        ncpus = 8L,
-        memory = 32,
-        partition = "normal"
-      )
+      description = "Imputed features + AQS sites (outcome and lat/lon) | pred"
     )
-    ,
-    # targets::tar_target(
-    #   name = list_pred_calc_nlcd,
-    #   command = reduce_list(list_pred_split_calc_nlcd),
-    #   description = "List of NLCD features (pred)"
-    # )
-    # ,
-    # targets::tar_target(
-    #   name = dt_pred_calc_nlcd,
-    #   command =
-    #     list_pred_calc_nlcd %>%
-    #       collapse::rowbind(fill = TRUE) %>%
-    #       collapse::funique() %>%
-    #       collapse::pivot(
-    #         ids = c(arglist_common$char_siteid, arglist_common$char_timeid),
-    #         values = names(.)[!names(.) %in% c(arglist_common$char_siteid, arglist_common$char_timeid)]
-    #       ) %>%
-    #       .[!is.na(.[["value"]]),] %>%
-    #       collapse::pivot(
-    #         ids = c("site_id", "time"),
-    #         values = c("value"),
-    #         how = "wider"
-    #       ),
-    #   description = "NLCD feature list (all dt) (pred)"
-    # )
-    # ,
-    # targets::tar_target(
-    #   list_pred_split_calc_nasa,
-    #   command =
-    #     inject_modis_par(
-    #       locs = list_pred_calc_grid_DEV[[chr_pred_calc_grid_DEV]],
-    #       injection = loadargs(file_prep_calc_args, chr_iter_calc_nasa)
-    #     ),
-    #   pattern = cross(
-    #     file_prep_calc_args,
-    #     chr_iter_calc_nasa,
-    #     chr_pred_calc_grid_DEV
-    #   ),
-    #   resources = set_slurm_resource(
-    #         ntasks = 1, ncpus = arglist_common$nthreads_nasa, memory = 8
-    #       ),
-    #   iteration = "list",
-    #   description = "Calculate MODIS/VIIRS features with branched sublists (pred)"
-    # )
-    # ,
-    # targets::tar_target(
-    #   name = list_pred_calc_nasa,
-    #   command = reduce_list(list_pred_split_calc_nasa),
-    #   description = "List of MODIS/VIIRS features (pred)"
-    # )
-    # ,
-    # targets::tar_target(
-    #   dt_pred_calc_nasa,
-    #   command = reduce_merge(list_pred_calc_nasa),
-    #   description = "data.table of MODIS/VIIRS features (pred)"
-    # )
-    # ,
-    # # # targets::tar_target(
-    # # #   list_pred_split_calc_geoscfaqc,
-    # # #   command = inject_geos(
-    # # #     locs = list_pred_calc_grid[[chr_pred_calc_grid]],
-    # # #     injection = list(
-    # # #       path = loadargs(file_prep_calc_args, chr_iter_calc_geoscf[2])$path,
-    # # #       date = fl_dates(list_pred_split_dates[[chr_pred_split_dates]]),
-    # # #       nthreads = 4
-    # # #     )
-    # # #   ),
-    # # #   pattern = cross(
-    # # #     chr_pred_split_dates,
-    # # #     chr_pred_calc_grid
-    # # #   ),
-    # # #   iteration = "list",
-    # # #   resources = set_slurm_resource(
-    # # #     ntasks = 1,
-    # # #     ncpus = 4,
-    # # #     memory = 8
-    # # #   ),
-    # # #   description = "Calculate GEOS-CF (aqc_tavg_1hr_g1440x721_v1) features with branched sublists"
-    # # # )
-    # # # ,
-    # targets::tar_target(
-    #   list_pred_split_calc_geoscfchm,
-    #   command = inject_geos(
-    #     locs = list_pred_calc_grid[[chr_pred_calc_grid]],
-    #     injection = list(
-    #       path = loadargs(file_prep_calc_args, chr_iter_calc_geoscf[1])$path,
-    #       date = fl_dates(list_pred_split_dates[[chr_pred_split_dates]]),
-    #       nthreads = 4
-    #     )
-    #   ),
-    #   pattern = cross(
-    #     chr_pred_split_dates,
-    #     chr_pred_calc_grid
-    #   ),
-    #   iteration = "list",
-    #   resources = set_slurm_resource(
-    #     ntasks = 1,
-    #     ncpus = 4,
-    #     memory = 20,
-    #     partition = "highmem"
-    #   ),
-    #   description = "Calculate GEOS-CF (chm_tavg_1hr_g1440x721_v1) features with branched sublists"
-    # )
-    # ,
-    # targets::tar_target(
-    #   dt_pred_calc_geoscf,
-    #   command = reduce_merge(
-    #     list(
-    #       reduce_list(list_pred_split_calc_geoscfaqc)[[1]],
-    #       reduce_list(list_pred_split_calc_geoscfchm)[[1]]
-    #     )
-    #   ),
-    #   description = "data.table of GEOS-CF features (pred)"
-    # )
-    # ,
-    targets::tar_target(
-      chr_pred_calc_gmted_radii,
-      # command = c(0, 1e3, 1e4, 5e4),
-      command = c(200),
-      description = "Radii for GMTED features"
-    )
-    ,
-    targets::tar_target(
-      name = list_pred_split_calc_gmted,
-      command = inject_gmted(
-        locs = list_pred_calc_grid_DEV[[chr_pred_calc_grid_DEV]],
-        variable = chr_iter_calc_gmted_vars,
-        radii = chr_pred_calc_gmted_radii,
-        injection = loadargs(file_prep_calc_args, "gmted")
-      ),
-      iteration = "list",
-      pattern = cross(
-        file_prep_calc_args,
-        chr_iter_calc_gmted_vars,
-        chr_pred_calc_grid_DEV,
-        chr_pred_calc_gmted_radii
-      ),
-      resources = set_slurm_resource(
-        ntasks = 1,
-        ncpus = arglist_common$nthreads_gmted,
-        memory = 8
-      ),
-      description = "Calculate GMTED features with branched sublists (pred)"
-    )
-    ,
-    targets::tar_target(
-      dt_pred_calc_gmted,
-      command = reduce_merge(
-        reduce_list(list_pred_split_calc_gmted),
-        "site_id"
-      ),
-      description = "data.table of GMTED features (pred)"
-    )
-    # # # ,
-    # # # targets::tar_target(
-    # # #   chr_pred_calc_narrmono,
-    # # #   command = loadargs(file_prep_calc_args, "narr")$domain %>%
-    # # #     dplyr::setdiff(c("omega", "shum")),
-    # # #   description = "NARR domain (monolevel)"
-    # # # )
-    # # # ,
-    # # # targets::tar_target(
-    # # #   name = list_pred_split_calc_narrmono,
-    # # #   command =
-    # # #     par_narr(
-    # # #       domain = chr_pred_calc_narrmono,
-    # # #       path = loadargs(file_prep_calc_args, "narr")$path,
-    # # #       date = fl_dates(list_pred_split_dates[[chr_pred_split_dates]]),
-    # # #       locs = list_pred_calc_grid[[chr_pred_calc_grid]],
-    # # #       nthreads = 4
-    # # #     )
-    # # #   ,
-    # # #   pattern = cross(
-    # # #     chr_pred_calc_narrmono,
-    # # #     chr_pred_split_dates,
-    # # #     chr_pred_calc_grid
-    # # #   ),
-    # # #   iteration = "list",
-    # # #   resources = set_slurm_resource(
-    # # #     ntasks = 1,
-    # # #     ncpus = 4,
-    # # #     memory = 4
-    # # #   ),
-    # # #   description = "Calculate NARR features with branched sublists (monolevel) (pred)"
-    # # # )
-    # # # ,
-    # # # targets::tar_target(
-    # # #   chr_pred_calc_narrpres,
-    # # #   command = c("omega", "shum"),
-    # # #   description = "NARR domain (pressure)"
-    # # # )
-    # ,
-    # targets::tar_target(
-    #   name = list_pred_split_calc_narrpres,
-    #   command =
-    #     par_narr(
-    #       domain = chr_pred_calc_narrpres,
-    #       path = loadargs(file_prep_calc_args, "narr")$path,
-    #       date = fl_dates(list_pred_split_dates[[chr_pred_split_dates]]),
-    #       locs = list_pred_calc_grid[[chr_pred_calc_grid]],
-    #       nthreads = 10
-    #     )
-    #   ,
-    #   pattern = cross(
-    #     chr_pred_calc_narrpres,
-    #     chr_pred_split_dates,
-    #     chr_pred_calc_grid
-    #   ),
-    #   iteration = "list",
-    #   resources = set_slurm_resource(
-    #     ntasks = 1,
-    #     ncpus = 10,
-    #     memory = 120,
-    #     partition = "highmem"
-    #   ),
-    #   description = "Calculate NARR features with branched sublists (pressure level) (pred)"
-    # )
-    # ,
-    # targets::tar_target(
-    #   dt_pred_calc_narr,
-    #   command = reduce_merge(
-    #     lapply(
-    #       list(list_pred_split_calc_narrmono, list_pred_split_calc_narrpres),
-    #       function(x) reduce_merge(reduce_list(lapply(x, "[[", 1)))
-    #     ),
-    #     by = c("site_id", "time")
-    #   ),
-    #   description = "data.table of NARR features (pred)"
-    # )
-    # ,
-    # targets::tar_target(
-    #   dt_pred_calc_date,
-    #   command = 
-    #   Reduce(
-    #     post_calc_autojoin,
-    #     list(
-    #       dt_pred_calc_narr,
-    #       dt_pred_calc_geoscf,
-    #       dt_pred_calc_hms
-    #       # dt_pred_calc_nasa
-    #     )
-    #   ),
-    #   description = "data.table of all daily features (pred)"
-    # )
-    # ,
-    # targets::tar_target(
-    #   dt_pred_calc_base,
-    #   command = 
-    #   Reduce(
-    #     post_calc_autojoin,
-    #     c(
-    #       list_pred_calc_base_flat,
-    #       list(dt_pred_calc_gmted),
-    #       list(dt_pred_calc_nlcd)
-    #     )
-    #   ),
-    #   description = "Base features (pred - no PM2.5)"
-    # )
-    # ,
-    # targets::tar_target(
-    #   dt_pred_calc_design,
-    #   command =
-    #     post_calc_autojoin(
-    #       dt_pred_calc_base,
-    #       dt_pred_calc_date,
-    #       year_start = as.integer(substr(arglist_common$char_period[1], 1, 4)),
-    #       year_end = as.integer(substr(arglist_common$char_period[2], 1, 4))
-    #     ),
-    #   description = "data.table of all features (pred - no PM2.5)"
-    # )
   )

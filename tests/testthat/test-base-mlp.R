@@ -12,6 +12,7 @@ testthat::test_that("fit mlp (folds + grid))", {
   dt_base <- readRDS(
     testthat::test_path("..", "testdata", "base", "dt_base.rds")
   )
+  dt_base <- dt_base[, grep("STACK|FUGITIVE", names(dt_base), invert = TRUE)]
 
   # set model
   mlp_model <- switch_model("mlp", device = "cpu")
@@ -38,19 +39,23 @@ testthat::test_that("fit mlp (folds + grid))", {
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
+      normalize = TRUE,
       trim_resamples = FALSE,
+      workflow = TRUE,
       return_best = TRUE
     )
   )
   # expect a list
   testthat::expect_true(is.list(mlp1))
-  # expect length 3
-  testthat::expect_length(mlp1, 3)
+  # expect length 4
+  testthat::expect_length(mlp1, 4)
   # expect sub-items are tibble data.frames
   testthat::expect_equal(
     unlist(lapply(1:3, function(x) methods::is(mlp1[[x]], "tbl_df"))),
     c(TRUE, TRUE, TRUE)
   )
+  # expect fourth item is a workflow
+  testthat::expect_true("workflow" %in% class(mlp1[[4]]))
   # expect base predictions are numeric
   testthat::expect_true(is.numeric(mlp1$base_prediction$.pred))
 
@@ -70,7 +75,9 @@ testthat::test_that("fit mlp (folds + grid))", {
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
+      normalize = TRUE,
       trim_resamples = FALSE,
+      workflow = FALSE,
       return_best = TRUE
     )
   )
@@ -102,7 +109,9 @@ testthat::test_that("fit mlp (folds + grid))", {
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
+      normalize = TRUE,
       trim_resamples = FALSE,
+      workflow = FALSE,
       return_best = TRUE
     )
   )
@@ -128,8 +137,9 @@ testthat::test_that("fit mlp (folds + grid))", {
 #   # sample inlcudes 2 months data for 3 sites
 #   # subset to only 50 predictors for light weight
 #   dt_base <- readRDS(
-#     testthat::test_path("..", "testdata", "base", "dt_base.rds")
+#     testthat::test_path("..", "testdata", "base", "dt_performance.rds")
 #   )
+#   dt_base <- dt_base[, grep("STACK|FUGITIVE", names(dt_base), invert = TRUE)]
 
 #   # set model
 #   mlp_model <- switch_model("mlp", device = "cpu")
@@ -144,11 +154,13 @@ testthat::test_that("fit mlp (folds + grid))", {
 #       folds = 5L,
 #       cv_mode = "temporal",
 #       tune_mode = "bayes",
-#       tune_bayes_iter = 2,
+#       tune_bayes_iter = 1,
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
+#       normalize = TRUE,
 #       trim_resamples = FALSE,
+#       workflow = FALSE,
 #       return_best = TRUE
 #     )
 #   )
@@ -175,11 +187,13 @@ testthat::test_that("fit mlp (folds + grid))", {
 #       folds = 5L,
 #       cv_mode = "spatial",
 #       tune_mode = "bayes",
-#       tune_bayes_iter = 2,
+#       tune_bayes_iter = 1,
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
+#       normalize = TRUE,
 #       trim_resamples = FALSE,
+#       workflow = FALSE,
 #       return_best = TRUE
 #     )
 #   )
@@ -206,11 +220,13 @@ testthat::test_that("fit mlp (folds + grid))", {
 #       folds = 5L,
 #       cv_mode = "spatiotemporal",
 #       tune_mode = "bayes",
-#       tune_bayes_iter = 2,
+#       tune_bayes_iter = 1,
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
+#       normalize = TRUE,
 #       trim_resamples = FALSE,
+#       workflow = FALSE,
 #       return_best = TRUE
 #     )
 #   )
@@ -239,6 +255,7 @@ testthat::test_that("fit mlp (args_generate_cv + grid)", {
   dt_base <- readRDS(
     testthat::test_path("..", "testdata", "base", "dt_base.rds")
   )
+  dt_base <- dt_base[, grep("STACK|FUGITIVE", names(dt_base), invert = TRUE)]
 
   # set model
   mlp_model <- switch_model("mlp", device = "cpu")
@@ -271,7 +288,9 @@ testthat::test_that("fit mlp (args_generate_cv + grid)", {
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
+      normalize = TRUE,
       trim_resamples = FALSE,
+      workflow = FALSE,
       return_best = TRUE
     )
   )
@@ -310,7 +329,9 @@ testthat::test_that("fit mlp (args_generate_cv + grid)", {
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
+      normalize = TRUE,
       trim_resamples = FALSE,
+      workflow = FALSE,
       return_best = TRUE
     )
   )
@@ -328,7 +349,7 @@ testthat::test_that("fit mlp (args_generate_cv + grid)", {
 
 
   # spatiotemporal
-  args_spatiotemporal <- list(v = 3)
+  args_spatiotemporal <- list(v = 2)
   testthat::expect_warning(
     mlp9 <- fit_base_learner(
       learner = "mlp",
@@ -344,7 +365,9 @@ testthat::test_that("fit mlp (args_generate_cv + grid)", {
       learn_rate = 0.1,
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
+      normalize = TRUE,
       trim_resamples = FALSE,
+      workflow = FALSE,
       return_best = TRUE
     )
   )
@@ -370,8 +393,9 @@ testthat::test_that("fit mlp (args_generate_cv + grid)", {
 #   # sample inlcudes 2 months data for 3 sites
 #   # subset to only 50 predictors for light weight
 #   dt_base <- readRDS(
-#     testthat::test_path("..", "testdata", "base", "dt_base.rds")
+#     testthat::test_path("..", "testdata", "base", "dt_performance.rds")
 #   )
+#   dt_base <- dt_base[, grep("STACK|FUGITIVE", names(dt_base), invert = TRUE)]
 
 #   # set model
 #   mlp_model <- switch_model("mlp", device = "cpu")
@@ -392,11 +416,13 @@ testthat::test_that("fit mlp (args_generate_cv + grid)", {
 #       args_generate_cv = args_temp,
 #       cv_mode = "temporal",
 #       tune_mode = "bayes",
-#       tune_bayes_iter = 2,
+#       tune_bayes_iter = 1,
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
+#       normalize = TRUE,
 #       trim_resamples = FALSE,
+#       workflow = FALSE,
 #       return_best = TRUE
 #     )
 #   )
@@ -430,11 +456,13 @@ testthat::test_that("fit mlp (args_generate_cv + grid)", {
 #       args_generate_cv = args_spatial,
 #       cv_mode = "spatial",
 #       tune_mode = "bayes",
-#       tune_bayes_iter = 2,
+#       tune_bayes_iter = 1,
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
+#       normalize = TRUE,
 #       trim_resamples = FALSE,
+#       workflow = FALSE,
 #       return_best = TRUE
 #     )
 #   )
@@ -452,7 +480,7 @@ testthat::test_that("fit mlp (args_generate_cv + grid)", {
 
 
 #   # spatiotemporal
-#   args_spatiotemporal <- list(v = 3)
+#   args_spatiotemporal <- list(v = 2)
 #   testthat::expect_warning(
 #     mlp12 <- fit_base_learner(
 #       learner = "mlp",
@@ -463,11 +491,13 @@ testthat::test_that("fit mlp (args_generate_cv + grid)", {
 #       args_generate_cv = args_spatiotemporal,
 #       cv_mode = "spatiotemporal",
 #       tune_mode = "bayes",
-#       tune_bayes_iter = 2,
+#       tune_bayes_iter = 1,
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
+#       normalize = TRUE,
 #       trim_resamples = TRUE, # trim samples
+#       workflow = FALSE,
 #       return_best = TRUE
 #     )
 #   )

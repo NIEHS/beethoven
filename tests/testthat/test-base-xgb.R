@@ -146,7 +146,7 @@
 #       folds = 5L,
 #       cv_mode = "temporal",
 #       tune_mode = "bayes",
-#       tune_bayes_iter = 2,
+#       tune_bayes_iter = 1,
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
@@ -178,7 +178,7 @@
 #       folds = 5L,
 #       cv_mode = "spatial",
 #       tune_mode = "bayes",
-#       tune_bayes_iter = 2,
+#       tune_bayes_iter = 1,
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
@@ -210,7 +210,7 @@
 #       folds = 5L,
 #       cv_mode = "spatiotemporal",
 #       tune_mode = "bayes",
-#       tune_bayes_iter = 2,
+#       tune_bayes_iter = 1,
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
@@ -332,7 +332,7 @@
 
 #   # spatiotemporal
 #   # warning is due to 3 metrics (rmse, rsq, mae)
-#   args_spatiotemporal <- list(v = 3)
+#   args_spatiotemporal <- list(v = 2)
 #   testthat::expect_warning(
 #     xgb9 <- fit_base_learner(
 #       learner = "xgb",
@@ -397,7 +397,7 @@
 #       args_generate_cv = args_temp,
 #       cv_mode = "temporal",
 #       tune_mode = "bayes",
-#       tune_bayes_iter = 2,
+#       tune_bayes_iter = 1,
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
@@ -435,7 +435,7 @@
 #       args_generate_cv = args_spatial,
 #       cv_mode = "spatial",
 #       tune_mode = "bayes",
-#       tune_bayes_iter = 2,
+#       tune_bayes_iter = 1,
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
@@ -458,7 +458,7 @@
 
 #   # spatiotemporal
 #   # warning is due to 3 metrics (rmse, rsq, mae)
-#   args_spatiotemporal <- list(v = 3)
+#   args_spatiotemporal <- list(v = 2)
 #   testthat::expect_warning(
 #     xgb12 <- fit_base_learner(
 #       learner = "xgb",
@@ -469,7 +469,7 @@
 #       args_generate_cv = args_spatiotemporal,
 #       cv_mode = "spatiotemporal",
 #       tune_mode = "bayes",
-#       tune_bayes_iter = 2,
+#       tune_bayes_iter = 1,
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),

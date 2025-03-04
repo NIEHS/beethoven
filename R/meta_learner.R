@@ -35,7 +35,7 @@ attach_pred <-
       cbind,
       (lapply(pred, function(x) x[[position]][, 1]))
     )
-    colnames(pred_merge) <- names(pred)
+    colnames(pred_merge) <- gsub("fit_learner_(base|meta)_", "", names(pred))
 
     stopifnot(nrow(data_targets) == nrow(pred_merge))
     data_pred <- cbind(data_targets, pred_merge)

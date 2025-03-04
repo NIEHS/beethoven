@@ -24,8 +24,13 @@ queue <- function() {
   system("squeue -u $USER")
 }
 
-cancel <- function() {
-  system("scancel -u $USER")
+cancel <- function(job = NULL) {
+  stopifnot(!is.null(job))
+  if (job == "full") {
+    system("scancel -u $USER")
+  } else {
+    system(paste0("scancel ", job))
+  }
 }
 
 batch <- function(file = "run.sh") {
@@ -34,8 +39,6 @@ batch <- function(file = "run.sh") {
 
 clean <- function(pattern = NULL) {
   system(paste0("rm slurm/*"))
-  stopifnot(!is.null(pattern))
-  system(paste0("rm _targets/objects/", pattern))
 }
 
 gpu <- function() {

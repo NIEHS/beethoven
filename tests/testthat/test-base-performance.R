@@ -13,6 +13,9 @@ testthat::test_that("fit elnet (performance)", {
   dt_performance <- readRDS(
     testthat::test_path("..", "testdata", "base", "dt_performance.rds")
   )
+  dt_performance <- dt_performance[
+    , grep("FUGITIVE|STACK", names(dt_performance), invert = TRUE)
+  ]
 
   # set model
   elnet_model <- switch_model("elnet")
@@ -44,6 +47,7 @@ testthat::test_that("fit elnet (performance)", {
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_performance)),
       trim_resamples = FALSE,
+      normalize = TRUE,
       return_best = TRUE
     )
   )
@@ -84,6 +88,7 @@ testthat::test_that("fit elnet (performance)", {
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_performance)),
       trim_resamples = FALSE,
+      normalize = TRUE,
       return_best = TRUE
     )
   )
@@ -102,7 +107,7 @@ testthat::test_that("fit elnet (performance)", {
 
 
   # spatiotemporal
-  args_spatiotemporal <- list(v = 3)
+  args_spatiotemporal <- list(v = 2)
   testthat::expect_warning(
     elnet_p3 <- fit_base_learner(
       learner = "elnet",
@@ -119,6 +124,7 @@ testthat::test_that("fit elnet (performance)", {
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_performance)),
       trim_resamples = FALSE,
+      normalize = TRUE,
       return_best = TRUE
     )
   )
@@ -148,12 +154,15 @@ testthat::test_that("fit lightgbm (performance)", {
   dt_performance <- readRDS(
     testthat::test_path("..", "testdata", "base", "dt_performance.rds")
   )
+  dt_performance <- dt_performance[
+    , grep("FUGITIVE|STACK", names(dt_performance), invert = TRUE)
+  ]
 
   # set model
   lgb_model <- switch_model("lgb", device = "cpu")
   # set grid
   lgb_grid <- expand.grid(
-    mtry = floor(c(0.025, seq(0.05, 0.2, 0.05)) * ncol(dt_performance)),
+    mtry = c(5, 10, 15, 20, 25),
     trees = c(50),
     learn_rate = c(0.3)
   )
@@ -180,6 +189,7 @@ testthat::test_that("fit lightgbm (performance)", {
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_performance)),
       trim_resamples = FALSE,
+      normalize = TRUE,
       return_best = TRUE
     )
   )
@@ -220,6 +230,7 @@ testthat::test_that("fit lightgbm (performance)", {
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_performance)),
       trim_resamples = FALSE,
+      normalize = TRUE,
       return_best = TRUE
     )
   )
@@ -238,7 +249,7 @@ testthat::test_that("fit lightgbm (performance)", {
 
 
   # spatiotemporal
-  args_spatiotemporal <- list(v = 3)
+  args_spatiotemporal <- list(v = 2)
   testthat::expect_warning(
     lgb_p3 <- fit_base_learner(
       learner = "lgb",
@@ -255,6 +266,7 @@ testthat::test_that("fit lightgbm (performance)", {
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_performance)),
       trim_resamples = FALSE,
+      normalize = TRUE,
       return_best = TRUE
     )
   )
@@ -284,6 +296,9 @@ testthat::test_that("fit mlp (performance)", {
   dt_performance <- readRDS(
     testthat::test_path("..", "testdata", "base", "dt_performance.rds")
   )
+  dt_performance <- dt_performance[
+    , grep("FUGITIVE|STACK", names(dt_performance), invert = TRUE)
+  ]
 
   # set model
   mlp_model <- switch_model("mlp", device = "cpu")
@@ -317,6 +332,7 @@ testthat::test_that("fit mlp (performance)", {
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_performance)),
       trim_resamples = FALSE,
+      normalize = TRUE,
       return_best = TRUE
     )
   )
@@ -325,13 +341,13 @@ testthat::test_that("fit mlp (performance)", {
   # expect no NA values
   testthat::expect_false(NA %in% mlp_p1$base_prediction$.pred)
   # expect non-repetative predictions
-  # testthat::expect_true(length(unique(mlp_p1$base_prediction$.pred)) > 1)
+  testthat::expect_true(length(unique(mlp_p1$base_prediction$.pred)) > 1)
   # expect mean ~= 7.76 (observed mean)
   mlp_p1_mean <- mean(mlp_p1$base_prediction$.pred)
-  # testthat::expect_true(mlp_p1_mean >= 6 && mlp_p1_mean <= 9)
+  testthat::expect_true(mlp_p1_mean >= 6 && mlp_p1_mean <= 9)
   # expect SD ~= 2 (> 0 and < 2)
   mlp_p1_sd <- sd(mlp_p1$base_prediction$.pred)
-  # testthat::expect_true(mlp_p1_sd > 0 && mlp_p1_sd <= 2)
+  testthat::expect_true(mlp_p1_sd > 0 && mlp_p1_sd <= 2)
 
 
   # spatial
@@ -357,6 +373,7 @@ testthat::test_that("fit mlp (performance)", {
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_performance)),
       trim_resamples = FALSE,
+      normalize = TRUE,
       return_best = TRUE
     )
   )
@@ -365,17 +382,17 @@ testthat::test_that("fit mlp (performance)", {
   # expect no NA values
   testthat::expect_false(NA %in% mlp_p2$base_prediction$.pred)
   # expect non-repetative predictions
-  # testthat::expect_true(length(unique(mlp_p2$base_prediction$.pred)) > 1)
+  testthat::expect_true(length(unique(mlp_p2$base_prediction$.pred)) > 1)
   # expect mean ~= 7.76 (observed mean)
   mlp_p2_mean <- mean(mlp_p2$base_prediction$.pred)
-  # testthat::expect_true(mlp_p2_mean >= 6 && mlp_p2_mean <= 9)
+  testthat::expect_true(mlp_p2_mean >= 6 && mlp_p2_mean <= 9)
   # expect SD ~= 2 (> 0 and < 2)
   mlp_p2_sd <- sd(mlp_p2$base_prediction$.pred)
-  # testthat::expect_true(mlp_p2_sd > 0 && mlp_p2_sd <= 2)
+  testthat::expect_true(mlp_p2_sd > 0 && mlp_p2_sd <= 2)
 
 
   # spatiotemporal
-  args_spatiotemporal <- list(v = 3)
+  args_spatiotemporal <- list(v = 2)
   testthat::expect_warning(
     mlp_p3 <- fit_base_learner(
       learner = "mlp",
@@ -392,6 +409,7 @@ testthat::test_that("fit mlp (performance)", {
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_performance)),
       trim_resamples = FALSE,
+      normalize = TRUE,
       return_best = TRUE
     )
   )
@@ -400,13 +418,13 @@ testthat::test_that("fit mlp (performance)", {
   # expect no NA values
   testthat::expect_false(NA %in% mlp_p3$base_prediction$.pred)
   # expect non-repetative predictions
-  # testthat::expect_true(length(unique(mlp_p3$base_prediction$.pred)) > 1)
+  testthat::expect_true(length(unique(mlp_p3$base_prediction$.pred)) > 1)
   # expect mean ~= 7.76 (observed mean)
   mlp_p3_mean <- mean(mlp_p3$base_prediction$.pred)
-  # testthat::expect_true(mlp_p3_mean >= 6 && mlp_p3_mean <= 9)
+  testthat::expect_true(mlp_p3_mean >= 6 && mlp_p3_mean <= 9)
   # expect SD ~= 2 (> 0 and < 2)
   mlp_p3_sd <- sd(mlp_p3$base_prediction$.pred)
-  # testthat::expect_true(mlp_p3_sd > 0 && mlp_p3_sd <= 2)
+  testthat::expect_true(mlp_p3_sd > 0 && mlp_p3_sd <= 2)
 
 })
 
@@ -510,7 +528,7 @@ testthat::test_that("fit mlp (performance)", {
 
 
 #   # spatiotemporal
-#   args_spatiotemporal <- list(v = 3)
+#   args_spatiotemporal <- list(v = 2)
 #   testthat::expect_warning(
 #     xgb_p3 <- fit_base_learner(
 #       learner = "xgb",

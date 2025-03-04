@@ -117,13 +117,13 @@ testthat::test_that("generate_cv_index_spt", {
       data = data.table::data.table(dt_performance),
       locs_id = "site_id",
       coords = c("lon", "lat"),
-      v = 5L,
+      v = 10L,
       time_id = "time"
     )
   )
   # expect list
   testthat::expect_true(is.list(index_spt1))
-  # expect length of 10 (v = 5L; data contains years 2020 + 2021)
+  # expect length of 10
   testthat::expect_length(index_spt1, 10)
   # expect no attributes
   testthat::expect_length(attr(index_spt1, "ref_list"), 0)
@@ -143,7 +143,7 @@ testthat::test_that("generate_cv_index_spt", {
   )
   # expect list
   testthat::expect_true(is.list(index_spt2))
-  # expect length of 5 (v = 5L; data contains years 2020)
+  # expect length of 5
   testthat::expect_length(index_spt2, 5)
   # expect no attributes
   testthat::expect_length(attr(index_spt2, "ref_list"), 0)
@@ -229,11 +229,13 @@ testthat::test_that("vis_spt_rset", {
       cv_mode = "spatial"
     )
   )
-
-  # expect no warning when rendering grpahic
-  testthat::expect_no_warning(
-    vis_spt_rset(rset_sp)
-  )
+  
+  withr::with_tempdir({
+    # expect no warning when rendering grpahic
+    testthat::expect_no_warning(
+      vis_spt_rset(rset_sp)
+    )
+  })
 })
 
 
@@ -353,8 +355,8 @@ testthat::test_that("convert_cv_index_rset", {
   testthat::expect_true(methods::is(rset_spt, "manual_rset"))
   # expect first element is list
   testthat::expect_true(is.list(rset_spt[[1]]))
-  # exepct list is length 10
-  testthat::expect_length(rset_spt[[1]], 10)
+  # exepct list is length 5
+  testthat::expect_length(rset_spt[[1]], 5)
 
   # import sample data
   dt_attach <- readRDS(

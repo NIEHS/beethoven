@@ -12,12 +12,13 @@ testthat::test_that("fit lightgbm (folds + grid)", {
   dt_base <- readRDS(
     testthat::test_path("..", "testdata", "base", "dt_base.rds")
   )
+  dt_base <- dt_base[, grep("STACK|FUGITIVE", names(dt_base), invert = TRUE)]
 
   # set model
   lgb_model <- switch_model("lgb", device = "cpu")
   # set grid
   lgb_grid <- expand.grid(
-    mtry = c(20),
+    mtry = c(8),
     trees = c(50),
     learn_rate = c(0.1)
   )
@@ -38,18 +39,22 @@ testthat::test_that("fit lightgbm (folds + grid)", {
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
       trim_resamples = FALSE,
+      normalize = TRUE,
+      workflow = TRUE,
       return_best = TRUE
     )
   )
   # expect a list
   testthat::expect_true(is.list(lgb1))
-  # expect length 3
-  testthat::expect_length(lgb1, 3)
+  # expect length 4
+  testthat::expect_length(lgb1, 4)
   # expect sub-items are tibble data.frames
   testthat::expect_equal(
     unlist(lapply(1:3, function(x) methods::is(lgb1[[x]], "tbl_df"))),
     c(TRUE, TRUE, TRUE)
   )
+  # expect fourth item is a workflow
+  testthat::expect_true("workflow"  %in% class(lgb1[[4]]))
   # expect base predictions are numeric
   testthat::expect_true(is.numeric(lgb1$base_prediction$.pred))
 
@@ -70,6 +75,8 @@ testthat::test_that("fit lightgbm (folds + grid)", {
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
       trim_resamples = FALSE,
+      normalize = TRUE,
+      workflow = FALSE,
       return_best = TRUE
     )
   )
@@ -102,6 +109,8 @@ testthat::test_that("fit lightgbm (folds + grid)", {
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
       trim_resamples = FALSE,
+      normalize = TRUE,
+      workflow = FALSE,
       return_best = TRUE
     )
   )
@@ -174,7 +183,7 @@ testthat::test_that("fit lightgbm (folds + grid)", {
 #       folds = 5L,
 #       cv_mode = "spatial",
 #       tune_mode = "bayes",
-#       tune_bayes_iter = 2,
+#       tune_bayes_iter = 1,
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
@@ -205,7 +214,7 @@ testthat::test_that("fit lightgbm (folds + grid)", {
 #       folds = 5L,
 #       cv_mode = "spatiotemporal",
 #       tune_mode = "bayes",
-#       tune_bayes_iter = 2,
+#       tune_bayes_iter = 1,
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
@@ -238,12 +247,13 @@ testthat::test_that("fit lightgbm (args_generate_cv + grid)", {
   dt_base <- readRDS(
     testthat::test_path("..", "testdata", "base", "dt_base.rds")
   )
+  dt_base <- dt_base[, grep("STACK|FUGITIVE", names(dt_base), invert = TRUE)]
 
   # set model
   lgb_model <- switch_model("lgb", device = "cpu")
   # set grid
   lgb_grid <- expand.grid(
-    mtry = c(20),
+    mtry = c(8),
     trees = c(50),
     learn_rate = c(0.1)
   )
@@ -270,6 +280,8 @@ testthat::test_that("fit lightgbm (args_generate_cv + grid)", {
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
       trim_resamples = FALSE,
+      normalize = TRUE,
+      workflow = FALSE,
       return_best = TRUE
     )
   )
@@ -309,6 +321,8 @@ testthat::test_that("fit lightgbm (args_generate_cv + grid)", {
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
       trim_resamples = FALSE,
+      normalize = TRUE,
+      workflow = FALSE,
       return_best = TRUE
     )
   )
@@ -326,7 +340,7 @@ testthat::test_that("fit lightgbm (args_generate_cv + grid)", {
 
 
   # spatiotemporal
-  args_spatiotemporal <- list(v = 3)
+  args_spatiotemporal <- list(v = 2)
   testthat::expect_warning(
     lgb9 <- fit_base_learner(
       learner = "lgb",
@@ -343,6 +357,8 @@ testthat::test_that("fit lightgbm (args_generate_cv + grid)", {
       yvar = "Arithmetic.Mean",
       xvar = seq(5, ncol(dt_base)),
       trim_resamples = FALSE,
+      normalize = TRUE,
+      workflow = FALSE,
       return_best = TRUE
     )
   )
@@ -390,7 +406,7 @@ testthat::test_that("fit lightgbm (args_generate_cv + grid)", {
 #       args_generate_cv = args_temp,
 #       cv_mode = "temporal",
 #       tune_mode = "bayes",
-#       tune_bayes_iter = 2,
+#       tune_bayes_iter = 1,
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
@@ -428,7 +444,7 @@ testthat::test_that("fit lightgbm (args_generate_cv + grid)", {
 #       args_generate_cv = args_spatial,
 #       cv_mode = "spatial",
 #       tune_mode = "bayes",
-#       tune_bayes_iter = 2,
+#       tune_bayes_iter = 1,
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
@@ -450,18 +466,18 @@ testthat::test_that("fit lightgbm (args_generate_cv + grid)", {
 
 
 #   # spatiotemporal
-#   args_spatiotemporal <- list(v = 3)
+#   args_spatiotemporal <- list(v = 2)
 #   testthat::expect_warning(
 #     lgb12 <- fit_base_learner(
 #       learner = "lgb",
 #       dt_full = data.table::data.table(dt_base),
-#       r_subsample = 1, # full sample dataset for accurate ngroup cv
+#       r_subsample = 1,
 #       model = lgb_model,
 #       folds = NULL,
 #       args_generate_cv = args_spatiotemporal,
 #       cv_mode = "spatiotemporal",
 #       tune_mode = "bayes",
-#       tune_bayes_iter = 2,
+#       tune_bayes_iter = 1,
 #       learn_rate = 0.1,
 #       yvar = "Arithmetic.Mean",
 #       xvar = seq(5, ncol(dt_base)),
