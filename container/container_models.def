@@ -89,30 +89,20 @@ From: nvidia/cuda:11.8.0-devel-ubuntu22.04
     mkdir /input
     mkdir /opt/_targets
 
-    # Clone and build LightGBM with GPU support
-    apt-get update && apt-get install -y ocl-icd-opencl-dev
-    Rscript -e "install.packages(c('R6', 'data.table', 'jsonlite', 'knitr'), \
-        repos = 'https://cran.r-project.org')"
-    rm -rf LightGBM
-    git clone --recursive https://github.com/microsoft/LightGBM
-    cd LightGBM
-    Rscript build_r.R \
-        --no-build-vignettes \
-        --use-gpu
-    cd ..
-
     # Download and install xgboost with GPU support
     # Note: awaiting parsnip upate of CRAN-version xgboost
-    wget https://github.com/dmlc/xgboost/releases/download/v2.1.3/xgboost_r_gpu_linux_2.1.3.tar.gz
-    R CMD INSTALL ./xgboost_r_gpu_linux_2.1.3.tar.gz
+    # wget https://github.com/dmlc/xgboost/releases/download/v2.1.3/xgboost_r_gpu_linux_2.1.3.tar.gz
+    # R CMD INSTALL ./xgboost_r_gpu_linux_2.1.3.tar.gz
 
     # Install R packages (mimicking rocker/ml-verse setup)
+    Rscript -e "install.packages(c('R6', 'data.table', 'jsonlite', 'knitr'), \
+        repos = 'https://cran.r-project.org')"
     Rscript -e "install.packages(c('pak', 'devtools'))"
     Rscript -e "devtools::install_version('targets', version = '1.10.0')"
     Rscript -e "pak::pak('mitchellmanware/parsnip@beethoven')"
     Rscript -e "install.packages(c('tarchetypes', \
         'testthat', 'tidymodels', 'bonsai', 'qs2', \
-        'torch', 'tidyverse', 'glmnet', 'covr'))"
+        'torch', 'tidyverse', 'glmnet', 'covr', 'lightgbm'))"
     Rscript -e "options(timeout = 1800); torch::install_torch(version = 'latest', type = 'gpu')"
     Rscript -e "pak::pak('tidymodels/brulee@gpu')"
     Rscript -e "pak::pak('shikokuchuo/nanonext'); pak::pak('shikokuchuo/mirai')"

@@ -1,14 +1,14 @@
 #!/bin/bash
 
-#SBATCH --job-name=gpu
+#SBATCH --job-name=lgb
 #SBATCH --mail-user=mitchell.manware@nih.gov
 #SBATCH --mail-type=END,FAIL
-#SBATCH --partition=geo
+#SBATCH --partition=normal
 #SBATCH --ntasks=1
-#SBATCH --mem=10G
+#SBATCH --mem=50G
 #SBATCH --cpus-per-task=10
-#SBATCH --error=slurm/gpu_%j.err
-#SBATCH --output=slurm/gpu_%j.out
+#SBATCH --error=slurm/lgb_%j.err
+#SBATCH --output=slurm/lgb_%j.out
 
 ############################      CERTIFICATES      ############################
 # Export CURL_CA_BUNDLE and SSL_CERT_FILE environmental variables to vertify
@@ -21,12 +21,11 @@ export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 export CUDA_VISIBLE_DEVICES=$(echo $(seq 0 $((SLURM_GPUS_ON_NODE-1))) | tr ' ' ',')
 
 #############################        MODELS        #############################
-# Set environmental variable to indicate GPU-enabled model fitting targets.
-export BEETHOVEN=gpu
+# Set environmental variable to indicate {lightGBM} model fitting targets.
+export BEETHOVEN=lgb
 
-# Fit GPU-enabled base learner models via container_models.sif.
+# Fit CPU-enabled base learner models via container_models.sif.
 apptainer exec \
-  --nv \
   --bind $PWD:/mnt \
   --bind $PWD/inst:/inst \
   --bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input \

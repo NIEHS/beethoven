@@ -10,69 +10,6 @@ target_baselearner <-
     )
     ,
     targets::tar_target(
-      engine_base_elnet,
-      command = beethoven::switch_model(
-        model_type = "elnet",
-        device = "cpu"
-      ),
-      description = "Engine and device | elnet | base learner"
-    )
-    ,
-    targets::tar_target(
-      list_base_params_elnet,
-      command = list(
-        elnet = expand.grid(
-          mixture = 0.5,
-          penalty = 0.01
-        )
-      ),
-      description = "tuning grid | elnet | base learner"
-    )
-    ,
-    targets::tar_target(
-      engine_base_lgb,
-      command = beethoven::switch_model(
-        model_type = "lgb",
-        device = "cpu"
-      ),
-      description = "Engine and device | lgb | base learner"
-    )
-    ,
-    targets::tar_target(
-      list_base_params_lgb,
-      command = list(
-        lgb = expand.grid(
-          mtry = floor(0.25 * (ncol(dt_feat_calc_xyt) - 4)),
-          trees = 500,
-          learn_rate = 0.05
-        )
-      ),
-      description = "tuning grid | lgb | base learner"
-    )
-    ,
-    targets::tar_target(
-      engine_base_mlp,
-      command = beethoven::switch_model(
-        model_type = "mlp",
-        device = "cuda"
-      ),
-      description = "Engine and device | mlp | base learner"
-    )
-    ,
-    targets::tar_target(
-      list_base_params_mlp,
-      command = list(
-        mlp = expand.grid(
-          hidden_units = list(128),
-          dropout = c(0.1),
-          activation = "relu",
-          learn_rate = c(0.001)
-        )
-      ),
-      description = "tuning grid | mlp | base learner"
-    )
-    ,
-    targets::tar_target(
       list_base_params_static,
       command = list(
         dt_full = dt_feat_calc_xyt,
@@ -97,9 +34,29 @@ target_baselearner <-
   )
 
 ################################################################################
-##### Fit CPU-enabled {elnet} and {lightgbm} base learners.
-target_baselearner_cpu <-
+##### Fit CPU-enabled {elnet} base learners on {geo} cluster.
+target_baselearner_elnet <-
   list(
+    targets::tar_target(
+      engine_base_elnet,
+      command = beethoven::switch_model(
+        model_type = "elnet",
+        device = "cpu"
+      ),
+      description = "Engine and device | elnet | base learner"
+    )
+    ,
+    targets::tar_target(
+      list_base_params_elnet,
+      command = list(
+        elnet = expand.grid(
+          mixture = 0.5,
+          penalty = 0.01
+        )
+      ),
+      description = "tuning grid | elnet | base learner"
+    )
+    ,
     targets::tar_target(
       df_learner_type_elnet,
       command = beethoven::assign_learner_cv(
@@ -142,6 +99,32 @@ target_baselearner_cpu <-
       ),
       description = "Fit base learner | elnet | cpu | base learner"
     )
+  )
+    
+################################################################################
+##### Fit CPU-enabled {lightGBM} base learners on {normal} cluster.
+target_baselearner_lgb <-
+  list(
+    targets::tar_target(
+      engine_base_lgb,
+      command = beethoven::switch_model(
+        model_type = "lgb",
+        device = "cpu"
+      ),
+      description = "Engine and device | lgb | base learner"
+    )
+    ,
+    targets::tar_target(
+      list_base_params_lgb,
+      command = list(
+        lgb = expand.grid(
+          mtry = floor(0.25 * (ncol(dt_feat_calc_xyt) - 4)),
+          trees = 500,
+          learn_rate = 0.05
+        )
+      ),
+      description = "tuning grid | lgb | base learner"
+    )
     ,
     targets::tar_target(
       df_learner_type_lgb,
@@ -149,8 +132,7 @@ target_baselearner_cpu <-
         learner = c("lgb"),
         ##### NOTE: {lgb} max ~13.2 Gb memory.
         cv_mode = "spatiotemporal",
-        # cv_rep = list_base_params_static$cv_rep,
-        cv_rep = 5L,
+        cv_rep = list_base_params_static$cv_rep,
         num_device = 1L
       ) %>%
         split(seq_len(nrow(.))),
@@ -182,16 +164,38 @@ target_baselearner_cpu <-
       pattern = map(df_learner_type_lgb),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_50")
+        crew = targets::tar_resources_crew(controller = "controller_1")
       ),
       description = "Fit base learner | lgb | cpu | base learner"
     )
   )
 
 ################################################################################
-##### Fit GPU-enabled {brulee} base learners.
-target_baselearner_gpu <-
+##### Fit GPU-enabled {brulee} base learners on {geo} cluster.
+target_baselearner_mlp <-
   list(
+    targets::tar_target(
+      engine_base_mlp,
+      command = beethoven::switch_model(
+        model_type = "mlp",
+        device = "cuda"
+      ),
+      description = "Engine and device | mlp | base learner"
+    )
+    ,
+    targets::tar_target(
+      list_base_params_mlp,
+      command = list(
+        mlp = expand.grid(
+          hidden_units = list(128),
+          dropout = c(0.1),
+          activation = "relu",
+          learn_rate = c(0.001)
+        )
+      ),
+      description = "tuning grid | mlp | base learner"
+    )
+    ,
     targets::tar_target(
       df_learner_type_mlp,
       command = beethoven::assign_learner_cv(
@@ -229,7 +233,7 @@ target_baselearner_gpu <-
       pattern = map(df_learner_type_mlp),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_gpu")
+        crew = targets::tar_resources_crew(controller = "controller_geo")
       ),
       description = "Fit base learners | mlp | gpu | base learner"
     )
