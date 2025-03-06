@@ -109,7 +109,8 @@ From: nvidia/cuda:11.8.0-devel-ubuntu22.04
     Rscript -e "pak::pak('wlandau/crew'); pak::pak('wlandau/crew.cluster')"
     Rscript -e "install.packages(c('scoringRules', 'future.mirai', 'vetiver', \
         'lwgeom', 'doRNG', 'quarto', 'kernlab'))"
-    Rscript -e "pak::pak('NIEHS/beethoven@mm-0224')"
+    Rscript -e "pak::pak('NIEHS/beethoven')"
+    Rscript -e "pak::pak('r-lib/ps', upgrade = TRUE)"
 
 %environment
     # Set locale and CUDA environment variables
