@@ -15,7 +15,7 @@ target_baselearner <-
         dt_full = dt_feat_calc_xyt,
         r_subsample = 0.3,
         c_subsample = 1.0,
-        folds = NULL,
+        folds = 10L,
         tune_mode = "grid",
         tune_grid_size = 1L,
         yvar = "Arithmetic.Mean",
@@ -23,7 +23,7 @@ target_baselearner <-
         normalize = TRUE,
         trim_resamples = TRUE,
         return_best = TRUE,
-        workflow = FALSE,
+        workflow = TRUE,
         ##### NOTE: exclude workflow for base to meta learner dev.
         ##### will need to be included to predict base learner values
         ##### on prediction grid.
@@ -50,8 +50,8 @@ target_baselearner_elnet <-
       list_base_params_elnet,
       command = list(
         elnet = expand.grid(
-          mixture = 0.5,
-          penalty = 0.01
+          mixture = (0.1, 0.5, 1),
+          penalty = double(1)
         )
       ),
       description = "tuning grid | elnet | base learner"
@@ -118,9 +118,9 @@ target_baselearner_lgb <-
       list_base_params_lgb,
       command = list(
         lgb = expand.grid(
-          mtry = floor(0.25 * (ncol(dt_feat_calc_xyt) - 4)),
-          trees = 500,
-          learn_rate = 0.05
+          mtry = c(floor(0.25 * (ncol(dt_feat_calc_xyt) - 4)), floor(0.5 * (ncol(dt_feat_calc_xyt) - 4))),
+          trees = c(100,500),
+          learn_rate = c(0.05, 0.1)
         )
       ),
       description = "tuning grid | lgb | base learner"
@@ -188,9 +188,9 @@ target_baselearner_mlp <-
       command = list(
         mlp = expand.grid(
           hidden_units = list(128),
-          dropout = c(0.1),
+          dropout = c(0.1, 0.3),
           activation = "relu",
-          learn_rate = c(0.001)
+          learn_rate = c(0.001, 0.1)
         )
       ),
       description = "tuning grid | mlp | base learner"
@@ -245,6 +245,7 @@ target_baselearner_mlp <-
         fit_learner_base_lgb,
         fit_learner_base_mlp
       ),
+      format = "file_fast",
       description = "All fit base learners | cpu | gpu | base learner"
     )
   )

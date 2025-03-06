@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SBATCH --job-name=lgb
-#SBATCH --mail-user=mitchell.manware@nih.gov
+#SBATCH --mail-user=kyle.messier@nih.gov
 #SBATCH --mail-type=END,FAIL
 #SBATCH --partition=normal
 #SBATCH --ntasks=1

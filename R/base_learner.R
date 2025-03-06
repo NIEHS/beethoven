@@ -489,7 +489,7 @@ fit_base_tune <-
           base_prediction = base_wf_pred_best,
           base_parameter = base_wfparam,
           best_performance = base_wftune,
-          fit_workflow = base_wf_fit_best
+          fit_workflow = base_wfresult
         )
     }
 
