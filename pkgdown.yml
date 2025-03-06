@@ -4,7 +4,7 @@ pkgdown_sha: ~
 articles:
   list_features: list_features.html
   prediction_points: prediction_points.html
-last_built: 2025-03-04T16:06Z
+last_built: 2025-03-06T20:02Z
 urls:
   reference: https://niehs.github.io/beethoven/reference
   article: https://niehs.github.io/beethoven/articles
