@@ -75,7 +75,7 @@ if (Sys.getenv("BEETHOVEN") == "covariates") {
   beethoven_packages <- c(
     "amadeus", "targets", "tarchetypes", "dplyr", "tidyverse",
     "data.table", "sf", "crew", "crew.cluster", "lubridate", "qs2",
-    "torch", "bonsai", "dials", "lightgbm", "glmnet"
+    "torch", "bonsai", "dials", "lightgbm", "glmnet","tidymodels","parsnip","tune"
   )
 }
 targets::tar_option_set(

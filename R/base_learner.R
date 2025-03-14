@@ -299,16 +299,7 @@ fit_base_learner <-
         )
     }
 
-
-
-
-      # drop mtry from model arguments if using baysian tuning
-      # for xgboost
-      if (model$engine %in% c("xgboost", "lightgbm")) {
-        model <- model %>%
-          parsnip::set_args(mtry = NULL)
-      }
-    
+   
 
     base_wftune <-
       fit_base_tune(
