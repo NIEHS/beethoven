@@ -168,25 +168,16 @@ switch_model <-
 #'   Available options are "spatiotemporal", "spatial", "temporal".
 #' @param args_generate_cv List of arguments to be passed to
 #'  `switch_generate_cv_rset` function.
-#' @param tune_mode character(1). Hyperparameter tuning mode.
-#'   Default is "grid", "bayes" is acceptable.
-#' @param tune_bayes_iter integer(1). The number of iterations for
-#'  Bayesian optimization. Default is 10. Only used when `tune_mode = "bayes"`.
 #' @param tune_grid_in data.frame object that includes the grid for
 #'   hyperparameter tuning. `tune_grid_size` rows will be randomly picked
 #'   from this data.frame for grid search.
-#' @param tune_grid_size integer(1). The number of grid size for hyperparameter
-#'  tuning. Default is 10. Only used when `tune_mode = "grid"`.
 #' @param learn_rate The learning rate for the model. For branching purpose.
 #'   Default is 0.1.
 #' @param yvar The target variable.
 #' @param xvar The predictor variables.
+#' @param drop_vars character vector or numeric. The variables to be dropped from the data.frame.
 #' @param normalize logical(1). If `TRUE`, all numeric predictors are
 #' normalized. Default is `FALSE`.
-#' @param trim_resamples logical(1). Default is TRUE, which replaces the actual
-#'   data.frames in splits column of `tune_results` object with NA.
-#' @param return_best logical(1). If TRUE, the best tuned model is returned.
-#' @param workflow logical(1). If TRUE, the best fit model workflow is returned.
 #' @param metric character(1). The metric to be used for selecting the best.
 #' Must be one of "rmse", "rsq", "mae". Default = "rmse"
 #' @param ... Additional arguments to be passed.
@@ -203,31 +194,25 @@ switch_model <-
 #' @export
 fit_base_learner <-
   function(
-    learner = c("mlp", "xgb", "lgb", "elnet"),
+    learner = "mlp",
     dt_full,
     r_subsample = 0.3,
     c_subsample = 1.0,
     model = NULL,
-    folds = 5L,
-    cv_mode  = c("spatiotemporal", "spatial", "temporal"),
+    folds = NULL,
+    cv_mode  = "spatiotemporal",
     args_generate_cv = NULL,
-    tune_mode = "grid",
-    tune_bayes_iter = 10L,
     tune_grid_in = NULL,
-    tune_grid_size = 10L,
     learn_rate = 0.1,
     yvar = "Arithmetic.Mean",
-    xvar = seq(5, ncol(dt_full)),
-    normalize = FALSE,
-    trim_resamples = FALSE,
-    return_best = TRUE,
-    workflow = TRUE,
+    xvar = names(dt_full)[seq(5, ncol(dt_full))],
+    drop_vars = names(dt_full)[seq(1,3)],
+    normalize = TRUE,
     metric = "rmse",
     ...
   ) {
-    learner <- match.arg(learner)
-    tune_mode <- match.arg(tune_mode, c("grid", "bayes"))
-    cv_mode <- match.arg(cv_mode)
+    learner <- match.arg(learner, c("mlp", "xgb", "lgb", "elnet"))
+    cv_mode <- match.arg(cv_mode, c("spatiotemporal", "spatial", "temporal"))
     stopifnot("parsnip model must be defined." = !is.null(model))
 
     if (cv_mode == "spatiotemporal") {
@@ -261,32 +246,11 @@ fit_base_learner <-
       with = FALSE
     ]
 
-    # full rows with c_subsample columns and lat/lon
-    dt_full_cols <- data.table::data.table(dt_full)[, chr_colidx, with = FALSE]
-
-    # ensure required columns are retained in data sample
-    chr_requiredcols <- c(yvar, "site_id", "Event.Type", "time", "lon", "lat")
-    stopifnot(all(chr_requiredcols %in% names(dt_sample)))
-    stopifnot(all(chr_requiredcols %in% names(dt_full_cols)))
-
     # detect model name
     model_name <- model$engine
 
-    base_recipe <-
-      recipes::recipe(
-        dt_sample[1, ]
-      ) %>%
-      recipes::update_role(!!xvar) %>%
-      recipes::update_role(!!yvar, new_role = "outcome")
-
-    if (normalize) {
-      base_recipe <-
-        base_recipe %>%
-        recipes::step_normalize(
-          recipes::all_numeric_predictors(), -recipes::all_integer_predictors()
-        )
-    }
-
+    # If folds in defined as an integer - we do random cross validation
+    # else we do a defined CV such as spatiotemporal CV
     if (!is.null(folds)) {
       base_vfold <- rsample::vfold_cv(dt_sample, v = folds)
     } else {
@@ -321,41 +285,41 @@ fit_base_learner <-
         )
     }
 
-    # generate random grid from hyperparameters
-    # dials approach is too complicated to implement since
-    # we already declared tuning hyperparameters with tune(),
-    # which is not compatible with dials approach to limit
-    # possible value ranges per hyperparameter.
-    if (tune_mode == "grid") {
-      grid_row_idx <-
-        sample(
-          nrow(tune_grid_in),
-          tune_grid_size,
-          replace = FALSE
+    # Drop variables that are not predictors or the outcome
+    dt_sample[, (drop_vars) := NULL]
+
+    base_recipe <-
+      recipes::recipe(dt_sample[1, ]) %>%
+      recipes::update_role(!!xvar, new_role = "predictor") %>%  # Dynamically assign covariates
+      recipes::update_role(!!yvar, new_role = "outcome") 
+
+
+    if (normalize) {
+      base_recipe <-
+        base_recipe %>%
+        recipes::step_normalize(
+          recipes::all_numeric_predictors(), -recipes::all_integer_predictors()
         )
-      grid_params <- tune_grid_in[grid_row_idx, ]
-    } else {
-      grid_params <- NULL
+    }
+
+
+
+
       # drop mtry from model arguments if using baysian tuning
       # for xgboost
       if (model$engine %in% c("xgboost", "lightgbm")) {
         model <- model %>%
           parsnip::set_args(mtry = NULL)
       }
-    }
+    
 
     base_wftune <-
       fit_base_tune(
         recipe = base_recipe,
         model = model,
         resample = base_vfold,
-        tune_mode = tune_mode,
-        grid = grid_params,
-        iter_bayes = tune_bayes_iter,
-        trim_resamples = trim_resamples,
-        return_best = return_best,
-        workflow = workflow,
-        data_full = dt_full_cols,
+        dt_sample = dt_sample,
+        grid = tune_grid_in,
         metric = metric
       )
 
@@ -369,14 +333,8 @@ fit_base_learner <-
 #' @param model The model object.
 #' @param resample The resample object. It is expected to be generated from the
 #'   subsamples.
-#' @param tune_mode character(1). Hyperparameter tuning mode.
-#'  Default is "bayes", "grid" is acceptable.
+#' @param dt_sample The data sample to be used for hyperparameter tuning.
 #' @param grid The grid object for hyperparameter tuning.
-#' @param trim_resamples logical(1). Default is TRUE, which replaces the actual
-#'  data.frames in splits column of `tune_results` object with NA.
-#' @param return_best logical(1). If TRUE, the best tuned model is returned.
-#' @param workflow logical(1). If TRUE, the best fit model workflow is returned.
-#' @param data_full The full data frame to be used for prediction.
 #' @param metric character(1). The metric to be used for selecting the best.
 #' Must be one of "rmse", "rsq", "mae". Default = "rmse"
 #' @return List of 3:
@@ -397,23 +355,16 @@ fit_base_tune <-
     recipe,
     model,
     resample,
-    tune_mode = c("bayes", "grid"),
+    dt_sample,
     grid = NULL,
-    iter_bayes = 10L,
-    trim_resamples = TRUE,
-    return_best = TRUE,
-    workflow = TRUE,
-    data_full = NULL,
     metric = "rmse"
   ) {
-    stopifnot("data_full must be entered." = !is.null(data_full))
-    tune_mode <- match.arg(tune_mode)
+  
     base_wf <-
       workflows::workflow() %>%
       workflows::add_recipe(recipe) %>%
       workflows::add_model(model)
 
-    if (tune_mode == "grid") {
       wf_config <-
         tune::control_grid(
           verbose = TRUE,
@@ -428,36 +379,12 @@ fit_base_tune <-
           metrics =
           yardstick::metric_set(
             yardstick::rmse,
-            yardstick::mape,
             yardstick::rsq,
             yardstick::mae
           ),
           control = wf_config
         )
-    } else {
-      wf_config <-
-        tune::control_bayes(
-          verbose = TRUE,
-          save_pred = FALSE,
-          save_workflow = TRUE
-        )
-      base_wftune <-
-        base_wf %>%
-        tune::tune_bayes(
-          resamples = resample,
-          iter = iter_bayes,
-          metrics =
-          yardstick::metric_set(
-            yardstick::rmse,
-            yardstick::mae,
-            yardstick::mape,
-            yardstick::rsq
-          ),
-          control = wf_config
-        )
-    }
 
-    if (return_best) {
       # Select the best hyperparameters
       metric <- match.arg(metric, c("rmse", "rsq", "mae"))
       base_wfparam <-
@@ -465,8 +392,13 @@ fit_base_tune <-
           base_wftune,
           metric = metric
         )
+
+    cv_metrics <- collect_metrics(base_wftune) %>%
+      dplyr::filter(.config == base_wfparam$.config)
+
       # finalize workflow with the best tuned hyperparameters
       base_wfresult <- tune::finalize_workflow(base_wf, base_wfparam)
+
 
       # unlist multi-layered hidden units if mlp model
       if (model$engine == "brulee" && is.list(grid$hidden_units)) {
@@ -479,28 +411,16 @@ fit_base_tune <-
       }
 
       # Best-fit model
-      base_wf_fit_best <- parsnip::fit(base_wfresult, data = data_full)
-      # Prediction with the best model
-      base_wf_pred_best <-
-        stats::predict(base_wf_fit_best, new_data = data_full)
+      base_wf_fit_best <- fit(base_wfresult, data = dt_sample)
 
-      base_wflist <-
-        list(
-          base_prediction = base_wf_pred_best,
-          base_parameter = base_wfparam,
-          best_performance = base_wftune,
-          fit_workflow = base_wfresult
-        )
-    }
+      # Add the CV metrics so we know how each base learner performed
+      base_wf_fit_best$cv_metrics <- cv_metrics 
 
-    if (!workflow) {
-      base_wflist <- base_wflist[-4]
-    }
-    if (trim_resamples) {
-      base_wflist <- base_wflist[-3]
-    }
+      # Butcher the fitted model to save memory
+      base_wf_fit_best <- butcher::butcher(base_wf_fit_best)
 
-    return(base_wflist)
+
+      return(base_wf_fit_best)
   }
 
 

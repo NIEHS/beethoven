@@ -96,7 +96,8 @@ targets::tar_option_set(
   resources = targets::tar_resources(
     crew = targets::tar_resources_crew(controller = "controller_250")
   ),
-  retrieval = "worker"
+  retrieval = "worker",
+  trust_timestamps = TRUE
 )
 
 ###########################      SOURCE TARGETS      ###########################

@@ -38,13 +38,11 @@ From: rocker/geospatial:latest
     # Install R packages
     Rscript -e "install.packages(c('pak', 'devtools'))"
     Rscript -e "devtools::install_version('targets', version = '1.10.0')"
-    Rscript -e "install.packages(c('tarchetypes', 'testthat', 'tidymodels', \
-        'bonsai', 'qs2', 'kernlab'))"
+    Rscript -e "pak::pkg_install(c('tarchetypes', 'testthat', 'tidymodels', 'bonsai', 'qs2', 'kernlab'), upgrade = TRUE)"
     Rscript -e "pak::pak('shikokuchuo/nanonext'); pak::pak('shikokuchuo/mirai')"
     Rscript -e "pak::pak('wlandau/crew'); pak::pak('wlandau/crew.cluster')"
     Rscript -e "pak::pak('NIEHS/amadeus@1.2.4')"
-    Rscript -e "install.packages(c('scoringRules', 'future.mirai', 'vetiver', \
-        'lwgeom', 'doRNG', 'quarto', 'kernlab'))"
+    Rscript -e "pak::pkg_install(c('scoringRules', 'future.mirai', 'vetiver', 'lwgeom', 'doRNG', 'quarto', 'kernlab'), upgrade = TRUE)"
     Rscript -e "pak::pak('NIEHS/beethoven@mm-0224')"
 
 %environment

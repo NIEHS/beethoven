@@ -19,15 +19,10 @@ target_baselearner <-
         tune_mode = "grid",
         tune_grid_size = 1L,
         yvar = "Arithmetic.Mean",
-        xvar = seq(5, ncol(dt_feat_calc_xyt)),
+        xvar = names(dt_feat_calc_xyt)[seq(5, ncol(dt_feat_calc_xyt))],
+        drop_vars = names(dt_feat_calc_xyt)[seq(1,3)],
         normalize = TRUE,
-        trim_resamples = TRUE,
-        return_best = TRUE,
-        workflow = TRUE,
-        ##### NOTE: exclude workflow for base to meta learner dev.
-        ##### will need to be included to predict base learner values
-        ##### on prediction grid.
-        cv_rep = 50L
+        num_base_models = 10L # B - the number of base model ensembles to fit (Small for testing; ~100 for final)
       ),
       description = "Static parameters | base learner"
     )
@@ -50,8 +45,8 @@ target_baselearner_elnet <-
       list_base_params_elnet,
       command = list(
         elnet = expand.grid(
-          mixture = (0.1, 0.5, 1),
-          penalty = double(1)
+          mixture = c(0.1, 0.5, 0.75, 1),
+          penalty = 1
         )
       ),
       description = "tuning grid | elnet | base learner"
@@ -63,7 +58,7 @@ target_baselearner_elnet <-
         learner = c("elnet"),
         ##### NOTE: {elnet} max ~14.8 Gb memory
         cv_mode = "spatiotemporal",
-        cv_rep = list_base_params_static$cv_rep,
+        cv_rep = list_base_params_static$num_base_models,
         num_device = 1L
       ) %>%
         split(seq_len(nrow(.))),
@@ -79,18 +74,14 @@ target_baselearner_elnet <-
         r_subsample = list_base_params_static$r_subsample,
         c_subsample = list_base_params_static$c_subsample,
         model = engine_base_elnet,
-        folds = list_base_params_static$folds,
         cv_mode = df_learner_type_elnet$cv_mode,
         args_generate_cv = list_base_args_cv[[df_learner_type_elnet$cv_mode]],
-        tune_mode = list_base_params_static$tune_mode,
         tune_grid_in = list_base_params_elnet[[df_learner_type_elnet$learner]],
-        tune_grid_size = list_base_params_static$tune_grid_size,
         yvar = list_base_params_static$yvar,
         xvar = list_base_params_static$xvar,
+        drop_vars = list_base_params_static$drop_vars,
         normalize = list_base_params_static$normalize,
-        trim_resamples = list_base_params_static$trim_resamples,
-        return_best = list_base_params_static$return_best,
-        workflow = list_base_params_static$workflow
+        metric = "rmse"
       ),
       pattern = map(df_learner_type_elnet),
       iteration = "list",
@@ -119,7 +110,7 @@ target_baselearner_lgb <-
       command = list(
         lgb = expand.grid(
           mtry = c(floor(0.25 * (ncol(dt_feat_calc_xyt) - 4)), floor(0.5 * (ncol(dt_feat_calc_xyt) - 4))),
-          trees = c(100,500),
+          trees = c(500, 1000),
           learn_rate = c(0.05, 0.1)
         )
       ),
@@ -132,7 +123,7 @@ target_baselearner_lgb <-
         learner = c("lgb"),
         ##### NOTE: {lgb} max ~13.2 Gb memory.
         cv_mode = "spatiotemporal",
-        cv_rep = list_base_params_static$cv_rep,
+        cv_rep = list_base_params_static$num_base_models,
         num_device = 1L
       ) %>%
         split(seq_len(nrow(.))),
@@ -164,7 +155,7 @@ target_baselearner_lgb <-
       pattern = map(df_learner_type_lgb),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_1")
+        crew = targets::tar_resources_crew(controller = "controller_50")
       ),
       description = "Fit base learner | lgb | cpu | base learner"
     )
@@ -187,7 +178,7 @@ target_baselearner_mlp <-
       list_base_params_mlp,
       command = list(
         mlp = expand.grid(
-          hidden_units = list(128),
+          hidden_units = list(64, 128),
           dropout = c(0.1, 0.3),
           activation = "relu",
           learn_rate = c(0.001, 0.1)
@@ -201,7 +192,7 @@ target_baselearner_mlp <-
       command = beethoven::assign_learner_cv(
         learner = c("mlp"),
         cv_mode = "spatiotemporal",
-        cv_rep = list_base_params_static$cv_rep,
+        cv_rep = list_base_params_static$num_base_models,
         num_device = 4L
       ) %>%
         split(seq_len(nrow(.))),
@@ -245,7 +236,7 @@ target_baselearner_mlp <-
         fit_learner_base_lgb,
         fit_learner_base_mlp
       ),
-      format = "file_fast",
       description = "All fit base learners | cpu | gpu | base learner"
     )
   )
+

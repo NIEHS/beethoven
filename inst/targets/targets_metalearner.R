@@ -12,7 +12,7 @@ target_metalearner <-
       name = dt_feat_base_xyt,
       command = beethoven::attach_pred(
         data = data.frame(dt_feat_calc_xyt),
-        pred = list_learner_base_best,
+        pred = c(fit_learner_base_elnet, fit_learner_base_lgb, fit_learner_base_mlp),
         target_cols = chr_learner_meta_cols,
         yvar = list_base_params_static$yvar
       ),
