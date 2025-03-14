@@ -111,7 +111,7 @@ From: nvidia/cuda:11.8.0-devel-ubuntu22.04
         'lwgeom', 'doRNG', 'quarto', 'kernlab'))"
     Rscript -e "pak::pak('tidymodels/stacks')"
     Rscript -e "pak::pak('NIEHS/amadeus@1.2.4')"
-    Rscript -e "pak::pak('NIEHS/beethoven')"
+    Rscript -e "pak::pak('NIEHS/beethoven@kpm-0313')"
     Rscript -e "pak::pak('r-lib/ps', upgrade = TRUE)"
 
 %environment

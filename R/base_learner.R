@@ -227,17 +227,14 @@ fit_base_learner <-
     )
 
     # apply c_subsample % column subsampling with lat/lon
-    chr_latlon <- which(names(dt_full) %in% c("lon", "lat"))
+    chr_latlon <- c("lon", "lat")
     # update `xvar` for subset of predictors
-    chr_xvar <- c(
-      sample(
+    chr_xvar <- sample(
         setdiff(xvar, chr_latlon),
-        (length(xvar) - 2) * c_subsample
-      ),
-      chr_latlon
-    )
-    chr_colidx <- c(1:4, chr_xvar)
-    xvar <- seq(5, length(chr_colidx))
+        length(setdiff(xvar, chr_latlon))* c_subsample
+      )
+
+    chr_colidx <- c(drop_vars, yvar, chr_xvar, chr_latlon)
 
     # sample of data with r_subsample rows, c_subsample columns, and lat/lon
     dt_sample <- data.table::data.table(dt_full)[
@@ -254,7 +251,7 @@ fit_base_learner <-
     if (!is.null(folds)) {
       base_vfold <- rsample::vfold_cv(dt_sample, v = folds)
     } else {
-      args_generate_cv <-
+      generate_cv_list <-
         c(
           list(data = dt_sample, cv_mode = cv_mode),
           args_generate_cv
@@ -276,7 +273,7 @@ fit_base_learner <-
         )
 
       # generate row index
-      cv_index <- beethoven::inject_match(target_fun, args_generate_cv)
+      cv_index <- beethoven::inject_match(target_fun, generate_cv_list)
 
       # using cv_index, restore rset
       base_vfold <-

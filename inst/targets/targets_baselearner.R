@@ -56,7 +56,6 @@ target_baselearner_elnet <-
       df_learner_type_elnet,
       command = beethoven::assign_learner_cv(
         learner = c("elnet"),
-        ##### NOTE: {elnet} max ~14.8 Gb memory
         cv_mode = "spatiotemporal",
         cv_rep = list_base_params_static$num_base_models,
         num_device = 1L
@@ -110,7 +109,7 @@ target_baselearner_lgb <-
       command = list(
         lgb = expand.grid(
           mtry = c(floor(0.25 * (ncol(dt_feat_calc_xyt) - 4)), floor(0.5 * (ncol(dt_feat_calc_xyt) - 4))),
-          trees = c(500, 1000),
+          trees = c(100, 500, 1000),
           learn_rate = c(0.05, 0.1)
         )
       ),
@@ -139,18 +138,14 @@ target_baselearner_lgb <-
         r_subsample = list_base_params_static$r_subsample,
         c_subsample = list_base_params_static$c_subsample,
         model = engine_base_lgb,
-        folds = list_base_params_static$folds,
         cv_mode = df_learner_type_lgb$cv_mode,
         args_generate_cv = list_base_args_cv[[df_learner_type_lgb$cv_mode]],
-        tune_mode = list_base_params_static$tune_mode,
         tune_grid_in = list_base_params_lgb[[df_learner_type_lgb$learner]],
-        tune_grid_size = list_base_params_static$tune_grid_size,
         yvar = list_base_params_static$yvar,
         xvar = list_base_params_static$xvar,
+        drop_vars = list_base_params_static$drop_vars,        
         normalize = list_base_params_static$normalize,
-        trim_resamples = list_base_params_static$trim_resamples,
-        return_best = list_base_params_static$return_best,
-        workflow = list_base_params_static$workflow
+        metric = "rmse"
       ),
       pattern = map(df_learner_type_lgb),
       iteration = "list",
@@ -208,18 +203,14 @@ target_baselearner_mlp <-
         r_subsample = list_base_params_static$r_subsample,
         c_subsample = list_base_params_static$c_subsample,
         model = engine_base_mlp,
-        folds = list_base_params_static$folds,
         cv_mode = df_learner_type_mlp$cv_mode,
         args_generate_cv = list_base_args_cv[[df_learner_type_mlp$cv_mode]],
         tune_mode = list_base_params_static$tune_mode,
         tune_grid_in = list_base_params_mlp[[df_learner_type_mlp$learner]],
-        tune_grid_size = list_base_params_static$tune_grid_size,
         yvar = list_base_params_static$yvar,
         xvar = list_base_params_static$xvar,
+        drop_vars = list_base_params_static$drop_vars,        
         normalize = list_base_params_static$normalize,
-        trim_resamples = list_base_params_static$trim_resamples,
-        return_best = list_base_params_static$return_best,
-        workflow = list_base_params_static$workflow
       ),
       pattern = map(df_learner_type_mlp),
       iteration = "list",
