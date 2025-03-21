@@ -121,3 +121,13 @@ lib-flex/**
 
 # local coverage RDS files
 cov/
+
+# images
+*.png
+
+# run scripts
+inst/scripts/*.sh
+inst/scripts/run_models_elnet.sh
+inst/scripts/run_models_lgb.sh
+inst/scripts/run_models_mlp.sh
+inst/scripts/run_models_meta.sh

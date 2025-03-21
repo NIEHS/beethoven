@@ -27,7 +27,7 @@ target_baselearner <-
         ##### NOTE: exclude workflow for base to meta learner dev.
         ##### will need to be included to predict base learner values
         ##### on prediction grid.
-        cv_rep = 50L
+        cv_rep = 10L
       ),
       description = "Static parameters | base learner"
     )
@@ -119,8 +119,9 @@ target_baselearner_lgb <-
       command = list(
         lgb = expand.grid(
           mtry = c(floor(0.25 * (ncol(dt_feat_calc_xyt) - 4)), floor(0.5 * (ncol(dt_feat_calc_xyt) - 4))),
-          trees = c(100,500),
-          learn_rate = c(0.05, 0.1)
+          trees = c(100,500, 1000),
+          learn_rate = c(0.05, 0.1),
+          tree_depth = c(10, 20)
         )
       ),
       description = "tuning grid | lgb | base learner"
@@ -133,6 +134,8 @@ target_baselearner_lgb <-
         ##### NOTE: {lgb} max ~13.2 Gb memory.
         cv_mode = "spatiotemporal",
         cv_rep = list_base_params_static$cv_rep,
+        crs = 5070L,
+        cellsize = 250000L,
         num_device = 1L
       ) %>%
         split(seq_len(nrow(.))),
@@ -148,7 +151,6 @@ target_baselearner_lgb <-
         r_subsample = list_base_params_static$r_subsample,
         c_subsample = list_base_params_static$c_subsample,
         model = engine_base_lgb,
-        folds = list_base_params_static$folds,
         cv_mode = df_learner_type_lgb$cv_mode,
         args_generate_cv = list_base_args_cv[[df_learner_type_lgb$cv_mode]],
         tune_mode = list_base_params_static$tune_mode,

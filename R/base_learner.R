@@ -691,6 +691,8 @@ attach_xy <-
 #' `v * length(unique(substr(data$time, 1, 4)))`.
 #' @keywords Baselearner
 #' @param data data.table or data.frame with `id`, `coords`, and `time` columns.
+#' @param crs The coordinate reference system (CRS) of the spatial object
+#' @param cellsize The size of each spatial block in meters. Uses the crs units
 #' @param locs_id The column name in `data` that represents the
 #' location identifier.
 #' @param coords The column names in the spatial object that represent the
@@ -707,6 +709,8 @@ attach_xy <-
 #' @export
 generate_cv_index_spt <- function(
   data,
+  crs = NULL,
+  cellsize = NULL,
   locs_id = "site_id",
   coords = c("lon", "lat"),
   v = 10L,
@@ -717,109 +721,87 @@ generate_cv_index_spt <- function(
   #########################       SPATIAL FOLDS       ##########################
   stopifnot(c(locs_id, coords, time_id) %in% names(data))
 
-  # new `data.frame`and `sf` with onle `id` and lat/lon coordinates
+
   data_trim <- unique(data.frame(data)[, c(locs_id, coords)])
-  data_sf <- sf::st_as_sf(
-    data_trim, coords = coords, remove = FALSE
-  )
+
+
+
+  if (is.null(crs)) {
+    df_sf <- sf::st_as_sf(data_trim, coords = coords, crs = 4326, remove = FALSE)    
+    data_sf <- st_transform(df_sf, crs = 5070)
+  } else {
+    df_sf <- sf::st_as_sf(data_trim, coords = coords, crs = 4326, remove = FALSE)    
+    data_sf <- st_transform(df_sf, crs = crs)
+  }
 
   # generate spatial splits with `spatialsample::spatial_block_cv`
+  if (!is.null(cellsize)) {
   sp_index <-
     rlang::inject(
       spatialsample::spatial_block_cv(
         data_sf,
         v = v,
+        cellsize = cellsize,
+        method = "snake",
         !!!list(...)
       )
     )
-
-  # retrieve in_id
-  data_rowid <- seq_len(nrow(data_trim))
-  spatial_cv <- data_rowid
-
-  if (
-    !all(
-      !is.na(Reduce(c, Map(function(x) is.na(x$out_id), sp_index$splits)))
-    )
-  ) {
-    warning("Some splits have missing values in `out_id`...\n")
-    spatial_cv <-
-      lapply(
-        sp_index$splits,
-        function(x) list(analysis = x$in_id, assessment = x$out_id)
-      )
   } else {
-    sp_index <- lapply(sp_index$splits, function(x) x$in_id)
-    for (i in seq_along(sp_index)) {
-      spatial_cv[setdiff(data_rowid, sp_index[[i]])] <- i
-    }
+    sp_index <- spatialsample::spatial_block_cv(
+      data = data_sf,
+      v = v, 
+      method = "snake",
+      !!!list(...)
+    )
   }
 
-  # merge spatial cross validation index with full data
-  data_trim$cv <- spatial_cv
-  data_sp <- data %>%
-    dplyr::left_join(
-      dplyr::select(data_trim, locs_id, coords[1], coords[2], cv),
-      by = c(locs_id, coords[1], coords[2])
-    )
 
-  # check spatial cross validation index is in the data
-  stopifnot("cv" %in% names(data_sp))
-  # check data with spatial cv has same rows as raw data
-  stopifnot(nrow(data_sp) == nrow(data))
-  # check data with spatial cv has one more column than raw data
-  stopifnot(ncol(data_sp) == ncol(data) + 1)
+  # Create a data frame that assigns fold labels to each row in the original data
+  fold_labels <- map_dfr(seq_along(sp_index$splits), function(k) {
+    assessment_ids <- assessment(sp_index$splits[[k]])$site_id
+    
+    tibble(
+      site_id = assessment_ids,
+      fold = k
+    )
+  }) 
+
+  data_spatial_cv <-  data.frame(data)[, c(locs_id, coords)] %>% 
+     sf::st_as_sf(coords = coords,  remove = FALSE
+  ) %>%
+  # Join the fold labels back to the original data
+    left_join( fold_labels, by = "site_id")
+
+
+
+
 
   #########################       TEMPORAL FOLDS       #########################
-  # coerce class of time and cv index
-  data_sp[[time_id]] <- as.Date(data_sp[[time_id]])
-  data_sp$cv <- as.integer(data_sp$cv)
-
-  # unique spatial indices
-  sp_indices <- sort(unique(data_sp$cv))
 
   # identify site's unique year + week combination
-  data_sp$yw <- paste0(
-    lubridate::year(data_sp[[time_id]]),
-    sprintf("%02d", lubridate::week(data_sp[[time_id]]))
-  )
-  # randomize unique year + week combinations
-  yearweek_random <- sample(unique(data_sp$yw))
-  # Split into ~equal sized chunks
-  yearweek_split <- split(
-    yearweek_random,
-    cut(seq_along(yearweek_random), v, labels = FALSE)
-  )
+  data_spatial_cv$yw <- paste0(
+    lubridate::year(data[[time_id]]),
+    sprintf("%02d", lubridate::week(data[[time_id]])))
 
-  # since both based on v, they should have the same length
-  stopifnot(length(yearweek_split) == length(sp_indices))
+  data_spatial_cv <- data_spatial_cv %>% mutate(st_int = interaction(fold, as.double(yw), drop = FALSE))
 
-  # list to store temporal cv index
-  spt_index_list <- list()
+    # Create a unique list of (id1, id2) combinations
+  unique_st_int <- data_spatial_cv$st_int %>% unique() %>% as.data.frame()
+  colnames(unique_st_int) <- "st_int"
 
-  for (i in seq(v)) {
-    # test data are within spatial and temporal fold `i`
-    out_id <- which(
-      data_sp$cv == sp_indices[i] &
-        data_sp$yw %in% yearweek_split[[i]]
-    )
-    # training data are all other data
-    in_id <- setdiff(seq_len(nrow(data_sp)), out_id)
-    spt_index_list <- c(
-      spt_index_list,
-      list(
-        list(
-          analysis = in_id,
-          assessment = out_id
-        )
-      )
-    )
-  }
+  # Assign P groups cyclically (to balance size)
+  unique_st_int <- unique_st_int %>%
+    mutate(spacetime_cv = rep(1:v, length.out = n()))
 
-  return(spt_index_list)
+  # Merge back to the full dataset
+  data_sp <- data_spatial_cv %>% left_join(unique_st_int, by = "st_int")
+
+ # length == nrow(data)
+  spt_index_num <- data_sp$spacetime_cv
+
+  return(spt_index_num)
 
 }
-
 
 # non site-wise; just using temporal information
 #' Generate temporal cross-validation index
@@ -1012,3 +994,4 @@ switch_generate_cv_rset <-
     cvindex <- beethoven::inject_match(target_fun, list(...))
     return(cvindex)
   }
+
