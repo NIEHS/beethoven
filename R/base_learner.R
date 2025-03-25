@@ -88,7 +88,8 @@ switch_model <-
         parsnip::boost_tree(
           mtry = parsnip::tune(),
           trees = parsnip::tune(),
-          learn_rate = parsnip::tune()
+          learn_rate = parsnip::tune(),
+          tree_depth = parsnip::tune()
         ) %>%
         parsnip::set_engine("lightgbm", device = device) %>%
         parsnip::set_mode("regression"),
@@ -156,16 +157,10 @@ switch_model <-
 #' Tuning is performed based on random grid search (size = 10).
 #' @param learner character(1). The base learner to be used.
 #'   Default is "mlp". Available options are "mlp", "xgb", "lgb", "elnet".
-#' @param outer_rset monte carlo training/test splitting produced from rsample::mc_cv
+#' @param rset monte carlo training/test and out-of-sample test set
 #' @param model The parsnip model object. Preferably generated from
 #'   `switch_model`.
-#' @param args_generate_cv List of arguments to be passed to
-#'  `switch_generate_cv_rset` function.
-#' @param tune_grid_in data.frame object that includes the grid for
-#'   hyperparameter tuning. `tune_grid_size` rows will be randomly picked
-#'   from this data.frame for grid search.
-#' @param learn_rate The learning rate for the model. For branching purpose.
-#'   Default is 0.1.
+#' @param tune_grid_size numeric(1), finetune grid size.
 #' @param yvar The target variable.
 #' @param xvar The predictor variables.
 #' @param drop_vars character vector or numeric. The variables to be dropped from the data.frame.
@@ -188,14 +183,12 @@ switch_model <-
 fit_base_learner <-
   function(
     learner = "mlp",
-    outer_rset = NULL,
+    rset = NULL,
     model = NULL,
-    args_generate_cv = NULL,
-    tune_grid_in = NULL,
-    learn_rate = 0.1,
+    tune_grid_size = 10L,
     yvar = "Arithmetic.Mean",
-    xvar = names(dt_full)[seq(5, ncol(dt_full))],
-    drop_vars = names(dt_full)[seq(1,3)],
+    xvar = NULL,
+    drop_vars = NULL,
     normalize = TRUE,
     metric = "rmse",
     ...
@@ -208,23 +201,12 @@ fit_base_learner <-
     # detect model name
     model_name <- model$engine
 
-    dt_train <- subsample$train
-    dt_train[, (drop_vars) := NULL]
-
-    dt_test <- subsample$test
-    dt_test[, (drop_vars) := NULL]    
-
-      # using cv_index, restore rset
-    outer_rset <- rsample::make_splits(
-      x = dt_train,
-      assessment = dt_test
-     )
-  
     
     base_recipe <-
-      recipes::recipe(dt_train[1,]) %>%
+      recipes::recipe(training(rset[[1]]$splits[[1]])[1,]) %>%
       recipes::update_role(!!xvar, new_role = "predictor") %>%  # Dynamically assign covariates
-      recipes::update_role(!!yvar, new_role = "outcome") 
+      recipes::update_role(!!yvar, new_role = "outcome") %>%
+      recipes::update_role(!!drop_vars, new_role = "id")
 
 
     if (normalize) {
@@ -241,20 +223,24 @@ fit_base_learner <-
       workflows::add_recipe(base_recipe) %>%
       workflows::add_model(model)
 
-      wf_config <-
-        tune::control_grid(
-        verbose = TRUE,
-        save_pred = FALSE,
-        save_workflow = TRUE
-      )  
+      # wf_config <-
+      #   tune::control_grid(
+      #   verbose = TRUE,
+      #   save_pred = FALSE,
+      #   save_workflow = TRUE
+      # )  
 
-      inner_cv <- vfold_cv(analysis(outer_rset), v = 10)
+    wf_config <- control_race(verbose_elim = TRUE,
+      save_workflow = TRUE,
+      verbose = TRUE)
+
+
 
       base_wftune <-
         base_wf %>%
-        tune::tune_grid(
-          resamples = inner_cv,
-          grid = tune_grid_in,
+        finetune::tune_race_anova(
+          resamples = rset[[1]], # list object 1 is the manual cv rset object created with spatiotemporal CV
+          grid = tune_grid_size,
           metrics =
           yardstick::metric_set(
             yardstick::rmse,
@@ -271,11 +257,10 @@ fit_base_learner <-
         final_wf <- finalize_workflow(base_wf, best_params)
         
         # Fit final model on the outer data test set
-        base_fit <- fit(final_wf, data = analysis(outer_rset))
+        base_fit <- fit(final_wf, data = rset[[2]]) %>% 
+          butcher::butcher()
 
-        predictions <- predict(base_fit, new_data = testing(outer_rset))
-
-        base_results <- list(prediction, collect_metrics(base_wftune))
+        base_results <- list(base_fit, collect_metrics(base_wftune))
 
     return(base_results)
   }
@@ -449,7 +434,7 @@ assign_learner_cv <-
     cellsize = 100000L,
     balance = FALSE
   ) {
-    learner_eligible <- c("lgb", "mlp", "xgb")
+    learner_eligible <- c("mlp", "xgb")
     learner <- sort(learner)
     learner_eligible_flag <- learner %in% learner_eligible
     cuda_devices <- seq_len(sum(learner_eligible_flag)) - 1

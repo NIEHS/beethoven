@@ -14,29 +14,52 @@ target_baselearner <-
       command = list(
         dt_full = dt_feat_calc_xyt,
         r_subsample = 0.3,
-        c_subsample = 1.0,
-        folds = 10L,
-        tune_mode = "grid",
-        tune_grid_size = 1L,
         yvar = "Arithmetic.Mean",
-        xvar = seq(5, ncol(dt_feat_calc_xyt)),
+        xvar = names(dt_feat_calc_xyt)[seq(5, ncol(dt_feat_calc_xyt))],
+        drop_vars = names(dt_feat_calc_xyt)[seq(1,3)],
         normalize = TRUE,
-        trim_resamples = TRUE,
-        return_best = TRUE,
-        workflow = TRUE,
-        ##### NOTE: exclude workflow for base to meta learner dev.
-        ##### will need to be included to predict base learner values
-        ##### on prediction grid.
         num_base_models = 10L
       ),
       description = "Static parameters | base learner"
     )
     ,
-      targets::tar_target(
-      mc_base_subsample,
-      command = {mc_cv(list_base_params_static$dt_full,
-      prop = list_base_params_static$r_subsample,
-      times = list_base_params_static$num_base_models)},
+    #   targets::tar_target(
+    #   mc_base_subsample,
+    #   command = {mc_cv(list_base_params_static$dt_full,
+    #   prop = list_base_params_static$r_subsample,
+    #   times = list_base_params_static$num_base_models)},
+    #   description = "B MC subsamples | base learner"
+    # )
+
+    targets::tar_target(
+      mc_base_subsample, 
+      command = {
+          outer_cv <- mc_cv(list_base_params_static$dt_full,
+              prop = list_base_params_static$r_subsample,
+              times = list_base_params_static$num_base_models)
+
+
+          inner_cv <- lapply(1:nrow(outer_cv), \(x) {
+            dt_train <- training(outer_cv$splits[[x]])
+            dt_test <- assessment(outer_cv$splits[[x]])
+            spatiotemporal_index <- beethoven::generate_cv_index_spt(
+              data = dt_train,
+              crs = 5070L,
+              cellsize  = 250000L,
+              locs_id = "site_id",
+              coords = c("lon","lat"),
+              v = 10L,
+              time_id = "time")
+            inner_cv <- beethoven::convert_cv_index_rset(
+              cvindex = spatiotemporal_index, 
+              data = dt_train,
+              cv_mode = "spatiotemporal")              
+            mc_sample <- list(inner_cv, dt_train, dt_test)
+            return(mc_sample)
+          })
+
+      }
+      ,
       description = "B MC subsamples | base learner"
     )
   )
@@ -128,8 +151,8 @@ target_baselearner_lgb <-
         lgb = expand.grid(
           mtry = c(floor(0.25 * (ncol(dt_feat_calc_xyt) - 4)), floor(0.5 * (ncol(dt_feat_calc_xyt) - 4))),
           trees = c(100,500, 1000),
-          learn_rate = c(0.05, 0.1),
-          tree_depth = c(10, 20)
+          learn_rate = c(0.001, 0.01, 0.1),
+          tree_depth = c(5, 10, 20)
         )
       ),
       description = "tuning grid | lgb | base learner"
@@ -140,7 +163,6 @@ target_baselearner_lgb <-
       df_learner_type_lgb,
       command = beethoven::assign_learner_cv(
         learner = c("lgb"),
-        ##### NOTE: {lgb} max ~13.2 Gb memory.
         cv_mode = "spatiotemporal",
         num_models = list_base_params_static$num_base_models,
         crs = 5070L,
@@ -158,12 +180,12 @@ target_baselearner_lgb <-
       fit_learner_base_lgb,
       command = beethoven::fit_base_learner(
         learner = "lgb",
-        outer_rset = mc_base_subsample[[1]],
+        rset = mc_base_subsample[[1]],
         model = engine_base_lgb,
-        args_generate_cv = df_learner_type_lgb[[1]],
-        tune_grid_in = list_base_params_lgb,
+        tune_grid_size = 10L,
         yvar = list_base_params_static$yvar,
         xvar = list_base_params_static$xvar,
+        drop_vars = list_base_params_static$drop_vars,
         normalize = list_base_params_static$normalize
       ),
       pattern = map(mc_base_subsample, df_learner_type_lgb),
