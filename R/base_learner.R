@@ -156,37 +156,21 @@ switch_model <-
 #' Tuning is performed based on random grid search (size = 10).
 #' @param learner character(1). The base learner to be used.
 #'   Default is "mlp". Available options are "mlp", "xgb", "lgb", "elnet".
-#' @param dt_full The full data table to be used for prediction.
-#' @param r_subsample numeric(1). The proportion of rows to be used.
-#' @param c_subsample numeric(1). The proportion of predictors to be used.
+#' @param outer_rset monte carlo training/test splitting produced from rsample::mc_cv
 #' @param model The parsnip model object. Preferably generated from
 #'   `switch_model`.
-#' @param folds integer(1). Number of cross-validation folds.
-#'   If NULL, `cv_mode` should be defined to be used in [rsample::vfold_cv].
-#' @param cv_mode character(1).
-#'   Cross-validation mode. Default is "spatiotemporal".
-#'   Available options are "spatiotemporal", "spatial", "temporal".
 #' @param args_generate_cv List of arguments to be passed to
 #'  `switch_generate_cv_rset` function.
-#' @param tune_mode character(1). Hyperparameter tuning mode.
-#'   Default is "grid", "bayes" is acceptable.
-#' @param tune_bayes_iter integer(1). The number of iterations for
-#'  Bayesian optimization. Default is 10. Only used when `tune_mode = "bayes"`.
 #' @param tune_grid_in data.frame object that includes the grid for
 #'   hyperparameter tuning. `tune_grid_size` rows will be randomly picked
 #'   from this data.frame for grid search.
-#' @param tune_grid_size integer(1). The number of grid size for hyperparameter
-#'  tuning. Default is 10. Only used when `tune_mode = "grid"`.
 #' @param learn_rate The learning rate for the model. For branching purpose.
 #'   Default is 0.1.
 #' @param yvar The target variable.
 #' @param xvar The predictor variables.
+#' @param drop_vars character vector or numeric. The variables to be dropped from the data.frame.
 #' @param normalize logical(1). If `TRUE`, all numeric predictors are
 #' normalized. Default is `FALSE`.
-#' @param trim_resamples logical(1). Default is TRUE, which replaces the actual
-#'   data.frames in splits column of `tune_results` object with NA.
-#' @param return_best logical(1). If TRUE, the best tuned model is returned.
-#' @param workflow logical(1). If TRUE, the best fit model workflow is returned.
 #' @param metric character(1). The metric to be used for selecting the best.
 #' Must be one of "rmse", "rsq", "mae". Default = "rmse"
 #' @param ... Additional arguments to be passed.
@@ -203,81 +187,45 @@ switch_model <-
 #' @export
 fit_base_learner <-
   function(
-    learner = c("mlp", "xgb", "lgb", "elnet"),
-    dt_full,
-    r_subsample = 0.3,
-    c_subsample = 1.0,
+    learner = "mlp",
+    outer_rset = NULL,
     model = NULL,
-    folds = 5L,
-    cv_mode  = c("spatiotemporal", "spatial", "temporal"),
     args_generate_cv = NULL,
-    tune_mode = "grid",
-    tune_bayes_iter = 10L,
     tune_grid_in = NULL,
-    tune_grid_size = 10L,
     learn_rate = 0.1,
     yvar = "Arithmetic.Mean",
-    xvar = seq(5, ncol(dt_full)),
-    normalize = FALSE,
-    trim_resamples = FALSE,
-    return_best = TRUE,
-    workflow = TRUE,
+    xvar = names(dt_full)[seq(5, ncol(dt_full))],
+    drop_vars = names(dt_full)[seq(1,3)],
+    normalize = TRUE,
     metric = "rmse",
     ...
   ) {
-    learner <- match.arg(learner)
-    tune_mode <- match.arg(tune_mode, c("grid", "bayes"))
-    cv_mode <- match.arg(cv_mode)
+    learner <- match.arg(learner, c("mlp","mpl2", "xgb", "lgb", "elnet"))
+    # cv_mode <- match.arg(cv_mode, c("spatiotemporal", "spatial", "temporal"))
     stopifnot("parsnip model must be defined." = !is.null(model))
 
-    if (cv_mode == "spatiotemporal") {
-      ngroup_init <- args_generate_cv$ngroup_init
-    } else {
-      ngroup_init <- NULL
-    }
-
-    # apply r_subsample % row subsampling
-    chr_rowidx <- beethoven::make_subdata(
-      dt_full, p = r_subsample, ngroup_init = ngroup_init
-    )
-
-    # apply c_subsample % column subsampling with lat/lon
-    chr_latlon <- which(names(dt_full) %in% c("lon", "lat"))
-    # update `xvar` for subset of predictors
-    chr_xvar <- c(
-      sample(
-        setdiff(xvar, chr_latlon),
-        (length(xvar) - 2) * c_subsample
-      ),
-      chr_latlon
-    )
-    chr_colidx <- c(1:4, chr_xvar)
-    xvar <- seq(5, length(chr_colidx))
-
-    # sample of data with r_subsample rows, c_subsample columns, and lat/lon
-    dt_sample <- data.table::data.table(dt_full)[
-      chr_rowidx,
-      chr_colidx,
-      with = FALSE
-    ]
-
-    # full rows with c_subsample columns and lat/lon
-    dt_full_cols <- data.table::data.table(dt_full)[, chr_colidx, with = FALSE]
-
-    # ensure required columns are retained in data sample
-    chr_requiredcols <- c(yvar, "site_id", "Event.Type", "time", "lon", "lat")
-    stopifnot(all(chr_requiredcols %in% names(dt_sample)))
-    stopifnot(all(chr_requiredcols %in% names(dt_full_cols)))
 
     # detect model name
     model_name <- model$engine
 
+    dt_train <- subsample$train
+    dt_train[, (drop_vars) := NULL]
+
+    dt_test <- subsample$test
+    dt_test[, (drop_vars) := NULL]    
+
+      # using cv_index, restore rset
+    outer_rset <- rsample::make_splits(
+      x = dt_train,
+      assessment = dt_test
+     )
+  
+    
     base_recipe <-
-      recipes::recipe(
-        dt_sample[1, ]
-      ) %>%
-      recipes::update_role(!!xvar) %>%
-      recipes::update_role(!!yvar, new_role = "outcome")
+      recipes::recipe(dt_train[1,]) %>%
+      recipes::update_role(!!xvar, new_role = "predictor") %>%  # Dynamically assign covariates
+      recipes::update_role(!!yvar, new_role = "outcome") 
+
 
     if (normalize) {
       base_recipe <-
@@ -287,79 +235,49 @@ fit_base_learner <-
         )
     }
 
-    if (!is.null(folds)) {
-      base_vfold <- rsample::vfold_cv(dt_sample, v = folds)
-    } else {
-      args_generate_cv <-
-        c(
-          list(data = dt_sample, cv_mode = cv_mode),
-          args_generate_cv
-        )
 
-      # manually replicate switch_generate_cv_rset function
-      # the formals() argument used in inject_match does not properly
-      # identify the expected arguments in the switched functions
-      # identify cv_mode
-      cv_mode_arg <- match.arg(
-        cv_mode, c("spatial", "temporal", "spatiotemporal")
-      )
-      target_fun <-
-        switch(
-          cv_mode_arg,
-          spatial = generate_cv_index_sp,
-          temporal = generate_cv_index_ts,
-          spatiotemporal = generate_cv_index_spt
-        )
+    base_wf <-
+      workflows::workflow() %>%
+      workflows::add_recipe(base_recipe) %>%
+      workflows::add_model(model)
 
-      # generate row index
-      cv_index <- beethoven::inject_match(target_fun, args_generate_cv)
+      wf_config <-
+        tune::control_grid(
+        verbose = TRUE,
+        save_pred = FALSE,
+        save_workflow = TRUE
+      )  
 
-      # using cv_index, restore rset
-      base_vfold <-
-        beethoven::convert_cv_index_rset(
-          cv_index, dt_sample, cv_mode = cv_mode
-        )
-    }
+      inner_cv <- vfold_cv(analysis(outer_rset), v = 10)
 
-    # generate random grid from hyperparameters
-    # dials approach is too complicated to implement since
-    # we already declared tuning hyperparameters with tune(),
-    # which is not compatible with dials approach to limit
-    # possible value ranges per hyperparameter.
-    if (tune_mode == "grid") {
-      grid_row_idx <-
-        sample(
-          nrow(tune_grid_in),
-          tune_grid_size,
-          replace = FALSE
-        )
-      grid_params <- tune_grid_in[grid_row_idx, ]
-    } else {
-      grid_params <- NULL
-      # drop mtry from model arguments if using baysian tuning
-      # for xgboost
-      if (model$engine %in% c("xgboost", "lightgbm")) {
-        model <- model %>%
-          parsnip::set_args(mtry = NULL)
-      }
-    }
-
-    base_wftune <-
-      fit_base_tune(
-        recipe = base_recipe,
-        model = model,
-        resample = base_vfold,
-        tune_mode = tune_mode,
-        grid = grid_params,
-        iter_bayes = tune_bayes_iter,
-        trim_resamples = trim_resamples,
-        return_best = return_best,
-        workflow = workflow,
-        data_full = dt_full_cols,
-        metric = metric
+      base_wftune <-
+        base_wf %>%
+        tune::tune_grid(
+          resamples = inner_cv,
+          grid = tune_grid_in,
+          metrics =
+          yardstick::metric_set(
+            yardstick::rmse,
+            yardstick::rsq            
+          ),
+          control = wf_config
       )
 
-    return(base_wftune)
+
+        # Select best model
+        best_params <- select_best(base_wftune, metric = metric)
+        
+        # Finalize workflow with best parameters
+        final_wf <- finalize_workflow(base_wf, best_params)
+        
+        # Fit final model on the outer data test set
+        base_fit <- fit(final_wf, data = analysis(outer_rset))
+
+        predictions <- predict(base_fit, new_data = testing(outer_rset))
+
+        base_results <- list(prediction, collect_metrics(base_wftune))
+
+    return(base_results)
   }
 
 
@@ -428,7 +346,6 @@ fit_base_tune <-
           metrics =
           yardstick::metric_set(
             yardstick::rmse,
-            yardstick::mape,
             yardstick::rsq,
             yardstick::mae
           ),
@@ -511,9 +428,13 @@ fit_base_tune <-
 #' @param cv_mode character(1). The cross-validation mode to be used.
 #'  Default is "spatiotemporal". Available options are "spatiotemporal",
 #'  "spatial", "temporal".
-#' @param cv_rep integer(1). The number of repetitions for each `cv_mode`.
+#' @param num_models integer(1). The number of repetitions for each `cv_mode`.
 #' @param num_device integer(1). The number of CUDA devices to be used.
 #'   Each device will be assigned to each eligible learner (i.e., lgb, mlp).
+#' @param crs Coordinate reference system in `sf` style. Default is 5070L
+#' Albers Equal Area Projected
+#' @param cellsize cellsize for cross-validation spatial blocks. crs units.
+#' Default is 100km
 #' @param balance logical(1). If TRUE, the number of CUDA devices will be
 #' equally distributed based on the number of eligible devices.
 #' @return A data frame with three columns: learner, cv_mode, and device.
@@ -522,8 +443,10 @@ assign_learner_cv <-
   function(
     learner = c("lgb", "mlp", "elnet"),
     cv_mode = c("spatiotemporal", "spatial", "temporal"),
-    cv_rep = 100L,
+    num_models = 100L,
     num_device = ifelse(torch::cuda_device_count() > 1, 2, 1),
+    crs = 5070L,
+    cellsize = 100000L,
     balance = FALSE
   ) {
     learner_eligible <- c("lgb", "mlp", "xgb")
@@ -541,13 +464,15 @@ assign_learner_cv <-
     learner_l <- split(learner, learner)
     learner_l <- mapply(
       function(x, y) {
-        cv_mode_rep <- rep(cv_mode, each = cv_rep)
+        num_models_rep <- rep(cv_mode, each = num_models)
         df <-
           data.frame(
-            learner = rep(x, cv_rep * length(cv_mode)),
+            learner = rep(x, num_models * length(cv_mode)),
             cv_mode =
-            cv_mode_rep[sample(length(cv_mode_rep), length(cv_mode_rep))],
-            device = y
+            num_models_rep[sample(length(num_models_rep), length(num_models_rep))],
+            device = y,
+            crs = crs,
+            cellsize = cellsize
           )
         return(df)
       },
@@ -714,8 +639,7 @@ generate_cv_index_spt <- function(
   locs_id = "site_id",
   coords = c("lon", "lat"),
   v = 10L,
-  time_id = "time",
-  ...
+  time_id = "time"
 ) {
 
   #########################       SPATIAL FOLDS       ##########################
@@ -742,16 +666,14 @@ generate_cv_index_spt <- function(
         data_sf,
         v = v,
         cellsize = cellsize,
-        method = "snake",
-        !!!list(...)
+        method = "snake"
       )
     )
   } else {
     sp_index <- spatialsample::spatial_block_cv(
       data = data_sf,
       v = v, 
-      method = "snake",
-      !!!list(...)
+      method = "snake"
     )
   }
 

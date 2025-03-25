@@ -27,9 +27,17 @@ target_baselearner <-
         ##### NOTE: exclude workflow for base to meta learner dev.
         ##### will need to be included to predict base learner values
         ##### on prediction grid.
-        cv_rep = 10L
+        num_base_models = 10L
       ),
       description = "Static parameters | base learner"
+    )
+    ,
+      targets::tar_target(
+      mc_base_subsample,
+      command = {mc_cv(list_base_params_static$dt_full,
+      prop = list_base_params_static$r_subsample,
+      times = list_base_params_static$num_base_models)},
+      description = "B MC subsamples | base learner"
     )
   )
 
@@ -127,13 +135,14 @@ target_baselearner_lgb <-
       description = "tuning grid | lgb | base learner"
     )
     ,
+    # working on updating assign_learner_cv - make a single list
     targets::tar_target(
       df_learner_type_lgb,
       command = beethoven::assign_learner_cv(
         learner = c("lgb"),
         ##### NOTE: {lgb} max ~13.2 Gb memory.
         cv_mode = "spatiotemporal",
-        cv_rep = list_base_params_static$cv_rep,
+        num_models = list_base_params_static$num_base_models,
         crs = 5070L,
         cellsize = 250000L,
         num_device = 1L
@@ -143,27 +152,21 @@ target_baselearner_lgb <-
       description = "Engines and CV modes | lgb | cpu | base learner"
     )
     ,
+    # fit_base_leaner - inner_cv needs st-cv
+    # arguments for cv -check
     targets::tar_target(
       fit_learner_base_lgb,
       command = beethoven::fit_base_learner(
-        learner = df_learner_type_lgb$learner,
-        dt_full = list_base_params_static$dt_full,
-        r_subsample = list_base_params_static$r_subsample,
-        c_subsample = list_base_params_static$c_subsample,
+        learner = "lgb",
+        outer_rset = mc_base_subsample[[1]],
         model = engine_base_lgb,
-        cv_mode = df_learner_type_lgb$cv_mode,
-        args_generate_cv = list_base_args_cv[[df_learner_type_lgb$cv_mode]],
-        tune_mode = list_base_params_static$tune_mode,
-        tune_grid_in = list_base_params_lgb[[df_learner_type_lgb$learner]],
-        tune_grid_size = list_base_params_static$tune_grid_size,
+        args_generate_cv = df_learner_type_lgb[[1]],
+        tune_grid_in = list_base_params_lgb,
         yvar = list_base_params_static$yvar,
         xvar = list_base_params_static$xvar,
-        normalize = list_base_params_static$normalize,
-        trim_resamples = list_base_params_static$trim_resamples,
-        return_best = list_base_params_static$return_best,
-        workflow = list_base_params_static$workflow
+        normalize = list_base_params_static$normalize
       ),
-      pattern = map(df_learner_type_lgb),
+      pattern = map(mc_base_subsample, df_learner_type_lgb),
       iteration = "list",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(controller = "controller_1")

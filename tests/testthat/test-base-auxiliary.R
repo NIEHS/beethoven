@@ -56,14 +56,16 @@ testthat::test_that("assign_learner_cv", {
     alc <- assign_learner_cv(
       learner = learners,
       cv_mode = modes,
-      cv_rep = 2L,
-      num_device = 1
+      num_models = 2L,
+      num_device = 1,
+      crs = 5070L,
+      cellsize = 1000L
     )
   )
   # expect data.frame
   testthat::expect_s3_class(alc, "data.frame")
-  # expect 18 rows (3 learners * 3 modes * 2 reps) and 3 columns
-  testthat::expect_equal(dim(alc), c(18, 3))
+  # expect 18 rows (3 learners * 3 modes * 2 reps) and 5 columns
+  testthat::expect_equal(dim(alc), c(18, 5))
   # expect all learners represented
   testthat::expect_true(all(learners %in% alc[, 1]))
   # expect all modes represented
@@ -88,8 +90,10 @@ testthat::test_that("assign_learner_cv", {
     alcb <- assign_learner_cv(
       learner = learners,
       cv_mode = modes,
-      cv_rep = 2L,
+      num_models = 2L,
       num_device = 4,
+      crs = 5070L,
+      cellsize = 250000L,
       balance = TRUE
     )
   )
@@ -112,27 +116,36 @@ testthat::test_that("generate_cv_index_spt", {
   )
 
   # expect warning due to non-sf dt_performance
-  testthat::expect_warning(
+  testthat::expect_no_warning(
     index_spt1 <- generate_cv_index_spt(
       data = data.table::data.table(dt_performance),
+      crs = NULL,
+      cellsize = NULL,
       locs_id = "site_id",
       coords = c("lon", "lat"),
       v = 10L,
       time_id = "time"
     )
   )
-  # expect list
-  testthat::expect_true(is.list(index_spt1))
-  # expect length of 10
-  testthat::expect_length(index_spt1, 10)
+  # expect numeri (note change where previously was list)
+  testthat::expect_true(is.numeric(index_spt1))
+  # expect nrow of dt_performance
+  testthat::expect_length(index_spt1, nrow(dt_performance))
   # expect no attributes
   testthat::expect_length(attr(index_spt1, "ref_list"), 0)
 
+  # test that each fold is within 10% of the expected fold size
+  testthat::expect_true(
+    {freq <- as.numeric(table(index_spt1))
+    mf <- mean(freq)
+    within_tolerance <- all(abs(freq - mf) / mf <= 0.1)
+    }, within_tolerance
+  )
   # import sample data
   dt_performance2 <- dt_performance[dt_performance$time %like% "2020", ]
 
-  # expect warning due to non-sf dt_performance2
-  testthat::expect_warning(
+  # expect no warnings
+  testthat::expect_no_warning(
     index_spt2 <- generate_cv_index_spt(
       data = data.table::data.table(dt_performance2),
       locs_id = "site_id",
@@ -142,11 +155,19 @@ testthat::test_that("generate_cv_index_spt", {
     )
   )
   # expect list
-  testthat::expect_true(is.list(index_spt2))
+  testthat::expect_true(is.numeric(index_spt2))
   # expect length of 5
-  testthat::expect_length(index_spt2, 5)
+  testthat::expect_length(unique(index_spt2), 5)
   # expect no attributes
   testthat::expect_length(attr(index_spt2, "ref_list"), 0)
+
+    # test that each fold is within 10% of the expected fold size
+  testthat::expect_true(
+    {freq <- as.numeric(table(index_spt2))
+    mf <- mean(freq)
+    within_tolerance <- all(abs(freq - mf) / mf <= 0.1)
+    }, within_tolerance
+  )
 
 })
 
