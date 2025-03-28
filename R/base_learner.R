@@ -68,7 +68,7 @@ make_subdata <- function(
 #' @export
 switch_model <-
   function(
-    model_type = c("mlp", "xgb", "lgb", "elnet"),
+    model_type = c("mlp","mlp2", "xgb", "lgb", "elnet","brulee_linear"),
     device = c("cpu", "cuda", "gpu")
   ) {
     device <- match.arg(device)
@@ -84,6 +84,19 @@ switch_model <-
         ) %>%
         parsnip::set_engine("brulee", device = device) %>%
         parsnip::set_mode("regression"),
+      mlp2 =
+        parsnip::mlp(
+          hidden_units = parsnip::tune(),
+          dropout = parsnip::tune(),
+          epochs = 1000,
+          activation = parsnip::tune(),
+          learn_rate = parsnip::tune()
+        ) %>%
+        parsnip::set_engine("brulee_two_layer", 
+        hidden_units_2 = parnsip::tune(),
+        activation_2 = parsnip::tune(),
+        device = device) %>%
+        parsnip::set_mode("regression"),        
       lgb =
         parsnip::boost_tree(
           mtry = parsnip::tune(),
@@ -107,7 +120,14 @@ switch_model <-
           penalty = parsnip::tune()
         ) %>%
         parsnip::set_engine("glmnet") %>%
-        parsnip::set_mode("regression")
+        parsnip::set_mode("regression"),
+      brulee_linear =
+        parsnip::linear_reg(
+          mixture = parsnip::tune(),
+          penalty = parsnip::tune()
+        ) %>%
+        parsnip::set_engine("brulee", device = device) %>%
+        parsnip::set_mode("regression")        
     )
 
   }
@@ -182,7 +202,6 @@ switch_model <-
 #' @export
 fit_base_learner <-
   function(
-    learner = "mlp",
     rset = NULL,
     model = NULL,
     tune_grid_size = 10L,
@@ -193,8 +212,6 @@ fit_base_learner <-
     metric = "rmse",
     ...
   ) {
-    learner <- match.arg(learner, c("mlp","mpl2", "xgb", "lgb", "elnet"))
-    # cv_mode <- match.arg(cv_mode, c("spatiotemporal", "spatial", "temporal"))
     stopifnot("parsnip model must be defined." = !is.null(model))
 
 
@@ -244,7 +261,8 @@ fit_base_learner <-
           metrics =
           yardstick::metric_set(
             yardstick::rmse,
-            yardstick::rsq            
+            yardstick::rsq,
+            yardstick::msd            
           ),
           control = wf_config
       )
@@ -256,11 +274,12 @@ fit_base_learner <-
         # Finalize workflow with best parameters
         final_wf <- finalize_workflow(base_wf, best_params)
         
-        # Fit final model on the outer data test set
+        # Fit final model on the outer data test set 
+        # rset[[2]] is the full training set for the given outer mc sample
         base_fit <- fit(final_wf, data = rset[[2]]) %>% 
           butcher::butcher()
 
-        base_results <- list(base_fit, collect_metrics(base_wftune))
+        base_results <- list("workflow" = base_fit, "metrics" = collect_metrics(base_wftune))
 
     return(base_results)
   }

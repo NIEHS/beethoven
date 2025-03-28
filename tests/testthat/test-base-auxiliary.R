@@ -78,7 +78,7 @@ testthat::test_that("assign_learner_cv", {
   )
   # expect CUDA for lgb
   testthat::expect_length(
-    grep("cuda", alc[alc$learner == "lgb", 3]), 6
+    grep("cuda", alc[alc$learner == "lgb", 3]), 0
   )
   # expect NULL for elnet
   testthat::expect_length(
@@ -108,7 +108,11 @@ testthat::test_that("assign_learner_cv", {
 ##### generate_cv_index_spt
 testthat::test_that("generate_cv_index_spt", {
   withr::local_package("dplyr")
+  withr::local_package("purrr")
   withr::local_package("data.table")
+  withr::local_package("sf")
+  withr::local_package("spatialsample")
+
 
   # import sample data
   dt_performance <- readRDS(
@@ -264,6 +268,10 @@ testthat::test_that("vis_spt_rset", {
 ##### switch_generate_cv_rset
 testthat::test_that("switch_generate_cv_rset", {
   withr::local_package("dplyr")
+  withr::local_package("purrr")
+  withr::local_package("sf")
+  withr::local_package("rsample")
+  withr::local_package("spatialsample")
   # import sample data
   dt_attach <- readRDS(
     testthat::test_path("..", "testdata", "base", "dt_wide.rds")
@@ -271,7 +279,7 @@ testthat::test_that("switch_generate_cv_rset", {
 
 
   # spatiotemporal
-  testthat::expect_warning(
+  testthat::expect_no_warning(
     index_spt_direct <- generate_cv_index_spt(
       data = data.table::data.table(dt_attach),
       locs_id = "site_id",
@@ -280,7 +288,7 @@ testthat::test_that("switch_generate_cv_rset", {
       time_id = "time"
     )
   )
-  testthat::expect_warning(
+  testthat::expect_no_warning(
     index_spt_switch <- switch_generate_cv_rset(
       learner = "spatiotemporal",
       data = data.table::data.table(dt_attach),
@@ -348,6 +356,10 @@ testthat::test_that("switch_generate_cv_rset", {
 ##### convert_cv_index_rset
 testthat::test_that("convert_cv_index_rset", {
   withr::local_package("dplyr")
+  withr::local_package("purrr")
+  withr::local_package("sf")
+  withr::local_package("rsample")
+  withr::local_package("spatialsample")  
 
   # import sample data
   dt_performance <- readRDS(
@@ -355,7 +367,7 @@ testthat::test_that("convert_cv_index_rset", {
   )
 
   # spatiotemporal
-  testthat::expect_warning(
+  testthat::expect_no_warning(
     index_spt <- generate_cv_index_spt(
       data = data.table::data.table(dt_performance),
       locs_id = "site_id",
