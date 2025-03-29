@@ -556,6 +556,9 @@ target_calculate_predict <-
       },
       pattern = cross(list_pred_calc_grid, chr_iter_radii),
       iteration = "list",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_50")
+      ),
       description = "Calculate population features | fit"
     )
     ,
@@ -586,13 +589,13 @@ target_calculate_predict <-
         download_tri
         beethoven::inject_calculate(
           covariate = "tri",
-          locs = dplyr::bind_rows(list_pred_calc_grid),
+          locs = list_pred_calc_grid,
           # NOTE: locs are all AQS sites for computational efficiency
           injection = list(
             domain = df_feat_calc_tri_params$year,
             domain_name = "year",
             path = file.path(chr_input_dir, "tri"),
-            variables = c(1, 13, 12, 14, 20, 34, 36, 47, 48, 49),
+            variables = c(1, 13, 12, 14, 3 + c(20, 34, 36, 47, 48, 49)),
             radius = df_feat_calc_tri_params$radius,
             nthreads = 1,
             covariate = "tri"
@@ -600,7 +603,10 @@ target_calculate_predict <-
         )
       },
       iteration = "list",
-      pattern = map(df_feat_calc_tri_params),
+      pattern = cross(list_pred_calc_grid, df_feat_calc_tri_params),
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_01")
+      ),
       description = "Calculate TRI features | prediction"
     )
     ,
