@@ -897,3 +897,106 @@ calculate_modis_direct <-
     extracted[["time"]] <- dateinfo
     return(extracted)
   }
+
+
+
+
+#' Modified isotropic Sum of Exponentially Decaying Contributions (SEDC)
+#'   covariates
+#' @description
+#' Calculate toxic release values for polygons or isotropic buffer point
+#' locations. Returns a \code{data.frame} object containing \code{locs_id}
+#' and variables for each chemical in \code{from}.
+#' @param from SpatVector(1). Output of \code{process_tri()}.
+#' @param locs sf/SpatVector. Locations where TRI variables are calculated.
+#' @param locs_id character(1). Unique site identifier column name.
+#'  Default is `"site_id"`.
+#' @param radius Circular buffer radius.
+#' Default is \code{c(1000, 10000, 50000)} (meters)
+#' @param geom FALSE/"sf"/"terra".. Should the function return with geometry?
+#' Default is `FALSE`, options with geometry are "sf" or "terra". The
+#' coordinate reference system of the `sf` or `SpatVector` is that of `from.`
+#' @param ... Placeholders.
+#' @author Insang Song, Mariana Kassien
+#' @return a data.frame or SpatVector object
+#' @note U.S. context.
+#' @seealso [`sum_edc`], [`process_tri`]
+#' @importFrom terra vect crs nearby hull buffer
+#' @importFrom methods is
+#' @importFrom data.table .SD rbindlist
+#' @importFrom utils read.csv
+#' @importFrom dplyr ends_with all_of group_by ungroup
+#' @importFrom dplyr filter mutate across summarize
+#' @export
+calc_tri_mod <-
+  function(
+    from = NULL,
+    locs,
+    locs_id = "site_id",
+    radius = c(1e3L, 1e4L, 5e4L),
+    geom = FALSE,
+    ...
+  ) {
+    amadeus:::check_geom(geom)
+    if (!methods::is(locs, "SpatVector")) {
+      if (methods::is(locs, "sf")) {
+        locs <- terra::vect(locs)
+      }
+    }
+    if (!is.numeric(radius)) {
+      stop("radius should be numeric.\n")
+    }
+    locs_re <- terra::project(locs, terra::crs(from))
+
+    # split by year: locs and tri locations
+    tri_cols <- grep("_AIR", names(from), value = TRUE)
+    # error fix: no whitespace
+    tri_cols <- sub(" ", "_", tri_cols)
+
+    # inner lapply
+    list_radius <- split(radius, radius)
+    list_locs_tri <-
+      Map(
+        function(x) {
+          locs_h <- terra::hull(locs)
+          locs_hb <-
+            terra::buffer(
+              locs_h,
+              width = x,
+              joinstyle = "square",
+              capstyle = "square"
+            )
+
+          from_re <- from[locs_hb, ]
+          locs_tri_s <-
+            amadeus::sum_edc(
+              locs = locs_re,
+              from = from_re,
+              locs_id = locs_id,
+              sedc_bandwidth = x,
+              target_fields = tri_cols,
+              geom = FALSE
+            )
+          return(locs_tri_s)
+        },
+        list_radius
+      )
+
+    # bind element data.frames into one
+    df_tri <- Reduce(function(x, y) dplyr::full_join(x, y), list_locs_tri)
+    if (nrow(df_tri) != nrow(locs)) {
+      df_tri <- dplyr::left_join(as.data.frame(locs), df_tri)
+    }
+
+    df_tri_return <- amadeus:::calc_return_locs(
+      covar = df_tri,
+      POSIXt = FALSE,
+      geom = geom,
+      crs = terra::crs(from)
+    )
+
+    # read attr
+    df_tri_return$time <- as.integer(attr(from, "tri_year"))
+
+    return(df_tri_return)
+  }

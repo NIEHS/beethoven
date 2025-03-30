@@ -587,20 +587,21 @@ target_calculate_predict <-
       list_pred_calc_tri,
       command = {
         download_tri
-        beethoven::inject_calculate(
-          covariate = "tri",
-          locs = list_pred_calc_grid,
-          # NOTE: locs are all AQS sites for computational efficiency
-          injection = list(
-            domain = df_feat_calc_tri_params$year,
-            domain_name = "year",
+        # beethoven::inject_calculate(
+          # covariate = "tri",
+        base_tri <-
+          amadeus::process_tri(
+            year = df_feat_calc_tri_params$year,
             path = file.path(chr_input_dir, "tri"),
-            variables = c(1, 13, 12, 14, 3 + c(20, 34, 36, 47, 48, 49)),
-            radius = df_feat_calc_tri_params$radius,
-            nthreads = 1,
-            covariate = "tri"
+            variables = c(1, 13, 12, 14, 3 + c(20, 34, 36, 47, 48, 49))
           )
-        )
+        res_tri <-
+          beethoven::calc_tri_mod(
+            from = base_tri,
+            locs = list_pred_calc_grid,
+            radius = df_feat_calc_tri_params$radius
+          )
+        res_tri
       },
       iteration = "list",
       pattern = cross(list_pred_calc_grid, df_feat_calc_tri_params),
