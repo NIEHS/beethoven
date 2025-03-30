@@ -647,7 +647,7 @@ target_calculate_predict <-
       },
       iteration = "list",
       pattern = cross(list_pred_calc_grid, chr_iter_calc_nei),
-      description = "Calculate NEI features | fit"
+      description = "Calculate NEI features | prediction grid"
     )
     ,
     # targets::tar_target(
@@ -677,16 +677,18 @@ target_calculate_predict <-
                 "us_eco_l3_state_boundaries.shp"
               )
             ),
-            locs = dplyr::bind_rows(list_pred_calc_grid),
-            resources = targets::tar_resources(
-              crew = targets::tar_resources_crew(controller = "controller_25")
-            ),
+            locs = list_pred_calc_grid,
             # NOTE: locs are all AQS sites for computational efficiency
             locs_id = "site_id"
           )
         )
       },
-      description = "data.table of Ecoregions features | fit"
+      iteration = "list",
+      pattern = map(list_pred_calc_grid),
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_25")
+      ),
+      description = "data.table of Ecoregions features | prediction grid"
     )
     ,
     ###########################        GROADS        ###########################
@@ -713,18 +715,18 @@ target_calculate_predict <-
       iteration = "list",
       pattern = cross(list_pred_calc_grid, chr_iter_radii),
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_25")
+        crew = targets::tar_resources_crew(controller = "controller_15")
       ),
-      description = "Calculate gRoads features | fit"
+      description = "Calculate gRoads features | prediction grid"
     )
-    #,
-    # targets::tar_target(
-    #   dt_feat_calc_groads,
-    #   command = beethoven::reduce_merge(
-    #     beethoven::reduce_list(list_pred_calc_groads),
-    #     by = c("site_id", "description")
-    #   ),
-    #   description = "data.table of gRoads features | fit"
-    # )
+    ,
+    targets::tar_target(
+      dt_pred_calc_groads,
+      command = beethoven::reduce_merge(
+        beethoven::reduce_list(list_pred_calc_groads),
+        by = c("site_id", "description")
+      ),
+      description = "data.table of gRoads features | fit"
+    )
     # ,
   )
