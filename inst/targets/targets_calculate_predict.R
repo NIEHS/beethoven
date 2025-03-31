@@ -707,7 +707,6 @@ target_calculate_predict <-
             )
           ),
           locs = list_pred_calc_grid,
-          # NOTE: locs are all AQS sites for computational efficiency
           locs_id = "site_id",
           radius = chr_iter_radii
         )
@@ -715,7 +714,7 @@ target_calculate_predict <-
       iteration = "list",
       pattern = cross(list_pred_calc_grid, chr_iter_radii),
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_15")
+        crew = targets::tar_resources_crew(controller = "controller_03")
       ),
       description = "Calculate gRoads features | prediction grid"
     )

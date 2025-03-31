@@ -933,10 +933,11 @@ calc_tri_mod <-
     from = NULL,
     locs,
     locs_id = "site_id",
-    radius = c(1e3L, 1e4L, 5e4L),
+    radius = 1e3L,
     geom = FALSE,
     ...
   ) {
+    stopifnot(length(radius) == 1)
     amadeus:::check_geom(geom)
     if (!methods::is(locs, "SpatVector")) {
       if (methods::is(locs, "sf")) {
@@ -988,15 +989,15 @@ calc_tri_mod <-
       df_tri <- dplyr::left_join(as.data.frame(locs), df_tri)
     }
 
-    df_tri_return <- amadeus:::calc_return_locs(
-      covar = df_tri,
-      POSIXt = FALSE,
-      geom = geom,
-      crs = terra::crs(from)
-    )
+    # df_tri_return <- amadeus:::calc_return_locs(
+    #   covar = df_tri,
+    #   POSIXt = FALSE,
+    #   geom = geom,
+    #   crs = terra::crs(from)
+    # )
 
     # read attr
-    df_tri_return$time <- as.integer(attr(from, "tri_year"))
+    df_tri$time <- as.integer(attr(from, "tri_year"))
 
-    return(df_tri_return)
+    return(df_tri)
   }
