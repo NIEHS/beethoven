@@ -911,11 +911,7 @@ calculate_modis_direct <-
 #' @param locs sf/SpatVector. Locations where TRI variables are calculated.
 #' @param locs_id character(1). Unique site identifier column name.
 #'  Default is `"site_id"`.
-#' @param radius Circular buffer radius.
-#' Default is \code{c(1000, 10000, 50000)} (meters)
-#' @param geom FALSE/"sf"/"terra".. Should the function return with geometry?
-#' Default is `FALSE`, options with geometry are "sf" or "terra". The
-#' coordinate reference system of the `sf` or `SpatVector` is that of `from.`
+#' @param radius integer(1). Circular buffer radius.
 #' @param ... Placeholders.
 #' @author Insang Song, Mariana Kassien
 #' @return a data.frame or SpatVector object
@@ -927,6 +923,7 @@ calculate_modis_direct <-
 #' @importFrom utils read.csv
 #' @importFrom dplyr ends_with all_of group_by ungroup
 #' @importFrom dplyr filter mutate across summarize
+#' @importFrom collapse set_collapse qDT
 #' @export
 calc_tri_mod <-
   function(
@@ -934,10 +931,10 @@ calc_tri_mod <-
     locs,
     locs_id = "site_id",
     radius = 1e3L,
-    geom = FALSE,
     ...
   ) {
     stopifnot(length(radius) == 1)
+    collapse::set_collapse(mask = "manip")
     amadeus:::check_geom(geom)
     if (!methods::is(locs, "SpatVector")) {
       if (methods::is(locs, "sf")) {
@@ -956,7 +953,7 @@ calc_tri_mod <-
 
     # inner lapply
     list_radius <- split(radius, radius)
-    list_locs_tri <-
+    df_tri <-
       Map(
         function(x) {
           locs_h <- terra::hull(locs)
@@ -970,23 +967,22 @@ calc_tri_mod <-
 
           from_re <- from[locs_hb, ]
           locs_tri_s <-
-            amadeus::sum_edc(
+            sum_edc_mod(
               locs = locs_re,
               from = from_re,
               locs_id = locs_id,
               sedc_bandwidth = x,
-              target_fields = tri_cols,
-              geom = FALSE
+              target_fields = tri_cols
             )
-          return(locs_tri_s)
+          locs_tri_s
         },
         list_radius
       )
 
     # bind element data.frames into one
-    df_tri <- Reduce(function(x, y) dplyr::full_join(x, y), list_locs_tri)
+    df_tri <- collapse::qDT(unlist(df_tri))
     if (nrow(df_tri) != nrow(locs)) {
-      df_tri <- dplyr::left_join(as.data.frame(locs), df_tri)
+      df_tri <- left_join(collapse::qDT(locs), df_tri)
     }
 
     # df_tri_return <- amadeus:::calc_return_locs(
@@ -1001,3 +997,142 @@ calc_tri_mod <-
 
     return(df_tri)
   }
+
+
+
+# nolint start
+#' Calculate isotropic Sum of Exponentially Decaying Contributions (SEDC) covariates
+#' @param from `SpatVector`(1). Point locations which contain point-source
+#' covariate data.
+#' @param locs sf/SpatVector(1). Locations where the sum of exponentially
+#' decaying contributions are calculated.
+#' @param locs_id character(1). Name of the unique id field in `point_to`.
+#' @param sedc_bandwidth numeric(1).
+#' Distance at which the source concentration is reduced to
+#'  `exp(-3)` (approximately -95 %)
+#' @param target_fields character(varying). Field names in characters.
+#' @return a data.frame (tibble) or SpatVector object with input field names with
+#'  a suffix \code{"_sedc"} where the sums of EDC are stored.
+#'  Additional attributes are attached for the EDC information.
+#'    - `attr(result, "sedc_bandwidth")``: the bandwidth where
+#'  concentration reduces to approximately five percent
+#'    - `attr(result, "sedc_threshold")``: the threshold distance
+#'  at which emission source points are excluded beyond that
+#' @note The function is originally from
+#' [chopin](https://github.com/ropensci/chopin)
+#' Distance calculation is done with terra functions internally.
+#'  Thus, the function internally converts sf objects in
+#'  \code{point_*} arguments to terra.
+#'  The threshold should be carefully chosen by users.
+#' @author Insang Song
+#' @references
+#' \insertRef{messier2012integrating}{amadeus}
+#' 
+#' \insertRef{web_sedctutorial_package}{amadeus}
+#' @examples
+#' set.seed(101)
+#' ncpath <- system.file("gpkg/nc.gpkg", package = "sf")
+#' nc <- terra::vect(ncpath)
+#' nc <- terra::project(nc, "EPSG:5070")
+#' pnt_locs <- terra::centroids(nc, inside = TRUE)
+#' pnt_locs <- pnt_locs[, "NAME"]
+#' pnt_from <- terra::spatSample(nc, 10L)
+#' pnt_from$pid <- seq(1, 10)
+#' pnt_from <- pnt_from[, "pid"]
+#' pnt_from$val1 <- rgamma(10L, 1, 0.05)
+#' pnt_from$val2 <- rgamma(10L, 2, 1)
+#'
+#' vals <- c("val1", "val2")
+#' sum_edc(pnt_locs, pnt_from, "NAME", 1e4, vals)
+#' @importFrom collapse set_collapse qDT
+#' @importFrom terra nearby distance buffer
+#' @importFrom rlang sym
+#' @export
+# nolint end
+sum_edc_mod <-
+  function(
+    from = NULL,
+    locs = NULL,
+    locs_id = NULL,
+    sedc_bandwidth = NULL,
+    target_fields = NULL
+  ) {
+    collapse::set_collapse(mask = "manip")
+    if (!methods::is(locs, "SpatVector")) {
+      locs <- try(terra::vect(locs))
+    }
+    if (!methods::is(from, "SpatVector")) {
+      from <- try(terra::vect(from))
+    }
+
+    cn_overlap <- intersect(names(locs), names(from))
+    if (length(cn_overlap) > 0) {
+      warning(
+        sprintf(
+          "There are %d fields with the same name.
+The result may not be accurate.\n",
+          length(cn_overlap)
+        )
+      )
+    }
+    len_point_locs <- seq_len(nrow(locs))
+
+    locs$from_id <- len_point_locs
+    locs_buf <-
+      terra::buffer(
+        locs,
+        width = sedc_bandwidth * 2,
+        quadsegs = 90
+      )
+
+    from_in <- from[locs_buf, ]
+    len_point_from <- seq_len(nrow(from_in))
+
+    # len point from? len point to?
+    from_in$to_id <- len_point_from
+    dist <- NULL
+
+    # near features with distance argument: only returns integer indices
+    # threshold is set to the twice of sedc_bandwidth
+    res_nearby <-
+      terra::nearby(locs, from_in, distance = sedc_bandwidth * 2)
+    # attaching actual distance
+    dist_nearby <- terra::distance(locs, from_in)
+    dist_nearby_df <- as.vector(dist_nearby)
+    # adding integer indices
+    dist_nearby_tdf <-
+      expand.grid(
+        from_id = len_point_locs,
+        to_id = len_point_from
+      )
+    dist_nearby_df <- cbind(dist_nearby_tdf, dist = dist_nearby_df)
+
+    # summary
+    res_sedc <- res_nearby |>
+      collapse::qDT() |>
+      left_join(collapse::qDT(locs)) |>
+      left_join(collapse::qDT(from_in)) |>
+      left_join(collapse::qDT(dist_nearby_df)) |>
+      # per the definition in
+      # https://mserre.sph.unc.edu/BMElab_web/SEDCtutorial/index.html
+      # exp(-3) is about 0.05 * (value at origin)
+      mutate(w_sedc = exp((-3 * dist) / sedc_bandwidth)) |>
+      group_by(!!rlang::sym(locs_id)) |>
+      summarize(
+        across(
+          all_of(target_fields),
+          ~sum(w_sedc * ., na.rm = TRUE)
+        )
+      ) |>
+      ungroup()
+    idx_air <- grep("_AIR_", names(res_sedc))
+    names(res_sedc)[idx_air] <-
+      sprintf("%s_%05d", names(res_sedc)[idx_air], sedc_bandwidth)
+
+
+    attr(res_sedc, "sedc_bandwidth") <- sedc_bandwidth
+    attr(res_sedc, "sedc_threshold") <- sedc_bandwidth * 2
+
+    return(res_sedc)
+  }
+

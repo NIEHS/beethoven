@@ -120,6 +120,47 @@ target_calculate_predict <-
       )
     )
     ,
+    ### VECTOR PROCESSING GRID ####
+    targets::tar_target(
+      sf_pred_calc_split_v,
+      command = {
+        init_grid <-
+          chopin::par_pad_grid(
+            sf_pred_calc_grid,
+            mode = "grid",
+            nx = 30L,
+            ny = 15L,
+            padding = 100
+          )[[1]]
+        grid_sample <- dplyr::sample_frac(sf_pred_raw_grid, 0.01)
+        init_grid_intersect <-
+          init_grid[grid_sample, ]
+        init_grid_intersect
+      },
+      iteration = "vector",
+      description = "sf split grid polygons (for vector processing)"
+    )
+    ,
+    targets::tar_target(
+      list_pred_calc_grid_v,
+      command = {
+        grid_unit <- sf::st_bbox(sf_pred_calc_split_v)
+        sf::st_as_sf(
+          df_pred_calc_gridcoords |>
+            dplyr::filter((lon <= grid_unit[3] & lon >= grid_unit[1]) & (lat <= grid_unit[4] & lat >= grid_unit[2])),
+          coords = c("lon", "lat"),
+          crs = 4326,
+          remove = FALSE
+        )
+      },
+      iteration = "list",
+      pattern = map(sf_pred_calc_split_v),
+      description = "Split prediction grid into list by chopin grid (DEV SAMPLE)",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_50")
+      )
+    )
+    ,
     ###########################         HMS          ###########################
     targets::tar_target(
       list_pred_calc_hms,
@@ -598,13 +639,13 @@ target_calculate_predict <-
         res_tri <-
           beethoven::calc_tri_mod(
             from = base_tri,
-            locs = list_pred_calc_grid,
+            locs = list_pred_calc_grid_v,
             radius = df_feat_calc_tri_params$radius
           )
         res_tri
       },
       iteration = "list",
-      pattern = cross(list_pred_calc_grid, df_feat_calc_tri_params),
+      pattern = cross(list_pred_calc_grid_v, df_feat_calc_tri_params),
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(controller = "controller_01")
       ),
@@ -636,7 +677,7 @@ target_calculate_predict <-
         download_nei
         beethoven::inject_calculate(
           covariate = "nei",
-          locs = list_pred_calc_grid,
+          locs = list_pred_calc_grid_v,
           injection = list(
             domain = chr_iter_calc_nei,
             domain_name = "year",
@@ -646,7 +687,7 @@ target_calculate_predict <-
         )
       },
       iteration = "list",
-      pattern = cross(list_pred_calc_grid, chr_iter_calc_nei),
+      pattern = cross(list_pred_calc_grid_v, chr_iter_calc_nei),
       description = "Calculate NEI features | prediction grid"
     )
     ,
@@ -706,26 +747,27 @@ target_calculate_predict <-
               "gROADS-v1-americas.gdb"
             )
           ),
-          locs = list_pred_calc_grid,
+          locs = list_pred_calc_grid_v,
           locs_id = "site_id",
           radius = chr_iter_radii
         )
       },
       iteration = "list",
-      pattern = cross(list_pred_calc_grid, chr_iter_radii),
+      pattern = cross(list_pred_calc_grid_v, chr_iter_radii),
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_03")
+        crew = targets::tar_resources_crew(controller = "controller_15")
       ),
       description = "Calculate gRoads features | prediction grid"
     )
     ,
     targets::tar_target(
       dt_pred_calc_groads,
-      command = beethoven::reduce_merge(
-        beethoven::reduce_list(list_pred_calc_groads),
-        by = c("site_id", "description")
+      command = collapse::rowbind(
+        list_pred_calc_groads[
+          !unlist(Map(function(x) tryCatch(is.null(x), error = function(e) return(TRUE)), list_pred_calc_groads))],
+        fill = TRUE
       ),
-      description = "data.table of gRoads features | fit"
+      description = "data.table of gRoads features | prediction grid"
     )
     # ,
   )

@@ -5,14 +5,7 @@
 \title{Modified isotropic Sum of Exponentially Decaying Contributions (SEDC)
 covariates}
 \usage{
-calc_tri_mod(
-  from = NULL,
-  locs,
-  locs_id = "site_id",
-  radius = c(1000L, 10000L, 50000L),
-  geom = FALSE,
-  ...
-)
+calc_tri_mod(from = NULL, locs, locs_id = "site_id", radius = 1000L, ...)
 }
 \arguments{
 \item{from}{SpatVector(1). Output of \code{process_tri()}.}
@@ -22,12 +15,7 @@ calc_tri_mod(
 \item{locs_id}{character(1). Unique site identifier column name.
 Default is \code{"site_id"}.}
 
-\item{radius}{Circular buffer radius.
-Default is \code{c(1000, 10000, 50000)} (meters)}
-
-\item{geom}{FALSE/"sf"/"terra".. Should the function return with geometry?
-Default is \code{FALSE}, options with geometry are "sf" or "terra". The
-coordinate reference system of the \code{sf} or \code{SpatVector} is that of \code{from.}}
+\item{radius}{integer(1). Circular buffer radius.}
 
 \item{...}{Placeholders.}
 }

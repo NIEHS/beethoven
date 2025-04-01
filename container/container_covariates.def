@@ -32,7 +32,7 @@ From: rocker/geospatial:latest
     mkdir /opt/_targets
 
     # Install R packages
-    Rscript -e "install.packages(c('pak', 'devtools'))"
+    Rscript -e "install.packages(c('pak', 'devtools', 'collapse'))"
     Rscript -e "devtools::install_version('targets', version = '1.10.0')"
     Rscript -e "install.packages(c('tarchetypes', 'testthat', 'tidymodels', \
         'bonsai', 'qs2'))"
