@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SBATCH --job-name=beethoven
-#SBATCH --partition=geo
+#SBATCH --partition=highmem
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=1G

@@ -35,7 +35,7 @@ controller_1 <- crew::crew_controller_local(
   workers = 1
 )
 
-
+#  #SBATCH --gres=gpu:1 \
 ##### `controller_geo` uses 4 GPU workers (undefined memory allocation).
 scriptlines_apptainer <- "apptainer"
 scriptlines_basedir <- "$PWD"
@@ -44,8 +44,7 @@ scriptlines_inputdir <- "/ddn/gs1/group/set/Projects/NRT-AP-Model/input"
 scriptlines_container <- "container_models.sif"
 scriptlines_geo <- glue::glue(
   "#SBATCH --job-name=submodel \
-  #SBATCH --partition=geo \
-  #SBATCH --gres=gpu:1 \
+  #SBATCH --partition=highmem \ 
   #SBATCH --error=slurm/submodel_%j.out \
   {scriptlines_apptainer} exec --nv --env ",
   "CUDA_VISIBLE_DEVICES=${{GPU_DEVICE_ORDINAL}} ",
@@ -103,7 +102,7 @@ targets::tar_option_set(
   resources = targets::tar_resources(
     crew = targets::tar_resources_crew(controller = "controller_250")
   ),
-  retrieval = "main"
+  retrieval = "worker"
 )
 
 ###########################      SOURCE TARGETS      ###########################

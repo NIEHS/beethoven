@@ -7,7 +7,7 @@ target_baselearner <-
       list_base_params_static,
       command = list(
         dt_full = dt_feat_calc_xyt,
-        r_subsample = 0.34,
+        r_subsample = 3,
         yvar = "Arithmetic.Mean",
         xvar = names(dt_feat_calc_xyt)[seq(5, ncol(dt_feat_calc_xyt))],
         drop_vars = names(dt_feat_calc_xyt)[seq(1,3)],
@@ -25,14 +25,16 @@ target_baselearner <-
     targets::tar_target(
       mc_base_subsample, 
       command = {
-          outer_cv <- rsample::mc_cv(list_base_params_static$dt_full,
-              prop = list_base_params_static$r_subsample,
-              times = list_base_params_static$num_base_models)
+          outer_cv <- rsample::vfold_cv(list_base_params_static$dt_full,
+              v = list_base_params_static$r_subsample,
+              repeats = list_base_params_static$num_base_models)
+
+       
 
 
           inner_cv <- lapply(1:nrow(outer_cv), \(x) {
-            dt_train <- training(outer_cv$splits[[x]])
-            dt_test <- assessment(outer_cv$splits[[x]])
+            dt_train <- assessment(outer_cv$splits[[x]]) # Note we are switching training and testing sets. 
+            dt_test <- training(outer_cv$splits[[x]])
             spatiotemporal_index <- beethoven::generate_cv_index_spt(
               data = dt_train,
               crs = list_base_params_static$crs,
@@ -41,7 +43,7 @@ target_baselearner <-
               coords = c("lon","lat"),
               v = list_base_params_static$cvsize,
               time_id = "time")
-            inner_cv <- beethoven::convert_cv_index_rset(
+            inner_cv <-  beethoven::convert_cv_index_rset(
               cvindex = spatiotemporal_index, 
               data = dt_train,
               cv_mode = "spatiotemporal")              
@@ -66,7 +68,7 @@ target_baselearner_elnet <-
           mixture = parsnip::tune(),
           penalty = parsnip::tune()
         ) %>%
-        parsnip::set_engine("brulee", device = "cuda") %>%
+        parsnip::set_engine("brulee", device = "cpu") %>%
         parsnip::set_mode("regression") 
       },
       description = "Engine and device | elnet | base learner"
@@ -150,13 +152,13 @@ target_baselearner_mlp <-
       engine_base_mlp,
       command = {
         parsnip::mlp(
-          hidden_units = c(parsnip::tune(), 32L, 16L),
-          dropout = c(parsnip::tune(), 0.1, 0.05),
+          hidden_units = c(parsnip::tune(), 32L),
+          dropout = c(parsnip::tune(), 0.3),
           epochs = 1000,
           activation = "leaky_relu",
           learn_rate = parsnip::tune()
         ) %>%
-        parsnip::set_engine("brulee", device = "cuda") %>%
+        parsnip::set_engine("brulee", device = "cpu") %>%
         parsnip::set_mode("regression")
       },
       description = "Engine and device | mlp | base learner"
