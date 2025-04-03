@@ -916,14 +916,12 @@ calculate_modis_direct <-
 #' @author Insang Song, Mariana Kassien
 #' @return a data.frame or SpatVector object
 #' @note U.S. context.
-#' @seealso [`sum_edc`], [`process_tri`]
 #' @importFrom terra vect crs nearby hull buffer
 #' @importFrom methods is
-#' @importFrom data.table .SD rbindlist
+#' @importFrom data.table .SD rbindlist as.data.table merge.data.table
 #' @importFrom utils read.csv
 #' @importFrom dplyr ends_with all_of group_by ungroup
 #' @importFrom dplyr filter mutate across summarize
-#' @importFrom collapse set_collapse qDT
 #' @export
 calc_tri_mod <-
   function(
@@ -934,8 +932,6 @@ calc_tri_mod <-
     ...
   ) {
     stopifnot(length(radius) == 1)
-    collapse::set_collapse(mask = "manip")
-    amadeus:::check_geom(geom)
     if (!methods::is(locs, "SpatVector")) {
       if (methods::is(locs, "sf")) {
         locs <- terra::vect(locs)
@@ -951,39 +947,38 @@ calc_tri_mod <-
     # error fix: no whitespace
     tri_cols <- sub(" ", "_", tri_cols)
 
-    # inner lapply
-    list_radius <- split(radius, radius)
-    df_tri <-
-      Map(
-        function(x) {
-          locs_h <- terra::hull(locs)
-          locs_hb <-
-            terra::buffer(
-              locs_h,
-              width = x,
-              joinstyle = "square",
-              capstyle = "square"
-            )
-
-          from_re <- from[locs_hb, ]
-          locs_tri_s <-
-            sum_edc_mod(
-              locs = locs_re,
-              from = from_re,
-              locs_id = locs_id,
-              sedc_bandwidth = x,
-              target_fields = tri_cols
-            )
-          locs_tri_s
-        },
-        list_radius
+    # list_radius <- split(radius, radius)
+    locs_h <- terra::hull(locs)
+    locs_hb <-
+      terra::buffer(
+        locs_h,
+        width = radius,
+        joinstyle = "mitre",
+        capstyle = "square"
       )
 
+    from_re <- from[locs_hb, ]
+
+    df_tri <-
+      sum_edc_mod(
+        locs = locs_re,
+        from = from_re,
+        locs_id = locs_id,
+        sedc_bandwidth = radius,
+        target_fields = tri_cols
+      )
     # bind element data.frames into one
-    df_tri <- collapse::qDT(unlist(df_tri))
+    # df_tri <- data.table::as.data.table(df_tri)
+    names(df_tri) <- gsub("X[0-9]{4,5}\\.", "", names(df_tri))
     if (nrow(df_tri) != nrow(locs)) {
-      df_tri <- left_join(collapse::qDT(locs), df_tri)
+      df_tri <-
+        data.table::merge.data.table(
+          data.table::as.data.table(locs),
+          df_tri,
+          by = locs_id
+        )
     }
+
 
     # df_tri_return <- amadeus:::calc_return_locs(
     #   covar = df_tri,
@@ -1043,7 +1038,7 @@ calc_tri_mod <-
 #' pnt_from$val2 <- rgamma(10L, 2, 1)
 #'
 #' vals <- c("val1", "val2")
-#' sum_edc(pnt_locs, pnt_from, "NAME", 1e4, vals)
+#' sum_edc_mod(pnt_locs, pnt_from, "NAME", 1e4, vals)
 #' @importFrom collapse set_collapse qDT
 #' @importFrom terra nearby distance buffer
 #' @importFrom rlang sym
@@ -1109,10 +1104,10 @@ The result may not be accurate.\n",
 
     # summary
     res_sedc <- res_nearby |>
-      collapse::qDT() |>
-      left_join(collapse::qDT(locs)) |>
-      left_join(collapse::qDT(from_in)) |>
-      left_join(collapse::qDT(dist_nearby_df)) |>
+      as.data.table() |>
+      left_join(as.data.table(locs)) |>
+      left_join(as.data.table(from_in)) |>
+      left_join(as.data.table(dist_nearby_df)) |>
       # per the definition in
       # https://mserre.sph.unc.edu/BMElab_web/SEDCtutorial/index.html
       # exp(-3) is about 0.05 * (value at origin)
@@ -1125,6 +1120,7 @@ The result may not be accurate.\n",
         )
       ) |>
       ungroup()
+
     idx_air <- grep("_AIR_", names(res_sedc))
     names(res_sedc)[idx_air] <-
       sprintf("%s_%05d", names(res_sedc)[idx_air], sedc_bandwidth)

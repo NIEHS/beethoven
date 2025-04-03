@@ -647,7 +647,7 @@ target_calculate_predict <-
       iteration = "list",
       pattern = cross(list_pred_calc_grid_v, df_feat_calc_tri_params),
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_01")
+        crew = targets::tar_resources_crew(controller = "controller_03")
       ),
       description = "Calculate TRI features | prediction"
     )

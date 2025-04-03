@@ -30,9 +30,6 @@ and variables for each chemical in \code{from}.
 \note{
 U.S. context.
 }
-\seealso{
-\code{\link{sum_edc}}, \code{\link{process_tri}}
-}
 \author{
 Insang Song, Mariana Kassien
 }

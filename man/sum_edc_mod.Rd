@@ -63,7 +63,7 @@ pnt_from$val1 <- rgamma(10L, 1, 0.05)
 pnt_from$val2 <- rgamma(10L, 2, 1)
 
 vals <- c("val1", "val2")
-sum_edc(pnt_locs, pnt_from, "NAME", 1e4, vals)
+sum_edc_mod(pnt_locs, pnt_from, "NAME", 1e4, vals)
 }
 \references{
 \insertRef{messier2012integrating}{amadeus}

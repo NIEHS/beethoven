@@ -43,7 +43,14 @@ controller_15 <- crew::crew_controller_local(
   name = "controller_15",
   workers = 15
 )
-##### `controller_01` uses 1 workers (750.0 GB per worker).
+
+##### `controller_10` uses 10 workers (66~75.0 GB per worker).
+controller_10 <- crew::crew_controller_local(
+  name = "controller_10",
+  workers = 10
+)
+
+##### `controller_03` uses 3 workers (250.0-330.0 GB per worker).
 controller_03 <- crew::crew_controller_local(
   name = "controller_03",
   workers = 3
@@ -112,7 +119,7 @@ targets::tar_option_set(
   controller = crew::crew_controller_group(
     controller_250, controller_100, controller_75,
     controller_50, controller_25, controller_15,
-    controller_03, controller_01#, controller_gpu
+    controller_10, controller_03, controller_01#, controller_gpu
   ),
   resources = targets::tar_resources(
     crew = targets::tar_resources_crew(controller = "controller_50")
