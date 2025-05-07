@@ -102,7 +102,7 @@ if (Sys.getenv("BEETHOVEN") == "covariates") {
     "amadeus", "targets", "tarchetypes", "dplyr", "tidyverse",
     "data.table", "sf", "crew", "crew.cluster", "lubridate", "qs2",
     "torch", "bonsai", "dials", "lightgbm", "xgboost", "glmnet",
-    "beethoven", "chopin"
+    "beethoven", "chopin", "arrow", "nanoparquet"
   )
 }
 targets::tar_option_set(

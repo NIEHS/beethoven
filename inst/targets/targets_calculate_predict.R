@@ -224,7 +224,7 @@ target_calculate_predict <-
       iteration = "list",
       description = "Calculate NLCD features with branched sublists (pred)",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_15")
+        crew = targets::tar_resources_crew(controller = "controller_10")
       )
     )
     ,
@@ -320,9 +320,20 @@ target_calculate_predict <-
     ###########################         NARR         ###########################
     # ????
     targets::tar_target(
+      chr_iter_calc_narr,
+      command = c(
+        "air.sfc", "albedo", "apcp", "dswrf", "evap", "hcdc", "hpbl",
+        "lcdc", "lhtfl", "mcdc", "pr_wtr", "prate", "pres.sfc",
+        "shtfl", "snowc", "soilm", "tcdc", "ulwrf.sfc", "uwnd.10m",
+        "vis", "vwnd.10m", "weasd", "omega", "shum"
+      ),
+      description = "NARR features"
+    )
+    ,
+    targets::tar_target(
       list_pred_calc_narr,
       command = {
-        download_narr_buffer
+        # download_narr_buffer
         dt_iter_calc_narr <- amadeus::calculate_narr(
           from = amadeus::process_narr(
             path = file.path(chr_input_dir, "narr", chr_iter_calc_narr),
@@ -345,6 +356,11 @@ target_calculate_predict <-
       },
       pattern = cross(list_pred_calc_grid, list_dates, chr_iter_calc_narr),
       iteration = "list",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_10"),
+        parquet = targets::tar_resources_parquet(compression = "lz4")
+      ),
+      format = "parquet",
       description = "Calculate NARR features | prediction"
     )
     ,
@@ -409,8 +425,10 @@ target_calculate_predict <-
       pattern = cross(chr_list_calc_mod06_files, list_pred_calc_grid, chr_iter_radii),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_50")
+        crew = targets::tar_resources_crew(controller = "controller_50"),
+        parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
+      format = "parquet",
       description = "Calculate MODIS - MOD06 features | prediction"
     )
     ,
@@ -430,8 +448,10 @@ target_calculate_predict <-
       pattern = cross(chr_list_calc_mod13_files, list_pred_calc_grid, chr_iter_radii),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_50")
+        crew = targets::tar_resources_crew(controller = "controller_50"),
+        parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
+      format = "parquet",
       description = "Calculate MODIS - MOD13 features | prediction"
     )
     ,
@@ -451,8 +471,10 @@ target_calculate_predict <-
       pattern = cross(chr_list_calc_mcd19_1km_files, list_pred_calc_grid, chr_iter_radii),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_50")
+        crew = targets::tar_resources_crew(controller = "controller_50"),
+        parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
+      format = "parquet",
       description = "Calculate MODIS - MCD19_1km features | prediction"
     )
     ,
@@ -475,8 +497,10 @@ target_calculate_predict <-
       pattern = cross(chr_list_calc_mcd19_5km_files, list_pred_calc_grid, chr_iter_radii),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_50")
+        crew = targets::tar_resources_crew(controller = "controller_50"),
+        parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
+      format = "parquet",
       description = "Calculate MODIS - MCD19_5km features | prediction"
     )
     ,
@@ -494,13 +518,16 @@ target_calculate_predict <-
           "MOD_SFCRF_5_", "MOD_SFCRF_6_", "MOD_SFCRF_7_"
           ),
           mark = TRUE
-        )
+        ) |>
+        as.data.frame()
       },
       pattern = cross(chr_list_calc_mod09_files, list_pred_calc_grid, chr_iter_radii),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_50")
+        crew = targets::tar_resources_crew(controller = "controller_50"),
+        parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
+      format = "parquet",
       description = "Calculate MODIS - MOD09GA features | prediction"
     )
     ,
@@ -515,13 +542,16 @@ target_calculate_predict <-
           radius = chr_iter_radii,
           colheader = "MOD_LGHTN_0_",
           mark = TRUE
-        )
+        ) |>
+        as.data.frame()
       },
       pattern = cross(chr_list_calc_viirs_files, list_pred_calc_grid, chr_iter_radii),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_50")
+        crew = targets::tar_resources_crew(controller = "controller_50"),
+        parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
+      format = "parquet",
       description = "Calculate MODIS - VIIRS features | prediction"
     )
     ,
@@ -552,7 +582,6 @@ target_calculate_predict <-
       dt_pred_calc_koppen,
       command = {
         # download_koppen
-        data.table::data.table(
           amadeus::calculate_koppen_geiger(
             from = amadeus::process_koppen_geiger(
               path = file.path(
@@ -567,9 +596,13 @@ target_calculate_predict <-
             locs_id = "site_id",
             geom = FALSE
           )
-        )
       },
-      description = "data.table of Koppen Geiger features | fit"
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_50"),
+        parquet = targets::tar_resources_parquet(compression = "lz4")
+      ),
+      format = "parquet",
+      description = "data.table of Koppen Geiger features | prediction grid"
     )
     ,
     ###########################      POPULATION      ###########################
@@ -593,14 +626,17 @@ target_calculate_predict <-
           locs_id = "site_id",
           geom = FALSE,
           radius = chr_iter_radii
-        )
+        ) |>
+        as.data.frame()
       },
       pattern = cross(list_pred_calc_grid, chr_iter_radii),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_50")
+        crew = targets::tar_resources_crew(controller = "controller_50"),
+        parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
-      description = "Calculate population features | fit"
+      format = "parquet",
+      description = "Calculate population features | prediction"
     )
     ,
     # targets::tar_target(
@@ -642,13 +678,15 @@ target_calculate_predict <-
             locs = list_pred_calc_grid_v,
             radius = df_feat_calc_tri_params$radius
           )
-        res_tri
+        as.data.frame(res_tri)
       },
       iteration = "list",
       pattern = cross(list_pred_calc_grid_v, df_feat_calc_tri_params),
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_03")
+        crew = targets::tar_resources_crew(controller = "controller_03"),
+        parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
+      format = "parquet",
       description = "Calculate TRI features | prediction"
     )
     ,
@@ -684,11 +722,16 @@ target_calculate_predict <-
             path = file.path(chr_input_dir, "nei", "data_files"),
             covariate = "nei"
           )
-        )
+        ) |> as.data.frame()
       },
       iteration = "list",
       pattern = cross(list_pred_calc_grid_v, chr_iter_calc_nei),
-      description = "Calculate NEI features | prediction grid"
+      description = "Calculate NEI features | prediction grid",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_15"),
+        parquet = targets::tar_resources_parquet(compression = "lz4")
+      ),
+      format = "parquet"
     )
     ,
     # targets::tar_target(
@@ -708,7 +751,7 @@ target_calculate_predict <-
       dt_pred_calc_ecoregions,
       command = {
         # download_ecoregions
-        data.table::data.table(
+        #data.table::data.table(
           amadeus::calculate_ecoregion(
             from = amadeus::process_ecoregion(
               path = file.path(
@@ -722,13 +765,15 @@ target_calculate_predict <-
             # NOTE: locs are all AQS sites for computational efficiency
             locs_id = "site_id"
           )
-        )
+        #)
       },
       iteration = "list",
       pattern = map(list_pred_calc_grid),
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_25")
+        crew = targets::tar_resources_crew(controller = "controller_25"),
+        parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
+      format = "parquet",
       description = "data.table of Ecoregions features | prediction grid"
     )
     ,
@@ -738,6 +783,9 @@ target_calculate_predict <-
       list_pred_calc_groads,
       command = {
         download_groads
+        # adhoc
+        tryCatch({
+          ##
         amadeus::calculate_groads(
           from = amadeus::process_groads(
             path = file.path(
@@ -750,13 +798,17 @@ target_calculate_predict <-
           locs = list_pred_calc_grid_v,
           locs_id = "site_id",
           radius = chr_iter_radii
-        )
+        ) |> as.data.frame()
+        ##
+        }, error = function(e) data.frame(site_id = -999))
       },
       iteration = "list",
       pattern = cross(list_pred_calc_grid_v, chr_iter_radii),
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_15")
+        crew = targets::tar_resources_crew(controller = "controller_15"),
+        parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
+      format = "parquet",
       description = "Calculate gRoads features | prediction grid"
     )
     ,
