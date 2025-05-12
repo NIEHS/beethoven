@@ -1,4 +1,3 @@
-
 #' Load county sf object
 #' @keywords Calculation
 #' @param year integer(1). Year of the county shapefile.
@@ -15,8 +14,10 @@ process_counties <-
     options(tigris_use_cache = TRUE)
     cnty <- tigris::counties(year = year)
     cnty <-
-      cnty[!cnty$STATEFP %in%
-           c("02", "15", "60", "66", "68", "69", "72", "78"), ]
+      cnty[
+        !cnty$STATEFP %in%
+          c("02", "15", "60", "66", "68", "69", "72", "78"),
+      ]
     return(cnty)
   }
 

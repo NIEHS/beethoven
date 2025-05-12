@@ -10,7 +10,7 @@ target_baselearner <-
         r_subsample = 3,
         yvar = "Arithmetic.Mean",
         xvar = names(dt_feat_calc_xyt)[seq(5, ncol(dt_feat_calc_xyt))],
-        drop_vars = names(dt_feat_calc_xyt)[seq(1,3)],
+        drop_vars = names(dt_feat_calc_xyt)[seq(1, 3)],
         normalize = TRUE,
         num_base_models = 20L,
         metric = "rmse",
@@ -20,39 +20,37 @@ target_baselearner <-
         cvsize = 5L
       ),
       description = "Static parameters | base learner"
-    )
-    ,
+    ),
     targets::tar_target(
-      mc_base_subsample, 
+      mc_base_subsample,
       command = {
-          outer_cv <- rsample::vfold_cv(list_base_params_static$dt_full,
-              v = list_base_params_static$r_subsample,
-              repeats = list_base_params_static$num_base_models)
+        outer_cv <- rsample::vfold_cv(
+          list_base_params_static$dt_full,
+          v = list_base_params_static$r_subsample,
+          repeats = list_base_params_static$num_base_models
+        )
 
-       
-
-
-          inner_cv <- lapply(1:nrow(outer_cv), \(x) {
-            dt_train <- assessment(outer_cv$splits[[x]]) # Note we are switching training and testing sets. 
-            dt_test <- training(outer_cv$splits[[x]])
-            spatiotemporal_index <- beethoven::generate_cv_index_spt(
-              data = dt_train,
-              crs = list_base_params_static$crs,
-              cellsize  = list_base_params_static$cellsize,
-              locs_id = "site_id",
-              coords = c("lon","lat"),
-              v = list_base_params_static$cvsize,
-              time_id = "time")
-            inner_cv <-  beethoven::convert_cv_index_rset(
-              cvindex = spatiotemporal_index, 
-              data = dt_train,
-              cv_mode = "spatiotemporal")              
-            mc_sample <- list(inner_cv, dt_train, dt_test)
-            return(mc_sample)
-          })
-
-      }
-      ,
+        inner_cv <- lapply(1:nrow(outer_cv), \(x) {
+          dt_train <- assessment(outer_cv$splits[[x]]) # Note we are switching training and testing sets.
+          dt_test <- training(outer_cv$splits[[x]])
+          spatiotemporal_index <- beethoven::generate_cv_index_spt(
+            data = dt_train,
+            crs = list_base_params_static$crs,
+            cellsize = list_base_params_static$cellsize,
+            locs_id = "site_id",
+            coords = c("lon", "lat"),
+            v = list_base_params_static$cvsize,
+            time_id = "time"
+          )
+          inner_cv <- beethoven::convert_cv_index_rset(
+            cvindex = spatiotemporal_index,
+            data = dt_train,
+            cv_mode = "spatiotemporal"
+          )
+          mc_sample <- list(inner_cv, dt_train, dt_test)
+          return(mc_sample)
+        })
+      },
       description = "B MC subsamples | base learner"
     )
   )
@@ -64,16 +62,15 @@ target_baselearner_elnet <-
     targets::tar_target(
       engine_base_elnet,
       command = {
-          parsnip::linear_reg(
+        parsnip::linear_reg(
           mixture = parsnip::tune(),
           penalty = parsnip::tune()
         ) %>%
-        parsnip::set_engine("brulee", device = "cpu") %>%
-        parsnip::set_mode("regression") 
+          parsnip::set_engine("brulee", device = "cpu") %>%
+          parsnip::set_mode("regression")
       },
       description = "Engine and device | elnet | base learner"
-    )
-    ,
+    ),
     targets::tar_target(
       fit_learner_base_elnet,
       command = beethoven::fit_base_learner(
@@ -91,8 +88,7 @@ target_baselearner_elnet <-
         crew = targets::tar_resources_crew(controller = "controller_geo")
       ),
       description = "Fit base learner | elnet | brulee linear regression | cuda | base learner"
-    )
-    ,
+    ),
     targets::tar_target(
       check_mc_branching,
       command = print(mc_base_subsample[[1]]),
@@ -104,7 +100,7 @@ target_baselearner_elnet <-
       description = "check branching | lgb | cpu | base learner"
     )
   )
-    
+
 ################################################################################
 ##### Fit CPU-enabled {lightGBM} base learners on {normal} cluster.
 target_baselearner_lgb <-
@@ -112,18 +108,17 @@ target_baselearner_lgb <-
     targets::tar_target(
       engine_base_lgb,
       command = {
-          parsnip::boost_tree(
+        parsnip::boost_tree(
           mtry = parsnip::tune(),
           trees = parsnip::tune(),
           learn_rate = parsnip::tune(),
           tree_depth = parsnip::tune()
         ) %>%
-        parsnip::set_engine("lightgbm", device = "cpu") %>%
-        parsnip::set_mode("regression")
+          parsnip::set_engine("lightgbm", device = "cpu") %>%
+          parsnip::set_mode("regression")
       },
       description = "Engine and device | lgb | base learner"
-    )
-    ,
+    ),
     targets::tar_target(
       fit_learner_base_lgb,
       command = beethoven::fit_base_learner(
@@ -158,12 +153,11 @@ target_baselearner_mlp <-
           activation = "leaky_relu",
           learn_rate = parsnip::tune()
         ) %>%
-        parsnip::set_engine("brulee", device = "cpu") %>%
-        parsnip::set_mode("regression")
+          parsnip::set_engine("brulee", device = "cpu") %>%
+          parsnip::set_mode("regression")
       },
       description = "Engine and device | mlp | base learner"
-    )
-    ,
+    ),
     targets::tar_target(
       fit_learner_base_mlp,
       command = beethoven::fit_base_learner(

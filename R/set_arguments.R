@@ -1,6 +1,6 @@
 # nolint start
 #' Generate argument list for raw data download
-#' 
+#'
 #' @keywords Utility
 #' @param char_period Character(2) vector specifying the time period.
 #'  Default is c("2018-01-01", "2022-10-31").
@@ -18,13 +18,14 @@
 #' @export
 set_args_download <-
   function(
-      char_period = c("2018-01-01", "2022-10-31"),
-      char_input_dir = "input",
-      nasa_earth_data_token = NULL,
-      mod06_filelist = NULL,
-      year_nlcd = c(2019, 2021),
-      export = FALSE,
-      path_export = "inst/targets/download_spec.qs") {
+    char_period = c("2018-01-01", "2022-10-31"),
+    char_input_dir = "input",
+    nasa_earth_data_token = NULL,
+    mod06_filelist = NULL,
+    year_nlcd = c(2019, 2021),
+    export = FALSE,
+    path_export = "inst/targets/download_spec.qs"
+  ) {
     # NULL NASA Earth Data token will warn users
     if (is.null(nasa_earth_data_token)) {
       warning(
@@ -47,16 +48,38 @@ set_args_download <-
     year_nei <- seq(2017, time_periods[2], 3)
     gmted_vars <-
       c(
-        "Breakline Emphasis", "Systematic Subsample", "Median Statistic",
-        "Minimum Statistic", "Mean Statistic", "Maximum Statistic",
+        "Breakline Emphasis",
+        "Systematic Subsample",
+        "Median Statistic",
+        "Minimum Statistic",
+        "Mean Statistic",
+        "Maximum Statistic",
         "Standard Deviation Statistic"
       )
     narr_variables_mono <-
       c(
-        "air.sfc", "albedo", "apcp", "dswrf", "evap", "hcdc",
-        "hpbl", "lcdc", "lhtfl", "mcdc", "pr_wtr",
-        "prate", "pres.sfc", "shtfl", "snowc", "soilm",
-        "tcdc", "ulwrf.sfc", "uwnd.10m", "vis", "vwnd.10m", "weasd"
+        "air.sfc",
+        "albedo",
+        "apcp",
+        "dswrf",
+        "evap",
+        "hcdc",
+        "hpbl",
+        "lcdc",
+        "lhtfl",
+        "mcdc",
+        "pr_wtr",
+        "prate",
+        "pres.sfc",
+        "shtfl",
+        "snowc",
+        "soilm",
+        "tcdc",
+        "ulwrf.sfc",
+        "uwnd.10m",
+        "vis",
+        "vwnd.10m",
+        "weasd"
       )
     narr_variables_plevels <-
       c("omega", "shum")
@@ -64,15 +87,18 @@ set_args_download <-
     list_download_config <-
       list(
         aqs = list(
-          dataset_name = "aqs", directory_to_save = ain("aqs"),
+          dataset_name = "aqs",
+          directory_to_save = ain("aqs"),
           year = time_periods,
-          unzip = TRUE, remove_zip = TRUE
+          unzip = TRUE,
+          remove_zip = TRUE
         ),
         mod11 = lapply(
           time_sequence,
           function(t) {
             list(
-              dataset_name = "modis", directory_to_save = ain("modis/raw"),
+              dataset_name = "modis",
+              directory_to_save = ain("modis/raw"),
               product = "MOD11A1",
               date = sprintf(char_date_temp, as.character(t)),
               nasa_earth_data_token = nasa_earth_data_token
@@ -83,7 +109,8 @@ set_args_download <-
           time_sequence,
           function(t) {
             list(
-              dataset_name = "modis", directory_to_save = ain("modis/raw"),
+              dataset_name = "modis",
+              directory_to_save = ain("modis/raw"),
               product = "MOD06_L2",
               date = sprintf(char_date_temp, as.character(t)),
               nasa_earth_data_token = nasa_earth_data_token,
@@ -95,7 +122,8 @@ set_args_download <-
           time_sequence,
           function(t) {
             list(
-              dataset_name = "modis", directory_to_save = ain("modis/raw"),
+              dataset_name = "modis",
+              directory_to_save = ain("modis/raw"),
               product = "MOD09GA",
               date = sprintf(char_date_temp, as.character(t)),
               nasa_earth_data_token = nasa_earth_data_token
@@ -106,8 +134,10 @@ set_args_download <-
           time_sequence,
           function(t) {
             list(
-              dataset_name = "modis", directory_to_save = ain("modis/raw"),
-              product = "MCD19A2", date = sprintf(char_date_temp, as.character(t)),
+              dataset_name = "modis",
+              directory_to_save = ain("modis/raw"),
+              product = "MCD19A2",
+              date = sprintf(char_date_temp, as.character(t)),
               nasa_earth_data_token = nasa_earth_data_token
             )
           }
@@ -116,8 +146,10 @@ set_args_download <-
           time_sequence,
           function(t) {
             list(
-              dataset_name = "modis", directory_to_save = ain("modis/raw"),
-              product = "MOD13A2", date = sprintf(char_date_temp, as.character(t)),
+              dataset_name = "modis",
+              directory_to_save = ain("modis/raw"),
+              product = "MOD13A2",
+              date = sprintf(char_date_temp, as.character(t)),
               nasa_earth_data_token = nasa_earth_data_token
             )
           }
@@ -126,36 +158,45 @@ set_args_download <-
           time_sequence,
           function(t) {
             list(
-              dataset_name = "modis", directory_to_save = ain("modis/raw"),
-              product = "VNP46A2", date = sprintf(char_date_temp, as.character(t)),
+              dataset_name = "modis",
+              directory_to_save = ain("modis/raw"),
+              product = "VNP46A2",
+              date = sprintf(char_date_temp, as.character(t)),
               version = "5000",
               nasa_earth_data_token = nasa_earth_data_token
             )
           }
         ),
         geoscf_aqc = list(
-          dataset_name = "geos", directory_to_save = ain("geos"),
+          dataset_name = "geos",
+          directory_to_save = ain("geos"),
           collection = "aqc_tavg_1hr_g1440x721_v1",
           date = char_period
         ),
         geoscf_chm = list(
-          dataset_name = "geos", directory_to_save = ain("geos"),
+          dataset_name = "geos",
+          directory_to_save = ain("geos"),
           collection = "chm_tavg_1hr_g1440x721_v1",
           date = char_period
         ),
         hms = list(
-          dataset_name = "smoke", directory_to_save = ain("HMS_Smoke"),
+          dataset_name = "smoke",
+          directory_to_save = ain("HMS_Smoke"),
           data_format = "Shapefile",
           date = char_period,
-          unzip = TRUE, remove_zip = TRUE
+          unzip = TRUE,
+          remove_zip = TRUE
         ),
         gmted = lapply(
           gmted_vars,
           function(v) {
             list(
-              dataset_name = "gmted", directory_to_save = ain("gmted"),
-              statistic = v, resolution = "7.5 arc-seconds",
-              unzip = TRUE, remove_zip = TRUE
+              dataset_name = "gmted",
+              directory_to_save = ain("gmted"),
+              statistic = v,
+              resolution = "7.5 arc-seconds",
+              unzip = TRUE,
+              remove_zip = TRUE
             )
           }
         ),
@@ -163,8 +204,10 @@ set_args_download <-
           year_nei,
           function(y) {
             list(
-              dataset_name = "nei", directory_to_save = ain("nei"),
-              year_target = y, unzip = TRUE
+              dataset_name = "nei",
+              directory_to_save = ain("nei"),
+              year_target = y,
+              unzip = TRUE
             )
           }
         ),
@@ -177,20 +220,27 @@ set_args_download <-
           year_nlcd,
           function(y) {
             list(
-              dataset_name = "nlcd", directory_to_save = ain("nlcd"),
+              dataset_name = "nlcd",
+              directory_to_save = ain("nlcd"),
               year = y,
-              unzip = TRUE, remove_zip = TRUE
+              unzip = TRUE,
+              remove_zip = TRUE
             )
           }
         ),
         koppen = list(
-          dataset_name = "koppen", directory_to_save = ain("koppen_geiger"),
-          data_resolution = "0.0083", time_period = "Present", unzip = TRUE, remove_zip = TRUE
+          dataset_name = "koppen",
+          directory_to_save = ain("koppen_geiger"),
+          data_resolution = "0.0083",
+          time_period = "Present",
+          unzip = TRUE,
+          remove_zip = TRUE
         ),
         ecoregions = list(
           dataset_name = "koppen",
           directory_to_save = ain("ecoregions"),
-          unzip = TRUE, remove_zip = TRUE
+          unzip = TRUE,
+          remove_zip = TRUE
         ),
         narr_monolevel = lapply(
           narr_variables_mono,
@@ -198,7 +248,8 @@ set_args_download <-
             list(
               dataset_name = "narr",
               directory_to_save = ain("narr"),
-              variables = v, year = time_periods
+              variables = v,
+              year = time_periods
             )
           }
         ),
@@ -208,18 +259,27 @@ set_args_download <-
             list(
               dataset_name = "narr",
               directory_to_save = ain("narr"),
-              variables = v, year = time_periods
+              variables = v,
+              year = time_periods
             )
           }
         ),
         groads = list(
-          dataset_name = "sedac_groads", directory_to_save = ain("sedac_groads"),
-          data_region = "Americas", data_format = "Geodatabase",
-          unzip = TRUE, remove_zip = TRUE
+          dataset_name = "sedac_groads",
+          directory_to_save = ain("sedac_groads"),
+          data_region = "Americas",
+          data_format = "Geodatabase",
+          unzip = TRUE,
+          remove_zip = TRUE
         ),
         population = list(
-          dataset_name = "sedac_population", directory_to_save = ain("sedac_population"),
-          data_resolution = "30 second", data_format = "GeoTIFF", year = "2020", unzip = TRUE, remove_zip = TRUE
+          dataset_name = "sedac_population",
+          directory_to_save = ain("sedac_population"),
+          data_resolution = "30 second",
+          data_format = "GeoTIFF",
+          year = "2020",
+          unzip = TRUE,
+          remove_zip = TRUE
         )
       )
 
@@ -327,23 +387,24 @@ set_args_download <-
 #' @export
 set_args_calc <-
   function(
-      char_siteid = "site_id",
-      char_timeid = "time",
-      char_period = c("2018-01-01", "2022-10-31"),
-      num_extent = c(-126, -62, 22, 52),
-      char_user_email = paste0(Sys.getenv("USER"), "@nih.gov"),
-      export = FALSE,
-      path_export = "inst/targets/calc_spec.qs",
-      char_input_dir = "input",
-      nthreads_nasa = 14L,
-      nthreads_tri = 5L,
-      nthreads_geoscf = 10L,
-      nthreads_gmted = 4L,
-      nthreads_narr = 24L,
-      nthreads_groads = 3L,
-      nthreads_population = 3L,
-      nthreads_append = 8L,
-      nthreads_impute = 64L) {
+    char_siteid = "site_id",
+    char_timeid = "time",
+    char_period = c("2018-01-01", "2022-10-31"),
+    num_extent = c(-126, -62, 22, 52),
+    char_user_email = paste0(Sys.getenv("USER"), "@nih.gov"),
+    export = FALSE,
+    path_export = "inst/targets/calc_spec.qs",
+    char_input_dir = "input",
+    nthreads_nasa = 14L,
+    nthreads_tri = 5L,
+    nthreads_geoscf = 10L,
+    nthreads_gmted = 4L,
+    nthreads_narr = 24L,
+    nthreads_groads = 3L,
+    nthreads_population = 3L,
+    nthreads_append = 8L,
+    nthreads_impute = 64L
+  ) {
     list_common <-
       list(
         char_siteid = char_siteid,
@@ -372,12 +433,31 @@ set_args_calc <-
     if (export) {
       list_paths <-
         list(
-          mod11 = load_modis_files(ain("modis/raw/61/MOD11A1"), date = list_common$char_period),
-          mod06 = load_modis_files(ain("modis/raw/61/MOD06_L2"), date = list_common$char_period),
-          mod09 = load_modis_files(ain("modis/raw/61/MOD09GA"), date = list_common$char_period),
-          mcd19 = load_modis_files(ain("modis/raw/61/MCD19A2"), date = list_common$char_period),
-          mod13 = load_modis_files(ain("modis/raw/61/MOD13A2"), date = list_common$char_period),
-          viirs = load_modis_files(ain("modis/raw/5000/VNP46A2"), "h5$", date = list_common$char_period)
+          mod11 = load_modis_files(
+            ain("modis/raw/61/MOD11A1"),
+            date = list_common$char_period
+          ),
+          mod06 = load_modis_files(
+            ain("modis/raw/61/MOD06_L2"),
+            date = list_common$char_period
+          ),
+          mod09 = load_modis_files(
+            ain("modis/raw/61/MOD09GA"),
+            date = list_common$char_period
+          ),
+          mcd19 = load_modis_files(
+            ain("modis/raw/61/MCD19A2"),
+            date = list_common$char_period
+          ),
+          mod13 = load_modis_files(
+            ain("modis/raw/61/MOD13A2"),
+            date = list_common$char_period
+          ),
+          viirs = load_modis_files(
+            ain("modis/raw/5000/VNP46A2"),
+            "h5$",
+            date = list_common$char_period
+          )
         )
 
       list_calcspec <-
@@ -417,7 +497,10 @@ set_args_calc <-
           ),
           mcd19_5km = list(
             from = list_paths$mcd19,
-            name_covariates = sprintf("MOD_%sAN_0_", c("CSZ", "CVZ", "RAZ", "SCT", "GLN")),
+            name_covariates = sprintf(
+              "MOD_%sAN_0_",
+              c("CSZ", "CVZ", "RAZ", "SCT", "GLN")
+            ),
             subdataset = "cos|RelAZ|Angle",
             nthreads = nthreads_nasa,
             radius = c(1e3, 1e4, 5e4)
@@ -483,7 +566,9 @@ set_args_calc <-
             nthreads = 6L
           ),
           koppen = list(
-            path = ain("koppen_geiger/data_files/Beck_KG_V1_present_0p0083.tif"),
+            path = ain(
+              "koppen_geiger/data_files/Beck_KG_V1_present_0p0083.tif"
+            ),
             covariate = "koppen",
             nthreads = 1L
           ),
@@ -496,17 +581,55 @@ set_args_calc <-
             path = ain("narr"),
             covariate = "narr",
             domain_reduced = c(
-              "air.sfc", "albedo", "apcp", "dswrf", "evap", "hcdc",
-              "hpbl", "lcdc", "lhtfl", "mcdc", "omega", "pr_wtr",
-              "pres.sfc", "shtfl", "snowc", "soilm",
-              "tcdc", "ulwrf.sfc", "uwnd.10m", "vis", "vwnd.10m", "weasd"
+              "air.sfc",
+              "albedo",
+              "apcp",
+              "dswrf",
+              "evap",
+              "hcdc",
+              "hpbl",
+              "lcdc",
+              "lhtfl",
+              "mcdc",
+              "omega",
+              "pr_wtr",
+              "pres.sfc",
+              "shtfl",
+              "snowc",
+              "soilm",
+              "tcdc",
+              "ulwrf.sfc",
+              "uwnd.10m",
+              "vis",
+              "vwnd.10m",
+              "weasd"
             ),
             domain_appt = c("prate", "shum"),
             domain = c(
-              "air.sfc", "albedo", "apcp", "dswrf", "evap", "hcdc",
-              "hpbl", "lcdc", "lhtfl", "mcdc", "omega", "pr_wtr",
-              "prate", "pres.sfc", "shtfl", "shum", "snowc", "soilm",
-              "tcdc", "ulwrf.sfc", "uwnd.10m", "vis", "vwnd.10m", "weasd"
+              "air.sfc",
+              "albedo",
+              "apcp",
+              "dswrf",
+              "evap",
+              "hcdc",
+              "hpbl",
+              "lcdc",
+              "lhtfl",
+              "mcdc",
+              "omega",
+              "pr_wtr",
+              "prate",
+              "pres.sfc",
+              "shtfl",
+              "shum",
+              "snowc",
+              "soilm",
+              "tcdc",
+              "ulwrf.sfc",
+              "uwnd.10m",
+              "vis",
+              "vwnd.10m",
+              "weasd"
             ),
             domain_name = "variable",
             date = list_common$char_period,
@@ -521,8 +644,11 @@ set_args_calc <-
             nthreads = nthreads_groads
           ),
           population = list(
-            path = ain("sedac_population/data_files/gpw_v4_population_density_adjusted_to_2015_unwpp_country_totals_rev11_2020_30_sec.tif"),
-            covariate = "population", fun = "mean",
+            path = ain(
+              "sedac_population/data_files/gpw_v4_population_density_adjusted_to_2015_unwpp_country_totals_rev11_2020_30_sec.tif"
+            ),
+            covariate = "population",
+            fun = "mean",
             radius = c(1e3, 1e4, 5e4),
             nthreads = nthreads_population
           )
@@ -530,26 +656,46 @@ set_args_calc <-
 
       attr(list_calcspec, "description") <-
         tibble::tribble(
-          ~dataset, ~description,
-          "mod11", "MODIS Land Surface Temperature Day/Night",
-          "mod06", "MODIS Cloud Fraction Day/Night",
-          "mod09", "MODIS Surface Reflectance",
-          "mcd19_1km", "MCD19A2 1km",
-          "mcd19_5km", "MCD19A2 5km",
-          "mod13", "MODIS Normalized Difference Vegetation Index",
-          "viirs", "VIIRS Nighttime Lights",
-          "hms", "NOAA Hazard Mapping System Smoke",
-          "geoscf_aqc", "GEOS-CF AQC",
-          "geoscf_chm", "GEOS-CF CHM",
-          "gmted", "GMTED elevation",
-          "nei", "National Emission Inventory",
-          "tri", "Toxic Release Inventory",
-          "nlcd", "National Land Cover Database",
-          "koppen", "Koppen-Geiger Climate Classification",
-          "ecoregions", "EPA Ecoregions",
-          "narr", "NARR",
-          "groads", "SEDAC Global Roads",
-          "population", "SEDAC Population Density"
+          ~dataset,
+          ~description,
+          "mod11",
+          "MODIS Land Surface Temperature Day/Night",
+          "mod06",
+          "MODIS Cloud Fraction Day/Night",
+          "mod09",
+          "MODIS Surface Reflectance",
+          "mcd19_1km",
+          "MCD19A2 1km",
+          "mcd19_5km",
+          "MCD19A2 5km",
+          "mod13",
+          "MODIS Normalized Difference Vegetation Index",
+          "viirs",
+          "VIIRS Nighttime Lights",
+          "hms",
+          "NOAA Hazard Mapping System Smoke",
+          "geoscf_aqc",
+          "GEOS-CF AQC",
+          "geoscf_chm",
+          "GEOS-CF CHM",
+          "gmted",
+          "GMTED elevation",
+          "nei",
+          "National Emission Inventory",
+          "tri",
+          "Toxic Release Inventory",
+          "nlcd",
+          "National Land Cover Database",
+          "koppen",
+          "Koppen-Geiger Climate Classification",
+          "ecoregions",
+          "EPA Ecoregions",
+          "narr",
+          "NARR",
+          "groads",
+          "SEDAC Global Roads",
+          "population",
+          "SEDAC Population Density"
         )
       if (is.null(path_export)) {
         assign("arglist_calcspec", list_calcspec, envir = .GlobalEnv)
@@ -574,28 +720,35 @@ set_args_calc <-
 #' This function sets up the library paths and environmental variables required
 #' for running the Beethoven workflow in a containerized environment.
 #' @keywords Utility
-#' @param libpaths A character vector specifying the library paths to use. 
+#' @param libpaths A character vector specifying the library paths to use.
 #'   By default, it excludes user-specific and host paths from `.libPaths()`.
-#' @param path A character string specifying the system `PATH` environment 
+#' @param path A character string specifying the system `PATH` environment
 #'   variable. Defaults to a container-friendly configuration with CUDA paths.
-#' @param ld_library_path A character string specifying the `LD_LIBRARY_PATH` 
+#' @param ld_library_path A character string specifying the `LD_LIBRARY_PATH`
 #'   environment variable. Defaults to `"/usr/local/cuda/lib64"`.
-#' @param cuda_home A character string specifying the `CUDA_HOME` environment 
+#' @param cuda_home A character string specifying the `CUDA_HOME` environment
 #'   variable. Defaults to `"/usr/local/cuda"`.
 #' @return NULL
 #' @export
 sys_beethoven <- function(
   libpaths = .libPaths(
     grep(
-      paste0("biotools|", Sys.getenv("USER")), .libPaths(),
+      paste0("biotools|", Sys.getenv("USER")),
+      .libPaths(),
       value = TRUE,
       invert = TRUE
     )
   ),
   path = paste0(
-    "/usr/local/cuda/bin:", "/usr/local/nvidia/bin:", "/usr/local/cuda/bin:",
-    "/usr/local/sbin:", "/usr/local/bin:", "/usr/sbin:", "/usr/bin:",
-    "/sbin:", "/bin"
+    "/usr/local/cuda/bin:",
+    "/usr/local/nvidia/bin:",
+    "/usr/local/cuda/bin:",
+    "/usr/local/sbin:",
+    "/usr/local/bin:",
+    "/usr/sbin:",
+    "/usr/bin:",
+    "/sbin:",
+    "/bin"
   ),
   ld_library_path = "/usr/local/cuda/lib64",
   cuda_home = "/usr/local/cuda"

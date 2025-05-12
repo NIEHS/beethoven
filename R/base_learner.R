@@ -68,70 +68,64 @@ make_subdata <- function(
 #' @export
 switch_model <-
   function(
-    model_type = c("mlp","mlp2", "xgb", "lgb", "elnet","brulee_linear"),
+    model_type = c("mlp", "mlp2", "xgb", "lgb", "elnet", "brulee_linear"),
     device = c("cpu", "cuda", "gpu")
   ) {
     device <- match.arg(device)
     switch(
       model_type,
-      mlp =
-        parsnip::mlp(
-          hidden_units = parsnip::tune(),
-          dropout = parsnip::tune(),
-          epochs = 1000,
-          activation = parsnip::tune(),
-          learn_rate = parsnip::tune()
-        ) %>%
+      mlp = parsnip::mlp(
+        hidden_units = parsnip::tune(),
+        dropout = parsnip::tune(),
+        epochs = 1000,
+        activation = parsnip::tune(),
+        learn_rate = parsnip::tune()
+      ) %>%
         parsnip::set_engine("brulee", device = device) %>%
         parsnip::set_mode("regression"),
-      mlp2 =
-        parsnip::mlp(
-          hidden_units = parsnip::tune(),
-          dropout = parsnip::tune(),
-          epochs = 1000,
-          activation = parsnip::tune(),
-          learn_rate = parsnip::tune()
+      mlp2 = parsnip::mlp(
+        hidden_units = parsnip::tune(),
+        dropout = parsnip::tune(),
+        epochs = 1000,
+        activation = parsnip::tune(),
+        learn_rate = parsnip::tune()
+      ) %>%
+        parsnip::set_engine(
+          "brulee_two_layer",
+          hidden_units_2 = parnsip::tune(),
+          activation_2 = parsnip::tune(),
+          device = device
         ) %>%
-        parsnip::set_engine("brulee_two_layer", 
-        hidden_units_2 = parnsip::tune(),
-        activation_2 = parsnip::tune(),
-        device = device) %>%
-        parsnip::set_mode("regression"),        
-      lgb =
-        parsnip::boost_tree(
-          mtry = parsnip::tune(),
-          trees = parsnip::tune(),
-          learn_rate = parsnip::tune(),
-          tree_depth = parsnip::tune()
-        ) %>%
+        parsnip::set_mode("regression"),
+      lgb = parsnip::boost_tree(
+        mtry = parsnip::tune(),
+        trees = parsnip::tune(),
+        learn_rate = parsnip::tune(),
+        tree_depth = parsnip::tune()
+      ) %>%
         parsnip::set_engine("lightgbm", device = device) %>%
         parsnip::set_mode("regression"),
-      xgb =
-        parsnip::boost_tree(
-          mtry = parsnip::tune(),
-          trees = parsnip::tune(),
-          learn_rate = parsnip::tune()
-        ) %>%
+      xgb = parsnip::boost_tree(
+        mtry = parsnip::tune(),
+        trees = parsnip::tune(),
+        learn_rate = parsnip::tune()
+      ) %>%
         parsnip::set_engine("xgboost", device = device) %>%
         parsnip::set_mode("regression"),
-      elnet =
-        parsnip::linear_reg(
-          mixture = parsnip::tune(),
-          penalty = parsnip::tune()
-        ) %>%
+      elnet = parsnip::linear_reg(
+        mixture = parsnip::tune(),
+        penalty = parsnip::tune()
+      ) %>%
         parsnip::set_engine("glmnet") %>%
         parsnip::set_mode("regression"),
-      brulee_linear =
-        parsnip::linear_reg(
-          mixture = parsnip::tune(),
-          penalty = parsnip::tune()
-        ) %>%
+      brulee_linear = parsnip::linear_reg(
+        mixture = parsnip::tune(),
+        penalty = parsnip::tune()
+      ) %>%
         parsnip::set_engine("brulee", device = device) %>%
-        parsnip::set_mode("regression")        
+        parsnip::set_mode("regression")
     )
-
   }
-
 
 
 #' Base learner: tune hyperparameters and retrieve the best model
@@ -214,72 +208,70 @@ fit_base_learner <-
   ) {
     stopifnot("parsnip model must be defined." = !is.null(model))
 
-
     # detect model name
     model_name <- model$engine
 
-    
     base_recipe <-
-      recipes::recipe(training(rset[[1]]$splits[[1]])[1,]) %>%
-      recipes::update_role(!!xvar, new_role = "predictor") %>%  # Dynamically assign covariates
+      recipes::recipe(training(rset[[1]]$splits[[1]])[1, ]) %>%
+      recipes::update_role(!!xvar, new_role = "predictor") %>% # Dynamically assign covariates
       recipes::update_role(!!yvar, new_role = "outcome") %>%
       recipes::update_role(!!drop_vars, new_role = "id")
-
 
     if (normalize) {
       base_recipe <-
         base_recipe %>%
         recipes::step_normalize(
-          recipes::all_numeric_predictors(), -recipes::all_integer_predictors()
+          recipes::all_numeric_predictors(),
+          -recipes::all_integer_predictors()
         )
     }
-
 
     base_wf <-
       workflows::workflow() %>%
       workflows::add_recipe(base_recipe) %>%
       workflows::add_model(model)
 
-      # wf_config <-
-      #   tune::control_grid(
-      #   verbose = TRUE,
-      #   save_pred = FALSE,
-      #   save_workflow = TRUE
-      # )  
+    # wf_config <-
+    #   tune::control_grid(
+    #   verbose = TRUE,
+    #   save_pred = FALSE,
+    #   save_workflow = TRUE
+    # )
 
-    wf_config <- control_race(verbose_elim = TRUE,
+    wf_config <- control_race(
+      verbose_elim = TRUE,
       save_workflow = TRUE,
-      verbose = TRUE)
+      verbose = TRUE
+    )
 
-
-
-      base_wftune <-
-        base_wf %>%
-        finetune::tune_race_anova(
-          resamples = rset[[1]], # list object 1 is the manual cv rset object created with spatiotemporal CV
-          grid = tune_grid_size,
-          metrics =
-          yardstick::metric_set(
-            yardstick::rmse,
-            yardstick::rsq,
-            yardstick::msd            
-          ),
-          control = wf_config
+    base_wftune <-
+      base_wf %>%
+      finetune::tune_race_anova(
+        resamples = rset[[1]], # list object 1 is the manual cv rset object created with spatiotemporal CV
+        grid = tune_grid_size,
+        metrics = yardstick::metric_set(
+          yardstick::rmse,
+          yardstick::rsq,
+          yardstick::msd
+        ),
+        control = wf_config
       )
 
+    # Select best model
+    best_params <- select_best(base_wftune, metric = metric)
 
-        # Select best model
-        best_params <- select_best(base_wftune, metric = metric)
-        
-        # Finalize workflow with best parameters
-        final_wf <- finalize_workflow(base_wf, best_params)
-        
-        # Fit final model on the outer data test set 
-        # rset[[2]] is the full training set for the given outer mc sample
-        base_fit <- fit(final_wf, data = rset[[2]]) %>% 
-          butcher::butcher()
+    # Finalize workflow with best parameters
+    final_wf <- finalize_workflow(base_wf, best_params)
 
-        base_results <- list("workflow" = base_fit, "metrics" = collect_metrics(base_wftune))
+    # Fit final model on the outer data test set
+    # rset[[2]] is the full training set for the given outer mc sample
+    base_fit <- fit(final_wf, data = rset[[2]]) %>%
+      butcher::butcher()
+
+    base_results <- list(
+      "workflow" = base_fit,
+      "metrics" = collect_metrics(base_wftune)
+    )
 
     return(base_results)
   }
@@ -347,8 +339,7 @@ fit_base_tune <-
         tune::tune_grid(
           resamples = resample,
           grid = grid,
-          metrics =
-          yardstick::metric_set(
+          metrics = yardstick::metric_set(
             yardstick::rmse,
             yardstick::rsq,
             yardstick::mae
@@ -367,8 +358,7 @@ fit_base_tune <-
         tune::tune_bayes(
           resamples = resample,
           iter = iter_bayes,
-          metrics =
-          yardstick::metric_set(
+          metrics = yardstick::metric_set(
             yardstick::rmse,
             yardstick::mae,
             yardstick::mape,
@@ -472,22 +462,27 @@ assign_learner_cv <-
         df <-
           data.frame(
             learner = rep(x, num_models * length(cv_mode)),
-            cv_mode =
-            num_models_rep[sample(length(num_models_rep), length(num_models_rep))],
+            cv_mode = num_models_rep[sample(
+              length(num_models_rep),
+              length(num_models_rep)
+            )],
             device = y,
             crs = crs,
             cellsize = cellsize
           )
         return(df)
       },
-      learner_l, cuda_get, SIMPLIFY = FALSE
+      learner_l,
+      cuda_get,
+      SIMPLIFY = FALSE
     )
     learner_v <- do.call(rbind, learner_l)
 
     if (balance) {
       learner_v_cuda <- learner_v[grep("cuda", learner_v$device), ]
       learner_v_cuda$device <- sprintf(
-        "cuda:%d", (seq_len(nrow(learner_v_cuda)) - 1) %% num_device
+        "cuda:%d",
+        (seq_len(nrow(learner_v_cuda)) - 1) %% num_device
       )
       learner_v[grep("cuda", learner_v$device), ] <- learner_v_cuda
     }
@@ -530,9 +525,12 @@ convert_cv_index_rset <-
     len_cvi <- seq_along(cvindex)
 
     if (is.list(cvindex)) {
-      list_split_dfs <- Map(function(x) {
-        rsample::make_splits(x = x, data = data)
-      }, cvindex)
+      list_split_dfs <- Map(
+        function(x) {
+          rsample::make_splits(x = x, data = data)
+        },
+        cvindex
+      )
     } else {
       if (!is.null(ref_list)) {
         list_cvi <- ref_list
@@ -546,8 +544,10 @@ convert_cv_index_rset <-
         lapply(
           list_cvi,
           function(x) {
-            list(analysis = which(!cvindex %in% x),
-                 assessment = which(cvindex %in% x))
+            list(
+              analysis = which(!cvindex %in% x),
+              assessment = which(cvindex %in% x)
+            )
           }
         )
       list_split_dfs <-
@@ -603,7 +603,10 @@ attach_xy <-
     # data_full_lean <- data_full[, c(locs_id, time_id), with = FALSE]
     data_full_attach <-
       collapse::join(
-        data_full, data_sfd, on = locs_id, how = "left"
+        data_full,
+        data_sfd,
+        on = locs_id,
+        how = "left"
       )
     return(data_full_attach)
   }
@@ -645,73 +648,75 @@ generate_cv_index_spt <- function(
   v = 10L,
   time_id = "time"
 ) {
-
   #########################       SPATIAL FOLDS       ##########################
   stopifnot(c(locs_id, coords, time_id) %in% names(data))
 
-
   data_trim <- unique(data.frame(data)[, c(locs_id, coords)])
 
-
-
   if (is.null(crs)) {
-    df_sf <- sf::st_as_sf(data_trim, coords = coords, crs = 4326, remove = FALSE)    
+    df_sf <- sf::st_as_sf(
+      data_trim,
+      coords = coords,
+      crs = 4326,
+      remove = FALSE
+    )
     data_sf <- st_transform(df_sf, crs = 5070)
   } else {
-    df_sf <- sf::st_as_sf(data_trim, coords = coords, crs = 4326, remove = FALSE)    
+    df_sf <- sf::st_as_sf(
+      data_trim,
+      coords = coords,
+      crs = 4326,
+      remove = FALSE
+    )
     data_sf <- st_transform(df_sf, crs = crs)
   }
 
   # generate spatial splits with `spatialsample::spatial_block_cv`
   if (!is.null(cellsize)) {
-  sp_index <-
-    rlang::inject(
-      spatialsample::spatial_block_cv(
-        data_sf,
-        v = v,
-        cellsize = cellsize,
-        method = "snake"
+    sp_index <-
+      rlang::inject(
+        spatialsample::spatial_block_cv(
+          data_sf,
+          v = v,
+          cellsize = cellsize,
+          method = "snake"
+        )
       )
-    )
   } else {
     sp_index <- spatialsample::spatial_block_cv(
       data = data_sf,
-      v = v, 
+      v = v,
       method = "snake"
     )
   }
 
-
   # Create a data frame that assigns fold labels to each row in the original data
   fold_labels <- map_dfr(seq_along(sp_index$splits), function(k) {
     assessment_ids <- assessment(sp_index$splits[[k]])$site_id
-    
+
     tibble(
       site_id = assessment_ids,
       fold = k
     )
-  }) 
+  })
 
-  data_spatial_cv <-  data.frame(data)[, c(locs_id, coords)] %>% 
-     sf::st_as_sf(coords = coords,  remove = FALSE
-  ) %>%
-  # Join the fold labels back to the original data
-    left_join( fold_labels, by = "site_id")
-
-
-
-
+  data_spatial_cv <- data.frame(data)[, c(locs_id, coords)] %>%
+    sf::st_as_sf(coords = coords, remove = FALSE) %>%
+    # Join the fold labels back to the original data
+    left_join(fold_labels, by = "site_id")
 
   #########################       TEMPORAL FOLDS       #########################
 
   # identify site's unique year + week combination
   data_spatial_cv$yw <- paste0(
     lubridate::year(data[[time_id]]),
-    sprintf("%02d", lubridate::week(data[[time_id]])))
+    sprintf("%02d", lubridate::week(data[[time_id]]))
+  )
 
-  data_spatial_cv <- data_spatial_cv %>% mutate(st_int = interaction(fold, as.double(yw), drop = FALSE))
+  data_spatial_cv <- data_spatial_cv %>%
+    mutate(st_int = interaction(fold, as.double(yw), drop = FALSE))
 
-    # Create a unique list of (id1, id2) combinations
+  # Create a unique list of (id1, id2) combinations
   unique_st_int <- data_spatial_cv$st_int %>% unique() %>% as.data.frame()
   colnames(unique_st_int) <- "st_int"
 
@@ -722,11 +727,10 @@ generate_cv_index_spt <- function(
   # Merge back to the full dataset
   data_sp <- data_spatial_cv %>% left_join(unique_st_int, by = "st_int")
 
- # length == nrow(data)
+  # length == nrow(data)
   spt_index_num <- data_sp$spacetime_cv
 
   return(spt_index_num)
-
 }
 
 # non site-wise; just using temporal information
@@ -824,7 +828,6 @@ generate_cv_index_sp <-
     target_cols = c("lon", "lat"),
     ...
   ) {
-
     data_sf <- sf::st_as_sf(data, coords = target_cols, remove = FALSE)
     cv_index <-
       rlang::inject(
@@ -859,7 +862,6 @@ generate_cv_index_sp <-
   }
 
 
-
 #' Visualize the spatio-temporal cross-validation index
 #' @keywords Baselearner
 #' @param rsplit rsample::manual_rset() object.
@@ -881,14 +883,16 @@ vis_spt_rset <-
       cleared$indx <- factor(cleared$indx)
       cleared$time <- as.POSIXct(cleared$time)
       scatterplot3d::scatterplot3d(
-        cleared$lon, cleared$lat, cleared$time,
+        cleared$lon,
+        cleared$lat,
+        cleared$time,
         color = rev(as.integer(cleared$indx) + 1),
-        cex.symbols = cex, pch = 19,
+        cex.symbols = cex,
+        pch = 19,
         angle = angle
       )
     }
   }
-
 
 
 #' Choose cross-validation strategy for the base learner
@@ -920,4 +924,3 @@ switch_generate_cv_rset <-
     cvindex <- beethoven::inject_match(target_fun, list(...))
     return(cvindex)
   }
-

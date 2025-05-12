@@ -65,23 +65,49 @@ controller_geo <- crew.cluster::crew_controller_slurm(
 )
 
 
-
-
 ##############################        STORE       ##############################
 targets::tar_config_set(store = "/opt/_targets")
 
 ##############################       OPTIONS      ##############################
 if (Sys.getenv("BEETHOVEN") == "covariates") {
   beethoven_packages <- c(
-    "amadeus", "targets", "tarchetypes", "dplyr", "tidyverse", "data.table",
-    "sf", "crew", "crew.cluster", "lubridate", "qs2", "kernlab"
+    "amadeus",
+    "targets",
+    "tarchetypes",
+    "dplyr",
+    "tidyverse",
+    "data.table",
+    "sf",
+    "crew",
+    "crew.cluster",
+    "lubridate",
+    "qs2",
+    "kernlab"
   )
 } else {
   beethoven_packages <- c(
-    "amadeus", "targets", "tarchetypes", "dplyr", "tidyverse",
-    "data.table", "sf", "crew", "crew.cluster", "lubridate", "qs2",
-    "torch","parsnip", "bonsai", "dials", "lightgbm", "glmnet",
-    "finetune","spatialsample", "tidymodels", "brulee","workflows"
+    "amadeus",
+    "targets",
+    "tarchetypes",
+    "dplyr",
+    "tidyverse",
+    "data.table",
+    "sf",
+    "crew",
+    "crew.cluster",
+    "lubridate",
+    "qs2",
+    "torch",
+    "parsnip",
+    "bonsai",
+    "dials",
+    "lightgbm",
+    "glmnet",
+    "finetune",
+    "spatialsample",
+    "tidymodels",
+    "brulee",
+    "workflows"
   )
 }
 targets::tar_option_set(
@@ -95,8 +121,12 @@ targets::tar_option_set(
   garbage_collection = TRUE,
   seed = 202401L,
   controller = crew::crew_controller_group(
-    controller_250, controller_100, controller_50,
-    controller_25, controller_10, controller_1,
+    controller_250,
+    controller_100,
+    controller_50,
+    controller_25,
+    controller_10,
+    controller_1,
     controller_geo
   ),
   resources = targets::tar_resources(
@@ -120,7 +150,7 @@ targets::tar_source("inst/targets/targets_metalearner.R")
 if (Sys.getenv("BEETHOVEN") == "covariates") {
   target_baselearner <-
     target_baselearner_elnet <-
-      target_baselearner_lgb <- 
+      target_baselearner_lgb <-
         target_baselearner_mlp <-
           target_metalearner <-
             target_calculate_predict <-
@@ -132,10 +162,10 @@ if (Sys.getenv("BEETHOVEN") == "covariates") {
         target_calculate_predict <-
           target_predict <- list()
 } else if (Sys.getenv("BEETHOVEN") == "lgb") {
-    target_baselearner_mlp <-
-      target_metalearner <-
-        target_calculate_predict <-
-          target_predict <- list()
+  target_baselearner_mlp <-
+    target_metalearner <-
+      target_calculate_predict <-
+        target_predict <- list()
 } else if (Sys.getenv("BEETHOVEN") == "mlp") {
   target_metalearner <-
     target_calculate_predict <-
@@ -156,7 +186,7 @@ list(
   target_baselearner_elnet,
   target_baselearner_lgb,
   target_baselearner_mlp,
-  target_metalearner# ,
+  target_metalearner # ,
   # target_calculate_predict
   # target_predict
 )

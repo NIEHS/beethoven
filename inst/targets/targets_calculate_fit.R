@@ -20,8 +20,7 @@ target_calculate_fit <-
       ),
       iteration = "list",
       description = "Calculate GEOS-CF features | aqc | fit"
-    )
-    ,
+    ),
     targets::tar_target(
       list_feat_calc_geos_chm,
       command = {
@@ -39,8 +38,7 @@ target_calculate_fit <-
       ),
       iteration = "list",
       description = "Calculate GEOS-CF features | chm | fit"
-    )
-    ,
+    ),
     targets::tar_target(
       dt_feat_calc_geos,
       command = beethoven::reduce_merge(
@@ -51,8 +49,7 @@ target_calculate_fit <-
         by = c("site_id", "time", "CO", "NO2", "SO2")
       ),
       description = "data.table of GEOS-CF features | fit"
-    )
-    ,
+    ),
     ###########################         NARR         ###########################
     targets::tar_target(
       list_feat_calc_narr,
@@ -84,8 +81,7 @@ target_calculate_fit <-
       pattern = cross(list_feat_proc_aqs_sites, list_dates, chr_iter_calc_narr),
       iteration = "list",
       description = "Calculate NARR features | nolag | fit"
-    )
-    ,
+    ),
     targets::tar_target(
       dt_feat_calc_narr_nolag,
       command = beethoven::reduce_merge(
@@ -93,8 +89,7 @@ target_calculate_fit <-
         by = c("site_id", "time")
       ),
       description = "data.table of NARR features | nolag | fit"
-    )
-    ,
+    ),
     targets::tar_target(
       list_feat_calc_narr_lag,
       command = {
@@ -138,8 +133,7 @@ target_calculate_fit <-
       pattern = map(chr_iter_calc_narr_lag),
       iteration = "list",
       description = "Calculate NARR features | lag | fit"
-    )
-    ,
+    ),
     targets::tar_target(
       dt_feat_calc_narr,
       command = beethoven::reduce_merge(
@@ -149,8 +143,7 @@ target_calculate_fit <-
         by = c("site_id", "time")
       ),
       description = "data.table of NARR features | fit"
-    )
-    ,
+    ),
     ###########################         HMS          ###########################
     targets::tar_target(
       list_feat_calc_hms,
@@ -173,15 +166,13 @@ target_calculate_fit <-
       },
       pattern = cross(list_feat_proc_aqs_sites, list_dates),
       iteration = "list",
-      description = "Calculate HMS features | fit"     
-    )
-    ,
+      description = "Calculate HMS features | fit"
+    ),
     targets::tar_target(
       dt_feat_calc_hms,
       command = beethoven::reduce_list(list_feat_calc_hms)[[1]],
       description = "data.table of HMS features | fit"
-    )
-    ,
+    ),
     ###########################       MODIS - MOD11       ######################
     targets::tar_target(
       chr_args_calc_mod11_files,
@@ -194,15 +185,16 @@ target_calculate_fit <-
         )
       },
       description = "MODIS - MOD11 files"
-    )
-    ,
+    ),
     targets::tar_target(
       list_args_calc_mod11,
       command = list(
         from = grep(
           x = chr_args_calc_mod11_files,
           pattern = paste0(
-            "MOD11A1.A", unlist(list_dates_julian), collapse = "|"
+            "MOD11A1.A",
+            unlist(list_dates_julian),
+            collapse = "|"
           ),
           value = TRUE
         ),
@@ -213,8 +205,7 @@ target_calculate_fit <-
       pattern = map(list_dates_julian),
       iteration = "list",
       description = "MODIS - MOD11 arguments"
-    )
-    ,
+    ),
     targets::tar_target(
       list_feat_calc_mod11,
       command = beethoven::inject_modis(
@@ -227,8 +218,7 @@ target_calculate_fit <-
         crew = targets::tar_resources_crew(controller = "controller_50")
       ),
       description = "Calculate MODIS - MOD11 features | fit"
-    )
-    ,
+    ),
     ###########################       MODIS - MOD06       ######################
     targets::tar_target(
       chr_args_calc_mod06_files,
@@ -241,15 +231,16 @@ target_calculate_fit <-
         )
       },
       description = "MODIS - MOD06 files"
-    )
-    ,
+    ),
     targets::tar_target(
       list_args_calc_mod06,
       command = list(
         from = grep(
           x = chr_args_calc_mod06_files,
           pattern = paste0(
-            "MOD06_L2.A", unlist(list_dates_julian), collapse = "|"
+            "MOD06_L2.A",
+            unlist(list_dates_julian),
+            collapse = "|"
           ),
           value = TRUE
         ),
@@ -261,8 +252,7 @@ target_calculate_fit <-
       pattern = map(list_dates_julian),
       iteration = "list",
       description = "MODIS - MOD06 arguments"
-    )
-    ,
+    ),
     targets::tar_target(
       list_feat_calc_mod06,
       command = beethoven::inject_modis(
@@ -275,8 +265,7 @@ target_calculate_fit <-
         crew = targets::tar_resources_crew(controller = "controller_50")
       ),
       description = "Calculate MODIS - MOD06 features | fit"
-    )
-    ,
+    ),
     ###########################       MODIS - MOD13       ######################
     targets::tar_target(
       chr_args_calc_mod13_files,
@@ -289,15 +278,16 @@ target_calculate_fit <-
         )
       },
       description = "MODIS - MOD13 files"
-    )
-    ,
+    ),
     targets::tar_target(
       list_args_calc_mod13,
       command = list(
         from = grep(
           x = chr_args_calc_mod13_files,
           pattern = paste0(
-            "MOD13A2.A", unlist(list_dates_julian), collapse = "|"
+            "MOD13A2.A",
+            unlist(list_dates_julian),
+            collapse = "|"
           ),
           value = TRUE
         ),
@@ -308,8 +298,7 @@ target_calculate_fit <-
       pattern = map(list_dates_julian),
       iteration = "list",
       description = "MODIS - MOD13 arguments"
-    )
-    ,
+    ),
     targets::tar_target(
       list_feat_calc_mod13,
       command = beethoven::inject_modis(
@@ -322,8 +311,7 @@ target_calculate_fit <-
         crew = targets::tar_resources_crew(controller = "controller_100")
       ),
       description = "Calculate MODIS - MOD13 features | fit"
-    )
-    ,
+    ),
     ###########################     MODIS - MCD19_1km     ######################
     targets::tar_target(
       chr_args_calc_mcd19_files,
@@ -336,15 +324,16 @@ target_calculate_fit <-
         )
       },
       description = "MODIS - MCD19_*km files"
-    )
-    ,
+    ),
     targets::tar_target(
       list_args_calc_mcd19_1km,
       command = list(
         from = grep(
           x = chr_args_calc_mcd19_files,
           pattern = paste0(
-            "MCD19A2.A", unlist(list_dates_julian), collapse = "|"
+            "MCD19A2.A",
+            unlist(list_dates_julian),
+            collapse = "|"
           ),
           value = TRUE
         ),
@@ -355,8 +344,7 @@ target_calculate_fit <-
       pattern = map(list_dates_julian),
       iteration = "list",
       description = "MODIS - MCD19_1km arguments"
-    )
-    ,
+    ),
     targets::tar_target(
       list_feat_calc_mcd19_1km,
       command = beethoven::inject_modis(
@@ -369,8 +357,7 @@ target_calculate_fit <-
         crew = targets::tar_resources_crew(controller = "controller_250")
       ),
       description = "Calculate MODIS - MCD19_1km features | fit"
-    )
-    ,
+    ),
     ###########################     MODIS - MCD19_5km     ######################
     targets::tar_target(
       list_args_calc_mcd19_5km,
@@ -378,13 +365,18 @@ target_calculate_fit <-
         from = grep(
           x = chr_args_calc_mcd19_files,
           pattern = paste0(
-            "MCD19A2.A", unlist(list_dates_julian), collapse = "|"
+            "MCD19A2.A",
+            unlist(list_dates_julian),
+            collapse = "|"
           ),
           value = TRUE
         ),
         name_covariates = c(
-          "MOD_CSZAN_0_", "MOD_CVZAN_0_", "MOD_RAZAN_0_",
-          "MOD_SCTAN_0_", "MOD_GLNAN_0_"
+          "MOD_CSZAN_0_",
+          "MOD_CVZAN_0_",
+          "MOD_RAZAN_0_",
+          "MOD_SCTAN_0_",
+          "MOD_GLNAN_0_"
         ),
         subdataset = "cos|RelAZ|Angle",
         radius = chr_iter_radii
@@ -392,8 +384,7 @@ target_calculate_fit <-
       pattern = map(list_dates_julian),
       iteration = "list",
       description = "MODIS - MCD19_5km arguments"
-    )
-    ,
+    ),
     targets::tar_target(
       list_feat_calc_mcd19_5km,
       command = beethoven::inject_modis(
@@ -406,8 +397,7 @@ target_calculate_fit <-
         crew = targets::tar_resources_crew(controller = "controller_250")
       ),
       description = "Calculate MODIS - MCD19_5km features | fit"
-    )
-    ,
+    ),
     ###########################       MODIS - MOD09       ######################
     targets::tar_target(
       chr_args_calc_mod09_files,
@@ -420,21 +410,27 @@ target_calculate_fit <-
         )
       },
       description = "MODIS - MOD09 files"
-    )
-    ,
+    ),
     targets::tar_target(
       list_args_calc_mod09,
       command = list(
         from = grep(
           x = chr_args_calc_mod09_files,
           pattern = paste0(
-            "MOD09GA.A", unlist(list_dates_julian), collapse = "|"
+            "MOD09GA.A",
+            unlist(list_dates_julian),
+            collapse = "|"
           ),
           value = TRUE
         ),
         name_covariates = c(
-          "MOD_SFCRF_1_", "MOD_SFCRF_2_", "MOD_SFCRF_3_", "MOD_SFCRF_4_",
-          "MOD_SFCRF_5_", "MOD_SFCRF_6_", "MOD_SFCRF_7_"
+          "MOD_SFCRF_1_",
+          "MOD_SFCRF_2_",
+          "MOD_SFCRF_3_",
+          "MOD_SFCRF_4_",
+          "MOD_SFCRF_5_",
+          "MOD_SFCRF_6_",
+          "MOD_SFCRF_7_"
         ),
         subdataset = "^sur_refl_",
         radius = chr_iter_radii
@@ -442,8 +438,7 @@ target_calculate_fit <-
       pattern = map(list_dates_julian),
       iteration = "list",
       description = "MODIS - MOD09 arguments"
-    )
-    ,
+    ),
     targets::tar_target(
       list_feat_calc_mod09,
       command = beethoven::inject_modis(
@@ -456,8 +451,7 @@ target_calculate_fit <-
         crew = targets::tar_resources_crew(controller = "controller_25")
       ),
       description = "Calculate MODIS - MOD09 features | fit"
-    )
-    ,
+    ),
     ###########################       MODIS - VIIRS       ######################
     targets::tar_target(
       chr_args_calc_viirs_files,
@@ -470,15 +464,16 @@ target_calculate_fit <-
         )
       },
       description = "MODIS - VIIRS files"
-    )
-    ,
+    ),
     targets::tar_target(
       list_args_calc_viirs,
       command = list(
         from = grep(
           x = chr_args_calc_viirs_files,
           pattern = paste0(
-            "VNP46A2.A", unlist(list_dates_julian), collapse = "|"
+            "VNP46A2.A",
+            unlist(list_dates_julian),
+            collapse = "|"
           ),
           value = TRUE
         ),
@@ -490,8 +485,7 @@ target_calculate_fit <-
       pattern = map(list_dates_julian),
       iteration = "list",
       description = "MODIS - VIIRS arguments"
-    )
-    ,
+    ),
     targets::tar_target(
       list_feat_calc_viirs,
       command = beethoven::inject_modis(
@@ -504,8 +498,7 @@ target_calculate_fit <-
         crew = targets::tar_resources_crew(controller = "controller_100")
       ),
       description = "Calculate MODIS - VIIRS features | fit"
-    )
-    ,
+    ),
     ###########################        MODIS/VIIRS        ######################
     targets::tar_target(
       dt_feat_calc_nasa,
@@ -525,15 +518,13 @@ target_calculate_fit <-
         by = NULL
       ),
       description = "data.table of MODIS/VIIRS features | fit"
-    )
-    ,
+    ),
     ###########################         GMTED        ###########################
     targets::tar_target(
       chr_iter_calc_gmted_radii,
       command = c(0, 1e3, 1e4),
       description = "GMTED radii"
-    )
-    ,
+    ),
     targets::tar_target(
       list_feat_calc_gmted,
       command = {
@@ -553,16 +544,15 @@ target_calculate_fit <-
         chr_iter_calc_gmted_radii
       ),
       description = "Calculate GMTED features | fit"
-    )
-    ,
+    ),
     targets::tar_target(
       dt_feat_calc_gmted,
       command = beethoven::reduce_merge(
-        beethoven::reduce_list(list_feat_calc_gmted), by = "site_id"
+        beethoven::reduce_list(list_feat_calc_gmted),
+        by = "site_id"
       ),
       description = "data.table of GMTED features | fit"
-    )
-    ,
+    ),
     ###########################         NLCD         ###########################
     targets::tar_target(
       df_feat_calc_nlcd_params,
@@ -573,8 +563,7 @@ target_calculate_fit <-
         split(seq_len(nrow(.))),
       iteration = "list",
       description = "NLCD features"
-    )
-    ,
+    ),
     targets::tar_target(
       list_feat_calc_nlcd,
       command = {
@@ -597,8 +586,7 @@ target_calculate_fit <-
       iteration = "list",
       pattern = map(df_feat_calc_nlcd_params),
       description = "Calculate NLCD features | fit"
-    )
-    ,
+    ),
     targets::tar_target(
       name = dt_feat_calc_nlcd,
       command = list_feat_calc_nlcd %>%
@@ -606,20 +594,22 @@ target_calculate_fit <-
         collapse::funique() %>%
         collapse::pivot(
           ids = c("site_id", "time"),
-          values = names(.)[!names(.) %in% c(
-            "site_id",
-            "time"
-          )]
+          values = names(.)[
+            !names(.) %in%
+              c(
+                "site_id",
+                "time"
+              )
+          ]
         ) %>%
-        .[!is.na(.[["value"]]),] %>%
+        .[!is.na(.[["value"]]), ] %>%
         collapse::pivot(
           ids = c("site_id", "time"),
           values = c("value"),
           how = "wider"
         ),
       description = "NLCD feature list (all dt) | fit"
-    )
-    ,
+    ),
     ###########################        KOPPEN        ###########################
     targets::tar_target(
       dt_feat_calc_koppen,
@@ -643,8 +633,7 @@ target_calculate_fit <-
         )
       },
       description = "data.table of Koppen Geiger features | fit"
-    )
-    ,
+    ),
     ###########################      POPULATION      ###########################
     targets::tar_target(
       list_feat_calc_pop,
@@ -671,16 +660,14 @@ target_calculate_fit <-
       pattern = cross(list_feat_proc_aqs_sites, chr_iter_radii),
       iteration = "list",
       description = "Calculate population features | fit"
-    )
-    ,
+    ),
     targets::tar_target(
       dt_feat_calc_pop,
       command = beethoven::reduce_merge(
         beethoven::reduce_list(list_feat_calc_pop)
       ),
       description = "data.table of population features | fit"
-    )
-    ,
+    ),
     ###########################         TRI          ###########################
     targets::tar_target(
       df_feat_calc_tri_params,
@@ -691,8 +678,7 @@ target_calculate_fit <-
         split(seq_len(nrow(.))),
       iteration = "list",
       description = "TRI features"
-    )
-    ,
+    ),
     targets::tar_target(
       list_feat_calc_tri,
       command = {
@@ -715,8 +701,7 @@ target_calculate_fit <-
       iteration = "list",
       pattern = map(df_feat_calc_tri_params),
       description = "Calculate TRI features | fit"
-    )
-    ,
+    ),
     targets::tar_target(
       list_feat_reduce_tri,
       command = {
@@ -740,8 +725,7 @@ target_calculate_fit <-
       iteration = "list",
       pattern = map(chr_iter_radii),
       description = "Reduce TRI features based on radii | fit"
-    )
-    ,
+    ),
     targets::tar_target(
       dt_feat_calc_tri,
       command = {
@@ -763,8 +747,7 @@ target_calculate_fit <-
         )
       },
       description = "data.table of TRI PCA-reduced features | fit"
-    )
-    ,
+    ),
     ###########################         NEI          ###########################
     targets::tar_target(
       list_feat_calc_nei,
@@ -784,8 +767,7 @@ target_calculate_fit <-
       iteration = "list",
       pattern = cross(list_feat_proc_aqs_sites, chr_iter_calc_nei),
       description = "Calculate NEI features | fit"
-    )
-    ,
+    ),
     targets::tar_target(
       dt_feat_calc_nei,
       command = beethoven::reduce_list(
@@ -795,8 +777,7 @@ target_calculate_fit <-
         )
       )[[1]],
       description = "data.table of NEI features | fit"
-    )
-    ,
+    ),
     ###########################      ECOREGIONS      ###########################
     targets::tar_target(
       dt_feat_calc_ecoregions,
@@ -819,8 +800,7 @@ target_calculate_fit <-
         )
       },
       description = "data.table of Ecoregions features | fit"
-    )
-    ,
+    ),
     ###########################        GROADS        ###########################
     targets::tar_target(
       list_feat_calc_groads,
@@ -844,8 +824,7 @@ target_calculate_fit <-
       iteration = "list",
       pattern = map(chr_iter_radii),
       description = "Calculate gRoads features | fit"
-    )
-    ,
+    ),
     targets::tar_target(
       dt_feat_calc_groads,
       command = beethoven::reduce_merge(
@@ -853,8 +832,7 @@ target_calculate_fit <-
         by = c("site_id", "description")
       ),
       description = "data.table of gRoads features | fit"
-    )
-    ,
+    ),
     ########################       DATE FEATURES       #########################
     targets::tar_target(
       dt_feat_calc_date,
@@ -867,8 +845,7 @@ target_calculate_fit <-
         )
       ),
       description = "data.table of all features | fit"
-    )
-    ,
+    ),
     ########################       BASE FEATURES       #########################
     targets::tar_target(
       list_feat_calc_base_flat,
@@ -906,8 +883,7 @@ target_calculate_fit <-
         }
       ),
       description = "Calculated base feature list (all dt) | fit"
-    )
-    ,
+    ),
     targets::tar_target(
       dt_feat_calc_base,
       command = Reduce(
@@ -920,8 +896,7 @@ target_calculate_fit <-
         )
       ),
       description = "Base features with PM2.5 | fit"
-    )
-    ,
+    ),
     #######################     CUMULATIVE FEATURES      #######################
     targets::tar_target(
       dt_feat_calc_design,
@@ -932,8 +907,7 @@ target_calculate_fit <-
         year_end = as.integer(substr(chr_daterange[2], 1, 4))
       ),
       description = "data.table of all features with PM2.5 | fit"
-    )
-    ,
+    ),
     targets::tar_target(
       dt_feat_calc_imputed,
       command = beethoven::impute_all(
@@ -944,8 +918,7 @@ target_calculate_fit <-
         nthreads_imputation = 32
       ),
       description = "Imputed features + lags | fit"
-    )
-    ,
+    ),
     targets::tar_target(
       name = dt_feat_calc_xyt,
       command = data.table::data.table(

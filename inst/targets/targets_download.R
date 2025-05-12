@@ -11,8 +11,7 @@ target_download <-
         hash = FALSE
       ),
       description = "Common download arguments | download"
-    )
-    ,
+    ),
     ###########################         AQS          ###########################
     targets::tar_target(
       download_aqs,
@@ -31,15 +30,13 @@ target_download <-
       },
       pattern = map(chr_years),
       description = "Download AQS data | download"
-    )
-    ,
+    ),
     ###########################         GEOS         ###########################
     targets::tar_target(
       chr_iter_calc_geos,
       command = c("aqc_tavg_1hr_g1440x721_v1", "chm_tavg_1hr_g1440x721_v1"),
       description = "GEOS-CF features | download"
-    )
-    ,
+    ),
     targets::tar_target(
       download_geos,
       command = amadeus::download_geos(
@@ -53,8 +50,7 @@ target_download <-
       ),
       pattern = cross(chr_iter_calc_geos, list_dates),
       description = "Download GEOS-CF data | download"
-    )
-    ,
+    ),
     targets::tar_target(
       download_geos_buffer,
       command = {
@@ -62,28 +58,50 @@ target_download <-
         TRUE
       },
       description = "Download GEOS-CF data | buffer | download"
-    )
-    ,
+    ),
     ###########################         NARR         ###########################
     targets::tar_target(
       chr_iter_calc_narr,
       command = c(
-        "air.sfc", "albedo", "apcp", "dswrf", "evap", "hcdc", "hpbl",
-        "lcdc", "lhtfl", "mcdc", "pr_wtr", "prate", "pres.sfc",
-        "shtfl", "snowc", "soilm", "tcdc", "ulwrf.sfc", "uwnd.10m",
-        "vis", "vwnd.10m", "weasd", "omega", "shum"
+        "air.sfc",
+        "albedo",
+        "apcp",
+        "dswrf",
+        "evap",
+        "hcdc",
+        "hpbl",
+        "lcdc",
+        "lhtfl",
+        "mcdc",
+        "pr_wtr",
+        "prate",
+        "pres.sfc",
+        "shtfl",
+        "snowc",
+        "soilm",
+        "tcdc",
+        "ulwrf.sfc",
+        "uwnd.10m",
+        "vis",
+        "vwnd.10m",
+        "weasd",
+        "omega",
+        "shum"
       ),
       description = "NARR features"
-    )
-    ,
+    ),
     targets::tar_target(
       chr_iter_calc_narr_lag,
       command = c(
-        "air.sfc", "apcp", "pres.sfc", "shum", "uwnd.10m", "vwnd.10m"
+        "air.sfc",
+        "apcp",
+        "pres.sfc",
+        "shum",
+        "uwnd.10m",
+        "vwnd.10m"
       ),
       description = "NARR features | lag"
-    )
-    ,
+    ),
     targets::tar_target(
       download_narr,
       command = amadeus::download_narr(
@@ -97,8 +115,7 @@ target_download <-
       ),
       pattern = cross(chr_iter_calc_narr, chr_years),
       description = "Download NARR data | download"
-    )
-    ,
+    ),
     targets::tar_target(
       download_narr_lag,
       command = amadeus::download_narr(
@@ -112,8 +129,7 @@ target_download <-
       ),
       pattern = cross(chr_iter_calc_narr_lag),
       description = "Download NARR data | lag | download"
-    )
-    ,
+    ),
     targets::tar_target(
       download_narr_buffer,
       command = {
@@ -122,8 +138,7 @@ target_download <-
         TRUE
       },
       description = "Download NARR data | buffer | download"
-    )
-    ,
+    ),
     ###########################         HMS          ###########################
     targets::tar_target(
       download_hms,
@@ -139,8 +154,7 @@ target_download <-
       ),
       pattern = map(list_dates),
       description = "Download HMS data | download"
-    )
-    ,
+    ),
     targets::tar_target(
       download_hms_buffer,
       command = {
@@ -148,8 +162,7 @@ target_download <-
         TRUE
       },
       description = "Download HMS data | buffer | download"
-    )
-    ,
+    ),
     ###########################       MODIS - MOD11       ######################
     targets::tar_target(
       download_mod11,
@@ -159,7 +172,11 @@ target_download <-
           nasa_earth_data_token = chr_nasa_token,
           date = beethoven::fl_dates(unlist(list_dates)),
           directory_to_save = file.path(
-            chr_input_dir, "modis", "raw", "61", "MOD11A1"
+            chr_input_dir,
+            "modis",
+            "raw",
+            "61",
+            "MOD11A1"
           ),
           remove_command = list_download_args$remove_command,
           acknowledgement = list_download_args$acknowledgement,
@@ -170,8 +187,7 @@ target_download <-
       },
       pattern = map(list_dates),
       description = "Download MODIS - MOD11 data | download"
-    )
-    ,
+    ),
     ###########################       MODIS - MOD06       ######################
     targets::tar_target(
       download_mod06,
@@ -182,7 +198,11 @@ target_download <-
           mod06_links = chr_mod06_links,
           date = beethoven::fl_dates(unlist(list_dates)),
           directory_to_save = file.path(
-            chr_input_dir, "modis", "raw", "61", "MOD06_L2"
+            chr_input_dir,
+            "modis",
+            "raw",
+            "61",
+            "MOD06_L2"
           ),
           remove_command = list_download_args$remove_command,
           acknowledgement = list_download_args$acknowledgement,
@@ -193,8 +213,7 @@ target_download <-
       },
       pattern = map(list_dates),
       description = "Download MODIS - MOD06 data | download"
-    )
-    ,
+    ),
     ###########################       MODIS - MOD13       ######################
     targets::tar_target(
       download_mod13,
@@ -204,7 +223,11 @@ target_download <-
           nasa_earth_data_token = chr_nasa_token,
           date = beethoven::fl_dates(unlist(list_dates)),
           directory_to_save = file.path(
-            chr_input_dir, "modis", "raw", "61", "MOD13A2"
+            chr_input_dir,
+            "modis",
+            "raw",
+            "61",
+            "MOD13A2"
           ),
           remove_command = list_download_args$remove_command,
           acknowledgement = list_download_args$acknowledgement,
@@ -215,8 +238,7 @@ target_download <-
       },
       pattern = map(list_dates),
       description = "Download MODIS - MOD13 data | download"
-    )
-    ,
+    ),
     ###########################       MODIS - MCD19       ######################
     targets::tar_target(
       download_mcd19,
@@ -226,7 +248,11 @@ target_download <-
           nasa_earth_data_token = chr_nasa_token,
           date = beethoven::fl_dates(unlist(list_dates)),
           directory_to_save = file.path(
-            chr_input_dir, "modis", "raw", "61", "MCD19A2"
+            chr_input_dir,
+            "modis",
+            "raw",
+            "61",
+            "MCD19A2"
           ),
           remove_command = list_download_args$remove_command,
           acknowledgement = list_download_args$acknowledgement,
@@ -237,8 +263,7 @@ target_download <-
       },
       pattern = map(list_dates),
       description = "Download MODIS - MCD19 data | download"
-    )
-    ,
+    ),
     ###########################       MODIS - MOD09       ######################
     targets::tar_target(
       download_mod09,
@@ -248,7 +273,11 @@ target_download <-
           nasa_earth_data_token = chr_nasa_token,
           date = beethoven::fl_dates(unlist(list_dates)),
           directory_to_save = file.path(
-            chr_input_dir, "modis", "raw", "61", "MOD09GA"
+            chr_input_dir,
+            "modis",
+            "raw",
+            "61",
+            "MOD09GA"
           ),
           remove_command = list_download_args$remove_command,
           acknowledgement = list_download_args$acknowledgement,
@@ -259,8 +288,7 @@ target_download <-
       },
       pattern = map(list_dates),
       description = "Download MODIS - MOD09 data | download"
-    )
-    ,
+    ),
     ###########################       MODIS - VIIRS       ######################
     targets::tar_target(
       download_viirs,
@@ -271,7 +299,11 @@ target_download <-
           nasa_earth_data_token = chr_nasa_token,
           date = beethoven::fl_dates(unlist(list_dates)),
           directory_to_save = file.path(
-            chr_input_dir, "modis", "raw", "5000", "VNP46A2"
+            chr_input_dir,
+            "modis",
+            "raw",
+            "5000",
+            "VNP46A2"
           ),
           remove_command = list_download_args$remove_command,
           acknowledgement = list_download_args$acknowledgement,
@@ -282,20 +314,21 @@ target_download <-
       },
       pattern = map(list_dates),
       description = "Download MODIS - VIIRS data | download"
-    )
-    ,
+    ),
     ###########################         GMTED        ###########################
     targets::tar_target(
       chr_iter_calc_gmted_vars,
       command = c(
-        "Breakline Emphasis", "Systematic Subsample",
-        "Median Statistic", "Minimum Statistic",
-        "Mean Statistic", "Maximum Statistic",
+        "Breakline Emphasis",
+        "Systematic Subsample",
+        "Median Statistic",
+        "Minimum Statistic",
+        "Mean Statistic",
+        "Maximum Statistic",
         "Standard Deviation Statistic"
       ),
       description = "GMTED features | download"
-    )
-    ,
+    ),
     targets::tar_target(
       download_gmted,
       command = {
@@ -314,15 +347,13 @@ target_download <-
       },
       pattern = map(chr_iter_calc_gmted_vars),
       description = "Download GMTED data | download"
-    )
-    ,
+    ),
     ###########################         NLCD         ###########################
     targets::tar_target(
       chr_iter_calc_nlcd,
       command = c(2019, 2021),
       description = "NLCD years | download"
-    )
-    ,
+    ),
     targets::tar_target(
       download_nlcd,
       command = {
@@ -340,8 +371,7 @@ target_download <-
       },
       pattern = map(chr_iter_calc_nlcd),
       description = "Download NLCD data | download"
-    )
-    ,
+    ),
     ###########################        KOPPEN        ###########################
     targets::tar_target(
       download_koppen,
@@ -360,8 +390,7 @@ target_download <-
         TRUE
       },
       description = "Download Koppen-Geiger data | download"
-    )
-    ,
+    ),
     ###########################      POPULATION      ###########################
     targets::tar_target(
       download_population,
@@ -381,8 +410,7 @@ target_download <-
         TRUE
       },
       description = "Download population data | download"
-    )
-    ,
+    ),
     ###########################         TRI          ###########################
     targets::tar_target(
       download_tri,
@@ -396,15 +424,13 @@ target_download <-
       ),
       pattern = map(chr_years),
       description = "Download TRI data | download"
-    )
-    ,
+    ),
     ###########################         NEI          ###########################
     targets::tar_target(
       chr_iter_calc_nei,
       command = c(2017, 2020),
       description = "NEI features | download"
-    )
-    ,
+    ),
     targets::tar_target(
       download_nei,
       command = {
@@ -421,8 +447,7 @@ target_download <-
       },
       pattern = map(chr_iter_calc_nei),
       description = "Download NEI data | download"
-    )
-    ,
+    ),
     ###########################      ECOREGIONS      ###########################
     targets::tar_target(
       download_ecoregions,
@@ -439,8 +464,7 @@ target_download <-
         TRUE
       },
       description = "Download ecoregions data | download"
-    )
-    ,
+    ),
     ###########################        GROADS        ###########################
     targets::tar_target(
       download_groads,

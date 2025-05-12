@@ -96,14 +96,14 @@ fit_meta_learner <-
     return_best = TRUE,
     metric = "rmse"
   ) {
-
     stopifnot(!is.null(data))
     stopifnot(!is.null(yvar))
     stopifnot(!is.null(target_cols))
 
     # define model
     meta_model <- beethoven::switch_model(
-      model_type = "elnet", device = "cpu"
+      model_type = "elnet",
+      device = "cpu"
     )
 
     # apply r_subsample % row subsampling
@@ -124,7 +124,9 @@ fit_meta_learner <-
 
     # sample of data with r_subsample rows, c_subsample columns
     dt_sample <- data.table::data.table(data)[
-      chr_rowidx, chr_colidx, with = FALSE
+      chr_rowidx,
+      chr_colidx,
+      with = FALSE
     ]
 
     # define spatiotemporal folds

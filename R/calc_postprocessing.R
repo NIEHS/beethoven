@@ -1,4 +1,3 @@
-
 #' Add Time Column
 #'
 #' This function adds a time column to a data frame.
@@ -22,7 +21,6 @@ add_time_col <- function(df, time_value, time_id = "time") {
   }
   return(df)
 }
-
 
 
 #' Merge input data.frame objects
@@ -61,12 +59,18 @@ post_calc_merge_features <-
       ellipsis_clean <- ellipsis
     }
     joined <-
-      Reduce(function(x, y) {
-        data.table::merge.data.table(
-          x, y,
-          by = by, all.x = TRUE, suffixes = c("_Ma", "_Mb")
-        )
-      }, ellipsis_clean)
+      Reduce(
+        function(x, y) {
+          data.table::merge.data.table(
+            x,
+            y,
+            by = by,
+            all.x = TRUE,
+            suffixes = c("_Ma", "_Mb")
+          )
+        },
+        ellipsis_clean
+      )
     return(joined)
   }
 
@@ -144,7 +148,8 @@ post_calc_join_yeardate <-
 
     df_joined <-
       data.table::merge.data.table(
-        df_date, df_year,
+        df_date,
+        df_year,
         by = c(spid, "year"),
         all.x = TRUE
       )
@@ -192,14 +197,12 @@ post_calc_year_expand <-
     if (min(time_available) > time_start) {
       time_target_seq <-
         c(
-          rep(min(time_available),
-              min(time_available) - time_start),
+          rep(min(time_available), min(time_available) - time_start),
           time_target_seq
         )
     }
     return(time_target_seq)
   }
-
 
 
 #' Expand a data frame by year
@@ -306,11 +309,14 @@ post_calc_merge_all <-
     locs <- data.table::as.data.table(locs)
     locs_merged <-
       data.table::merge.data.table(
-        locs, df_sp, by = c(locs_id)
+        locs,
+        df_sp,
+        by = c(locs_id)
       )
     locs_merged <-
       data.table::merge.data.table(
-        locs_merged, df_spt,
+        locs_merged,
+        df_spt,
         by = c(locs_id, time_id)
       )
     # need POSIXt class for amadeus function
@@ -429,7 +435,8 @@ post_calc_autojoin <-
       print(common_field)
       if (common_field == field_sp) {
         joined <- data.table::merge.data.table(
-          df_fine, df_coarse,
+          df_fine,
+          df_coarse,
           by = field_sp,
           all.x = TRUE
         )
@@ -457,7 +464,8 @@ post_calc_autojoin <-
             post_calc_join_yeardate(df_coarse2, df_fine, field_t, field_t)
         } else {
           joined <- data.table::merge.data.table(
-            df_fine, df_coarse,
+            df_fine,
+            df_coarse,
             by = c(field_sp, field_t),
             all.x = TRUE
           )
@@ -611,7 +619,9 @@ impute_all <-
         setNames(
           dt,
           stringi::stri_replace_all_regex(
-            names(dt), sprintf("%s$", geoscndf$variable[i]), geoscndf$code[i]
+            names(dt),
+            sprintf("%s$", geoscndf$variable[i]),
+            geoscndf$code[i]
           )
         )
     }
@@ -624,7 +634,9 @@ impute_all <-
     col_ndviv <- grep("MOD_NDVIV_", names(dt))
     dtndviv <-
       data.table::setnafill(
-        dt, type = "nocb", nan = NA,
+        dt,
+        type = "nocb",
+        nan = NA,
         cols = col_ndviv
       )
 
@@ -736,7 +748,9 @@ append_predecessors <-
     name_qs <-
       sprintf(
         "dt_feat_pm25_%s_%s_%s.qs",
-        period_new[1], period_new[2], time_create
+        period_new[1],
+        period_new[2],
+        time_create
       )
     if (length(input_old) == 0) {
       qs::qsave(input_new, file = file.path(path_qs, name_qs))
@@ -783,7 +797,6 @@ reduce_pca <- function(
   threshold = NA,
   kernel = FALSE
 ) {
-
   stopifnot(inherits(data, "data.frame"))
   stopifnot(is.numeric(num_comp))
 
@@ -792,13 +805,13 @@ reduce_pca <- function(
     recipes::step_normalize(recipes::all_numeric())
 
   if (kernel) {
-    data_pca <- data_pca  %>%
+    data_pca <- data_pca %>%
       recipes::step_kpca(
         recipes::all_numeric(),
         num_comp = num_comp
       )
   } else {
-    data_pca <- data_pca  %>%
+    data_pca <- data_pca %>%
       recipes::step_pca(
         recipes::all_numeric(),
         threshold = threshold,
@@ -856,13 +869,13 @@ post_calc_pca <- function(
   prefix = "PCA",
   kernel = FALSE
 ) {
-
   data <- data.table::data.table(data)
   chr_retaincols <- c(locs_id, time_id, yvar, coords)
   data_trim <- data[, chr_retaincols, with = FALSE]
 
-  data_pca <- data[
-    , grep(pattern, names(data)), with = FALSE
+  data_pca <- data[,
+    grep(pattern, names(data)),
+    with = FALSE
   ]
 
   if (is.null(groups)) {
@@ -876,8 +889,9 @@ post_calc_pca <- function(
   } else {
     list_pca <- list()
     for (g in seq_along(groups)) {
-      data_group <- data_pca[
-        , grep(groups[g], names(data_pca)), with = FALSE
+      data_group <- data_pca[,
+        grep(groups[g], names(data_pca)),
+        with = FALSE
       ]
       group_pca <- beethoven::reduce_pca(
         data = data_group,
@@ -886,7 +900,11 @@ post_calc_pca <- function(
         kernel = kernel
       )
       names(group_pca) <- paste0(
-        prefix, "_", names(group_pca), "_", groups[g]
+        prefix,
+        "_",
+        names(group_pca),
+        "_",
+        groups[g]
       )
       list_pca <- c(list_pca, group_pca)
     }
@@ -897,7 +915,6 @@ post_calc_pca <- function(
   data_return <- data.table::data.table(cbind(data_trim, return_pca))
 
   return(data_return)
-
 }
 
 #' Post-calculation column renaming
@@ -935,5 +952,4 @@ post_calc_cols <- function(
   chr_update <- unlist(list_update)
   names(data)[match(chr_edit, chr_names)] <- chr_update
   return(data)
-
 }
