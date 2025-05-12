@@ -177,7 +177,8 @@ switch_model <-
 #' @param tune_grid_size numeric(1), finetune grid size.
 #' @param yvar The target variable.
 #' @param xvar The predictor variables.
-#' @param drop_vars character vector or numeric. The variables to be dropped from the data.frame.
+#' @param drop_vars character vector or numeric.
+#' The variables to be dropped from the data.frame.
 #' @param normalize logical(1). If `TRUE`, all numeric predictors are
 #' normalized. Default is `FALSE`.
 #' @param metric character(1). The metric to be used for selecting the best.
@@ -213,7 +214,7 @@ fit_base_learner <-
 
     base_recipe <-
       recipes::recipe(training(rset[[1]]$splits[[1]])[1, ]) %>%
-      recipes::update_role(!!xvar, new_role = "predictor") %>% # Dynamically assign covariates
+      recipes::update_role(!!xvar, new_role = "predictor") %>%
       recipes::update_role(!!yvar, new_role = "outcome") %>%
       recipes::update_role(!!drop_vars, new_role = "id")
 
@@ -247,7 +248,9 @@ fit_base_learner <-
     base_wftune <-
       base_wf %>%
       finetune::tune_race_anova(
-        resamples = rset[[1]], # list object 1 is the manual cv rset object created with spatiotemporal CV
+        # list object 1 is the manual cv rset
+        # object created with spatiotemporal CV
+        resamples = rset[[1]],
         grid = tune_grid_size,
         metrics = yardstick::metric_set(
           yardstick::rmse,
@@ -690,7 +693,8 @@ generate_cv_index_spt <- function(
     )
   }
 
-  # Create a data frame that assigns fold labels to each row in the original data
+  # Create a data frame that assigns fold
+  # labels to each row in the original data
   fold_labels <- map_dfr(seq_along(sp_index$splits), function(k) {
     assessment_ids <- assessment(sp_index$splits[[k]])$site_id
 
