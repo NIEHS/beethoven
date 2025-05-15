@@ -171,7 +171,7 @@ switch_model <-
 #' Tuning is performed based on random grid search (size = 10).
 #' @param learner character(1). The base learner to be used.
 #'   Default is "mlp". Available options are "mlp", "xgb", "lgb", "elnet".
-#' @param rset monte carlo training/test and out-of-sample test set
+#' @param rset A space/time CV set generated from beethoven
 #' @param model The parsnip model object. Preferably generated from
 #'   `switch_model`.
 #' @param tune_grid_size numeric(1), finetune grid size.
@@ -248,9 +248,7 @@ fit_base_learner <-
     base_wftune <-
       base_wf %>%
       finetune::tune_race_anova(
-        # list object 1 is the manual cv rset
-        # object created with spatiotemporal CV
-        resamples = rset[[1]],
+        resamples = rset,
         grid = tune_grid_size,
         metrics = yardstick::metric_set(
           yardstick::rmse,
@@ -266,9 +264,14 @@ fit_base_learner <-
     # Finalize workflow with best parameters
     final_wf <- finalize_workflow(base_wf, best_params)
 
-    # Fit final model on the outer data test set
-    # rset[[2]] is the full training set for the given outer mc sample
-    base_fit <- fit(final_wf, data = rset[[2]]) %>%
+    # Combine the training and test sets
+    # to fit the final model
+    training_data <- rsample::training(rset$splits[[1]])
+    test_data <- rsample::testing(rset$splits[[1]])
+    final_data <- rbind(training_data, test_data) |>
+      arrange(site_id, time)
+
+    base_fit <- fit(final_wf, data = final_data) %>%
       butcher::butcher()
 
     base_results <- list(

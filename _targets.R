@@ -145,7 +145,7 @@ targets::tar_source("inst/targets/targets_baselearner.R")
 targets::tar_source("inst/targets/targets_metalearner.R")
 # targets::tar_source("inst/targets/targets_calculate_predict.R")
 # targets::tar_source("inst/targets/targets_predict.R")
-
+targets::tar_source() #All of the R/
 ###########################           STAGES          ##########################
 if (Sys.getenv("BEETHOVEN") == "covariates") {
   target_baselearner <-
@@ -185,7 +185,7 @@ list(
   target_baselearner,
   target_baselearner_elnet,
   target_baselearner_lgb,
-  target_baselearner_mlp,
+  # target_baselearner_mlp,
   target_metalearner # ,
   # target_calculate_predict
   # target_predict

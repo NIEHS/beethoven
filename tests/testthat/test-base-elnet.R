@@ -13,12 +13,12 @@ testthat::test_that("fit elnet (folds + grid)", {
   )
 
   # set model
-  elnet_model <- switch_model("elnet")
-  # set grid
-  elnet_grid <- expand.grid(
-    mixture = c(0, 1),
-    penalty = c(0.01, 0.05)
-  )
+  elnet_model <- parsnip::linear_reg(
+    mixture = parsnip::tune(),
+    penalty = parsnip::tune()
+  ) %>%
+    parsnip::set_engine("brulee", device = "cpu") %>%
+    parsnip::set_mode("regression")
 
   # spatiotemporal
   testthat::expect_no_error(

@@ -3,7 +3,7 @@
 #SBATCH --job-name=cov
 #SBATCH --mail-user=kyle.messier@nih.gov
 #SBATCH --mail-type=END,FAIL
-#SBATCH --partition=geo
+#SBATCH --partition=highmem
 #SBATCH --ntasks=1
 #SBATCH --mem=900G
 #SBATCH --cpus-per-task=225

@@ -27,9 +27,9 @@ target_metalearner <-
     targets::tar_target(
       name = base_linear_pred,
       command = {
-        predict(fit_learner_base_elnet$workflow, mc_base_subsampe[[3]])
+        predict(fit_learner_base_elnet$workflow, mc_test)
       },
-      pattern = map(fit_learner_base_elnet, mc_base_subsample),
+      pattern = map(fit_learner_base_elnet, mc_test),
       iteration = "list",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(controller = "controller_geo")
@@ -38,9 +38,9 @@ target_metalearner <-
     targets::tar_target(
       name = base_lgb_pred,
       command = {
-        predict(fit_learner_base_lgb$workflow, mc_base_subsample[[3]])
+        predict(fit_learner_base_lgb$workflow, mc_test)
       },
-      pattern = map(fit_learner_base_lgb, mc_base_subsample),
+      pattern = map(fit_learner_base_lgb, mc_test),
       iteration = "list",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(controller = "controller_geo")
@@ -49,9 +49,9 @@ target_metalearner <-
     targets::tar_target(
       name = base_mlp_pred,
       command = {
-        predict(fit_learner_base_mlp$workflow, mc_base_subsample[[3]])
+        predict(fit_learner_base_mlp$workflow, mc_test)
       },
-      pattern = map(fit_learner_base_mlp, mc_base_subsample),
+      pattern = map(fit_learner_base_mlp, mc_test),
       iteration = "list",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(controller = "controller_geo")
