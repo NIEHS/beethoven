@@ -205,7 +205,8 @@ target_calculate_predict <-
         )[[1]] |>
           dplyr::select(-dplyr::any_of(c("lon", "lat", "geometry", "hms_year")))
         }) %>%
-        collapse::rowbind()
+        collapse::rowbind() %>%
+        as.data.frame()
 
       },
       pattern = map(list_pred_calc_grid),
@@ -373,7 +374,7 @@ target_calculate_predict <-
     targets::tar_target(
       list_pred_calc_narr,
       command = {
-        download_narr_buffer <- TRUE
+        # download_narr_buffer <- TRUE
         lapply(
           chr_iter_calc_narr,
           function(name) {
@@ -692,11 +693,14 @@ target_calculate_predict <-
               locs_id = "site_id",
               geom = FALSE,
               radius = r
-            ) |>
-            as.data.frame()
-
+            )
           }
-        )
+        ) %>%
+          Reduce(
+            f = function(d, e) dplyr::full_join(d, e, by = c("site_id")),
+            .
+          ) %>%
+          as.data.frame()
       },
       pattern = map(list_pred_calc_grid),
       iteration = "list",
@@ -804,9 +808,10 @@ target_calculate_predict <-
                 path = file.path(chr_input_dir, "nei", "data_files"),
                 covariate = "nei"
               )
-            ) |> as.data.frame()
+            )
           }) %>%
-          collapse::rowbind()
+          collapse::rowbind() %>%
+          as.data.frame()
       },
       iteration = "list",
       pattern = map(list_pred_calc_grid_v),
