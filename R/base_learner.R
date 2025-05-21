@@ -193,7 +193,7 @@ switch_model <-
 #' @importFrom tune tune_grid fit_best
 #' @importFrom tidyselect all_of
 #' @importFrom yardstick metric_set rmse
-#' @importFrom rsample vfold_cv
+#' @importFrom rsample vfold_cv training
 #' @export
 fit_base_learner <-
   function(
@@ -212,8 +212,13 @@ fit_base_learner <-
     # detect model name
     model_name <- model$engine
 
+    # split into testing and training sets
+    training_data <- rsample::training(rset$splits[[1]])
+    test_data <- rsample::testing(rset$splits[[1]])
+
+    # define recipe
     base_recipe <-
-      recipes::recipe(training(rset[[1]]$splits[[1]])[1, ]) %>%
+      recipes::recipe(training_data[1, ]) %>%
       recipes::update_role(!!xvar, new_role = "predictor") %>%
       recipes::update_role(!!yvar, new_role = "outcome") %>%
       recipes::update_role(!!drop_vars, new_role = "id")
@@ -239,7 +244,7 @@ fit_base_learner <-
     #   save_workflow = TRUE
     # )
 
-    wf_config <- control_race(
+    wf_config <- finetune::control_race(
       verbose_elim = TRUE,
       save_workflow = TRUE,
       verbose = TRUE
@@ -259,15 +264,13 @@ fit_base_learner <-
       )
 
     # Select best model
-    best_params <- select_best(base_wftune, metric = metric)
+    best_params <- tune::select_best(base_wftune, metric = metric)
 
     # Finalize workflow with best parameters
-    final_wf <- finalize_workflow(base_wf, best_params)
+    final_wf <- tune::finalize_workflow(base_wf, best_params)
 
     # Combine the training and test sets
     # to fit the final model
-    training_data <- rsample::training(rset$splits[[1]])
-    test_data <- rsample::testing(rset$splits[[1]])
     final_data <- rbind(training_data, test_data) |>
       arrange(site_id, time)
 
@@ -276,7 +279,7 @@ fit_base_learner <-
 
     base_results <- list(
       "workflow" = base_fit,
-      "metrics" = collect_metrics(base_wftune)
+      "metrics" = tune::collect_metrics(base_wftune)
     )
 
     return(base_results)

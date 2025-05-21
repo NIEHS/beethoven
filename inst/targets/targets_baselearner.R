@@ -60,7 +60,7 @@ target_baselearner <-
       iteration = "list"
     ),
     targets::tar_target(
-      list_dt_train,
+      list_rset_train,
       command = {
         ###### NOTE: we are switching training and testing sets.
         dt_train <- rsample::assessment(list_cv_rsplit_buffer)
@@ -106,98 +106,119 @@ target_baselearner_elnet <-
       description = "Engine and device | elnet | base learner"
     ),
     targets::tar_target(
-      fit_learner_base_elnet,
-      command = beethoven::fit_base_learner(
-        rset = list_dt_train,
-        model = engine_base_elnet,
-        tune_grid_size = list_base_params_static$tune_grid_size,
-        yvar = list_base_params_static$yvar,
-        xvar = list_base_params_static$xvar,
-        drop_vars = list_base_params_static$drop_vars,
-        normalize = list_base_params_static$normalize
-      ),
-      pattern = map(list_dt_train),
-      iteration = "list",
-      resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_geo")
-      ),
-      description = "Fit base learner | elnet | brulee linear regression | cuda | base learner"
+      debug,
+      command = {
+        rset <- list_rset_train[[1]]
+        base_recipe <-
+          recipes::recipe(
+            rsample::training(rset[[1]]$splits[[1]])[1, ]
+          ) %>%
+          recipes::update_role(
+            "Arithmetic.Mean", new_role = "predictor"
+          ) %>%
+          recipes::update_role(
+            names(dt_feat_calc_xyt)[seq(5, ncol(dt_feat_calc_xyt))], new_role = "outcome"
+          ) %>%
+          recipes::update_role(
+            names(dt_feat_calc_xyt)[seq(1, 3)], new_role = "id"
+          )
+        return(base_recipe)
+      },
+      description = "Debug manual rset | base learner"
     )
+    # targets::tar_target(
+    #   fit_learner_base_elnet,
+    #   command = beethoven::fit_base_learner(
+    #     rset = list_rset_train[[1]],
+    #     model = engine_base_elnet,
+    #     tune_grid_size = list_base_params_static$tune_grid_size,
+    #     yvar = list_base_params_static$yvar,
+    #     xvar = list_base_params_static$xvar,
+    #     drop_vars = list_base_params_static$drop_vars,
+    #     normalize = list_base_params_static$normalize
+    #   ),
+    #   # pattern = map(list_rset_train),
+    #   # iteration = "list",
+    #   resources = targets::tar_resources(
+    #     crew = targets::tar_resources_crew(controller = "controller_10")
+    #   ),
+    #   description = "Fit base learner | elnet | brulee linear regression | cuda | base learner"
+    # )
   )
 
-################################################################################
-##### Fit CPU-enabled {lightGBM} base learners on {geo} cluster.
-target_baselearner_lgb <-
-  list(
-    targets::tar_target(
-      engine_base_lgb,
-      command = {
-        parsnip::boost_tree(
-          mtry = parsnip::tune(),
-          trees = parsnip::tune(),
-          learn_rate = parsnip::tune(),
-          tree_depth = parsnip::tune()
-        ) %>%
-          parsnip::set_engine("lightgbm", device = "cpu") %>%
-          parsnip::set_mode("regression")
-      },
-      description = "Engine and device | lgb | base learner"
-    ),
-    targets::tar_target(
-      fit_learner_base_lgb,
-      command = beethoven::fit_base_learner(
-        rset = list_dt_train,
-        model = engine_base_lgb,
-        tune_grid_size = list_base_params_static$tune_grid_size,
-        yvar = list_base_params_static$yvar,
-        xvar = list_base_params_static$xvar,
-        drop_vars = list_base_params_static$drop_vars,
-        normalize = list_base_params_static$normalize
-      ),
-      pattern = map(list_dt_train),
-      iteration = "list",
-      resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_geo")
-      ),
-      description = "Fit base learner | lgb | cpu | base learner"
-    )
-  )
+# ################################################################################
+# ##### Fit CPU-enabled {lightGBM} base learners on {geo} cluster.
+# target_baselearner_lgb <-
+#   list(
+#     targets::tar_target(
+#       engine_base_lgb,
+#       command = {
+#         parsnip::boost_tree(
+#           mtry = parsnip::tune(),
+#           trees = parsnip::tune(),
+#           learn_rate = parsnip::tune(),
+#           tree_depth = parsnip::tune()
+#         ) %>%
+#           parsnip::set_engine("lightgbm", device = "cpu") %>%
+#           parsnip::set_mode("regression")
+#       },
+#       description = "Engine and device | lgb | base learner"
+#     ),
+#     targets::tar_target(
+#       fit_learner_base_lgb,
+#       command = beethoven::fit_base_learner(
+#         rset = list_rset_train,
+#         model = engine_base_lgb,
+#         tune_grid_size = list_base_params_static$tune_grid_size,
+#         yvar = list_base_params_static$yvar,
+#         xvar = list_base_params_static$xvar,
+#         drop_vars = list_base_params_static$drop_vars,
+#         normalize = list_base_params_static$normalize
+#       ),
+#       # pattern = map(list_rset_train),
+#       iteration = "list",
+#       resources = targets::tar_resources(
+#         crew = targets::tar_resources_crew(controller = "controller_geo")
+#       ),
+#       description = "Fit base learner | lgb | cpu | base learner"
+#     )
+#   )
 
-################################################################################
-##### Fit GPU-enabled {brulee} base learners on {geo} cluster.
-target_baselearner_mlp <-
-  list(
-    targets::tar_target(
-      engine_base_mlp,
-      command = {
-        parsnip::mlp(
-          hidden_units = c(parsnip::tune(), 32L),
-          dropout = c(parsnip::tune(), 0.3),
-          epochs = 1000,
-          activation = "leaky_relu",
-          learn_rate = parsnip::tune()
-        ) %>%
-          parsnip::set_engine("brulee", device = "cpu") %>%
-          parsnip::set_mode("regression")
-      },
-      description = "Engine and device | mlp | base learner"
-    ),
-    targets::tar_target(
-      fit_learner_base_mlp,
-      command = beethoven::fit_base_learner(
-        rset = list_dt_train,
-        model = engine_base_mlp,
-        tune_grid_size = list_base_params_static$tune_grid_size,
-        yvar = list_base_params_static$yvar,
-        xvar = list_base_params_static$xvar,
-        drop_vars = list_base_params_static$drop_vars,
-        normalize = list_base_params_static$normalize
-      ),
-      pattern = map(list_dt_train),
-      iteration = "list",
-      resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_geo")
-      ),
-      description = "Fit base learners | mlp | gpu | base learner"
-    )
-  )
+# ################################################################################
+# ##### Fit GPU-enabled {brulee} base learners on {geo} cluster.
+# target_baselearner_mlp <-
+#   list(
+#     targets::tar_target(
+#       engine_base_mlp,
+#       command = {
+#         parsnip::mlp(
+#           hidden_units = c(parsnip::tune(), 32L),
+#           dropout = c(parsnip::tune(), 0.3),
+#           epochs = 1000,
+#           activation = "leaky_relu",
+#           learn_rate = parsnip::tune()
+#         ) %>%
+#           parsnip::set_engine("brulee", device = "cpu") %>%
+#           parsnip::set_mode("regression")
+#       },
+#       description = "Engine and device | mlp | base learner"
+#     ),
+#     targets::tar_target(
+#       fit_learner_base_mlp,
+#       command = beethoven::fit_base_learner(
+#         rset = list_rset_train,
+#         model = engine_base_mlp,
+#         tune_grid_size = list_base_params_static$tune_grid_size,
+#         yvar = list_base_params_static$yvar,
+#         xvar = list_base_params_static$xvar,
+#         drop_vars = list_base_params_static$drop_vars,
+#         normalize = list_base_params_static$normalize
+#       ),
+#       # pattern = map(list_rset_train),
+#       iteration = "list",
+#       resources = targets::tar_resources(
+#         crew = targets::tar_resources_crew(controller = "controller_geo")
+#       ),
+#       description = "Fit base learners | mlp | gpu | base learner"
+#     )
+#   )

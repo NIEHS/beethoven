@@ -46,10 +46,10 @@ scriptlines_targetdir <- "/ddn/gs1/group/set/Projects/beethoven"
 scriptlines_inputdir <- "/ddn/gs1/group/set/Projects/NRT-AP-Model/input"
 scriptlines_container <- "container_models.sif"
 scriptlines_geo <- glue::glue(
-  "#SBATCH --job-name=mlp \
+  "#SBATCH --job-name=submodel \
   #SBATCH --partition=geo \
   #SBATCH --gres=gpu:1 \
-  #SBATCH --error=slurm/mlp_%j.out \
+  #SBATCH --error=slurm/submodel_%j.out \
   {scriptlines_apptainer} exec --nv --env ",
   "CUDA_VISIBLE_DEVICES=${{GPU_DEVICE_ORDINAL}} ",
   "--bind {scriptlines_basedir}:/mnt ",
@@ -186,10 +186,10 @@ list(
   target_aqs,
   target_calculate_fit,
   target_baselearner,
-  target_baselearner_elnet,
-  target_baselearner_lgb,
+  target_baselearner_elnet # ,
+  # target_baselearner_lgb,
   # target_baselearner_mlp,
-  target_metalearner # ,
+  # target_metalearner # ,
   # target_calculate_predict
   # target_predict
 )

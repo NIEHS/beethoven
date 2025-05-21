@@ -5,86 +5,42 @@
 \title{Base learner: tune hyperparameters and retrieve the best model}
 \usage{
 fit_base_learner(
-  learner = c("mlp", "xgb", "lgb", "elnet"),
-  dt_full,
-  r_subsample = 0.3,
-  c_subsample = 1,
+  rset = NULL,
   model = NULL,
-  folds = 5L,
-  cv_mode = c("spatiotemporal", "spatial", "temporal"),
-  args_generate_cv = NULL,
-  tune_mode = "grid",
-  tune_bayes_iter = 10L,
-  tune_grid_in = NULL,
   tune_grid_size = 10L,
-  learn_rate = 0.1,
   yvar = "Arithmetic.Mean",
-  xvar = seq(5, ncol(dt_full)),
-  normalize = FALSE,
-  trim_resamples = FALSE,
-  return_best = TRUE,
-  workflow = TRUE,
+  xvar = NULL,
+  drop_vars = NULL,
+  normalize = TRUE,
   metric = "rmse",
   ...
 )
 }
 \arguments{
-\item{learner}{character(1). The base learner to be used.
-Default is "mlp". Available options are "mlp", "xgb", "lgb", "elnet".}
-
-\item{dt_full}{The full data table to be used for prediction.}
-
-\item{r_subsample}{numeric(1). The proportion of rows to be used.}
-
-\item{c_subsample}{numeric(1). The proportion of predictors to be used.}
+\item{rset}{A space/time CV set generated from beethoven}
 
 \item{model}{The parsnip model object. Preferably generated from
 \code{switch_model}.}
 
-\item{folds}{integer(1). Number of cross-validation folds.
-If NULL, \code{cv_mode} should be defined to be used in \link[rsample:vfold_cv]{rsample::vfold_cv}.}
-
-\item{cv_mode}{character(1).
-Cross-validation mode. Default is "spatiotemporal".
-Available options are "spatiotemporal", "spatial", "temporal".}
-
-\item{args_generate_cv}{List of arguments to be passed to
-\code{switch_generate_cv_rset} function.}
-
-\item{tune_mode}{character(1). Hyperparameter tuning mode.
-Default is "grid", "bayes" is acceptable.}
-
-\item{tune_bayes_iter}{integer(1). The number of iterations for
-Bayesian optimization. Default is 10. Only used when \code{tune_mode = "bayes"}.}
-
-\item{tune_grid_in}{data.frame object that includes the grid for
-hyperparameter tuning. \code{tune_grid_size} rows will be randomly picked
-from this data.frame for grid search.}
-
-\item{tune_grid_size}{integer(1). The number of grid size for hyperparameter
-tuning. Default is 10. Only used when \code{tune_mode = "grid"}.}
-
-\item{learn_rate}{The learning rate for the model. For branching purpose.
-Default is 0.1.}
+\item{tune_grid_size}{numeric(1), finetune grid size.}
 
 \item{yvar}{The target variable.}
 
 \item{xvar}{The predictor variables.}
 
+\item{drop_vars}{character vector or numeric.
+The variables to be dropped from the data.frame.}
+
 \item{normalize}{logical(1). If \code{TRUE}, all numeric predictors are
 normalized. Default is \code{FALSE}.}
-
-\item{trim_resamples}{logical(1). Default is TRUE, which replaces the actual
-data.frames in splits column of \code{tune_results} object with NA.}
-
-\item{return_best}{logical(1). If TRUE, the best tuned model is returned.}
-
-\item{workflow}{logical(1). If TRUE, the best fit model workflow is returned.}
 
 \item{metric}{character(1). The metric to be used for selecting the best.
 Must be one of "rmse", "rsq", "mae". Default = "rmse"}
 
 \item{...}{Additional arguments to be passed.}
+
+\item{learner}{character(1). The base learner to be used.
+Default is "mlp". Available options are "mlp", "xgb", "lgb", "elnet".}
 }
 \value{
 The fitted workflow.
