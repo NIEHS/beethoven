@@ -111,7 +111,7 @@ From: nvidia/cuda:11.8.0-devel-ubuntu22.04
         'lwgeom', 'doRNG', 'quarto', 'kernlab'))"
     Rscript -e "pak::pak('finetune')"
     Rscript -e "pak::pak('lme4',upgrade = TRUE)"    
-    Rscript -e "pak::pak('NIEHS/beethoven@kpm-0321')"
+    Rscript -e "pak::pak('NIEHS/beethoven@mm-0521')"
     Rscript -e "pak::pak('r-lib/ps', upgrade = TRUE)"
 
 %environment

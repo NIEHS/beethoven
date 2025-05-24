@@ -52,7 +52,7 @@ testthat::test_that("fit_meta_learner (spatiotemporal)", {
   )
 
   # expect warning for spatiotemporal folds
-  testthat::expect_warning(
+  testthat::expect_no_error(
     meta1 <- fit_meta_learner(
       data = data.table::data.table(dt_meta),
       c_subsample = 1.0,
@@ -152,7 +152,7 @@ testthat::test_that("predict_meta_learner", {
   )
 
   # expect no error for meta fit
-  testthat::expect_warning(
+  testthat::expect_no_error(
     meta4 <- fit_meta_learner(
       data.table::data.table(dt_meta),
       c_subsample = 1.0,

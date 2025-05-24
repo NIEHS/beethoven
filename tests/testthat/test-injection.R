@@ -543,7 +543,7 @@ testthat::test_that("inject_nlcd (2019 and 2021)", {
   # expect 1 row and 4 columns
   testthat::expect_equal(dim(nlcd_2019), c(1, 4))
 
-    # expect no error with year 2019
+  # expect no error with year 2019
   testthat::expect_no_error(
     nlcd_2021 <- beethoven::inject_nlcd(
       year = 2021,
