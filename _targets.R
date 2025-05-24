@@ -29,13 +29,16 @@ controller_10 <- crew::crew_controller_local(
   name = "controller_10",
   workers = 10
 )
+##### `controller_5` uses 5 workers (~180.0 Gb per worker).
+controller_5 <- crew::crew_controller_local(
+  name = "controller_5",
+  workers = 5
+)
 ##### `controller_1` uses 1 worker for sequential {lightGBM} models.
 controller_1 <- crew::crew_controller_local(
   name = "controller_1",
   workers = 1
 )
-
-#  #SBATCH --gres=gpu:1 \
 ##### `controller_geo` uses 4 GPU workers (undefined memory allocation).
 scriptlines_apptainer <- "apptainer"
 scriptlines_basedir <- "$PWD"
@@ -44,7 +47,8 @@ scriptlines_inputdir <- "/ddn/gs1/group/set/Projects/NRT-AP-Model/input"
 scriptlines_container <- "container_models.sif"
 scriptlines_geo <- glue::glue(
   "#SBATCH --job-name=submodel \
-  #SBATCH --partition=highmem \ 
+  #SBATCH --partition=geo \
+  #SBATCH --gres=gpu:1 \
   #SBATCH --error=slurm/submodel_%j.out \
   {scriptlines_apptainer} exec --nv --env ",
   "CUDA_VISIBLE_DEVICES=${{GPU_DEVICE_ORDINAL}} ",
@@ -54,7 +58,6 @@ scriptlines_geo <- glue::glue(
   "--bind {scriptlines_targetdir}/targets:/opt/_targets ",
   "{scriptlines_container} \\"
 )
-
 controller_geo <- crew.cluster::crew_controller_slurm(
   name = "controller_geo",
   workers = 4,
@@ -63,7 +66,6 @@ controller_geo <- crew.cluster::crew_controller_slurm(
     script_lines = scriptlines_geo
   )
 )
-
 
 ##############################        STORE       ##############################
 targets::tar_config_set(store = "/opt/_targets")
@@ -126,6 +128,7 @@ targets::tar_option_set(
     controller_50,
     controller_25,
     controller_10,
+    controller_5,
     controller_1,
     controller_geo
   ),
@@ -146,6 +149,7 @@ targets::tar_source("inst/targets/targets_metalearner.R")
 # targets::tar_source("inst/targets/targets_calculate_predict.R")
 # targets::tar_source("inst/targets/targets_predict.R")
 targets::tar_source() #All of the R/
+
 ###########################           STAGES          ##########################
 if (Sys.getenv("BEETHOVEN") == "covariates") {
   target_baselearner <-
@@ -185,8 +189,8 @@ list(
   target_baselearner,
   target_baselearner_elnet,
   target_baselearner_lgb,
-  # target_baselearner_mlp,
-  target_metalearner # ,
+  target_baselearner_mlp
+  # target_metalearner
   # target_calculate_predict
   # target_predict
 )

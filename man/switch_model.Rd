@@ -5,7 +5,7 @@
 \title{Define a base learner model based on parsnip and tune}
 \usage{
 switch_model(
-  model_type = c("mlp", "xgb", "lgb", "elnet"),
+  model_type = c("mlp", "mlp2", "xgb", "lgb", "elnet", "brulee_linear"),
   device = c("cpu", "cuda", "gpu")
 )
 }

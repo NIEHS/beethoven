@@ -1,12 +1,11 @@
 #!/bin/bash
 
 #SBATCH --job-name=beethoven
-#SBATCH --partition=highmem
+#SBATCH --partition=geo
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=1G
 #SBATCH --output=slurm/beethoven_%j.out
-
 
 #############################      COVARIATES      #############################
 # Download and calculate AQS sites covariates via container_covariates.sif

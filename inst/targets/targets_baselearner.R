@@ -22,7 +22,7 @@ target_baselearner <-
       description = "Static parameters | base learner"
     ),
     targets::tar_target(
-      mc_cv_sets,
+      list_cv_rsplit,
       command = {
         outer_cv <- rsample::vfold_cv(
           list_base_params_static$dt_full,
@@ -31,33 +31,40 @@ target_baselearner <-
         ) |>
           pull(splits) |>
           as.list()
-
         return(outer_cv)
       },
-      description = "B MC CV sets   | base learner"
+      description = "MC vfold rsets | base learner"
     ),
     targets::tar_target(
-      mc_test,
-      command = {
-        # Note we are switching training and testing sets.
-        dt_test <- rsample::training(mc_cv_sets)
-
-        return(dt_test)
-      },
-      pattern = map(mc_cv_sets),
+      num_cv_index,
+      command = seq_len(length(list_cv_rsplit)),
+      description = "Index of CV list objects | base learner"
+    )
+    ,
+    targets::tar_target(
+      list_cv_rsplit_buffer,
+      command = list_cv_rsplit[[num_cv_index]],
+      description = "Re-index for dynamic branching | base learner",
       iteration = "list",
+      pattern = map(num_cv_index),
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_10")
+        crew = targets::tar_resources_crew(controller = "controller_5")
       ),
-      description = " MC test set | base learner"
     ),
     targets::tar_target(
-      mc_train,
+      list_dt_test,
+      command = rsample::training(list_cv_rsplit_buffer),
+      ###### NOTE: we are switching training and testing sets.
+      description = "MC vfold testing sets | base learner",
+      pattern = map(list_cv_rsplit_buffer),
+      iteration = "list"
+    ),
+    targets::tar_target(
+      list_rset_train,
       command = {
-        # Note we are switching training and testing sets.
-        dt_train <- rsample::assessment(mc_cv_sets)
-
-        spatiotemporal_index <- generate_cv_index_spt(
+        ###### NOTE: we are switching training and testing sets.
+        dt_train <- rsample::assessment(list_cv_rsplit_buffer)
+        spatiotemporal_index <- beethoven::generate_cv_index_spt(
           data = dt_train,
           crs = list_base_params_static$crs,
           cellsize = list_base_params_static$cellsize,
@@ -66,21 +73,19 @@ target_baselearner <-
           v = list_base_params_static$cvsize,
           time_id = "time"
         )
-
-        inner_cv <- convert_cv_index_rset(
+        inner_cv <- beethoven::convert_cv_index_rset(
           cvindex = spatiotemporal_index,
           data = dt_train,
           cv_mode = "spatiotemporal"
         )
-
         return(inner_cv)
       },
-      pattern = map(mc_cv_sets),
+      description = "MC vfold training sets | base learner",
+      pattern = map(list_cv_rsplit_buffer),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_10")
-      ),
-      description = " MC CV training set | base learner"
+        crew = targets::tar_resources_crew(controller = "controller_100")
+      )
     )
   )
 
@@ -103,7 +108,7 @@ target_baselearner_elnet <-
     targets::tar_target(
       fit_learner_base_elnet,
       command = beethoven::fit_base_learner(
-        rset = mc_train,
+        rset = list_rset_train,
         model = engine_base_elnet,
         tune_grid_size = list_base_params_static$tune_grid_size,
         yvar = list_base_params_static$yvar,
@@ -111,17 +116,17 @@ target_baselearner_elnet <-
         drop_vars = list_base_params_static$drop_vars,
         normalize = list_base_params_static$normalize
       ),
-      pattern = map(mc_train),
+      pattern = map(list_rset_train),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_geo")
+        crew = targets::tar_resources_crew(controller = "controller_10")
       ),
       description = "Fit base learner | elnet | brulee linear regression | cuda | base learner"
     )
   )
 
 ################################################################################
-##### Fit CPU-enabled {lightGBM} base learners on {normal} cluster.
+##### Fit CPU-enabled {lightGBM} base learners on {geo} cluster.
 target_baselearner_lgb <-
   list(
     targets::tar_target(
@@ -141,7 +146,7 @@ target_baselearner_lgb <-
     targets::tar_target(
       fit_learner_base_lgb,
       command = beethoven::fit_base_learner(
-        rset = mc_train,
+        rset = list_rset_train,
         model = engine_base_lgb,
         tune_grid_size = list_base_params_static$tune_grid_size,
         yvar = list_base_params_static$yvar,
@@ -149,7 +154,7 @@ target_baselearner_lgb <-
         drop_vars = list_base_params_static$drop_vars,
         normalize = list_base_params_static$normalize
       ),
-      pattern = map(mc_train),
+      pattern = map(list_rset_train),
       iteration = "list",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(controller = "controller_geo")
@@ -172,7 +177,7 @@ target_baselearner_mlp <-
           activation = "leaky_relu",
           learn_rate = parsnip::tune()
         ) %>%
-          parsnip::set_engine("brulee", device = "cpu") %>%
+          parsnip::set_engine("brulee", device = "cuda") %>%
           parsnip::set_mode("regression")
       },
       description = "Engine and device | mlp | base learner"
@@ -180,7 +185,7 @@ target_baselearner_mlp <-
     targets::tar_target(
       fit_learner_base_mlp,
       command = beethoven::fit_base_learner(
-        rset = mc_train,
+        rset = list_rset_train,
         model = engine_base_mlp,
         tune_grid_size = list_base_params_static$tune_grid_size,
         yvar = list_base_params_static$yvar,
@@ -188,7 +193,7 @@ target_baselearner_mlp <-
         drop_vars = list_base_params_static$drop_vars,
         normalize = list_base_params_static$normalize
       ),
-      pattern = map(mc_train),
+      pattern = map(list_rset_train),
       iteration = "list",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(controller = "controller_geo")

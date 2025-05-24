@@ -19,3 +19,12 @@ testthat::test_that("cov", {
       testthat::expect_error(beethoven:::cov("test"))
     }, clean = TRUE)
 })
+
+################################################################################
+##### interactive
+testthat::test_that("interactive", {
+  # expect sh error for lack of `.sif` file but not caught by `expect_error`
+  withr::with_tempdir({
+      testthat::expect_no_error(beethoven:::interactive())
+    }, clean = TRUE)
+})

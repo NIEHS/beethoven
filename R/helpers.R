@@ -97,3 +97,11 @@ cov <- function() {
     )
   )
 }
+
+#' Open interactive session with `container.sif` container.
+#' @return NULL
+#' @keywords Miscellaneous
+interactive <- function(dir = "./") {
+  file <- file.path(dir, "interactive.sh")
+  system(paste0(". ", file))
+}

@@ -1,9 +1,9 @@
 #!/bin/bash
 
 #SBATCH --job-name=lgb
-#SBATCH --mail-user=kyle.messier@nih.gov
+#SBATCH --mail-user=mitchell.manware@nih.gov
 #SBATCH --mail-type=END,FAIL
-#SBATCH --partition=normal
+#SBATCH --partition=geo
 #SBATCH --ntasks=1
 #SBATCH --mem=50G
 #SBATCH --cpus-per-task=10

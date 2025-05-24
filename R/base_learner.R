@@ -169,8 +169,6 @@ switch_model <-
 #'  * Elastic net: Hyperparameters `mixture` and `penalty` are tuned.
 #'
 #' Tuning is performed based on random grid search (size = 10).
-#' @param learner character(1). The base learner to be used.
-#'   Default is "mlp". Available options are "mlp", "xgb", "lgb", "elnet".
 #' @param rset A space/time CV set generated from beethoven
 #' @param model The parsnip model object. Preferably generated from
 #'   `switch_model`.
@@ -193,7 +191,7 @@ switch_model <-
 #' @importFrom tune tune_grid fit_best
 #' @importFrom tidyselect all_of
 #' @importFrom yardstick metric_set rmse
-#' @importFrom rsample vfold_cv
+#' @importFrom rsample vfold_cv training
 #' @export
 fit_base_learner <-
   function(
@@ -212,10 +210,19 @@ fit_base_learner <-
     # detect model name
     model_name <- model$engine
 
+    # split into testing and training sets
+    training_data <- rsample::training(rset$splits[[1]])
+    test_data <- rsample::testing(rset$splits[[1]])
+
+    # define recipe
     base_recipe <-
-      recipes::recipe(training(rset[[1]]$splits[[1]])[1, ]) %>%
+      recipes::recipe(training_data[1, ]) %>%
       recipes::update_role(!!xvar, new_role = "predictor") %>%
-      recipes::update_role(!!yvar, new_role = "outcome") %>%
+      recipes::update_role(!!yvar, new_role = "outcome")
+
+    if (!is.null(drop_vars))
+    base_recipe <-
+      base_recipe %>%
       recipes::update_role(!!drop_vars, new_role = "id")
 
     if (normalize) {
@@ -232,14 +239,7 @@ fit_base_learner <-
       workflows::add_recipe(base_recipe) %>%
       workflows::add_model(model)
 
-    # wf_config <-
-    #   tune::control_grid(
-    #   verbose = TRUE,
-    #   save_pred = FALSE,
-    #   save_workflow = TRUE
-    # )
-
-    wf_config <- control_race(
+    wf_config <- finetune::control_race(
       verbose_elim = TRUE,
       save_workflow = TRUE,
       verbose = TRUE
@@ -259,24 +259,21 @@ fit_base_learner <-
       )
 
     # Select best model
-    best_params <- select_best(base_wftune, metric = metric)
+    best_params <- tune::select_best(base_wftune, metric = metric)
 
     # Finalize workflow with best parameters
-    final_wf <- finalize_workflow(base_wf, best_params)
+    final_wf <- tune::finalize_workflow(base_wf, best_params)
 
-    # Combine the training and test sets
-    # to fit the final model
-    training_data <- rsample::training(rset$splits[[1]])
-    test_data <- rsample::testing(rset$splits[[1]])
+    # Combine the training and test sets to fit the final model
     final_data <- rbind(training_data, test_data) |>
-      arrange(site_id, time)
+      dplyr::arrange(site_id, time)
 
-    base_fit <- fit(final_wf, data = final_data) %>%
+    base_fit <- parsnip::fit(final_wf, data = final_data) %>%
       butcher::butcher()
 
     base_results <- list(
       "workflow" = base_fit,
-      "metrics" = collect_metrics(base_wftune)
+      "metrics" = tune::collect_metrics(base_wftune)
     )
 
     return(base_results)
@@ -639,10 +636,13 @@ attach_xy <-
 #' @param time_id The column name in `data` that represents the time values.
 #' @param ... Additional arguments to be passed to
 #' `spatialsample::spatial_block_cv`.
-#' @importFrom dplyr left_join select
+#' @importFrom dplyr left_join select tibble
 #' @importFrom magrittr %>%
 #' @importFrom spatialsample spatial_block_cv
 #' @importFrom lubridate year week
+#' @importFrom sf st_transform
+#' @importFrom purrr map_dfr
+#' @importFrom rsample assessment
 #' @seealso [`spatialsample::spatial_block_cv`]
 #' @export
 generate_cv_index_spt <- function(
@@ -666,7 +666,7 @@ generate_cv_index_spt <- function(
       crs = 4326,
       remove = FALSE
     )
-    data_sf <- st_transform(df_sf, crs = 5070)
+    data_sf <- sf::st_transform(df_sf, crs = 5070)
   } else {
     df_sf <- sf::st_as_sf(
       data_trim,
@@ -674,7 +674,7 @@ generate_cv_index_spt <- function(
       crs = 4326,
       remove = FALSE
     )
-    data_sf <- st_transform(df_sf, crs = crs)
+    data_sf <- sf::st_transform(df_sf, crs = crs)
   }
 
   # generate spatial splits with `spatialsample::spatial_block_cv`
@@ -698,10 +698,10 @@ generate_cv_index_spt <- function(
 
   # Create a data frame that assigns fold
   # labels to each row in the original data
-  fold_labels <- map_dfr(seq_along(sp_index$splits), function(k) {
-    assessment_ids <- assessment(sp_index$splits[[k]])$site_id
+  fold_labels <- purrr::map_dfr(seq_along(sp_index$splits), function(k) {
+    assessment_ids <- rsample::assessment(sp_index$splits[[k]])$site_id
 
-    tibble(
+    dplyr::tibble(
       site_id = assessment_ids,
       fold = k
     )
@@ -710,7 +710,7 @@ generate_cv_index_spt <- function(
   data_spatial_cv <- data.frame(data)[, c(locs_id, coords)] %>%
     sf::st_as_sf(coords = coords, remove = FALSE) %>%
     # Join the fold labels back to the original data
-    left_join(fold_labels, by = "site_id")
+    dplyr::left_join(fold_labels, by = "site_id")
 
   #########################       TEMPORAL FOLDS       #########################
 
@@ -721,7 +721,7 @@ generate_cv_index_spt <- function(
   )
 
   data_spatial_cv <- data_spatial_cv %>%
-    mutate(st_int = interaction(fold, as.double(yw), drop = FALSE))
+    dplyr::mutate(st_int = interaction(fold, as.double(yw), drop = FALSE))
 
   # Create a unique list of (id1, id2) combinations
   unique_st_int <- data_spatial_cv$st_int %>% unique() %>% as.data.frame()
@@ -729,10 +729,10 @@ generate_cv_index_spt <- function(
 
   # Assign P groups cyclically (to balance size)
   unique_st_int <- unique_st_int %>%
-    mutate(spacetime_cv = rep(1:v, length.out = n()))
+    dplyr::mutate(spacetime_cv = rep(1:v, length.out = dplyr::n()))
 
   # Merge back to the full dataset
-  data_sp <- data_spatial_cv %>% left_join(unique_st_int, by = "st_int")
+  data_sp <- data_spatial_cv %>% dplyr::left_join(unique_st_int, by = "st_int")
 
   # length == nrow(data)
   spt_index_num <- data_sp$spacetime_cv
