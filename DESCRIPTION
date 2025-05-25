@@ -48,7 +48,8 @@ Imports:
   magrittr,
   lubridate,
   purrr,
-  finetune
+  finetune,
+  butcher
 Suggests:
   testthat (>= 3.0.0),
   covr,
