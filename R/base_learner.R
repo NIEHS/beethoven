@@ -184,14 +184,19 @@ switch_model <-
 #' @param ... Additional arguments to be passed.
 #'
 #' @return The fitted workflow.
-#' @importFrom recipes recipe update_role
+#' @importFrom recipes recipe update_role step_normalize all_numeric_predictors
+#' @importFrom recipes all_integer_predictors
 #' @importFrom magrittr %>%
-#' @importFrom parsnip mlp set_engine set_mode
+#' @importFrom parsnip mlp set_engine set_mode fit
 #' @importFrom workflows workflow add_recipe add_model
-#' @importFrom tune tune_grid fit_best
+#' @importFrom tune tune_grid fit_best collect_metrics select_best
+#' @importFrom tune finalize_workflow
 #' @importFrom tidyselect all_of
 #' @importFrom yardstick metric_set rmse
-#' @importFrom rsample vfold_cv training
+#' @importFrom rsample vfold_cv training testing
+#' @importFrom finetune control_race tune_race_anova
+#' @importFrom dplyr arrange
+#' @importFrom butcher butcher
 #' @export
 fit_base_learner <-
   function(

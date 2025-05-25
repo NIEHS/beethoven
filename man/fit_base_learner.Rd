@@ -38,9 +38,6 @@ normalized. Default is \code{FALSE}.}
 Must be one of "rmse", "rsq", "mae". Default = "rmse"}
 
 \item{...}{Additional arguments to be passed.}
-
-\item{learner}{character(1). The base learner to be used.
-Default is "mlp". Available options are "mlp", "xgb", "lgb", "elnet".}
 }
 \value{
 The fitted workflow.

@@ -6,22 +6,25 @@ target_calculate_predict <-
     targets::tar_target(
       list_feat_pred_sites,
       command = {
-        sf_feat_pred_random <- sf::st_sample(tigris::states(), 10)
-        sf_feat_pred_sites <- sf::st_as_sf(
-          data.frame(
-            site_id = sprintf("P%05d", 1:10),
-            lon = sf::st_coordinates(sf_feat_pred_random)[, 1],
-            lat = sf::st_coordinates(sf_feat_pred_random)[, 2]
-          ),
-          coords = c("lon", "lat"),
-          crs = "EPSG:4326"
+        df_pred_grid <- file.path(
+          chr_input_dir, "prediction", "df_pred_grid.rds"
         )
-        sf_feat_pred_sites$lon <- sf::st_coordinates(sf_feat_pred_random)[, 1]
-        sf_feat_pred_sites$lat <- sf::st_coordinates(sf_feat_pred_random)[, 2]
-        sf_feat_pred_sites <- sf_feat_pred_sites[, c("site_id", "lon", "lat")]
-        list(sf_feat_pred_sites)
+        df_pred_grid$site_id <- sprintf("P%08d", df_pred_grid$site_id)
+        sf_pred_grid <- sf::st_as_sf(
+          df_pred_grid, coords = c("lon", "lat"), crs = 5070
+        )
+        num_size_subgrid <- 1000
+        num_pred_list_length <- nrow(sf_pred_grid) / num_size_subgrid
+        sf_pred_grid$group <- rep(
+          1:num_pred_list_length, length.out = nrow(sf_pred_grid)
+        )
+        list_pred_grid <- split(sf_pred_grid, sf_pred_grid$group)
+        list_pred_grid <- lapply(
+          list_pred_grid, function(x) x[1:10, "site_id"]
+        )
+        list_pred_grid[1:2]
       },
-      description = "Prediction locations | pred | DEV"
+      description = "Prediction locations | pred | DEV (2 list objects; 10 sites each)"
     ),
     targets::tar_target(
       dt_feat_pred_sites,
@@ -70,17 +73,17 @@ target_calculate_predict <-
       iteration = "list",
       description = "Calculate GEOS-CF features | chm | pred"
     ),
-    targets::tar_target(
-      dt_feat_pred_geos,
-      command = beethoven::reduce_merge(
-        c(
-          beethoven::reduce_list(list_feat_pred_geos_aqc),
-          beethoven::reduce_list(list_feat_pred_geos_chm)
-        ),
-        by = c("site_id", "time", "CO", "NO2", "SO2")
-      ),
-      description = "data.table of GEOS-CF features | pred"
-    ),
+    # targets::tar_target(
+    #   dt_feat_pred_geos,
+    #   command = beethoven::reduce_merge(
+    #     c(
+    #       beethoven::reduce_list(list_feat_pred_geos_aqc),
+    #       beethoven::reduce_list(list_feat_pred_geos_chm)
+    #     ),
+    #     by = c("site_id", "time", "CO", "NO2", "SO2")
+    #   ),
+    #   description = "data.table of GEOS-CF features | pred"
+    # ),
     ###########################         NARR         ###########################
     targets::tar_target(
       list_feat_pred_narr,
@@ -113,14 +116,14 @@ target_calculate_predict <-
       iteration = "list",
       description = "Calculate NARR features | nolag | pred"
     ),
-    targets::tar_target(
-      dt_feat_pred_narr_nolag,
-      command = beethoven::reduce_merge(
-        beethoven::reduce_list(list_feat_pred_narr),
-        by = c("site_id", "time")
-      ),
-      description = "data.table of NARR features | nolag | pred"
-    ),
+    # targets::tar_target(
+    #   dt_feat_pred_narr_nolag,
+    #   command = beethoven::reduce_merge(
+    #     beethoven::reduce_list(list_feat_pred_narr),
+    #     by = c("site_id", "time")
+    #   ),
+    #   description = "data.table of NARR features | nolag | pred"
+    # ),
     targets::tar_target(
       list_feat_pred_narr_lag,
       command = {
@@ -165,16 +168,16 @@ target_calculate_predict <-
       iteration = "list",
       description = "Calculate NARR features | lag | pred"
     ),
-    targets::tar_target(
-      dt_feat_calc_narr,
-      command = beethoven::reduce_merge(
-        beethoven::reduce_list(
-          c(list(dt_feat_calc_narr_nolag), list_feat_calc_narr_lag)
-        ),
-        by = c("site_id", "time")
-      ),
-      description = "data.table of NARR features | pred"
-    ),
+    # targets::tar_target(
+    #   dt_feat_calc_narr,
+    #   command = beethoven::reduce_merge(
+    #     beethoven::reduce_list(
+    #       c(list(dt_feat_calc_narr_nolag), list_feat_calc_narr_lag)
+    #     ),
+    #     by = c("site_id", "time")
+    #   ),
+    #   description = "data.table of NARR features | pred"
+    # ),
     ###########################         HMS          ###########################
     targets::tar_target(
       list_feat_pred_hms,
@@ -199,11 +202,11 @@ target_calculate_predict <-
       iteration = "list",
       description = "Calculate HMS features | pred"
     ),
-    targets::tar_target(
-      dt_feat_pred_hms,
-      command = beethoven::reduce_list(list_feat_pred_hms)[[1]],
-      description = "data.table of HMS features | pred"
-    ),
+    # targets::tar_target(
+    #   dt_feat_pred_hms,
+    #   command = beethoven::reduce_list(list_feat_pred_hms)[[1]],
+    #   description = "data.table of HMS features | pred"
+    # ),
     ###########################       MODIS - MOD11       ######################
     targets::tar_target(
       list_feat_pred_mod11,
@@ -303,25 +306,25 @@ target_calculate_predict <-
       description = "Calculate MODIS - VIIRS features | pred"
     ),
     ###########################        MODIS/VIIRS        ######################
-    targets::tar_target(
-      dt_feat_pred_nasa,
-      command = beethoven::reduce_merge(
-        lapply(
-          list(
-            list_feat_pred_mod11,
-            list_feat_pred_mod06,
-            list_feat_pred_mod13,
-            list_feat_pred_mcd19_1km,
-            list_feat_pred_mcd19_5km,
-            list_feat_pred_mod09,
-            list_feat_pred_viirs
-          ),
-          function(x) data.table::data.table(beethoven::reduce_list(x)[[1]])
-        ),
-        by = NULL
-      ),
-      description = "data.table of MODIS/VIIRS features | pred"
-    ),
+    # targets::tar_target(
+    #   dt_feat_pred_nasa,
+    #   command = beethoven::reduce_merge(
+    #     lapply(
+    #       list(
+    #         list_feat_pred_mod11,
+    #         list_feat_pred_mod06,
+    #         list_feat_pred_mod13,
+    #         list_feat_pred_mcd19_1km,
+    #         list_feat_pred_mcd19_5km,
+    #         list_feat_pred_mod09,
+    #         list_feat_pred_viirs
+    #       ),
+    #       function(x) data.table::data.table(beethoven::reduce_list(x)[[1]])
+    #     ),
+    #     by = NULL
+    #   ),
+    #   description = "data.table of MODIS/VIIRS features | pred"
+    # ),
     ###########################         GMTED        ###########################
     targets::tar_target(
       list_feat_pred_gmted,
@@ -343,14 +346,14 @@ target_calculate_predict <-
       ),
       description = "Calculate GMTED features | pred"
     ),
-    targets::tar_target(
-      dt_feat_pred_gmted,
-      command = beethoven::reduce_merge(
-        beethoven::reduce_list(list_feat_pred_gmted),
-        by = "site_id"
-      ),
-      description = "data.table of GMTED features | pred"
-    ),
+    # targets::tar_target(
+    #   dt_feat_pred_gmted,
+    #   command = beethoven::reduce_merge(
+    #     beethoven::reduce_list(list_feat_pred_gmted),
+    #     by = "site_id"
+    #   ),
+    #   description = "data.table of GMTED features | pred"
+    # ),
     ###########################         NLCD         ###########################
     targets::tar_target(
       list_feat_pred_nlcd,
@@ -375,29 +378,29 @@ target_calculate_predict <-
       pattern = map(df_feat_calc_nlcd_params),
       description = "Calculate NLCD features | pred"
     ),
-    targets::tar_target(
-      name = dt_feat_pred_nlcd,
-      command = list_feat_pred_nlcd %>%
-        collapse::rowbind(fill = TRUE) %>%
-        collapse::funique() %>%
-        collapse::pivot(
-          ids = c("site_id", "time"),
-          values = names(.)[
-            !names(.) %in%
-              c(
-                "site_id",
-                "time"
-              )
-          ]
-        ) %>%
-        .[!is.na(.[["value"]]), ] %>%
-        collapse::pivot(
-          ids = c("site_id", "time"),
-          values = c("value"),
-          how = "wider"
-        ),
-      description = "NLCD feature list (all dt) | pred"
-    ),
+    # targets::tar_target(
+    #   name = dt_feat_pred_nlcd,
+    #   command = list_feat_pred_nlcd %>%
+    #     collapse::rowbind(fill = TRUE) %>%
+    #     collapse::funique() %>%
+    #     collapse::pivot(
+    #       ids = c("site_id", "time"),
+    #       values = names(.)[
+    #         !names(.) %in%
+    #           c(
+    #             "site_id",
+    #             "time"
+    #           )
+    #       ]
+    #     ) %>%
+    #     .[!is.na(.[["value"]]), ] %>%
+    #     collapse::pivot(
+    #       ids = c("site_id", "time"),
+    #       values = c("value"),
+    #       how = "wider"
+    #     ),
+    #   description = "NLCD feature list (all dt) | pred"
+    # ),
     ###########################        KOPPEN        ###########################
     targets::tar_target(
       dt_feat_pred_koppen,
@@ -449,13 +452,13 @@ target_calculate_predict <-
       iteration = "list",
       description = "Calculate population features | pred"
     ),
-    targets::tar_target(
-      dt_feat_pred_pop,
-      command = beethoven::reduce_merge(
-        beethoven::reduce_list(list_feat_pred_pop)
-      ),
-      description = "data.table of population features | pred"
-    ),
+    # targets::tar_target(
+    #   dt_feat_pred_pop,
+    #   command = beethoven::reduce_merge(
+    #     beethoven::reduce_list(list_feat_pred_pop)
+    #   ),
+    #   description = "data.table of population features | pred"
+    # ),
     ###########################         TRI          ###########################
     targets::tar_target(
       list_feat_pred_tri,
@@ -504,28 +507,28 @@ target_calculate_predict <-
       pattern = map(chr_iter_radii),
       description = "Reduce TRI features based on radii | pred"
     ),
-    targets::tar_target(
-      dt_feat_pred_tri,
-      command = {
-        dt_feat_merge_tri <- beethoven::reduce_merge(
-          list_feat_pred_reduce_tri,
-          by = c("site_id", "time", "lon", "lat", "tri_year"),
-          all.x = TRUE,
-          all.y = TRUE
-        )
-        dt_feat_merge_tri[is.na(dt_feat_merge_tri)] <- 0
-        dt_feat_pca_tri <- beethoven::post_calc_pca(
-          data = dt_feat_merge_tri,
-          yvar = NULL,
-          num_comp = 5,
-          pattern = "FUGITIVE|STACK",
-          groups = sprintf("%05d", chr_iter_radii),
-          prefix = "TRI",
-          kernel = TRUE
-        )
-      },
-      description = "data.table of TRI PCA-reduced features | pred"
-    ),
+    # targets::tar_target(
+    #   dt_feat_pred_tri,
+    #   command = {
+    #     dt_feat_merge_tri <- beethoven::reduce_merge(
+    #       list_feat_pred_reduce_tri,
+    #       by = c("site_id", "time", "lon", "lat", "tri_year"),
+    #       all.x = TRUE,
+    #       all.y = TRUE
+    #     )
+    #     dt_feat_merge_tri[is.na(dt_feat_merge_tri)] <- 0
+    #     dt_feat_pca_tri <- beethoven::post_calc_pca(
+    #       data = dt_feat_merge_tri,
+    #       yvar = NULL,
+    #       num_comp = 5,
+    #       pattern = "FUGITIVE|STACK",
+    #       groups = sprintf("%05d", chr_iter_radii),
+    #       prefix = "TRI",
+    #       kernel = TRUE
+    #     )
+    #   },
+    #   description = "data.table of TRI PCA-reduced features | pred"
+    # ),
     ###########################         NEI          ###########################
     targets::tar_target(
       list_feat_pred_nei,
@@ -546,16 +549,16 @@ target_calculate_predict <-
       pattern = cross(list_feat_pred_sites, chr_iter_calc_nei),
       description = "Calculate NEI features | pred"
     ),
-    targets::tar_target(
-      dt_feat_pred_nei,
-      command = beethoven::reduce_list(
-        lapply(
-          list_feat_pred_nei,
-          function(x) data.table::data.table(beethoven::reduce_list(x)[[1]])
-        )
-      )[[1]],
-      description = "data.table of NEI features | pred"
-    ),
+    # targets::tar_target(
+    #   dt_feat_pred_nei,
+    #   command = beethoven::reduce_list(
+    #     lapply(
+    #       list_feat_pred_nei,
+    #       function(x) data.table::data.table(beethoven::reduce_list(x)[[1]])
+    #     )
+    #   )[[1]],
+    #   description = "data.table of NEI features | pred"
+    # ),
     ###########################      ECOREGIONS      ###########################
     targets::tar_target(
       dt_feat_pred_ecoregions,
@@ -602,109 +605,109 @@ target_calculate_predict <-
       iteration = "list",
       pattern = map(chr_iter_radii),
       description = "Calculate gRoads features | pred"
-    ),
-    targets::tar_target(
-      dt_feat_pred_groads,
-      command = beethoven::reduce_merge(
-        beethoven::reduce_list(list_feat_pred_groads),
-        by = c("site_id", "description")
-      ),
-      description = "data.table of gRoads features | pred"
-    ),
-    ########################       DATE FEATURES       #########################
-    targets::tar_target(
-      dt_feat_pred_date,
-      command = Reduce(
-        beethoven::post_calc_autojoin,
-        list(
-          dt_feat_pred_geos,
-          dt_feat_pred_narr,
-          dt_feat_pred_nasa
-        )
-      ),
-      description = "data.table of all features | pred"
-    ),
-    ########################       BASE FEATURES       #########################
-    targets::tar_target(
-      list_feat_pred_base_flat,
-      command = lapply(
-        list(
-          list(dt_feat_pred_hms),
-          list(dt_feat_pred_tri),
-          list(dt_feat_pred_nei),
-          list(dt_feat_pred_ecoregions),
-          list(dt_feat_pred_koppen),
-          list(dt_feat_pred_pop),
-          list(dt_feat_pred_groads)
-        ),
-        function(x) {
-          if (length(x) == 1) {
-            x[[1]]
-          } else if (
-            sum(grepl("light|medium|heavy", sapply(x, \(t) names(t)))) == 3
-          ) {
-            xr <- lapply(x, \(dt) {
-              dta <- data.table::copy(dt)
-              dta <- dta[, time := as.character(time)]
-              return(dta)
-            })
-            xrr <- Reduce(
-              function(x, y) {
-                collapse::join(x, y, on = c("site_id", "time"), how = "full")
-              },
-              xr
-            )
-            return(xrr)
-          } else {
-            collapse::rowbind(x, use.names = TRUE, fill = TRUE)
-          }
-        }
-      ),
-      description = "Calculated base feature list (all dt) | pred"
-    ),
-    targets::tar_target(
-      dt_feat_pred_base,
-      command = Reduce(
-        beethoven::post_calc_autojoin,
-        c(
-          list(dt_feat_pred_sites),
-          list_feat_pred_base_flat,
-          list(dt_feat_pred_gmted),
-          list(data.table::data.table(dt_feat_pred_nlcd))
-        )
-      ),
-      description = "Base features with full temporal range | pred"
-    ),
-    #######################     CUMULATIVE FEATURES      #######################
-    targets::tar_target(
-      dt_feat_pred_design,
-      command = beethoven::post_pred_autojoin(
-        dt_feat_pred_base,
-        dt_feat_pred_date,
-        year_start = as.integer(substr(chr_daterange[1], 1, 4)),
-        year_end = as.integer(substr(chr_daterange[2], 1, 4))
-      ),
-      description = "data.table of all features with PM2.5 | pred"
-    ),
-    targets::tar_target(
-      dt_feat_pred_imputed,
-      command = beethoven::impute_all(
-        dt_feat_pred_design,
-        period = chr_daterange,
-        nthreads_dt = 32,
-        nthreads_collapse = 32,
-        nthreads_imputation = 32
-      ),
-      description = "Imputed features + lags | pred"
-    ),
-    targets::tar_target(
-      name = dt_feat_pred_xyt,
-      command = data.table::data.table(
-        beethoven::attach_xy(
-          dt_feat_pred_imputed,
-          dplyr::bind_rows(list_feat_pred_sites)
-        )
-      ),
-      description = "Imputed features + AQS sites (outcome and lat/lon) | pred"
     )
+    # targets::tar_target(
+    #   dt_feat_pred_groads,
+    #   command = beethoven::reduce_merge(
+    #     beethoven::reduce_list(list_feat_pred_groads),
+    #     by = c("site_id", "description")
+    #   ),
+    #   description = "data.table of gRoads features | pred"
+    # ),
+    ########################       DATE FEATURES       #########################
+    # targets::tar_target(
+    #   dt_feat_pred_date,
+    #   command = Reduce(
+    #     beethoven::post_calc_autojoin,
+    #     list(
+    #       dt_feat_pred_geos,
+    #       dt_feat_pred_narr,
+    #       dt_feat_pred_nasa
+    #     )
+    #   ),
+    #   description = "data.table of all features | pred"
+    # ),
+    ########################       BASE FEATURES       #########################
+    # targets::tar_target(
+    #   list_feat_pred_base_flat,
+    #   command = lapply(
+    #     list(
+    #       list(dt_feat_pred_hms),
+    #       list(dt_feat_pred_tri),
+    #       list(dt_feat_pred_nei),
+    #       list(dt_feat_pred_ecoregions),
+    #       list(dt_feat_pred_koppen),
+    #       list(dt_feat_pred_pop),
+    #       list(dt_feat_pred_groads)
+    #     ),
+    #     function(x) {
+    #       if (length(x) == 1) {
+    #         x[[1]]
+    #       } else if (
+    #         sum(grepl("light|medium|heavy", sapply(x, \(t) names(t)))) == 3
+    #       ) {
+    #         xr <- lapply(x, \(dt) {
+    #           dta <- data.table::copy(dt)
+    #           dta <- dta[, time := as.character(time)]
+    #           return(dta)
+    #         })
+    #         xrr <- Reduce(
+    #           function(x, y) {
+    #             collapse::join(x, y, on = c("site_id", "time"), how = "full")
+    #           },
+    #           xr
+    #         )
+    #         return(xrr)
+    #       } else {
+    #         collapse::rowbind(x, use.names = TRUE, fill = TRUE)
+    #       }
+    #     }
+    #   ),
+    #   description = "Calculated base feature list (all dt) | pred"
+    # ),
+    # targets::tar_target(
+    #   dt_feat_pred_base,
+    #   command = Reduce(
+    #     beethoven::post_calc_autojoin,
+    #     c(
+    #       list(dt_feat_pred_sites),
+    #       list_feat_pred_base_flat,
+    #       list(dt_feat_pred_gmted),
+    #       list(data.table::data.table(dt_feat_pred_nlcd))
+    #     )
+    #   ),
+    #   description = "Base features with full temporal range | pred"
+    # ),
+    #######################     CUMULATIVE FEATURES      #######################
+    # targets::tar_target(
+    #   dt_feat_pred_design,
+    #   command = beethoven::post_pred_autojoin(
+    #     dt_feat_pred_base,
+    #     dt_feat_pred_date,
+    #     year_start = as.integer(substr(chr_daterange[1], 1, 4)),
+    #     year_end = as.integer(substr(chr_daterange[2], 1, 4))
+    #   ),
+    #   description = "data.table of all features with PM2.5 | pred"
+    # ),
+    # targets::tar_target(
+    #   dt_feat_pred_imputed,
+    #   command = beethoven::impute_all(
+    #     dt_feat_pred_design,
+    #     period = chr_daterange,
+    #     nthreads_dt = 32,
+    #     nthreads_collapse = 32,
+    #     nthreads_imputation = 32
+    #   ),
+    #   description = "Imputed features + lags | pred"
+    # ),
+    # targets::tar_target(
+    #   name = dt_feat_pred_xyt,
+    #   command = data.table::data.table(
+    #     beethoven::attach_xy(
+    #       dt_feat_pred_imputed,
+    #       dplyr::bind_rows(list_feat_pred_sites)
+    #     )
+    #   ),
+    #   description = "Imputed features + AQS sites (outcome and lat/lon) | pred"
+    # )
   )

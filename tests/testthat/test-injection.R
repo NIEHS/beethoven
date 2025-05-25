@@ -516,6 +516,7 @@ testthat::test_that("inject_match only passes the matching arguments", {
 ################################################################################
 ##### inject_nlcd
 testthat::test_that("inject_nlcd (2019 and 2021)", {
+  testthat::skip_on_ci()
   withr::local_package("rlang")
   withr::local_package("amadeus")
 

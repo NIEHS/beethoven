@@ -46,7 +46,9 @@ Imports:
   amadeus (<= 1.2.3),
   parallelly,
   magrittr,
-  lubridate
+  lubridate,
+  purrr,
+  finetune
 Suggests:
   testthat (>= 3.0.0),
   covr,
