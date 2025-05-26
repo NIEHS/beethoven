@@ -43,7 +43,7 @@ Imports:
   tigris,
   graphics,
   scatterplot3d,
-  amadeus (<= 1.2.3),
+  amadeus,
   parallelly,
   magrittr,
   lubridate,
@@ -76,7 +76,7 @@ Suggests:
   quarto,
   torch,
   kernlab
-Remotes: ropensci/chopin, tidymodels/brulee@gpu, mitchellmanware/parsnip@beethoven, NIEHS/amadeus
+Remotes: ropensci/chopin, tidymodels/brulee@gpu, mitchellmanware/parsnip@beethoven, NIEHS/amadeus@1.2.4
 SystemRequirements: NetCDF4, CUDA (>= 10.0)
 Encoding: UTF-8
 VignetteBuilder: knitr, rmarkdown
