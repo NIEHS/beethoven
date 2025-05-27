@@ -28,8 +28,7 @@ controller_75 <- crew::crew_controller_local(
 ##### `controller_50` uses 50 workers (~20.0 Gb per worker).
 controller_50 <- crew::crew_controller_local(
   name = "controller_50",
-  workers = 50#,
-  # seconds_idle = 30
+  workers = 50
 )
 ##### `controller_25` uses 25 workers (~40.0 Gb per worker).
 controller_25 <- crew::crew_controller_local(
