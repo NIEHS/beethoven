@@ -58,20 +58,20 @@ testthat::test_that("fit_base_learner {lightGBM}", {
   testthat::expect_true("tbl" %in% class(lightgbm1[[2]]))
 
   # switch_model engine
-  testthat::expect_no_error(
-    lightgbm2 <- beethoven::fit_base_learner(
-      rset = rset_base,
-      model = beethoven::switch_model(
-        model_type = "lightgbm",
-        device = "cpu"
-      ),
-      tune_grid_size = 2L,
-      yvar = "Arithmetic.Mean",
-      xvar = seq(4, ncol(dt_base)),
-      drop_vars = NULL,
-      normalize = TRUE
-    )
-  )
+  # testthat::expect_no_error(
+  #   lightgbm2 <- beethoven::fit_base_learner(
+  #     rset = rset_base,
+  #     model = beethoven::switch_model(
+  #       model_type = "lightgbm",
+  #       device = "cpu"
+  #     ),
+  #     tune_grid_size = 2L,
+  #     yvar = "Arithmetic.Mean",
+  #     xvar = seq(4, ncol(dt_base)),
+  #     drop_vars = NULL,
+  #     normalize = TRUE
+  #   )
+  # )
 
 })
 

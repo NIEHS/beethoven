@@ -63,7 +63,7 @@ make_subdata <- function(
 #' equipped with CUDA-enabled graphical processing units if utilizing `cuda` or
 #' `gpu`.
 #' @return A parsnip model object.
-#' @importFrom parsnip mlp set_engine set_mode boost_tree linear_reg
+#' @importFrom parsnip mlp set_engine set_mode boost_tree linear_reg tune
 #' @importFrom magrittr %>%
 #' @export
 switch_model <-
@@ -226,9 +226,9 @@ fit_base_learner <-
       recipes::update_role(!!yvar, new_role = "outcome")
 
     if (!is.null(drop_vars))
-    base_recipe <-
-      base_recipe %>%
-      recipes::update_role(!!drop_vars, new_role = "id")
+      base_recipe <-
+        base_recipe %>%
+        recipes::update_role(!!drop_vars, new_role = "id")
 
     if (normalize) {
       base_recipe <-
@@ -639,8 +639,6 @@ attach_xy <-
 #' XY coordinates. Default is `c("lon", "lat")`.
 #' @param v integer(1). The number of partitions for the resampling.
 #' @param time_id The column name in `data` that represents the time values.
-#' @param ... Additional arguments to be passed to
-#' `spatialsample::spatial_block_cv`.
 #' @importFrom dplyr left_join select tibble
 #' @importFrom magrittr %>%
 #' @importFrom spatialsample spatial_block_cv

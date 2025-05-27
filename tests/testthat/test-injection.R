@@ -5,7 +5,6 @@
 ################################################################################
 ##### feature_raw_download
 testthat::test_that("feature_raw_download", {
-  
   withr::local_package("rlang")
   withr::local_package("qs")
 
@@ -52,7 +51,8 @@ testthat::test_that("feature_raw_download", {
   )
   # expect 5 files (.txt file and .dbf, .prf, .shp and .shx)
   testthat::expect_equal(
-    length(list.files(paste0(input_dir, "/HMS_Smoke"), recursive = TRUE)), 5
+    length(list.files(paste0(input_dir, "/HMS_Smoke"), recursive = TRUE)),
+    5
   )
   unlink(paste0(input_dir, "/HMS_Smoke"), recursive = TRUE)
 
@@ -65,18 +65,22 @@ testthat::test_that("feature_raw_download", {
   )
   # expect 8 files (5 hms files plus aqs .txt, .csv, and download_args.qs file)
   testthat::expect_equal(
-    length(list.files(input_dir, recursive = TRUE)), 8
+    length(list.files(input_dir, recursive = TRUE)),
+    8
   )
   # expect aqs and hms folders
   testthat::expect_true(
     all(c("aqs", "HMS_Smoke") %in% list.files(input_dir))
   )
-  
+
   # expect error when qs file does not contain proper arguments
   testthat::expect_error(
     beethoven::feature_raw_download(
       path = testthat::test_path(
-        "..", "testdata", "injection", "error_args.qs"
+        "..",
+        "testdata",
+        "injection",
+        "error_args.qs"
       ),
       dataset = "hms"
     )
@@ -124,7 +128,6 @@ testthat::test_that("set_target_years", {
 ################################################################################
 ##### inject_calc
 testthat::test_that("inject_calc (hms + nei)", {
-  
   withr::local_package("rlang")
 
   # sample location
@@ -137,7 +140,11 @@ testthat::test_that("inject_calc (hms + nei)", {
       locs = loc,
       injection = list(
         path = testthat::test_path(
-          "..", "testdata", "injection", "hms", "data_files"
+          "..",
+          "testdata",
+          "injection",
+          "hms",
+          "data_files"
         ),
         date = c("2018-01-01", "2018-01-01"),
         covariate = "hms"
@@ -153,7 +160,6 @@ testthat::test_that("inject_calc (hms + nei)", {
   # expect 1 row and 6 columns
   testthat::expect_equal(dim(hms_injected1$`1`), c(1, 6))
 
-
   # expect no errors (hms + 2 radii; 2 threads)
   testthat::expect_no_error(
     hms_injected2 <- beethoven::inject_calculate(
@@ -161,7 +167,11 @@ testthat::test_that("inject_calc (hms + nei)", {
       locs = loc,
       injection = list(
         path = testthat::test_path(
-          "..", "testdata", "injection", "hms", "data_files"
+          "..",
+          "testdata",
+          "injection",
+          "hms",
+          "data_files"
         ),
         date = c("2018-01-01", "2018-01-01"),
         covariate = "hms",
@@ -177,7 +187,6 @@ testthat::test_that("inject_calc (hms + nei)", {
   testthat::expect_false("TRUE" %in% any(is.na(hms_injected2$`1`)))
   # expect 1 row and 11 columns
   testthat::expect_equal(dim(hms_injected2$`1`), c(1, 9))
-
 
   # sample location as sf
   loc_sf <- sf::st_as_sf(
@@ -208,14 +217,12 @@ testthat::test_that("inject_calc (hms + nei)", {
   testthat::expect_false("TRUE" %in% any(is.na(nei_injected$`1`)))
   # expect 1 row and 5 columns
   testthat::expect_equal(dim(nei_injected$`1`), c(1, 5))
-
 })
 
 
 ################################################################################
 ##### inject_modis_par
 testthat::test_that("inject_modis_par (MOD11A1)", {
-  
   withr::local_package("rlang")
 
   # sample location
@@ -252,14 +259,12 @@ testthat::test_that("inject_modis_par (MOD11A1)", {
   testthat::expect_false("TRUE" %in% any(is.na(modis_injected_par)))
   # expect "time" column
   testthat::expect_true("time" %in% names(modis_injected_par))
-
 })
 
 
 ################################################################################
 ##### inject_modis
 testthat::test_that("inject_modis (MOD11A1)", {
-  
   withr::local_package("rlang")
 
   # sample location
@@ -296,14 +301,12 @@ testthat::test_that("inject_modis (MOD11A1)", {
   testthat::expect_false("TRUE" %in% any(is.na(modis_injected)))
   # expect "time" column
   testthat::expect_true("time" %in% names(modis_injected))
-
 })
 
 
 ################################################################################
 ##### inject_geos
 testthat::test_that("inject_geos (chm, aqc, and combined)", {
-  
   withr::local_package("rlang")
 
   # sample location
@@ -378,7 +381,11 @@ testthat::test_that("inject_geos (chm, aqc, and combined)", {
       locs = loc,
       injection = list(
         path = testthat::test_path(
-          "..", "testdata", "injection", "geos", "error"
+          "..",
+          "testdata",
+          "injection",
+          "geos",
+          "error"
         ),
         date = c("2018-01-01", "2018-01-01")
       )
@@ -390,7 +397,6 @@ testthat::test_that("inject_geos (chm, aqc, and combined)", {
 ################################################################################
 ##### inject_gmted
 testthat::test_that("inject_gmted (breakline emphasis)", {
-  
   withr::local_package("rlang")
 
   # sample location
@@ -399,7 +405,11 @@ testthat::test_that("inject_gmted (breakline emphasis)", {
   # breakline emphasis
   gmted_injection <- list(
     path = testthat::test_path(
-      "..", "testdata", "injection", "gmted", "be75_grd"
+      "..",
+      "testdata",
+      "injection",
+      "gmted",
+      "be75_grd"
     )
   )
   # expect no error with breakline emphasis data
@@ -418,7 +428,6 @@ testthat::test_that("inject_gmted (breakline emphasis)", {
   # expect no NA values in any column
   testthat::expect_false("TRUE" %in% any(is.na(calc_be)))
 
-
   # expect error with missing variable
   # NOTE: direct test of calc_gmted_direct
   testthat::expect_error(
@@ -435,7 +444,6 @@ testthat::test_that("inject_gmted (breakline emphasis)", {
 ################################################################################
 ##### reduce_merge
 testthat::test_that("reduce_merge joins all relevant data.frames", {
-  
   withr::local_package("rlang")
 
   # Create example data tables
@@ -454,7 +462,6 @@ testthat::test_that("reduce_merge joins all relevant data.frames", {
 })
 
 testthat::test_that("reduce_merge handles different number of rows", {
-  
   withr::local_package("rlang")
 
   # Create example data tables
@@ -487,8 +494,8 @@ testthat::test_that("inject_match only passes the matching arguments", {
     data.frame(
       id = c(1, 2, 3),
       area = c(10, 20, 30),
-      geometry =
-      c("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))",
+      geometry = c(
+        "POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))",
         "POLYGON ((1 1, 1 2, 2 2, 2 1, 1 1))",
         "POLYGON ((2 2, 2 3, 3 3, 3 2, 2 2))"
       )
@@ -509,48 +516,28 @@ testthat::test_that("inject_match only passes the matching arguments", {
     )
   )
   testthat::expect_s4_class(imatched, "SpatVector")
-
 })
 
 
 ################################################################################
 ##### inject_nlcd
-testthat::test_that("inject_nlcd (2019 and 2021)", {
+testthat::test_that("inject_nlcd (2021)", {
   testthat::skip_on_ci()
   withr::local_package("rlang")
-  withr::local_package("amadeus")
 
   # sample location
   loc <- terra::vect(
-    data.frame(lon = -114.7, lat = 38.9, site_id = "A1"),
+    data.frame(lon = -78.85, lat = 36.09, site_id = "A1"),
     crs = "EPSG:4326"
   )
 
-  # expect no error with year 2019
-  testthat::expect_no_error(
-    nlcd_2019 <- beethoven::inject_nlcd(
-      year = 2019,
-      radius = 100,
-      from = amadeus::process_nlcd(
-        path = testthat::test_path("..", "testdata", "injection", "nlcd"),
-        year = 2019
-      ),
-      locs = loc,
-      locs_id = "site_id"
-    )
-  )
-  # expect data.frame
-  testthat::expect_s3_class(nlcd_2019, "data.frame")
-  # expect 1 row and 4 columns
-  testthat::expect_equal(dim(nlcd_2019), c(1, 4))
-
-  # expect no error with year 2019
+  # expect no error with year 2021
   testthat::expect_no_error(
     nlcd_2021 <- beethoven::inject_nlcd(
       year = 2021,
       radius = 100,
       from = amadeus::process_nlcd(
-        path = testthat::test_path("..", "testdata", "injection", "nlcd"),
+        path = testthat::test_path("..", "testdata", "injection", "nlcd2"),
         year = 2021
       ),
       locs = loc,
@@ -560,5 +547,5 @@ testthat::test_that("inject_nlcd (2019 and 2021)", {
   # expect data.frame
   testthat::expect_s3_class(nlcd_2021, "data.frame")
   # expect 1 row and 4 columns
-  testthat::expect_equal(dim(nlcd_2021), c(1, 4))
+  testthat::expect_equal(dim(nlcd_2021), c(1, 6))
 })

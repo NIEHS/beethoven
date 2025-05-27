@@ -7,20 +7,26 @@ target_calculate_predict <-
       list_feat_pred_sites,
       command = {
         df_pred_grid <- file.path(
-          chr_input_dir, "prediction", "df_pred_grid.rds"
+          chr_input_dir,
+          "prediction",
+          "df_pred_grid.rds"
         )
         df_pred_grid$site_id <- sprintf("P%08d", df_pred_grid$site_id)
         sf_pred_grid <- sf::st_as_sf(
-          df_pred_grid, coords = c("lon", "lat"), crs = 5070
+          df_pred_grid,
+          coords = c("lon", "lat"),
+          crs = 5070
         )
         num_size_subgrid <- 1000
         num_pred_list_length <- nrow(sf_pred_grid) / num_size_subgrid
         sf_pred_grid$group <- rep(
-          1:num_pred_list_length, length.out = nrow(sf_pred_grid)
+          1:num_pred_list_length,
+          length.out = nrow(sf_pred_grid)
         )
         list_pred_grid <- split(sf_pred_grid, sf_pred_grid$group)
         list_pred_grid <- lapply(
-          list_pred_grid, function(x) x[1:10, "site_id"]
+          list_pred_grid,
+          function(x) x[1:10, "site_id"]
         )
         list_pred_grid[1:2]
       },
@@ -366,7 +372,7 @@ target_calculate_predict <-
           year = df_feat_calc_nlcd_params$year,
           radius = df_feat_calc_nlcd_params$radius,
           from = amadeus::process_nlcd(
-            path = file.path(chr_input_dir, "nlcd", "data_files"),
+            path = file.path(chr_input_dir, "nlcd2", "data_files"),
             year = df_feat_calc_nlcd_params$year
           ),
           nthreads = 1,

@@ -43,13 +43,13 @@ Imports:
   tigris,
   graphics,
   scatterplot3d,
-  amadeus,
   parallelly,
   magrittr,
   lubridate,
   purrr,
   finetune,
-  butcher
+  butcher,
+  amadeus
 Suggests:
   testthat (>= 3.0.0),
   covr,
@@ -76,7 +76,11 @@ Suggests:
   quarto,
   torch,
   kernlab
-Remotes: ropensci/chopin, tidymodels/brulee@gpu, mitchellmanware/parsnip@beethoven, NIEHS/amadeus@1.2.4
+Remotes:
+  ropensci/chopin,
+  tidymodels/brulee@gpu,
+  mitchellmanware/parsnip@beethoven,
+  NIEHS/amadeus
 SystemRequirements: NetCDF4, CUDA (>= 10.0)
 Encoding: UTF-8
 VignetteBuilder: knitr, rmarkdown

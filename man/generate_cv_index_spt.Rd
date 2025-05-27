@@ -31,9 +31,6 @@ XY coordinates. Default is \code{c("lon", "lat")}.}
 \item{v}{integer(1). The number of partitions for the resampling.}
 
 \item{time_id}{The column name in \code{data} that represents the time values.}
-
-\item{...}{Additional arguments to be passed to
-\code{spatialsample::spatial_block_cv}.}
 }
 \description{
 This function generates spatio-temporal cross-validation indices with
