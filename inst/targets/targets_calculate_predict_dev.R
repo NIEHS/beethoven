@@ -1101,19 +1101,31 @@ target_calculate_predict <-
             lapply(
               grid_rowidx,
               function(rows) {
-                amadeus::calculate_groads(
-                  from = amadeus::process_groads(
-                    path = file.path(
-                      chr_input_dir,
-                      "groads",
-                      "data_files",
-                      "gROADS-v1-americas.gdb"
-                    )
-                  ),
-                  locs = list_pred_calc_grid[rows, ],
-                  locs_id = "site_id",
-                  radius = radi
-                )
+                tryCatch({
+                  amadeus::calculate_groads(
+                    from = amadeus::process_groads(
+                      path = file.path(
+                        chr_input_dir,
+                        "groads",
+                        "data_files",
+                        "gROADS-v1-americas.gdb"
+                      )
+                    ),
+                    locs = list_pred_calc_grid[rows, ],
+                    locs_id = "site_id",
+                    radius = radi
+                  )
+                },
+                error = function(e) {
+                  res <- expand.grid(
+                    site_id = list_pred_calc_grid[["site_id"]],
+                    description = "1980 - 2010",
+                    GRD_TOTAL_0_ = NA_real_,
+                    GRD_DENKM_0_ = NA_real_
+                  )
+                  names(res)[3:4] <- paste0(names(res)[3:4], sprintf("%05d", radi))
+                  return(res)
+                })
               }
             ) %>%
             collapse::rowbind(fill = TRUE)
