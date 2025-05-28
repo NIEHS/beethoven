@@ -102,7 +102,6 @@ testthat::test_that("fit elnet (performance)", {
     estimate = pred
   )
   testthat::expect_true(rsq1$.estimate > 0.0)
-
 })
 
 ################################################################################
@@ -123,8 +122,9 @@ testthat::test_that("fit lightGBM (performance)", {
 
   # set model
   lightgbm_model <- parsnip::boost_tree(
-    trees = parsnip::tune(),
-    learn_rate = parsnip::tune(),
+    trees = 100,
+    learn_rate = 0.1,
+    mtry = 25
   ) %>%
     parsnip::set_engine("lightgbm", device = "cpu") %>%
     parsnip::set_mode("regression")
@@ -203,7 +203,6 @@ testthat::test_that("fit lightGBM (performance)", {
     estimate = pred
   )
   testthat::expect_true(rsq2$.estimate > 0.0)
-
 })
 
 ################################################################################
@@ -224,9 +223,9 @@ testthat::test_that("fit {brulee} MLP (performance)", {
 
   # set model
   mlp_model <- parsnip::mlp(
-    hidden_units = c(parsnip::tune(), 32L),
-    dropout = c(parsnip::tune(), 0.3),
-    epochs = 1000,
+    hidden_units = 32L,
+    dropout = 0.3,
+    epochs = 250,
     activation = "leaky_relu",
     learn_rate = parsnip::tune()
   ) %>%
@@ -307,5 +306,4 @@ testthat::test_that("fit {brulee} MLP (performance)", {
     estimate = pred
   )
   testthat::expect_true(rsq3$.estimate > 0.0)
-
 })

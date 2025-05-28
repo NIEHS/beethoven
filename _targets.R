@@ -66,6 +66,15 @@ controller_geo <- crew.cluster::crew_controller_slurm(
     script_lines = scriptlines_geo
   )
 )
+##### `controller_sequential` uses 1 GPU worker for {lightGBM} models..
+controller_sequential <- crew.cluster::crew_controller_slurm(
+  name = "controller_sequential",
+  workers = 1,
+  options_cluster = crew.cluster::crew_options_slurm(
+    verbose = TRUE,
+    script_lines = scriptlines_geo
+  )
+)
 
 ##############################        STORE       ##############################
 targets::tar_config_set(store = "/opt/_targets")
@@ -130,7 +139,8 @@ targets::tar_option_set(
     controller_10,
     controller_5,
     controller_1,
-    controller_geo
+    controller_geo,
+    controller_sequential
   ),
   resources = targets::tar_resources(
     crew = targets::tar_resources_crew(controller = "controller_250")

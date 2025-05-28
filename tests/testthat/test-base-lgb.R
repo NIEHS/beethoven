@@ -13,8 +13,9 @@ testthat::test_that("fit_base_learner {lightGBM}", {
 
   # set model
   lightgbm_model <- parsnip::boost_tree(
-    trees = parsnip::tune(),
+    trees = 100,
     learn_rate = parsnip::tune(),
+    mtry = 20
   ) %>%
     parsnip::set_engine("lightgbm", device = "cpu") %>%
     parsnip::set_mode("regression")
@@ -56,23 +57,6 @@ testthat::test_that("fit_base_learner {lightGBM}", {
   # expect sub-items are workflow and metrics
   testthat::expect_true("workflow" %in% class(lightgbm1[[1]]))
   testthat::expect_true("tbl" %in% class(lightgbm1[[2]]))
-
-  # switch_model engine
-  # testthat::expect_no_error(
-  #   lightgbm2 <- beethoven::fit_base_learner(
-  #     rset = rset_base,
-  #     model = beethoven::switch_model(
-  #       model_type = "lightgbm",
-  #       device = "cpu"
-  #     ),
-  #     tune_grid_size = 2L,
-  #     yvar = "Arithmetic.Mean",
-  #     xvar = seq(4, ncol(dt_base)),
-  #     drop_vars = NULL,
-  #     normalize = TRUE
-  #   )
-  # )
-
 })
 
 ################################################################################
@@ -147,5 +131,4 @@ testthat::test_that("fit_base_learner {lightGBM}", {
       normalize = TRUE
     )
   )
-
 })

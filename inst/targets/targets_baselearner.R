@@ -39,8 +39,7 @@ target_baselearner <-
       num_cv_index,
       command = seq_len(length(list_cv_rsplit)),
       description = "Index of CV list objects | base learner"
-    )
-    ,
+    ),
     targets::tar_target(
       list_cv_rsplit_buffer,
       command = list_cv_rsplit[[num_cv_index]],
@@ -133,10 +132,10 @@ target_baselearner_lgb <-
       engine_base_lgb,
       command = {
         parsnip::boost_tree(
-          mtry = parsnip::tune(),
-          trees = parsnip::tune(),
+          mtry = 239,
+          trees = 445,
           learn_rate = parsnip::tune(),
-          tree_depth = parsnip::tune()
+          tree_depth = 7
         ) %>%
           parsnip::set_engine("lightgbm", device = "cpu") %>%
           parsnip::set_mode("regression")
@@ -157,7 +156,7 @@ target_baselearner_lgb <-
       pattern = map(list_rset_train),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_geo")
+        crew = targets::tar_resources_crew(controller = "controller_sequential")
       ),
       description = "Fit base learner | lgb | cpu | base learner"
     )

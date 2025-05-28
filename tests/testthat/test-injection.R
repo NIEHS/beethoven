@@ -522,7 +522,6 @@ testthat::test_that("inject_match only passes the matching arguments", {
 ################################################################################
 ##### inject_nlcd
 testthat::test_that("inject_nlcd (2021)", {
-  testthat::skip_on_ci()
   withr::local_package("rlang")
 
   # sample location
@@ -538,7 +537,7 @@ testthat::test_that("inject_nlcd (2021)", {
       radius = 100,
       from = amadeus::process_nlcd(
         path = testthat::test_path("..", "testdata", "injection", "nlcd2"),
-        year = 2021
+        year = 2021L
       ),
       locs = loc,
       locs_id = "site_id"
