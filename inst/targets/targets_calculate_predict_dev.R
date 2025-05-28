@@ -121,67 +121,45 @@ target_calculate_predict <-
     )
     ,
     ### VECTOR PROCESSING GRID ####
-    targets::tar_target(
-      sf_pred_calc_split_v,
-      command = {
-        init_grid <-
-          chopin::par_pad_grid(
-            sf_pred_calc_grid,
-            mode = "grid",
-            nx = 30L,
-            ny = 15L,
-            padding = 100
-          )[[1]]
-        grid_sample <- dplyr::sample_frac(sf_pred_raw_grid, 0.01)
-        init_grid_intersect <-
-          init_grid[grid_sample, ]
-        if (!"grid_id" %in% names(init_grid_intersect)) {
-          init_grid_intersect$grid_id <- seq_len(nrow(init_grid_intersect))
-        }
-        init_grid_intersect
-      },
-      iteration = "vector",
-      description = "sf split grid polygons (for vector processing)"
-    )
-    ,
-    targets::tar_target(
-      list_pred_calc_grid_v,
-      command = {
-        grid_unit <- sf::st_bbox(sf_pred_calc_split_v)
-        sf::st_as_sf(
-          df_pred_calc_gridcoords |>
-            dplyr::filter((lon <= grid_unit[3] & lon >= grid_unit[1]) & (lat <= grid_unit[4] & lat >= grid_unit[2])),
-          coords = c("lon", "lat"),
-          crs = 4326,
-          remove = FALSE
-        )
-
-      },
-      iteration = "list",
-      pattern = map(sf_pred_calc_split_v),
-      description = "Split prediction grid into list by chopin grid (DEV SAMPLE)",
-      resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_50")
-      )
-    )
-    ,
     # targets::tar_target(
-    #   list_pred_calc_hms,
+    #   sf_pred_calc_split_v,
     #   command = {
-    #     beethoven::inject_calculate(
-    #       covariate = "hms",
-    #       locs = list_pred_calc_grid,
-    #       injection = list(
-    #         path = file.path(chr_input_dir, "hms", "data_files"),
-    #         date = beethoven::fl_dates(unlist(list_dates)),
-    #         covariate = "hms"
-    #       )
-    #     )[[1]] |>
-    #       dplyr::select(-dplyr::any_of(c("lon", "lat", "geometry", "hms_year")))
+    #     init_grid <-
+    #       chopin::par_pad_grid(
+    #         sf_pred_calc_grid,
+    #         mode = "grid",
+    #         nx = 30L,
+    #         ny = 15L,
+    #         padding = 100
+    #       )[[1]]
+    #     grid_sample <- dplyr::sample_frac(sf_pred_raw_grid, 0.01)
+    #     init_grid_intersect <-
+    #       init_grid[grid_sample, ]
+    #     if (!"grid_id" %in% names(init_grid_intersect)) {
+    #       init_grid_intersect$grid_id <- seq_len(nrow(init_grid_intersect))
+    #     }
+    #     init_grid_intersect
     #   },
-    #   pattern = cross(list_pred_calc_grid, list_dates),
+    #   iteration = "vector",
+    #   description = "sf split grid polygons (for vector processing)"
+    # )
+    # ,
+    # targets::tar_target(
+    #   list_pred_calc_grid_v,
+    #   command = {
+    #     grid_unit <- sf::st_bbox(sf_pred_calc_split_v)
+    #     sf::st_as_sf(
+    #       df_pred_calc_gridcoords |>
+    #         dplyr::filter((lon <= grid_unit[3] & lon >= grid_unit[1]) & (lat <= grid_unit[4] & lat >= grid_unit[2])),
+    #       coords = c("lon", "lat"),
+    #       crs = 4326,
+    #       remove = FALSE
+    #     )
+
+    #   },
     #   iteration = "list",
-    #   description = "Calculate HMS features | prediction",
+    #   pattern = map(sf_pred_calc_split_v),
+    #   description = "Split prediction grid into list by chopin grid (DEV SAMPLE)",
     #   resources = targets::tar_resources(
     #     crew = targets::tar_resources_crew(controller = "controller_50")
     #   )
@@ -194,16 +172,16 @@ target_calculate_predict <-
         # lapply
         lapply(list_dates, function(d) {
 
-        beethoven::inject_calculate(
-          covariate = "hms",
-          locs = list_pred_calc_grid,
-          injection = list(
-            path = file.path(chr_input_dir, "hms", "data_files"),
-            date = beethoven::fl_dates(unlist(d)), # used to be unlist(list_dates)
-            covariate = "hms"
-          )
-        )[[1]] |>
-          dplyr::select(-dplyr::any_of(c("lon", "lat", "geometry", "hms_year")))
+          beethoven::inject_calculate(
+            covariate = "hms",
+            locs = list_pred_calc_grid,
+            injection = list(
+              path = file.path(chr_input_dir, "hms", "data_files"),
+              date = beethoven::fl_dates(unlist(d)), # used to be unlist(list_dates)
+              covariate = "hms"
+            )
+          )[[1]] |>
+            dplyr::select(-dplyr::any_of(c("lon", "lat", "geometry", "hms_year")))
         }) %>%
         collapse::rowbind() %>%
         as.data.frame()
@@ -258,7 +236,6 @@ target_calculate_predict <-
                   ),
                   locs = list_pred_calc_grid[rows, ],
                   locs_id = arglist_common$char_siteid,
-                  #nthreads = 16L,
                   mode = "exact",
                   max_cells = 3e7
                 )
@@ -302,7 +279,7 @@ target_calculate_predict <-
     )
     ,
     targets::tar_target(
-      name = list_pred_split_calc_gmted,
+      name = list_pred_calc_gmted,
       command =
       {
         mapply(
@@ -339,12 +316,15 @@ target_calculate_predict <-
       list_pred_calc_geos_aqc,
       command = {
         download_geos_buffer <- TRUE
-        beethoven::calc_geos_strict(
+        aqc_extract <- beethoven::calc_geos_strict(
           path = file.path(chr_input_dir, "geos", chr_iter_calc_geos[1]),
           date = beethoven::fl_dates(unlist(list_dates)),
           locs = list_pred_calc_grid,
           locs_id = "site_id"
         )
+        target_idx <- which(names(aqc_extract) %in% c("site_id", "time"))
+        names(aqc_extract)[-target_idx] <- paste0("ATM_GOAQC_", names(aqc_extract)[-target_idx], "_0_00000")
+        aqc_extract
       },
       pattern = cross(list_pred_calc_grid, list_dates),
       resources = targets::tar_resources(
@@ -358,12 +338,15 @@ target_calculate_predict <-
       list_pred_calc_geos_chm,
       command = {
         # download_geos_buffer
-        beethoven::calc_geos_strict(
+        chm_extract <- beethoven::calc_geos_strict(
           path = file.path(chr_input_dir, "geos", chr_iter_calc_geos[2]),
           date = beethoven::fl_dates(unlist(list_dates)),
           locs = list_pred_calc_grid,
           locs_id = "site_id"
         )
+        target_idx <- which(names(chm_extract) %in% c("site_id", "time"))
+        names(chm_extract)[-target_idx] <- paste0("ATM_GOCHM_", names(chm_extract)[-target_idx], "_0_00000")
+        chm_extract
       },
       pattern = cross(list_pred_calc_grid, list_dates),
       resources = targets::tar_resources(
@@ -486,20 +469,6 @@ target_calculate_predict <-
       description = "Calculate MODIS - MOD11 features | prediction"
     )
     ,
-    # targets::tar_target(
-    #   list_pred_calc_mod11,
-    #   command = beethoven::inject_modis(
-    #     locs = list_pred_calc_grid,
-    #     injection = list_args_calc_mod11
-    #   ),
-    #   pattern = cross(list_pred_calc_grid, list_args_calc_mod11),
-    #   iteration = "list",
-    #   resources = targets::tar_resources(
-    #     crew = targets::tar_resources_crew(controller = "controller_50")
-    #   ),
-    #   description = "Calculate MODIS - MOD11 features | fit"
-    # )
-    # ,
     ###########################       MODIS - MOD06       ######################
     targets::tar_target(
       list_pred_calc_mod06,
@@ -865,7 +834,7 @@ target_calculate_predict <-
     ###########################        KOPPEN        ###########################
     # should be revised
     targets::tar_target(
-      dt_pred_calc_koppen,
+      list_pred_calc_koppen,
       command = {
         # download_koppen
           amadeus::calculate_koppen_geiger(
@@ -877,13 +846,14 @@ target_calculate_predict <-
                 "Beck_KG_V1_present_0p0083.tif"
               )
             ),
-            locs = dplyr::bind_rows(list_pred_calc_grid),
-            # NOTE: locs are all AQS sites for computational efficiency
+            locs = list_pred_calc_grid,
             locs_id = "site_id",
             geom = FALSE
           ) %>%
           as.data.frame()
       },
+      iteration = "list",
+      pattern = map(list_pred_calc_grid),
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(controller = "controller_50"),
         parquet = targets::tar_resources_parquet(compression = "lz4")
@@ -956,31 +926,67 @@ target_calculate_predict <-
     ,
     targets::tar_target(
       list_pred_calc_tri,
-      command = {
-        download_tri
-        tri_radii <- df_feat_calc_tri_params$radius
+      command = 
+      {
+        unique_radii <- chr_iter_radii
+
+        grid_rowids <- seq_len(nrow(list_pred_calc_grid))
+        grid_rowidx <- split(
+            grid_rowids,
+            ceiling(grid_rowids / 10000)
+          )
+        
+        # Threefold list comprehension
+        # First is for years (should be rowbinded)
         lapply(
-          tri_radii,
-          function(r) {
-            base_tri <-
-              amadeus::process_tri(
-                year = int_pred_calc_tri_years,,
-                path = file.path(chr_input_dir, "tri"),
-                variables = c(1, 13, 12, 14, 3 + c(20, 34, 36, 47, 48, 49))
-              )
-            res_tri <-
-              beethoven::calc_tri_mod(
-                from = base_tri,
-                locs = list_pred_calc_grid_v,
-                radius = df_feat_calc_tri_params$radius
-              )
-            as.data.frame(res_tri)
-          })
-      },
+          int_pred_calc_tri_years,
+          function(year) {
+            # The second one is for radii: full joined
+            lapply(
+              unique_radii,
+              function(radi) {
+                # The last one is for grid rows: rowbinded
+                lapply(
+                  grid_rowidx,
+                  function(rows) {
+                    grid_sub <- list_pred_calc_grid[rows, ]
+                    res_tri <- tryCatch({
+                      base_tri <-
+                        amadeus::process_tri(
+                          year = year,
+                          path = file.path(chr_input_dir, "tri"),
+                          # variables parameter should be changed properly depending on the vintage
+                          # as of Dec 2024, newly downloaded TRI data has different layout
+                          # compared to the one used in 2023
+                          variables = c(1, 13, 12, 14, 3 + c(20, 34, 36, 47, 48, 49))
+                        )
+                      res_tri <-
+                        beethoven::calc_tri_mod(
+                          from = base_tri,
+                          locs = list_pred_calc_grid[rows, ],
+                          radius = radi
+                        )
+                      as.data.frame(res_tri)
+                    }, error = function(e) {
+                      res_tri <- data.frame(site_id = grid_sub[["site_id"]], time = year)
+                      return(res_tri)
+                    })
+                    res_tri
+                  }
+                ) %>%
+                collapse::rowbind(., fill = TRUE)
+              }) %>%
+              Reduce(f = function(d, e) dplyr::full_join(d, e, by = c("site_id", "time")), .) 
+        }) %>%
+        collapse::rowbind(., fill = TRUE) %>%
+        as.data.frame()
+
+      }
+      ,
+      pattern = map(list_pred_calc_grid),
       iteration = "list",
-      pattern = map(list_pred_calc_grid_v),
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_03"),
+        crew = targets::tar_resources_crew(controller = "controller_10"),
         parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
       format = "parquet",
@@ -996,28 +1002,47 @@ target_calculate_predict <-
     ,
     targets::tar_target(
       list_pred_calc_nei,
-      command = {
+      command = 
+      {
         download_nei <- TRUE
+
+        grid_rowids <- seq_len(nrow(list_pred_calc_grid))
+        grid_rowidx <- split(
+            grid_rowids,
+            ceiling(grid_rowids / 100000)
+          )
         
+        # Twofold list comprehension
+        # First is for years (should be rowbinded)
         lapply(
           chr_iter_calc_nei,
-          function(y) {
-            beethoven::inject_calculate(
-              covariate = "nei",
-              locs = list_pred_calc_grid_v,
-              injection = list(
-                domain = y,
-                domain_name = "year",
-                path = file.path(chr_input_dir, "nei", "data_files"),
-                covariate = "nei"
-              )
-            )
-          }) %>%
-          collapse::rowbind() %>%
-          as.data.frame()
-      },
+          function(year) {
+            # The last one is for grid rows: rowbinded
+            lapply(
+              grid_rowidx,
+              function(rows) {
+                beethoven::inject_calculate(
+                  covariate = "nei",
+                  locs = list_pred_calc_grid[rows, ],
+                  injection = list(
+                    domain = year,
+                    domain_name = "year",
+                    path = file.path(chr_input_dir, "nei", "data_files"),
+                    covariate = "nei"
+                  )
+                ) %>%
+                collapse::rowbind(fill = TRUE)
+              }
+            ) %>%
+            collapse::rowbind(fill = TRUE)
+        }) %>%
+        collapse::rowbind(fill = TRUE) %>%
+        as.data.frame()
+
+      }
+      ,
       iteration = "list",
-      pattern = map(list_pred_calc_grid_v),
+      pattern = map(list_pred_calc_grid),
       description = "Calculate NEI features | prediction grid",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(controller = "controller_15"),
@@ -1027,26 +1052,23 @@ target_calculate_predict <-
     )
     ,
     ###########################      ECOREGIONS      ###########################
-    # should be revised
     targets::tar_target(
-      dt_pred_calc_ecoregions,
+      list_pred_calc_ecoregions,
       command = {
         # download_ecoregions
-        #data.table::data.table(
-          amadeus::calculate_ecoregion(
-            from = amadeus::process_ecoregion(
-              path = file.path(
-                chr_input_dir,
-                "ecoregions",
-                "data_files",
-                "us_eco_l3_state_boundaries.shp"
-              )
-            ),
-            locs = list_pred_calc_grid,
-            # NOTE: locs are all AQS sites for computational efficiency
-            locs_id = "site_id"
-          )
-        #)
+        amadeus::calculate_ecoregion(
+          from = amadeus::process_ecoregion(
+            path = file.path(
+              chr_input_dir,
+              "ecoregions",
+              "data_files",
+              "us_eco_l3_state_boundaries.shp"
+            )
+          ),
+          locs = list_pred_calc_grid,
+          # NOTE: locs are all AQS sites for computational efficiency
+          locs_id = "site_id"
+        )
       },
       iteration = "list",
       pattern = map(list_pred_calc_grid),
@@ -1055,11 +1077,10 @@ target_calculate_predict <-
         parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
       format = "parquet",
-      description = "data.table of Ecoregions features | prediction grid"
+      description = "List of Ecoregions features | prediction grid"
     )
     ,
     ###########################        GROADS        ###########################
-    # should be revised
     targets::tar_target(
       list_pred_calc_groads,
       command = {
@@ -1093,9 +1114,57 @@ target_calculate_predict <-
       description = "Calculate gRoads features | prediction grid"
     )
     ,
+    ###########################        SPATIAL BRANCHES FOR PREDICTION       ######################
+    targets::tar_target(
+      list_pred_calc_spatial,
+      command = {
+        Reduce(
+          f = function(d, e) dplyr::full_join(d, e, by = c("site_id")),
+          list_pred_calc_nlcd,
+          list_pred_calc_gmted,
+          list_pred_calc_pop,
+          list_pred_calc_koppen,
+          list_pred_calc_ecoregions,
+          list_pred_calc_groads
+        ) %>%
+        as.data.frame()
+      },
+      pattern = map(
+        list_pred_calc_nlcd,
+        list_pred_calc_gmted,
+        list_pred_calc_pop,
+        list_pred_calc_koppen,
+        list_pred_calc_ecoregions,
+        list_pred_calc_groads
+      ),
+      iteration = "list",
+      format = "parquet",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_10"),
+        parquet = targets::tar_resources_parquet(compression = "lz4")
+      ),
+      description = "data.frame of spatial features | prediction"
+    )
+    ,
+    # ##  Expand spatial targets to include all time stamps
+    # targets::tar_target(
+    #   list_pred_calc_spatial_exp,
+    #   command = {
+    #     list_pred_calc_spatial
+    #   },
+    #   pattern = cross(list_pred_calc_spatial, list_dates),
+    #   iteration = "list",
+    #   format = "parquet",
+    #   resources = targets::tar_resources(
+    #     crew = targets::tar_resources_crew(controller = "controller_10"),
+    #     parquet = targets::tar_resources_parquet(compression = "lz4")
+    #   ),
+    #   description = "spatiotemporally expanded spatial features | prediction"
+    # )
+    # ,
     ###########################        SPATIOTEMPORAL BRANCHES FOR PREDICTION       ###########################
     targets::tar_target(
-      list_feat_pred_spt,
+      list_pred_calc_spt,
       command = {
         Reduce(
           f = function(d, e) dplyr::full_join(d, e, by = c("site_id", "time")),
@@ -1133,5 +1202,52 @@ target_calculate_predict <-
         parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
       description = "data.frame of spatiotemporal features | prediction"
+    ),
+    #### Reference table for branches to match
+    targets::tar_target(
+      int_pred_calc_lookup_branches,
+      command = {
+        df_branches <-
+          targets::tar_branches(
+            list_pred_calc_hms
+          )
+        branch_sp <- df_branches[["list_pred_calc_grid"]]
+        branch_spindx <- unique(branch_sp)
+        branch_spindx <- match(branch_spindx, branch_sp)
+        branch_spindx
+      },
+      iteration = "list"
+    ),
+    ####################### IRREGULAR INTERVAL BRANCHES FOR PREDICTION ###########################
+    targets::tar_target(
+      list_pred_feat_final,
+      command = {
+
+        join_spec <- dplyr::join_by("site_id", time_temp >= time)
+        list_pred_calc_spt %>%
+          mutate(time_temp = lubridate::year(time)) %>%
+          left_join(
+            list_pred_calc_tri[[int_pred_calc_lookup_branches]],
+            by = join_spec
+          ) %>%
+          left_join(
+            list_pred_calc_nei[[int_pred_calc_lookup_branches]],
+            by = join_spec
+          ) %>%
+          dplyr::select(-time_temp) %>%
+          left_join(
+            list_pred_calc_spatial,
+            by = "site_id"
+          )
+      },
+      pattern = map(list_pred_calc_spt, int_pred_calc_lookup_branches),
+      iteration = "list",
+      # this target is managed as qs to reduce type conversion time
+      format = "qs",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_10")
+      ),
+      description = "data.frame of irregular interval features | prediction"
     )
+
   )
