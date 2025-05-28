@@ -1084,28 +1084,47 @@ target_calculate_predict <-
     targets::tar_target(
       list_pred_calc_groads,
       command = {
-        download_groads
+        download_groads <- TRUE
+
+        grid_rowids <- seq_len(nrow(list_pred_calc_grid))
+        grid_rowidx <- split(
+            grid_rowids,
+            ceiling(grid_rowids / 10000)
+          )
+        
+        # Twofold list comprehension
+        # First is for radii (should be full-joined)
         lapply(
           chr_iter_radii,
-          function(r) {
-          amadeus::calculate_groads(
-            from = amadeus::process_groads(
-              path = file.path(
-                chr_input_dir,
-                "groads",
-                "data_files",
-                "gROADS-v1-americas.gdb"
-              )
-            ),
-            locs = list_pred_calc_grid_v,
-            locs_id = "site_id",
-            radius = chr_iter_radii
-          ) |> as.data.frame()
-        }) %>%
-        Reduce(function(x, y) dplyr::full_join(x, y, by = c("site_id")), .)
+          function(radi) {
+            # The last one is for grid rows: rowbinded
+            lapply(
+              grid_rowidx,
+              function(rows) {
+                amadeus::calculate_groads(
+                  from = amadeus::process_groads(
+                    path = file.path(
+                      chr_input_dir,
+                      "groads",
+                      "data_files",
+                      "gROADS-v1-americas.gdb"
+                    )
+                  ),
+                  locs = list_pred_calc_grid[rows, ],
+                  locs_id = "site_id",
+                  radius = radi
+                )
+              }
+            ) %>%
+            collapse::rowbind(fill = TRUE)
+          }
+        ) %>%
+        Reduce(function(x, y) dplyr::full_join(x, y, by = c("site_id")), .) %>%
+        as.data.frame()
+
       },
       iteration = "list",
-      pattern = map(list_pred_calc_grid_v),
+      pattern = map(list_pred_calc_grid),
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(controller = "controller_15"),
         parquet = targets::tar_resources_parquet(compression = "lz4")
