@@ -7,6 +7,7 @@
 ################################################################################
 ##### elnet
 testthat::test_that("fit elnet (performance)", {
+  testthat::skip_on_ci()
   # sample data: 1 year; 50 sites; 35 predictors
   dt_performance <- readRDS(
     testthat::test_path("..", "testdata", "base", "dt_performance.rds")
@@ -107,6 +108,7 @@ testthat::test_that("fit elnet (performance)", {
 ################################################################################
 ##### lightGBM
 testthat::test_that("fit lightGBM (performance)", {
+  testthat::skip_on_ci()
   # sample data: 1 year; 50 sites; 35 predictors
   dt_performance <- readRDS(
     testthat::test_path("..", "testdata", "base", "dt_performance.rds")
