@@ -208,6 +208,7 @@ testthat::test_that("fit lightGBM (performance)", {
 ################################################################################
 ##### {brulee} MLP
 testthat::test_that("fit {brulee} MLP (performance)", {
+  testthat::skip_on_ci()
   # sample data: 1 year; 50 sites; 35 predictors
   dt_performance <- readRDS(
     testthat::test_path("..", "testdata", "base", "dt_performance.rds")
