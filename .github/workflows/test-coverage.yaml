@@ -32,6 +32,16 @@ jobs:
             any::lme4
           needs: coverage
 
+      - name: Install lme4
+        run: |
+          Rscript -e "install.packages('pak')"
+          Rscript -e "pak::pkg_install('lme4')"
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgfortran5 libblas-dev liblapack-dev
+
       - name: Cache C++ and R dependencies
         uses: actions/cache@v4
         with:
