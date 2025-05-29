@@ -5,7 +5,7 @@
 ################################################################################
 ##### expected success
 testthat::test_that("fit_base_learner {brulee} MLP", {
-  testthat::skip_on_ci()
+  testthat::skip_if_not_installed("lme4")
   withr::local_package("bonsai")
   # import sample data (4 sites with non-zero variance predictors)
   dt_base <- readRDS(

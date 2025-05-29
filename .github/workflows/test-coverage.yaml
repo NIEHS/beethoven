@@ -28,17 +28,7 @@ jobs:
             any::covr
             any::DT
             any::htmltools
-            any::pak
           needs: coverage
-
-      - name: Install lme4
-        run: |
-          Rscript -e "pak::pak('lme4')"
-
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libgfortran5 libblas-dev liblapack-dev
 
       - name: Cache C++ and R dependencies
         uses: actions/cache@v4
