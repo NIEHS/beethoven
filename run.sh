@@ -7,7 +7,6 @@
 #SBATCH --mem=1G
 #SBATCH --output=slurm/beethoven_%j.out
 
-
 #############################      COVARIATES      #############################
 # Download and calculate AQS sites covariates via container_covariates.sif
 echo "Submitting {beethoven} covariates targets ..."

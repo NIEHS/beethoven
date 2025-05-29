@@ -121,3 +121,8 @@ lib-flex/**
 
 # local coverage RDS files
 cov/
+
+# images
+*.png
+
+save/

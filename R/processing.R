@@ -1,7 +1,5 @@
-
 # please note that functions here are modified version of
 # the original functions in the package amadeus (<0.2.0)
-
 
 #' Process atmospheric composition data by chunks (v2)
 #' @keywords Calculation
@@ -25,12 +23,9 @@
 #' @importFrom terra subset
 #' @export
 process_geos_bulk <-
-  function(path = NULL,
-           date = c("2018-01-01", "2018-01-01"),
-           ...) {
+  function(path = NULL, date = c("2018-01-01", "2018-01-01"), ...) {
     #### directory setup
     if (length(path) == 1) {
-
       if (dir.exists(path)) {
         path <- amadeus::download_sanitize_path(path)
         paths <- list.files(
@@ -121,7 +116,8 @@ process_geos_bulk <-
           rast_summary <- terra::tapp(rast_in, index = "days", fun = "mean")
           names(rast_summary) <-
             paste0(
-              rep(v, terra::nlyr(rast_summary)), "_",
+              rep(v, terra::nlyr(rast_summary)),
+              "_",
               terra::time(rast_summary)
             )
           terra::set.crs(rast_summary, "EPSG:4326")
@@ -136,18 +132,14 @@ process_geos_bulk <-
     rast_10d_summary <-
       furrr::future_map(
         .x = future_inserted,
-        .f = ~summary_byvar(fs = .x),
-        .options =
-        furrr::furrr_options(
+        .f = ~ summary_byvar(fs = .x),
+        .options = furrr::furrr_options(
           globals = c("other_args", "data_variables")
         )
       )
     rast_10d_summary <- Reduce(c, rast_10d_summary)
     return(rast_10d_summary)
-
   }
-
-
 
 
 #' Process NARR Data (v2)
@@ -190,10 +182,11 @@ process_geos_bulk <-
 #' @importFrom terra rast time subset
 #' @export
 process_narr2 <- function(
-    date = c("2023-09-01", "2023-09-01"),
-    variable = NULL,
-    path = NULL,
-    ...) {
+  date = c("2023-09-01", "2023-09-01"),
+  variable = NULL,
+  path = NULL,
+  ...
+) {
   #### directory setup
   path <- amadeus::download_sanitize_path(path)
   #### check for variable
@@ -225,8 +218,7 @@ process_narr2 <- function(
     )
   )
   ym_of_interest <-
-    substr(date_sequence,
-           1, ifelse(all(nchar(ym_from) == 6), 6, 4))
+    substr(date_sequence, 1, ifelse(all(nchar(ym_from) == 6), 6, 4))
   ym_of_interest <- unique(ym_of_interest)
   #### subset file paths to only dates of interest
   data_paths_ym <- unique(
@@ -267,7 +259,9 @@ process_narr2 <- function(
     time_processed <- as.POSIXlt(data_year_tinfo)
     time_this <- time_processed[1]
     cat(paste0(
-      "Cleaning ", variable, " data for ",
+      "Cleaning ",
+      variable,
+      " data for ",
       sprintf(
         "%s, %d %s",
         strftime(time_this, "%B"),
@@ -283,7 +277,8 @@ process_narr2 <- function(
     if (length(lvinfo) == 0) {
       cat("Detected monolevel data...\n")
       names(data_year) <- paste0(
-        variable_abbr, "_",
+        variable_abbr,
+        "_",
         gsub("-", "", data_year_tinfo)
       )
     } else {
@@ -315,7 +310,8 @@ process_narr2 <- function(
         data_full_cn,
         nchar(data_full_cn) - 7,
         nchar(data_full_cn)
-      ) %in% date_sequence
+      ) %in%
+        date_sequence
     )
   )
   cat(paste0(

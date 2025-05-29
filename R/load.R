@@ -1,4 +1,3 @@
-
 ## file check: chunking
 ## if using tarchetypes::tar_files,
 ## the file *lists* should be stored as a single file
@@ -96,7 +95,8 @@ loadargs <- function(argfile, dataset) {
 load_modis_files <- function(path, pattern = "hdf$", date = character(2)) {
   modis_files <-
     list.files(
-      path, pattern = pattern,
+      path,
+      pattern = pattern,
       recursive = TRUE,
       full.names = TRUE
     )
@@ -106,7 +106,8 @@ load_modis_files <- function(path, pattern = "hdf$", date = character(2)) {
   modis_files <-
     grep(
       sprintf("(%s)", paste(paste0("A", date_exp), collapse = "|")),
-      modis_files, value = TRUE
+      modis_files,
+      value = TRUE
     )
   return(modis_files)
 }
@@ -135,7 +136,6 @@ read_locs <-
   }
 # nocov end
 
-
 #' Unmarshal functions
 #' @keywords Utility
 #' @param pkg_func_str Character string specifying the package and function.
@@ -159,7 +159,6 @@ unmarshal_function <-
     func_name <- pkg_func_split[2]
     get(func_name, envir = asNamespace(pkg_name))
   }
-
 
 
 #' Read paths from a directory with a specific file extension

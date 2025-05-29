@@ -1,4 +1,3 @@
-
 #' Check file status and download if necessary
 #' @keywords Utility
 #' @param path Path to qs file with all download specifications per
@@ -75,11 +74,12 @@ set_target_years <-
       }
     }
     assigned <- beethoven::post_calc_year_expand(
-      period[1], period[2], time_available = available
+      period[1],
+      period[2],
+      time_available = available
     )
     return(assigned)
   }
-
 
 
 # calculate over a list
@@ -124,7 +124,8 @@ calculate <-
           # we assume that ... have no "year" and "from" arguments
           args_process <- c(arg = domain_each, list(...))
           names(args_process)[1] <- domain_name
-          if (!is.null(args_process$covariate) &&
+          if (
+            !is.null(args_process$covariate) &&
               any(names(args_process) %in% c("covariate"))
           ) {
             if (args_process$covariate == "nei") {
@@ -160,7 +161,8 @@ calculate <-
                 if (!is.null(domain) && domain_name == "year") {
                   res <-
                     beethoven::add_time_col(
-                      res, domain_each,
+                      res,
+                      domain_each,
                       sprintf("%s_year", unname(args_process$covariate))
                     )
                 }
@@ -179,7 +181,8 @@ calculate <-
             }
           return(df_iteration_calc)
         },
-        domainlist, years_data,
+        domainlist,
+        years_data,
         SIMPLIFY = FALSE
       )
 
@@ -187,17 +190,15 @@ calculate <-
       cat(paste0(attr(res_calc, "condition")$message, "\n"))
       stop("Results do not match expectations.")
     }
-    res_calc <- lapply(res_calc,
-      function(x) {
-        if ("time" %in% names(x)) {
-          if (nchar(x$time[1]) != 4) {
-            x$time <- data.table::as.IDate(x$time)
-          }
+    res_calc <- lapply(res_calc, function(x) {
+      if ("time" %in% names(x)) {
+        if (nchar(x$time[1]) != 4) {
+          x$time <- data.table::as.IDate(x$time)
         }
-        xconvt <- data.table::as.data.table(x)
-        return(xconvt)
       }
-    )
+      xconvt <- data.table::as.data.table(x)
+      return(xconvt)
+    })
     # res_calcdf <- if (length(res_calc) == 1) {
     #   data.table::as.data.table(res_calc[[1]])
     # } else if (domain_name %in% c("year", "date")) {
@@ -207,8 +208,6 @@ calculate <-
     # }
     return(res_calc)
   }
-
-
 
 
 #' Injects the calculate function with specified arguments.
@@ -354,7 +353,6 @@ inject_geos <- function(locs, injection, ...) {
 #' @importFrom rlang inject
 #' @export
 inject_gmted <- function(locs, variable, radii, injection) {
-
   radii_list <- split(radii, seq_along(radii))
 
   radii_rep <-
@@ -408,7 +406,8 @@ reduce_merge <-
   function(
     list_in,
     by = c("site_id", "time"),
-    all.x = TRUE, all.y = FALSE
+    all.x = TRUE,
+    all.y = FALSE
   ) {
     list_check <- sapply(list_in, nrow)
     list_checkdiff <- diff(list_check)
@@ -421,12 +420,15 @@ reduce_merge <-
       function(x, y) {
         if (is.null(by)) by <- intersect(names(x), names(y))
         data.table::merge.data.table(
-          x, y, by = by, all.x = all.x, all.y = all.y
+          x,
+          y,
+          by = by,
+          all.x = all.x,
+          all.y = all.y
         )
       },
       list_in
     )
-
   }
 
 #' Reduce and merge a list of data tables
@@ -449,7 +451,6 @@ reduce_merge_iter <- function(
   all.x = TRUE,
   all.y = FALSE
 ) {
-
   list_check <- sapply(list_in, nrow)
   list_checkdiff <- diff(list_check)
   if (any(list_checkdiff > 0)) all.y <- TRUE
@@ -475,7 +476,6 @@ reduce_merge_iter <- function(
   }
 
   return(dt_merge)
-
 }
 
 
@@ -494,7 +494,6 @@ inject_match <- function(f, args) {
 
   # Inject the matching arguments
   rlang::inject(f(!!!args[matching_args]))
-
 }
 
 

@@ -7,15 +7,20 @@
 \usage{
 generate_cv_index_spt(
   data,
+  crs = NULL,
+  cellsize = NULL,
   locs_id = "site_id",
   coords = c("lon", "lat"),
   v = 10L,
-  time_id = "time",
-  ...
+  time_id = "time"
 )
 }
 \arguments{
 \item{data}{data.table or data.frame with \code{id}, \code{coords}, and \code{time} columns.}
+
+\item{crs}{The coordinate reference system (CRS) of the spatial object}
+
+\item{cellsize}{The size of each spatial block in meters. Uses the crs units}
 
 \item{locs_id}{The column name in \code{data} that represents the
 location identifier.}
@@ -26,9 +31,6 @@ XY coordinates. Default is \code{c("lon", "lat")}.}
 \item{v}{integer(1). The number of partitions for the resampling.}
 
 \item{time_id}{The column name in \code{data} that represents the time values.}
-
-\item{...}{Additional arguments to be passed to
-\code{spatialsample::spatial_block_cv}.}
 }
 \description{
 This function generates spatio-temporal cross-validation indices with

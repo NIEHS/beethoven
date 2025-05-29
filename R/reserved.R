@@ -1,7 +1,6 @@
 # nocov start
 # not used in the pipeline, but good for educational/development purposes
 
-
 #' Process atmospheric composition data by chunks (v2)
 #' @keywords Calculation
 #' @description
@@ -24,12 +23,9 @@
 #' @importFrom terra subset
 #' @export
 process_geos_bulk <-
-  function(path = NULL,
-           date = c("2018-01-01", "2018-01-01"),
-           ...) {
+  function(path = NULL, date = c("2018-01-01", "2018-01-01"), ...) {
     #### directory setup
     if (length(path) == 1) {
-
       if (dir.exists(path)) {
         path <- amadeus::download_sanitize_path(path)
         paths <- list.files(
@@ -120,7 +116,8 @@ process_geos_bulk <-
           rast_summary <- terra::tapp(rast_in, index = "days", fun = "mean")
           names(rast_summary) <-
             paste0(
-              rep(v, terra::nlyr(rast_summary)), "_",
+              rep(v, terra::nlyr(rast_summary)),
+              "_",
               terra::time(rast_summary)
             )
           terra::set.crs(rast_summary, "EPSG:4326")
@@ -135,18 +132,14 @@ process_geos_bulk <-
     rast_10d_summary <-
       furrr::future_map(
         .x = future_inserted,
-        .f = ~summary_byvar(fs = .x),
-        .options =
-        furrr::furrr_options(
+        .f = ~ summary_byvar(fs = .x),
+        .options = furrr::furrr_options(
           globals = c("other_args", "data_variables")
         )
       )
     rast_10d_summary <- Reduce(c, rast_10d_summary)
     return(rast_10d_summary)
-
   }
-
-
 
 
 #' Search package functions
@@ -231,7 +224,7 @@ fit_base_brulee <-
     dt_sample,
     dt_full,
     folds = NULL,
-    cv_mode  = c("spatiotemporal", "spatial", "temporal"),
+    cv_mode = c("spatiotemporal", "spatial", "temporal"),
     tune_mode = "bayes",
     tune_bayes_iter = 10L,
     learn_rate = 0.1,
@@ -282,7 +275,9 @@ fit_base_brulee <-
       # NOTE 08122024: not modified -- should be recoded
       base_vfold <-
         convert_cv_index_rset(
-          cv_index, dt_sample, cv_mode = cv_mode
+          cv_index,
+          dt_sample,
+          cv_mode = cv_mode
         )
     }
     # base_vfold <-
@@ -317,7 +312,6 @@ fit_base_brulee <-
 # dt <- qs::qread("output/dt_feat_design_imputed_061024.qs")
 # dtd <- dplyr::as_tibble(dt)
 # dtfit <- fit_base_brulee(dtd, r_subsample = 0.3)
-
 
 #' Base learner: Extreme gradient boosting (XGBoost)
 #'
@@ -397,10 +391,11 @@ fit_base_xgb <-
     # NOTE 08122024: not modified -- should be recoded
     rset_cv <-
       convert_cv_index_rset(
-        index_cv, data_orig, ref_list = ref_list, cv_mode = cv_mode
+        index_cv,
+        data_orig,
+        ref_list = ref_list,
+        cv_mode = cv_mode
       )
-
-
 
     base_recipe <-
       recipes::recipe(
@@ -439,13 +434,11 @@ fit_base_xgb <-
       )
 
     return(base_wftune)
-
   }
 
 # dt <- qs::qread("output/dt_feat_design_imputed_061024.qs")
 # dtd <- dplyr::as_tibble(dt)
 # dtfitx <- fit_base_xgb(dtd, xvar = names(dtd)[6:105], r_subsample = 0.3)
-
 
 #' Base learner: Light Gradient Boosting Machine (LightGBM)
 #'
@@ -523,9 +516,11 @@ fit_base_lightgbm <-
     # NOTE 08122024: not modified -- should be recoded
     rset_cv <-
       convert_cv_index_rset(
-        index_cv, data_orig, ref_list = ref_list, cv_mode = cv_mode
+        index_cv,
+        data_orig,
+        ref_list = ref_list,
+        cv_mode = cv_mode
       )
-
 
     base_recipe <-
       recipes::recipe(
@@ -564,7 +559,6 @@ fit_base_lightgbm <-
       )
 
     return(base_wftune)
-
   }
 
 
@@ -616,7 +610,7 @@ fit_base_elnet <-
     grid_hyper_tune <-
       expand.grid(
         mixture = seq(0, 1, length.out = 21),
-        penalty = 10 ^ seq(-3, 5)
+        penalty = 10^seq(-3, 5)
       )
 
     # generate row index for restoring rset
@@ -628,10 +622,11 @@ fit_base_elnet <-
     # NOTE 08122024: not modified -- should be recoded
     rset_cv <-
       convert_cv_index_rset(
-        index_cv, data_orig, ref_list = ref_list, cv_mode = cv_mode
+        index_cv,
+        data_orig,
+        ref_list = ref_list,
+        cv_mode = cv_mode
       )
-
-
 
     base_recipe <-
       recipes::recipe(
@@ -671,7 +666,6 @@ fit_base_elnet <-
       )
     future::plan(future::sequential)
     return(base_wftune)
-
   }
 # nolint end
 
@@ -747,8 +741,10 @@ restore_fit_best <-
                 function(df1, df2, df3, df4) {
                   dplyr::bind_rows(df1, df2, df3, df4)
                 },
-                combined_lr[[1]], combined_lr[[2]],
-                combined_lr[[3]], combined_lr[[4]],
+                combined_lr[[1]],
+                combined_lr[[2]],
+                combined_lr[[3]],
+                combined_lr[[4]],
                 SIMPLIFY = FALSE
               )
             template$.metric <- combined_lr
@@ -767,9 +763,6 @@ restore_fit_best <-
     model_fit <- parsnip::fit(model_best, data = df_full)
     pred <- predict(model_fit, data = df_full)
     return(pred)
-
   }
-
-
 
 # nocov end

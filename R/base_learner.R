@@ -63,54 +63,69 @@ make_subdata <- function(
 #' equipped with CUDA-enabled graphical processing units if utilizing `cuda` or
 #' `gpu`.
 #' @return A parsnip model object.
-#' @importFrom parsnip mlp set_engine set_mode boost_tree linear_reg
+#' @importFrom parsnip mlp set_engine set_mode boost_tree linear_reg tune
 #' @importFrom magrittr %>%
 #' @export
 switch_model <-
   function(
-    model_type = c("mlp", "xgb", "lgb", "elnet"),
+    model_type = c("mlp", "mlp2", "xgb", "lgb", "elnet", "brulee_linear"),
     device = c("cpu", "cuda", "gpu")
   ) {
     device <- match.arg(device)
     switch(
       model_type,
-      mlp =
-        parsnip::mlp(
-          hidden_units = parsnip::tune(),
-          dropout = parsnip::tune(),
-          epochs = 1000,
-          activation = parsnip::tune(),
-          learn_rate = parsnip::tune()
-        ) %>%
+      mlp = parsnip::mlp(
+        hidden_units = parsnip::tune(),
+        dropout = parsnip::tune(),
+        epochs = 1000,
+        activation = parsnip::tune(),
+        learn_rate = parsnip::tune()
+      ) %>%
         parsnip::set_engine("brulee", device = device) %>%
         parsnip::set_mode("regression"),
-      lgb =
-        parsnip::boost_tree(
-          mtry = parsnip::tune(),
-          trees = parsnip::tune(),
-          learn_rate = parsnip::tune()
+      mlp2 = parsnip::mlp(
+        hidden_units = parsnip::tune(),
+        dropout = parsnip::tune(),
+        epochs = 1000,
+        activation = parsnip::tune(),
+        learn_rate = parsnip::tune()
+      ) %>%
+        parsnip::set_engine(
+          "brulee_two_layer",
+          hidden_units_2 = parnsip::tune(),
+          activation_2 = parsnip::tune(),
+          device = device
         ) %>%
+        parsnip::set_mode("regression"),
+      lgb = parsnip::boost_tree(
+        mtry = parsnip::tune(),
+        trees = parsnip::tune(),
+        learn_rate = parsnip::tune(),
+        tree_depth = parsnip::tune()
+      ) %>%
         parsnip::set_engine("lightgbm", device = device) %>%
         parsnip::set_mode("regression"),
-      xgb =
-        parsnip::boost_tree(
-          mtry = parsnip::tune(),
-          trees = parsnip::tune(),
-          learn_rate = parsnip::tune()
-        ) %>%
+      xgb = parsnip::boost_tree(
+        mtry = parsnip::tune(),
+        trees = parsnip::tune(),
+        learn_rate = parsnip::tune()
+      ) %>%
         parsnip::set_engine("xgboost", device = device) %>%
         parsnip::set_mode("regression"),
-      elnet =
-        parsnip::linear_reg(
-          mixture = parsnip::tune(),
-          penalty = parsnip::tune()
-        ) %>%
+      elnet = parsnip::linear_reg(
+        mixture = parsnip::tune(),
+        penalty = parsnip::tune()
+      ) %>%
         parsnip::set_engine("glmnet") %>%
+        parsnip::set_mode("regression"),
+      brulee_linear = parsnip::linear_reg(
+        mixture = parsnip::tune(),
+        penalty = parsnip::tune()
+      ) %>%
+        parsnip::set_engine("brulee", device = device) %>%
         parsnip::set_mode("regression")
     )
-
   }
-
 
 
 #' Base learner: tune hyperparameters and retrieve the best model
@@ -154,212 +169,119 @@ switch_model <-
 #'  * Elastic net: Hyperparameters `mixture` and `penalty` are tuned.
 #'
 #' Tuning is performed based on random grid search (size = 10).
-#' @param learner character(1). The base learner to be used.
-#'   Default is "mlp". Available options are "mlp", "xgb", "lgb", "elnet".
-#' @param dt_full The full data table to be used for prediction.
-#' @param r_subsample numeric(1). The proportion of rows to be used.
-#' @param c_subsample numeric(1). The proportion of predictors to be used.
+#' @param rset A space/time CV set generated from beethoven
 #' @param model The parsnip model object. Preferably generated from
 #'   `switch_model`.
-#' @param folds integer(1). Number of cross-validation folds.
-#'   If NULL, `cv_mode` should be defined to be used in [rsample::vfold_cv].
-#' @param cv_mode character(1).
-#'   Cross-validation mode. Default is "spatiotemporal".
-#'   Available options are "spatiotemporal", "spatial", "temporal".
-#' @param args_generate_cv List of arguments to be passed to
-#'  `switch_generate_cv_rset` function.
-#' @param tune_mode character(1). Hyperparameter tuning mode.
-#'   Default is "grid", "bayes" is acceptable.
-#' @param tune_bayes_iter integer(1). The number of iterations for
-#'  Bayesian optimization. Default is 10. Only used when `tune_mode = "bayes"`.
-#' @param tune_grid_in data.frame object that includes the grid for
-#'   hyperparameter tuning. `tune_grid_size` rows will be randomly picked
-#'   from this data.frame for grid search.
-#' @param tune_grid_size integer(1). The number of grid size for hyperparameter
-#'  tuning. Default is 10. Only used when `tune_mode = "grid"`.
-#' @param learn_rate The learning rate for the model. For branching purpose.
-#'   Default is 0.1.
+#' @param tune_grid_size numeric(1), finetune grid size.
 #' @param yvar The target variable.
 #' @param xvar The predictor variables.
+#' @param drop_vars character vector or numeric.
+#' The variables to be dropped from the data.frame.
 #' @param normalize logical(1). If `TRUE`, all numeric predictors are
 #' normalized. Default is `FALSE`.
-#' @param trim_resamples logical(1). Default is TRUE, which replaces the actual
-#'   data.frames in splits column of `tune_results` object with NA.
-#' @param return_best logical(1). If TRUE, the best tuned model is returned.
-#' @param workflow logical(1). If TRUE, the best fit model workflow is returned.
 #' @param metric character(1). The metric to be used for selecting the best.
 #' Must be one of "rmse", "rsq", "mae". Default = "rmse"
 #' @param ... Additional arguments to be passed.
 #'
 #' @return The fitted workflow.
-#' @importFrom recipes recipe update_role
+#' @importFrom recipes recipe update_role step_normalize all_numeric_predictors
+#' @importFrom recipes all_integer_predictors
 #' @importFrom magrittr %>%
-#' @importFrom parsnip mlp set_engine set_mode
+#' @importFrom parsnip mlp set_engine set_mode fit
 #' @importFrom workflows workflow add_recipe add_model
-#' @importFrom tune tune_grid fit_best
+#' @importFrom tune tune_grid fit_best collect_metrics select_best
+#' @importFrom tune finalize_workflow
 #' @importFrom tidyselect all_of
 #' @importFrom yardstick metric_set rmse
-#' @importFrom rsample vfold_cv
+#' @importFrom rsample vfold_cv training testing
+#' @importFrom finetune control_race tune_race_anova
+#' @importFrom dplyr arrange
+#' @importFrom butcher butcher
 #' @export
 fit_base_learner <-
   function(
-    learner = c("mlp", "xgb", "lgb", "elnet"),
-    dt_full,
-    r_subsample = 0.3,
-    c_subsample = 1.0,
+    rset = NULL,
     model = NULL,
-    folds = 5L,
-    cv_mode  = c("spatiotemporal", "spatial", "temporal"),
-    args_generate_cv = NULL,
-    tune_mode = "grid",
-    tune_bayes_iter = 10L,
-    tune_grid_in = NULL,
     tune_grid_size = 10L,
-    learn_rate = 0.1,
     yvar = "Arithmetic.Mean",
-    xvar = seq(5, ncol(dt_full)),
-    normalize = FALSE,
-    trim_resamples = FALSE,
-    return_best = TRUE,
-    workflow = TRUE,
+    xvar = NULL,
+    drop_vars = NULL,
+    normalize = TRUE,
     metric = "rmse",
     ...
   ) {
-    learner <- match.arg(learner)
-    tune_mode <- match.arg(tune_mode, c("grid", "bayes"))
-    cv_mode <- match.arg(cv_mode)
     stopifnot("parsnip model must be defined." = !is.null(model))
-
-    if (cv_mode == "spatiotemporal") {
-      ngroup_init <- args_generate_cv$ngroup_init
-    } else {
-      ngroup_init <- NULL
-    }
-
-    # apply r_subsample % row subsampling
-    chr_rowidx <- beethoven::make_subdata(
-      dt_full, p = r_subsample, ngroup_init = ngroup_init
-    )
-
-    # apply c_subsample % column subsampling with lat/lon
-    chr_latlon <- which(names(dt_full) %in% c("lon", "lat"))
-    # update `xvar` for subset of predictors
-    chr_xvar <- c(
-      sample(
-        setdiff(xvar, chr_latlon),
-        (length(xvar) - 2) * c_subsample
-      ),
-      chr_latlon
-    )
-    chr_colidx <- c(1:4, chr_xvar)
-    xvar <- seq(5, length(chr_colidx))
-
-    # sample of data with r_subsample rows, c_subsample columns, and lat/lon
-    dt_sample <- data.table::data.table(dt_full)[
-      chr_rowidx,
-      chr_colidx,
-      with = FALSE
-    ]
-
-    # full rows with c_subsample columns and lat/lon
-    dt_full_cols <- data.table::data.table(dt_full)[, chr_colidx, with = FALSE]
-
-    # ensure required columns are retained in data sample
-    chr_requiredcols <- c(yvar, "site_id", "Event.Type", "time", "lon", "lat")
-    stopifnot(all(chr_requiredcols %in% names(dt_sample)))
-    stopifnot(all(chr_requiredcols %in% names(dt_full_cols)))
 
     # detect model name
     model_name <- model$engine
 
+    # split into testing and training sets
+    training_data <- rsample::training(rset$splits[[1]])
+    test_data <- rsample::testing(rset$splits[[1]])
+
+    # define recipe
     base_recipe <-
-      recipes::recipe(
-        dt_sample[1, ]
-      ) %>%
-      recipes::update_role(!!xvar) %>%
+      recipes::recipe(training_data[1, ]) %>%
+      recipes::update_role(!!xvar, new_role = "predictor") %>%
       recipes::update_role(!!yvar, new_role = "outcome")
+
+    if (!is.null(drop_vars))
+      base_recipe <-
+        base_recipe %>%
+        recipes::update_role(!!drop_vars, new_role = "id")
 
     if (normalize) {
       base_recipe <-
         base_recipe %>%
         recipes::step_normalize(
-          recipes::all_numeric_predictors(), -recipes::all_integer_predictors()
+          recipes::all_numeric_predictors(),
+          -recipes::all_integer_predictors()
         )
     }
 
-    if (!is.null(folds)) {
-      base_vfold <- rsample::vfold_cv(dt_sample, v = folds)
-    } else {
-      args_generate_cv <-
-        c(
-          list(data = dt_sample, cv_mode = cv_mode),
-          args_generate_cv
-        )
+    base_wf <-
+      workflows::workflow() %>%
+      workflows::add_recipe(base_recipe) %>%
+      workflows::add_model(model)
 
-      # manually replicate switch_generate_cv_rset function
-      # the formals() argument used in inject_match does not properly
-      # identify the expected arguments in the switched functions
-      # identify cv_mode
-      cv_mode_arg <- match.arg(
-        cv_mode, c("spatial", "temporal", "spatiotemporal")
-      )
-      target_fun <-
-        switch(
-          cv_mode_arg,
-          spatial = generate_cv_index_sp,
-          temporal = generate_cv_index_ts,
-          spatiotemporal = generate_cv_index_spt
-        )
-
-      # generate row index
-      cv_index <- beethoven::inject_match(target_fun, args_generate_cv)
-
-      # using cv_index, restore rset
-      base_vfold <-
-        beethoven::convert_cv_index_rset(
-          cv_index, dt_sample, cv_mode = cv_mode
-        )
-    }
-
-    # generate random grid from hyperparameters
-    # dials approach is too complicated to implement since
-    # we already declared tuning hyperparameters with tune(),
-    # which is not compatible with dials approach to limit
-    # possible value ranges per hyperparameter.
-    if (tune_mode == "grid") {
-      grid_row_idx <-
-        sample(
-          nrow(tune_grid_in),
-          tune_grid_size,
-          replace = FALSE
-        )
-      grid_params <- tune_grid_in[grid_row_idx, ]
-    } else {
-      grid_params <- NULL
-      # drop mtry from model arguments if using baysian tuning
-      # for xgboost
-      if (model$engine %in% c("xgboost", "lightgbm")) {
-        model <- model %>%
-          parsnip::set_args(mtry = NULL)
-      }
-    }
+    wf_config <- finetune::control_race(
+      verbose_elim = TRUE,
+      save_workflow = TRUE,
+      verbose = TRUE
+    )
 
     base_wftune <-
-      fit_base_tune(
-        recipe = base_recipe,
-        model = model,
-        resample = base_vfold,
-        tune_mode = tune_mode,
-        grid = grid_params,
-        iter_bayes = tune_bayes_iter,
-        trim_resamples = trim_resamples,
-        return_best = return_best,
-        workflow = workflow,
-        data_full = dt_full_cols,
-        metric = metric
+      base_wf %>%
+      finetune::tune_race_anova(
+        resamples = rset,
+        grid = tune_grid_size,
+        metrics = yardstick::metric_set(
+          yardstick::rmse,
+          yardstick::rsq,
+          yardstick::msd
+        ),
+        control = wf_config
       )
 
-    return(base_wftune)
+    # Select best model
+    best_params <- tune::select_best(base_wftune, metric = metric)
+
+    # Finalize workflow with best parameters
+    final_wf <- tune::finalize_workflow(base_wf, best_params)
+
+    # Combine the training and test sets to fit the final model
+    final_data <- rbind(training_data, test_data) |>
+      dplyr::arrange(site_id, time)
+
+    base_fit <- parsnip::fit(final_wf, data = final_data) %>%
+      butcher::butcher()
+
+    base_results <- list(
+      "workflow" = base_fit,
+      "metrics" = tune::collect_metrics(base_wftune)
+    )
+
+    return(base_results)
   }
 
 
@@ -425,10 +347,8 @@ fit_base_tune <-
         tune::tune_grid(
           resamples = resample,
           grid = grid,
-          metrics =
-          yardstick::metric_set(
+          metrics = yardstick::metric_set(
             yardstick::rmse,
-            yardstick::mape,
             yardstick::rsq,
             yardstick::mae
           ),
@@ -446,8 +366,7 @@ fit_base_tune <-
         tune::tune_bayes(
           resamples = resample,
           iter = iter_bayes,
-          metrics =
-          yardstick::metric_set(
+          metrics = yardstick::metric_set(
             yardstick::rmse,
             yardstick::mae,
             yardstick::mape,
@@ -511,9 +430,13 @@ fit_base_tune <-
 #' @param cv_mode character(1). The cross-validation mode to be used.
 #'  Default is "spatiotemporal". Available options are "spatiotemporal",
 #'  "spatial", "temporal".
-#' @param cv_rep integer(1). The number of repetitions for each `cv_mode`.
+#' @param num_models integer(1). The number of repetitions for each `cv_mode`.
 #' @param num_device integer(1). The number of CUDA devices to be used.
 #'   Each device will be assigned to each eligible learner (i.e., lgb, mlp).
+#' @param crs Coordinate reference system in `sf` style. Default is 5070L
+#' Albers Equal Area Projected
+#' @param cellsize cellsize for cross-validation spatial blocks. crs units.
+#' Default is 100km
 #' @param balance logical(1). If TRUE, the number of CUDA devices will be
 #' equally distributed based on the number of eligible devices.
 #' @return A data frame with three columns: learner, cv_mode, and device.
@@ -522,11 +445,13 @@ assign_learner_cv <-
   function(
     learner = c("lgb", "mlp", "elnet"),
     cv_mode = c("spatiotemporal", "spatial", "temporal"),
-    cv_rep = 100L,
+    num_models = 100L,
     num_device = ifelse(torch::cuda_device_count() > 1, 2, 1),
+    crs = 5070L,
+    cellsize = 100000L,
     balance = FALSE
   ) {
-    learner_eligible <- c("lgb", "mlp", "xgb")
+    learner_eligible <- c("mlp", "xgb")
     learner <- sort(learner)
     learner_eligible_flag <- learner %in% learner_eligible
     cuda_devices <- seq_len(sum(learner_eligible_flag)) - 1
@@ -541,24 +466,31 @@ assign_learner_cv <-
     learner_l <- split(learner, learner)
     learner_l <- mapply(
       function(x, y) {
-        cv_mode_rep <- rep(cv_mode, each = cv_rep)
+        num_models_rep <- rep(cv_mode, each = num_models)
         df <-
           data.frame(
-            learner = rep(x, cv_rep * length(cv_mode)),
-            cv_mode =
-            cv_mode_rep[sample(length(cv_mode_rep), length(cv_mode_rep))],
-            device = y
+            learner = rep(x, num_models * length(cv_mode)),
+            cv_mode = num_models_rep[sample(
+              length(num_models_rep),
+              length(num_models_rep)
+            )],
+            device = y,
+            crs = crs,
+            cellsize = cellsize
           )
         return(df)
       },
-      learner_l, cuda_get, SIMPLIFY = FALSE
+      learner_l,
+      cuda_get,
+      SIMPLIFY = FALSE
     )
     learner_v <- do.call(rbind, learner_l)
 
     if (balance) {
       learner_v_cuda <- learner_v[grep("cuda", learner_v$device), ]
       learner_v_cuda$device <- sprintf(
-        "cuda:%d", (seq_len(nrow(learner_v_cuda)) - 1) %% num_device
+        "cuda:%d",
+        (seq_len(nrow(learner_v_cuda)) - 1) %% num_device
       )
       learner_v[grep("cuda", learner_v$device), ] <- learner_v_cuda
     }
@@ -601,9 +533,12 @@ convert_cv_index_rset <-
     len_cvi <- seq_along(cvindex)
 
     if (is.list(cvindex)) {
-      list_split_dfs <- Map(function(x) {
-        rsample::make_splits(x = x, data = data)
-      }, cvindex)
+      list_split_dfs <- Map(
+        function(x) {
+          rsample::make_splits(x = x, data = data)
+        },
+        cvindex
+      )
     } else {
       if (!is.null(ref_list)) {
         list_cvi <- ref_list
@@ -617,8 +552,10 @@ convert_cv_index_rset <-
         lapply(
           list_cvi,
           function(x) {
-            list(analysis = which(!cvindex %in% x),
-                 assessment = which(cvindex %in% x))
+            list(
+              analysis = which(!cvindex %in% x),
+              assessment = which(cvindex %in% x)
+            )
           }
         )
       list_split_dfs <-
@@ -674,7 +611,10 @@ attach_xy <-
     # data_full_lean <- data_full[, c(locs_id, time_id), with = FALSE]
     data_full_attach <-
       collapse::join(
-        data_full, data_sfd, on = locs_id, how = "left"
+        data_full,
+        data_sfd,
+        on = locs_id,
+        how = "left"
       )
     return(data_full_attach)
   }
@@ -691,135 +631,117 @@ attach_xy <-
 #' `v * length(unique(substr(data$time, 1, 4)))`.
 #' @keywords Baselearner
 #' @param data data.table or data.frame with `id`, `coords`, and `time` columns.
+#' @param crs The coordinate reference system (CRS) of the spatial object
+#' @param cellsize The size of each spatial block in meters. Uses the crs units
 #' @param locs_id The column name in `data` that represents the
 #' location identifier.
 #' @param coords The column names in the spatial object that represent the
 #' XY coordinates. Default is `c("lon", "lat")`.
 #' @param v integer(1). The number of partitions for the resampling.
 #' @param time_id The column name in `data` that represents the time values.
-#' @param ... Additional arguments to be passed to
-#' `spatialsample::spatial_block_cv`.
-#' @importFrom dplyr left_join select
+#' @importFrom dplyr left_join select tibble
 #' @importFrom magrittr %>%
 #' @importFrom spatialsample spatial_block_cv
 #' @importFrom lubridate year week
+#' @importFrom sf st_transform
+#' @importFrom purrr map_dfr
+#' @importFrom rsample assessment
 #' @seealso [`spatialsample::spatial_block_cv`]
 #' @export
 generate_cv_index_spt <- function(
   data,
+  crs = NULL,
+  cellsize = NULL,
   locs_id = "site_id",
   coords = c("lon", "lat"),
   v = 10L,
-  time_id = "time",
-  ...
+  time_id = "time"
 ) {
-
   #########################       SPATIAL FOLDS       ##########################
   stopifnot(c(locs_id, coords, time_id) %in% names(data))
 
-  # new `data.frame`and `sf` with onle `id` and lat/lon coordinates
   data_trim <- unique(data.frame(data)[, c(locs_id, coords)])
-  data_sf <- sf::st_as_sf(
-    data_trim, coords = coords, remove = FALSE
-  )
+
+  if (is.null(crs)) {
+    df_sf <- sf::st_as_sf(
+      data_trim,
+      coords = coords,
+      crs = 4326,
+      remove = FALSE
+    )
+    data_sf <- sf::st_transform(df_sf, crs = 5070)
+  } else {
+    df_sf <- sf::st_as_sf(
+      data_trim,
+      coords = coords,
+      crs = 4326,
+      remove = FALSE
+    )
+    data_sf <- sf::st_transform(df_sf, crs = crs)
+  }
 
   # generate spatial splits with `spatialsample::spatial_block_cv`
-  sp_index <-
-    rlang::inject(
-      spatialsample::spatial_block_cv(
-        data_sf,
-        v = v,
-        !!!list(...)
-      )
-    )
-
-  # retrieve in_id
-  data_rowid <- seq_len(nrow(data_trim))
-  spatial_cv <- data_rowid
-
-  if (
-    !all(
-      !is.na(Reduce(c, Map(function(x) is.na(x$out_id), sp_index$splits)))
-    )
-  ) {
-    warning("Some splits have missing values in `out_id`...\n")
-    spatial_cv <-
-      lapply(
-        sp_index$splits,
-        function(x) list(analysis = x$in_id, assessment = x$out_id)
-      )
-  } else {
-    sp_index <- lapply(sp_index$splits, function(x) x$in_id)
-    for (i in seq_along(sp_index)) {
-      spatial_cv[setdiff(data_rowid, sp_index[[i]])] <- i
-    }
-  }
-
-  # merge spatial cross validation index with full data
-  data_trim$cv <- spatial_cv
-  data_sp <- data %>%
-    dplyr::left_join(
-      dplyr::select(data_trim, locs_id, coords[1], coords[2], cv),
-      by = c(locs_id, coords[1], coords[2])
-    )
-
-  # check spatial cross validation index is in the data
-  stopifnot("cv" %in% names(data_sp))
-  # check data with spatial cv has same rows as raw data
-  stopifnot(nrow(data_sp) == nrow(data))
-  # check data with spatial cv has one more column than raw data
-  stopifnot(ncol(data_sp) == ncol(data) + 1)
-
-  #########################       TEMPORAL FOLDS       #########################
-  # coerce class of time and cv index
-  data_sp[[time_id]] <- as.Date(data_sp[[time_id]])
-  data_sp$cv <- as.integer(data_sp$cv)
-
-  # unique spatial indices
-  sp_indices <- sort(unique(data_sp$cv))
-
-  # identify site's unique year + week combination
-  data_sp$yw <- paste0(
-    lubridate::year(data_sp[[time_id]]),
-    sprintf("%02d", lubridate::week(data_sp[[time_id]]))
-  )
-  # randomize unique year + week combinations
-  yearweek_random <- sample(unique(data_sp$yw))
-  # Split into ~equal sized chunks
-  yearweek_split <- split(
-    yearweek_random,
-    cut(seq_along(yearweek_random), v, labels = FALSE)
-  )
-
-  # since both based on v, they should have the same length
-  stopifnot(length(yearweek_split) == length(sp_indices))
-
-  # list to store temporal cv index
-  spt_index_list <- list()
-
-  for (i in seq(v)) {
-    # test data are within spatial and temporal fold `i`
-    out_id <- which(
-      data_sp$cv == sp_indices[i] &
-        data_sp$yw %in% yearweek_split[[i]]
-    )
-    # training data are all other data
-    in_id <- setdiff(seq_len(nrow(data_sp)), out_id)
-    spt_index_list <- c(
-      spt_index_list,
-      list(
-        list(
-          analysis = in_id,
-          assessment = out_id
+  if (!is.null(cellsize)) {
+    sp_index <-
+      rlang::inject(
+        spatialsample::spatial_block_cv(
+          data_sf,
+          v = v,
+          cellsize = cellsize,
+          method = "snake"
         )
       )
+  } else {
+    sp_index <- spatialsample::spatial_block_cv(
+      data = data_sf,
+      v = v,
+      method = "snake"
     )
   }
 
-  return(spt_index_list)
+  # Create a data frame that assigns fold
+  # labels to each row in the original data
+  fold_labels <- purrr::map_dfr(seq_along(sp_index$splits), function(k) {
+    assessment_ids <- rsample::assessment(sp_index$splits[[k]])$site_id
 
+    dplyr::tibble(
+      site_id = assessment_ids,
+      fold = k
+    )
+  })
+
+  data_spatial_cv <- data.frame(data)[, c(locs_id, coords)] %>%
+    sf::st_as_sf(coords = coords, remove = FALSE) %>%
+    # Join the fold labels back to the original data
+    dplyr::left_join(fold_labels, by = "site_id")
+
+  #########################       TEMPORAL FOLDS       #########################
+
+  # identify site's unique year + week combination
+  data_spatial_cv$yw <- paste0(
+    lubridate::year(data[[time_id]]),
+    sprintf("%02d", lubridate::week(data[[time_id]]))
+  )
+
+  data_spatial_cv <- data_spatial_cv %>%
+    dplyr::mutate(st_int = interaction(fold, as.double(yw), drop = FALSE))
+
+  # Create a unique list of (id1, id2) combinations
+  unique_st_int <- data_spatial_cv$st_int %>% unique() %>% as.data.frame()
+  colnames(unique_st_int) <- "st_int"
+
+  # Assign P groups cyclically (to balance size)
+  unique_st_int <- unique_st_int %>%
+    dplyr::mutate(spacetime_cv = rep(1:v, length.out = dplyr::n()))
+
+  # Merge back to the full dataset
+  data_sp <- data_spatial_cv %>% dplyr::left_join(unique_st_int, by = "st_int")
+
+  # length == nrow(data)
+  spt_index_num <- data_sp$spacetime_cv
+
+  return(spt_index_num)
 }
-
 
 # non site-wise; just using temporal information
 #' Generate temporal cross-validation index
@@ -916,7 +838,6 @@ generate_cv_index_sp <-
     target_cols = c("lon", "lat"),
     ...
   ) {
-
     data_sf <- sf::st_as_sf(data, coords = target_cols, remove = FALSE)
     cv_index <-
       rlang::inject(
@@ -951,7 +872,6 @@ generate_cv_index_sp <-
   }
 
 
-
 #' Visualize the spatio-temporal cross-validation index
 #' @keywords Baselearner
 #' @param rsplit rsample::manual_rset() object.
@@ -973,14 +893,16 @@ vis_spt_rset <-
       cleared$indx <- factor(cleared$indx)
       cleared$time <- as.POSIXct(cleared$time)
       scatterplot3d::scatterplot3d(
-        cleared$lon, cleared$lat, cleared$time,
+        cleared$lon,
+        cleared$lat,
+        cleared$time,
         color = rev(as.integer(cleared$indx) + 1),
-        cex.symbols = cex, pch = 19,
+        cex.symbols = cex,
+        pch = 19,
         angle = angle
       )
     }
   }
-
 
 
 #' Choose cross-validation strategy for the base learner

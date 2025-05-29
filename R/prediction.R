@@ -1,4 +1,3 @@
-
 #' Combine dynamically branched sublists based on common column names
 #' @description
 #' This function combines the sublists of dynamically branched targets object

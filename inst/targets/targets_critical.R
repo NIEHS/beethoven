@@ -14,8 +14,7 @@ target_critical <-
       chr_daterange,
       command = c("2018-01-01", "2022-12-31"),
       description = "Date range | critical"
-    )
-    ,
+    ),
     ##### 2. chr_nasa_token sets the file path to the user's NASA Earthdata
     #####    account credentials. We can create a group credential file,
     #####    but this target is still critical since the CREDENTIALS
@@ -25,8 +24,7 @@ target_critical <-
       chr_nasa_token,
       command = readLines("/inst/extdata/nasa_token.txt"),
       description = "NASA Earthdata token | critical"
-    )
-    ,
+    ),
     ##### 3. chr_mod06_links is the file path to the MOD06 links file. These
     #####    links must be manually downloaded per the `amadeus::download_modis`
     #####    function. The links are then stored in a CSV file that is read
@@ -36,8 +34,7 @@ target_critical <-
       chr_mod06_links,
       command = "/inst/extdata/mod06_links_2018_2022.csv",
       description = "File of MOD06 links | critical"
-    )
-    ,
+    ),
     ##### 4. chr_input_dir is the file path to the input directory. This target
     #####    controls where the raw data files are downloaded to and imported
     #####    from. This file path **MUST** be mounted to the container at run
@@ -46,8 +43,7 @@ target_critical <-
       chr_input_dir,
       command = "/input",
       description = "Data directory | critical"
-    )
-    ,
+    ),
     ##### 5. chr_dates_split controls the size of temporal splits. Splitting the
     #####    temporal range into smaller chunks allows for parallel processing
     #####    across multiple workers. It also allows for dispatching new dynamic

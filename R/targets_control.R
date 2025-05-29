@@ -1,4 +1,3 @@
-
 #' Set resource management for SLURM
 #'
 #' This function sets up resources for SLURM job submission.
@@ -35,15 +34,14 @@ set_slurm_resource <-
         plan = future::tweak(
           future.batchtools::batchtools_slurm,
           template = template_file,
-          resources =
-            list(
-              partition = partition,
-              ntasks = ntasks,
-              ncpus = ncpus,
-              memory = memory,
-              email = user_email,
-              error.file = error_log
-            )
+          resources = list(
+            partition = partition,
+            ntasks = ntasks,
+            ncpus = ncpus,
+            memory = memory,
+            email = user_email,
+            error.file = error_log
+          )
         )
       )
     )

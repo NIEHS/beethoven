@@ -63,7 +63,9 @@ test <- function(pattern = NULL) {
         "value = TRUE, invert = TRUE)); devtools::load_all('/mnt'); ",
         "library(bonsai); library(dplyr); library(testthat); ",
         "test_file <- list.files('/mnt/tests/testthat', full.names = TRUE, ",
-        "pattern = '", pattern, "'); source_files <- list.files('/mnt/R', ",
+        "pattern = '",
+        pattern,
+        "'); source_files <- list.files('/mnt/R', ",
         "full.names = TRUE); covr::file_coverage(source_files, test_file)\""
       ),
       collapse = ""
@@ -87,10 +89,20 @@ cov <- function() {
         "library(bonsai); library(dplyr); library(testthat); ",
         "cov <- covr::package_coverage(install_path = '/tmp/cov', ",
         "clean = FALSE); ",
-        "saveRDS(cov, '/mnt/cov/cov_", format(Sys.time(), "%m%d_%H%M"),
+        "saveRDS(cov, '/mnt/cov/cov_",
+        format(Sys.time(), "%m%d_%H%M"),
         ".rds'); covr::coverage_to_list(cov)\""
       ),
       collapse = ""
     )
   )
+}
+
+#' Open interactive session with `container.sif` container.
+#' @param dir character(1). Directory with `interactive.sh` file.
+#' @return NULL
+#' @keywords Miscellaneous
+interactive <- function(dir = "./") {
+  file <- file.path(dir, "interactive.sh")
+  system(paste0(". ", file))
 }

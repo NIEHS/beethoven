@@ -7,8 +7,10 @@
 assign_learner_cv(
   learner = c("lgb", "mlp", "elnet"),
   cv_mode = c("spatiotemporal", "spatial", "temporal"),
-  cv_rep = 100L,
+  num_models = 100L,
   num_device = ifelse(torch::cuda_device_count() > 1, 2, 1),
+  crs = 5070L,
+  cellsize = 100000L,
   balance = FALSE
 )
 }
@@ -20,10 +22,16 @@ Default is "mlp". Available options are "mlp", "lgb", "elnet".}
 Default is "spatiotemporal". Available options are "spatiotemporal",
 "spatial", "temporal".}
 
-\item{cv_rep}{integer(1). The number of repetitions for each \code{cv_mode}.}
+\item{num_models}{integer(1). The number of repetitions for each \code{cv_mode}.}
 
 \item{num_device}{integer(1). The number of CUDA devices to be used.
 Each device will be assigned to each eligible learner (i.e., lgb, mlp).}
+
+\item{crs}{Coordinate reference system in \code{sf} style. Default is 5070L
+Albers Equal Area Projected}
+
+\item{cellsize}{cellsize for cross-validation spatial blocks. crs units.
+Default is 100km}
 
 \item{balance}{logical(1). If TRUE, the number of CUDA devices will be
 equally distributed based on the number of eligible devices.}

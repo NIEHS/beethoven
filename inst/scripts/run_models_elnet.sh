@@ -1,12 +1,12 @@
 #!/bin/bash
 
 #SBATCH --job-name=elnet
-#SBATCH --mail-user=kyle.messier@nih.gov
+#SBATCH --mail-user=mitchell.manware@nih.gov
 #SBATCH --mail-type=END,FAIL
 #SBATCH --partition=geo
 #SBATCH --ntasks=1
 #SBATCH --mem=900G
-#SBATCH --cpus-per-task=100
+#SBATCH --cpus-per-task=10
 #SBATCH --error=slurm/elnet_%j.err
 #SBATCH --output=slurm/elnet_%j.out
 
@@ -15,6 +15,7 @@
 # servers' SSL certificates during download.
 export CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+#### #SBATCH --cpus-per-task=100 may need to be 100
 
 ###############################      GPU SETUP     #############################
 # Ensure all allocated GPUs are visible
