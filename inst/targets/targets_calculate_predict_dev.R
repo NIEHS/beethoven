@@ -205,56 +205,64 @@ target_calculate_predict <-
     ,
     targets::tar_target(
       chr_pred_calc_nlcd_radii,
-      command = c(1000, 2000),
+      command = c(1000, 10000),
       description = "NLCD radii | download"
     )
     ,
-    
     targets::tar_target(
       name = list_pred_calc_nlcd,
       command =
       {
         unique_radii <- chr_pred_calc_nlcd_radii
-
+        nlcd_years <- chr_iter_calc_nlcd
         grid_rowids <- seq_len(nrow(list_pred_calc_grid))
         grid_rowidx <- split(
             grid_rowids,
-            ceiling(grid_rowids / 1000)
+            ceiling(grid_rowids / 5000)
           )
+        # threefold lists
+        # First level: years (rowbind)
         lapply(
-          unique_radii,
-          function(radi) {
+          nlcd_years,
+          function(year) {
+            # Second level: radii (full join)
             lapply(
-              grid_rowidx,
-              function(rows) {
-                inject_nlcd(
-                  year = int_pred_calc_nlcd_years,
-                  radius = radi,
-                  from = amadeus::process_nlcd(
-                    path = file.path(chr_input_dir, "nlcd", "data_files"),
-                    year = int_pred_calc_nlcd_years,
-                  ),
-                  locs = list_pred_calc_grid[rows, ],
-                  locs_id = arglist_common$char_siteid,
-                  mode = "exact",
-                  max_cells = 3e7
-                )
-              }
-            ) %>%
-            data.table::rbindlist(., fill = TRUE)
-          }) %>%
-          Reduce(f = function(d, e) dplyr::full_join(d, e, by = c("site_id", "time")), .) %>%
-          as.data.frame()
+              unique_radii,
+              function(radi) {
+                # Third level: chunked rows (rowbind)
+                lapply(
+                  grid_rowidx,
+                  function(rows) {
+                    inject_nlcd(
+                      year = year,
+                      radius = radi,
+                      from = amadeus::process_nlcd(
+                        path = file.path(chr_input_dir, "nlcd", "data_files"),
+                        year = year,
+                      ),
+                      locs = list_pred_calc_grid[rows, ],
+                      locs_id = arglist_common$char_siteid,
+                      mode = "exact",
+                      max_cells = 3e7
+                    )
+                  }
+                ) %>%
+                collapse::rowbind(., fill = TRUE)
+              }) %>%
+              Reduce(f = function(d, e) dplyr::full_join(d, e, by = c("site_id", "time")), .)
+          }
+        ) %>%
+        collapse::rowbind(., fill = TRUE) %>%
+        as.data.frame()
+
       }
       ,
-      pattern = cross(
-        list_pred_calc_grid, int_pred_calc_nlcd_years
-      ),
+      pattern = map(list_pred_calc_grid),
       iteration = "list",
       format = "parquet",
-      description = "Calculate NLCD features with branched sublists (pred)",
+      description = "Calculate NLCD features | prediction",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_10"),
+        crew = targets::tar_resources_crew(controller = "controller_25"),
         parquet = targets::tar_resources_parquet(compression = "lz4")
       )
     )
@@ -306,7 +314,7 @@ target_calculate_predict <-
       iteration = "list",
       pattern = map(list_pred_calc_grid),
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_50")
+        crew = targets::tar_resources_crew(controller = "controller_25")
       ),
       description = "Calculate GMTED features | prediction"
     )
@@ -765,7 +773,7 @@ target_calculate_predict <-
       pattern = cross(list_pred_calc_grid, list_dates),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_50"),
+        crew = targets::tar_resources_crew(controller = "controller_25"),
         parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
       format = "parquet",
