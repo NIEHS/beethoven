@@ -23,8 +23,13 @@ jobs:
           use-public-rspm: true
 
       - uses: r-lib/actions/setup-r-dependencies@v2
+        install-dependencies: true
         with:
-          extra-packages: any::covr, any::DT, any::htmltools, any::lme4
+          extra-packages:
+            any::covr
+            any::DT
+            any::htmltools
+            any::lme4
           needs: coverage
 
       - name: Cache C++ and R dependencies
