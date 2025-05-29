@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">beethoven</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,8 +42,10 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">assign_learner_cv</span><span class="op">(</span></span>
 <span>  learner <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"lgb"</span>, <span class="st">"mlp"</span>, <span class="st">"elnet"</span><span class="op">)</span>,</span>
 <span>  cv_mode <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"spatiotemporal"</span>, <span class="st">"spatial"</span>, <span class="st">"temporal"</span><span class="op">)</span>,</span>
-<span>  cv_rep <span class="op">=</span> <span class="fl">100L</span>,</span>
+<span>  num_models <span class="op">=</span> <span class="fl">100L</span>,</span>
 <span>  num_device <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="fu">torch</span><span class="fu">::</span><span class="fu"><a href="https://torch.mlverse.org/docs/reference/cuda_device_count.html" class="external-link">cuda_device_count</a></span><span class="op">(</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  crs <span class="op">=</span> <span class="fl">5070L</span>,</span>
+<span>  cellsize <span class="op">=</span> <span class="fl">100000L</span>,</span>
 <span>  balance <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -63,13 +65,23 @@ Default is "spatiotemporal". Available options are "spatiotemporal",
 "spatial", "temporal".</p></dd>
 
 
-<dt id="arg-cv-rep">cv_rep<a class="anchor" aria-label="anchor" href="#arg-cv-rep"></a></dt>
+<dt id="arg-num-models">num_models<a class="anchor" aria-label="anchor" href="#arg-num-models"></a></dt>
 <dd><p>integer(1). The number of repetitions for each <code>cv_mode</code>.</p></dd>
 
 
 <dt id="arg-num-device">num_device<a class="anchor" aria-label="anchor" href="#arg-num-device"></a></dt>
 <dd><p>integer(1). The number of CUDA devices to be used.
 Each device will be assigned to each eligible learner (i.e., lgb, mlp).</p></dd>
+
+
+<dt id="arg-crs">crs<a class="anchor" aria-label="anchor" href="#arg-crs"></a></dt>
+<dd><p>Coordinate reference system in <code>sf</code> style. Default is 5070L
+Albers Equal Area Projected</p></dd>
+
+
+<dt id="arg-cellsize">cellsize<a class="anchor" aria-label="anchor" href="#arg-cellsize"></a></dt>
+<dd><p>cellsize for cross-validation spatial blocks. crs units.
+Default is 100km</p></dd>
 
 
 <dt id="arg-balance">balance<a class="anchor" aria-label="anchor" href="#arg-balance"></a></dt>
@@ -91,7 +103,7 @@ equally distributed based on the number of eligible devices.</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer></div>
