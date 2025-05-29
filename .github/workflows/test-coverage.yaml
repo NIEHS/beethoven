@@ -24,18 +24,16 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          dependencies: all
           extra-packages: |
             any::covr
             any::DT
             any::htmltools
-            any::lme4
+            any::pak
           needs: coverage
 
       - name: Install lme4
         run: |
-          Rscript -e "install.packages('pak')"
-          Rscript -e "pak::pkg_install('lme4')"
+          Rscript -e "pak::pak('lme4')"
 
       - name: Install system dependencies
         run: |
