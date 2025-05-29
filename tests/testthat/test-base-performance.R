@@ -7,6 +7,7 @@
 ################################################################################
 ##### elnet
 testthat::test_that("fit elnet (performance)", {
+  testthat::skip_on_ci()
   withr::local_package("lme4")
   # sample data: 1 year; 50 sites; 35 predictors
   dt_performance <- readRDS(

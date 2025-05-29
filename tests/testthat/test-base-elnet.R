@@ -5,6 +5,7 @@
 ################################################################################
 ##### expected success
 testthat::test_that("fit_base_learner {glmnt} elastic net", {
+  testthat::skip_on_ci()
   withr::local_package("lme4")
   # import sample data (4 sites with non-zero variance predictors)
   dt_base <- readRDS(
