@@ -7,7 +7,8 @@
 ################################################################################
 ##### elnet
 testthat::test_that("fit elnet (performance)", {
-  testthat::skip_if_not_installed("lme4")
+  testthat::skip_if_not_installed("Matrix", "1.6-2")
+  testthat::skip_if_not_installed("lme4", "1.1-35.1")
   withr::local_package("lme4")
   # sample data: 1 year; 50 sites; 35 predictors
   dt_performance <- readRDS(
@@ -109,7 +110,8 @@ testthat::test_that("fit elnet (performance)", {
 ################################################################################
 ##### lightGBM
 testthat::test_that("fit lightGBM (performance)", {
-  testthat::skip_if_not_installed("lme4")
+  testthat::skip_if_not_installed("Matrix", "1.6-2")
+  testthat::skip_if_not_installed("lme4", "1.1-35.1")
   # sample data: 1 year; 50 sites; 35 predictors
   dt_performance <- readRDS(
     testthat::test_path("..", "testdata", "base", "dt_performance.rds")
@@ -211,7 +213,8 @@ testthat::test_that("fit lightGBM (performance)", {
 ################################################################################
 ##### {brulee} MLP
 testthat::test_that("fit {brulee} MLP (performance)", {
-  testthat::skip_if_not_installed("lme4")
+  testthat::skip_if_not_installed("Matrix", "1.6-2")
+  testthat::skip_if_not_installed("lme4", "1.1-35.1")
   # sample data: 1 year; 50 sites; 35 predictors
   dt_performance <- readRDS(
     testthat::test_path("..", "testdata", "base", "dt_performance.rds")
