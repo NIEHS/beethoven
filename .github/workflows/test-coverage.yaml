@@ -23,8 +23,8 @@ jobs:
           use-public-rspm: true
 
       - uses: r-lib/actions/setup-r-dependencies@v2
-        install-dependencies: true
         with:
+          install-dependencies: true
           extra-packages: |
             any::covr
             any::DT
