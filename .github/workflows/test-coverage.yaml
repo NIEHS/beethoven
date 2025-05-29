@@ -25,7 +25,7 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         install-dependencies: true
         with:
-          extra-packages:
+          extra-packages: |
             any::covr
             any::DT
             any::htmltools
