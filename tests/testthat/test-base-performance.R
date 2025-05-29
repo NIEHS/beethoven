@@ -7,7 +7,6 @@
 ################################################################################
 ##### elnet
 testthat::test_that("fit elnet (performance)", {
-  testthat::skip_on_ci()
   # sample data: 1 year; 50 sites; 35 predictors
   dt_performance <- readRDS(
     testthat::test_path("..", "testdata", "base", "dt_performance.rds")
@@ -125,8 +124,8 @@ testthat::test_that("fit lightGBM (performance)", {
   # set model
   lightgbm_model <- parsnip::boost_tree(
     trees = 100,
-    learn_rate = 0.1,
-    mtry = 25
+    learn_rate = parsnip::tune(),
+    mtry = 20
   ) %>%
     parsnip::set_engine("lightgbm", device = "cpu") %>%
     parsnip::set_mode("regression")

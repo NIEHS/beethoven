@@ -8,5 +8,5 @@ apptainer exec \
   --bind /ddn/gs1/group/set/Projects/beethoven/targets:/opt/_targets \
   --bind /run/munge:/run/munge \
   --bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm \
-  container_models.sif \
+  container_models_test.sif \
   /usr/local/lib/R/bin/R --no-init-file

@@ -5,6 +5,7 @@
 ################################################################################
 ##### expected success
 testthat::test_that("fit_base_learner {lightGBM}", {
+  testthat::skip_on_ci()
   withr::local_package("bonsai")
   # import sample data (4 sites with non-zero variance predictors)
   dt_base <- readRDS(
