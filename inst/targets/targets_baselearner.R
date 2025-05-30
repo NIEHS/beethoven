@@ -6,11 +6,11 @@ target_baselearner <-
     targets::tar_target(
       list_base_params_static,
       command = list(
-        dt_full = dt_feat_calc_xyt,
+        dt_full = dt_feat_pm_imputed,
         r_subsample = 3,
         yvar = "Arithmetic.Mean",
-        xvar = names(dt_feat_calc_xyt)[seq(5, ncol(dt_feat_calc_xyt))],
-        drop_vars = names(dt_feat_calc_xyt)[seq(1, 3)],
+        xvar = names(dt_feat_pm_imputed)[seq(5, ncol(dt_feat_pm_imputed))],
+        drop_vars = names(dt_feat_pm_imputed)[seq(1, 3)],
         normalize = TRUE,
         num_base_models = 20L,
         metric = "rmse",

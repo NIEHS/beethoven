@@ -928,5 +928,23 @@ target_calculate_fit <-
         )
       ),
       description = "Imputed features + AQS sites (outcome and lat/lon) | fit"
+    ),
+    targets::tar_target(
+      name = dt_feat_pm_imputed,
+      command = {
+        dt_imp <- dt_feat_calc_xyt %>%
+          group_by(site_id) %>%
+          mutate(
+            min_pos = min(Arithmetic.Mean[Arithmetic.Mean > 0], na.rm = TRUE),
+            Arithmetic.Mean = if_else(
+              Arithmetic.Mean <= 0,
+              min_pos / 2,
+              Arithmetic.Mean
+            )
+          ) %>%
+          select(-min_pos) %>%
+          ungroup()
+      },
+      description = "Imputed AQS Data | fit"
     )
   )
