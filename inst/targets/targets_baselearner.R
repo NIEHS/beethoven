@@ -120,50 +120,7 @@ target_baselearner_elnet <-
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(controller = "controller_10")
       ),
-      description = "Fit base learner | elnet | brulee linear regression | cuda | base learner"
-    )
-  )
-
-################################################################################
-##### Fit CPU-enabled {lightGBM} base learners on {geo} cluster.
-target_baselearner_lgb <-
-  list(
-    targets::tar_target(
-      engine_base_lgb,
-      command = {
-        parsnip::boost_tree(
-          mtry = parsnip::tune(),
-          trees = parsnip::tune(),
-          learn_rate = parsnip::tune(),
-          tree_depth = parsnip::tune()
-        ) %>%
-          parsnip::set_engine("lightgbm", device = "cpu") %>%
-          parsnip::set_mode("regression")
-      },
-      description = "Engine and device | lgb | base learner"
-    ),
-    targets::tar_target(
-      fit_learner_base_lgb,
-      command = beethoven::fit_base_learner(
-        rset = list_rset_train,
-        model = engine_base_lgb,
-        tune_grid_size = expand.grid(
-          mtry = c(150, 239),
-          trees = c(250, 445),
-          learn_rate = c(0.1, 0.15),
-          tree_depth = c(4, 7)
-        ),
-        yvar = list_base_params_static$yvar,
-        xvar = list_base_params_static$xvar,
-        drop_vars = list_base_params_static$drop_vars,
-        normalize = list_base_params_static$normalize
-      ),
-      pattern = map(list_rset_train),
-      iteration = "list",
-      resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_sequential")
-      ),
-      description = "Fit base learner | lgb | cpu | base learner"
+      description = "Fit base learner | brulee regression | cpu | base learner"
     )
   )
 
@@ -203,5 +160,53 @@ target_baselearner_mlp <-
         crew = targets::tar_resources_crew(controller = "controller_geo")
       ),
       description = "Fit base learners | mlp | gpu | base learner"
+    )
+  )
+
+################################################################################
+##### Fit CPU-enabled {lightGBM} base learners on {geo} cluster.
+target_baselearner_lgb <-
+  list(
+    targets::tar_target(
+      engine_base_lgb,
+      command = {
+        parsnip::boost_tree(
+          mtry = parsnip::tune(),
+          trees = parsnip::tune(),
+          learn_rate = parsnip::tune(),
+          tree_depth = parsnip::tune()
+        ) %>%
+          parsnip::set_engine("lightgbm", device = "cpu") %>%
+          parsnip::set_mode("regression")
+      },
+      description = "Engine and device | lgb | base learner"
+    ),
+    targets::tar_target(
+      fit_learner_base_lgb,
+      command = {
+        df_lgb_grid <- expand.grid(
+          mtry = c(150, 239),
+          trees = c(250, 445),
+          learn_rate = c(0.1, 0.15),
+          tree_depth = c(4, 7)
+        )
+        beethoven::fit_base_learner(
+          rset = list_rset_train,
+          model = engine_base_lgb,
+          tune_grid_size = df_lgb_grid[
+            sample(nrow(df_lgb_grid), list_base_params_static$tune_grid_size),
+          ],
+          yvar = list_base_params_static$yvar,
+          xvar = list_base_params_static$xvar,
+          drop_vars = list_base_params_static$drop_vars,
+          normalize = list_base_params_static$normalize
+        )
+      },
+      pattern = map(list_rset_train),
+      iteration = "list",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_sequential")
+      ),
+      description = "Fit base learner | lgb | cpu | base learner"
     )
   )

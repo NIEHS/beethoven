@@ -175,12 +175,12 @@ if (Sys.getenv("BEETHOVEN") == "covariates") {
       target_metalearner <-
         target_calculate_predict <-
           target_predict <- list()
-} else if (Sys.getenv("BEETHOVEN") == "lgb") {
-  target_baselearner_mlp <-
+} else if (Sys.getenv("BEETHOVEN") == "mlp") {
+  target_baselearner_lgb <-
     target_metalearner <-
       target_calculate_predict <-
         target_predict <- list()
-} else if (Sys.getenv("BEETHOVEN") == "mlp") {
+} else if (Sys.getenv("BEETHOVEN") == "lgb") {
   target_metalearner <-
     target_calculate_predict <-
       target_predict <- list()
@@ -198,8 +198,8 @@ list(
   target_calculate_fit,
   target_baselearner,
   target_baselearner_elnet,
-  target_baselearner_lgb,
-  target_baselearner_mlp
+  target_baselearner_mlp,
+  target_baselearner_lgb
   # target_metalearner
   # target_calculate_predict
   # target_predict
