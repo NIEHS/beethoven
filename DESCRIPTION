@@ -3,15 +3,13 @@ Title: Building an Extensible, rEproducible, Test-driven, Harmonized, Open-sourc
 Version: 0.4.7
 Authors@R: c(
     person("Kyle", "Messier", , "kyle.messier@nih.gov", role = c("aut", "cre"), comment = c(ORCID = "0000-0001-9508-9623")),
+    person("Mitchell", "Manware", role = c("aut", "ctb"), comment = c(ORCID = "0009-0003-6440-6106")),
     person("Insang", "Song", role = c("aut", "ctb"), comment = c(ORCID = "0000-0001-8732-3256")),
     person("Eva", "Marques", role = c("aut", "ctb"), comment = c(ORCID = "0000-0001-9817-6546")),
-    person("Ranadeep", "Daw", role = c("aut", "ctb"), comment = c(ORCID = "0000-0003-3590-909X")),	
-    person("Mitchell", "Manware", role = c("aut", "ctb"), comment = c(ORCID = "0009-0003-6440-6106")),
-    person("Daniel", "Zilber", role = c("aut", "ctb"), comment = c(ORCID = "0000-0002-4387-0271")),
     person("Anisha", "Singh", role = c("aut", "ctb"), comment = c(ORCID = "0000-0002-7540-0856")),
     person("Lara", "Clark", role = c("aut", "ctb"), comment = c(ORCID = "0000-0001-6940-5442")),
+    person("Mariana", "Alifa Kassien", role = c("aut", "ctb"), comment = c(ORCID = "0000-0003-2295-406X")),
     person("Cavin", "Ward-Caviness", role = c("aut", "ctb"), comment = c(ORCID = "0000-0002-6322-4349")),
-    person("Mariana", "Alifa Kassien", role = c("aut", "ctb"), comment = c(ORCID = "0000-0003-2295-406X"))
   )
 Description: Near Real Time air pollution model results and code produced by the SET group. It is fully tested, versioned, and open source and open access.
 Depends: R (>= 4.1.0)
