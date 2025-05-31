@@ -132,10 +132,10 @@ target_baselearner_lgb <-
       engine_base_lgb,
       command = {
         parsnip::boost_tree(
-          mtry = 239,
-          trees = 445,
+          mtry = parsnip::tune(),
+          trees = parsnip::tune(),
           learn_rate = parsnip::tune(),
-          tree_depth = 7
+          tree_depth = parsnip::tune()
         ) %>%
           parsnip::set_engine("lightgbm", device = "cpu") %>%
           parsnip::set_mode("regression")
@@ -147,7 +147,12 @@ target_baselearner_lgb <-
       command = beethoven::fit_base_learner(
         rset = list_rset_train,
         model = engine_base_lgb,
-        tune_grid_size = list_base_params_static$tune_grid_size,
+        tune_grid_size = expand.grid(
+          mtry = c(150, 239),
+          trees = c(250, 445),
+          learn_rate = c(0.1, 0.15),
+          tree_depth = c(4, 7)
+        ),
         yvar = list_base_params_static$yvar,
         xvar = list_base_params_static$xvar,
         drop_vars = list_base_params_static$drop_vars,

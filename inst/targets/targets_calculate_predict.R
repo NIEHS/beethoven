@@ -6,10 +6,8 @@ target_calculate_predict <-
     targets::tar_target(
       list_feat_pred_sites,
       command = {
-        df_pred_grid <- file.path(
-          chr_input_dir,
-          "prediction",
-          "df_pred_grid.rds"
+        df_pred_grid <- qs::qread(
+          file.path("inst", "extdata", "prediction_grid.qs")
         )
         df_pred_grid$site_id <- sprintf("P%08d", df_pred_grid$site_id)
         sf_pred_grid <- sf::st_as_sf(
