@@ -308,8 +308,7 @@ target_calculate_predict <-
         Reduce(
           f = function(d, e) dplyr::full_join(d, e, by = c("site_id")),
           .
-        ) %>%
-        unlist()
+        )
       },
       iteration = "list",
       pattern = map(list_pred_calc_grid),
@@ -966,7 +965,8 @@ target_calculate_predict <-
                           # variables parameter should be changed properly depending on the vintage
                           # as of Dec 2024, newly downloaded TRI data has different layout
                           # compared to the one used in 2023
-                          variables = c(1, 13, 12, 14, 3 + c(20, 34, 36, 47, 48, 49))
+                          # add 3 after 20
+                          variables = c(1, 13, 12, 14, 20, 34, 36, 47, 48, 49)
                         )
                       res_tri <-
                         beethoven::calc_tri_mod(
@@ -1159,12 +1159,14 @@ target_calculate_predict <-
       command = {
         Reduce(
           f = function(d, e) dplyr::full_join(d, e, by = c("site_id")),
+          list(
           list_pred_calc_nlcd,
           list_pred_calc_gmted,
           list_pred_calc_pop,
           list_pred_calc_koppen,
           list_pred_calc_ecoregions,
           list_pred_calc_groads
+          )
         ) %>%
         as.data.frame()
       },
@@ -1185,22 +1187,6 @@ target_calculate_predict <-
       description = "data.frame of spatial features | prediction"
     )
     ,
-    # ##  Expand spatial targets to include all time stamps
-    # targets::tar_target(
-    #   list_pred_calc_spatial_exp,
-    #   command = {
-    #     list_pred_calc_spatial
-    #   },
-    #   pattern = cross(list_pred_calc_spatial, list_dates),
-    #   iteration = "list",
-    #   format = "parquet",
-    #   resources = targets::tar_resources(
-    #     crew = targets::tar_resources_crew(controller = "controller_10"),
-    #     parquet = targets::tar_resources_parquet(compression = "lz4")
-    #   ),
-    #   description = "spatiotemporally expanded spatial features | prediction"
-    # )
-    # ,
     ###########################        SPATIOTEMPORAL BRANCHES FOR PREDICTION       ###########################
     targets::tar_target(
       list_pred_calc_spt,
@@ -1248,12 +1234,13 @@ target_calculate_predict <-
       command = {
         df_branches <-
           targets::tar_branches(
-            list_pred_calc_hms
+            list_pred_calc_geos_aqc
           )
         branch_sp <- df_branches[["list_pred_calc_grid"]]
+
         branch_spindx <- unique(branch_sp)
-        branch_spindx <- match(branch_spindx, branch_sp)
-        branch_spindx
+        branch_spindx2 <- match(branch_sp, branch_spindx)
+        branch_spindx2
       },
       iteration = "list"
     ),

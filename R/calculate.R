@@ -50,7 +50,6 @@ calc_geos_strict <-
       paths <- path
     }
     #### check for variable
-    # amadeus::check_for_null_parameters(mget(ls()))
     #### identify file paths
     #### identify dates based on user input
     dates_of_interest <- amadeus::generate_date_sequence(
@@ -91,8 +90,7 @@ calc_geos_strict <-
     cat(
       paste0(
         "Identified collection ",
-        collection,
-        ".\n"
+        collection
       )
     )
     if (length(collection) > 1) {
@@ -100,7 +98,7 @@ calc_geos_strict <-
         paste0(
           "Multiple collections detected. Ensure that data files ",
           "for each collection are stored in different directories ",
-          "(ie. 'chm' in 'data/chm/' and 'aqc' in 'data/aqc/').\n"
+          "(ie. 'chm' in 'data/chm/' and 'aqc' in 'data/aqc/')."
         )
       )
       # mm-tests-0816 return error for multiple collections in one path
@@ -149,6 +147,7 @@ calc_geos_strict <-
       }
 
     # fs is the hourly file paths per day (each element with N=24)
+    # Process by variable in each day
     summary_byvar <- function(x = search_variables, fs) {
       rast_in <- rlang::inject(terra::rast(fs, !!!other_args))
       # strongly assume that we take the single day. no need to filter dates
@@ -159,21 +158,16 @@ calc_geos_strict <-
           x,
           function(v) {
             rast_inidx <- grep(v, data_variables)
-            #rast_in <- mean(rast_in[[rast_inidx]])
+            # Daily mean
             rast_summary <- terra::mean(rast_in[[rast_inidx]])
+
+            # Assign time tag
             rtin <- as.Date(terra::time(rast_in))
             rtin_u <- unique(rtin)
-            cat(sprintf("Processing %s, date: %s\n", v, rtin_u))
-            # rast_summary <- vector("list", length = length(rtin_u))
-            # for (d in seq_along(rtin_u)) {
-            #   rast_d <- rast_in[[rtin == rtin_u[d]]]
-            #   rast_summary[[d]] <- mean(rast_d)
-            # }
-            # rast_summary <- do.call(c, rast_summary)
+            message(sprintf("Processing %s, date: %s", v, rtin_u))
 
-            # the next line is deprecated
-            # rast_summary <- terra::tapp(rast_in, index = "days", fun = "mean")
-            terra::time(rast_summary) <- rtin_u
+            terra::time(rast_summary) <-
+              rep(rtin_u, terra::nlyr(rast_summary))
             names(rast_summary) <-
               paste0(
                 rep(gsub("_lev=.*", "", v), terra::nlyr(rast_summary))
@@ -184,14 +178,12 @@ calc_geos_strict <-
         )
       sds_proc <- terra::sds(sds_proc)
 
+      # SpatVector conversion
       locstr <- terra::vect(locs)
+      # Raster to point extraction
       rast_ext <- terra::extract(sds_proc, locstr, ID = TRUE)
-      # rast_ext <- lapply(rast_ext,
-      #   function(df) {
-      #     df$ID <- unlist(locs[[locs_id]])
-      #     return(df)
-      #   }
-      # )
+
+      # Full join across all variables
       rast_ext <-
         Reduce(function(dfa, dfb) dplyr::full_join(dfa, dfb, by = "ID"),
           rast_ext
@@ -208,7 +200,8 @@ calc_geos_strict <-
         future_inserted,
         function(fs) summary_byvar(fs = fs)
       )
-    rast_summary <- data.table::rbindlist(rast_summary)
+    # Daily results are rowbound
+    rast_summary <- data.table::rbindlist(rast_summary, fill=TRUE)
 
     return(rast_summary)
 
