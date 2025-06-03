@@ -32,7 +32,7 @@ target_metalearner <-
       pattern = map(fit_learner_base_elnet, mc_test),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_geo")
+        crew = targets::tar_resources_crew(controller = "controller_gpu")
       )
     ),
     targets::tar_target(
@@ -43,7 +43,7 @@ target_metalearner <-
       pattern = map(fit_learner_base_lgb, mc_test),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_geo")
+        crew = targets::tar_resources_crew(controller = "controller_gpu")
       )
     ),
     targets::tar_target(
@@ -54,7 +54,7 @@ target_metalearner <-
       pattern = map(fit_learner_base_mlp, mc_test),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_geo")
+        crew = targets::tar_resources_crew(controller = "controller_gpu")
       )
     )
     # # ,

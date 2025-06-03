@@ -157,7 +157,7 @@ target_baselearner_mlp <-
       pattern = map(list_rset_train),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_geo")
+        crew = targets::tar_resources_crew(controller = "controller_gpu")
       ),
       description = "Fit base learners | mlp | gpu | base learner"
     )
@@ -205,7 +205,7 @@ target_baselearner_lgb <-
       pattern = map(list_rset_train),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_sequential")
+        crew = targets::tar_resources_crew(controller = "controller_cpu")
       ),
       description = "Fit base learner | lgb | cpu | base learner"
     )
