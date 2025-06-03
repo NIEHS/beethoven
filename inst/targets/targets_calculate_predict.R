@@ -120,51 +120,6 @@ target_calculate_predict <-
       )
     )
     ,
-    ### VECTOR PROCESSING GRID ####
-    # targets::tar_target(
-    #   sf_pred_calc_split_v,
-    #   command = {
-    #     init_grid <-
-    #       chopin::par_pad_grid(
-    #         sf_pred_calc_grid,
-    #         mode = "grid",
-    #         nx = 30L,
-    #         ny = 15L,
-    #         padding = 100
-    #       )[[1]]
-    #     grid_sample <- dplyr::sample_frac(sf_pred_raw_grid, 0.01)
-    #     init_grid_intersect <-
-    #       init_grid[grid_sample, ]
-    #     if (!"grid_id" %in% names(init_grid_intersect)) {
-    #       init_grid_intersect$grid_id <- seq_len(nrow(init_grid_intersect))
-    #     }
-    #     init_grid_intersect
-    #   },
-    #   iteration = "vector",
-    #   description = "sf split grid polygons (for vector processing)"
-    # )
-    # ,
-    # targets::tar_target(
-    #   list_pred_calc_grid_v,
-    #   command = {
-    #     grid_unit <- sf::st_bbox(sf_pred_calc_split_v)
-    #     sf::st_as_sf(
-    #       df_pred_calc_gridcoords |>
-    #         dplyr::filter((lon <= grid_unit[3] & lon >= grid_unit[1]) & (lat <= grid_unit[4] & lat >= grid_unit[2])),
-    #       coords = c("lon", "lat"),
-    #       crs = 4326,
-    #       remove = FALSE
-    #     )
-
-    #   },
-    #   iteration = "list",
-    #   pattern = map(sf_pred_calc_split_v),
-    #   description = "Split prediction grid into list by chopin grid (DEV SAMPLE)",
-    #   resources = targets::tar_resources(
-    #     crew = targets::tar_resources_crew(controller = "controller_50")
-    #   )
-    # )
-    # ,
     ###########################         HMS          ###########################
     targets::tar_target(
       list_pred_calc_hms,
@@ -1053,7 +1008,7 @@ target_calculate_predict <-
       pattern = map(list_pred_calc_grid),
       description = "Calculate NEI features | prediction grid",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_15"),
+        crew = targets::tar_resources_crew(controller = "controller_25"),
         parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
       format = "parquet"
@@ -1146,7 +1101,7 @@ target_calculate_predict <-
       iteration = "list",
       pattern = map(list_pred_calc_grid),
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_15"),
+        crew = targets::tar_resources_crew(controller = "controller_10"),
         parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
       format = "parquet",
