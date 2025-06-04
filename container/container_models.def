@@ -84,6 +84,18 @@ From: nvidia/cuda:11.8.0-devel-ubuntu22.04
     export LANG=en_US.UTF-8
     export LC_ALL=en_US.UTF-8
 
+    # Clone and build LightGBM with GPU support
+    apt-get update && apt-get install -y ocl-icd-opencl-dev
+    Rscript -e "install.packages(c('R6', 'data.table', 'jsonlite', 'knitr'), \
+        repos = 'https://cran.r-project.org')"
+    rm -rf LightGBM
+    git clone --recursive https://github.com/microsoft/LightGBM
+    cd LightGBM
+    Rscript build_r.R \
+        --no-build-vignettes \
+        --use-gpu
+    cd ..
+
     # Create directories
     mkdir /pipeline
     mkdir /input
@@ -97,16 +109,18 @@ From: nvidia/cuda:11.8.0-devel-ubuntu22.04
     Rscript -e "pak::pak('mitchellmanware/parsnip@beethoven')"
     Rscript -e "install.packages(c('tarchetypes', \
         'testthat', 'tidymodels', 'bonsai', 'qs2', \
-        'torch', 'tidyverse', 'glmnet', 'covr', 'lightgbm'))"
+        'torch', 'tidyverse', 'glmnet', 'covr'))" # excluded lightGBM
     Rscript -e "options(timeout = 1800); torch::install_torch(version = 'latest', type = 'gpu')"
     Rscript -e "pak::pak('tidymodels/brulee@gpu')"
     Rscript -e "pak::pak('shikokuchuo/nanonext'); pak::pak('shikokuchuo/mirai')"
-    Rscript -e "pak::pak('wlandau/crew'); pak::pak('wlandau/crew.cluster')"
+    Rscript -e "devtools::install_version('crew', version = '1.1.2')"
+    Rscript -e "devtools::install_version('crew.cluster', version = '0.3.7')"
+    # Rscript -e "pak::pak('wlandau/crew'); pak::pak('wlandau/crew.cluster')"
     Rscript -e "install.packages(c('scoringRules', 'future.mirai', 'vetiver', \
-        'lwgeom', 'doRNG', 'quarto', 'kernlab'))"
+        'lwgeom', 'doRNG', 'quarto', 'kernlab', 'arrow'))"
     Rscript -e "pak::pak('finetune')"
     Rscript -e "pak::pak('lme4',upgrade = TRUE)"    
-    Rscript -e "pak::pak('NIEHS/beethoven@kpm-0321')"
+    Rscript -e "pak::pak('NIEHS/beethoven@mm-0530')"
     Rscript -e "pak::pak('r-lib/ps', upgrade = TRUE)"
 
 %environment
