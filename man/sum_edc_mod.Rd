@@ -73,3 +73,4 @@ sum_edc_mod(pnt_locs, pnt_from, "NAME", 1e4, vals)
 \author{
 Insang Song
 }
+\keyword{Calculation}

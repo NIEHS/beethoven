@@ -18,8 +18,10 @@ from the sites' coordinate system.}
 
 \item{colheader}{character. Column name header.}
 
-\item{mark}{logical(1). Mark zero-padded (length of 5) radius in the column name.}
+\item{mark}{logical(1). Mark zero-padded (length of 5) radius in the column
+name.}
 }
 \description{
 Calculate MODIS from preprocessed file
 }
+\keyword{Calculation}

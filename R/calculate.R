@@ -907,6 +907,7 @@ process_modis_swath, or process_blackmarble."
 #' @param colheader character. Column name header.
 #' @param mark logical(1). Mark zero-padded (length of 5) radius in the column
 #' name.
+#' @keywords Calculation
 #' @importFrom chopin extract_at
 #' @importFrom sf st_as_sf
 #' @importFrom stats setNames
@@ -978,6 +979,7 @@ calculate_modis_direct <-
 #' @author Insang Song, Mariana Kassien
 #' @return a data.frame or SpatVector object
 #' @note U.S. context.
+#' @keywords Calculation
 #' @importFrom terra vect crs nearby hull buffer
 #' @importFrom methods is
 #' @importFrom data.table .SD rbindlist as.data.table merge.data.table
@@ -1099,6 +1101,7 @@ calc_tri_mod <-
 #'
 #' vals <- c("val1", "val2")
 #' sum_edc_mod(pnt_locs, pnt_from, "NAME", 1e4, vals)
+#' @keywords Calculation
 #' @importFrom collapse set_collapse qDT
 #' @importFrom terra nearby distance buffer
 #' @importFrom rlang sym
