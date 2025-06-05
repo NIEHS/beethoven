@@ -1,4 +1,3 @@
-
 #' Process atmospheric composition data by chunks
 #' @keywords Calculation
 #' @description
@@ -26,11 +25,13 @@
 #' @importFrom dplyr full_join
 #' @export
 calc_geos_strict <-
-  function(path = NULL,
-           date = c("2018-01-01", "2018-01-01"),
-           locs = NULL,
-           locs_id = NULL,
-           ...) {
+  function(
+    path = NULL,
+    date = c("2018-01-01", "2018-01-01"),
+    locs = NULL,
+    locs_id = NULL,
+    ...
+  ) {
     #### directory setup
     if (length(path) == 1) {
       if (dir.exists(path)) {
@@ -133,14 +134,58 @@ calc_geos_strict <-
 
     search_variables <-
       if (grepl("chm", collection)) {
-        c("ACET", "ALD2", "ALK4", "BCPI", "BCPO", "BENZ", "C2H6", "C3H8",
-          "CH4", "CO", "DST1", "DST2", "DST3", "DST4", "EOH", "H2O2",
-          "HCHO", "HNO3", "HNO4", "ISOP", "MACR", "MEK", "MVK", "N2O5",
-          "NH3", "NH4", "NIT", "NO", "NO2", "NOy", "OCPI", "OCPO", "PAN",
-          "PM25_RH35_GCC", "PM25_RH35_GOCART", "PM25bc_RH35_GCC",
-          "PM25du_RH35_GCC", "PM25ni_RH35_GCC", "PM25oc_RH35_GCC",
-          "PM25soa_RH35_GCC", "PM25ss_RH35_GCC", "PM25su_RH35_GCC",
-          "PRPE", "RCHO", "SALA", "SALC", "SO2", "SOAP", "SOAS", "TOLU", "XYLE"
+        c(
+          "ACET",
+          "ALD2",
+          "ALK4",
+          "BCPI",
+          "BCPO",
+          "BENZ",
+          "C2H6",
+          "C3H8",
+          "CH4",
+          "CO",
+          "DST1",
+          "DST2",
+          "DST3",
+          "DST4",
+          "EOH",
+          "H2O2",
+          "HCHO",
+          "HNO3",
+          "HNO4",
+          "ISOP",
+          "MACR",
+          "MEK",
+          "MVK",
+          "N2O5",
+          "NH3",
+          "NH4",
+          "NIT",
+          "NO",
+          "NO2",
+          "NOy",
+          "OCPI",
+          "OCPO",
+          "PAN",
+          "PM25_RH35_GCC",
+          "PM25_RH35_GOCART",
+          "PM25bc_RH35_GCC",
+          "PM25du_RH35_GCC",
+          "PM25ni_RH35_GCC",
+          "PM25oc_RH35_GCC",
+          "PM25soa_RH35_GCC",
+          "PM25ss_RH35_GCC",
+          "PM25su_RH35_GCC",
+          "PRPE",
+          "RCHO",
+          "SALA",
+          "SALC",
+          "SO2",
+          "SOAP",
+          "SOAS",
+          "TOLU",
+          "XYLE"
         )
       } else {
         c("CO", "NO2", "O3", "SO2")
@@ -185,14 +230,14 @@ calc_geos_strict <-
 
       # Full join across all variables
       rast_ext <-
-        Reduce(function(dfa, dfb) dplyr::full_join(dfa, dfb, by = "ID"),
+        Reduce(
+          function(dfa, dfb) dplyr::full_join(dfa, dfb, by = "ID"),
           rast_ext
         )
       rast_ext$time <- unique(as.Date(terra::time(rast_in)))
       rast_ext$ID <- unlist(locs[[locs_id]])[rast_ext$ID]
       names(rast_ext)[names(rast_ext) == "ID"] <- locs_id
       return(rast_ext)
-
     }
 
     rast_summary <-
@@ -201,10 +246,9 @@ calc_geos_strict <-
         function(fs) summary_byvar(fs = fs)
       )
     # Daily results are rowbound
-    rast_summary <- data.table::rbindlist(rast_summary, fill=TRUE)
+    rast_summary <- data.table::rbindlist(rast_summary, fill = TRUE)
 
     return(rast_summary)
-
   }
 
 
@@ -224,14 +268,15 @@ calc_geos_strict <-
 #' @importFrom amadeus download_sanitize_path
 #' @export
 calc_gmted_direct <- function(
-    variable = NULL,
-    path = NULL,
-    locs = NULL,
-    locs_id = NULL,
-    win = c(-126, -62, 22, 52),
-    radius = 0,
-    fun = "mean",
-    ...) {
+  variable = NULL,
+  path = NULL,
+  locs = NULL,
+  locs_id = NULL,
+  win = c(-126, -62, 22, 52),
+  radius = 0,
+  fun = "mean",
+  ...
+) {
   #### directory setup
   path <- amadeus::download_sanitize_path(path)
   #### check for length of variable
@@ -263,13 +308,22 @@ calc_gmted_direct <- function(
     " resolution.\n"
   ))
   statistic_from <- c(
-    "Breakline Emphasis", "Systematic Subsample",
-    "Median Statistic", "Minimum Statistic",
-    "Mean Statistic", "Maximum Statistic",
+    "Breakline Emphasis",
+    "Systematic Subsample",
+    "Median Statistic",
+    "Minimum Statistic",
+    "Mean Statistic",
+    "Maximum Statistic",
     "Standard Deviation Statistic"
   )
   statistic_to <- c(
-    "BRKL", "SSUB", "MEDN", "MINI", "MEAN", "MAXL", "STDV"
+    "BRKL",
+    "SSUB",
+    "MEDN",
+    "MINI",
+    "MEAN",
+    "MAXL",
+    "STDV"
   )
   statistic_to <-
     sprintf("LDU_E%s", statistic_to[match(statistic, statistic_from)])
@@ -292,7 +346,8 @@ calc_gmted_direct <- function(
         statistic_code,
         as.character(resolution_code)
       ),
-      paths, value = TRUE
+      paths,
+      value = TRUE
     )
   # mm-tests-0816 ensures that .prj and .aux.xml files are not read
   # with terra::rast if path points to re-written ASCII file
@@ -346,13 +401,14 @@ calc_gmted_direct <- function(
   colnames(sites_extracted) <- c(
     locs_id,
     paste0(
-      statistic_to, "_", sprintf("%05d", radius)
+      statistic_to,
+      "_",
+      sprintf("%05d", radius)
     )
   )
   #### return data.frame
   return(data.frame(sites_extracted))
 }
-
 
 
 #' Calculate aggregated values for specified locations
@@ -410,9 +466,11 @@ calc_narr2 <- function(
   timetab <- table(time_from)
   if (!all(timetab == 1)) {
     time_split <-
-      split(time_from,
-            #ceiling(seq_along(time_from) / 29L))
-            ceiling(as.integer(as.factor(time_from)) / 14L))
+      split(
+        time_from,
+        #ceiling(seq_along(time_from) / 29L))
+        ceiling(as.integer(as.factor(time_from)) / 14L)
+      )
     sites_extracted <- Map(
       function(day) {
         cat(sprintf("Processing %s...\n", paste(day[1], "-", day[length(day)])))
@@ -435,7 +493,8 @@ calc_narr2 <- function(
       time_split
     )
     sites_extracted <- beethoven::reduce_merge(
-      sites_extracted, by = c("site_id")
+      sites_extracted,
+      by = c("site_id")
     )
   } else {
     sites_extracted <-
@@ -458,8 +517,7 @@ calc_narr2 <- function(
     tidyr::pivot_longer(cols = tidyselect::starts_with("MET_")) |>
     dplyr::rowwise() |>
     dplyr::mutate(
-      time =
-      regmatches(
+      time = regmatches(
         name,
         regexpr(
           "20[0-9]{2,2}[0-1][0-9][0-3][0-9]",
@@ -488,8 +546,6 @@ calc_narr2 <- function(
 }
 
 
-
-
 #' Parallelize NARR feature calculation
 #'
 #' This function parallelizes the processing and calculation of
@@ -504,7 +560,6 @@ calc_narr2 <- function(
 #' @return A list of results from the parallel processing.
 #' @export
 par_narr <- function(domain, path, date, locs) {
-
   if (!dir.exists(path)) {
     stop("The specified path does not exist.")
   }
@@ -526,7 +581,6 @@ par_narr <- function(domain, path, date, locs) {
       }
     )
   return(res)
-
 }
 
 #' Identify MODIS files
@@ -545,15 +599,17 @@ query_modis_files <- function(path, list, index) {
     path,
     full.names = TRUE,
     recursive = TRUE
-  ) |> grep(
-    pattern = paste0(
-      "A", list[[index]], collapse = "|"
-    ),
-    value = TRUE
-  )
+  ) |>
+    grep(
+      pattern = paste0(
+        "A",
+        list[[index]],
+        collapse = "|"
+      ),
+      value = TRUE
+    )
   return(grep_files)
 }
-
 
 
 #' Calculate MODIS product covariates in multiple CPU threads
@@ -680,8 +736,10 @@ calculate_modis <-
   ) {
     amadeus::check_geom(geom)
     if (!is.function(preprocess)) {
-      stop("preprocess should be one of process_modis_merge,
-process_modis_swath, or process_blackmarble.")
+      stop(
+        "preprocess should be one of process_modis_merge,
+process_modis_swath, or process_blackmarble."
+      )
     }
     # read all arguments
     # nolint start
@@ -720,14 +778,25 @@ process_modis_swath, or process_blackmarble.")
 
     locs_input <- try(sf::st_as_sf(locs), silent = TRUE)
     if (inherits(locs_input, "try-error")) {
-      stop("locs cannot be convertible to sf.
-      Please convert locs into a sf object to proceed.\n")
+      stop(
+        "locs cannot be convertible to sf.
+      Please convert locs into a sf object to proceed.\n"
+      )
     }
 
     export_list <- c()
     package_list <-
-      c("sf", "terra", "exactextractr", "data.table", "stars",
-        "dplyr", "parallelly", "rlang", "amadeus")
+      c(
+        "sf",
+        "terra",
+        "exactextractr",
+        "data.table",
+        "stars",
+        "dplyr",
+        "parallelly",
+        "rlang",
+        "amadeus"
+      )
     if (!is.null(export_list_add)) {
       export_list <- append(export_list, export_list_add)
     }
@@ -759,55 +828,54 @@ process_modis_swath, or process_blackmarble.")
             rlang::inject(preprocess(!!!hdf_args))
 
           if (sum(terra::nlyr(vrt_today)) != length(name_covariates)) {
-            message("The number of layers in the input raster do not match
-                    the length of name_covariates.\n")
+            message(
+              "The number of layers in the input raster do not match
+                    the length of name_covariates.\n"
+            )
           }
 
           res0 <-
-            lapply(radiusindexlist,
-              function(k) {
-                name_radius <-
-                  sprintf("%s%05d",
-                          name_covariates,
-                          radius[k])
-                extracted <-
-                  try(
-                    amadeus::calculate_modis_daily(
-                      locs = locs_input,
-                      from = vrt_today,
-                      locs_id = locs_id,
-                      date = as.character(day_to_pick),
-                      fun_summary = fun_summary,
-                      name_extracted = name_radius,
-                      radius = radius[k],
-                      max_cells = max_cells,
-                      geom = FALSE
-                    )
+            lapply(radiusindexlist, function(k) {
+              name_radius <-
+                sprintf("%s%05d", name_covariates, radius[k])
+              extracted <-
+                try(
+                  amadeus::calculate_modis_daily(
+                    locs = locs_input,
+                    from = vrt_today,
+                    locs_id = locs_id,
+                    date = as.character(day_to_pick),
+                    fun_summary = fun_summary,
+                    name_extracted = name_radius,
+                    radius = radius[k],
+                    max_cells = max_cells,
+                    geom = FALSE
                   )
-                if (inherits(extracted, "try-error")) {
-                  # coerce to avoid errors
-                  error_df <- data.frame(
-                    matrix(-99999,
-                           ncol = length(name_radius) + 1,
-                           nrow = nrow(locs_input))
+                )
+              if (inherits(extracted, "try-error")) {
+                # coerce to avoid errors
+                error_df <- data.frame(
+                  matrix(
+                    -99999,
+                    ncol = length(name_radius) + 1,
+                    nrow = nrow(locs_input)
                   )
-                  error_df <- stats::setNames(error_df, c(locs_id, name_radius))
-                  error_df[[locs_id]] <- unlist(locs_input[[locs_id]])
-                  error_df$time <- day_to_pick
-                  extracted <- error_df
-                }
-                return(extracted)
+                )
+                error_df <- stats::setNames(error_df, c(locs_id, name_radius))
+                error_df[[locs_id]] <- unlist(locs_input[[locs_id]])
+                error_df$time <- day_to_pick
+                extracted <- error_df
               }
-            )
+              return(extracted)
+            })
           res <-
-            Reduce(function(x, y) {
-              dplyr::left_join(x, y,
-                by = c(locs_id, "time")
-              )
-            },
-            res0)
+            Reduce(
+              function(x, y) {
+                dplyr::left_join(x, y, by = c(locs_id, "time"))
+              },
+              res0
+            )
           return(res)
-
         }
       )
     calc_results <- do.call(dplyr::bind_rows, calc_results)
@@ -830,7 +898,6 @@ process_modis_swath, or process_blackmarble.")
   }
 
 
-
 #' Calculate MODIS from preprocessed file
 #' @param file character(1). File path of preprocessed GeoTIFF file.
 #' @param site data.frame/sf. AQS sites. data.frame will be converted to sf.
@@ -838,12 +905,13 @@ process_modis_swath, or process_blackmarble.")
 #' @param radius numeric(1). Circular buffer radius. Distance unit is inherited
 #'   from the sites' coordinate system.
 #' @param colheader character. Column name header.
-#' @param mark logical(1). Mark zero-padded (length of 5) radius in the column name.
+#' @param mark logical(1). Mark zero-padded (length of 5) radius in the column
+#' name.
 #' @importFrom chopin extract_at
 #' @importFrom sf st_as_sf
 #' @importFrom stats setNames
 #' @importFrom stringi stri_extract_first_regex
-#' @export 
+#' @export
 calculate_modis_direct <-
   function(
     file,
@@ -873,7 +941,10 @@ calculate_modis_direct <-
     # time info
     chr_file1 <- file[1]
     dateinfo <-
-      stringi::stri_extract_first_regex(chr_file1, pattern = "2[0-9]{3,3}\\-[0-1][0-9]\\-[0-3][0-9]")
+      stringi::stri_extract_first_regex(
+        chr_file1,
+        pattern = "2[0-9]{3,3}\\-[0-1][0-9]\\-[0-3][0-9]"
+      )
     dateinfo <- as.Date(dateinfo, format = "%Y-%m-%d")
 
     extracted <-
@@ -890,8 +961,6 @@ calculate_modis_direct <-
     extracted[["time"]] <- dateinfo
     return(extracted)
   }
-
-
 
 
 #' Modified isotropic Sum of Exponentially Decaying Contributions (SEDC)
@@ -972,7 +1041,6 @@ calc_tri_mod <-
         )
     }
 
-
     # df_tri_return <- amadeus:::calc_return_locs(
     #   covar = df_tri,
     #   POSIXt = FALSE,
@@ -985,7 +1053,6 @@ calc_tri_mod <-
 
     return(df_tri)
   }
-
 
 
 # nolint start
@@ -1015,7 +1082,7 @@ calc_tri_mod <-
 #' @author Insang Song
 #' @references
 #' \insertRef{messier2012integrating}{amadeus}
-#' 
+#'
 #' \insertRef{web_sedctutorial_package}{amadeus}
 #' @examples
 #' set.seed(101)
@@ -1109,7 +1176,7 @@ The result may not be accurate.\n",
       summarize(
         across(
           all_of(target_fields),
-          ~sum(w_sedc * ., na.rm = TRUE)
+          ~ sum(w_sedc * ., na.rm = TRUE)
         )
       ) |>
       ungroup()
@@ -1118,12 +1185,8 @@ The result may not be accurate.\n",
     names(res_sedc)[idx_air] <-
       sprintf("%s_%05d", names(res_sedc)[idx_air], sedc_bandwidth)
 
-
     attr(res_sedc, "sedc_bandwidth") <- sedc_bandwidth
     attr(res_sedc, "sedc_threshold") <- sedc_bandwidth * 2
 
     return(res_sedc)
   }
-
-
-

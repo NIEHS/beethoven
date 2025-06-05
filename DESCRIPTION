@@ -48,7 +48,7 @@ Imports:
   finetune,
   butcher,
   amadeus,
-  arrow
+  chopin
 Suggests:
   testthat (>= 3.0.0),
   covr,
@@ -59,7 +59,6 @@ Suggests:
   lightgbm,
   scoringRules,
   future.mirai,
-  xgboost (<= 2.0.3.1),
   vetiver,
   tarchetypes,
   tidymodels,
@@ -74,7 +73,8 @@ Suggests:
   furrr,
   quarto,
   torch,
-  kernlab
+  kernlab,
+  arrow
 Remotes:
   ropensci/chopin,
   tidymodels/brulee@gpu,
