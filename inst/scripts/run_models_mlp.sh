@@ -5,8 +5,8 @@
 #SBATCH --mail-type=END,FAIL
 #SBATCH --partition=geo
 #SBATCH --ntasks=1
-#SBATCH --mem=10G
-#SBATCH --cpus-per-task=10
+#SBATCH --mem=1G
+#SBATCH --cpus-per-task=1
 #SBATCH --error=slurm/mlp_%j.err
 #SBATCH --output=slurm/mlp_%j.out
 

@@ -25,7 +25,11 @@ testthat::test_that("par_narr (weasd + omega)", {
     par_weasd <- par_narr(
       domain = "weasd",
       path = testthat::test_path(
-        "..", "testdata", "calculate", "narr", "weasd"
+        "..",
+        "testdata",
+        "calculate",
+        "narr",
+        "weasd"
       ),
       date = c("2018-01-01", "2018-01-01"),
       locs = loc
@@ -48,13 +52,16 @@ testthat::test_that("par_narr (weasd + omega)", {
   # expect "geometry" excluded from names
   testthat::expect_false("geometry" %in% names(par_weasd))
 
-
   # expect no error (omega)
   testthat::expect_no_error(
     par_omega <- par_narr(
       domain = "omega",
       path = testthat::test_path(
-        "..", "testdata", "calculate", "narr", "omega"
+        "..",
+        "testdata",
+        "calculate",
+        "narr",
+        "omega"
       ),
       date = c("2018-01-01", "2018-01-01"),
       locs = loc
@@ -77,7 +84,6 @@ testthat::test_that("par_narr (weasd + omega)", {
   # expect "geometry" dropped from names
   testthat::expect_false("geometry" %in% names(par_omega))
 
-
   # expect error with non-existent path
   testthat::expect_error(
     par_narr(
@@ -88,16 +94,15 @@ testthat::test_that("par_narr (weasd + omega)", {
       nthreads = 1
     )
   )
-
 })
 
 ################################################################################
 ##### query_modis_files
 testthat::test_that("query_modis_files", {
-
   path <- testthat::test_path("..", "testdata", "calculate", "modis")
   list <- list(
-    c("2018001"), c("2018002")
+    c("2018001"),
+    c("2018002")
   )
 
   # expect no error
@@ -118,7 +123,6 @@ testthat::test_that("query_modis_files", {
 ################################################################################
 ##### calculate_modis
 testthat::test_that("calculate_modis (MOD11A1)", {
-  
   withr::local_package("rlang")
 
   # sample location
@@ -135,7 +139,7 @@ testthat::test_that("calculate_modis (MOD11A1)", {
   )
 
   # expect no error with MOD11A1 files
-  testthat::expect_warning(
+  testthat::expect_no_error(
     modis_calculate_df <- beethoven::calculate_modis(
       from = mod11a1_files,
       locs = loc,
@@ -156,7 +160,7 @@ testthat::test_that("calculate_modis (MOD11A1)", {
   # expect "time" column
   testthat::expect_true("time" %in% names(modis_calculate_df))
 
-  testthat::expect_warning(
+  testthat::expect_no_error(
     modis_calculate_sf <- beethoven::calculate_modis(
       from = mod11a1_files,
       locs = loc,
@@ -183,7 +187,6 @@ testthat::test_that("calculate_modis (MOD11A1)", {
   # )
   # # expect a terra
   # testthat::expect_true(methods::is(modis_calculate_terra, "SpatVector"))
-
 
   # expect error with non-function preprocessor
   testthat::expect_error(
@@ -220,13 +223,10 @@ testthat::test_that("calculate_modis (MOD11A1)", {
       radius = c(100)
     )
   )
-
 })
 
 
-
 testthat::test_that("calculate_modis_direct: correct column renaming, date‐parsing, and mark=TRUE vs FALSE", {
-
   withr::local_package("terra")
   withr::local_package("sf")
   withr::local_package("dplyr")
@@ -239,7 +239,7 @@ testthat::test_that("calculate_modis_direct: correct column renaming, date‐par
     testthat::test_path("..", "testdata", "injection", "modis", "mod11a1"),
     full.names = TRUE
   )
-  mod11ras <- terra::rast(mod11a1_files, subds="LST_Day_1km")
+  mod11ras <- terra::rast(mod11a1_files, subds = "LST_Day_1km")
   tdir <- tempdir()
   mod11tif <- file.path(tdir, "mod11a1_h11v05_2021-08-15.tif")
   terra::writeRaster(
@@ -251,52 +251,56 @@ testthat::test_that("calculate_modis_direct: correct column renaming, date‐par
 
   site_sf <- sf::st_as_sf(
     data.frame(
-      lon = -90, lat = 39.5,
-      site_id = "site_id", time = as.Date("2021-08-15")
+      lon = -90,
+      lat = 39.5,
+      site_id = "site_id",
+      time = as.Date("2021-08-15")
     ),
     coords = c("lon", "lat"),
     crs = "EPSG:4326"
   )
-  
+
   # Run with mark = TRUE (default)
   out1 <- calculate_modis_direct(
-    file     = mod11tif,
-    site     = site_sf,
-    site_id  = "site_id",
-    radius   = 1000,           # numeric
+    file = mod11tif,
+    site = site_sf,
+    site_id = "site_id",
+    radius = 1000, # numeric
     colheader = "hdR_",
-    mark     = TRUE
+    mark = TRUE
   )
-  
+
   # Column names include "hdR_01000"
   testthat::expect_length(grep("^hdR_01000", names(out1)), 1L)
-  
+
   # The returned time column should be a Date extracted from the file name
   testthat::expect_s3_class(out1$time, "Date")
   testthat::expect_equal(out1$time, as.Date("2021-08-15"))
-  
+
   # The printed column name should have been printed to the console:
   testthat::expect_identical(colnames(out1)[2], "hdR_01000")
-  
+
   # Run again with mark = FALSE
   out2 <- calculate_modis_direct(
-    file      = mod11tif,
-    site      = site_sf,
-    site_id   = "site_id",
-    radius    = 500,
+    file = mod11tif,
+    site = site_sf,
+    site_id = "site_id",
+    radius = 500,
     colheader = "FooBar_",
-    mark      = FALSE
+    mark = FALSE
   )
-  
+
   # colheader should be exactly "FooBar_" (no padding added).
-  testthat::expect_true(all(grepl("^FooBar_$", names(out2)[grep("FooBar_", names(out2))])))
+  testthat::expect_true(all(grepl(
+    "^FooBar_$",
+    names(out2)[grep("FooBar_", names(out2))]
+  )))
   testthat::expect_length(grep("^FooBar_$", names(out2)), 1L)
   testthat::expect_equal(out2$time, as.Date("2021-08-15"))
 })
 
 
 testthat::test_that("sum_edc_mod: warning on overlapping names and correct numeric sums", {
-
   withr::local_package("terra")
   withr::local_package("sf")
   withr::local_package("dplyr")
@@ -307,7 +311,8 @@ testthat::test_that("sum_edc_mod: warning on overlapping names and correct numer
   # Build a tiny 'locs' SpatVector with one point
   sf_locs <- sf::st_as_sf(
     data.frame(site_id = "S1", X = 100, Y = 100, stringsAsFactors = FALSE),
-    coords = c("X", "Y"), crs = 32614
+    coords = c("X", "Y"),
+    crs = 32614
   )
   locs_sp <- terra::vect(sf_locs)
   locs_sp$site_id <- sf_locs$site_id
@@ -321,14 +326,18 @@ testthat::test_that("sum_edc_mod: warning on overlapping names and correct numer
     stringsAsFactors = FALSE
   )
   sf_from <- sf::st_as_sf(
-    df_from, coords = c("X", "Y"), crs = 32614)
+    df_from,
+    coords = c("X", "Y"),
+    crs = 32614
+  )
   from_sp <- terra::vect(sf_from)
-  
+
   # Test the warning about overlapping names:
   # For example, if both locs and from share a column called “id”:
   sf_locs2 <- sf::st_as_sf(
-    data.frame(id = "S1", X=0, Y=0, stringsAsFactors = FALSE),
-    coords = c("X","Y"), crs = 32614
+    data.frame(id = "S1", X = 0, Y = 0, stringsAsFactors = FALSE),
+    coords = c("X", "Y"),
+    crs = 32614
   )
 
   locs_sp2 <- terra::vect(sf_locs2)
@@ -337,47 +346,45 @@ testthat::test_that("sum_edc_mod: warning on overlapping names and correct numer
   testthat::expect_warning(
     suppressMessages(
       sum_edc_mod(
-        from            = from_sp,
-        locs            = locs_sp2,
-        locs_id         = "id",
-        sedc_bandwidth  = 100,
-        target_fields   = c("VAL_AIR")
+        from = from_sp,
+        locs = locs_sp2,
+        locs_id = "id",
+        sedc_bandwidth = 100,
+        target_fields = c("VAL_AIR")
       )
     )
   )
-  
+
   # At sedc_bandwidth, each point's attributes are attenuated to
   # exp(-3)*value, so we expect the sum to be 2 * exp(-3) = 0.099574
   suppressMessages(
     out_sedc <- sum_edc_mod(
-      from           = from_sp,
-      locs           = locs_sp,
-      locs_id        = "site_id",
+      from = from_sp,
+      locs = locs_sp,
+      locs_id = "site_id",
       sedc_bandwidth = 50,
-      target_fields  = "VAL_AIR"
+      target_fields = "VAL_AIR"
     )
   )
-  
+
   # It should return a data.frame (tibble) with one row "site_id"
   testthat::expect_s3_class(out_sedc, "data.frame")
   testthat::expect_true("site_id" %in% names(out_sedc))
-  
+
   # The column used will be named "VAL_AIR_00005" since sprintf("%05d", 5) → "00005"
   testthat::expect_true("VAL_AIR" %in% names(out_sedc))
-  
+
   computed <- out_sedc$VAL_AIR
   expected <- 2 * 10 * exp(-3)
   testthat::expect_equal(computed, expected, tolerance = 1e-6)
-  
+
   # Attributes "sedc_bandwidth" and "sedc_threshold" should be attached
   testthat::expect_equal(attr(out_sedc, "sedc_bandwidth"), 50)
-  testthat::expect_equal(attr(out_sedc, "sedc_threshold"), 100)  # 2 * bandwidth
-  
+  testthat::expect_equal(attr(out_sedc, "sedc_threshold"), 100) # 2 * bandwidth
 })
 
 
 testthat::test_that("calc_tri_mod: correct behavior, whitespace fixed, suffixes appended, and errors", {
-
   withr::local_package("terra")
   withr::local_package("sf")
   withr::local_package("dplyr")
@@ -388,7 +395,8 @@ testthat::test_that("calc_tri_mod: correct behavior, whitespace fixed, suffixes 
   # Build a tiny 'locs' SpatVector with one point
   sf_locs <- sf::st_as_sf(
     data.frame(site_id = "S1", X = 100, Y = 100, stringsAsFactors = FALSE),
-    coords = c("X", "Y"), crs = 32614
+    coords = c("X", "Y"),
+    crs = 32614
   )
   locs_sp <- terra::vect(sf_locs)
   locs_sp$site_id <- sf_locs$site_id
@@ -403,21 +411,23 @@ testthat::test_that("calc_tri_mod: correct behavior, whitespace fixed, suffixes 
     stringsAsFactors = FALSE
   )
   sf_from <- sf::st_as_sf(
-    df_from, coords = c("X", "Y"), crs = 32614)
+    df_from,
+    coords = c("X", "Y"),
+    crs = 32614
+  )
   from_sp <- terra::vect(sf_from)
 
   # Attach the attribute “tri_year”
   attr(from_sp, "tri_year") <- 2021L
-  
-  
+
   # Use a small radius (e.g. 10) so only the first “from” point at (0,0)
   #     is within the buffer created by calc_tri_mod()
   suppressMessages(
     out_tri <- calc_tri_mod(
-      from    = from_sp,
-      locs    = sf_locs,    # test the branch that converts sf → SpatVector
+      from = from_sp,
+      locs = sf_locs, # test the branch that converts sf → SpatVector
       locs_id = "site_id",
-      radius  = 100L
+      radius = 100L
     )
   )
 
@@ -426,23 +436,22 @@ testthat::test_that("calc_tri_mod: correct behavior, whitespace fixed, suffixes 
   # of sedc_bandwidth ("00010") will be appended. So we expect a column named
   # "CHEM_AIR_00010" to appear in out_tri.
   testthat::expect_true(any(grepl("^CHEM_AIR", names(out_tri))))
-  
+
   # Check that the “time” column is an integer and matches attr(from,) “tri_year”
   testthat::expect_true("time" %in% names(out_tri))
   testthat::expect_type(out_tri$time, "integer")
   testthat::expect_equal(out_tri$time, 2021L)
-  
+
   # If radius is non‐numeric, we expect an error at the very top of calc_tri_mod()
   testthat::expect_error(
     suppressMessages(
       calc_tri_mod(
-        from    = from_sp,
-        locs    = sf_locs,
+        from = from_sp,
+        locs = sf_locs,
         locs_id = "site_id",
-        radius  = "not_numeric"
+        radius = "not_numeric"
       )
     ),
     regexp = "radius should be numeric"
   )
 })
-
