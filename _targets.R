@@ -71,8 +71,8 @@ scriptlines_cpu <- glue::glue(
   "#SBATCH --job-name=submodel \
   #SBATCH --partition=geo \
   #SBATCH --ntasks=1 \
-  #SBATCH --cpus-per-task=16 \
-  #SBATCH --mem=100G \
+  #SBATCH --cpus-per-task=250 \
+  #SBATCH --mem=900G \
   #SBATCH --error=slurm/submodel_%j.out \
   {scriptlines_apptainer} exec --nv --env ",
   "CUDA_VISIBLE_DEVICES=${{GPU_DEVICE_ORDINAL}} ",

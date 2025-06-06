@@ -168,37 +168,6 @@ target_baselearner_mlp <-
 target_baselearner_lgb <-
   list(
     targets::tar_target(
-      engine_base_rf,
-      command = {
-        parsnip::rand_forest(
-          mtry = parsnip::tune(),
-          trees = parsnip::tune(),
-          min_n = parsnip::tune()
-        ) %>%
-          parsnip::set_engine("ranger", num.threads = 16) %>%
-          parsnip::set_mode("regression")
-      },
-      description = "Engine and device | rf | base learner"
-    ),
-    targets::tar_target(
-      fit_learner_base_rf,
-      command = beethoven::fit_base_learner(
-        rset = list_rset_train[[1]],
-        model = engine_base_rf,
-        tune_grid_size = list_base_params_static$tune_grid_size,
-        yvar = list_base_params_static$yvar,
-        xvar = list_base_params_static$xvar,
-        drop_vars = list_base_params_static$drop_vars,
-        normalize = list_base_params_static$normalize
-      ),
-      # pattern = map(list_rset_train),
-      iteration = "list",
-      resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_cpu")
-      ),
-      description = "Fit base learner | rf | cpu | base learner"
-    ),
-    targets::tar_target(
       engine_base_lgb,
       command = {
         parsnip::boost_tree(
@@ -226,7 +195,7 @@ target_baselearner_lgb <-
           tree_depth = c(4, 7)
         )
         beethoven::fit_base_learner(
-          rset = list_rset_train[[1]],
+          rset = list_rset_train,
           model = engine_base_lgb,
           tune_grid_size = df_lgb_grid[
             sample(nrow(df_lgb_grid), list_base_params_static$tune_grid_size),
@@ -237,7 +206,7 @@ target_baselearner_lgb <-
           normalize = list_base_params_static$normalize
         )
       },
-      # pattern = map(list_rset_train),
+      pattern = map(list_rset_train),
       iteration = "list",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(controller = "controller_cpu")
