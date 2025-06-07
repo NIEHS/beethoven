@@ -17,13 +17,13 @@ sbatch --wait inst/scripts/run_covariates.sh
 echo "Submitting {beethoven} {elnet} base model targets ..."
 sbatch --wait inst/scripts/run_models_elnet.sh
 
-# Fit CPU-enabled {lightGBM} models on `normal` cluster via container_models.sif.
-echo "Submitting {beethoven} {lightGBM} base model targets ..."
-sbatch --wait inst/scripts/run_models_lgb.sh
-
 # Fit GPU-enabled {brulee} models on `geo` cluster via container_models.sif.
 echo "Submitting {beethoven} {brulee} base model targets ..."
 sbatch --wait inst/scripts/run_models_mlp.sh
+
+# Fit CPU-enabled {lightGBM} models on `geo` cluster via container_models.sif.
+echo "Submitting {beethoven} {lightGBM} base model targets ..."
+sbatch --wait inst/scripts/run_models_lgb.sh
 
 # Fit CPU-enbaled meta learner models via container_models.sif.
 echo "Submitting {beethoven} CPU-enabled meta models targets ..."

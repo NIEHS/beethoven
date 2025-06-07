@@ -5,8 +5,8 @@
 #SBATCH --mail-type=END,FAIL
 #SBATCH --partition=geo
 #SBATCH --ntasks=1
-#SBATCH --mem=50G
-#SBATCH --cpus-per-task=10
+#SBATCH --mem=1G
+#SBATCH --cpus-per-task=1
 #SBATCH --error=slurm/lgb_%j.err
 #SBATCH --output=slurm/lgb_%j.out
 
@@ -26,6 +26,7 @@ export BEETHOVEN=lgb
 
 # Fit CPU-enabled base learner models via container_models.sif.
 apptainer exec \
+  --nv \
   --bind $PWD:/mnt \
   --bind $PWD/inst:/inst \
   --bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input \

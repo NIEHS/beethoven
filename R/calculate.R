@@ -39,7 +39,8 @@ calc_geos_strict <-
         paths <- list.files(
           path,
           pattern = "GEOS-CF.v01.rpl",
-          full.names = TRUE
+          full.names = TRUE,
+          recursive = TRUE
         )
         paths <- paths[grep(
           ".nc4",
@@ -50,7 +51,6 @@ calc_geos_strict <-
       paths <- path
     }
     #### check for variable
-    # amadeus::check_for_null_parameters(mget(ls()))
     #### identify file paths
     #### identify dates based on user input
     dates_of_interest <- amadeus::generate_date_sequence(
@@ -91,8 +91,7 @@ calc_geos_strict <-
     cat(
       paste0(
         "Identified collection ",
-        collection,
-        ".\n"
+        collection
       )
     )
     if (length(collection) > 1) {
@@ -100,7 +99,7 @@ calc_geos_strict <-
         paste0(
           "Multiple collections detected. Ensure that data files ",
           "for each collection are stored in different directories ",
-          "(ie. 'chm' in 'data/chm/' and 'aqc' in 'data/aqc/').\n"
+          "(ie. 'chm' in 'data/chm/' and 'aqc' in 'data/aqc/')."
         )
       )
       # mm-tests-0816 return error for multiple collections in one path
@@ -193,6 +192,7 @@ calc_geos_strict <-
       }
 
     # fs is the hourly file paths per day (each element with N=24)
+    # Process by variable in each day
     summary_byvar <- function(x = search_variables, fs) {
       rast_in <- rlang::inject(terra::rast(fs, !!!other_args))
       # strongly assume that we take the single day. no need to filter dates
@@ -203,21 +203,16 @@ calc_geos_strict <-
           x,
           function(v) {
             rast_inidx <- grep(v, data_variables)
-            #rast_in <- mean(rast_in[[rast_inidx]])
+            # Daily mean
             rast_summary <- terra::mean(rast_in[[rast_inidx]])
+
+            # Assign time tag
             rtin <- as.Date(terra::time(rast_in))
             rtin_u <- unique(rtin)
-            cat(sprintf("Processing %s, date: %s\n", v, rtin_u))
-            # rast_summary <- vector("list", length = length(rtin_u))
-            # for (d in seq_along(rtin_u)) {
-            #   rast_d <- rast_in[[rtin == rtin_u[d]]]
-            #   rast_summary[[d]] <- mean(rast_d)
-            # }
-            # rast_summary <- do.call(c, rast_summary)
+            message(sprintf("Processing %s, date: %s", v, rtin_u))
 
-            # the next line is deprecated
-            # rast_summary <- terra::tapp(rast_in, index = "days", fun = "mean")
-            terra::time(rast_summary) <- rtin_u
+            terra::time(rast_summary) <-
+              rep(rtin_u, terra::nlyr(rast_summary))
             names(rast_summary) <-
               paste0(
                 rep(gsub("_lev=.*", "", v), terra::nlyr(rast_summary))
@@ -228,14 +223,12 @@ calc_geos_strict <-
         )
       sds_proc <- terra::sds(sds_proc)
 
+      # SpatVector conversion
       locstr <- terra::vect(locs)
+      # Raster to point extraction
       rast_ext <- terra::extract(sds_proc, locstr, ID = TRUE)
-      # rast_ext <- lapply(rast_ext,
-      #   function(df) {
-      #     df$ID <- unlist(locs[[locs_id]])
-      #     return(df)
-      #   }
-      # )
+
+      # Full join across all variables
       rast_ext <-
         Reduce(
           function(dfa, dfb) dplyr::full_join(dfa, dfb, by = "ID"),
@@ -252,7 +245,8 @@ calc_geos_strict <-
         future_inserted,
         function(fs) summary_byvar(fs = fs)
       )
-    rast_summary <- data.table::rbindlist(rast_summary)
+    # Daily results are rowbound
+    rast_summary <- data.table::rbindlist(rast_summary, fill = TRUE)
 
     return(rast_summary)
   }
@@ -901,4 +895,301 @@ process_modis_swath, or process_blackmarble."
     attr(calc_results_return, "dates_dropped") <- dates_insuf
     Sys.sleep(1L)
     return(calc_results_return)
+  }
+
+
+#' Calculate MODIS from preprocessed file
+#' @param file character(1). File path of preprocessed GeoTIFF file.
+#' @param site data.frame/sf. AQS sites. data.frame will be converted to sf.
+#' @param site_id character(1). Unique identifier of `site`
+#' @param radius numeric(1). Circular buffer radius. Distance unit is inherited
+#'   from the sites' coordinate system.
+#' @param colheader character. Column name header.
+#' @param mark logical(1). Mark zero-padded (length of 5) radius in the column
+#' name.
+#' @keywords Calculation
+#' @importFrom chopin extract_at
+#' @importFrom sf st_as_sf
+#' @importFrom stats setNames
+#' @importFrom stringi stri_extract_first_regex
+#' @export
+calculate_modis_direct <-
+  function(
+    file,
+    site,
+    site_id,
+    radius,
+    colheader,
+    mark = TRUE
+  ) {
+    radius <- as.integer(unlist(radius))
+    chr_padr <- sprintf("%05d", radius)
+    chr_coln <- if (mark) {
+      sprintf("%s%s", colheader, chr_padr)
+    } else {
+      colheader
+    }
+    print(chr_coln)
+    stopifnot(inherits(site, "data.frame"))
+
+    if (inherits(site, "SpatVector")) {
+      site <- try(sf::st_as_sf(site))
+    }
+    if (!inherits(site, "sf")) {
+      site <- try(sf::st_as_sf(site, sf_column_name = "geometry"))
+    }
+
+    # time info
+    chr_file1 <- file[1]
+    dateinfo <-
+      stringi::stri_extract_first_regex(
+        chr_file1,
+        pattern = "2[0-9]{3,3}\\-[0-1][0-9]\\-[0-3][0-9]"
+      )
+    dateinfo <- as.Date(dateinfo, format = "%Y-%m-%d")
+
+    extracted <-
+      chopin::extract_at(
+        x = file,
+        y = site,
+        id = site_id,
+        radius = radius
+      )
+    coln <- names(extracted)
+    coln_replace <- grep("(mean|median|min|max)", coln)
+    coln[coln_replace] <- chr_coln
+    extracted <- setNames(extracted, coln)
+    extracted[["time"]] <- dateinfo
+    return(extracted)
+  }
+
+
+#' Modified isotropic Sum of Exponentially Decaying Contributions (SEDC)
+#'   covariates
+#' @description
+#' Calculate toxic release values for polygons or isotropic buffer point
+#' locations. Returns a \code{data.frame} object containing \code{locs_id}
+#' and variables for each chemical in \code{from}.
+#' @param from SpatVector(1). Output of \code{process_tri()}.
+#' @param locs sf/SpatVector. Locations where TRI variables are calculated.
+#' @param locs_id character(1). Unique site identifier column name.
+#'  Default is `"site_id"`.
+#' @param radius integer(1). Circular buffer radius.
+#' @param ... Placeholders.
+#' @author Insang Song, Mariana Kassien
+#' @return a data.frame or SpatVector object
+#' @note U.S. context.
+#' @keywords Calculation
+#' @importFrom terra vect crs nearby hull buffer
+#' @importFrom methods is
+#' @importFrom data.table .SD rbindlist as.data.table merge.data.table
+#' @importFrom utils read.csv
+#' @importFrom dplyr ends_with all_of group_by ungroup
+#' @importFrom dplyr filter mutate across summarize
+#' @export
+calc_tri_mod <-
+  function(
+    from = NULL,
+    locs,
+    locs_id = "site_id",
+    radius = 1e3L,
+    ...
+  ) {
+    stopifnot(length(radius) == 1)
+    if (!methods::is(locs, "SpatVector")) {
+      if (methods::is(locs, "sf")) {
+        locs <- terra::vect(locs)
+      }
+    }
+    if (!is.numeric(radius)) {
+      stop("radius should be numeric.\n")
+    }
+    locs_re <- terra::project(locs, terra::crs(from))
+
+    # split by year: locs and tri locations
+    tri_cols <- grep("_AIR", names(from), value = TRUE)
+    # error fix: no whitespace
+    tri_cols <- sub(" ", "_", tri_cols)
+
+    # list_radius <- split(radius, radius)
+    locs_h <- terra::hull(locs)
+    locs_hb <-
+      terra::buffer(
+        locs_h,
+        width = radius,
+        joinstyle = "mitre",
+        capstyle = "square"
+      )
+
+    from_re <- from[locs_hb, ]
+
+    df_tri <-
+      sum_edc_mod(
+        locs = locs_re,
+        from = from_re,
+        locs_id = locs_id,
+        sedc_bandwidth = radius,
+        target_fields = tri_cols
+      )
+    # bind element data.frames into one
+    # df_tri <- data.table::as.data.table(df_tri)
+    names(df_tri) <- gsub("X[0-9]{4,5}\\.", "", names(df_tri))
+    if (nrow(df_tri) != nrow(locs)) {
+      df_tri <-
+        data.table::merge.data.table(
+          data.table::as.data.table(locs),
+          df_tri,
+          by = locs_id
+        )
+    }
+
+    # df_tri_return <- amadeus:::calc_return_locs(
+    #   covar = df_tri,
+    #   POSIXt = FALSE,
+    #   geom = geom,
+    #   crs = terra::crs(from)
+    # )
+
+    # read attr
+    df_tri$time <- as.integer(attr(from, "tri_year"))
+
+    return(df_tri)
+  }
+
+
+# nolint start
+#' Calculate isotropic Sum of Exponentially Decaying Contributions (SEDC) covariates
+#' @param from `SpatVector`(1). Point locations which contain point-source
+#' covariate data.
+#' @param locs sf/SpatVector(1). Locations where the sum of exponentially
+#' decaying contributions are calculated.
+#' @param locs_id character(1). Name of the unique id field in `point_to`.
+#' @param sedc_bandwidth numeric(1).
+#' Distance at which the source concentration is reduced to
+#'  `exp(-3)` (approximately -95 %)
+#' @param target_fields character(varying). Field names in characters.
+#' @return a data.frame (tibble) or SpatVector object with input field names with
+#'  a suffix \code{"_sedc"} where the sums of EDC are stored.
+#'  Additional attributes are attached for the EDC information.
+#'    - `attr(result, "sedc_bandwidth")``: the bandwidth where
+#'  concentration reduces to approximately five percent
+#'    - `attr(result, "sedc_threshold")``: the threshold distance
+#'  at which emission source points are excluded beyond that
+#' @note The function is originally from
+#' [chopin](https://github.com/ropensci/chopin)
+#' Distance calculation is done with terra functions internally.
+#'  Thus, the function internally converts sf objects in
+#'  \code{point_*} arguments to terra.
+#'  The threshold should be carefully chosen by users.
+#' @author Insang Song
+#' @references
+#' \insertRef{messier2012integrating}{amadeus}
+#'
+#' \insertRef{web_sedctutorial_package}{amadeus}
+#' @examples
+#' set.seed(101)
+#' ncpath <- system.file("gpkg/nc.gpkg", package = "sf")
+#' nc <- terra::vect(ncpath)
+#' nc <- terra::project(nc, "EPSG:5070")
+#' pnt_locs <- terra::centroids(nc, inside = TRUE)
+#' pnt_locs <- pnt_locs[, "NAME"]
+#' pnt_from <- terra::spatSample(nc, 10L)
+#' pnt_from$pid <- seq(1, 10)
+#' pnt_from <- pnt_from[, "pid"]
+#' pnt_from$val1 <- rgamma(10L, 1, 0.05)
+#' pnt_from$val2 <- rgamma(10L, 2, 1)
+#'
+#' vals <- c("val1", "val2")
+#' sum_edc_mod(pnt_locs, pnt_from, "NAME", 1e4, vals)
+#' @keywords Calculation
+#' @importFrom collapse set_collapse qDT
+#' @importFrom terra nearby distance buffer
+#' @importFrom rlang sym
+#' @export
+# nolint end
+sum_edc_mod <-
+  function(
+    from = NULL,
+    locs = NULL,
+    locs_id = NULL,
+    sedc_bandwidth = NULL,
+    target_fields = NULL
+  ) {
+    collapse::set_collapse(mask = "manip")
+    if (!methods::is(locs, "SpatVector")) {
+      locs <- try(terra::vect(locs))
+    }
+    if (!methods::is(from, "SpatVector")) {
+      from <- try(terra::vect(from))
+    }
+
+    cn_overlap <- intersect(names(locs), names(from))
+    if (length(cn_overlap) > 0) {
+      warning(
+        sprintf(
+          "There are %d fields with the same name.
+The result may not be accurate.\n",
+          length(cn_overlap)
+        )
+      )
+    }
+    len_point_locs <- seq_len(nrow(locs))
+
+    locs$from_id <- len_point_locs
+    locs_buf <-
+      terra::buffer(
+        locs,
+        width = sedc_bandwidth * 2,
+        quadsegs = 90
+      )
+
+    from_in <- from[locs_buf, ]
+    len_point_from <- seq_len(nrow(from_in))
+
+    # len point from? len point to?
+    from_in$to_id <- len_point_from
+    dist <- NULL
+
+    # near features with distance argument: only returns integer indices
+    # threshold is set to the twice of sedc_bandwidth
+    res_nearby <-
+      terra::nearby(locs, from_in, distance = sedc_bandwidth * 2)
+    # attaching actual distance
+    dist_nearby <- terra::distance(locs, from_in)
+    dist_nearby_df <- as.vector(dist_nearby)
+    # adding integer indices
+    dist_nearby_tdf <-
+      expand.grid(
+        from_id = len_point_locs,
+        to_id = len_point_from
+      )
+    dist_nearby_df <- cbind(dist_nearby_tdf, dist = dist_nearby_df)
+
+    # summary
+    res_sedc <- res_nearby |>
+      as.data.table() |>
+      left_join(as.data.table(locs)) |>
+      left_join(as.data.table(from_in)) |>
+      left_join(as.data.table(dist_nearby_df)) |>
+      # per the definition in
+      # https://mserre.sph.unc.edu/BMElab_web/SEDCtutorial/index.html
+      # exp(-3) is about 0.05 * (value at origin)
+      mutate(w_sedc = exp((-3 * dist) / sedc_bandwidth)) |>
+      group_by(!!rlang::sym(locs_id)) |>
+      summarize(
+        across(
+          all_of(target_fields),
+          ~ sum(w_sedc * ., na.rm = TRUE)
+        )
+      ) |>
+      ungroup()
+
+    idx_air <- grep("_AIR_", names(res_sedc))
+    names(res_sedc)[idx_air] <-
+      sprintf("%s_%05d", names(res_sedc)[idx_air], sedc_bandwidth)
+
+    attr(res_sedc, "sedc_bandwidth") <- sedc_bandwidth
+    attr(res_sedc, "sedc_threshold") <- sedc_bandwidth * 2
+
+    return(res_sedc)
   }
