@@ -15,7 +15,7 @@ objects."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">beethoven</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -76,108 +76,174 @@ current environment.</p>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">unmarshal_function</span><span class="op">(</span><span class="st">"amadeus::process_aqs"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> function (path = NULL, date = c("2018-01-01", "2022-12-31"), </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     mode = c("date-location", "available-data", "location"), </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     data_field = "Arithmetic.Mean", return_format = c("terra", </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         "sf", "data.table"), extent = NULL, ...) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> function(</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     path = NULL,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     date = c("2018-01-01", "2022-12-31"),</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     mode = c("date-location", "available-data", "location"),</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     data_field = "Arithmetic.Mean",</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     return_format = c("terra", "sf", "data.table"),</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     extent = NULL,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ) {</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     mode &lt;- match.arg(mode)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     return_format &lt;- match.arg(return_format)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     if (!is.null(date)) {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         date &lt;- try(as.Date(date))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         if (inherits(date, "try-error")) {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             stop("date has invalid format(s). Please check the values.")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       date &lt;- try(as.Date(date))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       if (inherits(date, "try-error")) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         stop("date has invalid format(s). Please check the values.")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       if (length(date) != 2) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         if (length(date) == 1) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           date &lt;- c(date, date)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         } else {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           stop("date should be a character vector of length 1 or 2.")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         if (length(date) != 2) {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             if (length(date) == 1) {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                 date &lt;- c(date, date)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             else {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                 stop("date should be a character vector of length 1 or 2.")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     else {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         stop("date should be defined.")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     } else {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       stop("date should be defined.")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     if (length(path) == 1 &amp;&amp; dir.exists(path)) {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         path &lt;- list.files(path = path, pattern = "*.csv$", full.names = TRUE)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       path &lt;- list.files(</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         path = path,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         pattern = "*.csv$",</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         full.names = TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       )</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     if (length(path) == 0) {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         stop("path does not contain csv files.")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       stop("path does not contain csv files.")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     pathfiles &lt;- lapply(path, read.csv)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     sites &lt;- data.table::rbindlist(pathfiles, fill = TRUE)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     sites$site_id &lt;- sprintf("%02d%03d%04d%05d", as.integer(sites$State.Code), </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         as.integer(sites$County.Code), as.integer(sites$Site.Num), </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         as.integer(sites$Parameter.Code))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     ## get unique sites</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     sites$site_id &lt;-</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       sprintf(</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         "%02d%03d%04d%05d",</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         as.integer(sites$State.Code),</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         as.integer(sites$County.Code),</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         as.integer(sites$Site.Num),</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         as.integer(sites$Parameter.Code)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       )</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     site_id &lt;- NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     Datum &lt;- NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     POC &lt;- NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     Date.Local &lt;- NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     Sample.Duration &lt;- NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     date_start &lt;- as.Date(date[1])</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     date_end &lt;- as.Date(date[2])</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     date_sequence &lt;- seq(date_start, date_end, "day")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     date_sequence &lt;- as.character(date_sequence)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     sites &lt;- dplyr::ungroup(dplyr::mutate(dplyr::filter(dplyr::group_by(dplyr::filter(dplyr::filter(dplyr::as_tibble(sites), </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         as.character(Date.Local) %in% date_sequence), startsWith(Sample.Duration, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         "24")), site_id), POC == min(POC)), time = Date.Local))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     # select relevant fields only</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     sites &lt;- sites |&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       dplyr::as_tibble() |&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       dplyr::filter(as.character(Date.Local) %in% date_sequence) |&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       dplyr::filter(startsWith(Sample.Duration, "24")) |&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       dplyr::group_by(site_id) |&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       dplyr::filter(POC == min(POC)) |&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       dplyr::mutate(time = Date.Local) |&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       dplyr::ungroup()</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     col_sel &lt;- c("site_id", "Longitude", "Latitude", "Datum")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     if (mode != "available-data") {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         sites_v &lt;- unique(sites[, col_sel])</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     else {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         col_sel &lt;- append(col_sel, "Event.Type")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         col_sel &lt;- append(col_sel, "time")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         col_sel &lt;- append(col_sel, data_field)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         sites_v &lt;- dplyr::distinct(dplyr::select(sites, dplyr::all_of(col_sel)))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         sites_vdup &lt;- dplyr::ungroup(dplyr::filter(dplyr::filter(dplyr::group_by(sites_v, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             site_id, time), dplyr::n() &gt; 1), !!dplyr::sym("Event.Type") == </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             "Excluded"))</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         sites_v &lt;- dplyr::anti_join(sites_v, sites_vdup, by = c("site_id", </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             "time", "Event.Type"))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       sites_v &lt;- unique(sites[, col_sel])</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     } else {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       col_sel &lt;- append(col_sel, "Event.Type")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       col_sel &lt;- append(col_sel, "time")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       col_sel &lt;- append(col_sel, data_field)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       sites_v &lt;- sites |&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         dplyr::select(dplyr::all_of(col_sel)) |&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         dplyr::distinct()</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       # excluding site-time with multiple event types</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       # sites_vdup will be "subtracted" from the original sites_v</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       sites_vdup &lt;- sites_v |&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         dplyr::group_by(site_id, time) |&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         dplyr::filter(dplyr::n() &gt; 1) |&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         dplyr::filter(!!dplyr::sym("Event.Type") == "Excluded") |&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         dplyr::ungroup()</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       sites_v &lt;-</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         dplyr::anti_join(</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           sites_v,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           sites_vdup,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           by = c("site_id", "time", "Event.Type")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         )</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     names(sites_v)[2:3] &lt;- c("lon", "lat")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     sites_v &lt;- data.table::as.data.table(sites_v)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     sites_v &lt;- sites_v[!grepl("^(02|15|72|78|6|80)", site_id), </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         ]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     sites_v_nad &lt;- sites_v[sites_v$Datum == "NAD83", ]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     sites_v_nad &lt;- terra::vect(sites_v_nad, keepgeom = TRUE, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         crs = "EPSG:4269")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     # subset mainland</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     sites_v &lt;- sites_v[!grepl("^(02|15|72|78|6|80)", site_id), ]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     # NAD83 to WGS84</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     sites_v_nad &lt;-</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       sites_v[sites_v$Datum == "NAD83", ]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     sites_v_nad &lt;-</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       terra::vect(</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         sites_v_nad,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         keepgeom = TRUE,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         crs = "EPSG:4269"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       )</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     sites_v_nad &lt;- terra::project(sites_v_nad, "EPSG:4326")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     # postprocessing: combine WGS84 and new WGS84 records</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     sites_v_nad &lt;- as.data.frame(sites_v_nad)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     sites_v_wgs &lt;- sites_v[sites_v$Datum == "WGS84"]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     final_sites &lt;- data.table::rbindlist(list(sites_v_wgs, sites_v_nad), </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         fill = TRUE)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     final_sites &lt;- final_sites[, grep("Datum", names(final_sites), </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         invert = TRUE), with = FALSE]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     final_sites &lt;- data.table::rbindlist(</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       list(sites_v_wgs, sites_v_nad),</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       fill = TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     )</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     final_sites &lt;-</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       final_sites[,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         grep("Datum", names(final_sites), invert = TRUE),</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         with = FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       ]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     if (mode == "date-location") {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         final_sites &lt;- lapply(split(date_sequence, date_sequence), </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             function(x) {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                 fs_time &lt;- final_sites</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                 fs_time$time &lt;- x</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                 return(fs_time)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             })</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         final_sites &lt;- data.table::rbindlist(final_sites, fill = TRUE)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       final_sites &lt;-</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         split(date_sequence, date_sequence) |&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         lapply(function(x) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           fs_time &lt;- final_sites</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           fs_time$time &lt;- x</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           return(fs_time)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         })</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       final_sites &lt;- data.table::rbindlist(final_sites, fill = TRUE)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     if (mode == "available-data") {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         final_sites &lt;- unique(final_sites)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       final_sites &lt;- unique(final_sites)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     final_sites &lt;- switch(return_format, terra = terra::vect(final_sites, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         keepgeom = TRUE, crs = "EPSG:4326"), sf = sf::st_as_sf(final_sites, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         remove = FALSE, dim = "XY", coords = c("lon", "lat"), </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         crs = "EPSG:4326"), data.table = final_sites)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     final_sites &lt;-</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       switch(</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         return_format,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         terra = terra::vect(</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           final_sites,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           keepgeom = TRUE,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           crs = "EPSG:4326"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         ),</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         sf = sf::st_as_sf(</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           final_sites,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           remove = FALSE,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           dim = "XY",</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           coords = c("lon", "lat"),</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           crs = "EPSG:4326"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         ),</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         data.table = final_sites</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       )</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     if (!is.null(extent)) {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         if (return_format == "data.table") {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             warning("Extent is not applicable for data.table. Returning data.table...\n")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             return(final_sites)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         final_sites &lt;- apply_extent(final_sites, extent)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       if (return_format == "data.table") {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         warning(</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           "Extent is not applicable for data.table. Returning data.table...\n"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         )</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         return(final_sites)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       final_sites &lt;- apply_extent(final_sites, extent)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     return(final_sites)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;bytecode: 0x55c5197c1408&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;bytecode: 0x5600f2143e98&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: namespace:amadeus&gt;</span>
 </code></pre></div>
     </div>
@@ -186,7 +252,7 @@ current environment.</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Kyle Messier, Insang Song, Eva Marques, Ranadeep Daw, Mitchell Manware, Daniel Zilber, Anisha Singh, Lara Clark, Cavin Ward-Caviness, Mariana Alifa Kassien.</p>
+  <p>Developed by Kyle Messier, Mitchell Manware, Insang Song, Eva Marques, Anisha Singh, Lara Clark, Mariana Alifa Kassien, Cavin Ward-Caviness.</p>
 </div>
 
 <div class="pkgdown-footer-right">
