@@ -186,40 +186,22 @@ target_baselearner_lgb <-
       description = "Engine and device | lgb | base learner"
     ),
     targets::tar_target(
-      list_lgb_grid,
-      command = {
-        list_rset_train
-        df_lgb_grid <- expand.grid(
+      fit_learner_base_lgb,
+      command = beethoven::fit_base_learner(
+        rset = list_rset_train,
+        model = engine_base_lgb,
+        tune_grid_size = expand.grid(
           mtry = c(150, 239),
           trees = c(250, 445),
           learn_rate = c(0.1, 0.15),
           tree_depth = c(4, 7)
-        )
-        df_lgb_grid[
-          sample(nrow(df_lgb_grid), list_base_params_static$tune_grid_size),
-        ]
-      },
-      pattern = map(list_rset_train),
-      iteration = "list",
-      description = "Hyperparameter grid | lgb | base learner"
-    ),
-    targets::tar_target(
-      int_lgb_iterations,
-      command = seq_along(list_lgb_grid),
-      description = "Hyperparameter grid length | lgb | base learner"
-    ),
-    targets::tar_target(
-      fit_learner_base_lgb,
-      command = beethoven::fit_base_learner(
-        rset = list_rset_train[[int_lgb_iterations]],
-        model = engine_base_lgb,
-        tune_grid_size = list_lgb_grid[[int_lgb_iterations]],
+        ),
         yvar = list_base_params_static$yvar,
         xvar = list_base_params_static$xvar,
         drop_vars = list_base_params_static$drop_vars,
         normalize = list_base_params_static$normalize
       ),
-      pattern = map(int_lgb_iterations),
+      pattern = map(list_rset_train),
       iteration = "list",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(controller = "controller_cpu")
