@@ -72,6 +72,7 @@ testthat::test_that("fit_prediction", {
 ################################################################################
 ##### attach_pred
 testthat::test_that("attach_pred", {
+  withr::local_package("data.table")
   # import sample data
   fit_learner_base_elnet <- readRDS(
     testthat::test_path("..", "testdata", "meta", "fit_learner_base_elnet.rds")

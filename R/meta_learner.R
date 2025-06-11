@@ -8,8 +8,9 @@
 #' @param target_cols characters(1). Columns to retain from the full
 #' data.frame. DO NOT include `yvar` variable in the `target_cols`.
 #' @param yvar character(1). Outcome variable name.
-#' @return a data.frame object, including the target columns from `data` and
+#' @return a data.table object, including the target columns from `data` and
 #' the predictions for each base learner.
+#' @importFrom data.table data.table
 #' @keywords Utility
 #' @export
 attach_pred <-
@@ -32,7 +33,7 @@ attach_pred <-
     test_targets <- test[, which(names(test) %in% c(target_cols, yvar))]
 
     data_pred <- merge(test_targets, pred, by = target_cols)
-    return(data_pred)
+    return(data.table::data.table(data_pred))
   }
 
 #' Fit meta learner
