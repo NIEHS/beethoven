@@ -164,27 +164,9 @@ target_baselearner_mlp <-
   )
 
 ################################################################################
-##### Fit CPU-enabled {lightGBM} base learners on {geo} cluster.
+##### Fit CPU-enabled {lightGBM} base learners on {gpu:gn040809} cluster.
 target_baselearner_lgb <-
   list(
-    # targets::tar_target(
-    #   engine_base_lgb,
-    #   command = {
-    #     parsnip::boost_tree(
-    #       mtry = parsnip::tune(),
-    #       trees = parsnip::tune(),
-    #       learn_rate = parsnip::tune(),
-    #       tree_depth = parsnip::tune()
-    #     ) %>%
-    #       parsnip::set_engine(
-    #         "lightgbm",
-    #         device = "cpu",
-    #         num_threads = 1
-    #       ) %>%
-    #       parsnip::set_mode("regression")
-    #   },
-    #   description = "Engine and device | lgb | base learner"
-    # ),
     targets::tar_target(
       fit_learner_base_lgb,
       command = {
@@ -205,12 +187,6 @@ target_baselearner_lgb <-
           rset = list_rset_train,
           model = engine_base_lgb,
           tune_grid_size = list_base_params_static$tune_grid_size,
-          # tune_grid_size = expand.grid(
-          #   mtry = c(150, 239),
-          #   trees = c(250, 445),
-          #   learn_rate = c(0.1, 0.15),
-          #   tree_depth = c(4, 7)
-          # ),
           yvar = list_base_params_static$yvar,
           xvar = list_base_params_static$xvar,
           drop_vars = list_base_params_static$drop_vars,
