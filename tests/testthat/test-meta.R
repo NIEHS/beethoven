@@ -88,7 +88,7 @@ testthat::test_that("attach_pred", {
       name = paste0("elnet_", sprintf("%05d", 1))
     )
   )
-  testthat::expect_true("data.table" %in% class(dt_pred))
+  testthat::expect_true("data.frame" %in% class(dt_pred))
   testthat::expect_true("elnet_00001" %in% names(dt_pred))
 
   target_cols <- c("site_id", "time", "lon", "lat")

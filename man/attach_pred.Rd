@@ -22,7 +22,7 @@ data.frame. DO NOT include \code{yvar} variable in the \code{target_cols}.}
 \item{yvar}{character(1). Outcome variable name.}
 }
 \value{
-a data.table object, including the target columns from \code{data} and
+a data.frame object, including the target columns from \code{data} and
 the predictions for each base learner.
 }
 \description{
