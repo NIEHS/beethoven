@@ -35,47 +35,6 @@ attach_pred <-
     return(data_pred)
   }
 
-#' Predict base learners at for cross validation folds.
-#' @keywords meta_learner
-#' @param fit list(1). List with 1) trained workflow and 2) performance metrics.
-#' Workflow must be first item in list.
-#' @param test data.table(1). `data.table` with un-trained testing data.
-#' @param target_cols characters(1). Columns to retain from the full test data
-#' `data.frame``.
-#' @param name character(1). Name for prediction column. Should identify the
-#' model and engine and/or hyperparameters.
-#' @importFrom stats predict
-#' @importFrom data.table data.table
-#' @return `data.table` with attached site identifiers
-#' @export
-fit_prediction <- function(
-  fit = NULL,
-  test = NULL,
-  target_cols = c("site_id", "time", "lon", "lat"),
-  name = NULL
-) {
-  stopifnot(!is.null(fit))
-  stopifnot(!is.null(test))
-  stopifnot(!is.null(name))
-  stopifnot("data.frame" %in% class(test))
-  stopifnot("workflow" %in% class(fit[[1]]))
-
-  workflow <- fit[[1]]
-  num_prediction <- stats::predict(workflow, test)
-  dt_prediction <- data.table::data.table(
-    data.frame(
-      test[, target_cols],
-      num_prediction
-    )
-  )
-  names(dt_prediction) <- c(
-    target_cols,
-    as.character(name)
-  )
-  return(dt_prediction)
-}
-
-
 #' Fit meta learner
 #'
 #' This function subsets the full data by column subsamples (rate=50%)
