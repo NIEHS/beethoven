@@ -217,7 +217,7 @@ fit_base_learner <-
 
     # split into testing and training sets
     training_data <- rsample::training(rset$splits[[1]])
-    test_data <- rsample::testing(rset$splits[[1]])
+    # test_data <- rsample::testing(rset$splits[[1]])
 
     # define recipe
     base_recipe <-
@@ -248,7 +248,8 @@ fit_base_learner <-
     wf_config <- finetune::control_race(
       verbose_elim = TRUE,
       save_workflow = TRUE,
-      verbose = TRUE
+      verbose = TRUE,
+      save_pred = TRUE
     )
 
     base_wftune <-
@@ -259,7 +260,8 @@ fit_base_learner <-
         metrics = yardstick::metric_set(
           yardstick::rmse,
           yardstick::rsq,
-          yardstick::msd
+          yardstick::msd,
+          yardstick::mae
         ),
         control = wf_config
       )
@@ -267,18 +269,17 @@ fit_base_learner <-
     # Select best model
     best_params <- tune::select_best(base_wftune, metric = metric)
 
+    oof_predictions <- tune::collect_predictions(
+      base_wftune,
+      parameters = best_params
+    )
+
     # Finalize workflow with best parameters
     final_wf <- tune::finalize_workflow(base_wf, best_params)
 
-    # Combine the training and test sets to fit the final model
-    final_data <- rbind(training_data, test_data) |>
-      dplyr::arrange(site_id, time)
-
-    base_fit <- parsnip::fit(final_wf, data = final_data) %>%
-      butcher::butcher()
-
     base_results <- list(
-      "workflow" = base_fit,
+      "workflow" = final_wf,
+      "predictions" = oof_predictions,
       "metrics" = tune::collect_metrics(base_wftune)
     )
 
@@ -689,14 +690,14 @@ generate_cv_index_spt <- function(
           data_sf,
           v = v,
           cellsize = cellsize,
-          method = "snake"
+          method = "random"
         )
       )
   } else {
     sp_index <- spatialsample::spatial_block_cv(
       data = data_sf,
       v = v,
-      method = "snake"
+      method = "random"
     )
   }
 

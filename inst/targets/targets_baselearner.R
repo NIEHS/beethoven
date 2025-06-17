@@ -7,12 +7,11 @@ target_baselearner <-
       list_base_params_static,
       command = list(
         dt_full = dt_feat_pm_imputed,
-        r_subsample = 3,
         yvar = "Arithmetic.Mean",
         xvar = names(dt_feat_pm_imputed)[seq(5, ncol(dt_feat_pm_imputed))],
         drop_vars = names(dt_feat_pm_imputed)[seq(1, 3)],
         normalize = TRUE,
-        num_base_models = 20L,
+        num_base_models = 100L,
         metric = "rmse",
         tune_grid_size = 10L,
         crs = 5070L,
@@ -22,49 +21,16 @@ target_baselearner <-
       description = "Static parameters | base learner"
     ),
     targets::tar_target(
-      list_cv_rsplit,
-      command = {
-        outer_cv <- rsample::vfold_cv(
-          list_base_params_static$dt_full,
-          v = list_base_params_static$r_subsample,
-          repeats = list_base_params_static$num_base_models
-        ) |>
-          pull(splits) |>
-          as.list()
-        return(outer_cv)
-      },
-      description = "MC vfold rsets | base learner"
-    ),
-    targets::tar_target(
       num_cv_index,
-      command = seq_len(length(list_cv_rsplit)),
+      command = seq_len(list_base_params_static$num_base_models),
       description = "Index of CV list objects | base learner"
     ),
     targets::tar_target(
-      list_cv_rsplit_buffer,
-      command = list_cv_rsplit[[num_cv_index]],
-      description = "Re-index for dynamic branching | base learner",
-      iteration = "list",
-      pattern = map(num_cv_index),
-      resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_5")
-      ),
-    ),
-    targets::tar_target(
-      list_dt_test,
-      command = rsample::training(list_cv_rsplit_buffer),
-      ###### NOTE: we are switching training and testing sets.
-      description = "MC vfold testing sets | base learner",
-      pattern = map(list_cv_rsplit_buffer),
-      iteration = "list"
-    ),
-    targets::tar_target(
-      list_rset_train,
+      list_rset_st_vfolds,
       command = {
         ###### NOTE: we are switching training and testing sets.
-        dt_train <- rsample::assessment(list_cv_rsplit_buffer)
         spatiotemporal_index <- beethoven::generate_cv_index_spt(
-          data = dt_train,
+          data = list_base_params_static$dt_full,
           crs = list_base_params_static$crs,
           cellsize = list_base_params_static$cellsize,
           locs_id = "site_id",
@@ -72,15 +38,15 @@ target_baselearner <-
           v = list_base_params_static$cvsize,
           time_id = "time"
         )
-        inner_cv <- beethoven::convert_cv_index_rset(
+        cv_rset <- beethoven::convert_cv_index_rset(
           cvindex = spatiotemporal_index,
-          data = dt_train,
+          data = list_base_params_static$dt_full,
           cv_mode = "spatiotemporal"
         )
-        return(inner_cv)
+        return(cv_rset)
       },
       description = "MC vfold training sets | base learner",
-      pattern = map(list_cv_rsplit_buffer),
+      pattern = map(num_cv_index),
       iteration = "list",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(controller = "controller_100")
@@ -107,7 +73,7 @@ target_baselearner_elnet <-
     targets::tar_target(
       fit_learner_base_elnet,
       command = beethoven::fit_base_learner(
-        rset = list_rset_train,
+        rset = list_rset_st_vfolds,
         model = engine_base_elnet,
         tune_grid_size = list_base_params_static$tune_grid_size,
         yvar = list_base_params_static$yvar,
@@ -115,7 +81,7 @@ target_baselearner_elnet <-
         drop_vars = list_base_params_static$drop_vars,
         normalize = list_base_params_static$normalize
       ),
-      pattern = map(list_rset_train),
+      pattern = map(list_rset_st_vfolds),
       iteration = "list",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(controller = "controller_10")
