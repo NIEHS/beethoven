@@ -269,6 +269,7 @@ target_metalearner <-
               truth = int_y,
               estimate = int_x
             )
+            #### mean absolute error
             data.frame(
               model = names(x)[int_x],
               rbind(df_rsq, df_rmse, df_msd)

@@ -169,6 +169,8 @@ switch_model <-
 #'  * Elastic net: Hyperparameters `mixture` and `penalty` are tuned.
 #'
 #' Tuning is performed based on random grid search (size = 10).
+#' @param data Full data.table or data.frame with all space/time points. Used
+#' to merge predicition values to original space/time identifiers.
 #' @param rset A space/time CV set generated from beethoven
 #' @param model The parsnip model object. Preferably generated from
 #'   `switch_model`.
@@ -181,6 +183,8 @@ switch_model <-
 #' normalized. Default is `FALSE`.
 #' @param metric character(1). The metric to be used for selecting the best.
 #' Must be one of "rmse", "rsq", "mae". Default = "rmse"
+#' @param keep character. Columns from `data` to retain when merged
+#' with prediction values.
 #' @param ... Additional arguments to be passed.
 #'
 #' @return The fitted workflow.
@@ -200,6 +204,7 @@ switch_model <-
 #' @export
 fit_base_learner <-
   function(
+    data = NULL,
     rset = NULL,
     model = NULL,
     tune_grid_size = 10L,
@@ -208,6 +213,7 @@ fit_base_learner <-
     drop_vars = NULL,
     normalize = TRUE,
     metric = "rmse",
+    keep = NULL,
     ...
   ) {
     stopifnot("parsnip model must be defined." = !is.null(model))
@@ -248,6 +254,7 @@ fit_base_learner <-
     wf_config <- finetune::control_race(
       verbose_elim = TRUE,
       save_workflow = TRUE,
+      save_pred = TRUE,
       verbose = TRUE
     )
 
@@ -270,6 +277,20 @@ fit_base_learner <-
     # Finalize workflow with best parameters
     final_wf <- tune::finalize_workflow(base_wf, best_params)
 
+    # Extract and stack v fold predictions
+    list_predictions <- base_wftune$.predictions
+    df_best_predictions <- lapply(
+      list_predictions,
+      function(x) x[grep(best_params$.config, x$.config), ]
+    ) %>%
+      dplyr::bind_rows() %>%
+      dplyr::arrange(.row)
+
+    # Merge predictions with original data site + time identifiers
+    stopifnot(all(data[, yvar] == df_best_predictions$Arithmetic.Mean))
+    df_merge <- data.frame(cbind(data, df_best_predictions))
+    df_pred <- df_merge[, unique(c(keep, yvar, ".pred"))]
+
     # Combine the training and test sets to fit the final model
     final_data <- rbind(training_data, test_data) |>
       dplyr::arrange(site_id, time)
@@ -279,7 +300,8 @@ fit_base_learner <-
 
     base_results <- list(
       "workflow" = base_fit,
-      "metrics" = tune::collect_metrics(base_wftune)
+      "metrics" = tune::collect_metrics(base_wftune),
+      "predictions" = df_pred
     )
 
     return(base_results)

@@ -5,6 +5,7 @@
 \title{Base learner: tune hyperparameters and retrieve the best model}
 \usage{
 fit_base_learner(
+  data = NULL,
   rset = NULL,
   model = NULL,
   tune_grid_size = 10L,
@@ -13,10 +14,14 @@ fit_base_learner(
   drop_vars = NULL,
   normalize = TRUE,
   metric = "rmse",
+  keep = NULL,
   ...
 )
 }
 \arguments{
+\item{data}{Full data.table or data.frame with all space/time points. Used
+to merge predicition values to original space/time identifiers.}
+
 \item{rset}{A space/time CV set generated from beethoven}
 
 \item{model}{The parsnip model object. Preferably generated from
@@ -36,6 +41,9 @@ normalized. Default is \code{FALSE}.}
 
 \item{metric}{character(1). The metric to be used for selecting the best.
 Must be one of "rmse", "rsq", "mae". Default = "rmse"}
+
+\item{keep}{character. Columns from \code{data} to retain when merged
+with prediction values.}
 
 \item{...}{Additional arguments to be passed.}
 }
