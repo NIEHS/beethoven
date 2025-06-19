@@ -89,7 +89,7 @@ target_metalearner <-
               truth = int_y,
               estimate = int_x
             )
-            df_mae <- yardstick::msd(
+            df_mae <- yardstick::mae(
               data = x,
               truth = int_y,
               estimate = int_x
@@ -264,15 +264,14 @@ target_metalearner <-
               truth = int_y,
               estimate = int_x
             )
-            df_msd <- yardstick::msd(
+            df_mae <- yardstick::mae(
               data = x,
               truth = int_y,
               estimate = int_x
             )
-            #### mean absolute error
             data.frame(
               model = names(x)[int_x],
-              rbind(df_rsq, df_rmse, df_msd)
+              rbind(df_rsq, df_rmse, df_mae)
             )
           }
         )
