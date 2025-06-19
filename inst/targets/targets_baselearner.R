@@ -11,7 +11,7 @@ target_baselearner <-
         xvar = names(dt_feat_pm_imputed)[seq(5, ncol(dt_feat_pm_imputed))],
         drop_vars = names(dt_feat_pm_imputed)[seq(1, 3)],
         normalize = TRUE,
-        num_base_models = 5L,
+        num_base_models = 20L,
         metric = "rmse",
         tune_grid_size = 10L,
         crs = 5070L,
@@ -48,7 +48,7 @@ target_baselearner <-
       pattern = map(num_cv_index),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_10")
+        crew = targets::tar_resources_crew(controller = "controller_50")
       )
     )
   )
@@ -86,6 +86,38 @@ target_baselearner_elnet <-
         crew = targets::tar_resources_crew(controller = "controller_10")
       ),
       description = "Fit base learner | brulee regression | cpu | base learner"
+    ),
+    targets::tar_target(
+      list_learner_pred_elnet,
+      command = {
+        dt_pred_elnet <- fit_learner_base_elnet$predictions
+        dt_pred_elnet_sub <- dt_pred_elnet[,
+          c(".pred", ".row", "Arithmetic.Mean")
+        ]
+        names(dt_pred_elnet_sub) <- gsub(
+          ".pred",
+          sprintf("elnet_%05d", num_cv_index),
+          names(dt_pred_elnet_sub)
+        )
+        dt_pred_elnet_sub
+      },
+      pattern = map(fit_learner_base_elnet, num_cv_index),
+      iteration = "list",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_100")
+      ),
+      description = "elnet predictions as list | base learner"
+    ),
+    targets::tar_target(
+      dt_learner_pred_elnet,
+      command = beethoven::reduce_merge(
+        list_learner_pred_elnet,
+        by = c(".row", "Arithmetic.Mean")
+      ),
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_5")
+      ),
+      description = "elnet predictions as data.table | base learner"
     )
   )
 
@@ -125,6 +157,38 @@ target_baselearner_mlp <-
         crew = targets::tar_resources_crew(controller = "controller_mlp")
       ),
       description = "Fit base learners | mlp | gpu | base learner"
+    ),
+    targets::tar_target(
+      list_learner_pred_mlp,
+      command = {
+        dt_pred_mlp <- fit_learner_base_mlp$predictions
+        dt_pred_mlp_sub <- dt_pred_mlp[,
+          c(".pred", ".row", "Arithmetic.Mean")
+        ]
+        names(dt_pred_mlp_sub) <- gsub(
+          ".pred",
+          sprintf("mlp_%05d", num_cv_index),
+          names(dt_pred_mlp_sub)
+        )
+        dt_pred_mlp_sub
+      },
+      pattern = map(fit_learner_base_mlp, num_cv_index),
+      iteration = "list",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_100")
+      ),
+      description = "mlp predictions as list | base learner"
+    ),
+    targets::tar_target(
+      dt_learner_pred_mlp,
+      command = beethoven::reduce_merge(
+        list_learner_pred_mlp,
+        by = c(".row", "Arithmetic.Mean")
+      ),
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_5")
+      ),
+      description = "mlp predictions as data.table | base learner"
     )
   )
 
@@ -164,5 +228,37 @@ target_baselearner_lgb <-
         crew = targets::tar_resources_crew(controller = "controller_lgb")
       ),
       description = "Fit base learner | lgb | cpu | base learner"
+    ),
+    targets::tar_target(
+      list_learner_pred_lgb,
+      command = {
+        dt_pred_lgb <- fit_learner_base_lgb$predictions
+        dt_pred_lgb_sub <- dt_pred_lgb[,
+          c(".pred", ".row", "Arithmetic.Mean")
+        ]
+        names(dt_pred_lgb_sub) <- gsub(
+          ".pred",
+          sprintf("lgb_%05d", num_cv_index),
+          names(dt_pred_lgb_sub)
+        )
+        dt_pred_lgb_sub
+      },
+      pattern = map(fit_learner_base_lgb, num_cv_index),
+      iteration = "list",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_100")
+      ),
+      description = "lgb predictions as list | base learner"
+    ),
+    targets::tar_target(
+      dt_learner_pred_lgb,
+      command = beethoven::reduce_merge(
+        list_learner_pred_lgb,
+        by = c(".row", "Arithmetic.Mean")
+      ),
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_5")
+      ),
+      description = "lgb predictions as data.table | base learner"
     )
   )
