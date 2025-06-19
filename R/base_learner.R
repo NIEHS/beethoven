@@ -215,9 +215,8 @@ fit_base_learner <-
     # detect model name
     model_name <- model$engine
 
-    # split into testing and training sets
+    # first split training for covariate names in recipe
     training_data <- rsample::training(rset$splits[[1]])
-    # test_data <- rsample::testing(rset$splits[[1]])
 
     # define recipe
     base_recipe <-

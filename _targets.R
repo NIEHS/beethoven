@@ -217,8 +217,8 @@ list(
   target_baselearner,
   target_baselearner_elnet,
   target_baselearner_mlp,
-  target_baselearner_lgb,
-  target_metalearner
+  target_baselearner_lgb
+  # target_metalearner
   # target_calculate_predict
   # target_predict
 )

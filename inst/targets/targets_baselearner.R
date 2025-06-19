@@ -11,7 +11,7 @@ target_baselearner <-
         xvar = names(dt_feat_pm_imputed)[seq(5, ncol(dt_feat_pm_imputed))],
         drop_vars = names(dt_feat_pm_imputed)[seq(1, 3)],
         normalize = TRUE,
-        num_base_models = 100L,
+        num_base_models = 5L,
         metric = "rmse",
         tune_grid_size = 10L,
         crs = 5070L,
@@ -28,7 +28,6 @@ target_baselearner <-
     targets::tar_target(
       list_rset_st_vfolds,
       command = {
-        ###### NOTE: we are switching training and testing sets.
         spatiotemporal_index <- beethoven::generate_cv_index_spt(
           data = list_base_params_static$dt_full,
           crs = list_base_params_static$crs,
@@ -49,7 +48,7 @@ target_baselearner <-
       pattern = map(num_cv_index),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_100")
+        crew = targets::tar_resources_crew(controller = "controller_10")
       )
     )
   )
@@ -112,7 +111,7 @@ target_baselearner_mlp <-
     targets::tar_target(
       fit_learner_base_mlp,
       command = beethoven::fit_base_learner(
-        rset = list_rset_train,
+        rset = list_rset_st_vfolds,
         model = engine_base_mlp,
         tune_grid_size = list_base_params_static$tune_grid_size,
         yvar = list_base_params_static$yvar,
@@ -120,7 +119,7 @@ target_baselearner_mlp <-
         drop_vars = list_base_params_static$drop_vars,
         normalize = list_base_params_static$normalize
       ),
-      pattern = map(list_rset_train),
+      pattern = map(list_rset_st_vfolds),
       iteration = "list",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(controller = "controller_mlp")
@@ -150,7 +149,7 @@ target_baselearner_lgb <-
           ) %>%
           parsnip::set_mode("regression")
         beethoven::fit_base_learner(
-          rset = list_rset_train,
+          rset = list_rset_st_vfolds,
           model = engine_base_lgb,
           tune_grid_size = list_base_params_static$tune_grid_size,
           yvar = list_base_params_static$yvar,
@@ -159,7 +158,7 @@ target_baselearner_lgb <-
           normalize = list_base_params_static$normalize
         )
       },
-      pattern = map(list_rset_train),
+      pattern = map(list_rset_st_vfolds),
       iteration = "list",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(controller = "controller_lgb")

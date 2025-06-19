@@ -54,10 +54,15 @@ testthat::test_that("fit_base_learner {lightGBM}", {
   # expect a list
   testthat::expect_true(is.list(lightgbm1))
   # expect length 2
-  testthat::expect_length(lightgbm1, 2)
+  testthat::expect_length(lightgbm1, 3)
   # expect sub-items are workflow and metrics
-  testthat::expect_true("workflow" %in% class(lightgbm1[[1]]))
-  testthat::expect_true("tbl" %in% class(lightgbm1[[2]]))
+  testthat::expect_equal(
+    names(lightgbm1),
+    c("workflow", "predictions", "metrics")
+  )
+  testthat::expect_true("workflow" %in% class(lightgbm1$workflow))
+  testthat::expect_true("data.frame" %in% class(lightgbm1$predictions))
+  testthat::expect_true("tbl" %in% class(lightgbm1$metrics))
 })
 
 ################################################################################

@@ -56,26 +56,15 @@ testthat::test_that("fit_base_learner {brulee} MLP", {
   # expect a list
   testthat::expect_true(is.list(mlp1))
   # expect length 2
-  testthat::expect_length(mlp1, 2)
+  testthat::expect_length(mlp1, 3)
   # expect sub-items are workflow and metrics
-  testthat::expect_true("workflow" %in% class(mlp1[[1]]))
-  testthat::expect_true("tbl" %in% class(mlp1[[2]]))
-
-  # switch_model engine
-  # testthat::expect_no_error(
-  #   mlp2 <- beethoven::fit_base_learner(
-  #     rset = rset_base,
-  #     model = beethoven::switch_model(
-  #       model_type = "mlp",
-  #       device = "cpu"
-  #     ),
-  #     tune_grid_size = 2L,
-  #     yvar = "Arithmetic.Mean",
-  #     xvar = seq(4, ncol(dt_base)),
-  #     drop_vars = NULL,
-  #     normalize = TRUE
-  #   )
-  # )
+  testthat::expect_equal(
+    names(mlp1),
+    c("workflow", "predictions", "metrics")
+  )
+  testthat::expect_true("workflow" %in% class(mlp1$workflow))
+  testthat::expect_true("data.frame" %in% class(mlp1$predictions))
+  testthat::expect_true("tbl" %in% class(mlp1$metrics))
 })
 
 ################################################################################
