@@ -215,7 +215,7 @@ target_calculate_fit <-
       pattern = cross(list_feat_proc_aqs_sites, list_args_calc_mod11),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_50")
+        crew = targets::tar_resources_crew(controller = "controller_25")
       ),
       description = "Calculate MODIS - MOD11 features | fit"
     ),
@@ -262,7 +262,7 @@ target_calculate_fit <-
       pattern = cross(list_feat_proc_aqs_sites, list_args_calc_mod06),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_50")
+        crew = targets::tar_resources_crew(controller = "controller_25")
       ),
       description = "Calculate MODIS - MOD06 features | fit"
     ),
@@ -308,7 +308,7 @@ target_calculate_fit <-
       pattern = cross(list_feat_proc_aqs_sites, list_args_calc_mod13),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_100")
+        crew = targets::tar_resources_crew(controller = "controller_25")
       ),
       description = "Calculate MODIS - MOD13 features | fit"
     ),
@@ -354,7 +354,7 @@ target_calculate_fit <-
       pattern = cross(list_feat_proc_aqs_sites, list_args_calc_mcd19_1km),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_250")
+        crew = targets::tar_resources_crew(controller = "controller_25")
       ),
       description = "Calculate MODIS - MCD19_1km features | fit"
     ),
@@ -394,7 +394,7 @@ target_calculate_fit <-
       pattern = cross(list_feat_proc_aqs_sites, list_args_calc_mcd19_5km),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_250")
+        crew = targets::tar_resources_crew(controller = "controller_25")
       ),
       description = "Calculate MODIS - MCD19_5km features | fit"
     ),
@@ -495,7 +495,7 @@ target_calculate_fit <-
       pattern = cross(list_feat_proc_aqs_sites, list_args_calc_viirs),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_100")
+        crew = targets::tar_resources_crew(controller = "controller_25")
       ),
       description = "Calculate MODIS - VIIRS features | fit"
     ),

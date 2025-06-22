@@ -9,7 +9,7 @@ Authors@R: c(
     person("Anisha", "Singh", role = c("aut", "ctb"), comment = c(ORCID = "0000-0002-7540-0856")),
     person("Lara", "Clark", role = c("aut", "ctb"), comment = c(ORCID = "0000-0001-6940-5442")),
     person("Mariana", "Alifa Kassien", role = c("aut", "ctb"), comment = c(ORCID = "0000-0003-2295-406X")),
-    person("Cavin", "Ward-Caviness", role = c("aut", "ctb"), comment = c(ORCID = "0000-0002-6322-4349")),
+    person("Cavin", "Ward-Caviness", role = c("aut", "ctb"), comment = c(ORCID = "0000-0002-6322-4349"))
   )
 Description: Near Real Time air pollution model results and code produced by the SET group. It is fully tested, versioned, and open source and open access.
 Depends: R (>= 4.1.0)
@@ -48,7 +48,7 @@ Imports:
   finetune,
   butcher,
   amadeus,
-  parquet
+  arrow
 Suggests:
   testthat (>= 3.0.0),
   covr,

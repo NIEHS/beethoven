@@ -2,6 +2,13 @@
 ##############################      BEETHOVEN      #############################
 ##### Main file controlling the settings, options, and sourcing of targets
 ##### for the beethoven analysis pipeline.
+Sys.setenv(
+  BEETHOVEN = "covariates")
+bypass_condition <- function() {
+  # Your logic here - return TRUE when you want to skip computation
+  Sys.getenv("BEETHOVEN") == "covariates"
+}
+.libPaths(c("/mnt/lib-flex", .libPaths()))
 
 #############################      CONTROLLER      #############################
 ##### `controller_250` uses full allocation of workers (~4.0 Gb per worker).
@@ -83,6 +90,7 @@ targets::tar_config_set(store = "/opt/_targets")
 if (Sys.getenv("BEETHOVEN") == "covariates") {
   beethoven_packages <- c(
     "amadeus",
+    "beethoven",
     "targets",
     "tarchetypes",
     "dplyr",
@@ -98,6 +106,7 @@ if (Sys.getenv("BEETHOVEN") == "covariates") {
 } else {
   beethoven_packages <- c(
     "amadeus",
+    "beethoven",
     "targets",
     "tarchetypes",
     "dplyr",
@@ -124,6 +133,7 @@ if (Sys.getenv("BEETHOVEN") == "covariates") {
 targets::tar_option_set(
   packages = beethoven_packages,
   repository = "local",
+  library = .libPaths(),
   error = "continue",
   memory = "transient",
   format = "qs",
@@ -143,7 +153,7 @@ targets::tar_option_set(
     controller_sequential
   ),
   resources = targets::tar_resources(
-    crew = targets::tar_resources_crew(controller = "controller_250")
+    crew = targets::tar_resources_crew(controller = "controller_25")
   ),
   retrieval = "worker"
 )

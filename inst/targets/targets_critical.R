@@ -12,7 +12,7 @@ target_critical <-
     #####    chr_daterange.
     targets::tar_target(
       chr_daterange,
-      command = c("2018-01-01", "2022-12-31"),
+      command = c("2020-12-01", "2020-12-31"),
       description = "Date range | critical"
     ),
     ##### 2. chr_nasa_token sets the file path to the user's NASA Earthdata
@@ -22,7 +22,7 @@ target_critical <-
     #####    credential file, the token must be updated every 90 days.
     targets::tar_target(
       chr_nasa_token,
-      command = readLines("/inst/extdata/nasa_token.txt"),
+      command = "inst/extdata/nasa_token.txt",#readLines("/inst/extdata/nasa_token.txt"),
       description = "NASA Earthdata token | critical"
     ),
     ##### 3. chr_mod06_links is the file path to the MOD06 links file. These

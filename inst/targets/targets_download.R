@@ -1,21 +1,30 @@
+
 target_download <-
   list(
     targets::tar_target(
       list_download_args,
-      command = list(
-        unzip = TRUE,
-        remove_zip = FALSE,
-        remove_command = TRUE,
-        acknowledgement = TRUE,
-        download = TRUE,
-        hash = FALSE
-      ),
+      command = 
+      if (bypass_condition()) {
+        TRUE
+      } else {
+        list(
+          unzip = TRUE,
+          remove_zip = FALSE,
+          remove_command = TRUE,
+          acknowledgement = TRUE,
+          download = TRUE,
+          hash = FALSE
+        )
+      },
       description = "Common download arguments | download"
     ),
     ###########################         AQS          ###########################
     targets::tar_target(
       download_aqs,
       command = {
+      if (bypass_condition()) {
+        TRUE
+      } else {
         amadeus::download_aqs(
           directory_to_save = file.path(chr_input_dir, "aqs"),
           year = chr_years,
@@ -27,6 +36,7 @@ target_download <-
           hash = list_download_args$hash
         )
         TRUE
+      }
       },
       pattern = map(chr_years),
       description = "Download AQS data | download"
@@ -39,15 +49,21 @@ target_download <-
     ),
     targets::tar_target(
       download_geos,
-      command = amadeus::download_geos(
-        collection = chr_iter_calc_geos,
-        directory_to_save = file.path(chr_input_dir, "geos"),
-        date = beethoven::fl_dates(unlist(list_dates)),
-        remove_command = list_download_args$remove_command,
-        acknowledgement = list_download_args$acknowledgement,
-        download = list_download_args$download,
-        hash = list_download_args$hash
-      ),
+      command = {
+      if (bypass_condition()) {
+        TRUE
+      } else {
+        amadeus::download_geos(
+          collection = chr_iter_calc_geos,
+          directory_to_save = file.path(chr_input_dir, "geos"),
+          date = beethoven::fl_dates(unlist(list_dates)),
+          remove_command = list_download_args$remove_command,
+          acknowledgement = list_download_args$acknowledgement,
+          download = list_download_args$download,
+          hash = list_download_args$hash
+        )
+      }
+      },
       pattern = cross(chr_iter_calc_geos, list_dates),
       description = "Download GEOS-CF data | download"
     ),
@@ -104,62 +120,88 @@ target_download <-
     ),
     targets::tar_target(
       download_narr,
-      command = amadeus::download_narr(
-        variables = chr_iter_calc_narr,
-        directory_to_save = file.path(chr_input_dir, "narr"),
-        year = chr_years,
-        remove_command = list_download_args$remove_command,
-        acknowledgement = list_download_args$acknowledgement,
-        download = list_download_args$download,
-        hash = list_download_args$hash
-      ),
+      command = {
+      if (bypass_condition()) {
+        TRUE
+      } else {
+        amadeus::download_narr(
+          variables = chr_iter_calc_narr,
+          directory_to_save = file.path(chr_input_dir, "narr"),
+          year = chr_years,
+          remove_command = list_download_args$remove_command,
+          acknowledgement = list_download_args$acknowledgement,
+          download = list_download_args$download,
+          hash = list_download_args$hash
+        )
+      }
+      },
       pattern = cross(chr_iter_calc_narr, chr_years),
       description = "Download NARR data | download"
     ),
     targets::tar_target(
       download_narr_lag,
-      command = amadeus::download_narr(
-        variables = chr_iter_calc_narr_lag,
-        directory_to_save = file.path(chr_input_dir, "narr"),
-        year = chr_years[1] - 1,
-        remove_command = list_download_args$remove_command,
-        acknowledgement = list_download_args$acknowledgement,
-        download = list_download_args$download,
-        hash = list_download_args$hash
-      ),
+      command = {
+      if (bypass_condition()) {
+        TRUE
+      } else {
+        amadeus::download_narr(
+          variables = chr_iter_calc_narr_lag,
+          directory_to_save = file.path(chr_input_dir, "narr"),
+          year = chr_years[1] - 1,
+          remove_command = list_download_args$remove_command,
+          acknowledgement = list_download_args$acknowledgement,
+          download = list_download_args$download,
+          hash = list_download_args$hash
+        )
+      }
+      },
       pattern = cross(chr_iter_calc_narr_lag),
       description = "Download NARR data | lag | download"
     ),
     targets::tar_target(
       download_narr_buffer,
       command = {
+      if (bypass_condition()) {
+        TRUE
+      } else {
         download_narr
         download_narr_lag
         TRUE
+      }
       },
       description = "Download NARR data | buffer | download"
     ),
     ###########################         HMS          ###########################
     targets::tar_target(
       download_hms,
-      command = amadeus::download_hms(
-        directory_to_save = file.path(chr_input_dir, "hms"),
-        date = beethoven::fl_dates(unlist(list_dates)),
-        unzip = list_download_args$unzip,
-        remove_zip = list_download_args$remove_zip,
-        remove_command = list_download_args$remove_command,
-        acknowledgement = list_download_args$acknowledgement,
-        download = list_download_args$download,
-        hash = list_download_args$hash
-      ),
+      command = {
+      if (bypass_condition()) {
+        TRUE
+      } else {
+        amadeus::download_hms(
+          directory_to_save = file.path(chr_input_dir, "hms"),
+          date = beethoven::fl_dates(unlist(list_dates)),
+          unzip = list_download_args$unzip,
+          remove_zip = list_download_args$remove_zip,
+          remove_command = list_download_args$remove_command,
+          acknowledgement = list_download_args$acknowledgement,
+          download = list_download_args$download,
+          hash = list_download_args$hash
+        )
+      }
+      },
       pattern = map(list_dates),
       description = "Download HMS data | download"
     ),
     targets::tar_target(
       download_hms_buffer,
       command = {
+      if (bypass_condition()) {
+        TRUE
+      } else {
         download_hms
         TRUE
+      }
       },
       description = "Download HMS data | buffer | download"
     ),
@@ -167,6 +209,9 @@ target_download <-
     targets::tar_target(
       download_mod11,
       command = {
+      if (bypass_condition()) {
+        TRUE
+      } else {
         amadeus::download_modis(
           product = "MOD11A1",
           nasa_earth_data_token = chr_nasa_token,
@@ -184,6 +229,7 @@ target_download <-
           hash = list_download_args$hash
         )
         TRUE
+      }
       },
       pattern = map(list_dates),
       description = "Download MODIS - MOD11 data | download"
@@ -192,6 +238,9 @@ target_download <-
     targets::tar_target(
       download_mod06,
       command = {
+      if (bypass_condition()) {
+        TRUE
+      } else {
         amadeus::download_modis(
           product = "MOD06_L2",
           nasa_earth_data_token = chr_nasa_token,
@@ -210,6 +259,7 @@ target_download <-
           hash = list_download_args$hash
         )
         TRUE
+      }
       },
       pattern = map(list_dates),
       description = "Download MODIS - MOD06 data | download"
@@ -218,6 +268,9 @@ target_download <-
     targets::tar_target(
       download_mod13,
       command = {
+      if (bypass_condition()) {
+        TRUE
+      } else {
         amadeus::download_modis(
           product = "MOD13A2",
           nasa_earth_data_token = chr_nasa_token,
@@ -235,6 +288,7 @@ target_download <-
           hash = list_download_args$hash
         )
         TRUE
+      }
       },
       pattern = map(list_dates),
       description = "Download MODIS - MOD13 data | download"
@@ -243,6 +297,9 @@ target_download <-
     targets::tar_target(
       download_mcd19,
       command = {
+      if (bypass_condition()) {
+        TRUE
+      } else {
         amadeus::download_modis(
           product = "MCD19A2",
           nasa_earth_data_token = chr_nasa_token,
@@ -260,6 +317,7 @@ target_download <-
           hash = list_download_args$hash
         )
         TRUE
+      }
       },
       pattern = map(list_dates),
       description = "Download MODIS - MCD19 data | download"
@@ -268,6 +326,9 @@ target_download <-
     targets::tar_target(
       download_mod09,
       command = {
+      if (bypass_condition()) {
+        TRUE
+      } else {
         amadeus::download_modis(
           product = "MOD09GA",
           nasa_earth_data_token = chr_nasa_token,
@@ -285,6 +346,7 @@ target_download <-
           hash = list_download_args$hash
         )
         TRUE
+      }
       },
       pattern = map(list_dates),
       description = "Download MODIS - MOD09 data | download"
@@ -293,6 +355,9 @@ target_download <-
     targets::tar_target(
       download_viirs,
       command = {
+      if (bypass_condition()) {
+        TRUE
+      } else {
         amadeus::download_modis(
           product = "VNP46A2",
           version = "5000",
@@ -311,6 +376,7 @@ target_download <-
           hash = list_download_args$hash
         )
         TRUE
+      }
       },
       pattern = map(list_dates),
       description = "Download MODIS - VIIRS data | download"
@@ -332,6 +398,9 @@ target_download <-
     targets::tar_target(
       download_gmted,
       command = {
+      if (bypass_condition()) {
+        TRUE
+      } else {
         amadeus::download_gmted(
           statistic = chr_iter_calc_gmted_vars,
           resolution = "7.5 arc-seconds",
@@ -344,6 +413,7 @@ target_download <-
           hash = list_download_args$hash
         )
         TRUE
+      }
       },
       pattern = map(chr_iter_calc_gmted_vars),
       description = "Download GMTED data | download"
@@ -357,6 +427,9 @@ target_download <-
     targets::tar_target(
       download_nlcd,
       command = {
+      if (bypass_condition()) {
+        TRUE
+      } else {
         amadeus::download_nlcd(
           year = chr_iter_calc_nlcd,
           directory_to_save = file.path(chr_input_dir, "nlcd"),
@@ -368,6 +441,7 @@ target_download <-
           hash = list_download_args$hash
         )
         TRUE
+      }
       },
       pattern = map(chr_iter_calc_nlcd),
       description = "Download NLCD data | download"
@@ -376,6 +450,9 @@ target_download <-
     targets::tar_target(
       download_koppen,
       command = {
+      if (bypass_condition()) {
+        TRUE
+      } else {
         amadeus::download_koppen_geiger(
           data_resolution = "0.0083",
           time_period = "Present",
@@ -388,6 +465,7 @@ target_download <-
           hash = list_download_args$hash
         )
         TRUE
+      }
       },
       description = "Download Koppen-Geiger data | download"
     ),
@@ -395,6 +473,9 @@ target_download <-
     targets::tar_target(
       download_population,
       command = {
+      if (bypass_condition()) {
+        TRUE
+      } else {
         amadeus::download_population(
           data_resolution = "30 second",
           data_format = "GeoTIFF",
@@ -408,20 +489,27 @@ target_download <-
           hash = list_download_args$hash
         )
         TRUE
+      }
       },
       description = "Download population data | download"
     ),
     ###########################         TRI          ###########################
     targets::tar_target(
       download_tri,
-      command = amadeus::download_tri(
-        year = chr_years,
-        directory_to_save = file.path(chr_input_dir, "tri"),
-        remove_command = list_download_args$remove_command,
-        acknowledgement = list_download_args$acknowledgement,
-        download = list_download_args$download,
-        hash = list_download_args$hash
-      ),
+      command = {
+      if (bypass_condition()) {
+        TRUE
+      } else {
+        amadeus::download_tri(
+          year = chr_years,
+          directory_to_save = file.path(chr_input_dir, "tri"),
+          remove_command = list_download_args$remove_command,
+          acknowledgement = list_download_args$acknowledgement,
+          download = list_download_args$download,
+          hash = list_download_args$hash
+        )
+      }
+      },
       pattern = map(chr_years),
       description = "Download TRI data | download"
     ),
@@ -434,6 +522,9 @@ target_download <-
     targets::tar_target(
       download_nei,
       command = {
+      if (bypass_condition()) {
+        TRUE
+      } else {
         amadeus::download_nei(
           year = chr_iter_calc_nei,
           directory_to_save = file.path(chr_input_dir, "nei"),
@@ -444,6 +535,7 @@ target_download <-
           hash = list_download_args$hash
         )
         TRUE
+      }
       },
       pattern = map(chr_iter_calc_nei),
       description = "Download NEI data | download"
@@ -452,6 +544,9 @@ target_download <-
     targets::tar_target(
       download_ecoregions,
       command = {
+      if (bypass_condition()) {
+        TRUE
+      } else {
         amadeus::download_ecoregion(
           directory_to_save = file.path(chr_input_dir, "ecoregions"),
           unzip = list_download_args$unzip,
@@ -462,6 +557,7 @@ target_download <-
           hash = list_download_args$hash
         )
         TRUE
+      }
       },
       description = "Download ecoregions data | download"
     ),
@@ -469,6 +565,9 @@ target_download <-
     targets::tar_target(
       download_groads,
       command = {
+      if (bypass_condition()) {
+        TRUE
+      } else {
         amadeus::download_groads(
           data_region = "Americas",
           data_format = "Geodatabase",
@@ -481,6 +580,7 @@ target_download <-
           hash = list_download_args$hash
         )
         TRUE
+      }
       },
       description = "Download gRoads data | download"
     )
