@@ -222,7 +222,8 @@ fit_base_learner <-
     base_recipe <-
       recipes::recipe(training_data[1, ]) %>%
       recipes::update_role(!!xvar, new_role = "predictor") %>%
-      recipes::update_role(!!yvar, new_role = "outcome")
+      recipes::update_role(!!yvar, new_role = "outcome") %>%
+      recipes::step_zv(recipes::all_predictors())
 
     if (!is.null(drop_vars)) {
       base_recipe <-
