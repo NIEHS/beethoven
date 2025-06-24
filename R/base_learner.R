@@ -240,11 +240,13 @@ fit_base_learner <-
         )
     }
 
+    # initial workflow
     base_wf <-
       workflows::workflow() %>%
       workflows::add_recipe(base_recipe) %>%
       workflows::add_model(model)
 
+    # finetune race control
     wf_config <- finetune::control_race(
       verbose_elim = TRUE,
       save_workflow = TRUE,
@@ -252,19 +254,51 @@ fit_base_learner <-
       save_pred = TRUE
     )
 
-    base_wftune <-
-      base_wf %>%
-      finetune::tune_race_anova(
-        resamples = rset,
-        grid = tune_grid_size,
-        metrics = yardstick::metric_set(
-          yardstick::rmse,
-          yardstick::rsq,
-          yardstick::msd,
-          yardstick::mae
-        ),
-        control = wf_config
-      )
+    # initial base tuning
+    base_wftune <- tryCatch(
+      {
+        base_wf %>%
+          finetune::tune_race_anova(
+            resamples = rset,
+            grid = tune_grid_size,
+            metrics = yardstick::metric_set(
+              yardstick::rmse,
+              yardstick::rsq,
+              yardstick::msd,
+              yardstick::mae
+            ),
+            control = wf_config
+          )
+      },
+      error = function(e) {
+        # if error due to zero-variance in the `rset` splits
+        message("Re-tuning with additional recipes::step_nzv()...")
+
+        # update the recipe with near-zero variance filter
+        base_recipe_nzv <- base_recipe %>%
+          recipes::step_nzv(recipes::all_predictors())
+
+        # rebuild the workflow
+        base_wf <-
+          workflows::workflow() %>%
+          workflows::update_recipe()(base_recipe_nzv) %>%
+          workflows::add_model(model)
+
+        # re-run base tuning
+        base_wf %>%
+          finetune::tune_race_anova(
+            resamples = rset,
+            grid = tune_grid_size,
+            metrics = yardstick::metric_set(
+              yardstick::rmse,
+              yardstick::rsq,
+              yardstick::msd,
+              yardstick::mae
+            ),
+            control = wf_config
+          )
+      }
+    )
 
     # Select best model
     best_params <- tune::select_best(base_wftune, metric = metric)
