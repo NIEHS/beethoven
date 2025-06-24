@@ -281,7 +281,7 @@ fit_base_learner <-
         # rebuild the workflow
         base_wf <-
           workflows::workflow() %>%
-          workflows::update_recipe()(base_recipe_nzv) %>%
+          workflows::add_recipe(base_recipe_nzv) %>%
           workflows::add_model(model)
 
         # re-run base tuning
