@@ -39,6 +39,22 @@ target_aqs <-
     )
     ,
     targets::tar_target(
+      list_feat_proc_aqs_sites_unsplit,
+      command = {
+        download_aqs
+        sf_feat_proc_aqs_sites_date <- amadeus::process_aqs(
+          path = file.path(chr_input_dir, "aqs", "data_files"),
+          date = chr_daterange,
+          mode = "location",
+          data_field = "Arithmetic.Mean",
+          return_format = "sf"
+        )
+        sf_feat_proc_aqs_sites_date
+      },
+      description = "AQS locations | aqs (unsplit)"
+    )
+    ,
+    targets::tar_target(
       dt_feat_proc_aqs_sites_time,
       command = {
         download_aqs

@@ -329,3 +329,109 @@ process_narr2 <- function(
   #### return SpatRaster
   return(data_return)
 }
+
+#' Export preprocessed GeoTIFF file of one day MODIS product files
+#' @param path_in character. File paths of MODIS product files on a day
+#' @param product_code character(1). Product code. e.g., "VNP46A2".
+#' @param pat character. Filter of `path_in`.
+#' @param subdataset character. Subdatasets to merge. It is ignored
+#'   when `product_code` is one of `"MOD06_L2"` or `"VNP46A2"`.
+#' @param dest character(1). Directory path to export the result file.
+#' @return A GeoTIFF file is saved to
+#'   `{dest}/{product_code}_processed_{date}.tif` and this path is returned.
+#' @importFrom amadeus process_blackmarble process_blackmarble_corners
+#' @importFrom amadeus process_modis_swath process_modis_merge
+#' @importFrom stringi stri_extract_first_regex stri_sub
+#' @importFrom terra writeRaster
+#' @author Insang Song
+#' @export
+#' @examples
+#' \dontrun{
+#' export_tif(c("A2018001.001.hdf", "A2018001.002.hdf"),
+#'            product_code = "MOD11A1",
+#'            pat = "A\\d{7,7}",
+#'            subdataset = "16 day NDVI",
+#'            dest = ".")
+#' # mirai run
+#' library(mirai)
+#' basedir61 <- "/mnt/modis/raw/61"
+#' product <- "MCD19A2"
+#' paths <-
+#'   list.files(
+#'     file.path(basedir61, product),
+#'     pattern = "*.*.hdf$",
+#'     full.names = TRUE,
+#'     recursive = TRUE
+#'   )
+#' pcode <- "MCD19A2"
+#' pattern <- "A\\d{7,7}"
+#' subdataset <- c("Optical_Depth_055")
+#' dest = "mydir"
+#'
+#' run_mirai <-
+#'   mirai_map(
+#'     paths,
+#'     .f = export_tif,
+#'     .args = list(
+#'        product_code = product,
+#'        pat = pattern,
+#'        subdataset = subdataset,
+#'        dest = dest
+#'     )
+#'   )
+#' run_mirai[.progress]
+#' }
+export_tif <- function(
+  path_in,
+  product_code,
+  pat,
+  subdataset = "",
+  dest = "."
+) {
+  redate <- stringi::stri_extract_first_regex(path_in, pat)
+  redate <- unique(redate)
+  redate <- stringi::stri_sub(redate, 2, 8)
+  redate <- as.Date(redate, format = "%Y%j")
+  # path to export the result file(s)
+  name_head <-
+    paste0(product_code, "_processed_", redate, ".tif")
+  name_head <- file.path(dest, name_head)
+
+  if (!file.exists(name_head)) {
+    flattened <-
+      if (product_code == "VNP46A2") {
+        amadeus::process_blackmarble(
+          path = path_in,
+          date = as.character(redate),
+          subdataset = 3L,
+          tile_df = amadeus::process_blackmarble_corners()
+        )
+      } else if (product_code == "MOD06_L2") {
+        amadeus::process_modis_swath(
+          path = path_in,
+          date = as.character(redate),
+          subdataset = c("Cloud_Fraction_Day", "Cloud_Fraction_Night"),
+          suffix = ":mod06:",
+          resolution = 0.05
+        )
+      } else {
+        amadeus::process_modis_merge(
+          path = path_in,
+          date = as.character(redate),
+          subdataset = subdataset,
+          fun_agg = "mean"
+        )
+      }
+
+    terra::writeRaster(
+      flattened,
+      name_head,
+      gdal = "COMPRESS=DEFLATE",
+      overwrite = TRUE
+    )
+    message(paste0("Exported ", name_head))
+  } else {
+    message("The target file exists. Proceed to the next target.")
+  }
+  return(name_head)
+}

@@ -258,7 +258,7 @@ fit_base_learner <-
         metrics = yardstick::metric_set(
           yardstick::rmse,
           yardstick::rsq,
-          yardstick::msd
+          yardstick::mae
         ),
         control = wf_config
       )

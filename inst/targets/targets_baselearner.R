@@ -138,7 +138,7 @@ target_baselearner_mlp <-
           activation = "leaky_relu",
           learn_rate = parsnip::tune()
         ) %>%
-          parsnip::set_engine("brulee", device = "cuda") %>%
+          parsnip::set_engine("brulee", device = "cpu") %>%
           parsnip::set_mode("regression")
       },
       description = "Engine and device | mlp | base learner"
@@ -157,7 +157,7 @@ target_baselearner_mlp <-
       pattern = map(list_rset_train),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_geo")
+        crew = targets::tar_resources_crew(controller = "controller_1")
       ),
       description = "Fit base learners | mlp | gpu | base learner"
     )
@@ -205,7 +205,7 @@ target_baselearner_lgb <-
       pattern = map(list_rset_train),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_sequential")
+        crew = targets::tar_resources_crew(controller = "controller_1")
       ),
       description = "Fit base learner | lgb | cpu | base learner"
     )

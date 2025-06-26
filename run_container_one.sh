@@ -18,10 +18,13 @@ DEBUG_TARGET=$1
 
 # run pipeline in the container
 apptainer exec \
+  --nv \
+  --writable-tmpfs \
   --bind $PWD:/mnt \
   --bind $PWD/inst:/inst \
   --bind /ddn:/input \
   --bind $PWD/_targets:/opt/_targets \
+  --bind /tmp:/tmp \
   container/container_covariates.sif \
   Rscript --no-init-file -e "targets::tar_make('$DEBUG_TARGET')"
 

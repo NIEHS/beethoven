@@ -2,8 +2,8 @@
 ##############################      BEETHOVEN      #############################
 ##### Main file controlling the settings, options, and sourcing of targets
 ##### for the beethoven analysis pipeline.
-Sys.setenv(
-  BEETHOVEN = "covariates")
+# Sys.setenv(
+#   BEETHOVEN = "covariates")
 bypass_condition <- function() {
   # Your logic here - return TRUE when you want to skip computation
   Sys.getenv("BEETHOVEN") == "covariates"
