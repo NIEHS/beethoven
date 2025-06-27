@@ -49,7 +49,7 @@ scriptlines_mlp <- glue::glue(
   "#SBATCH --job-name=submodel \
   #SBATCH --partition=geo \
   #SBATCH --gres=gpu:1 \
-  #SBATCH --error=slurm/submodel_%j.out \
+  #SBATCH --error=slurm/mlp_%j.out \
   {scriptlines_apptainer} exec --nv --env ",
   "CUDA_VISIBLE_DEVICES=${{GPU_DEVICE_ORDINAL}} ",
   "--bind {scriptlines_basedir}:/mnt ",
@@ -74,7 +74,7 @@ scriptlines_lgb <- glue::glue(
   #SBATCH --ntasks=1 \
   #SBATCH --cpus-per-task=32 \
   #SBATCH --mem=100G \
-  #SBATCH --error=slurm/submodel_%j.out \
+  #SBATCH --error=slurm/lgb_%j.out \
   export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK \
   export LIGHTGBM_NUM_THREADS=$SLURM_CPUS_PER_TASK \
   {scriptlines_apptainer} exec --env OMP_NUM_THREADS=$OMP_NUM_THREADS ",
@@ -187,22 +187,7 @@ if (Sys.getenv("BEETHOVEN") == "covariates") {
           target_metalearner <-
             target_calculate_predict <-
               target_predict <- list()
-} else if (Sys.getenv("BEETHOVEN") == "elnet") {
-  target_baselearner_lgb <-
-    target_baselearner_mlp <-
-      target_metalearner <-
-        target_calculate_predict <-
-          target_predict <- list()
-} else if (Sys.getenv("BEETHOVEN") == "mlp") {
-  target_baselearner_lgb <-
-    target_metalearner <-
-      target_calculate_predict <-
-        target_predict <- list()
-} else if (Sys.getenv("BEETHOVEN") == "lgb") {
-  target_metalearner <-
-    target_calculate_predict <-
-      target_predict <- list()
-} else if (Sys.getenv("BEETHOVEN") == "meta") {
+} else if (Sys.getenv("BEETHOVEN") == "models") {
   target_calculate_predict <-
     target_predict <- list()
 }

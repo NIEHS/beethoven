@@ -1,14 +1,14 @@
 #!/bin/bash
 
-#SBATCH --job-name=covariate
+#SBATCH --job-name=model
 #SBATCH --mail-user=mitchell.manware@nih.gov
 #SBATCH --mail-type=END,FAIL
 #SBATCH --partition=geo
 #SBATCH --ntasks=1
 #SBATCH --mem=900G
 #SBATCH --cpus-per-task=225
-#SBATCH --error=slurm/cov_%j.err
-#SBATCH --output=slurm/cov_%j.out
+#SBATCH --error=slurm/model_%j.err
+#SBATCH --output=slurm/model_%j.out
 
 ############################      CERTIFICATES      ############################
 # Export CURL_CA_BUNDLE and SSL_CERT_FILE environmental variables to vertify
@@ -16,21 +16,22 @@
 export CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 
-#############################      COVARIATES      #############################
-# Set environmental variable to indicate download and covariate
-# calculation targets.
-export BEETHOVEN=covariates
+###############################      GPU SETUP     #############################
+# Ensure all allocated GPUs are visible
+export CUDA_VISIBLE_DEVICES=$(echo $(seq 0 $((SLURM_GPUS_ON_NODE-1))) | tr ' ' ',')
 
-# Set stack size limit for large merge of TRI covariates.
-ulimit -s 20000
+#############################        MODELS        #############################
+# Set environmental variable to indicate CPU-enabled model fitting targets.
+export BEETHOVEN=models
 
-# Download and calculate covariates via container_covariates.sif
+# Fit CPU-enabled base learner models via container_models.sif.
 apptainer exec \
+  --nv \
   --bind $PWD:/mnt \
   --bind $PWD/inst:/inst \
   --bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input \
   --bind /ddn/gs1/group/set/Projects/beethoven/targets:/opt/_targets \
   --bind /run/munge:/run/munge \
   --bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm \
-  container_covariates.sif \
+  container_models.sif \
   /usr/local/lib/R/bin/Rscript --no-init-file /mnt/inst/targets/targets_start.R
