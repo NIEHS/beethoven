@@ -37,7 +37,7 @@ testthat::test_that("fit_prediction", {
       fit = fit_learner_base_elnet[[1]][[1]],
       test = list_dt_test[[1]],
       target_cols = c("site_id", "time", "lon", "lat"),
-      name = paste0("elnet_", sprintf("%05d", x))
+      name = paste0("elnet_", sprintf("%05d", 1))
     )
   )
   # bad test object
@@ -46,7 +46,7 @@ testthat::test_that("fit_prediction", {
       fit = fit_learner_base_elnet[[1]],
       test = list_dt_test,
       target_cols = c("site_id", "time", "lon", "lat"),
-      name = paste0("elnet_", sprintf("%05d", x))
+      name = paste0("elnet_", sprintf("%05d", 1))
     )
   )
   # NULL columns
@@ -55,7 +55,7 @@ testthat::test_that("fit_prediction", {
       fit = fit_learner_base_elnet[[1]],
       test = list_dt_test[[1]],
       target_cols = NULL,
-      name = paste0("elnet_", sprintf("%05d", x))
+      name = paste0("elnet_", sprintf("%05d", 1))
     )
   )
   # NULL name
@@ -72,7 +72,6 @@ testthat::test_that("fit_prediction", {
 ################################################################################
 ##### attach_pred
 testthat::test_that("attach_pred", {
-  withr::local_package("data.table")
   # import sample data
   fit_learner_base_elnet <- readRDS(
     testthat::test_path("..", "testdata", "meta", "fit_learner_base_elnet.rds")

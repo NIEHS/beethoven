@@ -993,6 +993,7 @@ fit_prediction <- function(
   stopifnot(!is.null(fit))
   stopifnot(!is.null(test))
   stopifnot(!is.null(name))
+  stopifnot(!is.null(target_cols))
   stopifnot("data.frame" %in% class(test))
   stopifnot("workflow" %in% class(fit[[1]]))
 

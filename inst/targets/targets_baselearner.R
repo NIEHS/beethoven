@@ -200,10 +200,16 @@ target_baselearner_mlp <-
       command = {
         df_mlp_grid <- expand.grid(
           hidden_units = list(
+            32,
+            64,
+            128,
+            256,
+            512,
             c(64, 64),
-            c(128, 128)
+            c(128, 128),
+            c(256, 256)
           ),
-          dropout = c(0.0, 0.05),
+          dropout = c(0.00, 0.05),
           learn_rate = c(0.01, 0.005)
         )
 
