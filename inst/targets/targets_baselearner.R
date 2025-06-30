@@ -209,9 +209,10 @@ target_baselearner_mlp <-
             c(128, 128),
             c(256, 256)
           ),
-          dropout = c(0.00, 0.05),
-          learn_rate = c(0.01, 0.005)
+          dropout = c(0.00),
+          learn_rate = c(0.01)
         )
+        # dt_mlp_sample <- df_mlp_grid[sample(nrow(df_mlp_grid), 10), ]
 
         engine_base_mlp2 <- parsnip::mlp(
           hidden_units = parsnip::tune(),
@@ -234,7 +235,7 @@ target_baselearner_mlp <-
           metric = list_base_params_static$metric
         )
       },
-      pattern = sample(list_rset_st_vfolds, 25),
+      pattern = sample(list_rset_st_vfolds, 5),
       iteration = "list",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(controller = "controller_mlp")
