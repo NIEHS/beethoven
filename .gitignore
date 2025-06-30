@@ -125,4 +125,7 @@ cov/
 # images
 *.png
 
+# dev + debugging folders
+dev/
 save/
+debug/

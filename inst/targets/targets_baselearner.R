@@ -192,6 +192,48 @@ target_baselearner_mlp <-
         crew = targets::tar_resources_crew(controller = "controller_5")
       ),
       description = "mlp predictions as data.table | base learner"
+    ),
+    ################################################################################
+    ##### Development work with 2-layer {brulee} mlp.
+    targets::tar_target(
+      fit_learner_base_mlp_2layer,
+      command = {
+        df_mlp_grid <- expand.grid(
+          hidden_units = list(
+            c(64, 64),
+            c(128, 128)
+          ),
+          dropout = c(0.0, 0.05),
+          learn_rate = c(0.01, 0.005)
+        )
+
+        engine_base_mlp2 <- parsnip::mlp(
+          hidden_units = parsnip::tune(),
+          dropout = parsnip::tune(),
+          epochs = 1000,
+          activation = "leaky_relu",
+          learn_rate = parsnip::tune()
+        ) %>%
+          parsnip::set_engine("brulee", device = "cuda") %>%
+          parsnip::set_mode("regression")
+
+        fit_learner_mlp2 <- beethoven::fit_base_learner(
+          rset = list_rset_st_vfolds,
+          model = engine_base_mlp2,
+          tune_grid_size = df_mlp_grid,
+          yvar = list_base_params_static$yvar,
+          xvar = list_base_params_static$xvar,
+          drop_vars = list_base_params_static$drop_vars,
+          normalize = list_base_params_static$normalize,
+          metric = list_base_params_static$metric
+        )
+      },
+      pattern = map(list_rset_st_vfolds),
+      iteration = "list",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_mlp")
+      ),
+      description = "Fit base learners | mlp 2 layer | gpu | base learner"
     )
   )
 

@@ -46,7 +46,7 @@ scriptlines_targetdir <- "/ddn/gs1/group/set/Projects/beethoven"
 scriptlines_inputdir <- "/ddn/gs1/group/set/Projects/NRT-AP-Model/input"
 scriptlines_container <- "container_models.sif"
 scriptlines_mlp <- glue::glue(
-  "#SBATCH --job-name=submodel \
+  "#SBATCH --job-name=mlp \
   #SBATCH --partition=geo \
   #SBATCH --gres=gpu:1 \
   #SBATCH --error=slurm/mlp_%j.out \
@@ -68,7 +68,7 @@ controller_mlp <- crew.cluster::crew_controller_slurm(
 )
 ##### `controller_lgb` uses 100 CPUs for {lightGBM} models.
 scriptlines_lgb <- glue::glue(
-  "#SBATCH --job-name=submodel \
+  "#SBATCH --job-name=lgb \
   #SBATCH --partition=gpu \
   #SBATCH --nodelist=gn040809 \
   #SBATCH --ntasks=1 \
