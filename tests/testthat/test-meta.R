@@ -81,11 +81,16 @@ testthat::test_that("attach_pred", {
   )
 
   testthat::expect_no_error(
-    dt_pred <- beethoven::fit_prediction(
-      fit = fit_learner_base_elnet[[1]],
-      test = dt_test[[1]],
-      target_cols = c("site_id", "time", "lon", "lat"),
-      name = paste0("elnet_", sprintf("%05d", 1))
+    dt_pred <- lapply(
+      seq_len(1),
+      function(x) {
+        beethoven::fit_prediction(
+          fit = fit_learner_base_elnet[[x]],
+          test = list_dt_test[[x]],
+          target_cols = c("site_id", "time", "lon", "lat"),
+          name = paste0("elnet_", sprintf("%05d", x))
+        )
+      }
     )
   )
   testthat::expect_true("data.frame" %in% class(dt_pred))

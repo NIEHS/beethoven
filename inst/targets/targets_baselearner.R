@@ -234,7 +234,7 @@ target_baselearner_mlp <-
           metric = list_base_params_static$metric
         )
       },
-      pattern = map(list_rset_st_vfolds),
+      pattern = sample(list_rset_st_vfolds, 25),
       iteration = "list",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(controller = "controller_mlp")
