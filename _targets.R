@@ -203,7 +203,7 @@ if (Sys.getenv("BEETHOVEN") == "covariates") {
 list(
   target_critical,
   target_initiate,
-  target_download,
+  # target_download,
   target_aqs,
   target_calculate_fit,
   target_baselearner,

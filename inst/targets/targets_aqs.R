@@ -6,7 +6,7 @@ target_aqs <-
     targets::tar_target(
       list_feat_proc_aqs_sites,
       command = {
-        download_aqs
+        download_aqs <- TRUE
         sf_feat_proc_aqs_sites_date <- amadeus::process_aqs(
           path = file.path(chr_input_dir, "aqs", "data_files"),
           date = chr_daterange,
@@ -41,7 +41,7 @@ target_aqs <-
     targets::tar_target(
       list_feat_proc_aqs_sites_unsplit,
       command = {
-        download_aqs
+        download_aqs <- TRUE
         sf_feat_proc_aqs_sites_date <- amadeus::process_aqs(
           path = file.path(chr_input_dir, "aqs", "data_files"),
           date = chr_daterange,
@@ -57,7 +57,7 @@ target_aqs <-
     targets::tar_target(
       dt_feat_proc_aqs_sites_time,
       command = {
-        download_aqs
+        download_aqs <- TRUE
         amadeus::process_aqs(
           path = list.files(
             path = file.path(

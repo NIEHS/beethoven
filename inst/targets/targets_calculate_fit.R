@@ -180,15 +180,27 @@ target_calculate_fit <-
       command = {
         #download_mod11
         julian_date <- sprintf("A%s", unlist(list_dates_julian))
-        julian_query <- sprintf("(%s)", paste(julian_date, collapse = "|"))
-        list.files(
-          file.path(chr_input_dir, "modis", "raw", "61", "MOD11A1"),
-          pattern = julian_query,
-          full.names = TRUE,
-          recursive = TRUE
-        )
+        # loop through chunks of julian_date
+        # to avoid too long query strings
+        # e.g. "A2018001|A2018002|A2018003|..."
+        unique_julian_date <- unique(julian_date)
+        flists <- c()
+        jdates <- ceiling(seq_along(unique_julian_date) / 60)
+        for (i in unique(jdates)) {
+          julian_query <- sprintf("(%s)", paste(unique_julian_date[jdates == i], collapse = "|"))
+          flists <-
+            append(
+              flists,
+              list.files(
+                file.path(chr_input_dir, "modis", "raw", "61", "MOD11A1"),
+                pattern = julian_query,
+                full.names = TRUE,
+                recursive = TRUE
+              )
+            )
+        }
+        flists
       },
-      iteration = "list",
       description = "MODIS - MOD11 files"
     )
     ,
@@ -196,7 +208,7 @@ target_calculate_fit <-
       list_args_calc_mod11_files,
       command = {
         chr_a7s <- stringi::stri_extract_first_regex(
-          chr_args_calc_mod11_files,
+          unlist(chr_args_calc_mod11_files),
           pattern = "A2[0-9]{6,6}"
         )
         # Split the file paths
@@ -250,13 +262,23 @@ target_calculate_fit <-
       command = {
         #download_mod06
         julian_date <- sprintf("A%s", unlist(list_dates_julian))
-        julian_query <- sprintf("(%s)", paste(julian_date, collapse = "|"))
-        list.files(
-          file.path(chr_input_dir, "modis", "raw", "61", "MOD06_L2"),
-          pattern = julian_query,
-          full.names = TRUE,
-          recursive = TRUE
-        )
+        unique_julian_date <- unique(julian_date)
+        flists <- c()
+        jdates <- ceiling(seq_along(unique_julian_date) / 60)
+        for (i in unique(jdates)) {
+          julian_query <- sprintf("(%s)", paste(unique_julian_date[jdates == i], collapse = "|"))
+          flists <-
+            append(
+              flists,
+              list.files(
+                file.path(chr_input_dir, "modis", "raw", "61", "MOD06_L2"),
+                pattern = julian_query,
+                full.names = TRUE,
+                recursive = TRUE
+              )
+            )
+        }
+        flists
       },
       iteration = "list",
       description = "MODIS - MOD06 files"
@@ -320,13 +342,23 @@ target_calculate_fit <-
       command = {
         # download_mod13
         julian_date <- sprintf("A%s", unlist(list_dates_julian))
-        julian_query <- sprintf("(%s)", paste(julian_date, collapse = "|"))
-        list.files(
-          file.path(chr_input_dir, "modis", "raw", "61", "MOD13A2"),
-          pattern = julian_query,
-          full.names = TRUE,
-          recursive = TRUE
-        )
+        unique_julian_date <- unique(julian_date)
+        flists <- c()
+        jdates <- ceiling(seq_along(unique_julian_date) / 60)
+        for (i in unique(jdates)) {
+          julian_query <- sprintf("(%s)", paste(unique_julian_date[jdates == i], collapse = "|"))
+          flists <-
+            append(
+              flists,
+              list.files(
+                file.path(chr_input_dir, "modis", "raw", "61", "MOD13A2"),
+                pattern = julian_query,
+                full.names = TRUE,
+                recursive = TRUE
+              )
+            )
+        }
+        flists
       },
       description = "MODIS - MOD13 files"
     )
@@ -388,14 +420,23 @@ target_calculate_fit <-
       command = {
         # download_mcd19
         julian_date <- sprintf("A%s", unlist(list_dates_julian))
-        julian_query <- sprintf("(%s)", paste(julian_date, collapse = "|"))
-
-        list.files(
-          file.path(chr_input_dir, "modis", "raw", "61", "MCD19A2"),
-          pattern = julian_query,
-          full.names = TRUE,
-          recursive = TRUE
-        )
+        unique_julian_date <- unique(julian_date)
+        flists <- c()
+        jdates <- ceiling(seq_along(unique_julian_date) / 60)
+        for (i in unique(jdates)) {
+          julian_query <- sprintf("(%s)", paste(unique_julian_date[jdates == i], collapse = "|"))
+          flists <-
+            append(
+              flists,
+              list.files(
+                file.path(chr_input_dir, "modis", "raw", "61", "MCD19A2"),
+                pattern = julian_query,
+                full.names = TRUE,
+                recursive = TRUE
+              )
+            )
+        }
+        flists
       },
       description = "MODIS - MCD19_*km files"
     )
@@ -511,14 +552,23 @@ target_calculate_fit <-
       command = {
         # download_mod09
         julian_date <- sprintf("A%s", unlist(list_dates_julian))
-        julian_query <- sprintf("(%s)", paste(julian_date, collapse = "|"))
-
-        list.files(
-          file.path(chr_input_dir, "modis", "raw", "61", "MOD09GA"),
-          pattern = julian_query,
-          full.names = TRUE,
-          recursive = TRUE
-        )
+        unique_julian_date <- unique(julian_date)
+        flists <- c()
+        jdates <- ceiling(seq_along(unique_julian_date) / 60)
+        for (i in unique(jdates)) {
+          julian_query <- sprintf("(%s)", paste(unique_julian_date[jdates == i], collapse = "|"))
+          flists <-
+            append(
+              flists,
+              list.files(
+                file.path(chr_input_dir, "modis", "raw", "61", "MOD09GA"),
+                pattern = julian_query,
+                full.names = TRUE,
+                recursive = TRUE
+              )
+            )
+        }
+        flists
       },
       description = "MODIS - MOD09 files"
     )
@@ -582,13 +632,23 @@ target_calculate_fit <-
       command = {
         # download_viirs
         julian_date <- sprintf("A%s", unlist(list_dates_julian))
-        julian_query <- sprintf("(%s)", paste(julian_date, collapse = "|"))
-        list.files(
-          file.path(chr_input_dir, "modis", "raw", "5000", "VNP46A2"),
-          pattern = julian_query,
-          full.names = TRUE,
-          recursive = TRUE
-        )
+        unique_julian_date <- unique(julian_date)
+        flists <- c()
+        jdates <- ceiling(seq_along(unique_julian_date) / 60)
+        for (i in unique(jdates)) {
+          julian_query <- sprintf("(%s)", paste(unique_julian_date[jdates == i], collapse = "|"))
+          flists <-
+            append(
+              flists,
+              list.files(
+                file.path(chr_input_dir, "modis", "raw", "5000", "VNP46A2"),
+                pattern = julian_query,
+                full.names = TRUE,
+                recursive = TRUE
+              )
+            )
+        }
+        flists
       },
       description = "MODIS - VIIRS files"
     )
@@ -912,7 +972,7 @@ target_calculate_fit <-
     targets::tar_target(
       list_feat_calc_nei,
       command = {
-        download_nei
+        download_nei <- TRUE
         beethoven::inject_calculate(
           covariate = "nei",
           locs = list_feat_proc_aqs_sites[[1]],
@@ -942,7 +1002,7 @@ target_calculate_fit <-
     targets::tar_target(
       dt_feat_calc_ecoregions,
       command = {
-        download_ecoregions
+        download_ecoregions <- TRUE
         data.table::data.table(
           amadeus::calculate_ecoregion(
             from = amadeus::process_ecoregion(

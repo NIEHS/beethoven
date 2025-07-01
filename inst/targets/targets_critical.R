@@ -12,7 +12,7 @@ target_critical <-
     #####    chr_daterange.
     targets::tar_target(
       chr_daterange,
-      command = c("2020-12-01", "2020-12-31"),
+      command = c("2018-01-01", "2022-12-31"),
       description = "Date range | critical"
     ),
     ##### 2. chr_nasa_token sets the file path to the user's NASA Earthdata
