@@ -85,7 +85,7 @@ testthat::test_that("attach_pred", {
   testthat::expect_true(is.list(fit_learner_base_elnet[[1]]))
   testthat::expect_true(exists("list_dt_test"))
   testthat::expect_true(is.list(list_dt_test))
-  testthat::expect_s3_class(dt_pred, "data.frame")
+  testthat::expect_s3_class(list_dt_test[[1]], "data.frame")
 
   # testthat::expect_no_error(
   dt_pred <- beethoven::fit_prediction(
