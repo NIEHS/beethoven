@@ -215,20 +215,21 @@ fit_base_learner <-
     # detect model name
     model_name <- model$engine
 
-    # split into testing and training sets
+    # first split training for covariate names in recipe
     training_data <- rsample::training(rset$splits[[1]])
-    test_data <- rsample::testing(rset$splits[[1]])
 
     # define recipe
     base_recipe <-
       recipes::recipe(training_data[1, ]) %>%
       recipes::update_role(!!xvar, new_role = "predictor") %>%
-      recipes::update_role(!!yvar, new_role = "outcome")
+      recipes::update_role(!!yvar, new_role = "outcome") %>%
+      recipes::step_zv(recipes::all_predictors())
 
-    if (!is.null(drop_vars))
+    if (!is.null(drop_vars)) {
       base_recipe <-
         base_recipe %>%
         recipes::update_role(!!drop_vars, new_role = "id")
+    }
 
     if (normalize) {
       base_recipe <-
@@ -239,45 +240,80 @@ fit_base_learner <-
         )
     }
 
+    # initial workflow
     base_wf <-
       workflows::workflow() %>%
       workflows::add_recipe(base_recipe) %>%
       workflows::add_model(model)
 
+    # finetune race control
     wf_config <- finetune::control_race(
       verbose_elim = TRUE,
       save_workflow = TRUE,
-      verbose = TRUE
+      verbose = TRUE,
+      save_pred = TRUE
     )
 
-    base_wftune <-
-      base_wf %>%
-      finetune::tune_race_anova(
-        resamples = rset,
-        grid = tune_grid_size,
-        metrics = yardstick::metric_set(
-          yardstick::rmse,
-          yardstick::rsq,
-          yardstick::msd
-        ),
-        control = wf_config
-      )
+    # initial base tuning
+    base_wftune <- tryCatch(
+      {
+        base_wf %>%
+          finetune::tune_race_anova(
+            resamples = rset,
+            grid = tune_grid_size,
+            metrics = yardstick::metric_set(
+              yardstick::rmse,
+              yardstick::rsq,
+              yardstick::msd,
+              yardstick::mae
+            ),
+            control = wf_config
+          )
+      },
+      error = function(e) {
+        # if error due to zero-variance in the `rset` splits
+        message("Re-tuning with additional recipes::step_nzv()...")
+
+        # update the recipe with near-zero variance filter
+        base_recipe_nzv <- base_recipe %>%
+          recipes::step_nzv(recipes::all_predictors())
+
+        # rebuild the workflow
+        base_wf <-
+          workflows::workflow() %>%
+          workflows::add_recipe(base_recipe_nzv) %>%
+          workflows::add_model(model)
+
+        # re-run base tuning
+        base_wf %>%
+          finetune::tune_race_anova(
+            resamples = rset,
+            grid = tune_grid_size,
+            metrics = yardstick::metric_set(
+              yardstick::rmse,
+              yardstick::rsq,
+              yardstick::msd,
+              yardstick::mae
+            ),
+            control = wf_config
+          )
+      }
+    )
 
     # Select best model
     best_params <- tune::select_best(base_wftune, metric = metric)
 
+    oof_predictions <- tune::collect_predictions(
+      base_wftune,
+      parameters = best_params
+    )
+
     # Finalize workflow with best parameters
     final_wf <- tune::finalize_workflow(base_wf, best_params)
 
-    # Combine the training and test sets to fit the final model
-    final_data <- rbind(training_data, test_data) |>
-      dplyr::arrange(site_id, time)
-
-    base_fit <- parsnip::fit(final_wf, data = final_data) %>%
-      butcher::butcher()
-
     base_results <- list(
-      "workflow" = base_fit,
+      "workflow" = final_wf,
+      "predictions" = oof_predictions,
       "metrics" = tune::collect_metrics(base_wftune)
     )
 
@@ -688,14 +724,14 @@ generate_cv_index_spt <- function(
           data_sf,
           v = v,
           cellsize = cellsize,
-          method = "snake"
+          method = "random"
         )
       )
   } else {
     sp_index <- spatialsample::spatial_block_cv(
       data = data_sf,
       v = v,
-      method = "snake"
+      method = "random"
     )
   }
 
@@ -934,3 +970,44 @@ switch_generate_cv_rset <-
     cvindex <- beethoven::inject_match(target_fun, list(...))
     return(cvindex)
   }
+
+#' Predict base learners at for cross validation folds.
+#' @keywords Baselearner
+#' @param fit list(1). List with 1) trained workflow and 2) performance metrics.
+#' Workflow must be first item in list.
+#' @param test data.table(1). `data.table` with un-trained testing data.
+#' @param target_cols characters(1). Columns to retain from the full test data
+#' `data.frame``.
+#' @param name character(1). Name for prediction column. Should identify the
+#' model and engine and/or hyperparameters.
+#' @importFrom stats predict
+#' @importFrom data.table data.table
+#' @return `data.table` with attached site identifiers
+#' @export
+fit_prediction <- function(
+  fit = NULL,
+  test = NULL,
+  target_cols = c("site_id", "time", "lon", "lat"),
+  name = NULL
+) {
+  stopifnot(!is.null(fit))
+  stopifnot(!is.null(test))
+  stopifnot(!is.null(name))
+  stopifnot(!is.null(target_cols))
+  stopifnot("data.frame" %in% class(test))
+  stopifnot("workflow" %in% class(fit[[1]]))
+
+  workflow <- fit[[1]]
+  num_prediction <- stats::predict(workflow, test)
+  dt_prediction <- data.table::data.table(
+    data.frame(
+      test[, target_cols],
+      num_prediction
+    )
+  )
+  names(dt_prediction) <- c(
+    target_cols,
+    as.character(name)
+  )
+  return(dt_prediction)
+}

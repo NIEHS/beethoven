@@ -2,26 +2,22 @@
 % Please edit documentation in R/meta_learner.R
 \name{attach_pred}
 \alias{attach_pred}
-\title{Combine prediction values from base learners}
+\title{Combine base learner prediction values with testing data.}
 \usage{
 attach_pred(
-  data,
-  pred,
-  position = 1,
-  target_cols = c("site_id", "time", "Event.Type", "lon", "lat"),
+  pred = NULL,
+  test = NULL,
+  target_cols = c("site_id", "time", "lon", "lat"),
   yvar = "Arithmetic.Mean"
 )
 }
 \arguments{
-\item{data}{data.frame(1). Full data.}
+\item{pred}{data.table(1). Predicted values from \code{fit_prediction}}
 
-\item{pred}{list(1). List with base learner prediction values.}
-
-\item{position}{numeric(1). Position of the prediction values in the list
-\code{pred}. Default is 1.}
+\item{test}{data.table(1). \code{data.table} with with testing dataset.}
 
 \item{target_cols}{characters(1). Columns to retain from the full
-data.frame.}
+data.frame. DO NOT include \code{yvar} variable in the \code{target_cols}.}
 
 \item{yvar}{character(1). Outcome variable name.}
 }

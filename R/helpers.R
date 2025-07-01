@@ -24,6 +24,12 @@ queue <- function() {
   system("squeue -u $USER")
 }
 
+#' Cancel current workflow.
+#' @param job character(1). SLURM job number or "full", to cancel all jobs
+#' running on `$USER` SLURM profile.
+#' @return NULL; cancels jobs.
+#' @keywords Miscellaneous
+#' @export
 cancel <- function(job = NULL) {
   stopifnot(!is.null(job))
   if (job == "full") {
@@ -53,7 +59,9 @@ gpu <- function() {
 #' @seealso [testthat::test_file()]
 #' @keywords Miscellaneous
 test <- function(pattern = NULL) {
-  if (is.null(pattern)) stop()
+  if (is.null(pattern)) {
+    stop()
+  }
   system(
     paste(
       c(

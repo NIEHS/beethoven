@@ -45,11 +45,11 @@ scriptlines_basedir <- "$PWD"
 scriptlines_targetdir <- "/ddn/gs1/group/set/Projects/beethoven"
 scriptlines_inputdir <- "/ddn/gs1/group/set/Projects/NRT-AP-Model/input"
 scriptlines_container <- "container_models.sif"
-scriptlines_gpu <- glue::glue(
-  "#SBATCH --job-name=submodel \
+scriptlines_mlp <- glue::glue(
+  "#SBATCH --job-name=mlp \
   #SBATCH --partition=geo \
   #SBATCH --gres=gpu:1 \
-  #SBATCH --error=slurm/submodel_%j.out \
+  #SBATCH --error=slurm/mlp_%j.out \
   {scriptlines_apptainer} exec --nv --env ",
   "CUDA_VISIBLE_DEVICES=${{GPU_DEVICE_ORDINAL}} ",
   "--bind {scriptlines_basedir}:/mnt ",
@@ -58,36 +58,39 @@ scriptlines_gpu <- glue::glue(
   "--bind {scriptlines_targetdir}/targets:/opt/_targets ",
   "{scriptlines_container} \\"
 )
-controller_gpu <- crew.cluster::crew_controller_slurm(
-  name = "controller_gpu",
+controller_mlp <- crew.cluster::crew_controller_slurm(
+  name = "controller_mlp",
   workers = 4,
   options_cluster = crew.cluster::crew_options_slurm(
     verbose = TRUE,
-    script_lines = scriptlines_gpu
+    script_lines = scriptlines_mlp
   )
 )
-##### `controller_cpu` uses 100 CPUs for {lightGBM} models.
-scriptlines_cpu <- glue::glue(
-  "#SBATCH --job-name=submodel \
-  #SBATCH --partition=geo \
+##### `controller_lgb` uses 100 CPUs for {lightGBM} models.
+scriptlines_lgb <- glue::glue(
+  "#SBATCH --job-name=lgb \
+  #SBATCH --partition=gpu \
+  #SBATCH --nodelist=gn040809 \
   #SBATCH --ntasks=1 \
-  #SBATCH --cpus-per-task=250 \
-  #SBATCH --mem=900G \
-  #SBATCH --error=slurm/submodel_%j.out \
-  {scriptlines_apptainer} exec --nv --env ",
-  "CUDA_VISIBLE_DEVICES=${{GPU_DEVICE_ORDINAL}} ",
+  #SBATCH --cpus-per-task=32 \
+  #SBATCH --mem=100G \
+  #SBATCH --error=slurm/lgb_%j.out \
+  export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK \
+  export LIGHTGBM_NUM_THREADS=$SLURM_CPUS_PER_TASK \
+  {scriptlines_apptainer} exec --env OMP_NUM_THREADS=$OMP_NUM_THREADS ",
+  "--env LIGHTGBM_NUM_THREADS=$LIGHTGBM_NUM_THREADS ",
   "--bind {scriptlines_basedir}:/mnt ",
   "--bind {scriptlines_basedir}/inst:/inst ",
   "--bind {scriptlines_inputdir}:/input ",
   "--bind {scriptlines_targetdir}/targets:/opt/_targets ",
   "{scriptlines_container} \\"
 )
-controller_cpu <- crew.cluster::crew_controller_slurm(
-  name = "controller_cpu",
-  workers = 1,
+controller_lgb <- crew.cluster::crew_controller_slurm(
+  name = "controller_lgb",
+  workers = 3,
   options_cluster = crew.cluster::crew_options_slurm(
     verbose = TRUE,
-    script_lines = scriptlines_cpu
+    script_lines = scriptlines_lgb
   )
 )
 
@@ -154,8 +157,8 @@ targets::tar_option_set(
     controller_10,
     controller_5,
     controller_1,
-    controller_gpu,
-    controller_cpu
+    controller_mlp,
+    controller_lgb
   ),
   resources = targets::tar_resources(
     crew = targets::tar_resources_crew(controller = "controller_250")
@@ -184,22 +187,7 @@ if (Sys.getenv("BEETHOVEN") == "covariates") {
           target_metalearner <-
             target_calculate_predict <-
               target_predict <- list()
-} else if (Sys.getenv("BEETHOVEN") == "elnet") {
-  target_baselearner_lgb <-
-    target_baselearner_mlp <-
-      target_metalearner <-
-        target_calculate_predict <-
-          target_predict <- list()
-} else if (Sys.getenv("BEETHOVEN") == "mlp") {
-  target_baselearner_lgb <-
-    target_metalearner <-
-      target_calculate_predict <-
-        target_predict <- list()
-} else if (Sys.getenv("BEETHOVEN") == "lgb") {
-  target_metalearner <-
-    target_calculate_predict <-
-      target_predict <- list()
-} else if (Sys.getenv("BEETHOVEN") == "meta") {
+} else if (Sys.getenv("BEETHOVEN") == "models") {
   target_calculate_predict <-
     target_predict <- list()
 }
@@ -214,8 +202,8 @@ list(
   target_baselearner,
   target_baselearner_elnet,
   target_baselearner_mlp,
-  target_baselearner_lgb
-  # target_metalearner
+  target_baselearner_lgb,
+  target_metalearner
   # target_calculate_predict
   # target_predict
 )

@@ -7,13 +7,12 @@ target_baselearner <-
       list_base_params_static,
       command = list(
         dt_full = dt_feat_pm_imputed,
-        r_subsample = 3,
         yvar = "Arithmetic.Mean",
         xvar = names(dt_feat_pm_imputed)[seq(5, ncol(dt_feat_pm_imputed))],
         drop_vars = names(dt_feat_pm_imputed)[seq(1, 3)],
         normalize = TRUE,
-        num_base_models = 20L,
-        metric = "rmse",
+        num_base_models = 100L,
+        metric = "mae",
         tune_grid_size = 10L,
         crs = 5070L,
         cellsize = 250000L,
@@ -22,49 +21,16 @@ target_baselearner <-
       description = "Static parameters | base learner"
     ),
     targets::tar_target(
-      list_cv_rsplit,
-      command = {
-        outer_cv <- rsample::vfold_cv(
-          list_base_params_static$dt_full,
-          v = list_base_params_static$r_subsample,
-          repeats = list_base_params_static$num_base_models
-        ) |>
-          pull(splits) |>
-          as.list()
-        return(outer_cv)
-      },
-      description = "MC vfold rsets | base learner"
-    ),
-    targets::tar_target(
       num_cv_index,
-      command = seq_len(length(list_cv_rsplit)),
+      command = seq_len(list_base_params_static$num_base_models),
       description = "Index of CV list objects | base learner"
     ),
     targets::tar_target(
-      list_cv_rsplit_buffer,
-      command = list_cv_rsplit[[num_cv_index]],
-      description = "Re-index for dynamic branching | base learner",
-      iteration = "list",
-      pattern = map(num_cv_index),
-      resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_5")
-      ),
-    ),
-    targets::tar_target(
-      list_dt_test,
-      command = rsample::training(list_cv_rsplit_buffer),
-      ###### NOTE: we are switching training and testing sets.
-      description = "MC vfold testing sets | base learner",
-      pattern = map(list_cv_rsplit_buffer),
-      iteration = "list"
-    ),
-    targets::tar_target(
-      list_rset_train,
+      list_rset_st_vfolds,
       command = {
-        ###### NOTE: we are switching training and testing sets.
-        dt_train <- rsample::assessment(list_cv_rsplit_buffer)
+        message(paste0("Generating `rset` fold ", num_cv_index))
         spatiotemporal_index <- beethoven::generate_cv_index_spt(
-          data = dt_train,
+          data = list_base_params_static$dt_full,
           crs = list_base_params_static$crs,
           cellsize = list_base_params_static$cellsize,
           locs_id = "site_id",
@@ -72,18 +38,18 @@ target_baselearner <-
           v = list_base_params_static$cvsize,
           time_id = "time"
         )
-        inner_cv <- beethoven::convert_cv_index_rset(
+        cv_rset <- beethoven::convert_cv_index_rset(
           cvindex = spatiotemporal_index,
-          data = dt_train,
+          data = list_base_params_static$dt_full,
           cv_mode = "spatiotemporal"
         )
-        return(inner_cv)
+        return(cv_rset)
       },
       description = "MC vfold training sets | base learner",
-      pattern = map(list_cv_rsplit_buffer),
+      pattern = map(num_cv_index),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_100")
+        crew = targets::tar_resources_crew(controller = "controller_10")
       )
     )
   )
@@ -107,20 +73,53 @@ target_baselearner_elnet <-
     targets::tar_target(
       fit_learner_base_elnet,
       command = beethoven::fit_base_learner(
-        rset = list_rset_train,
+        rset = list_rset_st_vfolds,
         model = engine_base_elnet,
         tune_grid_size = list_base_params_static$tune_grid_size,
         yvar = list_base_params_static$yvar,
         xvar = list_base_params_static$xvar,
         drop_vars = list_base_params_static$drop_vars,
-        normalize = list_base_params_static$normalize
+        normalize = list_base_params_static$normalize,
+        metric = list_base_params_static$metric
       ),
-      pattern = map(list_rset_train),
+      pattern = map(list_rset_st_vfolds),
       iteration = "list",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(controller = "controller_10")
       ),
       description = "Fit base learner | brulee regression | cpu | base learner"
+    ),
+    targets::tar_target(
+      list_learner_pred_elnet,
+      command = {
+        dt_pred_elnet <- fit_learner_base_elnet$predictions
+        dt_pred_elnet_sub <- dt_pred_elnet[,
+          c(".pred", ".row", "Arithmetic.Mean")
+        ]
+        names(dt_pred_elnet_sub) <- gsub(
+          ".pred",
+          sprintf("elnet_%05d", num_cv_index),
+          names(dt_pred_elnet_sub)
+        )
+        dt_pred_elnet_sub
+      },
+      pattern = map(fit_learner_base_elnet, num_cv_index),
+      iteration = "list",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_100")
+      ),
+      description = "elnet predictions as list | base learner"
+    ),
+    targets::tar_target(
+      dt_learner_pred_elnet,
+      command = beethoven::reduce_merge(
+        list_learner_pred_elnet,
+        by = c(".row", "Arithmetic.Mean")
+      ),
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_5")
+      ),
+      description = "elnet predictions as data.table | base learner"
     )
   )
 
@@ -146,31 +145,115 @@ target_baselearner_mlp <-
     targets::tar_target(
       fit_learner_base_mlp,
       command = beethoven::fit_base_learner(
-        rset = list_rset_train,
+        rset = list_rset_st_vfolds,
         model = engine_base_mlp,
         tune_grid_size = list_base_params_static$tune_grid_size,
         yvar = list_base_params_static$yvar,
         xvar = list_base_params_static$xvar,
         drop_vars = list_base_params_static$drop_vars,
-        normalize = list_base_params_static$normalize
+        normalize = list_base_params_static$normalize,
+        metric = list_base_params_static$metric
       ),
-      pattern = map(list_rset_train),
+      pattern = map(list_rset_st_vfolds),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_gpu")
+        crew = targets::tar_resources_crew(controller = "controller_mlp")
       ),
       description = "Fit base learners | mlp | gpu | base learner"
+    ),
+    targets::tar_target(
+      list_learner_pred_mlp,
+      command = {
+        dt_pred_mlp <- fit_learner_base_mlp$predictions
+        dt_pred_mlp_sub <- dt_pred_mlp[,
+          c(".pred", ".row", "Arithmetic.Mean")
+        ]
+        names(dt_pred_mlp_sub) <- gsub(
+          ".pred",
+          sprintf("mlp_%05d", num_cv_index),
+          names(dt_pred_mlp_sub)
+        )
+        dt_pred_mlp_sub
+      },
+      pattern = map(fit_learner_base_mlp, num_cv_index),
+      iteration = "list",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_100")
+      ),
+      description = "mlp predictions as list | base learner"
+    ),
+    targets::tar_target(
+      dt_learner_pred_mlp,
+      command = beethoven::reduce_merge(
+        list_learner_pred_mlp,
+        by = c(".row", "Arithmetic.Mean")
+      ),
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_5")
+      ),
+      description = "mlp predictions as data.table | base learner"
+    ),
+    ################################################################################
+    ##### Development work with 2-layer {brulee} mlp.
+    targets::tar_target(
+      fit_learner_base_mlp_2layer,
+      command = {
+        df_mlp_grid <- expand.grid(
+          hidden_units = list(
+            # 32,
+            # 64,
+            128,
+            256,
+            512,
+            # c(64, 64),
+            c(128, 128),
+            c(256, 256),
+            c(256, 512)
+          ),
+          dropout = c(0.00),
+          learn_rate = c(0.01, 0.005)
+        )
+        # dt_mlp_sample <- df_mlp_grid[sample(nrow(df_mlp_grid), 10), ]
+
+        engine_base_mlp2 <- parsnip::mlp(
+          hidden_units = parsnip::tune(),
+          dropout = parsnip::tune(),
+          epochs = 1000,
+          activation = "relu",
+          learn_rate = parsnip::tune()
+        ) %>%
+          parsnip::set_engine("brulee", device = "cuda") %>%
+          parsnip::set_mode("regression")
+
+        fit_learner_mlp2 <- beethoven::fit_base_learner(
+          rset = list_rset_st_vfolds,
+          model = engine_base_mlp2,
+          tune_grid_size = df_mlp_grid,
+          yvar = list_base_params_static$yvar,
+          xvar = list_base_params_static$xvar,
+          drop_vars = list_base_params_static$drop_vars,
+          normalize = list_base_params_static$normalize,
+          metric = list_base_params_static$metric
+        )
+      },
+      pattern = sample(list_rset_st_vfolds, 5),
+      iteration = "list",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_mlp")
+      ),
+      description = "Fit base learners | mlp 2 layer | gpu | base learner"
     )
   )
 
 ################################################################################
-##### Fit CPU-enabled {lightGBM} base learners on {geo} cluster.
+##### Fit CPU-enabled {lightGBM} base learners on {gpu:gn040809} cluster.
 target_baselearner_lgb <-
   list(
     targets::tar_target(
-      engine_base_lgb,
+      fit_learner_base_lgb,
       command = {
-        parsnip::boost_tree(
+        int_lgb_threads <- as.integer(Sys.getenv("SLURM_CPUS_PER_TASK"))
+        engine_base_lgb <- parsnip::boost_tree(
           mtry = parsnip::tune(),
           trees = parsnip::tune(),
           learn_rate = parsnip::tune(),
@@ -179,38 +262,57 @@ target_baselearner_lgb <-
           parsnip::set_engine(
             "lightgbm",
             device = "cpu",
-            num_threads = 1
+            num_threads = int_lgb_threads
           ) %>%
           parsnip::set_mode("regression")
-      },
-      description = "Engine and device | lgb | base learner"
-    ),
-    targets::tar_target(
-      fit_learner_base_lgb,
-      command = {
-        df_lgb_grid <- expand.grid(
-          mtry = c(150, 239),
-          trees = c(250, 445),
-          learn_rate = c(0.1, 0.15),
-          tree_depth = c(4, 7)
-        )
         beethoven::fit_base_learner(
-          rset = list_rset_train,
+          rset = list_rset_st_vfolds,
           model = engine_base_lgb,
-          tune_grid_size = df_lgb_grid[
-            sample(nrow(df_lgb_grid), list_base_params_static$tune_grid_size),
-          ],
+          tune_grid_size = list_base_params_static$tune_grid_size,
           yvar = list_base_params_static$yvar,
           xvar = list_base_params_static$xvar,
           drop_vars = list_base_params_static$drop_vars,
-          normalize = list_base_params_static$normalize
+          normalize = list_base_params_static$normalize,
+          metric = list_base_params_static$metric
         )
       },
-      pattern = map(list_rset_train),
+      pattern = map(list_rset_st_vfolds),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_cpu")
+        crew = targets::tar_resources_crew(controller = "controller_lgb")
       ),
       description = "Fit base learner | lgb | cpu | base learner"
+    ),
+    targets::tar_target(
+      list_learner_pred_lgb,
+      command = {
+        dt_pred_lgb <- fit_learner_base_lgb$predictions
+        dt_pred_lgb_sub <- dt_pred_lgb[,
+          c(".pred", ".row", "Arithmetic.Mean")
+        ]
+        names(dt_pred_lgb_sub) <- gsub(
+          ".pred",
+          sprintf("lgb_%05d", num_cv_index),
+          names(dt_pred_lgb_sub)
+        )
+        dt_pred_lgb_sub
+      },
+      pattern = map(fit_learner_base_lgb, num_cv_index),
+      iteration = "list",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_100")
+      ),
+      description = "lgb predictions as list | base learner"
+    ),
+    targets::tar_target(
+      dt_learner_pred_lgb,
+      command = beethoven::reduce_merge(
+        list_learner_pred_lgb,
+        by = c(".row", "Arithmetic.Mean")
+      ),
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_5")
+      ),
+      description = "lgb predictions as data.table | base learner"
     )
   )

@@ -1,14 +1,12 @@
-#' Combine prediction values from base learners
+#' Combine base learner prediction values with testing data.
 #' @description
 #' This function combines outcome data (observations) with the prediction
 #' values from each base learner.
 #' @keywords meta_learner
-#' @param data data.frame(1). Full data.
-#' @param pred list(1). List with base learner prediction values.
-#' @param position numeric(1). Position of the prediction values in the list
-#' `pred`. Default is 1.
+#' @param pred data.table(1). Predicted values from `fit_prediction`
+#' @param test data.table(1). `data.table` with with testing dataset.
 #' @param target_cols characters(1). Columns to retain from the full
-#' data.frame.
+#' data.frame. DO NOT include `yvar` variable in the `target_cols`.
 #' @param yvar character(1). Outcome variable name.
 #' @return a data.frame object, including the target columns from `data` and
 #' the predictions for each base learner.
@@ -16,33 +14,26 @@
 #' @export
 attach_pred <-
   function(
-    data,
-    pred,
-    position = 1,
-    target_cols = c("site_id", "time", "Event.Type", "lon", "lat"),
+    pred = NULL,
+    test = NULL,
+    target_cols = c("site_id", "time", "lon", "lat"),
     yvar = "Arithmetic.Mean"
   ) {
-    stopifnot(!is.null(data))
+    stopifnot(!is.null(pred))
+    stopifnot(!is.null(test))
     stopifnot(!is.null(target_cols))
     stopifnot(!is.null(yvar))
-    if ("data.table" %in% class(data)) data <- data.frame(data)
-    if (!(yvar %in% target_cols)) {
-      target_cols <- c(target_cols, yvar)
+    if ("data.table" %in% class(pred)) {
+      pred <- data.frame(pred)
     }
-    data_targets <- data[, which(names(data) %in% target_cols)]
 
-    pred_merge <- do.call(
-      cbind,
-      (lapply(pred, function(x) x[[position]][, 1]))
-    )
-    colnames(pred_merge) <- gsub("fit_learner_(base|meta)_", "", names(pred))
+    stopifnot(all(target_cols %in% names(pred)))
+    stopifnot(yvar %in% names(test))
+    test_targets <- test[, which(names(test) %in% c(target_cols, yvar))]
 
-    stopifnot(nrow(data_targets) == nrow(pred_merge))
-    data_pred <- cbind(data_targets, pred_merge)
-
+    data_pred <- merge(test_targets, pred, by = target_cols)
     return(data_pred)
   }
-
 
 #' Fit meta learner
 #'

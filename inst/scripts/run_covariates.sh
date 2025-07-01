@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name=cov
+#SBATCH --job-name=covariate
 #SBATCH --mail-user=mitchell.manware@nih.gov
 #SBATCH --mail-type=END,FAIL
 #SBATCH --partition=geo

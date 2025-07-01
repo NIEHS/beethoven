@@ -52,10 +52,15 @@ testthat::test_that("fit_base_learner {glmnt} elastic net", {
   # expect a list
   testthat::expect_true(is.list(elnet1))
   # expect length 2
-  testthat::expect_length(elnet1, 2)
+  testthat::expect_length(elnet1, 3)
   # expect sub-items are workflow and metrics
-  testthat::expect_true("workflow" %in% class(elnet1[[1]]))
-  testthat::expect_true("tbl" %in% class(elnet1[[2]]))
+  testthat::expect_equal(
+    names(elnet1),
+    c("workflow", "predictions", "metrics")
+  )
+  testthat::expect_true("workflow" %in% class(elnet1$workflow))
+  testthat::expect_true("data.frame" %in% class(elnet1$predictions))
+  testthat::expect_true("tbl" %in% class(elnet1$metrics))
 
   # switch_model engine
   testthat::expect_no_error(
