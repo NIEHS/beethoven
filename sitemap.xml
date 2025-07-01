@@ -19,6 +19,7 @@
 <url><loc>https://niehs.github.io/beethoven/reference/calculate.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/calculate_modis.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/calculate_modis_direct.html</loc></url>
+<url><loc>https://niehs.github.io/beethoven/reference/cancel.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/convert_cv_index_rset.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/cov.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/divisor.html</loc></url>
@@ -27,6 +28,7 @@
 <url><loc>https://niehs.github.io/beethoven/reference/fit_base_learner.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/fit_base_tune.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/fit_meta_learner.html</loc></url>
+<url><loc>https://niehs.github.io/beethoven/reference/fit_prediction.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/fl_dates.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/generate_cv_index_sp.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/generate_cv_index_spt.html</loc></url>
