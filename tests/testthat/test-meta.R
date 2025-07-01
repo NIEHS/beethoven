@@ -80,15 +80,25 @@ testthat::test_that("attach_pred", {
     testthat::test_path("..", "testdata", "meta", "list_dt_test.rds")
   )
 
-  testthat::expect_no_error(
-    dt_pred <- beethoven::fit_prediction(
-      fit = fit_learner_base_elnet[[1]],
-      test = list_dt_test[[1]],
-      target_cols = c("site_id", "time", "lon", "lat"),
-      name = paste0("elnet_", sprintf("%05d", 1))
-    )
+  testthat::expect_true(exists("fit_learner_base_elnet"))
+  testthat::expect_true(is.list(fit_learner_base_elnet))
+  testthat::expect_true(is.list(fit_learner_base_elnet[[1]]))
+  testthat::expect_true(exists("list_dt_test"))
+  testthat::expect_true(is.list(list_dt_test))
+  testthat::expect_s3_class(dt_pred, "data.frame")
+
+  # testthat::expect_no_error(
+  dt_pred <- beethoven::fit_prediction(
+    fit = fit_learner_base_elnet[[1]],
+    test = list_dt_test[[1]],
+    target_cols = c("site_id", "time", "lon", "lat"),
+    name = paste0("elnet_", sprintf("%05d", 1))
   )
-  testthat::expect_true("data.frame" %in% class(dt_pred))
+  # )
+  testthat::expect_false("list" %in% class(dt_pred))
+  testthat::expect_true(exists("dt_pred"))
+
+  testthat::expect_s3_class(dt_pred, "data.frame")
   testthat::expect_true("elnet_00001" %in% names(dt_pred))
 
   target_cols <- c("site_id", "time", "lon", "lat")
