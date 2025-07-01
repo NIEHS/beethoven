@@ -200,17 +200,18 @@ target_baselearner_mlp <-
       command = {
         df_mlp_grid <- expand.grid(
           hidden_units = list(
-            32,
-            64,
+            # 32,
+            # 64,
             128,
             256,
             512,
-            c(64, 64),
+            # c(64, 64),
             c(128, 128),
-            c(256, 256)
+            c(256, 256),
+            c(256, 512)
           ),
           dropout = c(0.00),
-          learn_rate = c(0.01)
+          learn_rate = c(0.01, 0.005)
         )
         # dt_mlp_sample <- df_mlp_grid[sample(nrow(df_mlp_grid), 10), ]
 
@@ -218,7 +219,7 @@ target_baselearner_mlp <-
           hidden_units = parsnip::tune(),
           dropout = parsnip::tune(),
           epochs = 1000,
-          activation = "leaky_relu",
+          activation = "relu",
           learn_rate = parsnip::tune()
         ) %>%
           parsnip::set_engine("brulee", device = "cuda") %>%
