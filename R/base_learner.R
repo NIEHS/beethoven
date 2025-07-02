@@ -309,7 +309,7 @@ fit_base_learner <-
     )
 
     # Finalize workflow with best parameters
-    final_wf <- tune::finalize_workflow(base_wf, best_params)
+    final_wf <- tune::finalize_workflow(base_wftune, best_params)
 
     base_results <- list(
       "workflow" = final_wf,
