@@ -309,7 +309,7 @@ fit_base_learner <-
     # Select best model
     best_params <- tune::select_best(base_wftune, metric = metric)
 
-    oof_predictions <- tune::collect_predictions(
+    oof_predictions <- finetune:::collect_predictions.tune_race(
       base_wftune,
       parameters = best_params
     )

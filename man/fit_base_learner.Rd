@@ -35,7 +35,7 @@ The variables to be dropped from the data.frame.}
 normalized. Default is \code{FALSE}.}
 
 \item{metric}{character(1). The metric to be used for selecting the best.
-Must be one of "rmse", "rsq", "mae". Default = "rmse"}
+Must be one of "rmse", "rsq", "msd", "mae". Default = "rmse"}
 
 \item{...}{Additional arguments to be passed.}
 }

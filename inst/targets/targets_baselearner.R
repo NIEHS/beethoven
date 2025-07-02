@@ -200,27 +200,25 @@ target_baselearner_mlp <-
       command = {
         df_mlp_grid <- expand.grid(
           hidden_units = list(
-            # 32,
-            # 64,
             128,
             256,
             512,
-            # c(64, 64),
             c(128, 128),
             c(256, 256),
             c(256, 512)
           ),
-          dropout = c(0.00),
+          dropout = c(0.00, 0.1, 0.2, 0.3),
           learn_rate = c(0.01, 0.005)
         )
-        # dt_mlp_sample <- df_mlp_grid[sample(nrow(df_mlp_grid), 10), ]
+        dt_mlp_sample <- df_mlp_grid[sample(nrow(df_mlp_grid), 10), ]
 
         engine_base_mlp2 <- parsnip::mlp(
           hidden_units = parsnip::tune(),
           dropout = parsnip::tune(),
           epochs = 1000,
           activation = "relu",
-          learn_rate = parsnip::tune()
+          learn_rate = parsnip::tune(),
+          penalty = 1e6
         ) %>%
           parsnip::set_engine("brulee", device = "cuda") %>%
           parsnip::set_mode("regression")
@@ -228,7 +226,7 @@ target_baselearner_mlp <-
         fit_learner_mlp2 <- beethoven::fit_base_learner(
           rset = list_rset_st_vfolds,
           model = engine_base_mlp2,
-          tune_grid_size = df_mlp_grid,
+          tune_grid_size = dt_mlp_sample,
           yvar = list_base_params_static$yvar,
           xvar = list_base_params_static$xvar,
           drop_vars = list_base_params_static$drop_vars,
@@ -236,7 +234,7 @@ target_baselearner_mlp <-
           metric = list_base_params_static$metric
         )
       },
-      pattern = sample(list_rset_st_vfolds, 5),
+      pattern = sample(list_rset_st_vfolds, 8),
       iteration = "list",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(controller = "controller_mlp")
