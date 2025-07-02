@@ -1,6 +1,6 @@
 Package: beethoven
 Title: Building an Extensible, rEproducible, Test-driven, Harmonized, Open-source, Versioned, ENsemble model for air quality
-Version: 0.5.1
+Version: 0.5.2
 Authors@R: c(
     person("Kyle", "Messier", , "kyle.messier@nih.gov", role = c("aut", "cre"), comment = c(ORCID = "0000-0001-9508-9623")),
     person("Mitchell", "Manware", role = c("aut", "ctb"), comment = c(ORCID = "0009-0003-6440-6106")),
@@ -12,7 +12,7 @@ Authors@R: c(
     person("Cavin", "Ward-Caviness", role = c("aut", "ctb"), comment = c(ORCID = "0000-0002-6322-4349"))
   )
 Description: Near Real Time air pollution model results and code produced by the SET group. It is fully tested, versioned, and open source and open access.
-Depends: R (>= 4.1.0)
+Depends: R (>= 4.2.0)
 Imports:
   dplyr,
   sf,
@@ -20,7 +20,6 @@ Imports:
   terra,
   methods,
   data.table,
-  future,
   targets,
   tune (>= 1.2.1),
   rlang,
@@ -33,7 +32,6 @@ Imports:
   workflows,
   recipes,
   missRanger,
-  future.batchtools,
   qs,
   stringi,
   tibble,
