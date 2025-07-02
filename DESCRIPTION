@@ -56,7 +56,6 @@ Suggests:
   glmnet,
   lightgbm,
   scoringRules,
-  future.mirai,
   vetiver,
   tarchetypes,
   tidymodels,

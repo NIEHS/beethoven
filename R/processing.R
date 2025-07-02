@@ -345,6 +345,7 @@ process_narr2 <- function(
 #' @importFrom stringi stri_extract_first_regex stri_sub
 #' @importFrom terra writeRaster
 #' @author Insang Song
+#' @keywords Calculation
 #' @export
 #' @examples
 #' \dontrun{
