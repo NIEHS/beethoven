@@ -50,7 +50,8 @@ testthat::test_that("fit_base_learner {brulee} MLP", {
       yvar = "Arithmetic.Mean",
       xvar = seq(4, ncol(dt_base)),
       drop_vars = NULL,
-      normalize = TRUE
+      normalize = TRUE,
+      metric = "rmse"
     )
   )
   # expect a list

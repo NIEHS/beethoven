@@ -45,7 +45,7 @@ From: rocker/geospatial:latest
     Rscript -e "pak::pak('NIEHS/amadeus')"
     Rscript -e "install.packages(c('scoringRules', 'future.mirai', 'vetiver', \
         'lwgeom', 'doRNG', 'quarto', 'kernlab'))"
-    Rscript -e "pak::pak('NIEHS/beethoven@mm-0607')"
+    Rscript -e "pak::pak('NIEHS/beethoven@mm-0701')"
 
 %environment
     # Set locale for the container environment

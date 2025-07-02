@@ -109,7 +109,7 @@ From: nvidia/cuda:11.8.0-devel-ubuntu22.04
     Rscript -e "pak::pak('finetune')"
     Rscript -e "pak::pak('lme4',upgrade = TRUE)"
     Rscript -e "pak::pak('ropensci/chopin')"
-    Rscript -e "pak::pak('NIEHS/beethoven@cv-updates-0613')"
+    Rscript -e "pak::pak('NIEHS/beethoven@mm-0701')"
     Rscript -e "pak::pak('r-lib/ps', upgrade = TRUE)"
 
 %environment
