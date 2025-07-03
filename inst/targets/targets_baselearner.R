@@ -137,7 +137,11 @@ target_baselearner_mlp <-
           activation = "leaky_relu",
           learn_rate = parsnip::tune()
         ) %>%
-          parsnip::set_engine("brulee", device = "cuda") %>%
+          parsnip::set_engine(
+            "brulee",
+            device = "cuda",
+            early_stopping = TRUE
+          ) %>%
           parsnip::set_mode("regression")
       },
       description = "Engine and device | mlp | base learner"
@@ -196,26 +200,24 @@ target_baselearner_mlp <-
     ################################################################################
     ##### Development work with 2-layer {brulee} mlp.
     targets::tar_target(
-      fit_learner_base_mlp_2layer,
+      fit_learner_base_mlp2,
       command = {
         df_mlp_grid <- expand.grid(
           hidden_units = list(
-            # 128,
-            # 256,
-            # 512,
-            # c(128, 128),
-            # c(256, 256),
-            # c(256, 512),
+            256,
+            512,
+            c(256, 256),
+            c(256, 512),
             c(128, 256, 512),
             c(128, 256, 128),
             c(256, 512, 256)
           ),
-          dropout = 0.0,
-          # dropout = seq(0.0, 0.3, 0.05),
-          learn_rate = 0.005
-          # learn_rate = seq(0.0025, 0.01, 0.0015)
+          dropout = seq(0.1, 0.5, 0.05),
+          learn_rate = seq(0.0025, 0.01, 0.0015)
         )
-        # dt_mlp_sample <- df_mlp_grid[sample(nrow(df_mlp_grid), 10), ]
+        dt_mlp_grid_sample <- df_mlp_grid[
+          sample(nrow(df_mlp_grid), list_base_params_static$tune_grid_size),
+        ]
 
         engine_base_mlp2 <- parsnip::mlp(
           hidden_units = parsnip::tune(),
@@ -225,13 +227,17 @@ target_baselearner_mlp <-
           learn_rate = parsnip::tune(),
           penalty = 1e-06
         ) %>%
-          parsnip::set_engine("brulee", device = "cuda") %>%
+          parsnip::set_engine(
+            "brulee",
+            device = "cuda",
+            early_stopping = TRUE
+          ) %>%
           parsnip::set_mode("regression")
 
         fit_learner_mlp2 <- beethoven::fit_base_learner(
           rset = list_rset_st_vfolds,
           model = engine_base_mlp2,
-          tune_grid_size = df_mlp_grid,
+          tune_grid_size = dt_mlp_grid_sample,
           yvar = list_base_params_static$yvar,
           xvar = list_base_params_static$xvar,
           drop_vars = list_base_params_static$drop_vars,
@@ -239,12 +245,44 @@ target_baselearner_mlp <-
           metric = list_base_params_static$metric
         )
       },
-      pattern = sample(list_rset_st_vfolds, 8),
+      pattern = map(list_rset_st_vfolds),
       iteration = "list",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(controller = "controller_mlp")
       ),
       description = "Fit base learners | mlp 2 layer | gpu | base learner"
+    ),
+    targets::tar_target(
+      list_learner_pred_mlp2,
+      command = {
+        dt_pred_mlp2 <- fit_learner_base_mlp2$predictions
+        dt_pred_mlp2_sub <- dt_pred_mlp2[,
+          c(".pred", ".row", "Arithmetic.Mean")
+        ]
+        names(dt_pred_mlp2_sub) <- gsub(
+          ".pred",
+          sprintf("mlp2_%05d", num_cv_index),
+          names(dt_pred_mlp2_sub)
+        )
+        dt_pred_mlp2_sub
+      },
+      pattern = map(fit_learner_base_mlp2, num_cv_index),
+      iteration = "list",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_100")
+      ),
+      description = "mlp predictions as list | base learner"
+    ),
+    targets::tar_target(
+      dt_learner_pred_mlp2,
+      command = beethoven::reduce_merge(
+        list_learner_pred_mlp2,
+        by = c(".row", "Arithmetic.Mean")
+      ),
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_5")
+      ),
+      description = "mlp predictions as data.table | base learner"
     )
   )
 

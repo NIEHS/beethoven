@@ -20,7 +20,7 @@ testthat::test_that("fit_base_learner {brulee} MLP", {
     activation = "leaky_relu",
     learn_rate = parsnip::tune()
   ) %>%
-    parsnip::set_engine("brulee", device = "cpu") %>%
+    parsnip::set_engine("brulee", device = "cpu", early_stopping = TRUE) %>%
     parsnip::set_mode("regression")
 
   # generate rset index
