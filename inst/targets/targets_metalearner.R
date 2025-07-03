@@ -29,15 +29,7 @@ target_metalearner <-
         dt_base_pred <- data.frame(
           cbind(
             list_base_params_static$dt_full[,
-              c(
-                chr_learner_meta_cols,
-                list_base_params_static$yvar,
-                grep(
-                  "DUM_E2",
-                  names(list_base_params_static$dt_full),
-                  value = TRUE
-                )
-              )
+              c(chr_learner_meta_cols, list_base_params_static$yvar)
             ],
             dt_pred
           )
@@ -45,13 +37,8 @@ target_metalearner <-
         stopifnot(
           all(dt_base_pred$Arithmetic.Mean == dt_base_pred$Arithmetic.Mean.1)
         )
-        dt_base_pred2 <- merge(
-          dt_base_pred,
-          dt_state_dummy,
-          by = chr_learner_meta_cols
-        )
-        dt_base_pred2[,
-          grep("Arithmetic.Mean.1|.row", names(dt_base_pred2), invert = TRUE)
+        dt_base_pred[,
+          grep("Arithmetic.Mean.1|.row", names(dt_base_pred), invert = TRUE)
         ]
       },
       description = "Base learner predictions with space/time ID | meta"
