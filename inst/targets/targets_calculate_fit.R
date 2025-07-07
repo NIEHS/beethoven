@@ -4,9 +4,14 @@ target_calculate_fit <-
   list(
     ###########################         GEOS         ###########################
     targets::tar_target(
+      chr_iter_calc_geos,
+      command = c("aqc_tavg_1hr_g1440x721_v1", "chm_tavg_1hr_g1440x721_v1"),
+      description = "GEOS-CF features | download"
+    ),
+    targets::tar_target(
       list_feat_calc_geos_aqc,
       command = {
-        download_geos_buffer
+        # download_geos_buffer
         beethoven::calc_geos_strict(
           path = file.path(chr_input_dir, "geos", chr_iter_calc_geos[1]),
           date = beethoven::fl_dates(unlist(list_dates)),
@@ -16,7 +21,7 @@ target_calculate_fit <-
       },
       pattern = cross(list_feat_proc_aqs_sites, list_dates),
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_100")
+        crew = targets::tar_resources_crew(controller = "controller_25")
       ),
       iteration = "list",
       description = "Calculate GEOS-CF features | aqc | fit"
@@ -24,7 +29,7 @@ target_calculate_fit <-
     targets::tar_target(
       list_feat_calc_geos_chm,
       command = {
-        download_geos_buffer
+        # download_geos_buffer
         beethoven::calc_geos_strict(
           path = file.path(chr_input_dir, "geos", chr_iter_calc_geos[2]),
           date = beethoven::fl_dates(unlist(list_dates)),
@@ -34,7 +39,7 @@ target_calculate_fit <-
       },
       pattern = cross(list_feat_proc_aqs_sites, list_dates),
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_100")
+        crew = targets::tar_resources_crew(controller = "controller_25")
       ),
       iteration = "list",
       description = "Calculate GEOS-CF features | chm | fit"
@@ -46,7 +51,7 @@ target_calculate_fit <-
           beethoven::reduce_list(list_feat_calc_geos_aqc),
           beethoven::reduce_list(list_feat_calc_geos_chm)
         ),
-        by = c("site_id", "time", "CO", "NO2", "SO2")
+        by = c("site_id", "time")
       ),
       description = "data.table of GEOS-CF features | fit"
     ),
@@ -148,7 +153,7 @@ target_calculate_fit <-
     targets::tar_target(
       list_feat_calc_hms,
       command = {
-        download_hms_buffer
+        # download_hms_buffer
         dt_iter_calc_hms <- beethoven::inject_calculate(
           covariate = "hms",
           locs = list_feat_proc_aqs_sites[[1]],
@@ -164,6 +169,9 @@ target_calculate_fit <-
           prefix = "HMS_"
         )
       },
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_50")
+      ),
       pattern = cross(list_feat_proc_aqs_sites, list_dates),
       iteration = "list",
       description = "Calculate HMS features | fit"
@@ -312,7 +320,10 @@ target_calculate_fit <-
       },
       iteration = "list",
       pattern = map(list_args_calc_mod06_files),
-      description = "preprocessed MODIS MOD06 files"
+      description = "preprocessed MODIS MOD06 files",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_25")
+      )
     )
     ,
     targets::tar_target(
@@ -834,7 +845,7 @@ target_calculate_fit <-
     targets::tar_target(
       dt_feat_calc_koppen,
       command = {
-        download_koppen
+        # download_koppen
         data.table::data.table(
           amadeus::calculate_koppen_geiger(
             from = amadeus::process_koppen_geiger(
