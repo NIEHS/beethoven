@@ -170,6 +170,7 @@ switch_model <-
 #'
 #' Tuning is performed based on random grid search (size = 10).
 #' @param rset A space/time CV set generated from beethoven
+#' @param full_data The full data frame to be used for training after the tuning.
 #' @param model The parsnip model object. Preferably generated from
 #'   `switch_model`.
 #' @param tune_grid_size numeric(1), finetune grid size.
@@ -201,6 +202,7 @@ switch_model <-
 fit_base_learner <-
   function(
     rset = NULL,
+    full_data = NULL,
     model = NULL,
     tune_grid_size = 10L,
     yvar = "Arithmetic.Mean",
@@ -315,7 +317,9 @@ fit_base_learner <-
     )
 
     # Finalize workflow with best parameters
-    final_wf <- tune::finalize_workflow(base_wf, best_params)
+    final_wf <- tune::finalize_workflow(base_wf, best_params) |>
+      # Fit the finalized workflow to the full data
+      parsnip::fit(data = full_data)
 
     base_results <- list(
       "workflow" = final_wf,
