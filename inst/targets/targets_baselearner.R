@@ -224,8 +224,7 @@ target_baselearner_mlp <-
           dropout = parsnip::tune(),
           epochs = 1000,
           activation = "leaky_relu",
-          learn_rate = parsnip::tune(),
-          penalty = 1e-06
+          learn_rate = parsnip::tune()
         ) %>%
           parsnip::set_engine(
             "brulee",
