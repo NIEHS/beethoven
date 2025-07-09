@@ -170,7 +170,8 @@ switch_model <-
 #'
 #' Tuning is performed based on random grid search (size = 10).
 #' @param rset A space/time CV set generated from beethoven
-#' @param full_data The full data frame to be used for training after the tuning.
+#' @param full_data The full data frame to be used for training after the
+#' tuning. Passed to `parsnip::fit`.
 #' @param model The parsnip model object. Preferably generated from
 #'   `switch_model`.
 #' @param tune_grid_size numeric(1), finetune grid size.

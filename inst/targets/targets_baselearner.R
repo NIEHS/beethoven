@@ -51,21 +51,21 @@ target_baselearner <-
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(controller = "controller_10")
       )
-    ),
-    targets::tar_target(
-      list_rset_random_vfolds,
-      command = {
-        cv_rset <- rsample::vfold_cv(
-          data = list_base_params_static$dt_full,
-          v = list_base_params_static$cvsize,
-          repeats = list_base_params_static$num_base_models
-        )
-      },
-      description = "random vfold training sets | base learner",
-      resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_10")
-      )
-    )
+    ) # ,
+    # targets::tar_target(
+    #   list_rset_random_vfolds,
+    #   command = {
+    #     cv_rset <- rsample::vfold_cv(
+    #       data = list_base_params_static$dt_full,
+    #       v = list_base_params_static$cvsize,
+    #       repeats = list_base_params_static$num_base_models
+    #     )
+    #   },
+    #   description = "random vfold training sets | base learner",
+    #   resources = targets::tar_resources(
+    #     crew = targets::tar_resources_crew(controller = "controller_10")
+    #   )
+    # )
   )
 
 ################################################################################

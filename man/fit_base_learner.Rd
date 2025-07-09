@@ -6,6 +6,7 @@
 \usage{
 fit_base_learner(
   rset = NULL,
+  full_data = NULL,
   model = NULL,
   tune_grid_size = 10L,
   yvar = "Arithmetic.Mean",
@@ -18,6 +19,9 @@ fit_base_learner(
 }
 \arguments{
 \item{rset}{A space/time CV set generated from beethoven}
+
+\item{full_data}{The full data frame to be used for training after the
+tuning. Passed to \code{parsnip::fit}.}
 
 \item{model}{The parsnip model object. Preferably generated from
 \code{switch_model}.}
