@@ -45,11 +45,15 @@ jobs:
           Rscript ${{ github.workspace }}/.github/workflows/test-coverage.R ${{ runner.temp }} ${{ github.workspace }}
         shell: bash
 
-      - name: Show testthat output
+      - name: Show testthat.Rout output in logs
         if: always()
         run: |
-          ## --------------------------------------------------------------------
-          find ${{ runner.temp }}/package -name 'testthat.Rout*' -exec cat '{}' \; || true
+          echo "Looking for testthat.Rout files..."
+          find ${{ runner.temp }} -type f -name 'testthat.Rout' | while read file; do
+            echo "::group::Contents of $file"
+            cat "$file"
+            echo "::endgroup::"
+          done
         shell: bash
 
       - name: Upload workspace dump as artifact if the test fails
