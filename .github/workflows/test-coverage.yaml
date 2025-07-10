@@ -57,7 +57,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-outputs
-          path: ${{ github.workspace }}/**
+          path: ${{ runner.temp }}/package/**/testthat.Rout*
 
       - name: Get Values
         id: get-values
