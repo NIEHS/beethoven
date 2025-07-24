@@ -103,6 +103,7 @@ if (Sys.getenv("BEETHOVEN") == "covariates") {
     "amadeus",
     "targets",
     "tarchetypes",
+    # "sqltargets",
     "dplyr",
     "tidyverse",
     "data.table",
@@ -111,13 +112,15 @@ if (Sys.getenv("BEETHOVEN") == "covariates") {
     "crew.cluster",
     "lubridate",
     "qs2",
-    "kernlab"
+    "kernlab",
+    "DBI"
   )
 } else {
   beethoven_packages <- c(
     "amadeus",
     "targets",
     "tarchetypes",
+    # "sqltargets",
     "dplyr",
     "tidyverse",
     "data.table",
@@ -165,6 +168,7 @@ targets::tar_option_set(
   ),
   retrieval = "worker"
 )
+sqltargets::sqltargets_option_set("sqltargets.template_engine", "jinjar")
 
 ###########################      SOURCE TARGETS      ###########################
 targets::tar_source("inst/targets/targets_critical.R")
@@ -174,7 +178,7 @@ targets::tar_source("inst/targets/targets_aqs.R")
 targets::tar_source("inst/targets/targets_calculate_fit.R")
 targets::tar_source("inst/targets/targets_baselearner.R")
 targets::tar_source("inst/targets/targets_metalearner.R")
-# targets::tar_source("inst/targets/targets_calculate_predict.R")
+targets::tar_source("inst/targets/targets_calculate_predict.R")
 # targets::tar_source("inst/targets/targets_predict.R")
 targets::tar_source() #All of the R/
 
@@ -185,11 +189,9 @@ if (Sys.getenv("BEETHOVEN") == "covariates") {
       target_baselearner_lgb <-
         target_baselearner_mlp <-
           target_metalearner <-
-            target_calculate_predict <-
-              target_predict <- list()
+            target_predict <- list()
 } else if (Sys.getenv("BEETHOVEN") == "models") {
-  target_calculate_predict <-
-    target_predict <- list()
+  target_predict <- list()
 }
 
 ##############################      PIPELINE      ##############################
@@ -203,7 +205,7 @@ list(
   target_baselearner_elnet,
   target_baselearner_mlp,
   target_baselearner_lgb,
-  target_metalearner
-  # target_calculate_predict
+  target_metalearner,
+  target_calculate_predict
   # target_predict
 )

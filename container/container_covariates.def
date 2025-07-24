@@ -38,8 +38,9 @@ From: rocker/geospatial:latest
     # Install R packages
     Rscript -e "install.packages(c('pak', 'devtools'))"
     Rscript -e "devtools::install_version('targets', version = '1.10.0')"
+    Rscript -e "pak::pak('DBI'); pak::pak('duckdb')"
     Rscript -e "install.packages(c('tarchetypes', 'testthat', 'tidymodels', \
-        'bonsai', 'qs2', 'kernlab'))"
+        'bonsai', 'qs2', 'kernlab', 'sqltargets'))"
     Rscript -e "pak::pak('shikokuchuo/nanonext'); pak::pak('shikokuchuo/mirai')"
     Rscript -e "pak::pak('wlandau/crew'); pak::pak('wlandau/crew.cluster')"
     Rscript -e "pak::pak('NIEHS/amadeus')"

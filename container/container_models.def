@@ -95,7 +95,7 @@ From: nvidia/cuda:11.8.0-devel-ubuntu22.04
     Rscript -e "install.packages(c('pak', 'devtools'))"
     Rscript -e "devtools::install_version('targets', version = '1.10.0')"
     Rscript -e "pak::pak('mitchellmanware/parsnip@beethoven')"
-    Rscript -e "install.packages(c('tarchetypes', \
+    Rscript -e "install.packages(c('tarchetypes', 'sqltargets', \
         'testthat', 'tidymodels', 'bonsai', 'qs2', \
         'torch', 'tidyverse', 'glmnet', 'covr', 'lightgbm'))"
     Rscript -e "options(timeout = 1800); torch::install_torch(version = 'latest', type = 'gpu')"
