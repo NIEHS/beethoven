@@ -418,19 +418,30 @@ post_calc_autojoin <-
     if (any(grepl("population", names(df_coarse)))) {
       df_coarse <- df_coarse[, -c("time"), with = FALSE]
     }
-    common_field <- intersect(names(df_fine), names(df_coarse))
     df_fine <- data.table::as.data.table(df_fine)
     df_coarse <- data.table::as.data.table(df_coarse)
     df_fine <- post_calc_drop_cols(df_fine)
     df_coarse <- post_calc_drop_cols(df_coarse)
+    common_field <- intersect(names(df_fine), names(df_coarse))
     # if (length(common_field) > 2) {
     #   message("The data frames have more than two common fields.")
     #   message("Trying to remove the redundant common fields...")
     #   common_field <- intersect(names(df_fine), names(df_coarse))
     #   print(common_field)
-    #   common_field <-
-    #     common_field[-which(!common_field %in% c(field_sp, field_t))]
+    #   noncommon_field <-
+    #     common_field[which(!common_field %in% c(field_sp, field_t))]
     # }
+    if (length(common_field) > 2 || length(common_field) == 0) {
+      stop(
+        paste0(
+          "The data frames should have only one or two common fields.\n",
+          "Check your data frames.\n",
+          "The common fields are: ",
+          paste(common_field, collapse = ", ")
+        )
+      )
+    }
+
     if (length(common_field) == 1) {
       print(common_field)
       if (common_field == field_sp) {

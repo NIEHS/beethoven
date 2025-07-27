@@ -68,7 +68,7 @@ target_calculate_predict <-
     ,
     targets::tar_target(
       list_pred_split_dates,
-      command = split_dates(arglist_common$char_period, 50),
+      command = split_dates(arglist_common$char_period, 14),
       description = "Split period into list of dates"
     )
     ,
@@ -125,39 +125,65 @@ target_calculate_predict <-
       list_pred_calc_hms,
       command = {
         # lapply
-        lapply(list_dates, function(d) {
-
-          beethoven::inject_calculate(
+        results <- vector("list", length(list_dates))
+        
+        for (i in seq_along(list_dates)) {
+          d <- list_dates[[i]]
+          
+          results[[i]] <- beethoven::inject_calculate(
             covariate = "hms",
             locs = list_pred_calc_grid,
             injection = list(
               path = file.path(chr_input_dir, "hms", "data_files"),
-              date = beethoven::fl_dates(unlist(d)), # used to be unlist(list_dates)
+              date = beethoven::fl_dates(unlist(d)),
               covariate = "hms"
             )
           )[[1]] |>
             dplyr::select(-dplyr::any_of(c("lon", "lat", "geometry", "hms_year")))
-        }) %>%
-        collapse::rowbind() %>%
-        as.data.frame()
+          
+          # Force garbage collection every 10 iterations
+          if (i %% 10 == 0) {
+            gc()
+          }
+        }
+        
+        # Use data.table for more efficient binding
+        final_result <- data.table::rbindlist(results, use.names = TRUE, fill = TRUE) |>
+          as.data.frame()
+        final_result
+        # lapply(list_dates, function(d) {
+
+        #   beethoven::inject_calculate(
+        #     covariate = "hms",
+        #     locs = list_pred_calc_grid,
+        #     injection = list(
+        #       path = file.path(chr_input_dir, "hms", "data_files"),
+        #       date = beethoven::fl_dates(unlist(d)), # used to be unlist(list_dates)
+        #       covariate = "hms"
+        #     )
+        #   )[[1]] |>
+        #     dplyr::select(-dplyr::any_of(c("lon", "lat", "geometry", "hms_year")))
+        # }) %>%
+        # collapse::rowbind() %>%
+        # as.data.frame()
 
       },
-      pattern = map(list_pred_calc_grid),
+      pattern = cross(list_pred_calc_grid, list_dates),
       iteration = "list",
       description = "Calculate HMS features | prediction",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_50")
+        crew = targets::tar_resources_crew(controller = "controller_40")
       )
     )
     ,
     ##############################   NLCD    #############################
     # Added for test
-    targets::tar_target(
-      chr_iter_calc_nlcd,
-      command = c(2019, 2021),
-      description = "NLCD years | download"
-    )
-    ,
+    # targets::tar_target(
+    #   chr_iter_calc_nlcd,
+    #   command = c(2019, 2021),
+    #   description = "NLCD years | download"
+    # )
+    # ,
     targets::tar_target(
       chr_pred_calc_nlcd_radii,
       command = c(1000, 10000),
@@ -230,17 +256,17 @@ target_calculate_predict <-
       description = "Radii for GMTED features"
     )
     ,
-    targets::tar_target(
-      chr_iter_calc_gmted_vars,
-      command = c(
-        "Breakline Emphasis", "Systematic Subsample",
-        "Median Statistic", "Minimum Statistic",
-        "Mean Statistic", "Maximum Statistic",
-        "Standard Deviation Statistic"
-      ),
-      description = "GMTED features | download"
-    )
-    ,
+    # targets::tar_target(
+    #   chr_iter_calc_gmted_vars,
+    #   command = c(
+    #     "Breakline Emphasis", "Systematic Subsample",
+    #     "Median Statistic", "Minimum Statistic",
+    #     "Mean Statistic", "Maximum Statistic",
+    #     "Standard Deviation Statistic"
+    #   ),
+    #   description = "GMTED features | download"
+    # )
+    # ,
     targets::tar_target(
       name = list_pred_calc_gmted,
       command =
@@ -319,17 +345,17 @@ target_calculate_predict <-
     )
     ,
     ###########################         NARR         ###########################
-    targets::tar_target(
-      chr_iter_calc_narr,
-      command = c(
-        "air.sfc", "albedo", "apcp", "dswrf", "evap", "hcdc", "hpbl",
-        "lcdc", "lhtfl", "mcdc", "pr_wtr", "prate", "pres.sfc",
-        "shtfl", "snowc", "soilm", "tcdc", "ulwrf.sfc", "uwnd.10m",
-        "vis", "vwnd.10m", "weasd", "omega", "shum"
-      ),
-      description = "NARR features"
-    )
-    ,
+    # targets::tar_target(
+    #   chr_iter_calc_narr,
+    #   command = c(
+    #     "air.sfc", "albedo", "apcp", "dswrf", "evap", "hcdc", "hpbl",
+    #     "lcdc", "lhtfl", "mcdc", "pr_wtr", "prate", "pres.sfc",
+    #     "shtfl", "snowc", "soilm", "tcdc", "ulwrf.sfc", "uwnd.10m",
+    #     "vis", "vwnd.10m", "weasd", "omega", "shum"
+    #   ),
+    #   description = "NARR features"
+    # )
+    # ,
     targets::tar_target(
       list_pred_calc_narr,
       command = {
@@ -957,12 +983,12 @@ target_calculate_predict <-
     )
     ,
     ###########################         NEI          ###########################
-    targets::tar_target(
-      chr_iter_calc_nei,
-      command = c(2017, 2020),
-      description = "NEI features | download"
-    )
-    ,
+    # targets::tar_target(
+    #   chr_iter_calc_nei,
+    #   command = c(2017, 2020),
+    #   description = "NEI features | download"
+    # )
+    # ,
     targets::tar_target(
       list_pred_calc_nei,
       command = 

@@ -57,9 +57,52 @@ target_calculate_fit <-
     ),
     ###########################         NARR         ###########################
     targets::tar_target(
+      chr_iter_calc_narr,
+      command = c(
+        "air.sfc",
+        "albedo",
+        "apcp",
+        "dswrf",
+        "evap",
+        "hcdc",
+        "hpbl",
+        "lcdc",
+        "lhtfl",
+        "mcdc",
+        "pr_wtr",
+        "prate",
+        "pres.sfc",
+        "shtfl",
+        "snowc",
+        "soilm",
+        "tcdc",
+        "ulwrf.sfc",
+        "uwnd.10m",
+        "vis",
+        "vwnd.10m",
+        "weasd",
+        "omega",
+        "shum"
+      ),
+      description = "NARR features"
+    ),
+    targets::tar_target(
+      chr_iter_calc_narr_lag,
+      command = c(
+        "air.sfc",
+        "apcp",
+        "pres.sfc",
+        "shum",
+        "uwnd.10m",
+        "vwnd.10m"
+      ),
+      description = "NARR features | lag"
+    ),
+    ## Remove between the previous header and this line when activating download targets
+    targets::tar_target(
       list_feat_calc_narr,
       command = {
-        download_narr_buffer
+        # download_narr_buffer
         dt_iter_calc_narr <- amadeus::calculate_narr(
           from = amadeus::process_narr(
             path = file.path(chr_input_dir, "narr", chr_iter_calc_narr),
@@ -83,6 +126,9 @@ target_calculate_fit <-
           prefix = "NARR_0_"
         )
       },
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_25")
+      ),
       pattern = cross(list_feat_proc_aqs_sites, list_dates, chr_iter_calc_narr),
       iteration = "list",
       description = "Calculate NARR features | nolag | fit"
@@ -98,7 +144,7 @@ target_calculate_fit <-
     targets::tar_target(
       list_feat_calc_narr_lag,
       command = {
-        download_narr_buffer
+        # download_narr_buffer
         dt_lag_calc_narr <- amadeus::calculate_narr(
           from = amadeus::process_narr(
             path = file.path(chr_input_dir, "narr", chr_iter_calc_narr_lag),
@@ -135,6 +181,9 @@ target_calculate_fit <-
           locs_id = "site_id"
         )
       },
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_25")
+      ),
       pattern = map(chr_iter_calc_narr_lag),
       iteration = "list",
       description = "Calculate NARR features | lag | fit"
@@ -757,9 +806,22 @@ target_calculate_fit <-
       description = "GMTED radii"
     ),
     targets::tar_target(
+      chr_iter_calc_gmted_vars,
+      command = c(
+        "Breakline Emphasis",
+        "Systematic Subsample",
+        "Median Statistic",
+        "Minimum Statistic",
+        "Mean Statistic",
+        "Maximum Statistic",
+        "Standard Deviation Statistic"
+      ),
+      description = "GMTED features | download"
+    ),
+    targets::tar_target(
       list_feat_calc_gmted,
       command = {
-        download_gmted
+        # download_gmted
         beethoven::calc_gmted_direct(
           variable = c(chr_iter_calc_gmted_vars, "7.5 arc-seconds"),
           path = file.path(chr_input_dir, "gmted", "data_files"),
@@ -786,6 +848,11 @@ target_calculate_fit <-
     ),
     ###########################         NLCD         ###########################
     targets::tar_target(
+      chr_iter_calc_nlcd,
+      command = c(2019, 2021),
+      description = "NLCD years | download"
+    ),
+    targets::tar_target(
       df_feat_calc_nlcd_params,
       command = expand.grid(
         year = chr_iter_calc_nlcd,
@@ -798,7 +865,7 @@ target_calculate_fit <-
     targets::tar_target(
       list_feat_calc_nlcd,
       command = {
-        download_nlcd
+        # download_nlcd
         beethoven::inject_nlcd(
           locs = dplyr::bind_rows(list_feat_proc_aqs_sites),
           # NOTE: locs are all AQS sites for computational efficiency
@@ -913,7 +980,7 @@ target_calculate_fit <-
     targets::tar_target(
       list_feat_calc_tri,
       command = {
-        download_tri
+        # download_tri
         beethoven::inject_calculate(
           covariate = "tri",
           locs = dplyr::bind_rows(list_feat_proc_aqs_sites),
@@ -943,15 +1010,19 @@ target_calculate_fit <-
         chr_tri_radii_index <- sapply(
           list_feat_calc_tri_unnest,
           function(x) {
-            any(grepl(sprintf("_%05d", chr_iter_radii), names(x)))
+            any(grepl(sprintf("_%05d$", chr_iter_radii), names(x)))
           }
         )
-        beethoven::reduce_merge(
+        # beethoven::reduce_merge(
+        # recheck with the main branch: the resulting list has data.frames with the same layout
+        data.table::rbindlist(
           list_feat_calc_tri_unnest[chr_tri_radii_index],
-          by = NULL,
-          all.x = TRUE,
-          all.y = TRUE
+          fill = TRUE
         )
+          # by = NULL,
+          # all.x = TRUE,
+          # all.y = TRUE
+        # )
       },
       iteration = "list",
       pattern = map(chr_iter_radii),
@@ -981,12 +1052,17 @@ target_calculate_fit <-
     ),
     ###########################         NEI          ###########################
     targets::tar_target(
+      chr_iter_calc_nei,
+      command = c(2017, 2020),
+      description = "NEI features | download"
+    ),
+    targets::tar_target(
       list_feat_calc_nei,
       command = {
         download_nei <- TRUE
         beethoven::inject_calculate(
           covariate = "nei",
-          locs = list_feat_proc_aqs_sites[[1]],
+          locs = dplyr::bind_rows(list_feat_proc_aqs_sites),#[[1]],
           injection = list(
             domain = chr_iter_calc_nei,
             domain_name = "year",
@@ -996,17 +1072,18 @@ target_calculate_fit <-
         )
       },
       iteration = "list",
-      pattern = cross(list_feat_proc_aqs_sites, chr_iter_calc_nei),
+      pattern = map(chr_iter_calc_nei),
       description = "Calculate NEI features | fit"
     ),
     targets::tar_target(
       dt_feat_calc_nei,
-      command = beethoven::reduce_list(
-        lapply(
-          list_feat_calc_nei,
-          function(x) data.table::data.table(beethoven::reduce_list(x)[[1]])
-        )
-      )[[1]],
+      # command = beethoven::reduce_list(
+      #   lapply(
+      #     list_feat_calc_nei,
+      #     function(x) data.table::data.table(beethoven::reduce_list(x)[[1]])
+      #   )
+      # )[[1]],
+      command = collapse::rowbind(Map(\(x) x[[1]], list_feat_calc_nei)),
       description = "data.table of NEI features | fit"
     ),
     ###########################      ECOREGIONS      ###########################
@@ -1072,7 +1149,8 @@ target_calculate_fit <-
         list(
           dt_feat_calc_geos,
           dt_feat_calc_narr,
-          dt_feat_calc_nasa
+          dt_feat_calc_nasa,
+          dt_feat_calc_hms
         )
       ),
       description = "data.table of all features | fit"
@@ -1082,7 +1160,7 @@ target_calculate_fit <-
       list_feat_calc_base_flat,
       command = lapply(
         list(
-          list(dt_feat_calc_hms),
+          # list(dt_feat_calc_hms),
           list(dt_feat_calc_tri),
           list(dt_feat_calc_nei),
           list(dt_feat_calc_ecoregions),

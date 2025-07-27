@@ -26,6 +26,11 @@ controller_50 <- crew::crew_controller_local(
   name = "controller_50",
   workers = 50
 )
+##### `controller_40` uses 40 workers (~25.0 Gb per worker).
+controller_40 <- crew::crew_controller_local(
+  name = "controller_40",
+  workers = 40
+)
 ##### `controller_25` uses 25 workers (~40.0 Gb per worker).
 controller_25 <- crew::crew_controller_local(
   name = "controller_25",
@@ -133,7 +138,7 @@ if (Sys.getenv("BEETHOVEN") == "covariates") {
 targets::tar_option_set(
   packages = beethoven_packages,
   repository = "local",
-  library = .libPaths(),
+  library = .libPaths(c("/mnt/lib-flex", .libPaths())),
   error = "continue",
   memory = "transient",
   format = "qs",
@@ -145,6 +150,7 @@ targets::tar_option_set(
     controller_250,
     controller_100,
     controller_50,
+    controller_40,
     controller_25,
     controller_10,
     controller_5,
@@ -166,7 +172,7 @@ targets::tar_source("inst/targets/targets_aqs.R")
 targets::tar_source("inst/targets/targets_calculate_fit.R")
 targets::tar_source("inst/targets/targets_baselearner.R")
 targets::tar_source("inst/targets/targets_metalearner.R")
-# targets::tar_source("inst/targets/targets_calculate_predict.R")
+targets::tar_source("inst/targets/targets_calculate_predict.R")
 # targets::tar_source("inst/targets/targets_predict.R")
 targets::tar_source() #All of the R/
 
@@ -209,8 +215,8 @@ list(
   target_baselearner,
   target_baselearner_elnet,
   target_baselearner_mlp,
-  target_baselearner_lgb
+  target_baselearner_lgb,
   # target_metalearner
-  # target_calculate_predict
+  target_calculate_predict
   # target_predict
 )
