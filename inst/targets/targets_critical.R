@@ -52,6 +52,14 @@ target_critical <-
       num_dates_split,
       command = 122,
       description = "Number of days in each temporal split | critical"
+    ),
+    ##### 6. chr_store defines the path to the {targets} store **relative**
+    #####    to the container-mounted file paths. Used for querying parquet
+    #####    files for SQL merges.
+    targets::tar_target(
+      chr_store,
+      command = "/opt/_targets/objects/",
+      description = "{targets} store | critical"
     )
     ############################################################################
     ############################################################################

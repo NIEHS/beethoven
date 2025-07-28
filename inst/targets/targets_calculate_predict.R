@@ -276,11 +276,6 @@ target_calculate_predict <-
     ############################################################################
     ############################################################################
     targets::tar_target(
-      chr_store,
-      command = "/opt/_targets/objects/",
-      description = "{targets} store | prediction"
-    ),
-    targets::tar_target(
       chr_pred_calc_hms,
       command = list.files(
         chr_store,
@@ -304,66 +299,101 @@ target_calculate_predict <-
       },
       description = "Initiate {duckdb} for prediction grid | prediction"
     ),
+    # targets::tar_target(
+    #   db_pred_calc_hms,
+    #   command = {
+    #     chr_parquet_hms <- paste0(
+    #       "['",
+    #       paste(chr_pred_calc_hms, collapse = "','"),
+    #       "']"
+    #     )
+    #     chr_db_hms <- "df_pred_calc_hms"
+    #     chr_sql_hms <- sprintf(
+    #       "
+    #       CREATE OR REPLACE TABLE %s AS
+    #       SELECT *
+    #       FROM read_parquet(%s)
+    #       ORDER BY site_id, time;
+    #     ",
+    #       chr_db_hms,
+    #       chr_parquet_hms
+    #     )
+    #     con_prediction <- DBI::dbConnect(duckdb::duckdb(), chr_duckdb)
+    #     on.exit(DBI::dbDisconnect(con_prediction, shutdown = TRUE))
+    #     if (DBI::dbExistsTable(con_prediction, chr_db_hms)) {
+    #       DBI::dbExecute(con_prediction, paste0("DROP TABLE ", chr_db_hms))
+    #     }
+    #     DBI::dbExecute(con_prediction, chr_sql_hms)
+    #     chr_hash <- paste0(
+    #       "SELECT md5(
+    #         string_agg(
+    #           concat_ws('|', COLUMNS(*)),
+    #           '||' ORDER BY site_id, time
+    #         )
+    #       ) AS table_hash
+    #       FROM ",
+    #       chr_db_hms,
+    #       ";"
+    #     )
+    #     DBI::dbGetQuery(con_prediction, chr_hash)$table_hash
+    #   },
+    #   description = "Merge HMS features with SQL x {duckdb} | prediction",
+    #   resources = targets::tar_resources(
+    #     crew = targets::tar_resources_crew(controller = "controller_1")
+    #   )
+    # ),
     targets::tar_target(
-      df_pred_calc_hms,
-      command = {
-        chr_sql_hms <- paste0(
-          "SELECT * FROM read_parquet('",
-          chr_pred_calc_hms[1],
-          "') ",
-          paste(
-            sprintf(
-              "UNION SELECT * FROM read_parquet('%s')",
-              # chr_pred_calc_hms[2:length(chr_pred_calc_hms)]
-              chr_pred_calc_hms[2:5]
-            ),
-            collapse = " "
-          ),
-          " ORDER BY site_id, time"
-        )
-        chr_db_hms <- "df_pred_calc_hms"
-        con_prediction <- DBI::dbConnect(duckdb::duckdb(), chr_duckdb)
-        on.exit(DBI::dbDisconnect(con_prediction, shutdown = TRUE))
-        DBI::dbExecute(con_prediction, "DROP TABLE df_pred_calc_hms")
-        DBI::dbExecute(
-          con_prediction,
-          paste0("CREATE TABLE ", chr_db_hms, " AS ", chr_sql_hms)
-        )
-        chr_hash <- paste0(
-          "SELECT md5(
-            string_agg(
-              concat_ws('|', COLUMNS(*)),
-              '||' ORDER BY site_id, time
-            )
-          ) AS table_hash
-          FROM ",
-          chr_db_hms,
-          ";"
-        )
-        DBI::dbGetQuery(con_prediction, chr_hash)$table_hash
-      },
-      description = "Merge HMS features with SQL x {duckdb} | prediction"
+      chr_pred_calc_gmted,
+      command = list.files(
+        chr_store,
+        pattern = paste0(deparse(substitute(list_pred_calc_gmted))),
+        full.names = TRUE,
+        recursive = TRUE
+      ),
+      description = "{parquet} file paths for GMTED features | prediction"
     )
     # targets::tar_target(
-    #   list_pred_calc_hms_files,
-    #   command = list(
-    #     parquet_paths = list.files(
-    #       path = chr_store,
-    #       recursive = TRUE,
-    #       full.names = TRUE,
-    #       all.files = TRUE,
-    #       pattern = deparse(substitute(list_pred_calc_hms))
+    #   db_pred_calc_gmted,
+    #   command = {
+    #     chr_sql_gmted <- paste0(
+    #       "SELECT * FROM read_parquet('",
+    #       chr_pred_calc_gmted[1],
+    #       "') ",
+    #       paste(
+    #         sprintf(
+    #           "UNION SELECT * FROM read_parquet('%s')",
+    #           chr_pred_calc_gmted[2:length(chr_pred_calc_gmted)]
+    #         ),
+    #         collapse = " "
+    #       ),
+    #       " ORDER BY site_id"
     #     )
-    #   ),
-    #   description = "{parquet} file paths for HMS features | prediction"
-    # ),
-    # sqltargets::tar_sql(
-    #   db_pred_calc_hms,
-    #   path = "inst/queries/merge_spacetime.sql",
-    #   params = list_pred_calc_hms_files,
-    #   format = "parquet",
+    #     chr_db_gmted <- "df_pred_calc_gmted"
+    #     con_prediction <- DBI::dbConnect(duckdb::duckdb(), chr_duckdb)
+    #     on.exit(DBI::dbDisconnect(con_prediction, shutdown = TRUE))
+    #     if (DBI::dbExistsTable(con_prediction, chr_db_gmted)) {
+    #       DBI::dbExecute(con_prediction, paste0("DROP TABLE ", chr_db_gmted))
+    #     }
+    #     DBI::dbExecute(
+    #       con_prediction,
+    #       paste0("CREATE TABLE ", chr_db_gmted, " AS ", chr_sql_gmted)
+    #     )
+    #     chr_hash <- paste0(
+    #       "SELECT md5(
+    #         string_agg(
+    #           concat_ws('|', COLUMNS(*)),
+    #           '||' ORDER BY site_id
+    #         )
+    #       ) AS table_hash
+    #       FROM ",
+    #       chr_db_gmted,
+    #       ";"
+    #     )
+    #     DBI::dbGetQuery(con_prediction, chr_hash)$table_hash
+    #   },
+    #   description = "Merge GMTED features with SQL x {duckdb} | prediction",
     #   resources = targets::tar_resources(
-    #     parquet = targets::tar_resources_parquet(compression = "lz4")
+    #     crew = targets::tar_resources_crew(controller = "controller_1")
     #   )
     # )
     ############################################################################
