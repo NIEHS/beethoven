@@ -172,7 +172,7 @@ target_calculate_predict <-
       iteration = "list",
       description = "Calculate HMS features | prediction",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_40")
+        crew = targets::tar_resources_crew(controller = "controller_30")
       )
     )
     ,
@@ -886,7 +886,7 @@ target_calculate_predict <-
       pattern = map(list_pred_calc_grid),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_50"),
+        crew = targets::tar_resources_crew(controller = "controller_30"),
         parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
       format = "parquet",
