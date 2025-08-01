@@ -450,7 +450,7 @@ target_calculate_predict <-
       pattern = cross(list_pred_calc_grid, list_dates),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_50"),
+        crew = targets::tar_resources_crew(controller = "controller_30"),
         parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
       format = "parquet",
@@ -519,7 +519,7 @@ target_calculate_predict <-
     targets::tar_target(
       list_pred_calc_mod13,
       command = {
-        search_dir <- file.path(chr_input_dir, "modis_preprocessed", "MOD13A1")
+        search_dir <- file.path(chr_input_dir, "modis_preprocessed", "MOD13A2")
         date_find <- list_dates
         
         lapply(chr_iter_radii, function(r) {
