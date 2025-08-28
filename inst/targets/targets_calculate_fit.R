@@ -748,6 +748,28 @@ target_calculate_fit <-
       },
       description = "data.table of TRI PCA-reduced features | fit"
     ),
+    # targets::tar_target(
+    #   list_pca_calc_tri,
+    #   command = {
+    #     dt_feat_merge_tri <- beethoven::reduce_merge(
+    #       list_feat_reduce_tri,
+    #       by = c("site_id", "time", "lon", "lat", "tri_year"),
+    #       all.x = TRUE,
+    #       all.y = TRUE
+    #     )
+    #     dt_feat_merge_tri[is.na(dt_feat_merge_tri)] <- 0
+    #     beethoven::post_calc_pca(
+    #       data = dt_feat_merge_tri,
+    #       yvar = NULL,
+    #       num_comp = 5,
+    #       pattern = "FUGITIVE|STACK",
+    #       groups = sprintf("%05d", chr_iter_radii),
+    #       prefix = "TRI",
+    #       kernel = TRUE
+    #     )
+    #   },
+    #   description = "list with recipe and TRI PCA-reduced features | fit | dev"
+    # ),
     ###########################         NEI          ###########################
     targets::tar_target(
       list_feat_calc_nei,

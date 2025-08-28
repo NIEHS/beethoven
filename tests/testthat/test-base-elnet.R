@@ -46,7 +46,8 @@ testthat::test_that("fit_base_learner {glmnt} elastic net", {
       yvar = "Arithmetic.Mean",
       xvar = seq(4, ncol(dt_base)),
       drop_vars = NULL,
-      normalize = TRUE
+      normalize = TRUE,
+      metric = "mae"
     )
   )
   # expect a list

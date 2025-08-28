@@ -95,9 +95,10 @@ From: nvidia/cuda:11.8.0-devel-ubuntu22.04
     Rscript -e "install.packages(c('pak', 'devtools'))"
     Rscript -e "devtools::install_version('targets', version = '1.10.0')"
     Rscript -e "pak::pak('mitchellmanware/parsnip@beethoven')"
-    Rscript -e "install.packages(c('tarchetypes', \
+    Rscript -e "install.packages(c('tarchetypes', 'sqltargets', \
         'testthat', 'tidymodels', 'bonsai', 'qs2', \
-        'torch', 'tidyverse', 'glmnet', 'covr', 'lightgbm'))"
+        'tidyverse', 'glmnet', 'covr', 'lightgbm'))"
+    Rscript -e "devtools::install_version('torch', version = '0.15.1')"
     Rscript -e "options(timeout = 1800); torch::install_torch(version = 'latest', type = 'gpu')"
     Rscript -e "pak::pak('tidymodels/brulee@gpu')"
     Rscript -e "pak::pak('shikokuchuo/nanonext'); pak::pak('shikokuchuo/mirai')"
@@ -105,11 +106,12 @@ From: nvidia/cuda:11.8.0-devel-ubuntu22.04
     Rscript -e "devtools::install_version('crew.cluster', version = '0.3.7')"
     # Rscript -e "pak::pak('wlandau/crew'); pak::pak('wlandau/crew.cluster')"
     Rscript -e "install.packages(c('scoringRules', 'future.mirai', 'vetiver', \
-        'lwgeom', 'doRNG', 'quarto', 'kernlab', 'arrow'))"
+        'lwgeom', 'doRNG', 'quarto', 'kernlab', 'arrow', 'h3r'))"
     Rscript -e "pak::pak('finetune')"
     Rscript -e "pak::pak('lme4',upgrade = TRUE)"
+    Rscript -e "remotes::install_github('crazycapivara/h3-r')"
     Rscript -e "pak::pak('ropensci/chopin')"
-    Rscript -e "pak::pak('NIEHS/beethoven@cv-updates-0613')"
+    Rscript -e "pak::pak('NIEHS/beethoven@mm-0701')"
     Rscript -e "pak::pak('r-lib/ps', upgrade = TRUE)"
 
 %environment

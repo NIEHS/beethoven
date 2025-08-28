@@ -129,3 +129,13 @@ cov/
 dev/
 save/
 debug/
+inst/extdata/bdp/
+inst/extdata/bdp2/
+inst/extdata/bdp3/
+inst/extdata/bdp4/
+inst/extdata/filesize.R
+inst/extdata/filesize_hex.R
+inst/extdata/filesize_hex_wide.R
+inst/extdata/filesize_checks.R
+inst/extdata/bigdata.sh
+*.parquet

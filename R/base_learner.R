@@ -170,6 +170,8 @@ switch_model <-
 #'
 #' Tuning is performed based on random grid search (size = 10).
 #' @param rset A space/time CV set generated from beethoven
+#' @param full_data The full data frame to be used for training after the
+#' tuning. Passed to `parsnip::fit`.
 #' @param model The parsnip model object. Preferably generated from
 #'   `switch_model`.
 #' @param tune_grid_size numeric(1), finetune grid size.
@@ -180,7 +182,7 @@ switch_model <-
 #' @param normalize logical(1). If `TRUE`, all numeric predictors are
 #' normalized. Default is `FALSE`.
 #' @param metric character(1). The metric to be used for selecting the best.
-#' Must be one of "rmse", "rsq", "mae". Default = "rmse"
+#' Must be one of "rmse", "rsq", "msd", "mae". Default = "rmse"
 #' @param ... Additional arguments to be passed.
 #'
 #' @return The fitted workflow.
@@ -201,6 +203,7 @@ switch_model <-
 fit_base_learner <-
   function(
     rset = NULL,
+    full_data = NULL,
     model = NULL,
     tune_grid_size = 10L,
     yvar = "Arithmetic.Mean",
@@ -214,6 +217,22 @@ fit_base_learner <-
 
     # detect model name
     model_name <- model$engine
+
+    # supported metrics
+    chr_metrics <- c("rmse", "rsq", "msd", "mae")
+    stopifnot(metric %in% chr_metrics)
+
+    # order metrics (first metric is used for tune_race_anova)
+    chr_metrics_ordered <- c(metric, setdiff(chr_metrics, metric))
+
+    # namespaced symbols
+    sym_metrics <- lapply(chr_metrics_ordered, function(m) {
+      # Create a call to :: (e.g., quote(yardstick::rmse))
+      call("::", quote(yardstick), as.symbol(m))
+    })
+
+    # full call
+    call_metric <- as.call(c(quote(yardstick::metric_set), sym_metrics))
 
     # first split training for covariate names in recipe
     training_data <- rsample::training(rset$splits[[1]])
@@ -261,12 +280,7 @@ fit_base_learner <-
           finetune::tune_race_anova(
             resamples = rset,
             grid = tune_grid_size,
-            metrics = yardstick::metric_set(
-              yardstick::rmse,
-              yardstick::rsq,
-              yardstick::msd,
-              yardstick::mae
-            ),
+            metrics = eval(call_metric),
             control = wf_config
           )
       },
@@ -289,12 +303,7 @@ fit_base_learner <-
           finetune::tune_race_anova(
             resamples = rset,
             grid = tune_grid_size,
-            metrics = yardstick::metric_set(
-              yardstick::rmse,
-              yardstick::rsq,
-              yardstick::msd,
-              yardstick::mae
-            ),
+            metrics = eval(call_metric),
             control = wf_config
           )
       }
@@ -303,13 +312,15 @@ fit_base_learner <-
     # Select best model
     best_params <- tune::select_best(base_wftune, metric = metric)
 
-    oof_predictions <- tune::collect_predictions(
+    oof_predictions <- finetune:::collect_predictions.tune_race(
       base_wftune,
       parameters = best_params
     )
 
     # Finalize workflow with best parameters
-    final_wf <- tune::finalize_workflow(base_wf, best_params)
+    final_wf <- tune::finalize_workflow(base_wf, best_params) |>
+      # Fit the finalized workflow to the full data
+      parsnip::fit(data = full_data)
 
     base_results <- list(
       "workflow" = final_wf,

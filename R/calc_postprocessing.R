@@ -822,7 +822,7 @@ reduce_pca <- function(
   data_prep <- recipes::prep(data_pca, data = data)
   data_pca <- recipes::bake(data_prep, new_data = data)
 
-  return(data_pca)
+  return(list(pca = data_pca, recipe = data_prep))
 }
 
 #' Post-calculation Principal Component Analysis
@@ -879,18 +879,21 @@ post_calc_pca <- function(
   ]
 
   if (is.null(groups)) {
-    return_pca <- beethoven::reduce_pca(
+    list_pca <- beethoven::reduce_pca(
       data = data_pca,
       threshold = threshold,
       num_comp = num_comp,
       kernel = kernel
     )
+    return_pca <- list_pca$pca
     names(return_pca) <- paste0(prefix, "_", names(return_pca))
+    list_recipe <- list_pca$recipe
   } else {
     list_pca <- list()
+    list_recipe <- list()
     for (g in seq_along(groups)) {
       data_group <- data_pca[,
-        grep(groups[g], names(data_pca)),
+        grep(paste0("_", groups[g], "$"), names(data_pca)),
         with = FALSE
       ]
       group_pca <- beethoven::reduce_pca(
@@ -899,14 +902,15 @@ post_calc_pca <- function(
         num_comp = num_comp,
         kernel = kernel
       )
-      names(group_pca) <- paste0(
+      names(group_pca$pca) <- paste0(
         prefix,
         "_",
-        names(group_pca),
+        names(group_pca$pca),
         "_",
         groups[g]
       )
-      list_pca <- c(list_pca, group_pca)
+      list_pca <- c(list_pca, group_pca$pca)
+      list_recipe <- c(list_recipe, list(group_pca$recipe))
     }
     return_pca <- do.call(cbind, list_pca)
   }
@@ -914,7 +918,7 @@ post_calc_pca <- function(
   stopifnot(nrow(data_trim) == nrow(return_pca))
   data_return <- data.table::data.table(cbind(data_trim, return_pca))
 
-  return(data_return)
+  return(list(pca = data_return, recipe = list_recipe))
 }
 
 #' Post-calculation column renaming

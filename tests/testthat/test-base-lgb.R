@@ -48,7 +48,8 @@ testthat::test_that("fit_base_learner {lightGBM}", {
       yvar = "Arithmetic.Mean",
       xvar = seq(4, ncol(dt_base)),
       drop_vars = NULL,
-      normalize = TRUE
+      normalize = TRUE,
+      metric = "rsq"
     )
   )
   # expect a list

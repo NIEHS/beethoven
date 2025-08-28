@@ -22,7 +22,12 @@ target_metalearner <-
       dt_base_pred,
       command = {
         dt_pred <- beethoven::reduce_merge(
-          list(dt_learner_pred_elnet, dt_learner_pred_mlp, dt_learner_pred_lgb),
+          list(
+            dt_learner_pred_elnet,
+            dt_learner_pred_mlp,
+            dt_learner_pred_mlp2,
+            dt_learner_pred_lgb
+          ),
           by = c(".row", "Arithmetic.Mean")
         ) |>
           dplyr::arrange(.row)
@@ -55,101 +60,117 @@ target_metalearner <-
         ]
       },
       description = "Base learner predictions with space/time ID | meta"
+    ),
+    targets::tar_target(
+      dt_base_performance,
+      command = {
+        chr_models <- grep("elnet|mlp|lgb", names(dt_base_pred), value = TRUE)
+        purrr::map_dfr(
+          chr_models,
+          function(pred_col) {
+            df <- dt_base_pred %>%
+              dplyr::select(
+                truth = Arithmetic.Mean,
+                estimate = dplyr::all_of(pred_col)
+              )
+            data.frame(
+              model = pred_col,
+              rsq = yardstick::rsq(
+                df,
+                truth = truth,
+                estimate = estimate
+              )$.estimate,
+              rmse = yardstick::rmse(
+                df,
+                truth = truth,
+                estimate = estimate
+              )$.estimate,
+              mae = yardstick::mae(
+                df,
+                truth = truth,
+                estimate = estimate
+              )$.estimate
+            )
+          }
+        )
+      },
+      description = "Base prediction performance | base"
+    ),
+    targets::tar_target(
+      rset_meta,
+      command = rsample::vfold_cv(dt_base_pred, v = 5)$splits[[1]],
+      description = "Split predictions into 80% train 20% test | meta"
+    ),
+    targets::tar_target(
+      dt_meta_test,
+      command = rsample::assessment(rset_meta),
+      description = "Hold out testing data | meta",
+    ),
+    targets::tar_target(
+      list_meta_rset_train,
+      command = {
+        dt_meta_train <- rsample::training(rset_meta)
+        spatiotemporal_index <- beethoven::generate_cv_index_spt(
+          data = dt_meta_train,
+          crs = list_base_params_static$crs,
+          cellsize = list_base_params_static$cellsize,
+          locs_id = "site_id",
+          coords = c("lon", "lat"),
+          v = list_base_params_static$cvsize,
+          time_id = "time"
+        )
+        cv_rset <- beethoven::convert_cv_index_rset(
+          cvindex = spatiotemporal_index,
+          data = dt_meta_train,
+          cv_mode = "spatiotemporal"
+        )
+        return(cv_rset)
+      },
+      description = "MC vfold training sets | meta",
+      pattern = map(num_cv_index),
+      iteration = "list",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_50")
+      )
+    ),
+    targets::tar_target(
+      fit_learner_meta,
+      command = {
+        int_lgb_threads <- as.integer(Sys.getenv("SLURM_CPUS_PER_TASK"))
+        engine_meta_lgb <- parsnip::boost_tree(
+          mtry = parsnip::tune(),
+          trees = parsnip::tune(),
+          learn_rate = parsnip::tune(),
+          tree_depth = parsnip::tune()
+        ) %>%
+          parsnip::set_engine(
+            "lightgbm",
+            device = "cpu",
+            num_threads = int_lgb_threads
+          ) %>%
+          parsnip::set_mode("regression")
+        beethoven::fit_base_learner(
+          rset = list_meta_rset_train,
+          model = engine_meta_lgb,
+          tune_grid_size = list_base_params_static$tune_grid_size,
+          yvar = list_base_params_static$yvar,
+          xvar = grep(
+            "elnet|mlp|lgb|DUM|lon|lat",
+            names(dt_base_pred),
+            value = TRUE
+          ),
+          drop_vars = list_base_params_static$drop_vars,
+          normalize = list_base_params_static$normalize,
+          metric = list_base_params_static$metric
+        )
+      },
+      pattern = map(list_meta_rset_train),
+      iteration = "list",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_lgb")
+      ),
+      description = "Fit meta learner | lightgbm | cpu | meta"
     )
-    # targets::tar_target(
-    #   dt_base_performance,
-    #   command = {
-    #     chr_models <- grep("elnet|mlp|lgb", names(dt_base_pred), value = TRUE)
-    #     purrr::map_dfr(
-    #       chr_models,
-    #       function(pred_col) {
-    #         df <- dt_base_pred %>%
-    #           dplyr::select(
-    #             truth = Arithmetic.Mean,
-    #             estimate = dplyr::all_of(pred_col)
-    #           )
-    #         data.frame(
-    #           model = pred_col,
-    #           rsq = yardstick::rsq(
-    #             df,
-    #             truth = truth,
-    #             estimate = estimate
-    #           )$.estimate,
-    #           rmse = yardstick::rmse(
-    #             df,
-    #             truth = truth,
-    #             estimate = estimate
-    #           )$.estimate,
-    #           mae = yardstick::mae(
-    #             df,
-    #             truth = truth,
-    #             estimate = estimate
-    #           )$.estimate
-    #         )
-    #       }
-    #     )
-    #   },
-    #   description = "Base prediction performance | base"
-    # ),
-    # targets::tar_target(
-    #   rset_meta,
-    #   command = rsample::vfold_cv(dt_base_pred, v = 5)$splits[[1]],
-    #   description = "Split predictions into 80% train 20% test | meta"
-    # ),
-    # targets::tar_target(
-    #   dt_meta_test,
-    #   command = rsample::assessment(rset_meta),
-    #   description = "Hold out testing data | meta",
-    # ),
-    # targets::tar_target(
-    #   list_meta_rset_train,
-    #   command = {
-    #     dt_meta_train <- rsample::training(rset_meta)
-    #     spatiotemporal_index <- beethoven::generate_cv_index_spt(
-    #       data = dt_meta_train,
-    #       crs = list_base_params_static$crs,
-    #       cellsize = list_base_params_static$cellsize,
-    #       locs_id = "site_id",
-    #       coords = c("lon", "lat"),
-    #       v = list_base_params_static$cvsize,
-    #       time_id = "time"
-    #     )
-    #     cv_rset <- beethoven::convert_cv_index_rset(
-    #       cvindex = spatiotemporal_index,
-    #       data = dt_meta_train,
-    #       cv_mode = "spatiotemporal"
-    #     )
-    #     return(cv_rset)
-    #   },
-    #   description = "MC vfold training sets | meta",
-    #   pattern = map(num_cv_index),
-    #   iteration = "list",
-    #   resources = targets::tar_resources(
-    #     crew = targets::tar_resources_crew(controller = "controller_50")
-    #   )
-    # ),
-    # targets::tar_target(
-    #   fit_learner_meta,
-    #   command = beethoven::fit_base_learner(
-    #     rset = list_meta_rset_train,
-    #     model = engine_base_elnet,
-    #     tune_grid_size = list_base_params_static$tune_grid_size,
-    #     yvar = list_base_params_static$yvar,
-    #     xvar = grep(
-    #       "elnet|mlp|lgb|lon|lat",
-    #       names(dt_base_pred),
-    #       value = TRUE
-    #     ),
-    #     drop_vars = list_base_params_static$drop_vars,
-    #     normalize = list_base_params_static$normalize
-    #   ),
-    #   pattern = map(list_meta_rset_train),
-    #   iteration = "list",
-    #   resources = targets::tar_resources(
-    #     crew = targets::tar_resources_crew(controller = "controller_10")
-    #   ),
-    #   description = "Fit meta learner | elnet | cpu | meta"
-    # ),
     # targets::tar_target(
     #   list_meta_predict,
     #   command = beethoven::attach_pred(

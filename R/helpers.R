@@ -30,7 +30,7 @@ queue <- function() {
 #' @return NULL; cancels jobs.
 #' @keywords Miscellaneous
 #' @export
-cancel <- function(job = NULL) {
+scancel <- function(job = NULL) {
   stopifnot(!is.null(job))
   if (job == "full") {
     system("scancel -u $USER")

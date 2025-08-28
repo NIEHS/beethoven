@@ -30,7 +30,6 @@ testthat::test_that("post_calc_merge_features", {
   # expect 15 rows (5 dates x 3 sites) and 183 columns
   testthat::expect_equal(dim(dt_pcmf1), c(15, 183))
 
-
   # expect no error with date and no-time data
   testthat::expect_no_error(
     dt_pcmf2 <- beethoven::post_calc_merge_features(
@@ -50,7 +49,6 @@ testthat::test_that("post_calc_merge_features", {
     1
   )
 
-
   # expect NA values with merging date wiith no-time data AND time = TRUE
   testthat::expect_no_error(
     dt_pcmf3 <- beethoven::post_calc_merge_features(
@@ -61,7 +59,6 @@ testthat::test_that("post_calc_merge_features", {
     )
   )
   testthat::expect_true("TRUE" %in% any(is.na(dt_pcmf3)))
-
 
   # expect "lon" and "lat" are dropped when included
   lonlat <- data.frame(
@@ -79,7 +76,6 @@ testthat::test_that("post_calc_merge_features", {
     )
   )
   testthat::expect_false(unique(c("lon", "lat") %in% names(dt_pcmf4)))
-
 })
 
 
@@ -93,7 +89,6 @@ testthat::test_that("post_calc_unify_timecols", {
   # set improper colname for NLCD years
   names(dt_nlcd)[2] <- "year"
 
-  
   # expect no error when colname is set to time
   testthat::expect_no_error(
     dt_pcut <- beethoven::post_calc_unify_timecols(
@@ -135,7 +130,6 @@ testthat::test_that("post_calc_convert_time", {
   # expect "time" is a character
   testthat::expect_true(is.character(dt_pcct$time))
 
-  
   # expect error without time column
   dt_notime <- dt_geos[, -c("time")]
   testthat::expect_error(
@@ -151,7 +145,6 @@ testthat::test_that("post_calc_join_yeardate", {
   dt_nlcd <- readRDS(
     testthat::test_path("..", "testdata", "postprocessing", "dt_nlcd.rds")
   )
-
 
   # expect error when data.frame and integer
   testthat::expect_error(
@@ -197,7 +190,6 @@ testthat::test_that("post_calc_df_year_expand", {
   # subset to get uneven rows
   dt_nlcd_sub <- dt_nlcd[1:4, ]
 
-
   # expect error with uneven rows in df
   testthat::expect_error(
     beethoven::post_calc_df_year_expand(
@@ -225,7 +217,6 @@ testthat::test_that("post_calc_merge_all", {
   # create locs
   locs <- dt_narr[, c("site_id", "time")]
 
-  
   # expect no error when merging spatial (gmted) to spatiotemporal (narr)
   testthat::expect_no_error(
     dt_pcma1 <- beethoven::post_calc_merge_all(
@@ -243,7 +234,6 @@ testthat::test_that("post_calc_merge_all", {
   testthat::expect_equal(dim(dt_pcma1), c(15, 180))
   # exepct time column is character
   testthat::expect_true(is.character(dt_pcma1$time))
-
 
   # create locs as sf
   locs$lon <- rep(c(-70, -71, -72), 5)
@@ -275,7 +265,6 @@ testthat::test_that("post_calc_merge_all", {
     c("lon", "lat", "geometry") %in% names(dt_pcma2),
     c(FALSE, FALSE, FALSE)
   )
-
 })
 
 
@@ -290,7 +279,7 @@ testthat::test_that("post_calc_drop_cols", {
     year = 2000:2005,
     other = rep("saved", 6)
   )
-  
+
   # expect no error with strict = FALSE
   testthat::expect_no_error(
     dt_weak <- beethoven::post_calc_drop_cols(
@@ -301,7 +290,6 @@ testthat::test_that("post_calc_drop_cols", {
   )
   # expect 3 columns (dropped "year")
   testthat::expect_length(names(dt_weak), 4)
-
 
   # expect no error with strict = TRUE
   testthat::expect_no_error(
@@ -324,8 +312,7 @@ testthat::test_that("post_calc_autojoin expands and joins data.frames with diffe
   df_fine1 <-
     expand.grid(
       site_id = rep(LETTERS[1:4], 5),
-      time =
-      rep(
+      time = rep(
         seq.Date(as.Date("2021-12-30"), as.Date("2022-01-03"), by = 1),
         each = 4
       ),
@@ -335,27 +322,32 @@ testthat::test_that("post_calc_autojoin expands and joins data.frames with diffe
   df_fine2 <-
     data.frame(
       site_id = rep(c("A", "B", "C", "D"), 2),
-      time =
-      c(
+      time = c(
         as.Date(c("2022-01-01", "2022-01-02", "2021-12-31", "2021-01-03")),
         as.Date(c("2022-01-01", "2022-01-02", "2021-12-31", "2021-01-03")) + 1
       ),
-      value2 = c(c(1+2i, 2+3i, 3+4i, 5+6i),
-                c(1+2i, 2+3i, 3+4i, 5+6i) + 1)
+      value2 = c(
+        c(1 + 2i, 2 + 3i, 3 + 4i, 5 + 6i),
+        c(1 + 2i, 2 + 3i, 3 + 4i, 5 + 6i) + 1
+      )
     )
   # attempt to join two data.frames with the same temporal resolution
   # will run quietly
   testthat::expect_no_error(
     autojoin_iden <-
       beethoven::post_calc_autojoin(
-        df_fine = df_fine1, df_coarse = df_fine2,
-        field_sp = "site_id", field_t = "time"
+        df_fine = df_fine1,
+        df_coarse = df_fine2,
+        field_sp = "site_id",
+        field_t = "time"
       )
   )
 
-  df_coarse0 <- data.frame(site_id = c("A", "B", "C", "D"),
-                           time = rep(2020, 4),
-                           other_value = c(10, 20, 30, 40))
+  df_coarse0 <- data.frame(
+    site_id = c("A", "B", "C", "D"),
+    time = rep(2020, 4),
+    other_value = c(10, 20, 30, 40)
+  )
   # df_coarse0 includes year values. It will lead to an error when
   # attempting to convert the year values to Date objects.
   # we leverage that characteristics to detect whether the temporal
@@ -371,7 +363,6 @@ testthat::test_that("post_calc_autojoin expands and joins data.frames with diffe
   testthat::expect_no_error(
     autojoin_diff <- beethoven::post_calc_autojoin(df_fine1, df_coarse2)
   )
-
 })
 
 
@@ -402,17 +393,20 @@ testthat::test_that("impute_all", {
   testthat::expect_false(TRUE %in% unique(is.na(dt_imputed1)))
   # expect "site_id" and "time" in names
   testthat::expect_equal(
-    c("site_id", "time") %in% names(dt_imputed1), c(TRUE, TRUE)
+    c("site_id", "time") %in% names(dt_imputed1),
+    c(TRUE, TRUE)
   )
   # expect 10 dates
   testthat::expect_length(unique(dt_imputed1$time), 10)
-
 
   # expect no errors on imputation (file path)
   testthat::expect_no_error(
     dt_imputed2 <- beethoven::impute_all(
       dt = testthat::test_path(
-        "..", "testdata", "postprocessing", "dt_full.qs"
+        "..",
+        "testdata",
+        "postprocessing",
+        "dt_full.qs"
       ),
       period = c("2018-01-01", "2018-01-10"),
       nthreads_dt = 1L,
@@ -428,7 +422,8 @@ testthat::test_that("impute_all", {
   testthat::expect_false(TRUE %in% unique(is.na(dt_imputed2)))
   # expect "site_id" and "time" in names
   testthat::expect_equal(
-    c("site_id", "time") %in% names(dt_imputed2), c(TRUE, TRUE)
+    c("site_id", "time") %in% names(dt_imputed2),
+    c(TRUE, TRUE)
   )
   # expect 10 dates
   testthat::expect_length(unique(dt_imputed2$time), 10)
@@ -437,7 +432,10 @@ testthat::test_that("impute_all", {
   testthat::expect_error(
     beethoven::impute_all(
       dt = testthat::test_path(
-        "..", "testdata", "postprocessing", "wRoNgFiLePaTh.rDs"
+        "..",
+        "testdata",
+        "postprocessing",
+        "wRoNgFiLePaTh.rDs"
       ),
       period = c("2018-01-01", "2018-01-10"),
       nthreads_dt = 1L,
@@ -458,7 +456,10 @@ testthat::test_that("append_predecessors", {
   testthat::expect_no_error(
     dt_imputed1 <- beethoven::impute_all(
       dt = testthat::test_path(
-        "..", "testdata", "postprocessing", "dt_full.qs"
+        "..",
+        "testdata",
+        "postprocessing",
+        "dt_full.qs"
       ),
       period = c("2018-01-01", "2018-01-10"),
       nthreads_dt = 1L,
@@ -488,12 +489,14 @@ testthat::test_that("append_predecessors", {
   # expect 10 dates
   testthat::expect_length(unique(dt_append1$time), 10)
 
-
   # expect no error for imputed data (impute 2)
   testthat::expect_no_error(
     dt_imputed2 <- beethoven::impute_all(
       dt = testthat::test_path(
-        "..", "testdata", "postprocessing", "dt_append.qs"
+        "..",
+        "testdata",
+        "postprocessing",
+        "dt_append.qs"
       ),
       period = c("2018-01-11", "2018-01-20"),
       nthreads_dt = 1L,
@@ -501,7 +504,7 @@ testthat::test_that("append_predecessors", {
       nthreads_imputation = 1L
     )
   )
-  # SUBSET dt_imputed2 TO MATCH COLUMNS OF dt_imputed1 
+  # SUBSET dt_imputed2 TO MATCH COLUMNS OF dt_imputed1
   # dt_imputed1 has 743 columns, ~3200 columns dropped due to using a small
   # sample of sites and times
   # dt_imputed_sub <- dt_imputed2[, names(dt_imputed1)]
@@ -521,7 +524,6 @@ testthat::test_that("append_predecessors", {
   # # expect 10 dates
   # testthat::expect_length(unique(dt_append2$time), 20)
 
-
   # expect error with NULL `input_new`
   testthat::expect_error(
     beethoven::append_predecessors()
@@ -531,14 +533,13 @@ testthat::test_that("append_predecessors", {
 ################################################################################
 ##### post_calc_pca
 testthat::test_that("post_calc_pca", {
-
   dt_wide <- readRDS(
     testthat::test_path("..", "testdata", "base", "dt_wide.rds")
   )
 
   # one PCA for all predictors | manual num_comp
   testthat::expect_warning(
-    dt_pca1 <- beethoven::post_calc_pca(
+    list_pca1 <- beethoven::post_calc_pca(
       data = dt_wide,
       locs_id = "site_id",
       time_id = "time",
@@ -550,13 +551,15 @@ testthat::test_that("post_calc_pca", {
       prefix = "TRI"
     )
   )
-  testthat::expect_true("data.frame" %in% class(dt_pca1))
-  testthat::expect_equal(nrow(dt_wide), nrow(dt_pca1))
-  testthat::expect_equal(ncol(dt_pca1), 10)
+  testthat::expect_true(is.list(list_pca1))
+  testthat::expect_true("data.frame" %in% class(list_pca1$pca))
+  testthat::expect_true("recipe" %in% class(list_pca1$recipe))
+  testthat::expect_equal(nrow(dt_wide), nrow(list_pca1$pca))
+  testthat::expect_equal(ncol(list_pca1$pca), 10)
 
   # 3 PCA for grouped predictors | manual num_comp
   testthat::expect_warning(
-    dt_pca2 <- beethoven::post_calc_pca(
+    list_pca2 <- beethoven::post_calc_pca(
       data = dt_wide,
       locs_id = "site_id",
       time_id = "time",
@@ -569,13 +572,16 @@ testthat::test_that("post_calc_pca", {
       prefix = "TRI"
     )
   )
-  testthat::expect_true("data.frame" %in% class(dt_pca2))
-  testthat::expect_equal(nrow(dt_wide), nrow(dt_pca2))
-  testthat::expect_equal(ncol(dt_pca2), 20)
+  testthat::expect_true(is.list(list_pca2))
+  testthat::expect_true("data.frame" %in% class(list_pca2$pca))
+  testthat::expect_true(is.list(list_pca2$recipe))
+  testthat::expect_true("recipe" %in% class(list_pca2$recipe[[1]]))
+  testthat::expect_equal(nrow(dt_wide), nrow(list_pca2$pca))
+  testthat::expect_equal(ncol(list_pca2$pca), 20)
 
   # one PCA for all predictors | flexible threshold
   testthat::expect_warning(
-    dt_pca3 <- beethoven::post_calc_pca(
+    list_pca3 <- beethoven::post_calc_pca(
       data = dt_wide,
       locs_id = "site_id",
       time_id = "time",
@@ -587,12 +593,14 @@ testthat::test_that("post_calc_pca", {
       prefix = "TRI"
     )
   )
-  testthat::expect_true("data.frame" %in% class(dt_pca3))
-  testthat::expect_equal(nrow(dt_wide), nrow(dt_pca3))
+  testthat::expect_true(is.list(list_pca3))
+  testthat::expect_true("data.frame" %in% class(list_pca3$pca))
+  testthat::expect_true("recipe" %in% class(list_pca3$recipe))
+  testthat::expect_equal(nrow(dt_wide), nrow(list_pca3$pca))
 
   # 3 PCA for grouped predictors | flexible threshold
   testthat::expect_warning(
-    dt_pca4 <- beethoven::post_calc_pca(
+    list_pca4 <- beethoven::post_calc_pca(
       data = dt_wide,
       locs_id = "site_id",
       time_id = "time",
@@ -605,12 +613,15 @@ testthat::test_that("post_calc_pca", {
       prefix = "TRI"
     )
   )
-  testthat::expect_true("data.frame" %in% class(dt_pca4))
-  testthat::expect_equal(nrow(dt_wide), nrow(dt_pca4))
+  testthat::expect_true(is.list(list_pca4))
+  testthat::expect_true("data.frame" %in% class(list_pca4$pca))
+  testthat::expect_true(is.list(list_pca4$recipe))
+  testthat::expect_true("recipe" %in% class(list_pca4$recipe[[1]]))
+  testthat::expect_equal(nrow(dt_wide), nrow(list_pca4$pca))
 
   # 3 PCA for grouped predictors | manual num_comp | kernel pca
   testthat::expect_warning(
-    dt_pca5 <- beethoven::post_calc_pca(
+    list_pca5 <- beethoven::post_calc_pca(
       data = dt_wide,
       locs_id = "site_id",
       time_id = "time",
@@ -624,10 +635,9 @@ testthat::test_that("post_calc_pca", {
       kernel = TRUE
     )
   )
-  testthat::expect_true("data.frame" %in% class(dt_pca5))
-  testthat::expect_equal(nrow(dt_wide), nrow(dt_pca5))
-  testthat::expect_equal(ncol(dt_pca5), 20)
-
+  testthat::expect_true(is.list(list_pca5))
+  testthat::expect_equal(nrow(dt_wide), nrow(list_pca5$pca))
+  testthat::expect_equal(ncol(list_pca5$pca), 20)
 })
 
 ################################################################################

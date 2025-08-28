@@ -6,6 +6,7 @@
 \usage{
 fit_base_learner(
   rset = NULL,
+  full_data = NULL,
   model = NULL,
   tune_grid_size = 10L,
   yvar = "Arithmetic.Mean",
@@ -18,6 +19,9 @@ fit_base_learner(
 }
 \arguments{
 \item{rset}{A space/time CV set generated from beethoven}
+
+\item{full_data}{The full data frame to be used for training after the
+tuning. Passed to \code{parsnip::fit}.}
 
 \item{model}{The parsnip model object. Preferably generated from
 \code{switch_model}.}
@@ -35,7 +39,7 @@ The variables to be dropped from the data.frame.}
 normalized. Default is \code{FALSE}.}
 
 \item{metric}{character(1). The metric to be used for selecting the best.
-Must be one of "rmse", "rsq", "mae". Default = "rmse"}
+Must be one of "rmse", "rsq", "msd", "mae". Default = "rmse"}
 
 \item{...}{Additional arguments to be passed.}
 }

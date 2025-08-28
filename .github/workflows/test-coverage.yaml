@@ -42,50 +42,81 @@ jobs:
 
       - name: Test coverage
         run: |
-          Rscript -e "covpack<-covr::package_coverage(install_path='${{ github.workspace }}/cov', clean=FALSE, quiet=FALSE); \
-          covr::report(covpack, file = file.path('${{ github.workspace }}', 'chopin-coverage-report.html')); \
-          covd<-covr::coverage_to_list(covpack)$totalcoverage; \
-          write.table(covd[length(covd)], file = '${{ github.workspace }}/local_cov.Rout', row.names = F, col.names = F)"
+          Rscript ${{ github.workspace }}/.github/workflows/test-coverage.R ${{ runner.temp }} ${{ github.workspace }}
         shell: bash
 
-      - name: Upload covr report as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: covr-report
-          path: ${{ github.workspace }}/beethoven-coverage-report.html
+      - name: Show testthat.Rout output in logs
+        if: always()
+        run: |
+          echo "Looking for testthat.Rout files..."
+          find ${{ runner.temp }} -type f -name 'testthat.Rout' | while read file; do
+            echo "::group::Contents of $file"
+            cat "$file"
+            echo "::endgroup::"
+          done
+        shell: bash
 
       - name: Upload workspace dump as artifact if the test fails
         if: ${{ failure() }}
         uses: actions/upload-artifact@v4
         with:
           name: test-outputs
-          path: ${{ github.workspace }}/**
+          path: ${{ runner.temp }}/package/**/testthat.Rout*
 
       - name: Get Values
         id: get-values
         shell: bash
         run: |
           COV=$(cat ${{ github.workspace }}/local_cov.Rout)
+          echo "Patch coverage: $COV"
           echo "coverage=$COV" >> $GITHUB_OUTPUT
 
       - name: Checkout gh-pages
         uses: actions/checkout@v4
         with:
           ref: gh-pages
-  
+
+      - name: Patch comparison
+        id: patch-comparison
+        shell: bash
+        run: |
+          if ( ! test -f cov_current.Rout ); then
+            echo "0" >> cov_current.Rout
+          fi
+
+          cov_patch="${{ steps.get-values.outputs.coverage }}"
+          cov_current=$(cat cov_current.Rout)
+          echo "Current coverage: $cov_current"
+
+          if (( $(echo "$cov_patch >= $cov_current" | bc -l) )); then
+            echo "Patch coverage ($cov_patch) is greater than or equal to current coverage ($cov_current)."
+            echo "cov_update=$cov_patch" >> $GITHUB_OUTPUT
+           else
+            echo "Patch coverage ($cov_patch) is less than current coverage ($cov_current)."
+            exit 1
+          fi
+
+      - name: Overwrite cov_current.Rout
+        if: ${{ github.event_name == 'push' }}
+        shell: bash
+        run: |
+          cov_update="${{ steps.patch-comparison.outputs.cov_update }}"
+          touch cov_current.Rout
+          echo "$cov_update" > cov_current.Rout
+
       - name: Create Badges
         shell: bash
         run: |
           npm i -g badgen-cli
           export COV=${{ steps.get-values.outputs.coverage }}
-          COLOR=$(node -p '+process.env.COV >= 95 ? `green` : `orange`')
+          COLOR=$(node -p '+process.env.COV >= 95 ? `green` : `yellow`')
           mkdir -p badges
           badgen -j coverage -s $COV% -c $COLOR > badges/coverage.svg
   
       - name: Deploy Badges
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: "Update badges [skip ci]"
+          commit_message: "Update badges [skip ci] & cov_current.Rout"
           branch: gh-pages
           skip_fetch: true
           skip_checkout: true
@@ -96,4 +127,4 @@ jobs:
       - name: Checkout Back
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref }} 
+          ref: ${{ github.ref }}  
