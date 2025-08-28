@@ -19,10 +19,10 @@
 <url><loc>https://niehs.github.io/beethoven/reference/calculate.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/calculate_modis.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/calculate_modis_direct.html</loc></url>
-<url><loc>https://niehs.github.io/beethoven/reference/cancel.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/convert_cv_index_rset.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/cov.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/divisor.html</loc></url>
+<url><loc>https://niehs.github.io/beethoven/reference/export_tif.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/feature_raw_download.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/figures/visnetwork.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/fit_base_learner.html</loc></url>
@@ -69,9 +69,9 @@
 <url><loc>https://niehs.github.io/beethoven/reference/reduce_merge.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/reduce_merge_iter.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/reduce_pca.html</loc></url>
+<url><loc>https://niehs.github.io/beethoven/reference/scancel.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/set_args_calc.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/set_args_download.html</loc></url>
-<url><loc>https://niehs.github.io/beethoven/reference/set_slurm_resource.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/set_target_years.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/split_dates.html</loc></url>
 <url><loc>https://niehs.github.io/beethoven/reference/sum_edc_mod.html</loc></url>
