@@ -9,8 +9,8 @@
 
 #############################      COVARIATES      #############################
 # Download and calculate AQS sites covariates via container_covariates.sif
-echo "Submitting {beethoven} covariates targets ..."
-sbatch --wait inst/scripts/run_covariates.sh
+# echo "Submitting {beethoven} covariates targets ..."
+# sbatch --wait inst/scripts/run_covariates.sh
 
 #############################        MODELS        #############################
 # Fit CPU-enbaled meta learner models via container_models.sif.

@@ -139,7 +139,9 @@ if (Sys.getenv("BEETHOVEN") == "covariates") {
     "spatialsample",
     "tidymodels",
     "brulee",
-    "workflows"
+    "workflows",
+    "h3",
+    "h3r"
   )
 }
 targets::tar_option_set(

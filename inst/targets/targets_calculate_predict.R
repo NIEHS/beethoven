@@ -10,88 +10,97 @@
 target_calculate_predict <-
   list(
     targets::tar_target(
-      df_pred_calc_grid,
-      command = qs::qread(
-        list.files(
-          path = file.path(chr_input_dir, "prediction"),
-          pattern = "prediction_grid.qs",
-          full.names = TRUE
-        )
-      ),
-      description = "Import prediction grid | prediction"
+      sf_us_contig,
+      command = sf::st_read("inst/extdata/us_contiguous.gpkg"),
+      description = "US | outline | prediction"
     ),
     targets::tar_target(
-      sf_pred_raw_grid,
-      command = sf::st_transform(
-        sf::st_as_sf(
-          df_pred_calc_grid,
-          coords = c("lon", "lat"),
-          crs = 5070
-        ),
-        crs = 4326
-      ),
-      description = "Prediction grid as sf (no coordinates) | prediction"
+      chr_hex_res8_index,
+      command = polyfill(sf_us_contig, res = 8),
+      description = "H3 | grid | prediction"
     ),
     targets::tar_target(
-      df_pred_raw_grid,
-      command = sf::st_coordinates(sf_pred_raw_grid),
-      description = "Prediction grid coordinates as df | prediction"
+      chr_hex_res3_index,
+      command = map_chr(chr_hex_res8_index, h3_to_parent, res = 3),
+      description = "H3 | grid | prediction"
     ),
     targets::tar_target(
-      sf_pred_calc_grid,
-      command = cbind(
-        sf_pred_raw_grid,
-        lon = df_pred_raw_grid[, 1],
-        lat = df_pred_raw_grid[, 2]
-      ),
-      description = "Prediction grid as sf (with coordinates) | prediction"
+      list_h3_res8_index,
+      command = split(chr_hex_res8_index, chr_hex_res3_index),
+      description = "H3 | split | grid | prediction"
     ),
-    targets::tar_target(
-      df_pred_calc_gridcoords,
-      command = sf::st_drop_geometry(sf_pred_calc_grid),
-      description = "Prediction grid as tibble (with coordinates) | prediction"
-    ),
-    targets::tar_target(
-      sf_pred_calc_split,
-      command = {
-        init_grid <-
-          chopin::par_pad_grid(
-            sf_pred_calc_grid,
-            mode = "grid",
-            nx = 10L,
-            ny = 5L,
-            padding = 100
-          )[[1]]
-        grid_sample <- dplyr::sample_frac(sf_pred_raw_grid, 0.01)
-        init_grid_intersect <-
-          init_grid[grid_sample, ]
-        init_grid_intersect
-      },
-      iteration = "vector",
-      description = "sf split grid polygons | prediction"
-    ),
-    targets::tar_target(
-      list_pred_calc_grid,
-      command = {
-        grid_unit <- sf::st_bbox(sf_pred_calc_split)
-        sf::st_as_sf(
-          df_pred_calc_gridcoords |>
-            dplyr::filter(
-              (lon <= grid_unit[3] & lon >= grid_unit[1]) &
-                (lat <= grid_unit[4] & lat >= grid_unit[2])
-            ),
-          coords = c("lon", "lat"),
-          crs = 4326,
-          remove = FALSE
-        )
-      },
-      iteration = "list",
-      pattern = map(sf_pred_calc_split),
-      description = "Split prediction grid into list by chopin grid | prediction",
-      resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_50")
-      )
-    ),
+    # targets::tar_target(
+    #   sf_pred_raw_grid,
+    #   command = sf::st_transform(
+    #     sf::st_as_sf(
+    #       df_pred_calc_grid,
+    #       coords = c("lon", "lat"),
+    #       crs = 5070
+    #     ),
+    #     crs = 4326
+    #   ),
+    #   description = "Prediction grid as sf (no coordinates) | prediction"
+    # ),
+    # targets::tar_target(
+    #   df_pred_raw_grid,
+    #   command = sf::st_coordinates(sf_pred_raw_grid),
+    #   description = "Prediction grid coordinates as df | prediction"
+    # ),
+    # targets::tar_target(
+    #   sf_pred_calc_grid,
+    #   command = cbind(
+    #     sf_pred_raw_grid,
+    #     lon = df_pred_raw_grid[, 1],
+    #     lat = df_pred_raw_grid[, 2]
+    #   ),
+    #   description = "Prediction grid as sf (with coordinates) | prediction"
+    # ),
+    # targets::tar_target(
+    #   df_pred_calc_gridcoords,
+    #   command = sf::st_drop_geometry(sf_pred_calc_grid),
+    #   description = "Prediction grid as tibble (with coordinates) | prediction"
+    # ),
+    # targets::tar_target(
+    #   sf_pred_calc_split,
+    #   command = {
+    #     init_grid <-
+    #       chopin::par_pad_grid(
+    #         sf_pred_calc_grid,
+    #         mode = "grid",
+    #         nx = 10L,
+    #         ny = 5L,
+    #         padding = 100
+    #       )[[1]]
+    #     grid_sample <- dplyr::sample_frac(sf_pred_raw_grid, 0.01)
+    #     init_grid_intersect <-
+    #       init_grid[grid_sample, ]
+    #     init_grid_intersect
+    #   },
+    #   iteration = "vector",
+    #   description = "sf split grid polygons | prediction"
+    # ),
+    # targets::tar_target(
+    #   list_pred_calc_grid,
+    #   command = {
+    #     grid_unit <- sf::st_bbox(sf_pred_calc_split)
+    #     sf::st_as_sf(
+    #       df_pred_calc_gridcoords |>
+    #         dplyr::filter(
+    #           (lon <= grid_unit[3] & lon >= grid_unit[1]) &
+    #             (lat <= grid_unit[4] & lat >= grid_unit[2])
+    #         ),
+    #       coords = c("lon", "lat"),
+    #       crs = 4326,
+    #       remove = FALSE
+    #     )
+    #   },
+    #   iteration = "list",
+    #   pattern = map(sf_pred_calc_split),
+    #   description = "Split prediction grid into list by chopin grid | prediction",
+    #   resources = targets::tar_resources(
+    #     crew = targets::tar_resources_crew(controller = "controller_50")
+    #   )
+    # ),
     ############################################################################
     ############################################################################
     ############################################################################
@@ -166,9 +175,11 @@ target_calculate_predict <-
     targets::tar_target(
       list_pred_calc_hms,
       command = {
+        h3_locs <- h3_to_geo_sf(list_h3_res8_index[[1]])
+        h3_locs$site_id <- h3_locs$h3_index
         beethoven::inject_calculate(
           covariate = "hms",
-          locs = list_pred_calc_grid,
+          locs = h3_locs,
           injection = list(
             path = file.path(chr_input_dir, "hms", "data_files"),
             date = beethoven::fl_dates(unlist(list_dates)),
@@ -176,15 +187,15 @@ target_calculate_predict <-
           )
         )[[1]] |>
           dplyr::select(
-            -dplyr::any_of(c("lon", "lat", "geometry", "hms_year"))
+            -dplyr::any_of(c("h3_index", "geometry", "hms_year"))
           )
       },
-      pattern = cross(list_pred_calc_grid, list_dates),
+      pattern = cross(list_h3_res8_index, list_dates),
       iteration = "list",
       description = "Calculate HMS features | prediction",
       format = "parquet",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_25"),
+        crew = targets::tar_resources_crew(controller = "controller_100"),
         parquet = targets::tar_resources_parquet(compression = "lz4")
       )
     ),
@@ -252,53 +263,57 @@ target_calculate_predict <-
     ##############################   GMTED    #############################
     targets::tar_target(
       name = list_pred_calc_gmted,
-      command = beethoven::calc_gmted_direct(
-        variable = c(chr_iter_calc_gmted_vars, "7.5 arc-seconds"),
-        path = file.path(chr_input_dir, "gmted", "data_files"),
-        locs = list_pred_calc_grid,
-        locs_id = "site_id",
-        radius = chr_iter_calc_gmted_radii
-      ),
+      command = {
+        h3_locs <- h3_to_geo_sf(list_h3_res8_index[[1]])
+        h3_locs$site_id <- h3_locs$h3_index
+        beethoven::calc_gmted_direct(
+          variable = c(chr_iter_calc_gmted_vars, "7.5 arc-seconds"),
+          path = file.path(chr_input_dir, "gmted", "data_files"),
+          locs = h3_locs,
+          locs_id = "site_id",
+          radius = chr_iter_calc_gmted_radii
+        )
+      },
       iteration = "list",
       pattern = cross(
-        list_pred_calc_grid,
+        list_h3_res8_index,
         chr_iter_calc_gmted_vars,
         chr_iter_calc_gmted_radii
       ),
       format = "parquet",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_25"),
+        crew = targets::tar_resources_crew(controller = "controller_100"),
         parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
-      description = "Calculate GMTED features | prediction"
+      description = "Calculate GMTED features | prediction | H3"
     ),
     ############################################################################
     ############################################################################
     ############################################################################
-    targets::tar_target(
-      chr_pred_calc_hms,
-      command = list.files(
-        chr_store,
-        pattern = paste0(deparse(substitute(list_pred_calc_hms))),
-        full.names = TRUE,
-        recursive = TRUE
-      ),
-      description = "{parquet} file paths for HMS features | prediction"
-    ),
-    targets::tar_target(
-      chr_duckdb,
-      command = {
-        chr_duckdb <- file.path(
-          chr_input_dir,
-          "prediction",
-          "db_prediction.duckdb"
-        )
-        con_prediction <- DBI::dbConnect(duckdb::duckdb(), dbdir = chr_duckdb)
-        on.exit(DBI::dbDisconnect(con_prediction, shutdown = TRUE))
-        chr_duckdb
-      },
-      description = "Initiate {duckdb} for prediction grid | prediction"
-    ),
+    # targets::tar_target(
+    #   chr_pred_calc_hms,
+    #   command = list.files(
+    #     chr_store,
+    #     pattern = paste0(deparse(substitute(list_pred_calc_hms))),
+    #     full.names = TRUE,
+    #     recursive = TRUE
+    #   ),
+    #   description = "{parquet} file paths for HMS features | prediction"
+    # ),
+    # targets::tar_target(
+    #   chr_duckdb,
+    #   command = {
+    #     chr_duckdb <- file.path(
+    #       chr_input_dir,
+    #       "prediction",
+    #       "db_prediction.duckdb"
+    #     )
+    #     con_prediction <- DBI::dbConnect(duckdb::duckdb(), dbdir = chr_duckdb)
+    #     on.exit(DBI::dbDisconnect(con_prediction, shutdown = TRUE))
+    #     chr_duckdb
+    #   },
+    #   description = "Initiate {duckdb} for prediction grid | prediction"
+    # ),
     # targets::tar_target(
     #   db_pred_calc_hms,
     #   command = {
@@ -342,16 +357,16 @@ target_calculate_predict <-
     #     crew = targets::tar_resources_crew(controller = "controller_1")
     #   )
     # ),
-    targets::tar_target(
-      chr_pred_calc_gmted,
-      command = list.files(
-        chr_store,
-        pattern = paste0(deparse(substitute(list_pred_calc_gmted))),
-        full.names = TRUE,
-        recursive = TRUE
-      ),
-      description = "{parquet} file paths for GMTED features | prediction"
-    )
+    # targets::tar_target(
+    #   chr_pred_calc_gmted,
+    #   command = list.files(
+    #     chr_store,
+    #     pattern = paste0(deparse(substitute(list_pred_calc_gmted))),
+    #     full.names = TRUE,
+    #     recursive = TRUE
+    #   ),
+    #   description = "{parquet} file paths for GMTED features | prediction"
+    # )
     # targets::tar_target(
     #   db_pred_calc_gmted,
     #   command = {
@@ -401,56 +416,62 @@ target_calculate_predict <-
     ############################################################################
 
     ###########################         GEOS         ###########################
-    # targets::tar_target(
-    #   list_pred_calc_geos_aqc,
-    #   command = {
-    #     download_geos_buffer <- TRUE
-    #     aqc_extract <- beethoven::calc_geos_strict(
-    #       path = file.path(chr_input_dir, "geos", chr_iter_calc_geos[1]),
-    #       date = beethoven::fl_dates(unlist(list_dates)),
-    #       locs = list_pred_calc_grid,
-    #       locs_id = "site_id"
-    #     )
-    #     target_idx <- which(names(aqc_extract) %in% c("site_id", "time"))
-    #     names(aqc_extract)[-target_idx] <- paste0(
-    #       "ATM_GOAQC_",
-    #       names(aqc_extract)[-target_idx],
-    #       "_0_00000"
-    #     )
-    #     aqc_extract
-    #   },
-    #   pattern = cross(list_pred_calc_grid, list_dates),
-    #   resources = targets::tar_resources(
-    #     crew = targets::tar_resources_crew(controller = "controller_50")
-    #   ),
-    #   iteration = "list",
-    #   description = "Calculate GEOS-CF features | aqc | prediction"
-    # ),
-    # targets::tar_target(
-    #   list_pred_calc_geos_chm,
-    #   command = {
-    #     # download_geos_buffer
-    #     chm_extract <- beethoven::calc_geos_strict(
-    #       path = file.path(chr_input_dir, "geos", chr_iter_calc_geos[2]),
-    #       date = beethoven::fl_dates(unlist(list_dates)),
-    #       locs = list_pred_calc_grid,
-    #       locs_id = "site_id"
-    #     )
-    #     target_idx <- which(names(chm_extract) %in% c("site_id", "time"))
-    #     names(chm_extract)[-target_idx] <- paste0(
-    #       "ATM_GOCHM_",
-    #       names(chm_extract)[-target_idx],
-    #       "_0_00000"
-    #     )
-    #     chm_extract
-    #   },
-    #   pattern = cross(list_pred_calc_grid, list_dates),
-    #   resources = targets::tar_resources(
-    #     crew = targets::tar_resources_crew(controller = "controller_50")
-    #   ),
-    #   iteration = "list",
-    #   description = "Calculate GEOS-CF features | chm | prediction"
-    # ),
+    targets::tar_target(
+      list_pred_calc_geos_aqc,
+      command = {
+        h3_locs <- h3_to_geo_sf(list_h3_res8_index[[1]])
+        h3_locs$site_id <- h3_locs$h3_index
+        download_geos_buffer <- TRUE
+        aqc_extract <- beethoven::calc_geos_strict(
+          path = file.path(chr_input_dir, "geos", chr_iter_calc_geos[1]),
+          date = beethoven::fl_dates(unlist(list_dates)),
+          locs = h3_locs,
+          locs_id = "site_id"
+        )
+        target_idx <- which(names(aqc_extract) %in% c("site_id", "time"))
+        names(aqc_extract)[-target_idx] <- paste0(
+          "ATM_GOAQC_",
+          names(aqc_extract)[-target_idx],
+          "_0_00000"
+        )
+        aqc_extract
+      },
+      pattern = cross(list_h3_res8_index, list_dates),
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_25"),
+        parquet = targets::tar_resources_parquet(compression = "lz4")
+      ),
+      iteration = "list",
+      description = "Calculate GEOS-CF features | aqc | H3 | prediction"
+    ),
+    targets::tar_target(
+      list_pred_calc_geos_chm,
+      command = {
+        download_geos_buffer
+        h3_locs <- h3_to_geo_sf(list_h3_res8_index[[1]])
+        h3_locs$site_id <- h3_locs$h3_index
+        chm_extract <- beethoven::calc_geos_strict(
+          path = file.path(chr_input_dir, "geos", chr_iter_calc_geos[2]),
+          date = beethoven::fl_dates(unlist(list_dates)),
+          locs = h3_locs,
+          locs_id = "site_id"
+        )
+        target_idx <- which(names(chm_extract) %in% c("site_id", "time"))
+        names(chm_extract)[-target_idx] <- paste0(
+          "ATM_GOCHM_",
+          names(chm_extract)[-target_idx],
+          "_0_00000"
+        )
+        chm_extract
+      },
+      pattern = cross(list_h3_res8_index, list_dates),
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_25"),
+        parquet = targets::tar_resources_parquet(compression = "lz4")
+      ),
+      iteration = "list",
+      description = "Calculate GEOS-CF features | chm | H3 | prediction"
+    )
     ###########################         NARR         ###########################
     # targets::tar_target(
     #   list_pred_calc_narr,
