@@ -66,14 +66,42 @@ controller_mlp <- crew.cluster::crew_controller_slurm(
     script_lines = scriptlines_mlp
   )
 )
+
+##### `controller_lgb` uses 100 CPUs for {lightGBM} models.
+# scriptlines_lgb <- glue::glue(
+#   "#SBATCH --job-name=lgb \
+#   #SBATCH --partition=gpu \
+#   #SBATCH --nodelist=gn040809 \
+#   #SBATCH --ntasks=1 \
+#   #SBATCH --cpus-per-task=25 \
+#   #SBATCH --mem=500G \
+#   #SBATCH --error=slurm/lgb_%j.out \
+#   export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK \
+#   export LIGHTGBM_NUM_THREADS=$SLURM_CPUS_PER_TASK \
+#   {scriptlines_apptainer} exec --env OMP_NUM_THREADS=$OMP_NUM_THREADS ",
+#   "--env LIGHTGBM_NUM_THREADS=$LIGHTGBM_NUM_THREADS ",
+#   "--bind {scriptlines_basedir}:/mnt ",
+#   "--bind {scriptlines_basedir}/inst:/inst ",
+#   "--bind {scriptlines_inputdir}:/input ",
+#   "--bind {scriptlines_targetdir}/targets:/opt/_targets ",
+#   "{scriptlines_container} \\"
+# )
+# controller_lgb <- crew.cluster::crew_controller_slurm(
+#   name = "controller_lgb",
+#   workers = 25,
+#   options_cluster = crew.cluster::crew_options_slurm(
+#     verbose = TRUE,
+#     script_lines = scriptlines_lgb
+#   )
+# )
+
 ##### `controller_lgb` uses 100 CPUs for {lightGBM} models.
 scriptlines_lgb <- glue::glue(
   "#SBATCH --job-name=lgb \
-  #SBATCH --partition=gpu \
-  #SBATCH --nodelist=gn040809 \
+  #SBATCH --partition=normal,highmem,geo \
   #SBATCH --ntasks=1 \
-  #SBATCH --cpus-per-task=32 \
-  #SBATCH --mem=100G \
+  #SBATCH --cpus-per-task=1 \
+  #SBATCH --mem=35G \
   #SBATCH --error=slurm/lgb_%j.out \
   export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK \
   export LIGHTGBM_NUM_THREADS=$SLURM_CPUS_PER_TASK \
@@ -87,7 +115,7 @@ scriptlines_lgb <- glue::glue(
 )
 controller_lgb <- crew.cluster::crew_controller_slurm(
   name = "controller_lgb",
-  workers = 3,
+  workers = 500,
   options_cluster = crew.cluster::crew_options_slurm(
     verbose = TRUE,
     script_lines = scriptlines_lgb
@@ -195,6 +223,7 @@ if (Sys.getenv("BEETHOVEN") == "covariates") {
 } else if (Sys.getenv("BEETHOVEN") == "models") {
   target_predict <- list()
 }
+
 
 ##############################      PIPELINE      ##############################
 list(

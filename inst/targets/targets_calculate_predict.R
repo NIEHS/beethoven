@@ -29,6 +29,16 @@ target_calculate_predict <-
       command = split(chr_hex_res8_index, chr_hex_res3_index),
       description = "H3 | split | grid | prediction"
     ),
+    targets::tar_target(
+      chr_hex_res2_index,
+      command = map_chr(chr_hex_res8_index, h3_to_parent, res = 2),
+      description = "H3 | grid | prediction"
+    ),
+    targets::tar_target(
+      list_h3_res8_index2,
+      command = split(chr_hex_res8_index, chr_hex_res2_index),
+      description = "H3 | split | grid | prediction"
+    ),
     # targets::tar_target(
     #   sf_pred_raw_grid,
     #   command = sf::st_transform(
@@ -419,26 +429,20 @@ target_calculate_predict <-
     targets::tar_target(
       list_pred_calc_geos_aqc,
       command = {
-        h3_locs <- h3_to_geo_sf(list_h3_res8_index[[1]])
+        h3_locs <- h3_to_geo_sf(list_h3_res8_index2[[1]])
         h3_locs$site_id <- h3_locs$h3_index
         download_geos_buffer <- TRUE
-        aqc_extract <- beethoven::calc_geos_strict(
+        beethoven::calc_geos_strict(
           path = file.path(chr_input_dir, "geos", chr_iter_calc_geos[1]),
           date = beethoven::fl_dates(unlist(list_dates)),
           locs = h3_locs,
           locs_id = "site_id"
         )
-        target_idx <- which(names(aqc_extract) %in% c("site_id", "time"))
-        names(aqc_extract)[-target_idx] <- paste0(
-          "ATM_GOAQC_",
-          names(aqc_extract)[-target_idx],
-          "_0_00000"
-        )
-        aqc_extract
       },
-      pattern = cross(list_h3_res8_index, list_dates),
+      pattern = cross(list_h3_res8_index2, list_dates),
+      format = "parquet",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_25"),
+        crew = targets::tar_resources_crew(controller = "controller_lgb"),
         parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
       iteration = "list",
@@ -448,34 +452,30 @@ target_calculate_predict <-
       list_pred_calc_geos_chm,
       command = {
         download_geos_buffer
-        h3_locs <- h3_to_geo_sf(list_h3_res8_index[[1]])
+        h3_locs <- h3_to_geo_sf(list_h3_res8_index2[[1]])
         h3_locs$site_id <- h3_locs$h3_index
-        chm_extract <- beethoven::calc_geos_strict(
+        beethoven::calc_geos_strict(
           path = file.path(chr_input_dir, "geos", chr_iter_calc_geos[2]),
           date = beethoven::fl_dates(unlist(list_dates)),
           locs = h3_locs,
           locs_id = "site_id"
         )
-        target_idx <- which(names(chm_extract) %in% c("site_id", "time"))
-        names(chm_extract)[-target_idx] <- paste0(
-          "ATM_GOCHM_",
-          names(chm_extract)[-target_idx],
-          "_0_00000"
-        )
-        chm_extract
       },
-      pattern = cross(list_h3_res8_index, list_dates),
+      pattern = cross(list_h3_res8_index2, list_dates),
+      format = "parquet",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_25"),
+        crew = targets::tar_resources_crew(controller = "controller_lgb"),
         parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
       iteration = "list",
       description = "Calculate GEOS-CF features | chm | H3 | prediction"
-    )
+    ),
     ###########################         NARR         ###########################
     # targets::tar_target(
     #   list_pred_calc_narr,
     #   command = {
+    #     h3_locs <- h3_to_geo_sf(list_h3_res8_index2[[1]])
+    #     h3_locs$site_id <- h3_locs$h3_index
     #     # download_narr_buffer <- TRUE
     #     lapply(
     #       chr_iter_calc_narr,
@@ -486,7 +486,7 @@ target_calculate_predict <-
     #             variable = name,
     #             date = beethoven::fl_dates(unlist(list_dates))
     #           ),
-    #           locs = list_pred_calc_grid,
+    #           locs = h3_locs,
     #           locs_id = "site_id",
     #           radius = 0,
     #           fun = "mean",
@@ -509,137 +509,143 @@ target_calculate_predict <-
     #       ) %>%
     #       as.data.frame()
     #   },
-    #   pattern = cross(list_pred_calc_grid, list_dates),
+    #   pattern = cross(list_h3_res8_index2, list_dates),
     #   iteration = "list",
+    #   format = "parquet",
     #   resources = targets::tar_resources(
-    #     crew = targets::tar_resources_crew(controller = "controller_10"),
+    #     crew = targets::tar_resources_crew(controller = "controller_lgb"),
     #     parquet = targets::tar_resources_parquet(compression = "lz4")
     #   ),
-    #   format = "parquet",
-    #   description = "Calculate NARR features | prediction"
+    #   description = "Calculate NARR features | prediction | H3"
     # ),
     ###########################       MODIS - MOD11       ######################
-    # targets::tar_target(
-    #   list_pred_calc_mod11,
-    #   command = {
-    #     search_dir <- file.path(chr_input_dir, "modis_preprocessed", "MOD11A1")
-    #     date_find <- list_dates
+    targets::tar_target(
+      list_pred_calc_mod11,
+      command = {
+        search_dir <- file.path(chr_input_dir, "modis_preprocessed", "MOD11A1")
+        date_find <- list_dates
 
-    #     lapply(chr_iter_radii, function(r) {
-    #       Map(
-    #         f = function(date_i) {
-    #           date_in <- paste("(", date_i, ")", sep = "")
-    #           target_file <- list.files(
-    #             path = search_dir,
-    #             pattern = paste0(date_in, "\\.tif$"),
-    #             full.names = TRUE
-    #           )
-    #           res <- tryCatch(
-    #             {
-    #               beethoven::calculate_modis_direct(
-    #                 file = target_file, #chr_list_calc_mod11_files,
-    #                 site = list_pred_calc_grid,
-    #                 site_id = arglist_common[["char_siteid"]],
-    #                 radius = r,
-    #                 colheader = c("MOD_SFCTD_0_", "MOD_SFCTN_0_"),
-    #                 mark = TRUE
-    #               )
-    #             },
-    #             error = function(e) {
-    #               res <- expand.grid(
-    #                 site_id = list_pred_calc_grid[["site_id"]],
-    #                 time = date_i,
-    #                 MOD_SFCTD_0_ = NA_real_,
-    #                 MOD_SFCTN_0_ = NA_real_
-    #               )
-    #               names(res)[3:4] <- paste0(names(res)[3:4], sprintf("%05d", r))
-    #               return(res)
-    #             }
-    #           )
-    #           res
-    #         },
-    #         date_find
-    #       ) %>%
-    #         collapse::rowbind(., fill = TRUE)
-    #     }) %>%
-    #       Reduce(
-    #         f = function(d, e) {
-    #           dplyr::full_join(d, e, by = c("site_id", "time"))
-    #         },
-    #         .
-    #       ) %>%
-    #       as.data.frame()
-    #   },
-    #   pattern = cross(list_pred_calc_grid, list_dates),
-    #   iteration = "list",
-    #   resources = targets::tar_resources(
-    #     crew = targets::tar_resources_crew(controller = "controller_50"),
-    #     parquet = targets::tar_resources_parquet(compression = "lz4")
-    #   ),
-    #   format = "parquet",
-    #   description = "Calculate MODIS - MOD11 features | prediction"
-    # ),
-    ###########################       MODIS - MOD06       ######################
-    # targets::tar_target(
-    #   list_pred_calc_mod06,
-    #   command = {
-    #     search_dir <- file.path(chr_input_dir, "modis_preprocessed", "MOD06_L2")
-    #     date_find <- list_dates
+        h3_locs <- h3_to_geo_sf(list_h3_res8_index2[[1]])
+        h3_locs$site_id <- h3_locs$h3_index
 
-    #     lapply(chr_iter_radii, function(r) {
-    #       Map(
-    #         f = function(date_i) {
-    #           date_in <- paste("(", date_i, ")", sep = "")
-    #           target_file <- list.files(
-    #             path = search_dir,
-    #             pattern = paste0(date_in, "\\.tif$"),
-    #             full.names = TRUE
-    #           )
-    #           res <- tryCatch(
-    #             {
-    #               beethoven::calculate_modis_direct(
-    #                 file = target_file,
-    #                 site = list_pred_calc_grid,
-    #                 site_id = arglist_common[["char_siteid"]],
-    #                 radius = r,
-    #                 colheader = c("MOD_CLCVD_0_", "MOD_CLCVN_0_"),
-    #                 mark = TRUE
-    #               )
-    #             },
-    #             error = function(e) {
-    #               res <- expand.grid(
-    #                 site_id = list_pred_calc_grid[["site_id"]],
-    #                 time = date_i,
-    #                 MOD_CLCVD_0_ = NA_real_,
-    #                 MOD_CLCVN_0_ = NA_real_
-    #               )
-    #               names(res)[3:4] <- paste0(names(res)[3:4], sprintf("%05d", r))
-    #               return(res)
-    #             }
-    #           )
-    #           res
-    #         },
-    #         date_find
-    #       ) %>%
-    #         collapse::rowbind(., fill = TRUE)
-    #     }) %>%
-    #       Reduce(
-    #         f = function(d, e) {
-    #           dplyr::full_join(d, e, by = c("site_id", "time"))
-    #         },
-    #         .
-    #       ) %>%
-    #       as.data.frame()
-    #   },
-    #   pattern = cross(list_pred_calc_grid, list_dates),
-    #   iteration = "list",
-    #   resources = targets::tar_resources(
-    #     crew = targets::tar_resources_crew(controller = "controller_50"),
-    #     parquet = targets::tar_resources_parquet(compression = "lz4")
-    #   ),
-    #   format = "parquet",
-    #   description = "Calculate MODIS - MOD06 features | prediction"
-    # ),
+        lapply(chr_iter_radii, function(r) {
+          Map(
+            f = function(date_i) {
+              date_in <- paste("(", date_i, ")", sep = "")
+              target_file <- list.files(
+                path = search_dir,
+                pattern = paste0(date_in, "\\.tif$"),
+                full.names = TRUE
+              )
+              res <- tryCatch(
+                {
+                  beethoven::calculate_modis_direct(
+                    file = target_file, #chr_list_calc_mod11_files,
+                    site = h3_locs,
+                    site_id = arglist_common[["char_siteid"]],
+                    radius = r,
+                    colheader = c("MOD_SFCTD_0_", "MOD_SFCTN_0_"),
+                    mark = TRUE
+                  )
+                },
+                error = function(e) {
+                  res <- expand.grid(
+                    site_id = h3_locs[["site_id"]],
+                    time = date_i,
+                    MOD_SFCTD_0_ = NA_real_,
+                    MOD_SFCTN_0_ = NA_real_
+                  )
+                  names(res)[3:4] <- paste0(names(res)[3:4], sprintf("%05d", r))
+                  return(res)
+                }
+              )
+              res
+            },
+            date_find
+          ) %>%
+            collapse::rowbind(., fill = TRUE)
+        }) %>%
+          Reduce(
+            f = function(d, e) {
+              dplyr::full_join(d, e, by = c("site_id", "time"))
+            },
+            .
+          ) %>%
+          as.data.frame()
+      },
+      pattern = cross(list_h3_res8_index2, list_dates),
+      iteration = "list",
+      format = "parquet",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_lgb"),
+        parquet = targets::tar_resources_parquet(compression = "lz4")
+      ),
+      description = "Calculate MODIS - MOD11 features | prediction"
+    ),
+    ##########################       MODIS - MOD06       ######################
+    targets::tar_target(
+      list_pred_calc_mod06,
+      command = {
+        search_dir <- file.path(chr_input_dir, "modis_preprocessed", "MOD06_L2")
+        date_find <- list_dates
+
+        h3_locs <- h3_to_geo_sf(list_h3_res8_index2[[1]])
+        h3_locs$site_id <- h3_locs$h3_index
+
+        lapply(chr_iter_radii, function(r) {
+          Map(
+            f = function(date_i) {
+              date_in <- paste("(", date_i, ")", sep = "")
+              target_file <- list.files(
+                path = search_dir,
+                pattern = paste0(date_in, "\\.tif$"),
+                full.names = TRUE
+              )
+              res <- tryCatch(
+                {
+                  beethoven::calculate_modis_direct(
+                    file = target_file,
+                    site = h3_locs,
+                    site_id = arglist_common[["char_siteid"]],
+                    radius = r,
+                    colheader = c("MOD_CLCVD_0_", "MOD_CLCVN_0_"),
+                    mark = TRUE
+                  )
+                },
+                error = function(e) {
+                  res <- expand.grid(
+                    site_id = h3_locs[["site_id"]],
+                    time = date_i,
+                    MOD_CLCVD_0_ = NA_real_,
+                    MOD_CLCVN_0_ = NA_real_
+                  )
+                  names(res)[3:4] <- paste0(names(res)[3:4], sprintf("%05d", r))
+                  return(res)
+                }
+              )
+              res
+            },
+            date_find
+          ) %>%
+            collapse::rowbind(., fill = TRUE)
+        }) %>%
+          Reduce(
+            f = function(d, e) {
+              dplyr::full_join(d, e, by = c("site_id", "time"))
+            },
+            .
+          ) %>%
+          as.data.frame()
+      },
+      pattern = cross(list_h3_res8_index2, list_dates),
+      iteration = "list",
+      format = "parquet",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_lgb"),
+        parquet = targets::tar_resources_parquet(compression = "lz4")
+      ),
+      description = "Calculate MODIS - MOD06 features | prediction | H3"
+    ),
     ###########################       MODIS - MOD13       ######################
     # targets::tar_target(
     #   list_pred_calc_mod13,
@@ -976,77 +982,81 @@ target_calculate_predict <-
     #   description = "Calculate MODIS - VIIRS features | prediction"
     # ),
     ###########################        KOPPEN        ###########################
-    # # should be revised
-    # targets::tar_target(
-    #   list_pred_calc_koppen,
-    #   command = {
-    #     # download_koppen
-    #     amadeus::calculate_koppen_geiger(
-    #       from = amadeus::process_koppen_geiger(
-    #         path = file.path(
-    #           chr_input_dir,
-    #           "koppen_geiger",
-    #           "data_files",
-    #           "Beck_KG_V1_present_0p0083.tif"
-    #         )
-    #       ),
-    #       locs = list_pred_calc_grid,
-    #       locs_id = "site_id",
-    #       geom = FALSE
-    #     ) %>%
-    #       as.data.frame()
-    #   },
-    #   iteration = "list",
-    #   pattern = map(list_pred_calc_grid),
-    #   resources = targets::tar_resources(
-    #     crew = targets::tar_resources_crew(controller = "controller_50"),
-    #     parquet = targets::tar_resources_parquet(compression = "lz4")
-    #   ),
-    #   format = "parquet",
-    #   description = "data.table of Koppen Geiger features | prediction grid"
-    # ),
+    # should be revised
+    targets::tar_target(
+      list_pred_calc_koppen,
+      command = {
+        # download_koppen
+        h3_locs <- h3_to_geo_sf(list_h3_res8_index[[1]])
+        h3_locs$site_id <- h3_locs$h3_index
+        amadeus::calculate_koppen_geiger(
+          from = amadeus::process_koppen_geiger(
+            path = file.path(
+              chr_input_dir,
+              "koppen_geiger",
+              "data_files",
+              "Beck_KG_V1_present_0p0083.tif"
+            )
+          ),
+          locs = h3_locs,
+          locs_id = "site_id",
+          geom = FALSE
+        ) %>%
+          as.data.frame()
+      },
+      iteration = "list",
+      pattern = map(list_h3_res8_index),
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_50"),
+        parquet = targets::tar_resources_parquet(compression = "lz4")
+      ),
+      format = "parquet",
+      description = "data.table of Koppen Geiger features | prediction grid | H3"
+    ),
     ###########################      POPULATION      ###########################
-    # targets::tar_target(
-    #   list_pred_calc_pop,
-    #   command = {
-    #     download_population
-    #     lapply(
-    #       chr_iter_radii,
-    #       function(r) {
-    #         amadeus::calculate_population(
-    #           from = amadeus::process_population(
-    #             path = file.path(
-    #               chr_input_dir,
-    #               "population",
-    #               "data_files",
-    #               paste0(
-    #                 "gpw_v4_population_density_adjusted_to_",
-    #                 "2015_unwpp_country_totals_rev11_2020_30_sec.tif"
-    #               )
-    #             )
-    #           ),
-    #           locs = list_pred_calc_grid,
-    #           locs_id = "site_id",
-    #           geom = FALSE,
-    #           radius = r
-    #         )
-    #       }
-    #     ) %>%
-    #       Reduce(
-    #         f = function(d, e) dplyr::full_join(d, e, by = c("site_id")),
-    #         .
-    #       ) %>%
-    #       as.data.frame()
-    #   },
-    #   pattern = map(list_pred_calc_grid),
-    #   iteration = "list",
-    #   resources = targets::tar_resources(
-    #     crew = targets::tar_resources_crew(controller = "controller_50"),
-    #     parquet = targets::tar_resources_parquet(compression = "lz4")
-    #   ),
-    #   format = "parquet",
-    #   description = "Calculate population features | prediction"
-    # ),
+    targets::tar_target(
+      list_pred_calc_pop,
+      command = {
+        download_population
+        h3_locs <- h3_to_geo_sf(list_h3_res8_index[[1]])
+        h3_locs$site_id <- h3_locs$h3_index
+        lapply(
+          chr_iter_radii,
+          function(r) {
+            amadeus::calculate_population(
+              from = amadeus::process_population(
+                path = file.path(
+                  chr_input_dir,
+                  "population",
+                  "data_files",
+                  paste0(
+                    "gpw_v4_population_density_adjusted_to_",
+                    "2015_unwpp_country_totals_rev11_2020_30_sec.tif"
+                  )
+                )
+              ),
+              locs = h3_locs,
+              locs_id = "site_id",
+              geom = FALSE,
+              radius = r
+            )
+          }
+        ) %>%
+          Reduce(
+            f = function(d, e) dplyr::full_join(d, e, by = c("site_id")),
+            .
+          ) %>%
+          as.data.frame()
+      },
+      pattern = map(list_h3_res8_index),
+      iteration = "list",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_50"),
+        parquet = targets::tar_resources_parquet(compression = "lz4")
+      ),
+      format = "parquet",
+      description = "Calculate population features | prediction grid | H3"
+    ),
     ###########################         TRI          ###########################
     # # should be revised
     # # targets::tar_target(
@@ -1145,59 +1155,57 @@ target_calculate_predict <-
     #   description = "Calculate TRI features | prediction"
     # ),
     ###########################         NEI          ###########################
-    # targets::tar_target(
-    #   chr_iter_calc_nei,
-    #   command = c(2017, 2020),
-    #   description = "NEI features | download"
-    # ),
-    # targets::tar_target(
-    #   list_pred_calc_nei,
-    #   command = {
-    #     download_nei <- TRUE
+    targets::tar_target(
+      list_pred_calc_nei,
+      command = {
+        download_nei <- TRUE
 
-    #     grid_rowids <- seq_len(nrow(list_pred_calc_grid))
-    #     grid_rowidx <- split(
-    #       grid_rowids,
-    #       ceiling(grid_rowids / 100000)
-    #     )
+        h3_locs <- h3_to_geo_sf(list_h3_res8_index2[[1]])
+        h3_locs$site_id <- h3_locs$h3_index
 
-    #     # Twofold list comprehension
-    #     # First is for years (should be rowbinded)
-    #     lapply(
-    #       chr_iter_calc_nei,
-    #       function(year) {
-    #         # The last one is for grid rows: rowbinded
-    #         lapply(
-    #           grid_rowidx,
-    #           function(rows) {
-    #             beethoven::inject_calculate(
-    #               covariate = "nei",
-    #               locs = list_pred_calc_grid[rows, ],
-    #               injection = list(
-    #                 domain = year,
-    #                 domain_name = "year",
-    #                 path = file.path(chr_input_dir, "nei", "data_files"),
-    #                 covariate = "nei"
-    #               )
-    #             ) %>%
-    #               collapse::rowbind(fill = TRUE)
-    #           }
-    #         ) %>%
-    #           collapse::rowbind(fill = TRUE)
-    #       }
-    #     ) %>%
-    #       collapse::rowbind(fill = TRUE) %>%
-    #       as.data.frame()
-    #   },
-    #   iteration = "list",
-    #   pattern = map(list_pred_calc_grid),
-    #   description = "Calculate NEI features | prediction grid",
-    #   resources = targets::tar_resources(
-    #     crew = targets::tar_resources_crew(controller = "controller_25"),
-    #     parquet = targets::tar_resources_parquet(compression = "lz4")
-    #   ),
-    #   format = "parquet"
-    # ),
+        grid_rowids <- seq_len(nrow(h3_locs))
+        grid_rowidx <- split(
+          grid_rowids,
+          ceiling(grid_rowids / 100000)
+        )
+
+        # Twofold list comprehension
+        # First is for years (should be rowbinded)
+        lapply(
+          chr_iter_calc_nei,
+          function(year) {
+            # The last one is for grid rows: rowbinded
+            lapply(
+              grid_rowidx,
+              function(rows) {
+                beethoven::inject_calculate(
+                  covariate = "nei",
+                  locs = h3_locs[rows, ],
+                  injection = list(
+                    domain = year,
+                    domain_name = "year",
+                    path = file.path(chr_input_dir, "nei", "data_files"),
+                    covariate = "nei"
+                  )
+                ) %>%
+                  collapse::rowbind(fill = TRUE)
+              }
+            ) %>%
+              collapse::rowbind(fill = TRUE)
+          }
+        ) %>%
+          collapse::rowbind(fill = TRUE) %>%
+          as.data.frame()
+      },
+      iteration = "list",
+      pattern = map(list_h3_res8_index2),
+      format = "parquet",
+      description = "Calculate NEI features | prediction grid | H3",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_lgb"),
+        parquet = targets::tar_resources_parquet(compression = "lz4")
+      )
+    )
     ###########################      ECOREGIONS      ###########################
     # targets::tar_target(
     #   list_pred_calc_ecoregions,

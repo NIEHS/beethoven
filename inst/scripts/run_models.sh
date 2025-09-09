@@ -3,10 +3,10 @@
 #SBATCH --job-name=model
 #SBATCH --mail-user=kyle.messier@nih.gov
 #SBATCH --mail-type=END,FAIL
-#SBATCH --partition=geo
+#SBATCH --partition=normal
 #SBATCH --ntasks=1
-#SBATCH --mem=900G
-#SBATCH --cpus-per-task=225
+#SBATCH --mem=4G
+#SBATCH --cpus-per-task=1
 #SBATCH --error=slurm/model_%j.err
 #SBATCH --output=slurm/model_%j.out
 
