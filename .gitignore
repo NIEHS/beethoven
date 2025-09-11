@@ -139,3 +139,4 @@ inst/extdata/filesize_hex_wide.R
 inst/extdata/filesize_checks.R
 inst/extdata/bigdata.sh
 *.parquet
+pipeline/
