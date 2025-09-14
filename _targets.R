@@ -97,13 +97,12 @@ controller_lgb <- crew.cluster::crew_controller_slurm(
 
 scriptlines_backup <- glue::glue(
   "#SBATCH --job-name=g_back \
-  #SBATCH --partition=normal,highmem \
+  #SBATCH --partition=geo \
   #SBATCH --ntasks=1 \
   #SBATCH --cpus-per-task=1 \
   #SBATCH --mem=200G \
   #SBATCH --error=slurm/grid_%j.out \
-  export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK \
-  {scriptlines_apptainer} exec --env OMP_NUM_THREADS=$OMP_NUM_THREADS ",
+  {scriptlines_apptainer} exec ",
   "--bind {scriptlines_basedir}:/mnt ",
   "--bind {scriptlines_basedir}/inst:/inst ",
   "--bind {scriptlines_inputdir}:/input ",
@@ -113,7 +112,7 @@ scriptlines_backup <- glue::glue(
 
 controller_backup <- crew.cluster::crew_controller_slurm(
   name = "controller_backup",
-  workers = 100,
+  workers = 5,
   options_cluster = crew.cluster::crew_options_slurm(
     verbose = TRUE,
     script_lines = scriptlines_backup
@@ -130,11 +129,17 @@ scriptlines_grid <- glue::glue(
   #SBATCH --mem=35G \
   #SBATCH --error=slurm/grid_%j.out \
   export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK \
+  export LIGHTGBM_NUM_THREADS=$SLURM_CPUS_PER_TASK \
   {scriptlines_apptainer} exec --env OMP_NUM_THREADS=$OMP_NUM_THREADS ",
+  "--env LIGHTGBM_NUM_THREADS=$LIGHTGBM_NUM_THREADS ",
   "--bind {scriptlines_basedir}:/mnt ",
   "--bind {scriptlines_basedir}/inst:/inst ",
   "--bind {scriptlines_inputdir}:/input ",
+  "--bind /run/munge:/run/munge ",
+  "--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm ",
   "--bind {scriptlines_targetdir}/targets:/opt/_targets ",
+  "--bind /etc/passwd:/etc/passwd:ro ",
+  "--bind /etc/group:/etc/group:ro ",
   "{scriptlines_container} \\"
 )
 
@@ -146,43 +151,50 @@ controller_grid <- crew.cluster::crew_controller_slurm(
     verbose = TRUE,
     script_lines = scriptlines_grid
   ),
-  backup = controller_backup,
   options_metrics = crew::crew_options_metrics(
     path = "pipeline/",
     seconds_interval = 1
-  )
+  ),
+  backup = controller_backup,
+  tasks_max = 1L
 )
 
 scriptlines_big_grid <- glue::glue(
   "#SBATCH --job-name=biggrid \
   #SBATCH --partition=normal,highmem \
   #SBATCH --ntasks=1 \
-  #SBATCH --cpus-per-task=2 \
-  #SBATCH --mem=100G \
+  #SBATCH --cpus-per-task=1 \
+  #SBATCH --mem=50G \
   #SBATCH --error=slurm/bgrid_%j.out \
   export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK \
+  export LIGHTGBM_NUM_THREADS=$SLURM_CPUS_PER_TASK \
   {scriptlines_apptainer} exec --env OMP_NUM_THREADS=$OMP_NUM_THREADS ",
+  "--env LIGHTGBM_NUM_THREADS=$LIGHTGBM_NUM_THREADS ",
   "--bind {scriptlines_basedir}:/mnt ",
   "--bind {scriptlines_basedir}/inst:/inst ",
   "--bind {scriptlines_inputdir}:/input ",
+  "--bind /run/munge:/run/munge ",
+  "--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm ",
   "--bind {scriptlines_targetdir}/targets:/opt/_targets ",
+  "--bind /etc/passwd:/etc/passwd:ro ",
+  "--bind /etc/group:/etc/group:ro ",
   "{scriptlines_container} \\"
 )
 
 controller_big_grid <- crew.cluster::crew_controller_slurm(
   name = "controller_big_grid",
-  workers = 500,
+  workers = 1000,
   crashes_max = 5L,
   options_cluster = crew.cluster::crew_options_slurm(
     verbose = TRUE,
     script_lines = scriptlines_big_grid
   ),
-  backup = controller_backup,
-  garbage_collection = TRUE,
   options_metrics = crew::crew_options_metrics(
     path = "pipeline/",
     seconds_interval = 1
-  )
+  ),
+  backup = controller_backup,
+  tasks_max = 1L
 )
 
 # if (targets::tar_active()) {
