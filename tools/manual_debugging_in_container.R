@@ -1,4 +1,4 @@
-
+# Use with ./debug_container_interactive.sh
 chr_daterange <- c("2018-01-01", "2018-03-31") # Date range | critical
 # chr_nasa_token <- readLines("/inst/extdata/nasa_token.txt") # NASA Earthdata token | critical
 chr_mod06_links <- "/inst/extdata/mod06_links_2018_2022.csv" # File of MOD06 links | critical
@@ -139,26 +139,26 @@ chr_iter_calc_narr <- c(
   "albedo",
   "apcp",
   "dswrf",
-  "evap",
-  "hcdc",
-  "hpbl",
-  "lcdc",
-  "lhtfl",
-  "mcdc",
-  "pr_wtr",
-  "prate",
-  "pres.sfc",
-  "shtfl",
-  "snowc",
-  "soilm",
-  "tcdc",
-  "ulwrf.sfc",
-  "uwnd.10m",
-  "vis",
-  "vwnd.10m",
-  "weasd",
-  "omega",
-  "shum"
+  "evap"
+  # "hcdc",
+  # "hpbl",
+  # "lcdc",
+  # "lhtfl",
+  # "mcdc",
+  # "pr_wtr",
+  # "prate",
+  # "pres.sfc",
+  # "shtfl",
+  # "snowc",
+  # "soilm",
+  # "tcdc",
+  # "ulwrf.sfc",
+  # "uwnd.10m",
+  # "vis",
+  # "vwnd.10m",
+  # "weasd",
+  # "omega",
+  # "shum"
 )
 chr_iter_calc_narr_lag <- c(
   "air.sfc",
@@ -189,6 +189,7 @@ list_pred_calc_narr <- {
         fun = "mean",
         geom = FALSE
       )
+      message("checkpoint: ", name)
       if (length(grep("level", names(dt_iter_calc_narr))) == 1) {
         dt_iter_calc_narr <-
           dt_iter_calc_narr[dt_iter_calc_narr$level == 1000, ]
@@ -200,11 +201,11 @@ list_pred_calc_narr <- {
   ) %>%
     Reduce(
       f = function(d, e) {
+        message("Joining...")
         dplyr::full_join(d, e, by = c("site_id", "time"))
       },
       .
-    ) %>%
-    as.data.frame()
+    )
 }
 
 list_pred_calc_mod11 <- {
@@ -255,6 +256,255 @@ list_pred_calc_mod11 <- {
       f = function(d, e) {
         dplyr::full_join(d, e, by = c("site_id", "time"))
       },
+      .
+    ) %>%
+    as.data.frame()
+}
+
+
+###########################       KOPPEN        ###########################
+list_pred_calc_koppen <- {
+  h3_locs <- h3_to_geo_sf(list_h3_res8_index[[1]])
+  h3_locs$site_id <- h3_locs$h3_index
+  amadeus::calculate_koppen_geiger(
+    from = amadeus::process_koppen_geiger(
+      path = file.path(
+        chr_input_dir,
+        "koppen_geiger",
+        "data_files",
+        "Beck_KG_V1_present_0p0083.tif"
+      )
+    ),
+    locs = h3_locs,
+    locs_id = "site_id",
+    geom = FALSE
+  ) %>%
+    as.data.frame()
+}
+
+###########################      POPULATION      ###########################
+# Calculate population features | prediction grid | H3
+list_pred_calc_pop <- {
+  h3_locs <- h3_to_geo_sf(list_h3_res8_index[[1]])
+  h3_locs$site_id <- h3_locs$h3_index
+  lapply(
+    chr_iter_radii,
+    function(r) {
+      amadeus::calculate_population(
+        from = amadeus::process_population(
+          path = file.path(
+            chr_input_dir,
+            "population",
+            "data_files",
+            paste0(
+              "gpw_v4_population_density_adjusted_to_",
+              "2015_unwpp_country_totals_rev11_2020_30_sec.tif"
+            )
+          )
+        ),
+        locs = h3_locs,
+        locs_id = "site_id",
+        geom = FALSE,
+        radius = r
+      )
+    }
+  ) %>%
+    Reduce(
+      f = function(d, e) dplyr::full_join(d, e, by = c("site_id")),
+      .
+    ) %>%
+    as.data.frame()
+}
+
+###########################         TRI          ###########################
+# Calculate TRI features | prediction grid | H3
+list_pred_calc_tri <- {
+  unique_radii <- chr_iter_radii
+
+  h3_locs <- h3_to_geo_sf(list_h3_res8_index2[[1]])
+  h3_locs$site_id <- h3_locs$h3_index
+
+  grid_rowids <- seq_len(nrow(h3_locs))
+  grid_rowidx <- split(
+    grid_rowids,
+    ceiling(grid_rowids / 10000)
+  )
+
+  lapply(
+    chr_years,
+    function(year) {
+      lapply(
+        unique_radii,
+        function(radi) {
+          lapply(
+            grid_rowidx,
+            function(rows) {
+              grid_sub <- h3_locs[rows, ]
+              res_tri <- tryCatch(
+                {
+                  base_tri <-
+                    amadeus::process_tri(
+                      year = year,
+                      path = file.path(chr_input_dir, "tri"),
+                      variables = c(1, 13, 12, 14, 20, 3 + c(34, 36, 47, 48, 49))
+                    )
+                  res_tri <-
+                    beethoven::calc_tri_mod(
+                      from = base_tri,
+                      locs = h3_locs[rows, ],
+                      radius = radi
+                    )
+                  as.data.frame(res_tri)
+                },
+                error = function(e) {
+                  res_tri <- data.frame(
+                    site_id = grid_sub[["site_id"]],
+                    time = year
+                  )
+                  return(res_tri)
+                }
+              )
+              res_tri
+            }
+          ) %>%
+            collapse::rowbind(., fill = TRUE)
+        }
+      ) %>%
+        Reduce(
+          f = function(d, e) {
+            dplyr::full_join(d, e, by = c("site_id", "time"))
+          },
+          .
+        )
+    }
+  ) %>%
+    collapse::rowbind(., fill = TRUE) %>%
+    as.data.frame()
+}
+
+###########################         NEI          ###########################
+# Calculate NEI features | prediction grid | H3
+chr_iter_calc_nei <- c(2017, 2020)
+
+list_pred_calc_nei <- {
+  download_nei <- TRUE
+
+  h3_locs <- h3_to_geo_sf(list_h3_res8_index2[[1]])
+  h3_locs$site_id <- h3_locs$h3_index
+
+  grid_rowids <- seq_len(nrow(h3_locs))
+  grid_rowidx <- split(
+    grid_rowids,
+    ceiling(grid_rowids / 100000)
+  )
+
+  lapply(
+    chr_iter_calc_nei,
+    function(year) {
+      lapply(
+        grid_rowidx,
+        function(rows) {
+          beethoven::inject_calculate(
+            covariate = "nei",
+            locs = h3_locs[rows, ],
+            injection = list(
+              domain = year,
+              domain_name = "year",
+              path = file.path(chr_input_dir, "nei", "data_files"),
+              covariate = "nei"
+            )
+          ) %>%
+            collapse::rowbind(fill = TRUE)
+        }
+      ) %>%
+        collapse::rowbind(fill = TRUE)
+    }
+  ) %>%
+    collapse::rowbind(fill = TRUE) %>%
+    as.data.frame()
+}
+
+###########################      ECOREGIONS      ###########################
+# List of Ecoregions features | prediction grid | H3
+list_pred_calc_ecoregions <- {
+  # download_ecoregions
+  h3_locs <- h3_to_geo_sf(list_h3_res8_index2[[1]])
+  h3_locs$site_id <- h3_locs$h3_index
+
+  amadeus::calculate_ecoregion(
+    from = amadeus::process_ecoregion(
+      path = file.path(
+        chr_input_dir,
+        "ecoregions",
+        "data_files",
+        "us_eco_l3_state_boundaries.shp"
+      )
+    ),
+    locs = h3_locs,
+    locs_id = "site_id"
+  )
+}
+
+###########################        GROADS        ###########################
+# Calculate gRoads features | prediction grid | H3
+list_pred_calc_groads <- {
+  download_groads <- TRUE
+
+  h3_locs <- h3_to_geo_sf(list_h3_res8_index2[[1]])
+  h3_locs$site_id <- h3_locs$h3_index
+
+  grid_rowids <- seq_len(nrow(h3_locs))
+  grid_rowidx <- split(
+    grid_rowids,
+    ceiling(grid_rowids / 10000)
+  )
+
+  # Twofold list comprehension
+  # First is for radii (should be full-joined)
+  lapply(
+    chr_iter_radii,
+    function(radi) {
+      # The last one is for grid rows: rowbinded
+      lapply(
+        grid_rowidx,
+        function(rows) {
+          tryCatch(
+            {
+              amadeus::calculate_groads(
+                from = amadeus::process_groads(
+                  path = file.path(
+                    chr_input_dir,
+                    "groads",
+                    "data_files",
+                    "gROADS-v1-americas.gdb"
+                  )
+                ),
+                locs = h3_locs[rows, ],
+                locs_id = "site_id",
+                radius = radi
+              )
+            },
+            error = function(e) {
+              res <- expand.grid(
+                site_id = h3_locs[["site_id"]],
+                description = "1980 - 2010",
+                GRD_TOTAL_0_ = NA_real_,
+                GRD_DENKM_0_ = NA_real_
+              )
+              names(res)[3:4] <- paste0(
+                names(res)[3:4],
+                sprintf("%05d", radi)
+              )
+              return(res)
+            }
+          )
+        }
+      ) %>%
+        collapse::rowbind(fill = TRUE)
+    }
+  ) %>%
+    Reduce(
+      function(x, y) dplyr::full_join(x, y, by = c("site_id")),
       .
     ) %>%
     as.data.frame()
