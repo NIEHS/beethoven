@@ -146,14 +146,18 @@ controller_grid <- crew.cluster::crew_controller_slurm(
     verbose = TRUE,
     script_lines = scriptlines_grid
   ),
-  backup = controller_backup
+  backup = controller_backup,
+  options_metrics = crew::crew_options_metrics(
+    path = "pipeline/",
+    seconds_interval = 1
+  )
 )
 
 scriptlines_big_grid <- glue::glue(
   "#SBATCH --job-name=biggrid \
   #SBATCH --partition=normal,highmem \
   #SBATCH --ntasks=1 \
-  #SBATCH --cpus-per-task=1 \
+  #SBATCH --cpus-per-task=2 \
   #SBATCH --mem=100G \
   #SBATCH --error=slurm/bgrid_%j.out \
   export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK \
@@ -174,7 +178,11 @@ controller_big_grid <- crew.cluster::crew_controller_slurm(
     script_lines = scriptlines_big_grid
   ),
   backup = controller_backup,
-  garbage_collection = TRUE
+  garbage_collection = TRUE,
+  options_metrics = crew::crew_options_metrics(
+    path = "pipeline/",
+    seconds_interval = 1
+  )
 )
 
 # if (targets::tar_active()) {

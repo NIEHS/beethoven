@@ -112,6 +112,7 @@ From: nvidia/cuda:11.8.0-devel-ubuntu22.04
     Rscript -e "pak::pak('lme4',upgrade = TRUE)"
     Rscript -e "remotes::install_github('crazycapivara/h3-r')"
     Rscript -e "pak::pak('ropensci/chopin')"
+    Rscript -e "pak::pak('NIEHS/amadeus')"
     Rscript -e "pak::pak('NIEHS/beethoven')"
     Rscript -e "pak::pak('r-lib/ps', upgrade = TRUE)"
 

@@ -81,11 +81,6 @@ target_calculate_predict <-
 
         unique_radii <- chr_iter_radii
         nlcd_years <- chr_iter_calc_nlcd
-        grid_rowids <- seq_len(nrow(h3_locs))
-        grid_rowidx <- split(
-          grid_rowids,
-          ceiling(grid_rowids / 5000)
-        )
         # threefold lists
         # First level: years (rowbind)
         lapply(
@@ -102,7 +97,7 @@ target_calculate_predict <-
                     path = file.path(chr_input_dir, "nlcd", "data_files"),
                     year = yearj,
                   ),
-                  locs = h3_locs,   # full dataset (no chunking by rows)
+                  locs = h3_locs, # full dataset (no chunking by rows)
                   locs_id = arglist_common$char_siteid,
                   mode = "exact",
                   max_cells = 3e7
@@ -112,12 +107,10 @@ target_calculate_predict <-
               Reduce(
                 f = function(d, e) {
                   dplyr::full_join(d, e, by = c("site_id", "time"))
-                },
-                .
+                }
               )
           }
-        )
-        %>%
+        ) %>%
           collapse::rowbind(., fill = TRUE) %>%
           as.data.frame()
       },
@@ -207,53 +200,53 @@ target_calculate_predict <-
       description = "Calculate GEOS-CF features | chm | H3 | prediction"
     ),
     ###########################         NARR         ###########################
-    # targets::tar_target(
-    #   list_pred_calc_narr,
-    #   command = {
-    #     h3_locs <- h3_to_geo_sf(list_h3_res8_index[[1]])
-    #     h3_locs$site_id <- h3_locs$h3_index
-    #     # download_narr_buffer <- TRUE
-    #     lapply(
-    #       chr_iter_calc_narr,
-    #       function(name) {
-    #         dt_iter_calc_narr <- amadeus::calculate_narr(
-    #           from = amadeus::process_narr(
-    #             path = file.path(chr_input_dir, "narr", name),
-    #             variable = name,
-    #             date = beethoven::fl_dates(unlist(list_dates))
-    #           ),
-    #           locs = h3_locs,
-    #           locs_id = "site_id",
-    #           radius = 0,
-    #           fun = "mean",
-    #           geom = FALSE
-    #         )
-    #         if (length(grep("level", names(dt_iter_calc_narr))) == 1) {
-    #           dt_iter_calc_narr <-
-    #             dt_iter_calc_narr[dt_iter_calc_narr$level == 1000, ]
-    #           dt_iter_calc_narr <-
-    #             dt_iter_calc_narr[, -grep("level", names(dt_iter_calc_narr))]
-    #         }
-    #         dt_iter_calc_narr
-    #       }
-    #     ) %>%
-    #       Reduce(
-    #         f = function(d, e) {
-    #           dplyr::full_join(d, e, by = c("site_id", "time"))
-    #         },
-    #         .
-    #       ) %>%
-    #       as.data.frame()
-    #   },
-    #   pattern = cross(list_h3_res8_index, list_dates),
-    #   iteration = "list",
-    #   format = "parquet",
-    #   resources = targets::tar_resources(
-    #     crew = targets::tar_resources_crew(controller = "controller_big_grid"),
-    #     parquet = targets::tar_resources_parquet(compression = "lz4")
-    #   ),
-    #   description = "Calculate NARR features | prediction | H3"
-    # ),
+    targets::tar_target(
+      list_pred_calc_narr,
+      command = {
+        h3_locs <- h3_to_geo_sf(list_h3_res8_index2[[1]])
+        h3_locs$site_id <- h3_locs$h3_index
+        # download_narr_buffer <- TRUE
+        lapply(
+          chr_iter_calc_narr,
+          function(name) {
+            dt_iter_calc_narr <- amadeus::calculate_narr(
+              from = amadeus::process_narr(
+                path = file.path(chr_input_dir, "narr", name),
+                variable = name,
+                date = beethoven::fl_dates(unlist(list_dates))
+              ),
+              locs = h3_locs,
+              locs_id = "site_id",
+              radius = 0,
+              fun = "mean",
+              geom = FALSE
+            )
+            if (length(grep("level", names(dt_iter_calc_narr))) == 1) {
+              dt_iter_calc_narr <-
+                dt_iter_calc_narr[dt_iter_calc_narr$level == 1000, ]
+              dt_iter_calc_narr <-
+                dt_iter_calc_narr[, -grep("level", names(dt_iter_calc_narr))]
+            }
+            dt_iter_calc_narr
+          }
+        ) %>%
+          Reduce(
+            f = function(d, e) {
+              dplyr::full_join(d, e, by = c("site_id", "time"))
+            },
+            .
+          ) %>%
+          as.data.frame()
+      },
+      pattern = cross(list_h3_res8_index2, list_dates),
+      iteration = "list",
+      format = "parquet",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(controller = "controller_big_grid"),
+        parquet = targets::tar_resources_parquet(compression = "lz4")
+      ),
+      description = "Calculate NARR features | prediction | H3"
+    ),
     ###########################       MODIS - MOD11       ######################
     targets::tar_target(
       list_pred_calc_mod11,
@@ -758,7 +751,7 @@ target_calculate_predict <-
       iteration = "list",
       pattern = map(list_h3_res8_index),
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_50"),
+        crew = targets::tar_resources_crew(controller = "controller_grid"),
         parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
       format = "parquet",
@@ -802,30 +795,14 @@ target_calculate_predict <-
       pattern = map(list_h3_res8_index),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_50"),
+        crew = targets::tar_resources_crew(controller = "controller_grid"),
         parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
       format = "parquet",
       description = "Calculate population features | prediction grid | H3"
     ),
     ###########################         TRI          ###########################
-    # should be revised
-    # targets::tar_target(
-    #   df_feat_calc_tri_params,
-    #   command = expand.grid(
-    #     year = chr_years,
-    #     radius = chr_iter_radii
-    #   ) %>%
-    #     split(seq_len(nrow(.))),
-    #   iteration = "list",
-    #   description = "TRI features"
-    # )
-    # ,
-    targets::tar_target(
-      int_pred_calc_tri_years,
-      command = c(2020),
-      description = "TRI years | download"
-    ),
+    # df_feat_calc_tri_params
     targets::tar_target(
       list_pred_calc_tri,
       command = {
@@ -843,7 +820,7 @@ target_calculate_predict <-
         # Threefold list comprehension
         # First is for years (should be rowbinded)
         lapply(
-          int_pred_calc_tri_years,
+          chr_years,
           function(year) {
             # The second one is for radii: full joined
             lapply(
