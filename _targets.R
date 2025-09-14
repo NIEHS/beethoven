@@ -197,6 +197,7 @@ controller_big_grid <- crew.cluster::crew_controller_slurm(
   tasks_max = 1L
 )
 
+
 # if (targets::tar_active()) {
 #   autometric::log_start(
 #     path = "main_process.txt", # Statistics on the main process go here.
