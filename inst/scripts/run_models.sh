@@ -18,7 +18,7 @@ export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 
 ###############################      GPU SETUP     #############################
 # Ensure all allocated GPUs are visible
-export CUDA_VISIBLE_DEVICES=$(echo $(seq 0 $((SLURM_GPUS_ON_NODE-1))) | tr ' ' ',')
+# export CUDA_VISIBLE_DEVICES=$(echo $(seq 0 $((SLURM_GPUS_ON_NODE-1))) | tr ' ' ',')
 
 #############################        MODELS        #############################
 # Set environmental variable to indicate CPU-enabled model fitting targets.
@@ -26,7 +26,6 @@ export BEETHOVEN=models
 
 # Fit CPU-enabled base learner models via container_models.sif.
 apptainer exec \
-  --nv \
   --bind $PWD:/mnt \
   --bind $PWD/inst:/inst \
   --bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input \
