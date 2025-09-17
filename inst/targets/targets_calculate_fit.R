@@ -178,347 +178,505 @@ target_calculate_fit <-
       chr_args_calc_mod11_files,
       command = {
         download_mod11
+        julian_date <- sprintf("A%s", unlist(list_dates_julian))
+        julian_query <- sprintf("(%s)", paste(julian_date, collapse = "|"))
         list.files(
           file.path(chr_input_dir, "modis", "raw", "61", "MOD11A1"),
+          pattern = julian_query,
           full.names = TRUE,
           recursive = TRUE
         )
       },
-      description = "MODIS - MOD11 files"
-    ),
-    targets::tar_target(
-      list_args_calc_mod11,
-      command = list(
-        from = grep(
-          x = chr_args_calc_mod11_files,
-          pattern = paste0(
-            "MOD11A1.A",
-            unlist(list_dates_julian),
-            collapse = "|"
-          ),
-          value = TRUE
-        ),
-        name_covariates = c("MOD_SFCTD_0_", "MOD_SFCTN_0_"),
-        subdataset = "^LST_",
-        radius = chr_iter_radii
-      ),
-      pattern = map(list_dates_julian),
       iteration = "list",
-      description = "MODIS - MOD11 arguments"
-    ),
+      description = "MODIS - MOD11 files"
+    )
+    ,
+    targets::tar_target(
+      list_args_calc_mod11_files,
+      command = {
+        chr_a7s <- stringi::stri_extract_first_regex(
+          chr_args_calc_mod11_files,
+          pattern = "A2[0-9]{6,6}"
+        )
+        # Split the file paths
+        split(chr_args_calc_mod11_files, chr_a7s)
+      },
+      iteration = "list",
+      description = "MODIS - MOD11 file paths by day"
+    )
+    ,
+    # modified
+    targets::tar_target(
+      chr_list_calc_mod11_files,
+      command = {
+        beethoven::export_tif(
+          path_in = list_args_calc_mod11_files,
+          product_code = "MOD11A1",
+          pat = "A\\d{7,7}",
+          subdataset = "^LST_",
+          dest = file.path(chr_input_dir, "modis_preprocessed", "MOD11A1")
+        )
+      },
+      iteration = "list",
+      pattern = map(list_args_calc_mod11_files),
+      description = "preprocessed MODIS MOD11 files"
+    )
+    ,
     targets::tar_target(
       list_feat_calc_mod11,
-      command = beethoven::inject_modis(
-        locs = list_feat_proc_aqs_sites[[1]],
-        injection = list_args_calc_mod11
-      ),
-      pattern = cross(list_feat_proc_aqs_sites, list_args_calc_mod11),
+      command = {
+        calculate_modis_direct(
+          file = chr_list_calc_mod11_files,
+          site = list_feat_proc_aqs_sites,
+          site_id = arglist_common[["char_siteid"]],
+          radius = chr_iter_radii,
+          colheader = c("MOD_SFCTD_0_", "MOD_SFCTN_0_"),
+          mark = TRUE
+        )
+      },
+      pattern = cross(chr_list_calc_mod11_files, chr_iter_radii),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_50")
+        crew = targets::tar_resources_crew(controller = "controller_100")
       ),
       description = "Calculate MODIS - MOD11 features | fit"
-    ),
+    )
+    ,
     ###########################       MODIS - MOD06       ######################
     targets::tar_target(
       chr_args_calc_mod06_files,
       command = {
         download_mod06
+        julian_date <- sprintf("A%s", unlist(list_dates_julian))
+        julian_query <- sprintf("(%s)", paste(julian_date, collapse = "|"))
         list.files(
           file.path(chr_input_dir, "modis", "raw", "61", "MOD06_L2"),
+          pattern = julian_query,
           full.names = TRUE,
           recursive = TRUE
         )
       },
-      description = "MODIS - MOD06 files"
-    ),
-    targets::tar_target(
-      list_args_calc_mod06,
-      command = list(
-        from = grep(
-          x = chr_args_calc_mod06_files,
-          pattern = paste0(
-            "MOD06_L2.A",
-            unlist(list_dates_julian),
-            collapse = "|"
-          ),
-          value = TRUE
-        ),
-        name_covariates = c("MOD_CLCVD_0_", "MOD_CLCVN_0_"),
-        subdataset = c("Cloud_Fraction_Day", "Cloud_Fraction_Night"),
-        preprocess = amadeus::process_modis_swath,
-        radius = chr_iter_radii
-      ),
-      pattern = map(list_dates_julian),
       iteration = "list",
-      description = "MODIS - MOD06 arguments"
-    ),
+      description = "MODIS - MOD06 files"
+    )
+    ,
+    targets::tar_target(
+      list_args_calc_mod06_files,
+      command = {
+        chr_a7s <- stringi::stri_extract_first_regex(
+          chr_args_calc_mod06_files,
+          pattern = "A2[0-9]{6,6}"
+        )
+        # Split the file paths
+        split(chr_args_calc_mod06_files, chr_a7s)
+      },
+      iteration = "list",
+      description = "MODIS - MOD06 file paths by day"
+    )
+    ,
+    # modified
+    targets::tar_target(
+      chr_list_calc_mod06_files,
+      command = {
+        beethoven::export_tif(
+          path_in = list_args_calc_mod06_files,
+          product_code = "MOD06_L2",
+          pat = "A\\d{7,7}",
+          subdataset = "^Cloud_Fraction",
+          dest = file.path(chr_input_dir, "modis_preprocessed", "MOD06_L2")
+        )
+      },
+      iteration = "list",
+      pattern = map(list_args_calc_mod06_files),
+      description = "preprocessed MODIS MOD06 files"
+    )
+    ,
     targets::tar_target(
       list_feat_calc_mod06,
-      command = beethoven::inject_modis(
-        locs = list_feat_proc_aqs_sites[[1]],
-        injection = list_args_calc_mod06
-      ),
-      pattern = cross(list_feat_proc_aqs_sites, list_args_calc_mod06),
+      command = {
+        calculate_modis_direct(
+          file = chr_list_calc_mod06_files,
+          site = list_feat_proc_aqs_sites,
+          site_id = arglist_common[["char_siteid"]],
+          radius = chr_iter_radii,
+          colheader = c("MOD_CLCVD_0_", "MOD_CLCVN_0_"),
+          mark = TRUE
+        )
+      },
+      pattern = cross(chr_list_calc_mod06_files, chr_iter_radii),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_50")
+        crew = targets::tar_resources_crew(controller = "controller_100")
       ),
       description = "Calculate MODIS - MOD06 features | fit"
-    ),
+    )
+    ,
     ###########################       MODIS - MOD13       ######################
     targets::tar_target(
       chr_args_calc_mod13_files,
       command = {
         download_mod13
+        julian_date <- sprintf("A%s", unlist(list_dates_julian))
+        julian_query <- sprintf("(%s)", paste(julian_date, collapse = "|"))
         list.files(
           file.path(chr_input_dir, "modis", "raw", "61", "MOD13A2"),
+          pattern = julian_query,
           full.names = TRUE,
           recursive = TRUE
         )
       },
       description = "MODIS - MOD13 files"
-    ),
+    )
+    ,
     targets::tar_target(
-      list_args_calc_mod13,
-      command = list(
-        from = grep(
-          x = chr_args_calc_mod13_files,
-          pattern = paste0(
-            "MOD13A2.A",
-            unlist(list_dates_julian),
-            collapse = "|"
-          ),
-          value = TRUE
-        ),
-        name_covariates = "MOD_NDVIV_0_",
-        subdataset = "(NDVI)",
-        radius = chr_iter_radii
-      ),
-      pattern = map(list_dates_julian),
+      list_args_calc_mod13_files,
+      command = {
+        chr_a7s <- stringi::stri_extract_first_regex(
+          chr_args_calc_mod13_files,
+          pattern = "A2[0-9]{6,6}"
+        )
+        # Split the file paths
+        split(chr_args_calc_mod13_files, chr_a7s)
+      },
       iteration = "list",
-      description = "MODIS - MOD13 arguments"
-    ),
+      description = "MODIS - MOD13 file paths by day"
+    )
+    ,
+    # modified
+    targets::tar_target(
+      chr_list_calc_mod13_files,
+      command = {
+        beethoven::export_tif(
+          path_in = list_args_calc_mod13_files,
+          product_code = "MOD13A2",
+          pat = "A\\d{7,7}",
+          subdataset = "(NDVI)",
+          dest = file.path(chr_input_dir, "modis_preprocessed", "MOD13A2")
+        )
+      },
+      iteration = "list",
+      pattern = map(list_args_calc_mod13_files),
+      description = "preprocessed MODIS MOD13 files"
+    )
+    ,
     targets::tar_target(
       list_feat_calc_mod13,
-      command = beethoven::inject_modis(
-        locs = list_feat_proc_aqs_sites[[1]],
-        injection = list_args_calc_mod13
-      ),
-      pattern = cross(list_feat_proc_aqs_sites, list_args_calc_mod13),
+      command = {
+        calculate_modis_direct(
+          file = chr_list_calc_mod13_files,
+          site = list_feat_proc_aqs_sites,
+          site_id = arglist_common[["char_siteid"]],
+          radius = chr_iter_radii,
+          colheader = "MOD_NDVIV_0_",
+          mark = TRUE
+        )
+      },
+      pattern = cross(chr_list_calc_mod13_files, chr_iter_radii),
       iteration = "list",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(controller = "controller_100")
       ),
       description = "Calculate MODIS - MOD13 features | fit"
-    ),
+    )
+    ,
     ###########################     MODIS - MCD19_1km     ######################
     targets::tar_target(
       chr_args_calc_mcd19_files,
       command = {
         download_mcd19
+        julian_date <- sprintf("A%s", unlist(list_dates_julian))
+        julian_query <- sprintf("(%s)", paste(julian_date, collapse = "|"))
+
         list.files(
           file.path(chr_input_dir, "modis", "raw", "61", "MCD19A2"),
+          pattern = julian_query,
           full.names = TRUE,
           recursive = TRUE
         )
       },
       description = "MODIS - MCD19_*km files"
-    ),
+    )
+    ,
     targets::tar_target(
-      list_args_calc_mcd19_1km,
-      command = list(
-        from = grep(
-          x = chr_args_calc_mcd19_files,
-          pattern = paste0(
-            "MCD19A2.A",
-            unlist(list_dates_julian),
-            collapse = "|"
-          ),
-          value = TRUE
-        ),
-        name_covariates = c("MOD_AD4TA_0_", "MOD_AD5TA_0_"),
-        subdataset = "^Optical_Depth",
-        radius = chr_iter_radii
-      ),
-      pattern = map(list_dates_julian),
+      list_args_calc_mcd19_files,
+      command = {
+        chr_a7s <- stringi::stri_extract_first_regex(
+          chr_args_calc_mcd19_files,
+          pattern = "A2[0-9]{6,6}"
+        )
+        # Split the file paths
+        split(chr_args_calc_mcd19_files, chr_a7s)
+      },
       iteration = "list",
-      description = "MODIS - MCD19_1km arguments"
-    ),
+      description = "MODIS - MCD19 file paths"
+    )
+    ,
+    targets::tar_target(
+      chr_list_calc_mcd19_1km_files,
+      command = {
+        beethoven::export_tif(
+          path_in = list_args_calc_mcd19_files,
+          product_code = "MCD19A2",
+          pat = "A\\d{7,7}",
+          subdataset = "^Optical_Depth",
+          dest = file.path(chr_input_dir, "modis_preprocessed", "MCD19A2_1km")
+        )
+      },
+      iteration = "list",
+      pattern = map(list_args_calc_mcd19_files),
+      description = "preprocessed MODIS MCD19_1km files"
+    )
+    ,
     targets::tar_target(
       list_feat_calc_mcd19_1km,
-      command = beethoven::inject_modis(
-        locs = list_feat_proc_aqs_sites[[1]],
-        injection = list_args_calc_mcd19_1km
-      ),
-      pattern = cross(list_feat_proc_aqs_sites, list_args_calc_mcd19_1km),
+      command = {
+        calculate_modis_direct(
+          file = chr_list_calc_mcd19_1km_files,
+          site = list_feat_proc_aqs_sites,
+          site_id = arglist_common[["char_siteid"]],
+          radius = chr_iter_radii,
+          colheader = c("MOD_AD4TA_0_", "MOD_AD5TA_0_"),
+          mark = TRUE
+        )
+      },
+      pattern = cross(chr_list_calc_mcd19_1km_files, chr_iter_radii),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_250")
+        crew = targets::tar_resources_crew(controller = "controller_100")
       ),
       description = "Calculate MODIS - MCD19_1km features | fit"
-    ),
+    )
+    ,
     ###########################     MODIS - MCD19_5km     ######################
     targets::tar_target(
       list_args_calc_mcd19_5km,
-      command = list(
-        from = grep(
-          x = chr_args_calc_mcd19_files,
-          pattern = paste0(
-            "MCD19A2.A",
-            unlist(list_dates_julian),
-            collapse = "|"
-          ),
-          value = TRUE
-        ),
-        name_covariates = c(
-          "MOD_CSZAN_0_",
-          "MOD_CVZAN_0_",
-          "MOD_RAZAN_0_",
-          "MOD_SCTAN_0_",
-          "MOD_GLNAN_0_"
-        ),
-        subdataset = "cos|RelAZ|Angle",
-        radius = chr_iter_radii
-      ),
-      pattern = map(list_dates_julian),
+      command = {
+        chr_a7s <- stringi::stri_extract_first_regex(
+          chr_args_calc_mcd19_files,
+          pattern = "A2[0-9]{6,6}"
+        )
+        # Split the file paths
+        split(chr_args_calc_mcd19_files, chr_a7s)
+      },
       iteration = "list",
       description = "MODIS - MCD19_5km arguments"
-    ),
+    )
+    ,
+    targets::tar_target(
+      chr_list_calc_mcd19_5km_files,
+      command = {
+        beethoven::export_tif(
+          path_in = list_args_calc_mcd19_5km,
+          product_code = "MCD19A2",
+          pat = "A\\d{7,7}",
+          subdataset = "cos|RelAZ|Angle",
+          dest = file.path(chr_input_dir, "modis_preprocessed", "MCD19A2_5km")
+        )
+      },
+      iteration = "list",
+      pattern = map(list_args_calc_mcd19_5km),
+      description = "preprocessed MODIS MCD19_5km files"
+    )
+    ,
     targets::tar_target(
       list_feat_calc_mcd19_5km,
-      command = beethoven::inject_modis(
-        locs = list_feat_proc_aqs_sites[[1]],
-        injection = list_args_calc_mcd19_5km
-      ),
-      pattern = cross(list_feat_proc_aqs_sites, list_args_calc_mcd19_5km),
+      command = {
+        calculate_modis_direct(
+          file = chr_list_calc_mcd19_5km_files,
+          site = list_feat_proc_aqs_sites,
+          site_id = arglist_common[["char_siteid"]],
+          radius = chr_iter_radii,
+          colheader = c(
+          "MOD_CSZAN_0_", "MOD_CVZAN_0_", "MOD_RAZAN_0_",
+          "MOD_SCTAN_0_", "MOD_GLNAN_0_"
+          ),
+          mark = TRUE
+        )
+
+      },
+      pattern = cross(chr_list_calc_mcd19_5km_files, chr_iter_radii),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_250")
+        crew = targets::tar_resources_crew(controller = "controller_100")
       ),
       description = "Calculate MODIS - MCD19_5km features | fit"
-    ),
+    )
+    ,
     ###########################       MODIS - MOD09       ######################
     targets::tar_target(
       chr_args_calc_mod09_files,
       command = {
         download_mod09
+        julian_date <- sprintf("A%s", unlist(list_dates_julian))
+        julian_query <- sprintf("(%s)", paste(julian_date, collapse = "|"))
+
         list.files(
           file.path(chr_input_dir, "modis", "raw", "61", "MOD09GA"),
+          pattern = julian_query,
           full.names = TRUE,
           recursive = TRUE
         )
       },
       description = "MODIS - MOD09 files"
-    ),
+    )
+    ,
     targets::tar_target(
       list_args_calc_mod09,
-      command = list(
-        from = grep(
-          x = chr_args_calc_mod09_files,
-          pattern = paste0(
-            "MOD09GA.A",
-            unlist(list_dates_julian),
-            collapse = "|"
-          ),
-          value = TRUE
-        ),
-        name_covariates = c(
-          "MOD_SFCRF_1_",
-          "MOD_SFCRF_2_",
-          "MOD_SFCRF_3_",
-          "MOD_SFCRF_4_",
-          "MOD_SFCRF_5_",
-          "MOD_SFCRF_6_",
-          "MOD_SFCRF_7_"
-        ),
-        subdataset = "^sur_refl_",
-        radius = chr_iter_radii
-      ),
-      pattern = map(list_dates_julian),
+      command = {
+        chr_a7s <- stringi::stri_extract_first_regex(
+          chr_args_calc_mod09_files,
+          pattern = "A2[0-9]{6,6}"
+        )
+        # Split the file paths
+        split(chr_args_calc_mod09_files, chr_a7s)
+      },
       iteration = "list",
-      description = "MODIS - MOD09 arguments"
-    ),
+      description = "MODIS - MOD09GA arguments"
+    )
+    ,
+    targets::tar_target(
+      chr_list_calc_mod09_files,
+      command = {
+        beethoven::export_tif(
+          path_in = list_args_calc_mod09,
+          product_code = "MOD09GA",
+          pat = "A\\d{7,7}",
+          subdataset = "^sur_refl_",
+          dest = file.path(chr_input_dir, "modis_preprocessed", "MOD09GA")
+        )
+      },
+      iteration = "list",
+      pattern = map(list_args_calc_mod09),
+      description = "preprocessed MODIS MOD09GA files"
+    )
+    ,
     targets::tar_target(
       list_feat_calc_mod09,
-      command = beethoven::inject_modis(
-        locs = list_feat_proc_aqs_sites[[1]],
-        injection = list_args_calc_mod09
-      ),
-      pattern = cross(list_feat_proc_aqs_sites, list_args_calc_mod09),
+      command = {
+        calculate_modis_direct(
+          file = chr_list_calc_mod09_files,
+          site = list_feat_proc_aqs_sites,
+          site_id = arglist_common[["char_siteid"]],
+          radius = chr_iter_radii,
+          colheader = c(
+          "MOD_SFCRF_1_", "MOD_SFCRF_2_", "MOD_SFCRF_3_", "MOD_SFCRF_4_",
+          "MOD_SFCRF_5_", "MOD_SFCRF_6_", "MOD_SFCRF_7_"
+          ),
+          mark = TRUE
+        )
+      },
+      pattern = cross(chr_list_calc_mod09_files, chr_iter_radii),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_25")
+        crew = targets::tar_resources_crew(controller = "controller_100")
       ),
-      description = "Calculate MODIS - MOD09 features | fit"
-    ),
+      description = "Calculate MODIS - MOD09GA features | fit"
+    )
+    ,
     ###########################       MODIS - VIIRS       ######################
     targets::tar_target(
       chr_args_calc_viirs_files,
       command = {
         download_viirs
+        julian_date <- sprintf("A%s", unlist(list_dates_julian))
+        julian_query <- sprintf("(%s)", paste(julian_date, collapse = "|"))
         list.files(
           file.path(chr_input_dir, "modis", "raw", "5000", "VNP46A2"),
+          pattern = julian_query,
           full.names = TRUE,
           recursive = TRUE
         )
       },
       description = "MODIS - VIIRS files"
-    ),
+    )
+    ,
     targets::tar_target(
       list_args_calc_viirs,
-      command = list(
-        from = grep(
-          x = chr_args_calc_viirs_files,
-          pattern = paste0(
-            "VNP46A2.A",
-            unlist(list_dates_julian),
-            collapse = "|"
-          ),
-          value = TRUE
-        ),
-        name_covariates = "MOD_LGHTN_0_",
-        subdataset = 3,
-        preprocess = amadeus::process_blackmarble,
-        radius = chr_iter_radii
-      ),
-      pattern = map(list_dates_julian),
+      command = {
+        chr_a7s <- stringi::stri_extract_first_regex(
+          chr_args_calc_viirs_files,
+          pattern = "A2[0-9]{6,6}"
+        )
+        # Split the file paths
+        split(chr_args_calc_viirs_files, chr_a7s)
+      },
       iteration = "list",
       description = "MODIS - VIIRS arguments"
-    ),
+    )
+    ,
+    targets::tar_target(
+      chr_list_calc_viirs_files,
+      command = {
+        beethoven::export_tif(
+          path_in = list_args_calc_viirs,
+          product_code = "VNP46A2",
+          pat = "A\\d{7,7}",
+          subdataset = 3,
+          dest = file.path(chr_input_dir, "modis_preprocessed", "VNP46A2")
+        )
+      },
+      iteration = "list",
+      pattern = map(list_args_calc_viirs),
+      description = "preprocessed MODIS VIIRS files"
+    )
+    ,
     targets::tar_target(
       list_feat_calc_viirs,
-      command = beethoven::inject_modis(
-        locs = list_feat_proc_aqs_sites[[1]],
-        injection = list_args_calc_viirs
-      ),
-      pattern = cross(list_feat_proc_aqs_sites, list_args_calc_viirs),
+      command = {
+        calculate_modis_direct(
+          file = chr_list_calc_viirs_files,
+          site = list_feat_proc_aqs_sites,
+          site_id = arglist_common[["char_siteid"]],
+          radius = chr_iter_radii,
+          colheader = "MOD_LGHTN_0_",
+          mark = TRUE
+        )
+      },
+      pattern = cross(chr_list_calc_viirs_files, chr_iter_radii),
       iteration = "list",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(controller = "controller_100")
       ),
       description = "Calculate MODIS - VIIRS features | fit"
-    ),
+    )
+    ,
     ###########################        MODIS/VIIRS        ######################
     targets::tar_target(
       dt_feat_calc_nasa,
-      command = beethoven::reduce_merge(
-        lapply(
+      command = {
+        beethoven::reduce_merge(
           list(
-            list_feat_calc_mod11,
-            list_feat_calc_mod06,
-            list_feat_calc_mod13,
-            list_feat_calc_mcd19_1km,
-            list_feat_calc_mcd19_5km,
-            list_feat_calc_mod09,
-            list_feat_calc_viirs
-          ),
-          function(x) data.table::data.table(beethoven::reduce_list(x)[[1]])
-        ),
-        by = NULL
-      ),
+            # branching by radii requires another way to merge
+            # here we group by radii index, which should be modified if radii are changed
+            collapse::rowbind(list_feat_calc_mod11[seq_len(length(list_feat_calc_mod11)) %% 3 == 1], fill = TRUE),
+            collapse::rowbind(list_feat_calc_mod11[seq_len(length(list_feat_calc_mod11)) %% 3 == 2], fill = TRUE),
+            collapse::rowbind(list_feat_calc_mod11[seq_len(length(list_feat_calc_mod11)) %% 3 == 0], fill = TRUE),
+            collapse::rowbind(list_feat_calc_mod06[seq_len(length(list_feat_calc_mod06)) %% 3 == 1], fill = TRUE),
+            collapse::rowbind(list_feat_calc_mod06[seq_len(length(list_feat_calc_mod06)) %% 3 == 2], fill = TRUE),
+            collapse::rowbind(list_feat_calc_mod06[seq_len(length(list_feat_calc_mod06)) %% 3 == 0], fill = TRUE),
+            collapse::rowbind(list_feat_calc_mod13[seq_len(length(list_feat_calc_mod13)) %% 3 == 1], fill = TRUE),
+            collapse::rowbind(list_feat_calc_mod13[seq_len(length(list_feat_calc_mod13)) %% 3 == 2], fill = TRUE),
+            collapse::rowbind(list_feat_calc_mod13[seq_len(length(list_feat_calc_mcd19_1km)) %% 3 == 0], fill = TRUE),
+            collapse::rowbind(list_feat_calc_mcd19_1km[seq_len(length(list_feat_calc_mcd19_1km)) %% 3 == 1], fill = TRUE),
+            collapse::rowbind(list_feat_calc_mcd19_1km[seq_len(length(list_feat_calc_mcd19_1km)) %% 3 == 2], fill = TRUE),
+            collapse::rowbind(list_feat_calc_mcd19_1km[seq_len(length(list_feat_calc_mcd19_1km)) %% 3 == 0], fill = TRUE),
+            collapse::rowbind(list_feat_calc_mcd19_5km[seq_len(length(list_feat_calc_mcd19_5km)) %% 3 == 1], fill = TRUE),
+            collapse::rowbind(list_feat_calc_mcd19_5km[seq_len(length(list_feat_calc_mcd19_5km)) %% 3 == 2], fill = TRUE),
+            collapse::rowbind(list_feat_calc_mcd19_5km[seq_len(length(list_feat_calc_mcd19_5km)) %% 3 == 0], fill = TRUE),
+            collapse::rowbind(list_feat_calc_mod09[seq_len(length(list_feat_calc_mod09)) %% 3 == 1], fill = TRUE),
+            collapse::rowbind(list_feat_calc_mod09[seq_len(length(list_feat_calc_mod09)) %% 3 == 2], fill = TRUE),
+            collapse::rowbind(list_feat_calc_mod09[seq_len(length(list_feat_calc_mod09)) %% 3 == 0], fill = TRUE),
+            collapse::rowbind(list_feat_calc_viirs[seq_len(length(list_feat_calc_viirs)) %% 3 == 1], fill = TRUE),
+            collapse::rowbind(list_feat_calc_viirs[seq_len(length(list_feat_calc_viirs)) %% 3 == 2], fill = TRUE),
+            collapse::rowbind(list_feat_calc_viirs[seq_len(length(list_feat_calc_viirs)) %% 3 == 0], fill = TRUE)
+          )
+          ,
+          by = NULL
+        )
+      },
       description = "data.table of MODIS/VIIRS features | fit"
-    ),
+    )
+    ,
     ###########################         GMTED        ###########################
     targets::tar_target(
       chr_iter_calc_gmted_radii,
