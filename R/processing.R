@@ -345,7 +345,6 @@ process_narr2 <- function(
 #' @importFrom stringi stri_extract_first_regex stri_sub
 #' @importFrom terra writeRaster
 #' @author Insang Song
-#' @keywords Calculation
 #' @export
 #' @examples
 #' \dontrun{
@@ -390,6 +389,9 @@ export_tif <- function(
   subdataset = "",
   dest = "."
 ) {
+  if (!dir.exists(dest)) {
+    dir.create(dest, recursive = TRUE)
+  }
   redate <- stringi::stri_extract_first_regex(path_in, pat)
   redate <- unique(redate)
   redate <- stringi::stri_sub(redate, 2, 8)
