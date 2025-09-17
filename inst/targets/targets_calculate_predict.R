@@ -439,142 +439,34 @@ target_calculate_predict <-
       description = "Calculate MODIS - MOD13 features | prediction grid | H3"
     ),
     ###########################     MODIS - MCD19_1km     ######################
-    targets::tar_target(
-      list_pred_calc_mcd19_1km,
-      command = {
-        search_dir <- file.path(
-          chr_input_dir,
-          "modis_preprocessed",
-          "MCD19A2_1km"
-        )
-        date_find <- list_dates
-
-        h3_locs <- h3_to_geo_sf(list_h3_res8_index2[[1]])
-        h3_locs$site_id <- h3_locs$h3_index
-
-        lapply(chr_iter_radii, function(r) {
-          Map(
-            f = function(date_i) {
-              date_in <- paste("(", date_i, ")", sep = "")
-              target_file <- list.files(
-                path = search_dir,
-                pattern = paste0(date_in, "\\.tif$"),
-                full.names = TRUE
-              )
-              res <- tryCatch(
-                {
-                  beethoven::calculate_modis_direct(
-                    file = target_file,
-                    site = h3_locs,
-                    site_id = arglist_common[["char_siteid"]],
-                    radius = r,
-                    colheader = c("MOD_AD4TA_0_", "MOD_AD5TA_0_"),
-                    mark = TRUE
-                  )
-                },
-                error = function(e) {
-                  res <- expand.grid(
-                    site_id = h3_locs[["site_id"]],
-                    time = date_i,
-                    MOD_AD4TA_0_ = NA_real_,
-                    MOD_AD5TA_0_ = NA_real_
-                  )
-                  names(res)[3:4] <- paste0(names(res)[3:4], sprintf("%05d", r))
-                  return(res)
-                }
-              )
-              res
-            },
-            date_find
-          ) %>%
-            collapse::rowbind(., fill = TRUE)
-        }) %>%
-          Reduce(
-            f = function(d, e) {
-              dplyr::full_join(d, e, by = c("site_id", "time"))
-            },
-            .
-          ) %>%
-          as.data.frame()
-      },
-      pattern = cross(list_h3_res8_index2, list_dates),
-      iteration = "list",
-      resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_grid"),
-        parquet = targets::tar_resources_parquet(compression = "lz4")
-      ),
-      format = "parquet",
-      description = "Calculate MODIS - MCD19_1km features | prediction grid | H3"
-    ),
+    # targets::tar_target(
+    #   list_pred_calc_mcd19_1km,
+    #   command = {},
+    #   pattern = cross(list_h3_res8_index2, list_dates),
+    #   iteration = "list",
+    #   resources = targets::tar_resources(
+    #     crew = targets::tar_resources_crew(controller = "controller_grid"),
+    #     parquet = targets::tar_resources_parquet(compression = "lz4")
+    #   ),
+    #   format = "parquet",
+    #   description = "Calculate MODIS - MCD19_1km features | prediction grid | H3"
+    # ),
     ###########################     MODIS - MCD19_5km     ######################
     targets::tar_target(
       list_pred_calc_mcd19_5km,
       command = {
-        search_dir <- file.path(
-          chr_input_dir,
-          "modis_preprocessed",
-          "MCD19A2_5km"
-        )
-        date_find <- list_dates
-
         h3_locs <- h3_to_geo_sf(list_h3_res8_index2[[1]])
         h3_locs$site_id <- h3_locs$h3_index
 
-        lapply(chr_iter_radii, function(r) {
-          Map(
-            f = function(date_i) {
-              date_in <- paste("(", date_i, ")", sep = "")
-              target_file <- list.files(
-                path = search_dir,
-                pattern = paste0(date_in, "\\.tif$"),
-                full.names = TRUE
-              )
-              res <- tryCatch(
-                {
-                  beethoven::calculate_modis_direct(
-                    file = target_file,
-                    site = h3_locs,
-                    site_id = arglist_common[["char_siteid"]],
-                    radius = r,
-                    colheader = c(
-                      "MOD_CSZAN_0_",
-                      "MOD_CVZAN_0_",
-                      "MOD_RAZAN_0_",
-                      "MOD_SCTAN_0_",
-                      "MOD_GLNAN_0_"
-                    ),
-                    mark = TRUE
-                  )
-                },
-                error = function(e) {
-                  res <- expand.grid(
-                    site_id = h3_locs[["site_id"]],
-                    time = date_i,
-                    MOD_CSZAN_0_ = NA_real_,
-                    MOD_CVZAN_0_ = NA_real_,
-                    MOD_RAZAN_0_ = NA_real_,
-                    MOD_SCTAN_0_ = NA_real_,
-                    MOD_GLNAN_0_ = NA_real_
-                  )
-                  names(res)[3:7] <- paste0(names(res)[3:7], sprintf("%05d", r))
-                  return(res)
-                }
-              )
-              res
-            },
-            date_find
-          ) %>%
-            collapse::rowbind(., fill = TRUE)
-        }) %>%
-          Reduce(
-            f = function(d, e) {
-              dplyr::full_join(d, e, by = c("site_id", "time"))
-            },
-            .
-          ) %>%
-          as.data.frame()
+        #drop h3_index column
+        h3_locs <- h3_locs[, -which(names(h3_locs) == "h3_index")]
+        mcd19_5km <- beethoven::inject_modis(
+          locs = h3_locs,
+          injection = list_args_calc_mcd19_5km
+        )
+        mcd19_5km
       },
-      pattern = cross(list_h3_res8_index2, list_dates),
+      pattern = cross(list_h3_res8_index2, list_args_calc_mcd19_5km),
       iteration = "list",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(controller = "controller_grid"),

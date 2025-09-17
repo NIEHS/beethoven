@@ -95,42 +95,11 @@ controller_lgb <- crew.cluster::crew_controller_slurm(
   )
 )
 
-scriptlines_backup <- glue::glue(
-  "#SBATCH --job-name=g_back \
-  #SBATCH --partition=normal,highmem,geo \
-  #SBATCH --ntasks=1 \
-  #SBATCH --cpus-per-task=1 \
-  #SBATCH --mem=200G \
-  #SBATCH --error=slurm/backup_%j.out \
-  module load R \
-  set -euo pipefail \  
-  {scriptlines_apptainer} exec ",
-  "--bind {scriptlines_basedir}:/mnt ",
-  "--bind {scriptlines_basedir}/inst:/inst ",
-  "--bind {scriptlines_inputdir}:/input ",
-  "--bind {scriptlines_targetdir}/targets:/opt/_targets ",
-  "{scriptlines_container} \\"
-)
-
-controller_backup <- crew.cluster::crew_controller_slurm(
-  name = "controller_backup",
-  workers = 100,
-  options_cluster = crew.cluster::crew_options_slurm(
-    verbose = TRUE,
-    script_lines = scriptlines_backup
-  ),
-  garbage_collection = TRUE
-)
 
 ##### `controller_grid` uses 100 CPUs for {grid covariates} models.
-scriptlines_grid <- glue::glue(
+
+scriptlines_launch <- glue::glue(
   "#SBATCH --job-name=grid \
-  #SBATCH --partition=normal,highmem \
-  #SBATCH --requeue \  
-  #SBATCH --ntasks=1 \
-  #SBATCH --cpus-per-task=1 \
-  #SBATCH --mem=35G \
-  #SBATCH --error=slurm/grid_%j.out \
   module load R \
   set -euo pipefail \
   export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK \
@@ -144,59 +113,48 @@ scriptlines_grid <- glue::glue(
   "{scriptlines_container} \\"
 )
 
+options_regular = crew.cluster::crew_options_slurm(
+  verbose = TRUE,
+  log_output = "slurm/grid_%j.out",
+  log_error = "slurm/grid_%j.err",
+  partition = "normal,highmem",
+  cpus_per_task = 1,
+  memory_gigabytes_required = 35,
+  script_lines = scriptlines_launch
+)
+
+options_big = crew.cluster::crew_options_slurm(
+  verbose = TRUE,
+  log_output = "slurm/bgrid_%j.out",
+  log_error = "slurm/bgrid_%j.err",
+  partition = "normal,highmem",
+  cpus_per_task = 1,
+  memory_gigabytes_required = 50,
+  script_lines = scriptlines_launch
+)
 
 controller_grid <- crew.cluster::crew_controller_slurm(
   name = "controller_grid",
-  workers = 1000,
+  workers = 500,
   crashes_max = 5L,
-  options_cluster = crew.cluster::crew_options_slurm(
-    verbose = TRUE,
-    script_lines = scriptlines_grid
-  ),
   options_metrics = crew::crew_options_metrics(
     path = "pipeline/",
     seconds_interval = 1
   ),
-  backup = controller_backup,
+  options_cluster = options_regular,
   tasks_max = 1L
 )
 
-#   #SBATCH --nodelist=cn040301,cn040609,cn030307,cn030309,cn030311 \
-
-scriptlines_big_grid <- glue::glue(
-  "#SBATCH --job-name=biggrid \
-  #SBATCH --partition=normal,highmem \
-  #SBATCH --requeue \  
-  #SBATCH --ntasks=1 \
-  #SBATCH --cpus-per-task=1 \
-  #SBATCH --mem=50G \
-  #SBATCH --error=slurm/bgrid_%j.out \
-  module load R \
-  set -euo pipefail \  
-  export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK \
-  {scriptlines_apptainer} exec --env OMP_NUM_THREADS=$OMP_NUM_THREADS ",
-  "--bind {scriptlines_basedir}:/mnt ",
-  "--bind {scriptlines_basedir}/inst:/inst ",
-  "--bind {scriptlines_inputdir}:/input ",
-  "--bind /run/munge:/run/munge ",
-  "--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm ",
-  "--bind {scriptlines_targetdir}/targets:/opt/_targets ",
-  "{scriptlines_container} \\"
-)
 
 controller_big_grid <- crew.cluster::crew_controller_slurm(
   name = "controller_big_grid",
-  workers = 1000,
+  workers = 500,
   crashes_max = 5L,
-  options_cluster = crew.cluster::crew_options_slurm(
-    verbose = TRUE,
-    script_lines = scriptlines_big_grid
-  ),
   options_metrics = crew::crew_options_metrics(
     path = "pipeline/",
     seconds_interval = 1
   ),
-  backup = controller_backup,
+  options_cluster = options_big,
   tasks_max = 1L
 )
 
@@ -282,7 +240,6 @@ targets::tar_option_set(
     controller_mlp,
     controller_lgb,
     controller_grid,
-    controller_backup,
     controller_big_grid
   ),
   resources = targets::tar_resources(
