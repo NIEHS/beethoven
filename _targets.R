@@ -66,14 +66,15 @@ controller_mlp <- crew.cluster::crew_controller_slurm(
     script_lines = scriptlines_mlp
   )
 )
+
 ##### `controller_lgb` uses 100 CPUs for {lightGBM} models.
 scriptlines_lgb <- glue::glue(
   "#SBATCH --job-name=lgb \
   #SBATCH --partition=gpu \
   #SBATCH --nodelist=gn040809 \
   #SBATCH --ntasks=1 \
-  #SBATCH --cpus-per-task=32 \
-  #SBATCH --mem=100G \
+  #SBATCH --cpus-per-task=25 \
+  #SBATCH --mem=500G \
   #SBATCH --error=slurm/lgb_%j.out \
   export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK \
   export LIGHTGBM_NUM_THREADS=$SLURM_CPUS_PER_TASK \
@@ -87,12 +88,125 @@ scriptlines_lgb <- glue::glue(
 )
 controller_lgb <- crew.cluster::crew_controller_slurm(
   name = "controller_lgb",
-  workers = 3,
+  workers = 25,
   options_cluster = crew.cluster::crew_options_slurm(
     verbose = TRUE,
     script_lines = scriptlines_lgb
   )
 )
+
+scriptlines_backup <- glue::glue(
+  "#SBATCH --job-name=g_back \
+  #SBATCH --partition=normal,highmem,geo \
+  #SBATCH --ntasks=1 \
+  #SBATCH --cpus-per-task=1 \
+  #SBATCH --mem=200G \
+  #SBATCH --error=slurm/backup_%j.out \
+  module load R \
+  set -euo pipefail \  
+  {scriptlines_apptainer} exec ",
+  "--bind {scriptlines_basedir}:/mnt ",
+  "--bind {scriptlines_basedir}/inst:/inst ",
+  "--bind {scriptlines_inputdir}:/input ",
+  "--bind {scriptlines_targetdir}/targets:/opt/_targets ",
+  "{scriptlines_container} \\"
+)
+
+controller_backup <- crew.cluster::crew_controller_slurm(
+  name = "controller_backup",
+  workers = 100,
+  options_cluster = crew.cluster::crew_options_slurm(
+    verbose = TRUE,
+    script_lines = scriptlines_backup
+  ),
+  garbage_collection = TRUE
+)
+
+##### `controller_grid` uses 100 CPUs for {grid covariates} models.
+scriptlines_grid <- glue::glue(
+  "#SBATCH --job-name=grid \
+  #SBATCH --partition=normal,highmem \
+  #SBATCH --requeue \  
+  #SBATCH --ntasks=1 \
+  #SBATCH --cpus-per-task=1 \
+  #SBATCH --mem=35G \
+  #SBATCH --error=slurm/grid_%j.out \
+  module load R \
+  set -euo pipefail \
+  export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK \
+  {scriptlines_apptainer} exec --env OMP_NUM_THREADS=$OMP_NUM_THREADS ",
+  "--bind {scriptlines_basedir}:/mnt ",
+  "--bind {scriptlines_basedir}/inst:/inst ",
+  "--bind {scriptlines_inputdir}:/input ",
+  "--bind /run/munge:/run/munge ",
+  "--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm ",
+  "--bind {scriptlines_targetdir}/targets:/opt/_targets ",
+  "{scriptlines_container} \\"
+)
+
+
+controller_grid <- crew.cluster::crew_controller_slurm(
+  name = "controller_grid",
+  workers = 1000,
+  crashes_max = 5L,
+  options_cluster = crew.cluster::crew_options_slurm(
+    verbose = TRUE,
+    script_lines = scriptlines_grid
+  ),
+  options_metrics = crew::crew_options_metrics(
+    path = "pipeline/",
+    seconds_interval = 1
+  ),
+  backup = controller_backup,
+  tasks_max = 1L
+)
+
+#   #SBATCH --nodelist=cn040301,cn040609,cn030307,cn030309,cn030311 \
+
+scriptlines_big_grid <- glue::glue(
+  "#SBATCH --job-name=biggrid \
+  #SBATCH --partition=normal,highmem \
+  #SBATCH --requeue \  
+  #SBATCH --ntasks=1 \
+  #SBATCH --cpus-per-task=1 \
+  #SBATCH --mem=50G \
+  #SBATCH --error=slurm/bgrid_%j.out \
+  module load R \
+  set -euo pipefail \  
+  export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK \
+  {scriptlines_apptainer} exec --env OMP_NUM_THREADS=$OMP_NUM_THREADS ",
+  "--bind {scriptlines_basedir}:/mnt ",
+  "--bind {scriptlines_basedir}/inst:/inst ",
+  "--bind {scriptlines_inputdir}:/input ",
+  "--bind /run/munge:/run/munge ",
+  "--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm ",
+  "--bind {scriptlines_targetdir}/targets:/opt/_targets ",
+  "{scriptlines_container} \\"
+)
+
+controller_big_grid <- crew.cluster::crew_controller_slurm(
+  name = "controller_big_grid",
+  workers = 1000,
+  crashes_max = 5L,
+  options_cluster = crew.cluster::crew_options_slurm(
+    verbose = TRUE,
+    script_lines = scriptlines_big_grid
+  ),
+  options_metrics = crew::crew_options_metrics(
+    path = "pipeline/",
+    seconds_interval = 1
+  ),
+  backup = controller_backup,
+  tasks_max = 1L
+)
+
+
+# if (targets::tar_active()) {
+#   autometric::log_start(
+#     path = "main_process.txt", # Statistics on the main process go here.
+#     seconds = 1
+#   )
+# }
 
 ##############################        STORE       ##############################
 targets::tar_config_set(store = "/opt/_targets")
@@ -110,6 +224,7 @@ if (Sys.getenv("BEETHOVEN") == "covariates") {
     "sf",
     "crew",
     "crew.cluster",
+    "mirai",
     "lubridate",
     "qs2",
     "kernlab",
@@ -128,6 +243,7 @@ if (Sys.getenv("BEETHOVEN") == "covariates") {
     "crew",
     "crew.cluster",
     "lubridate",
+    "mirai",
     "qs2",
     "torch",
     "parsnip",
@@ -139,14 +255,17 @@ if (Sys.getenv("BEETHOVEN") == "covariates") {
     "spatialsample",
     "tidymodels",
     "brulee",
-    "workflows"
+    "workflows",
+    "h3",
+    "h3r",
+    "autometric"
   )
 }
 targets::tar_option_set(
   packages = beethoven_packages,
   repository = "local",
   error = "continue",
-  memory = "transient",
+  memory = "auto",
   format = "qs",
   storage = "worker",
   deployment = "worker",
@@ -161,7 +280,10 @@ targets::tar_option_set(
     controller_5,
     controller_1,
     controller_mlp,
-    controller_lgb
+    controller_lgb,
+    controller_grid,
+    controller_backup,
+    controller_big_grid
   ),
   resources = targets::tar_resources(
     crew = targets::tar_resources_crew(controller = "controller_250")
@@ -193,6 +315,7 @@ if (Sys.getenv("BEETHOVEN") == "covariates") {
 } else if (Sys.getenv("BEETHOVEN") == "models") {
   target_predict <- list()
 }
+
 
 ##############################      PIPELINE      ##############################
 list(

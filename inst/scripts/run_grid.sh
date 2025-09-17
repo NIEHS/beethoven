@@ -3,12 +3,12 @@
 #SBATCH --job-name=gridh3
 #SBATCH --mail-user=kyle.messier@nih.gov
 #SBATCH --mail-type=END,FAIL
-#SBATCH --partition=geo
+#SBATCH --partition=normal
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=1G
-#SBATCH --error=slurm/predict_%j.err
-#SBATCH --output=slurm/predict_%j.out
+#SBATCH --error=slurm/gridh3_%j.err
+#SBATCH --output=slurm/gridh3_%j.out
 
 ############################      CERTIFICATES      ############################
 # Export CURL_CA_BUNDLE and SSL_CERT_FILE environmental variables to vertify
@@ -19,7 +19,7 @@ export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 #############################      PREDICTION COVARIATEs      #############################
 # Set environmental variable to indicate download and covariate
 # calculation targets.
-export BEETHOVEN=predict
+export BEETHOVEN=grid
 
 ###############################      GPU SETUP     #############################
 # Ensure all allocated GPUs are visible
@@ -31,6 +31,7 @@ ulimit -s 20000
 
 # Download and calculate covariates via container_covariates.sif
 apptainer exec \
+  --nv \
   --bind $PWD:/mnt \
   --bind $PWD/inst:/inst \
   --bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input \
