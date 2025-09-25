@@ -41,13 +41,14 @@ From: rocker/geospatial:latest
     Rscript -e "pak::pak('DBI'); pak::pak('duckdb')"
     Rscript -e "install.packages(c('tarchetypes', 'testthat', 'tidymodels', \
         'bonsai', 'qs2', 'kernlab', 'sqltargets'))"
-    Rscript -e "pak::pak('shikokuchuo/nanonext'); pak::pak('shikokuchuo/mirai')"
+    Rscript -e "install.packages(c('nanonext', 'mirai'))"
     Rscript -e "pak::pak('wlandau/crew'); pak::pak('wlandau/crew.cluster')"
     Rscript -e "pak::pak('wlandau/autometric')"
-    Rscript -e "pak::pak('NIEHS/amadeus')"
+    Rscript -e "install.packages('amadeus')"
     Rscript -e "install.packages(c('scoringRules', 'future.mirai', 'vetiver', \
         'lwgeom', 'doRNG', 'quarto', 'kernlab'))"
     Rscript -e "install.packages(c('h3', 'h3r'))"
+    Rscript -e "pak::pak('crazycapivara/h3-r')"
     Rscript -e "pak::pak('NIEHS/beethoven@h3_pred')"
 
 %environment

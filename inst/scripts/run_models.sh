@@ -3,7 +3,7 @@
 #SBATCH --job-name=model
 #SBATCH --mail-user=kyle.messier@nih.gov
 #SBATCH --mail-type=END,FAIL
-#SBATCH --partition=normal
+#SBATCH --partition=compute
 #SBATCH --ntasks=1
 #SBATCH --mem=4G
 #SBATCH --cpus-per-task=1

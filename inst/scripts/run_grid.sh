@@ -1,9 +1,9 @@
 #!/bin/bash
 
 #SBATCH --job-name=gridh3
-#SBATCH --mail-user=kyle.messier@nih.gov
+#SBATCH --mail-user=geoissong@snu.ac.kr
 #SBATCH --mail-type=END,FAIL
-#SBATCH --partition=normal
+#SBATCH --partition=compute
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=1G

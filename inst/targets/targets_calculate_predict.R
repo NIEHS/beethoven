@@ -68,7 +68,7 @@ target_calculate_predict <-
       description = "Calculate HMS features | prediction",
       format = "parquet",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_40"),
+        crew = targets::tar_resources_crew(controller = "controller_grid"),
         parquet = targets::tar_resources_parquet(compression = "lz4")
       )
     ),

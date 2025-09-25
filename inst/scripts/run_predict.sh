@@ -1,12 +1,12 @@
 #!/bin/bash
 
 #SBATCH --job-name=gridh3
-#SBATCH --mail-user=kyle.messier@nih.gov
+#SBATCH --mail-user=geoissong@snu.ac.kr
 #SBATCH --mail-type=END,FAIL
-#SBATCH --partition=geo
+#SBATCH --partition=compute
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
-#SBATCH --mem=1G
+#SBATCH --mem=8G
 #SBATCH --error=slurm/predict_%j.err
 #SBATCH --output=slurm/predict_%j.out
 
@@ -33,9 +33,10 @@ ulimit -s 20000
 apptainer exec \
   --bind $PWD:/mnt \
   --bind $PWD/inst:/inst \
-  --bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input \
-  --bind /ddn/gs1/group/set/Projects/beethoven/targets:/opt/_targets \
+  --bind /ddn:/input \
+  --bind $PWD/_targets:/opt/_targets \
   --bind /run/munge:/run/munge \
-  --bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm \
+  --bind /usr/local/etc/slurm.conf:/usr/local/etc/slurm.conf \
+  --bind /etc/hosts:/etc/hosts \
   container_covariates.sif \
   /usr/local/lib/R/bin/Rscript --no-init-file /mnt/inst/targets/targets_start.R

@@ -19,4 +19,5 @@ cat("Active LD_LIBRARY_PATH:\n")
 Sys.getenv("LD_LIBRARY_PATH")
 
 ############################      RUN PIPELINE      ############################
-targets::tar_make(reporter = "verbose_positives")
+# targets::tar_make(reporter = "verbose_positives")
+targets::tar_make(list_pred_calc_hms)

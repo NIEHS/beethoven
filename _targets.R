@@ -59,20 +59,22 @@ controller_1 <- crew::crew_controller_local(
 ##### `controller_geo` uses 4 GPU workers (undefined memory allocation).
 scriptlines_apptainer <- "apptainer"
 scriptlines_basedir <- "$PWD"
-scriptlines_targetdir <- "/ddn/gs1/group/set/Projects/beethoven"
-scriptlines_inputdir <- "/ddn/gs1/group/set/Projects/NRT-AP-Model/input"
-scriptlines_container <- "container_models.sif"
+scriptlines_targetdir <- "/members/songlab/beethoven-dev/beethoven"
+scriptlines_inputdir <- "/ddn"
+# scriptlines_targetdir <- "/ddn/gs1/group/set/Projects/beethoven"
+# scriptlines_inputdir <- "/ddn/gs1/group/set/Projects/NRT-AP-Model/input"
+scriptlines_container <- "container_covariates.sif"
 scriptlines_geo <- glue::glue(
   "#SBATCH --job-name=submodel \
-  #SBATCH --partition=geo \
-  #SBATCH --gres=gpu:1 \
+  #SBATCH --partition=compute \
+  #SBATCH --gres=gpu:0 \
   #SBATCH --error=slurm/submodel_%j.out \
   {scriptlines_apptainer} exec --nv --env ",
   "CUDA_VISIBLE_DEVICES=${{GPU_DEVICE_ORDINAL}} ",
   "--bind {scriptlines_basedir}:/mnt ",
   "--bind {scriptlines_basedir}/inst:/inst ",
   "--bind {scriptlines_inputdir}:/input ",
-  "--bind {scriptlines_targetdir}/targets:/opt/_targets ",
+  "--bind {scriptlines_targetdir}/_targets:/opt/_targets ",
   "{scriptlines_container} \\"
 )
 controller_geo <- crew.cluster::crew_controller_slurm(
@@ -95,7 +97,7 @@ controller_sequential <- crew.cluster::crew_controller_slurm(
 
 scriptlines_backup <- glue::glue(
   "#SBATCH --job-name=g_back \
-  #SBATCH --partition=normal,highmem \
+  #SBATCH --partition=compute \
   #SBATCH --ntasks=1 \
   #SBATCH --cpus-per-task=1 \
   #SBATCH --mem=200G \
@@ -122,23 +124,23 @@ controller_backup <- crew.cluster::crew_controller_slurm(
 ##### `controller_grid` uses 100 CPUs for {grid covariates} models.
 scriptlines_grid <- glue::glue(
   "#SBATCH --job-name=grid \
-  #SBATCH --partition=normal,highmem \
+  #SBATCH --partition=compute \
   #SBATCH --ntasks=1 \
   #SBATCH --cpus-per-task=1 \
-  #SBATCH --mem=35G \
+  #SBATCH --mem=32G \
   #SBATCH --error=slurm/grid_%j.out \
   export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK \
   {scriptlines_apptainer} exec --env OMP_NUM_THREADS=$OMP_NUM_THREADS ",
   "--bind {scriptlines_basedir}:/mnt ",
   "--bind {scriptlines_basedir}/inst:/inst ",
   "--bind {scriptlines_inputdir}:/input ",
-  "--bind {scriptlines_targetdir}/targets:/opt/_targets ",
+  "--bind {scriptlines_targetdir}/_targets:/opt/_targets ",
   "{scriptlines_container} \\"
 )
 
 controller_grid <- crew.cluster::crew_controller_slurm(
   name = "controller_grid",
-  workers = 1000,
+  workers = 300,
   crashes_max = 5L,
   options_cluster = crew.cluster::crew_options_slurm(
     verbose = TRUE,
@@ -151,7 +153,7 @@ controller_grid <- crew.cluster::crew_controller_slurm(
 
 scriptlines_big_grid <- glue::glue(
   "#SBATCH --job-name=biggrid \
-  #SBATCH --partition=normal,highmem \
+  #SBATCH --partition=compute \
   #SBATCH --ntasks=1 \
   #SBATCH --cpus-per-task=2 \
   #SBATCH --mem=100G \
@@ -161,7 +163,7 @@ scriptlines_big_grid <- glue::glue(
   "--bind {scriptlines_basedir}:/mnt ",
   "--bind {scriptlines_basedir}/inst:/inst ",
   "--bind {scriptlines_inputdir}:/input ",
-  "--bind {scriptlines_targetdir}/targets:/opt/_targets ",
+  "--bind {scriptlines_targetdir}/_targets:/opt/_targets ",
   "{scriptlines_container} \\"
 )
 
@@ -267,7 +269,7 @@ targets::tar_option_set(
     controller_big_grid
   ),
   resources = targets::tar_resources(
-    crew = targets::tar_resources_crew(controller = "controller_25")
+    crew = targets::tar_resources_crew(controller = "controller_grid")
   ),
   retrieval = "worker"
 )
@@ -291,7 +293,7 @@ if (Sys.getenv("BEETHOVEN") == "covariates") {
       target_baselearner_lgb <-
         target_baselearner_mlp <-
           target_metalearner <-
-            target_calculate_predict <-
+            #target_calculate_predict <-
               target_predict <- list()
 } else if (Sys.getenv("BEETHOVEN") == "elnet") {
   target_baselearner_lgb <-
