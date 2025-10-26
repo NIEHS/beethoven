@@ -1,2 +1,3 @@
 main:
-  store: /opt/_targets
+  store: /members/songlab/GitHub/beethoven/_targets
+  # store: /opt/_targets

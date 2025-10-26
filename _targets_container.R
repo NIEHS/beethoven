@@ -8,7 +8,7 @@ bypass_condition <- function() {
   # Your logic here - return TRUE when you want to skip computation
   Sys.getenv("BEETHOVEN") == "covariates"
 }
-# .libPaths(c("/mnt/lib-flex", .libPaths()))
+.libPaths(c("/mnt/lib-flex", .libPaths()))
 
 #############################      CONTROLLER      #############################
 ##### `controller_250` uses full allocation of workers (~4.0 Gb per worker).
@@ -70,8 +70,6 @@ scriptlines_geo <- glue::glue(
   #SBATCH --gres=gpu:0 \
   #SBATCH --error=slurm/submodel_%j.out \
   {scriptlines_apptainer} exec --nv --env ",
-  "--writable-tmpfs ",
-  "--no-mount hostfs ",
   "CUDA_VISIBLE_DEVICES=${{GPU_DEVICE_ORDINAL}} ",
   "--bind {scriptlines_basedir}:/mnt ",
   "--bind {scriptlines_basedir}/inst:/inst ",
@@ -106,8 +104,6 @@ scriptlines_backup <- glue::glue(
   #SBATCH --error=slurm/grid_%j.out \
   export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK \
   {scriptlines_apptainer} exec --env OMP_NUM_THREADS=$OMP_NUM_THREADS ",
-  "--writable-tmpfs ",
-  "--no-mount hostfs ",
   "--bind {scriptlines_basedir}:/mnt ",
   "--bind {scriptlines_basedir}/inst:/inst ",
   "--bind {scriptlines_inputdir}:/input ",
@@ -135,8 +131,6 @@ scriptlines_grid <- glue::glue(
   #SBATCH --error=slurm/grid_%j.out \
   export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK \
   {scriptlines_apptainer} exec --env OMP_NUM_THREADS=$OMP_NUM_THREADS ",
-  "--writable-tmpfs ",
-  "--no-mount hostfs ",
   "--bind {scriptlines_basedir}:/mnt ",
   "--bind {scriptlines_basedir}/inst:/inst ",
   "--bind {scriptlines_inputdir}:/input ",
@@ -166,8 +160,6 @@ scriptlines_big_grid <- glue::glue(
   #SBATCH --error=slurm/bgrid_%j.out \
   export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK \
   {scriptlines_apptainer} exec --env OMP_NUM_THREADS=$OMP_NUM_THREADS ",
-  "--writable-tmpfs ",
-  "--no-mount hostfs ",
   "--bind {scriptlines_basedir}:/mnt ",
   "--bind {scriptlines_basedir}/inst:/inst ",
   "--bind {scriptlines_inputdir}:/input ",
@@ -195,7 +187,7 @@ controller_big_grid <- crew.cluster::crew_controller_slurm(
 # }
 
 ##############################        STORE       ##############################
-# targets::tar_config_set(store = "/opt/_targets")
+targets::tar_config_set(store = "/opt/_targets")
 
 ##############################       OPTIONS      ##############################
 # Sys.setenv("BEETHOVEN" = "covariates")
@@ -252,7 +244,7 @@ if (Sys.getenv("BEETHOVEN") == "covariates") {
 targets::tar_option_set(
   packages = beethoven_packages,
   repository = "local",
-  # library = .libPaths(),
+  library = .libPaths(c("/mnt/lib-flex", .libPaths())),
   error = "continue",
   memory = "auto",
   format = "qs",

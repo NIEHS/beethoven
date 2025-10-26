@@ -726,7 +726,6 @@ target_calculate_predict <-
       description = "Calculate MODIS - VIIRS features | prediction grid | H3"
     ),
     ###########################        KOPPEN        ###########################
-    # should be revised
     targets::tar_target(
       list_pred_calc_koppen,
       command = {
@@ -751,7 +750,7 @@ target_calculate_predict <-
       iteration = "list",
       pattern = map(list_h3_res8_index),
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_30"),
+        crew = targets::tar_resources_crew(controller = "controller_50"),
         parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
       format = "parquet",
