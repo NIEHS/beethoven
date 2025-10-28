@@ -20,4 +20,4 @@ Sys.getenv("LD_LIBRARY_PATH")
 
 ############################      RUN PIPELINE      ############################
 # targets::tar_make(reporter = "verbose_positives")
-targets::tar_make(list_pred_calc_hms)
+targets::tar_make(list_chr_h3_res5_in)

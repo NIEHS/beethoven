@@ -25,7 +25,7 @@ apptainer exec \
   --bind /ddn:/input \
   --bind $PWD/_targets:/opt/_targets \
   --bind /tmp:/tmp \
-  container/container_covariates.sif \
+  container_covariates.sif \
   Rscript --no-init-file -e "targets::tar_make('$DEBUG_TARGET')"
 
 

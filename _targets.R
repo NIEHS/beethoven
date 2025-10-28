@@ -244,7 +244,7 @@ if (Sys.getenv("BEETHOVEN") == "covariates") {
 targets::tar_option_set(
   packages = beethoven_packages,
   repository = "local",
-  library = .libPaths(c("/mnt/lib-flex", .libPaths())),
+  library = .libPaths(),
   error = "continue",
   memory = "auto",
   format = "qs",
@@ -269,7 +269,7 @@ targets::tar_option_set(
     controller_big_grid
   ),
   resources = targets::tar_resources(
-    crew = targets::tar_resources_crew(controller = "controller_grid")
+    crew = targets::tar_resources_crew(controller = "controller_30")
   ),
   retrieval = "worker"
 )
@@ -284,7 +284,8 @@ targets::tar_source("inst/targets/targets_baselearner.R")
 targets::tar_source("inst/targets/targets_metalearner.R")
 targets::tar_source("inst/targets/targets_calculate_predict.R")
 # targets::tar_source("inst/targets/targets_predict.R")
-targets::tar_source() #All of the R/
+targets::tar_source("inst/targets/targets_test_controller.R")
+# targets::tar_source() #All of the R/
 
 ###########################           STAGES          ##########################
 if (Sys.getenv("BEETHOVEN") == "covariates") {
@@ -327,6 +328,7 @@ list(
   target_baselearner_mlp,
   target_baselearner_lgb,
   # target_metalearner
+  # print_controllers,
   target_calculate_predict
   # target_predict
 )

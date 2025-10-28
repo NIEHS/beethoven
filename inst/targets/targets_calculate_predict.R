@@ -20,6 +20,31 @@ target_calculate_predict <-
       description = "H3 | grid | prediction"
     ),
     targets::tar_target(
+      chr_hex_res5_index,
+      command = polyfill(sf_us_contig, res = 5),
+      description = "H3 | grid | prediction | res5 (test)"
+    ),
+    targets::tar_target(
+      chr_hex_res5_3_parent_index,
+      command = map_chr(chr_hex_res5_index, h3_to_parent, res = 3),
+      description = "H3 | grid | prediction | res3 parents of res5"
+    ),
+    targets::tar_target(
+      list_int_seq_simple,
+      command = seq(1, 1e3, 1),
+      description = "test integer sequence up to 1000"
+    ),
+    targets::tar_target(
+      list_chr_h3_res5_in,
+      command = {
+        set.seed(list_int_seq_simple)
+        sample(chr_hex_res5_index, 20)
+      },
+      pattern = map(list_int_seq_simple),
+      iteration = "vector",
+      description = "does map-branching fail with name errors?"
+    ),
+    targets::tar_target(
       chr_hex_res3_index,
       command = map_chr(chr_hex_res8_index, h3_to_parent, res = 3),
       description = "H3 | grid | prediction"
@@ -68,7 +93,7 @@ target_calculate_predict <-
       description = "Calculate HMS features | prediction",
       format = "parquet",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_grid"),
+        # crew = targets::tar_resources_crew(controller = "controller_30"),
         parquet = targets::tar_resources_parquet(compression = "lz4")
       )
     ),
