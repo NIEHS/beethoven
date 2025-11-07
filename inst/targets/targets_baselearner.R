@@ -49,7 +49,7 @@ target_baselearner <-
       pattern = map(num_cv_index),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_10")
+        crew = targets::tar_resources_crew(controller = "controller_big")
       )
     ) # ,
     # targets::tar_target(
@@ -63,7 +63,7 @@ target_baselearner <-
     #   },
     #   description = "random vfold training sets | base learner",
     #   resources = targets::tar_resources(
-    #     crew = targets::tar_resources_crew(controller = "controller_10")
+    #     crew = targets::tar_resources_crew(controller = "controller_big")
     #   )
     # )
   )
@@ -99,7 +99,7 @@ target_baselearner_elnet <-
       pattern = map(list_rset_st_vfolds),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_10")
+        crew = targets::tar_resources_crew(controller = "controller_big")
       ),
       description = "Fit base learner | brulee regression | cpu | base learner"
     ),
@@ -120,7 +120,7 @@ target_baselearner_elnet <-
       pattern = map(fit_learner_base_elnet, num_cv_index),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_100")
+        crew = targets::tar_resources_crew(controller = "controller_regular")
       ),
       description = "elnet predictions as list | base learner"
     ),
@@ -131,7 +131,7 @@ target_baselearner_elnet <-
         by = c(".row", "Arithmetic.Mean")
       ),
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_5")
+        crew = targets::tar_resources_crew(controller = "controller_super")
       ),
       description = "elnet predictions as data.table | base learner"
     )
@@ -175,7 +175,7 @@ target_baselearner_mlp <-
       pattern = map(list_rset_st_vfolds),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_mlp")
+        crew = targets::tar_resources_crew(controller = "controller_geo")
       ),
       description = "Fit base learners | mlp | gpu | base learner"
     ),
@@ -196,7 +196,7 @@ target_baselearner_mlp <-
       pattern = map(fit_learner_base_mlp, num_cv_index),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_100")
+        crew = targets::tar_resources_crew(controller = "controller_regular")
       ),
       description = "mlp predictions as list | base learner"
     ),
@@ -207,7 +207,7 @@ target_baselearner_mlp <-
         by = c(".row", "Arithmetic.Mean")
       ),
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_5")
+        crew = targets::tar_resources_crew(controller = "controller_super")
       ),
       description = "mlp predictions as data.table | base learner"
     ),
@@ -261,7 +261,7 @@ target_baselearner_mlp <-
       pattern = map(list_rset_st_vfolds),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_mlp")
+        crew = targets::tar_resources_crew(controller = "controller_geo")
       ),
       description = "Fit base learners | mlp 2 layer | gpu | base learner"
     ),
@@ -282,7 +282,7 @@ target_baselearner_mlp <-
       pattern = map(fit_learner_base_mlp2, num_cv_index),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_100")
+        crew = targets::tar_resources_crew(controller = "controller_regular")
       ),
       description = "mlp predictions as list | base learner"
     ),
@@ -293,7 +293,7 @@ target_baselearner_mlp <-
         by = c(".row", "Arithmetic.Mean")
       ),
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_5")
+        crew = targets::tar_resources_crew(controller = "controller_super")
       ),
       description = "mlp predictions as data.table | base learner"
     )
@@ -333,7 +333,7 @@ target_baselearner_lgb <-
       pattern = map(list_rset_st_vfolds),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_lgb")
+        crew = targets::tar_resources_crew(controller = "controller_gpu")
       ),
       description = "Fit base learner | lgb | cpu | base learner"
     ),
@@ -354,7 +354,7 @@ target_baselearner_lgb <-
       pattern = map(fit_learner_base_lgb, num_cv_index),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_100")
+        crew = targets::tar_resources_crew(controller = "controller_regular")
       ),
       description = "lgb predictions as list | base learner"
     ),
@@ -365,7 +365,7 @@ target_baselearner_lgb <-
         by = c(".row", "Arithmetic.Mean")
       ),
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_5")
+        crew = targets::tar_resources_crew(controller = "controller_super")
       ),
       description = "lgb predictions as data.table | base learner"
     )

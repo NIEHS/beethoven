@@ -68,7 +68,7 @@ target_calculate_predict <-
       description = "Calculate HMS features | prediction",
       format = "parquet",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_100"),
+        crew = targets::tar_resources_crew(controller = "controller_regular"),
         parquet = targets::tar_resources_parquet(compression = "lz4")
       )
     ),
@@ -119,7 +119,7 @@ target_calculate_predict <-
       format = "parquet",
       description = "Calculate NLCD features | prediction grid | H3",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_grid"),
+        crew = targets::tar_resources_crew(controller = "controller_regular"),
         parquet = targets::tar_resources_parquet(compression = "lz4")
       )
     ),
@@ -145,7 +145,7 @@ target_calculate_predict <-
       ),
       format = "parquet",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_100"),
+        crew = targets::tar_resources_crew(controller = "controller_regular"),
         parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
       description = "Calculate GMTED features | prediction | H3"
@@ -171,7 +171,7 @@ target_calculate_predict <-
       pattern = cross(list_h3_res8_index2, list_dates),
       format = "parquet",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_grid"),
+        crew = targets::tar_resources_crew(controller = "controller_regular"),
         parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
       iteration = "list",
@@ -193,7 +193,7 @@ target_calculate_predict <-
       pattern = cross(list_h3_res8_index2, list_dates),
       format = "parquet",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_grid"),
+        crew = targets::tar_resources_crew(controller = "controller_regular"),
         parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
       iteration = "list",
@@ -242,7 +242,7 @@ target_calculate_predict <-
       iteration = "list",
       format = "parquet",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_big_grid"),
+        crew = targets::tar_resources_crew(controller = "controller_big"),
         parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
       description = "Calculate NARR features | prediction | H3"
@@ -306,7 +306,7 @@ target_calculate_predict <-
       iteration = "list",
       format = "parquet",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_grid"),
+        crew = targets::tar_resources_crew(controller = "controller_regular"),
         parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
       description = "Calculate MODIS - MOD11 features | prediction"
@@ -370,7 +370,7 @@ target_calculate_predict <-
       iteration = "list",
       format = "parquet",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_grid"),
+        crew = targets::tar_resources_crew(controller = "controller_regular"),
         parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
       description = "Calculate MODIS - MOD06 features | prediction | H3"
@@ -432,7 +432,7 @@ target_calculate_predict <-
       pattern = cross(list_h3_res8_index2, list_dates),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_grid"),
+        crew = targets::tar_resources_crew(controller = "controller_regular"),
         parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
       format = "parquet",
@@ -445,7 +445,7 @@ target_calculate_predict <-
     #   pattern = cross(list_h3_res8_index2, list_dates),
     #   iteration = "list",
     #   resources = targets::tar_resources(
-    #     crew = targets::tar_resources_crew(controller = "controller_grid"),
+    #     crew = targets::tar_resources_crew(controller = "controller_regular"),
     #     parquet = targets::tar_resources_parquet(compression = "lz4")
     #   ),
     #   format = "parquet",
@@ -469,7 +469,7 @@ target_calculate_predict <-
       pattern = cross(list_h3_res8_index2, list_args_calc_mcd19_5km),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_grid"),
+        crew = targets::tar_resources_crew(controller = "controller_regular"),
         parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
       format = "parquet",
@@ -546,7 +546,7 @@ target_calculate_predict <-
       pattern = cross(list_h3_res8_index2, list_dates),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_grid"),
+        crew = targets::tar_resources_crew(controller = "controller_regular"),
         parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
       format = "parquet",
@@ -611,7 +611,7 @@ target_calculate_predict <-
       pattern = cross(list_h3_res8_index2, list_dates),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_grid"),
+        crew = targets::tar_resources_crew(controller = "controller_regular"),
         parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
       format = "parquet",
@@ -643,7 +643,7 @@ target_calculate_predict <-
       iteration = "list",
       pattern = map(list_h3_res8_index),
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_grid"),
+        crew = targets::tar_resources_crew(controller = "controller_regular"),
         parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
       format = "parquet",
@@ -687,7 +687,7 @@ target_calculate_predict <-
       pattern = map(list_h3_res8_index),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_grid"),
+        crew = targets::tar_resources_crew(controller = "controller_regular"),
         parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
       format = "parquet",
@@ -771,7 +771,7 @@ target_calculate_predict <-
       pattern = map(list_h3_res8_index2),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_grid"),
+        crew = targets::tar_resources_crew(controller = "controller_regular"),
         parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
       format = "parquet",
@@ -825,7 +825,7 @@ target_calculate_predict <-
       format = "parquet",
       description = "Calculate NEI features | prediction grid | H3",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_grid"),
+        crew = targets::tar_resources_crew(controller = "controller_regular"),
         parquet = targets::tar_resources_parquet(compression = "lz4")
       )
     ),
@@ -854,7 +854,7 @@ target_calculate_predict <-
       iteration = "list",
       pattern = map(list_h3_res8_index2),
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_grid"),
+        crew = targets::tar_resources_crew(controller = "controller_regular"),
         parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
       format = "parquet",
@@ -928,7 +928,7 @@ target_calculate_predict <-
       iteration = "list",
       pattern = map(list_h3_res8_index2),
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_grid"),
+        crew = targets::tar_resources_crew(controller = "controller_regular"),
         parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
       format = "parquet",

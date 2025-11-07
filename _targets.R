@@ -1,163 +1,174 @@
+library(targets)
+library(tidyverse)
+library(crew)
+library(crew.cluster)
+
 ################################################################################
 ##############################      BEETHOVEN      #############################
 ##### Main file controlling the settings, options, and sourcing of targets
 ##### for the beethoven analysis pipeline.
 
 #############################      CONTROLLER      #############################
-##### `controller_250` uses full allocation of workers (~4.0 Gb per worker).
-controller_250 <- crew::crew_controller_local(
-  name = "controller_250",
-  workers = 250
-)
-##### `controller_100` uses 100 workers (~10.0 Gb per worker).
-controller_100 <- crew::crew_controller_local(
-  name = "controller_100",
-  workers = 100
-)
-##### `controller_50` uses 50 workers (~20.0 Gb per worker).
-controller_50 <- crew::crew_controller_local(
-  name = "controller_50",
-  workers = 50
-)
-##### `controller_25` uses 25 workers (~40.0 Gb per worker).
-controller_25 <- crew::crew_controller_local(
-  name = "controller_25",
-  workers = 25
-)
-##### `controller_10` uses 10 workers (~90.0 Gb per worker).
-controller_10 <- crew::crew_controller_local(
-  name = "controller_10",
-  workers = 10
-)
-##### `controller_5` uses 5 workers (~180.0 Gb per worker).
-controller_5 <- crew::crew_controller_local(
-  name = "controller_5",
-  workers = 5
-)
-##### `controller_1` uses 1 worker for sequential {lightGBM} models.
-controller_1 <- crew::crew_controller_local(
-  name = "controller_1",
-  workers = 1
-)
-##### `controller_gpu` uses 4 GPU workers (undefined memory allocation).
+
+##### `controller_geo` uses 4 GPU workers (undefined memory allocation).
 scriptlines_apptainer <- "apptainer"
-scriptlines_basedir <- "$PWD"
-scriptlines_targetdir <- "/ddn/gs1/group/set/Projects/beethoven"
-scriptlines_inputdir <- "/ddn/gs1/group/set/Projects/NRT-AP-Model/input"
-scriptlines_container <- "container_models.sif"
-scriptlines_mlp <- glue::glue(
-  "#SBATCH --job-name=mlp \
+scriptlines_container_covariates <- "container_covariates.sif"
+
+scriptlines_geo <- glue::glue(
+  "#SBATCH --job-name=geo \
   #SBATCH --partition=geo \
   #SBATCH --gres=gpu:1 \
-  #SBATCH --error=slurm/mlp_%j.out \
-  {scriptlines_apptainer} exec --nv --env ",
+  #SBATCH --error=slurm/geo_%j.out \
+  #SBATCH --ntasks=1 \
+  srun \
+  apptainer exec --nv --env ",
+  "--containall ",
+  "--env R_LIBS='/opt/Rlibs' ",
+  "--env R_LIBS_USER='/opt/Rlibs' ",
+  "--env R_LIBS_SITE='/opt/Rlibs' ",
   "CUDA_VISIBLE_DEVICES=${{GPU_DEVICE_ORDINAL}} ",
-  "--bind {scriptlines_basedir}:/mnt ",
-  "--bind {scriptlines_basedir}/inst:/inst ",
-  "--bind {scriptlines_inputdir}:/input ",
-  "--bind {scriptlines_targetdir}/targets:/opt/_targets ",
-  "{scriptlines_container} \\"
+  "--bind /ddn/gs1/home/messierkp/projects/beethoven:/mnt ",
+  "--bind /ddn/gs1/home/messierkp/projects/beethoven/inst:/inst ",
+  "--bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input ",
+  "--bind /ddn/gs1/group/set/Projects/beethoven/targets:/opt/_targets ",
+  "--bind /run/munge:/run/munge ",
+  "--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm ",
+  "container_models.sif \\"
 )
-controller_mlp <- crew.cluster::crew_controller_slurm(
-  name = "controller_mlp",
+
+
+controller_geo <- crew.cluster::crew_controller_slurm(
+  name = "controller_geo",
   workers = 4,
   options_cluster = crew.cluster::crew_options_slurm(
     verbose = TRUE,
-    script_lines = scriptlines_mlp
-  )
+    script_lines = scriptlines_geo
+  ),
+  tasks_max = Inf
 )
 
 ##### `controller_lgb` uses 100 CPUs for {lightGBM} models.
-scriptlines_lgb <- glue::glue(
-  "#SBATCH --job-name=lgb \
+scriptlines_gpu <- glue::glue(
+  "#SBATCH --job-name=gpu \
   #SBATCH --partition=gpu \
   #SBATCH --nodelist=gn040809 \
   #SBATCH --ntasks=1 \
-  #SBATCH --cpus-per-task=25 \
-  #SBATCH --mem=500G \
-  #SBATCH --error=slurm/lgb_%j.out \
+  #SBATCH --mem=100G \
+  #SBATCH --error=slurm/gpu_%j.out \
   export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK \
   export LIGHTGBM_NUM_THREADS=$SLURM_CPUS_PER_TASK \
-  {scriptlines_apptainer} exec --env OMP_NUM_THREADS=$OMP_NUM_THREADS ",
+  srun \
+  apptainer exec --cleanenv --env OMP_NUM_THREADS=$OMP_NUM_THREADS ",
+  "--containall ",
+  "--env R_LIBS='/opt/Rlibs' ",
+  "--env R_LIBS_USER='/opt/Rlibs' ",
+  "--env R_LIBS_SITE='/opt/Rlibs' ",
   "--env LIGHTGBM_NUM_THREADS=$LIGHTGBM_NUM_THREADS ",
-  "--bind {scriptlines_basedir}:/mnt ",
-  "--bind {scriptlines_basedir}/inst:/inst ",
-  "--bind {scriptlines_inputdir}:/input ",
-  "--bind {scriptlines_targetdir}/targets:/opt/_targets ",
-  "{scriptlines_container} \\"
+  "--bind /ddn/gs1/home/messierkp/projects/beethoven:/mnt ",
+  "--bind /ddn/gs1/home/messierkp/projects/beethoven/inst:/inst ",
+  "--bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input ",
+  "--bind /ddn/gs1/group/set/Projects/beethoven/targets:/opt/_targets ",
+  "--bind /run/munge:/run/munge ",
+  "--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm ",
+  "container_models.sif \\"
 )
-controller_lgb <- crew.cluster::crew_controller_slurm(
-  name = "controller_lgb",
+controller_gpu <- crew.cluster::crew_controller_slurm(
+  name = "controller_gpu",
   workers = 25,
   options_cluster = crew.cluster::crew_options_slurm(
     verbose = TRUE,
-    script_lines = scriptlines_lgb
-  )
+    script_lines = scriptlines_gpu
+  ),
+  tasks_max = Inf
 )
 
 
-##### `controller_grid` uses 100 CPUs for {grid covariates} models.
+#####
 
-scriptlines_launch <- glue::glue(
-  "#SBATCH --job-name=grid \
-  module load R \
-  set -euo pipefail \
-  export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK \
-  {scriptlines_apptainer} exec --env OMP_NUM_THREADS=$OMP_NUM_THREADS ",
-  "--bind {scriptlines_basedir}:/mnt ",
-  "--bind {scriptlines_basedir}/inst:/inst ",
-  "--bind {scriptlines_inputdir}:/input ",
+scriptlines_common <- glue::glue(
+  "#SBATCH --partition=normal \
+  #SBATCH --job-name=common \
+  #SBATCH --ntasks=1 \
+  srun \
+  apptainer exec ",
+  "--containall ",
+  "--env R_LIBS='/opt/Rlibs' ",
+  "--env R_LIBS_USER='/opt/Rlibs' ",
+  "--env R_LIBS_SITE='/opt/Rlibs' ",
+  "--bind /ddn/gs1/home/messierkp/projects/beethoven:/mnt ",
+  "--bind /ddn/gs1/home/messierkp/projects/beethoven/inst:/inst ",
+  "--bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input ",
+  "--bind /ddn/gs1/group/set/Projects/beethoven/targets:/opt/_targets ",
   "--bind /run/munge:/run/munge ",
   "--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm ",
-  "--bind {scriptlines_targetdir}/targets:/opt/_targets ",
-  "{scriptlines_container} \\"
+  "container_models.sif \\"
 )
+
+
+#### mem for different tasks:
+# regular grid covariates: 35 GB
+# big grid covariates: 50 GB
+# super big grid covariates: 100 GB
 
 options_regular = crew.cluster::crew_options_slurm(
   verbose = TRUE,
-  log_output = "slurm/grid_%j.out",
-  log_error = "slurm/grid_%j.err",
-  partition = "normal,highmem",
-  cpus_per_task = 1,
+  log_output = "slurm/regular_%j.out",
+  log_error = "slurm/regular_%j.err",
   memory_gigabytes_required = 35,
-  script_lines = scriptlines_launch
+  script_lines = scriptlines_common
 )
 
 options_big = crew.cluster::crew_options_slurm(
   verbose = TRUE,
-  log_output = "slurm/bgrid_%j.out",
-  log_error = "slurm/bgrid_%j.err",
-  partition = "normal,highmem",
-  cpus_per_task = 1,
+  log_output = "slurm/big_%j.out",
+  log_error = "slurm/big_%j.err",
   memory_gigabytes_required = 50,
-  script_lines = scriptlines_launch
+  script_lines = scriptlines_common
 )
 
-controller_grid <- crew.cluster::crew_controller_slurm(
-  name = "controller_grid",
-  workers = 500,
+options_super = crew.cluster::crew_options_slurm(
+  verbose = TRUE,
+  log_output = "slurm/super_%j.out",
+  log_error = "slurm/super_%j.err",
+  memory_gigabytes_required = 100,
+  script_lines = scriptlines_common
+)
+
+controller_regular <- crew.cluster::crew_controller_slurm(
+  name = "controller_regular",
+  workers = 200,
   crashes_max = 5L,
   options_metrics = crew::crew_options_metrics(
     path = "pipeline/",
     seconds_interval = 1
   ),
   options_cluster = options_regular,
-  tasks_max = 1L
+  tasks_max = Inf
 )
 
-
-controller_big_grid <- crew.cluster::crew_controller_slurm(
-  name = "controller_big_grid",
-  workers = 500,
+controller_big <- crew.cluster::crew_controller_slurm(
+  name = "controller_big",
+  workers = 100,
   crashes_max = 5L,
   options_metrics = crew::crew_options_metrics(
     path = "pipeline/",
     seconds_interval = 1
   ),
   options_cluster = options_big,
-  tasks_max = 1L
+  tasks_max = Inf
 )
 
+controller_super <- crew.cluster::crew_controller_slurm(
+  name = "controller_super",
+  workers = 50,
+  crashes_max = 5L,
+  options_metrics = crew::crew_options_metrics(
+    path = "pipeline/",
+    seconds_interval = 1
+  ),
+  options_cluster = options_super,
+  tasks_max = Inf
+)
 
 # if (targets::tar_active()) {
 #   autometric::log_start(
@@ -168,7 +179,9 @@ controller_big_grid <- crew.cluster::crew_controller_slurm(
 
 ##############################        STORE       ##############################
 targets::tar_config_set(store = "/opt/_targets")
-
+# targets::tar_config_set(
+#   store = "/ddn/gs1/group/set/Projects/beethoven/targets/"
+# )
 ##############################       OPTIONS      ##############################
 if (Sys.getenv("BEETHOVEN") == "covariates") {
   beethoven_packages <- c(
@@ -222,32 +235,27 @@ if (Sys.getenv("BEETHOVEN") == "covariates") {
 targets::tar_option_set(
   packages = beethoven_packages,
   repository = "local",
+  library = "/opt/Rlibs",
   error = "continue",
   memory = "auto",
   format = "qs",
   storage = "worker",
   deployment = "worker",
-  garbage_collection = TRUE,
+  garbage_collection = 10L,
   seed = 202401L,
   controller = crew::crew_controller_group(
-    controller_250,
-    controller_100,
-    controller_50,
-    controller_25,
-    controller_10,
-    controller_5,
-    controller_1,
-    controller_mlp,
-    controller_lgb,
-    controller_grid,
-    controller_big_grid
+    controller_geo,
+    controller_gpu,
+    controller_regular,
+    controller_big,
+    controller_super
   ),
   resources = targets::tar_resources(
-    crew = targets::tar_resources_crew(controller = "controller_250")
+    crew = targets::tar_resources_crew(controller = "controller_regular")
   ),
   retrieval = "worker"
 )
-sqltargets::sqltargets_option_set("sqltargets.template_engine", "jinjar")
+# sqltargets::sqltargets_option_set("sqltargets.template_engine", "jinjar")
 
 ###########################      SOURCE TARGETS      ###########################
 targets::tar_source("inst/targets/targets_critical.R")
@@ -270,7 +278,12 @@ if (Sys.getenv("BEETHOVEN") == "covariates") {
           target_metalearner <-
             target_predict <- list()
 } else if (Sys.getenv("BEETHOVEN") == "models") {
-  target_predict <- list()
+  target_baselearner <-
+    target_baselearner_elnet <-
+      target_baselearner_lgb <-
+        target_baselearner_mlp <-
+          target_metalearner <-
+            target_predict <- list()
 }
 
 

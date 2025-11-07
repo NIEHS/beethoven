@@ -24,6 +24,18 @@ From: rocker/geospatial:latest
     # Install git-lfs for debug
     apt-get update && apt-get install -y git-lfs && git lfs install
 
+    apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y slurm-client munge && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*        
+
+
+    # Set default library to /opt/Rlibs
+    echo 'R_LIBS_USER=/opt/Rlibs' >> /etc/environment
+    echo 'R_LIBS=/opt/Rlibs' >> /etc/environment
+    echo 'R_LIBS_SITE=/opt/Rlibs' >> /etc/environment
+
+
+
     # Set locale for the environment
     echo "LANG=en_US.UTF-8" >> /etc/default/locale
     echo "LC_ALL=en_US.UTF-8" >> /etc/default/locale
@@ -34,19 +46,29 @@ From: rocker/geospatial:latest
     mkdir /pipeline
     mkdir /input
     mkdir /opt/_targets
+    mkdir /opt/Rlibs
+    chmod -R 777 /opt/Rlibs
+
+    export R_LIBS_USER=/opt/Rlibs
+    export RENV_PATHS_LIBRARY=/opt/Rlibs        
 
     # Install R packages
+    Rscript -e ".libPaths('/opt/Rlibs'); install.packages(c('pak','devtools'), repos = 'https://cloud.r-project.org')"
     Rscript -e "install.packages(c('pak', 'devtools'))"
-    Rscript -e "devtools::install_version('targets', version = '1.10.0')"
-    Rscript -e "pak::pak('DBI'); pak::pak('duckdb')"
-    Rscript -e "install.packages(c('tarchetypes', 'testthat', 'tidymodels', \
-        'bonsai', 'qs2', 'kernlab', 'sqltargets'))"
-    Rscript -e "pak::pak('shikokuchuo/nanonext'); pak::pak('shikokuchuo/mirai')"
-    Rscript -e "pak::pak('wlandau/crew'); pak::pak('wlandau/crew.cluster')"
-    Rscript -e "pak::pak('NIEHS/amadeus')"
-    Rscript -e "install.packages(c('scoringRules', 'future.mirai', 'vetiver', \
-        'lwgeom', 'doRNG', 'quarto', 'kernlab'))"
-    Rscript -e "pak::pak('NIEHS/beethoven@mm-0701')"
+        Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('targets', upgrade = TRUE)"
+    Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('tarchetypes', upgrade = TRUE)"    
+    Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('crew', upgrade = TRUE)"    
+    Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('crew.cluster', upgrade = TRUE)"    
+    Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('mirai', upgrade = TRUE)"    
+    Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('nanonext', upgrade = TRUE)"   
+    
+    Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('DBI', upgrade = TRUE); pak::pak('duckdb', upgrade = TRUE)"
+    Rscript -e ".libPaths('/opt/Rlibs'); pak::pak(c('tarchetypes', 'testthat', 'tidymodels', \
+        'bonsai', 'qs2', 'kernlab', 'sqltargets'), upgrade = TRUE)"
+    Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('NIEHS/amadeus', upgrade = TRUE)"
+    Rscript -e ".libPaths('/opt/Rlibs'); pak::pak(c('scoringRules', 'future.mirai', 'vetiver', \
+        'lwgeom', 'doRNG', 'quarto', 'kernlab'), upgrade = TRUE)"
+    Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('NIEHS/beethoven@mm-0701')"
 
 %environment
     # Set locale for the container environment

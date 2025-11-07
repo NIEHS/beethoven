@@ -16,7 +16,7 @@ target_calculate_fit <-
       },
       pattern = cross(list_feat_proc_aqs_sites, list_dates),
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_100")
+        crew = targets::tar_resources_crew(controller = "controller_super")
       ),
       iteration = "list",
       description = "Calculate GEOS-CF features | aqc | fit"
@@ -34,7 +34,7 @@ target_calculate_fit <-
       },
       pattern = cross(list_feat_proc_aqs_sites, list_dates),
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_100")
+        crew = targets::tar_resources_crew(controller = "controller_super")
       ),
       iteration = "list",
       description = "Calculate GEOS-CF features | chm | fit"
@@ -189,8 +189,7 @@ target_calculate_fit <-
       },
       iteration = "list",
       description = "MODIS - MOD11 files"
-    )
-    ,
+    ),
     targets::tar_target(
       list_args_calc_mod11_files,
       command = {
@@ -203,8 +202,7 @@ target_calculate_fit <-
       },
       iteration = "list",
       description = "MODIS - MOD11 file paths by day"
-    )
-    ,
+    ),
     # modified
     targets::tar_target(
       chr_list_calc_mod11_files,
@@ -220,8 +218,7 @@ target_calculate_fit <-
       iteration = "list",
       pattern = map(list_args_calc_mod11_files),
       description = "preprocessed MODIS MOD11 files"
-    )
-    ,
+    ),
     targets::tar_target(
       list_feat_calc_mod11,
       command = {
@@ -237,11 +234,10 @@ target_calculate_fit <-
       pattern = cross(chr_list_calc_mod11_files, chr_iter_radii),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_100")
+        crew = targets::tar_resources_crew(controller = "controller_super")
       ),
       description = "Calculate MODIS - MOD11 features | fit"
-    )
-    ,
+    ),
     ###########################       MODIS - MOD06       ######################
     targets::tar_target(
       chr_args_calc_mod06_files,
@@ -258,8 +254,7 @@ target_calculate_fit <-
       },
       iteration = "list",
       description = "MODIS - MOD06 files"
-    )
-    ,
+    ),
     targets::tar_target(
       list_args_calc_mod06_files,
       command = {
@@ -272,8 +267,7 @@ target_calculate_fit <-
       },
       iteration = "list",
       description = "MODIS - MOD06 file paths by day"
-    )
-    ,
+    ),
     # modified
     targets::tar_target(
       chr_list_calc_mod06_files,
@@ -289,8 +283,7 @@ target_calculate_fit <-
       iteration = "list",
       pattern = map(list_args_calc_mod06_files),
       description = "preprocessed MODIS MOD06 files"
-    )
-    ,
+    ),
     targets::tar_target(
       list_feat_calc_mod06,
       command = {
@@ -306,11 +299,10 @@ target_calculate_fit <-
       pattern = cross(chr_list_calc_mod06_files, chr_iter_radii),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_100")
+        crew = targets::tar_resources_crew(controller = "controller_super")
       ),
       description = "Calculate MODIS - MOD06 features | fit"
-    )
-    ,
+    ),
     ###########################       MODIS - MOD13       ######################
     targets::tar_target(
       chr_args_calc_mod13_files,
@@ -326,8 +318,7 @@ target_calculate_fit <-
         )
       },
       description = "MODIS - MOD13 files"
-    )
-    ,
+    ),
     targets::tar_target(
       list_args_calc_mod13_files,
       command = {
@@ -340,8 +331,7 @@ target_calculate_fit <-
       },
       iteration = "list",
       description = "MODIS - MOD13 file paths by day"
-    )
-    ,
+    ),
     # modified
     targets::tar_target(
       chr_list_calc_mod13_files,
@@ -357,8 +347,7 @@ target_calculate_fit <-
       iteration = "list",
       pattern = map(list_args_calc_mod13_files),
       description = "preprocessed MODIS MOD13 files"
-    )
-    ,
+    ),
     targets::tar_target(
       list_feat_calc_mod13,
       command = {
@@ -374,11 +363,10 @@ target_calculate_fit <-
       pattern = cross(chr_list_calc_mod13_files, chr_iter_radii),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_100")
+        crew = targets::tar_resources_crew(controller = "controller_super")
       ),
       description = "Calculate MODIS - MOD13 features | fit"
-    )
-    ,
+    ),
     ###########################     MODIS - MCD19_1km     ######################
     targets::tar_target(
       chr_args_calc_mcd19_files,
@@ -395,8 +383,7 @@ target_calculate_fit <-
         )
       },
       description = "MODIS - MCD19_*km files"
-    )
-    ,
+    ),
     targets::tar_target(
       list_args_calc_mcd19_files,
       command = {
@@ -409,8 +396,7 @@ target_calculate_fit <-
       },
       iteration = "list",
       description = "MODIS - MCD19 file paths"
-    )
-    ,
+    ),
     targets::tar_target(
       chr_list_calc_mcd19_1km_files,
       command = {
@@ -425,8 +411,7 @@ target_calculate_fit <-
       iteration = "list",
       pattern = map(list_args_calc_mcd19_files),
       description = "preprocessed MODIS MCD19_1km files"
-    )
-    ,
+    ),
     targets::tar_target(
       list_feat_calc_mcd19_1km,
       command = {
@@ -442,11 +427,10 @@ target_calculate_fit <-
       pattern = cross(chr_list_calc_mcd19_1km_files, chr_iter_radii),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_100")
+        crew = targets::tar_resources_crew(controller = "controller_super")
       ),
       description = "Calculate MODIS - MCD19_1km features | fit"
-    )
-    ,
+    ),
     ###########################     MODIS - MCD19_5km     ######################
     targets::tar_target(
       list_args_calc_mcd19_5km,
@@ -460,8 +444,7 @@ target_calculate_fit <-
       },
       iteration = "list",
       description = "MODIS - MCD19_5km arguments"
-    )
-    ,
+    ),
     targets::tar_target(
       chr_list_calc_mcd19_5km_files,
       command = {
@@ -476,8 +459,7 @@ target_calculate_fit <-
       iteration = "list",
       pattern = map(list_args_calc_mcd19_5km),
       description = "preprocessed MODIS MCD19_5km files"
-    )
-    ,
+    ),
     targets::tar_target(
       list_feat_calc_mcd19_5km,
       command = {
@@ -487,21 +469,22 @@ target_calculate_fit <-
           site_id = arglist_common[["char_siteid"]],
           radius = chr_iter_radii,
           colheader = c(
-          "MOD_CSZAN_0_", "MOD_CVZAN_0_", "MOD_RAZAN_0_",
-          "MOD_SCTAN_0_", "MOD_GLNAN_0_"
+            "MOD_CSZAN_0_",
+            "MOD_CVZAN_0_",
+            "MOD_RAZAN_0_",
+            "MOD_SCTAN_0_",
+            "MOD_GLNAN_0_"
           ),
           mark = TRUE
         )
-
       },
       pattern = cross(chr_list_calc_mcd19_5km_files, chr_iter_radii),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_100")
+        crew = targets::tar_resources_crew(controller = "controller_super")
       ),
       description = "Calculate MODIS - MCD19_5km features | fit"
-    )
-    ,
+    ),
     ###########################       MODIS - MOD09       ######################
     targets::tar_target(
       chr_args_calc_mod09_files,
@@ -518,8 +501,7 @@ target_calculate_fit <-
         )
       },
       description = "MODIS - MOD09 files"
-    )
-    ,
+    ),
     targets::tar_target(
       list_args_calc_mod09,
       command = {
@@ -532,8 +514,7 @@ target_calculate_fit <-
       },
       iteration = "list",
       description = "MODIS - MOD09GA arguments"
-    )
-    ,
+    ),
     targets::tar_target(
       chr_list_calc_mod09_files,
       command = {
@@ -548,8 +529,7 @@ target_calculate_fit <-
       iteration = "list",
       pattern = map(list_args_calc_mod09),
       description = "preprocessed MODIS MOD09GA files"
-    )
-    ,
+    ),
     targets::tar_target(
       list_feat_calc_mod09,
       command = {
@@ -559,8 +539,13 @@ target_calculate_fit <-
           site_id = arglist_common[["char_siteid"]],
           radius = chr_iter_radii,
           colheader = c(
-          "MOD_SFCRF_1_", "MOD_SFCRF_2_", "MOD_SFCRF_3_", "MOD_SFCRF_4_",
-          "MOD_SFCRF_5_", "MOD_SFCRF_6_", "MOD_SFCRF_7_"
+            "MOD_SFCRF_1_",
+            "MOD_SFCRF_2_",
+            "MOD_SFCRF_3_",
+            "MOD_SFCRF_4_",
+            "MOD_SFCRF_5_",
+            "MOD_SFCRF_6_",
+            "MOD_SFCRF_7_"
           ),
           mark = TRUE
         )
@@ -568,11 +553,10 @@ target_calculate_fit <-
       pattern = cross(chr_list_calc_mod09_files, chr_iter_radii),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_100")
+        crew = targets::tar_resources_crew(controller = "controller_super")
       ),
       description = "Calculate MODIS - MOD09GA features | fit"
-    )
-    ,
+    ),
     ###########################       MODIS - VIIRS       ######################
     targets::tar_target(
       chr_args_calc_viirs_files,
@@ -588,8 +572,7 @@ target_calculate_fit <-
         )
       },
       description = "MODIS - VIIRS files"
-    )
-    ,
+    ),
     targets::tar_target(
       list_args_calc_viirs,
       command = {
@@ -602,8 +585,7 @@ target_calculate_fit <-
       },
       iteration = "list",
       description = "MODIS - VIIRS arguments"
-    )
-    ,
+    ),
     targets::tar_target(
       chr_list_calc_viirs_files,
       command = {
@@ -618,8 +600,7 @@ target_calculate_fit <-
       iteration = "list",
       pattern = map(list_args_calc_viirs),
       description = "preprocessed MODIS VIIRS files"
-    )
-    ,
+    ),
     targets::tar_target(
       list_feat_calc_viirs,
       command = {
@@ -635,11 +616,10 @@ target_calculate_fit <-
       pattern = cross(chr_list_calc_viirs_files, chr_iter_radii),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_100")
+        crew = targets::tar_resources_crew(controller = "controller_super")
       ),
       description = "Calculate MODIS - VIIRS features | fit"
-    )
-    ,
+    ),
     ###########################        MODIS/VIIRS        ######################
     targets::tar_target(
       dt_feat_calc_nasa,
@@ -648,35 +628,138 @@ target_calculate_fit <-
           list(
             # branching by radii requires another way to merge
             # here we group by radii index, which should be modified if radii are changed
-            collapse::rowbind(list_feat_calc_mod11[seq_len(length(list_feat_calc_mod11)) %% 3 == 1], fill = TRUE),
-            collapse::rowbind(list_feat_calc_mod11[seq_len(length(list_feat_calc_mod11)) %% 3 == 2], fill = TRUE),
-            collapse::rowbind(list_feat_calc_mod11[seq_len(length(list_feat_calc_mod11)) %% 3 == 0], fill = TRUE),
-            collapse::rowbind(list_feat_calc_mod06[seq_len(length(list_feat_calc_mod06)) %% 3 == 1], fill = TRUE),
-            collapse::rowbind(list_feat_calc_mod06[seq_len(length(list_feat_calc_mod06)) %% 3 == 2], fill = TRUE),
-            collapse::rowbind(list_feat_calc_mod06[seq_len(length(list_feat_calc_mod06)) %% 3 == 0], fill = TRUE),
-            collapse::rowbind(list_feat_calc_mod13[seq_len(length(list_feat_calc_mod13)) %% 3 == 1], fill = TRUE),
-            collapse::rowbind(list_feat_calc_mod13[seq_len(length(list_feat_calc_mod13)) %% 3 == 2], fill = TRUE),
-            collapse::rowbind(list_feat_calc_mod13[seq_len(length(list_feat_calc_mcd19_1km)) %% 3 == 0], fill = TRUE),
-            collapse::rowbind(list_feat_calc_mcd19_1km[seq_len(length(list_feat_calc_mcd19_1km)) %% 3 == 1], fill = TRUE),
-            collapse::rowbind(list_feat_calc_mcd19_1km[seq_len(length(list_feat_calc_mcd19_1km)) %% 3 == 2], fill = TRUE),
-            collapse::rowbind(list_feat_calc_mcd19_1km[seq_len(length(list_feat_calc_mcd19_1km)) %% 3 == 0], fill = TRUE),
-            collapse::rowbind(list_feat_calc_mcd19_5km[seq_len(length(list_feat_calc_mcd19_5km)) %% 3 == 1], fill = TRUE),
-            collapse::rowbind(list_feat_calc_mcd19_5km[seq_len(length(list_feat_calc_mcd19_5km)) %% 3 == 2], fill = TRUE),
-            collapse::rowbind(list_feat_calc_mcd19_5km[seq_len(length(list_feat_calc_mcd19_5km)) %% 3 == 0], fill = TRUE),
-            collapse::rowbind(list_feat_calc_mod09[seq_len(length(list_feat_calc_mod09)) %% 3 == 1], fill = TRUE),
-            collapse::rowbind(list_feat_calc_mod09[seq_len(length(list_feat_calc_mod09)) %% 3 == 2], fill = TRUE),
-            collapse::rowbind(list_feat_calc_mod09[seq_len(length(list_feat_calc_mod09)) %% 3 == 0], fill = TRUE),
-            collapse::rowbind(list_feat_calc_viirs[seq_len(length(list_feat_calc_viirs)) %% 3 == 1], fill = TRUE),
-            collapse::rowbind(list_feat_calc_viirs[seq_len(length(list_feat_calc_viirs)) %% 3 == 2], fill = TRUE),
-            collapse::rowbind(list_feat_calc_viirs[seq_len(length(list_feat_calc_viirs)) %% 3 == 0], fill = TRUE)
-          )
-          ,
+            collapse::rowbind(
+              list_feat_calc_mod11[
+                seq_len(length(list_feat_calc_mod11)) %% 3 == 1
+              ],
+              fill = TRUE
+            ),
+            collapse::rowbind(
+              list_feat_calc_mod11[
+                seq_len(length(list_feat_calc_mod11)) %% 3 == 2
+              ],
+              fill = TRUE
+            ),
+            collapse::rowbind(
+              list_feat_calc_mod11[
+                seq_len(length(list_feat_calc_mod11)) %% 3 == 0
+              ],
+              fill = TRUE
+            ),
+            collapse::rowbind(
+              list_feat_calc_mod06[
+                seq_len(length(list_feat_calc_mod06)) %% 3 == 1
+              ],
+              fill = TRUE
+            ),
+            collapse::rowbind(
+              list_feat_calc_mod06[
+                seq_len(length(list_feat_calc_mod06)) %% 3 == 2
+              ],
+              fill = TRUE
+            ),
+            collapse::rowbind(
+              list_feat_calc_mod06[
+                seq_len(length(list_feat_calc_mod06)) %% 3 == 0
+              ],
+              fill = TRUE
+            ),
+            collapse::rowbind(
+              list_feat_calc_mod13[
+                seq_len(length(list_feat_calc_mod13)) %% 3 == 1
+              ],
+              fill = TRUE
+            ),
+            collapse::rowbind(
+              list_feat_calc_mod13[
+                seq_len(length(list_feat_calc_mod13)) %% 3 == 2
+              ],
+              fill = TRUE
+            ),
+            collapse::rowbind(
+              list_feat_calc_mod13[
+                seq_len(length(list_feat_calc_mcd19_1km)) %% 3 == 0
+              ],
+              fill = TRUE
+            ),
+            collapse::rowbind(
+              list_feat_calc_mcd19_1km[
+                seq_len(length(list_feat_calc_mcd19_1km)) %% 3 == 1
+              ],
+              fill = TRUE
+            ),
+            collapse::rowbind(
+              list_feat_calc_mcd19_1km[
+                seq_len(length(list_feat_calc_mcd19_1km)) %% 3 == 2
+              ],
+              fill = TRUE
+            ),
+            collapse::rowbind(
+              list_feat_calc_mcd19_1km[
+                seq_len(length(list_feat_calc_mcd19_1km)) %% 3 == 0
+              ],
+              fill = TRUE
+            ),
+            collapse::rowbind(
+              list_feat_calc_mcd19_5km[
+                seq_len(length(list_feat_calc_mcd19_5km)) %% 3 == 1
+              ],
+              fill = TRUE
+            ),
+            collapse::rowbind(
+              list_feat_calc_mcd19_5km[
+                seq_len(length(list_feat_calc_mcd19_5km)) %% 3 == 2
+              ],
+              fill = TRUE
+            ),
+            collapse::rowbind(
+              list_feat_calc_mcd19_5km[
+                seq_len(length(list_feat_calc_mcd19_5km)) %% 3 == 0
+              ],
+              fill = TRUE
+            ),
+            collapse::rowbind(
+              list_feat_calc_mod09[
+                seq_len(length(list_feat_calc_mod09)) %% 3 == 1
+              ],
+              fill = TRUE
+            ),
+            collapse::rowbind(
+              list_feat_calc_mod09[
+                seq_len(length(list_feat_calc_mod09)) %% 3 == 2
+              ],
+              fill = TRUE
+            ),
+            collapse::rowbind(
+              list_feat_calc_mod09[
+                seq_len(length(list_feat_calc_mod09)) %% 3 == 0
+              ],
+              fill = TRUE
+            ),
+            collapse::rowbind(
+              list_feat_calc_viirs[
+                seq_len(length(list_feat_calc_viirs)) %% 3 == 1
+              ],
+              fill = TRUE
+            ),
+            collapse::rowbind(
+              list_feat_calc_viirs[
+                seq_len(length(list_feat_calc_viirs)) %% 3 == 2
+              ],
+              fill = TRUE
+            ),
+            collapse::rowbind(
+              list_feat_calc_viirs[
+                seq_len(length(list_feat_calc_viirs)) %% 3 == 0
+              ],
+              fill = TRUE
+            )
+          ),
           by = NULL
         )
       },
       description = "data.table of MODIS/VIIRS features | fit"
-    )
-    ,
+    ),
     ###########################         GMTED        ###########################
     targets::tar_target(
       chr_iter_calc_gmted_radii,

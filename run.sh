@@ -19,6 +19,8 @@
 
 #############################        GRID CALC        #############################
 # Fit CPU-enbaled meta learner models via container_models.sif.
+cat $PWD
+
 echo "Submitting {beethoven} prediction grid targets ..."
 sbatch --wait inst/scripts/run_models.sh
 

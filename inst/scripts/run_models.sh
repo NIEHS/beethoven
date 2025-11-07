@@ -1,14 +1,14 @@
 #!/bin/bash
 
-#SBATCH --job-name=model
+#SBATCH --job-name=model_dispatch
 #SBATCH --mail-user=kyle.messier@nih.gov
 #SBATCH --mail-type=END,FAIL
 #SBATCH --partition=normal
 #SBATCH --ntasks=1
 #SBATCH --mem=4G
 #SBATCH --cpus-per-task=1
-#SBATCH --error=slurm/model_%j.err
-#SBATCH --output=slurm/model_%j.out
+#SBATCH --error=slurm/model_dispatch_%j.err
+#SBATCH --output=slurm/model_dispatch_%j.out
 
 ############################      CERTIFICATES      ############################
 # Export CURL_CA_BUNDLE and SSL_CERT_FILE environmental variables to vertify
@@ -18,12 +18,36 @@ export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 
 ###############################      GPU SETUP     #############################
 # Ensure all allocated GPUs are visible
-# export CUDA_VISIBLE_DEVICES=$(echo $(seq 0 $((SLURM_GPUS_ON_NODE-1))) | tr ' ' ',')
+ export CUDA_VISIBLE_DEVICES=$(echo $(seq 0 $((SLURM_GPUS_ON_NODE-1))) | tr ' ' ',')
 
 #############################        MODELS        #############################
 # Set environmental variable to indicate CPU-enabled model fitting targets.
 export BEETHOVEN=models
 
+###############################      GPU SETUP     #############################
+# Ensure all allocated GPUs are visible
+export R_LIBS="/opt/Rlibs"
+export R_LIBS_USER="/opt/Rlibs"
+export R_LIBS_SITE="/opt/Rlibs"
+export LD_LIBRARY_PATH="/opt/Rlibs/lib"
+export R_HOME=/usr/lib/R
+export PATH=/usr/lib/R/bin:$PATH
+
+export PATH="/usr/local/cuda/bin:\
+/usr/local/nvidia/bin:\
+/usr/local/cuda/bin:\
+/usr/local/sbin:\
+/usr/local/bin:\
+/usr/sbin:\
+/usr/bin:\
+/sbin:\
+/bin"
+
+# ---- CUDA ----
+export CUDA_HOME="/usr/local/cuda"
+export LD_LIBRARY_PATH="/usr/local/cuda/lib64"
+
+cat $PWD
 # Fit CPU-enabled base learner models via container_models.sif.
 apptainer exec \
   --bind $PWD:/mnt \
