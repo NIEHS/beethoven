@@ -2,6 +2,83 @@
 ##### Calculate covariates at US EPA AQS sites
 target_calculate_fit <-
   list(
+    # tar_target(
+    #   worker_env_dump,
+    #   {
+    #     Sys.getenv() |> print()
+    #     "worker environment printed"
+    #   }
+    # ),
+    # tar_target(
+    #   print_my_fun_source,
+    #   {
+    #     # Print the function object
+    #     print(beethoven::export_tif)
+
+    #     # Also show raw source if available
+    #     tryCatch(
+    #       {
+    #         source_code <- deparse(beethoven::export_tif)
+    #         cat(paste(source_code, collapse = "\n"))
+    #       },
+    #       error = function(e) message("Couldn't deparse: ", e)
+    #     )
+
+    #     "printed my_fun source"
+    #   },
+    #   resources = targets::tar_resources(
+    #     crew = targets::tar_resources_crew(controller = "controller_regular")
+    #   )
+    # ),
+    # tar_target(
+    #   print_env_var_test,
+    #   {
+    #     val <- Sys.getenv("TEST_VAR", unset = "NOT_FOUND")
+
+    #     message("TEST_VAR: ", val)
+    #   },
+    #   resources = targets::tar_resources(
+    #     crew = targets::tar_resources_crew(controller = "controller_regular")
+    #   )
+    # ),
+    # tar_target(
+    #   debug_env,
+    #   command = {
+    #     cat("PWD:", getwd(), "\n")
+    #     cat("lib path:", .libPaths(), "\n")
+    #     # Check /input
+    #     cat("input exists:", dir.exists("/input"), "\n")
+    #     if (dir.exists("/input")) {
+    #       cat("Contents of /input:\n")
+    #       print(list.files("/input", full.names = T, recursive = TRUE))
+    #     }
+
+    #     # Check /mnt
+    #     cat("mnt exists:", dir.exists("/mnt"), "\n")
+    #     if (dir.exists("/mnt")) {
+    #       cat("Contents of /mnt:\n")
+    #       print(list.files("/mnt", full.names = T, recursive = TRUE))
+    #     }
+
+    #     cat("tempdir:", tempdir(), "\n")
+    #     list.files("/input")[1:10]
+    #   },
+    #   resources = targets::tar_resources(
+    #     crew = targets::tar_resources_crew(controller = "controller_regular")
+    #   )
+    # ),
+    # tar_target(
+    #   show_export_tif_code,
+    #   {
+    #     cat("=== beethoven::export_tif source ===\n")
+    #     cat("\n=== Function body ===\n")
+    #     print(body(beethoven::export_tif))
+
+    #     # Return TRUE so target has a concrete output
+    #     TRUE
+    #   }
+    # )
+
     ###########################         GEOS         ###########################
     targets::tar_target(
       list_feat_calc_geos_aqc,
@@ -180,12 +257,12 @@ target_calculate_fit <-
         download_mod11
         julian_date <- sprintf("A%s", unlist(list_dates_julian))
         julian_query <- sprintf("(%s)", paste(julian_date, collapse = "|"))
-        list.files(
+
+        fs::dir_ls(
           file.path(chr_input_dir, "modis", "raw", "61", "MOD11A1"),
-          pattern = julian_query,
-          full.names = TRUE,
-          recursive = TRUE
-        )
+          recurse = TRUE
+        ) |>
+          stringr::str_subset(julian_query)
       },
       iteration = "list",
       description = "MODIS - MOD11 files"
@@ -245,12 +322,11 @@ target_calculate_fit <-
         download_mod06
         julian_date <- sprintf("A%s", unlist(list_dates_julian))
         julian_query <- sprintf("(%s)", paste(julian_date, collapse = "|"))
-        list.files(
+        fs::dir_ls(
           file.path(chr_input_dir, "modis", "raw", "61", "MOD06_L2"),
-          pattern = julian_query,
-          full.names = TRUE,
-          recursive = TRUE
-        )
+          recurse = TRUE
+        ) |>
+          stringr::str_subset(julian_query)
       },
       iteration = "list",
       description = "MODIS - MOD06 files"
@@ -310,12 +386,11 @@ target_calculate_fit <-
         download_mod13
         julian_date <- sprintf("A%s", unlist(list_dates_julian))
         julian_query <- sprintf("(%s)", paste(julian_date, collapse = "|"))
-        list.files(
+        fs::dir_ls(
           file.path(chr_input_dir, "modis", "raw", "61", "MOD13A2"),
-          pattern = julian_query,
-          full.names = TRUE,
-          recursive = TRUE
-        )
+          recurse = TRUE
+        ) |>
+          stringr::str_subset(julian_query)
       },
       description = "MODIS - MOD13 files"
     ),
@@ -375,12 +450,11 @@ target_calculate_fit <-
         julian_date <- sprintf("A%s", unlist(list_dates_julian))
         julian_query <- sprintf("(%s)", paste(julian_date, collapse = "|"))
 
-        list.files(
+        fs::dir_ls(
           file.path(chr_input_dir, "modis", "raw", "61", "MCD19A2"),
-          pattern = julian_query,
-          full.names = TRUE,
-          recursive = TRUE
-        )
+          recurse = TRUE
+        ) |>
+          stringr::str_subset(julian_query)
       },
       description = "MODIS - MCD19_*km files"
     ),
@@ -493,12 +567,11 @@ target_calculate_fit <-
         julian_date <- sprintf("A%s", unlist(list_dates_julian))
         julian_query <- sprintf("(%s)", paste(julian_date, collapse = "|"))
 
-        list.files(
+        fs::dir_ls(
           file.path(chr_input_dir, "modis", "raw", "61", "MOD09GA"),
-          pattern = julian_query,
-          full.names = TRUE,
-          recursive = TRUE
-        )
+          recurse = TRUE
+        ) |>
+          stringr::str_subset(julian_query)
       },
       description = "MODIS - MOD09 files"
     ),
@@ -564,12 +637,11 @@ target_calculate_fit <-
         download_viirs
         julian_date <- sprintf("A%s", unlist(list_dates_julian))
         julian_query <- sprintf("(%s)", paste(julian_date, collapse = "|"))
-        list.files(
+        fs::dir_ls(
           file.path(chr_input_dir, "modis", "raw", "5000", "VNP46A2"),
-          pattern = julian_query,
-          full.names = TRUE,
-          recursive = TRUE
-        )
+          recurse = TRUE
+        ) |>
+          stringr::str_subset(julian_query)
       },
       description = "MODIS - VIIRS files"
     ),

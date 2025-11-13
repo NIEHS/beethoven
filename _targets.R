@@ -3,10 +3,6 @@ library(tidyverse)
 library(crew)
 library(crew.cluster)
 
-################################################################################
-##############################      BEETHOVEN      #############################
-##### Main file controlling the settings, options, and sourcing of targets
-##### for the beethoven analysis pipeline.
 
 #############################      CONTROLLER      #############################
 
@@ -20,15 +16,10 @@ scriptlines_geo <- glue::glue(
   #SBATCH --gres=gpu:1 \
   #SBATCH --error=slurm/geo_%j.out \
   #SBATCH --ntasks=1 \
-  srun \
-  apptainer exec --nv --env ",
-  "--containall ",
-  "--env R_LIBS='/opt/Rlibs' ",
-  "--env R_LIBS_USER='/opt/Rlibs' ",
-  "--env R_LIBS_SITE='/opt/Rlibs' ",
-  "CUDA_VISIBLE_DEVICES=${{GPU_DEVICE_ORDINAL}} ",
-  "--bind /ddn/gs1/home/messierkp/projects/beethoven:/mnt ",
-  "--bind /ddn/gs1/home/messierkp/projects/beethoven/inst:/inst ",
+  apptainer exec --nv ",
+  "--env-file beethoven_env.txt ",
+  "--bind $PWD:/mnt ",
+  "--bind $PWD/inst:/inst ",
   "--bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input ",
   "--bind /ddn/gs1/group/set/Projects/beethoven/targets:/opt/_targets ",
   "--bind /run/munge:/run/munge ",
@@ -55,17 +46,10 @@ scriptlines_gpu <- glue::glue(
   #SBATCH --ntasks=1 \
   #SBATCH --mem=100G \
   #SBATCH --error=slurm/gpu_%j.out \
-  export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK \
-  export LIGHTGBM_NUM_THREADS=$SLURM_CPUS_PER_TASK \
-  srun \
-  apptainer exec --cleanenv --env OMP_NUM_THREADS=$OMP_NUM_THREADS ",
-  "--containall ",
-  "--env R_LIBS='/opt/Rlibs' ",
-  "--env R_LIBS_USER='/opt/Rlibs' ",
-  "--env R_LIBS_SITE='/opt/Rlibs' ",
-  "--env LIGHTGBM_NUM_THREADS=$LIGHTGBM_NUM_THREADS ",
-  "--bind /ddn/gs1/home/messierkp/projects/beethoven:/mnt ",
-  "--bind /ddn/gs1/home/messierkp/projects/beethoven/inst:/inst ",
+  apptainer exec ",
+  "--env-file beethoven_env.txt ",
+  "--bind $PWD:/mnt ",
+  "--bind $PWD/inst:/inst ",
   "--bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input ",
   "--bind /ddn/gs1/group/set/Projects/beethoven/targets:/opt/_targets ",
   "--bind /run/munge:/run/munge ",
@@ -89,14 +73,10 @@ scriptlines_common <- glue::glue(
   "#SBATCH --partition=normal \
   #SBATCH --job-name=common \
   #SBATCH --ntasks=1 \
-  srun \
   apptainer exec ",
-  "--containall ",
-  "--env R_LIBS='/opt/Rlibs' ",
-  "--env R_LIBS_USER='/opt/Rlibs' ",
-  "--env R_LIBS_SITE='/opt/Rlibs' ",
-  "--bind /ddn/gs1/home/messierkp/projects/beethoven:/mnt ",
-  "--bind /ddn/gs1/home/messierkp/projects/beethoven/inst:/inst ",
+  "--env-file beethoven_env.txt ",
+  "--bind $PWD:/mnt ",
+  "--bind $PWD/inst:/inst ",
   "--bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input ",
   "--bind /ddn/gs1/group/set/Projects/beethoven/targets:/opt/_targets ",
   "--bind /run/munge:/run/munge ",
@@ -268,7 +248,6 @@ targets::tar_source("inst/targets/targets_metalearner.R")
 targets::tar_source("inst/targets/targets_calculate_predict.R")
 # targets::tar_source("inst/targets/targets_predict.R")
 targets::tar_source() #All of the R/
-
 ###########################           STAGES          ##########################
 if (Sys.getenv("BEETHOVEN") == "covariates") {
   target_baselearner <-

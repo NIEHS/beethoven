@@ -134,7 +134,7 @@ From: nvidia/cuda:11.8.0-devel-ubuntu22.04
     Rscript -e ".libPaths('/opt/Rlibs'); remotes::install_github('crazycapivara/h3-r')"
     Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('ropensci/chopin', upgrade = TRUE)"
     Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('NIEHS/amadeus', upgrade = TRUE)"
-    Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('NIEHS/beethoven', upgrade = TRUE)"
+    Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('NIEHS/beethoven@h3_pred', upgrade = TRUE)"
     Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('r-lib/ps', upgrade = TRUE)"    
     Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('tidymodels', upgrade = TRUE)"    
 
@@ -153,7 +153,6 @@ From: nvidia/cuda:11.8.0-devel-ubuntu22.04
     export SHELL LANG 
 
     # Optionally preconfigure R
-    export R_HOME=/usr/lib/R
     export R_LIBS_USER=/opt/Rlibs        
 
 %runscript

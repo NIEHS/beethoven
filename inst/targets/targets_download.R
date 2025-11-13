@@ -8,7 +8,7 @@ target_download <-
         remove_command = TRUE,
         acknowledgement = TRUE,
         download = TRUE,
-        hash = FALSE
+        hash = TRUE
       ),
       description = "Common download arguments | download"
     ),
@@ -26,7 +26,6 @@ target_download <-
           download = list_download_args$download,
           hash = list_download_args$hash
         )
-        TRUE
       },
       pattern = map(chr_years),
       description = "Download AQS data | download"
@@ -183,7 +182,6 @@ target_download <-
           download = list_download_args$download,
           hash = list_download_args$hash
         )
-        TRUE
       },
       pattern = map(list_dates),
       description = "Download MODIS - MOD11 data | download"
@@ -209,7 +207,6 @@ target_download <-
           download = list_download_args$download,
           hash = list_download_args$hash
         )
-        TRUE
       },
       pattern = map(list_dates),
       description = "Download MODIS - MOD06 data | download"
@@ -234,7 +231,6 @@ target_download <-
           download = list_download_args$download,
           hash = list_download_args$hash
         )
-        TRUE
       },
       pattern = map(list_dates),
       description = "Download MODIS - MOD13 data | download"
@@ -259,7 +255,6 @@ target_download <-
           download = list_download_args$download,
           hash = list_download_args$hash
         )
-        TRUE
       },
       pattern = map(list_dates),
       description = "Download MODIS - MCD19 data | download"
@@ -284,7 +279,6 @@ target_download <-
           download = list_download_args$download,
           hash = list_download_args$hash
         )
-        TRUE
       },
       pattern = map(list_dates),
       description = "Download MODIS - MOD09 data | download"
@@ -310,7 +304,6 @@ target_download <-
           download = list_download_args$download,
           hash = list_download_args$hash
         )
-        TRUE
       },
       pattern = map(list_dates),
       description = "Download MODIS - VIIRS data | download"
@@ -343,7 +336,6 @@ target_download <-
           download = list_download_args$download,
           hash = list_download_args$hash
         )
-        TRUE
       },
       pattern = map(chr_iter_calc_gmted_vars),
       description = "Download GMTED data | download"
@@ -351,7 +343,7 @@ target_download <-
     ###########################         NLCD         ###########################
     targets::tar_target(
       chr_iter_calc_nlcd,
-      command = c(2019, 2021),
+      command = c(2018, 2019, 2020, 2021, 2022),
       description = "NLCD years | download"
     ),
     targets::tar_target(
@@ -367,7 +359,6 @@ target_download <-
           download = list_download_args$download,
           hash = list_download_args$hash
         )
-        TRUE
       },
       pattern = map(chr_iter_calc_nlcd),
       description = "Download NLCD data | download"
@@ -387,7 +378,6 @@ target_download <-
           download = list_download_args$download,
           hash = list_download_args$hash
         )
-        TRUE
       },
       description = "Download Koppen-Geiger data | download"
     ),
@@ -407,7 +397,6 @@ target_download <-
           download = list_download_args$download,
           hash = list_download_args$hash
         )
-        TRUE
       },
       description = "Download population data | download"
     ),
@@ -443,7 +432,6 @@ target_download <-
           download = list_download_args$download,
           hash = list_download_args$hash
         )
-        TRUE
       },
       pattern = map(chr_iter_calc_nei),
       description = "Download NEI data | download"
@@ -461,7 +449,6 @@ target_download <-
           download = list_download_args$download,
           hash = list_download_args$hash
         )
-        TRUE
       },
       description = "Download ecoregions data | download"
     ),
@@ -480,7 +467,6 @@ target_download <-
           download = list_download_args$download,
           hash = list_download_args$hash
         )
-        TRUE
       },
       description = "Download gRoads data | download"
     )
