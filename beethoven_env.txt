@@ -9,7 +9,7 @@ APPTAINERENV_R_LIBS_SITE=/opt/Rlibs
 APPTAINERENV_R_HOME=/usr/local/lib/R
 
 # Prepend R to PATH (do not override)
-APPTAINERENV_PATH="/usr/local/lib/R/bin:$PATH"
+APPTAINERENV_PATH=/usr/local/lib/R/bin:$PATH
 
 ############################################
 # R TEMP & UTF SETTINGS
@@ -24,22 +24,16 @@ APPTAINERENV_CUDA_HOME=/usr/local/cuda
 APPTAINERENV_CUDA_VERSION=11.8.0
 
 # Prepend CUDA to PATH
-APPTAINERENV_PATH="/usr/local/cuda/bin:/usr/local/nvidia/bin:$APPTAINERENV_PATH"
+APPTAINERENV_PATH=/usr/local/cuda/bin:/usr/local/nvidia/bin:$APPTAINERENV_PATH
 
 # Prepend shared libs (critical: PREPEND, don’t overwrite)
-APPTAINERENV_LD_LIBRARY_PATH="/opt/Rlibs/lib:/usr/local/cuda/lib64:$LD_LIBRARY_PATH"
+APPTAINERENV_LD_LIBRARY_PATH=/opt/Rlibs/lib:/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 
 ############################################
 # OTHER TOOLS
 ############################################
 APPTAINERENV_EDITOR=vi
 APPTAINERENV_PAGER=/usr/bin/less
-
-############################################
-# DISABLE SHELL PROMPT OVERRIDE
-# (prevents Apptainer from rewriting your prompt)
-############################################
-APPTAINERENV_PROMPT_COMMAND=
 
 
 ############################      CERTIFICATES      ############################

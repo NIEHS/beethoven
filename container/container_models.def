@@ -105,7 +105,7 @@ From: nvidia/cuda:11.8.0-devel-ubuntu22.04
     chmod -R 777 /opt/Rlibs
 
     
-   export R_LIBS_USER=/opt/Rlibs
+    export R_LIBS_USER=/opt/Rlibs
     export RENV_PATHS_LIBRARY=/opt/Rlibs
 
     # Pre-install some bootstrap packages so renv can resolve dependencies faster

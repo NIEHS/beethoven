@@ -68,7 +68,7 @@ From: rocker/geospatial:latest
     Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('NIEHS/amadeus', upgrade = TRUE)"
     Rscript -e ".libPaths('/opt/Rlibs'); pak::pak(c('scoringRules', 'future.mirai', 'vetiver', \
         'lwgeom', 'doRNG', 'quarto', 'kernlab'), upgrade = TRUE)"
-    Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('NIEHS/beethoven@mm-0701')"
+    Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('NIEHS/beethoven@h3_pred', upgrade = TRUE)"
 
 %environment
     # Set locale for the container environment

@@ -1,33 +1,48 @@
+##### Libraries for the _targets.R file #####
 library(targets)
 library(tidyverse)
 library(crew)
 library(crew.cluster)
 
+################ Read in ENV and VARS from the beethoven_env.txt file ######
+readRenviron("beethoven_binds.txt")
+chr_raw_files_dir <- Sys.getenv("INPUT_DIR")
+chr_root_dir <- Sys.getenv("ROOT_DIR")
+chr_inst_dir <- Sys.getenv("INST_DIR")
+chr_slurm_munge <- Sys.getenv("SLURM_MUNGE")
+chr_slurm_etc <- Sys.getenv("SLURM_ETC")
+chr_store_dir <- Sys.getenv("STORE_DIR")
 
+
+print(chr_raw_files_dir)
+print(chr_root_dir)
+print(chr_inst_dir)
+print(chr_slurm_munge)
+print(chr_slurm_etc)
 #############################      CONTROLLER      #############################
 
 ##### `controller_geo` uses 4 GPU workers (undefined memory allocation).
-scriptlines_apptainer <- "apptainer"
 scriptlines_container_covariates <- "container_covariates.sif"
 
+
 scriptlines_geo <- glue::glue(
-  "#SBATCH --job-name=geo \
-  #SBATCH --partition=geo \
-  #SBATCH --gres=gpu:1 \
-  #SBATCH --error=slurm/geo_%j.out \
-  #SBATCH --ntasks=1 \
-  apptainer exec --nv ",
-  "--env-file beethoven_env.txt ",
-  "--bind $PWD:/mnt ",
-  "--bind $PWD/inst:/inst ",
-  "--bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input ",
-  "--bind /ddn/gs1/group/set/Projects/beethoven/targets:/opt/_targets ",
-  "--bind /run/munge:/run/munge ",
-  "--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm ",
-  "container_models.sif \\"
+  "#SBATCH --job-name=geo
+#SBATCH --partition=geo
+#SBATCH --gres=gpu:1
+#SBATCH --error=slurm/geo_%j.out
+#SBATCH --ntasks=1
+apptainer exec --nv \
+  --env-file beethoven_env.txt \
+  --bind {chr_root_dir}:/mnt \
+  --bind {chr_inst_dir}:/inst \
+  --bind {chr_raw_files_dir}:/input \
+  --bind {chr_store_dir}:/opt/_targets \
+  --bind {chr_slurm_munge}:/etc/munge \
+  --bind {chr_slurm_etc}:{chr_slurm_etc}\
+  container_models.sif \\"
 )
 
-
+print(scriptlines_geo)
 controller_geo <- crew.cluster::crew_controller_slurm(
   name = "controller_geo",
   workers = 4,
@@ -40,22 +55,25 @@ controller_geo <- crew.cluster::crew_controller_slurm(
 
 ##### `controller_lgb` uses 100 CPUs for {lightGBM} models.
 scriptlines_gpu <- glue::glue(
-  "#SBATCH --job-name=gpu \
-  #SBATCH --partition=gpu \
-  #SBATCH --nodelist=gn040809 \
-  #SBATCH --ntasks=1 \
-  #SBATCH --mem=100G \
-  #SBATCH --error=slurm/gpu_%j.out \
-  apptainer exec ",
-  "--env-file beethoven_env.txt ",
-  "--bind $PWD:/mnt ",
-  "--bind $PWD/inst:/inst ",
-  "--bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input ",
-  "--bind /ddn/gs1/group/set/Projects/beethoven/targets:/opt/_targets ",
-  "--bind /run/munge:/run/munge ",
-  "--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm ",
-  "container_models.sif \\"
+  "
+#SBATCH --job-name=gpu
+#SBATCH --partition=gpu
+#SBATCH --nodelist=gn040809
+#SBATCH --ntasks=1
+#SBATCH --mem=100G
+#SBATCH --error=slurm/gpu_%j.out
+
+apptainer exec \
+  --env-file beethoven_env.txt \
+  --bind {chr_root_dir}:/mnt \
+  --bind {chr_inst_dir}:/inst \
+  --bind {chr_raw_files_dir}:/input \
+  --bind {chr_store_dir}:/opt/_targets \
+  --bind {chr_slurm_munge}:/etc/munge \
+  --bind {chr_slurm_etc}:{chr_slurm_etc} \
+  container_models.sif \\"
 )
+
 controller_gpu <- crew.cluster::crew_controller_slurm(
   name = "controller_gpu",
   workers = 25,
@@ -70,18 +88,19 @@ controller_gpu <- crew.cluster::crew_controller_slurm(
 #####
 
 scriptlines_common <- glue::glue(
-  "#SBATCH --partition=normal \
-  #SBATCH --job-name=common \
-  #SBATCH --ntasks=1 \
-  apptainer exec ",
-  "--env-file beethoven_env.txt ",
-  "--bind $PWD:/mnt ",
-  "--bind $PWD/inst:/inst ",
-  "--bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input ",
-  "--bind /ddn/gs1/group/set/Projects/beethoven/targets:/opt/_targets ",
-  "--bind /run/munge:/run/munge ",
-  "--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm ",
-  "container_models.sif \\"
+  "
+#SBATCH --partition=normal
+#SBATCH --job-name=common
+#SBATCH --ntasks=1
+apptainer exec \
+  --env-file beethoven_env.txt \
+  --bind {chr_root_dir}:/mnt \
+  --bind {chr_inst_dir}:/inst \
+  --bind {chr_raw_files_dir}:/input \
+  --bind {chr_store_dir}:/opt/_targets \
+  --bind {chr_slurm_munge}:/etc/munge \
+  --bind {chr_slurm_etc}:/etc/slurm \
+  container_models.sif \\"
 )
 
 
@@ -158,10 +177,8 @@ controller_super <- crew.cluster::crew_controller_slurm(
 # }
 
 ##############################        STORE       ##############################
-targets::tar_config_set(store = "/opt/_targets")
-# targets::tar_config_set(
-#   store = "/ddn/gs1/group/set/Projects/beethoven/targets/"
-# )
+targets::tar_config_set(store = "/ddn/gs1/group/set/Projects/beethoven/targets")
+
 ##############################       OPTIONS      ##############################
 if (Sys.getenv("BEETHOVEN") == "covariates") {
   beethoven_packages <- c(

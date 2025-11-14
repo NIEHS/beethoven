@@ -10,20 +10,7 @@
 #SBATCH --error=slurm/gridh3_%j.err
 #SBATCH --output=slurm/gridh3_%j.out
 
-############################      CERTIFICATES      ############################
-# Export CURL_CA_BUNDLE and SSL_CERT_FILE environmental variables to vertify
-# servers' SSL certificates during download.
-export CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
-export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
-
-#############################      PREDICTION COVARIATEs      #############################
-# Set environmental variable to indicate download and covariate
-# calculation targets.
-export BEETHOVEN=grid
-
-###############################      GPU SETUP     #############################
-# Ensure all allocated GPUs are visible
-export CUDA_VISIBLE_DEVICES=$(echo $(seq 0 $((SLURM_GPUS_ON_NODE-1))) | tr ' ' ',')
+source beethoven_env.txt
 
 
 # Set stack size limit for large merge of TRI covariates.
@@ -31,12 +18,12 @@ ulimit -s 20000
 
 # Download and calculate covariates via container_covariates.sif
 apptainer exec \
-  --nv \
-  --bind $PWD:/mnt \
-  --bind $PWD/inst:/inst \
-  --bind /ddn/gs1/group/set/Projects/NRT-AP-Model/input:/input \
-  --bind /ddn/gs1/group/set/Projects/beethoven/targets:/opt/_targets \
-  --bind /run/munge:/run/munge \
-  --bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm \
+  --env-file beethoven_env.txt \
+  --bind $APPTAINERENV_ROOT_DIR:/mnt \
+  --bind $APPTAINERENV_INST_DIR:/inst \
+  --bind $APPTAINERENV_INPUT_DIR:/input \
+  --bind $APPTAINERENV_STORE_DIR:/opt/_targets   \
+  --bind $APPTAINERENV_SLURM_MUNGE:/run/munge \
+  --bind $APPTAINERENV_SLURM_ETC:/etc/slurm \
   container_covariates.sif \
-  /usr/local/lib/R/bin/Rscript --no-init-file /mnt/inst/targets/targets_start.R
+  /usr/local/lib/R/bin/Rscript --no-init-file -e "targets::tar_make()"
