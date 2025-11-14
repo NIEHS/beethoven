@@ -10,30 +10,5 @@
 #SBATCH --error=slurm/model_dispatch_%j.err
 #SBATCH --output=slurm/model_dispatch_%j.out
 
-# source beethoven_binds.txt
-
-# Fit CPU-enabled base learner models via container_models.sif.
-# apptainer exec \
-#   --env-file beethoven_env.txt \
-#   --bind ${ROOT_DIR}:/mnt \
-#   --bind ${INST_DIR}:/inst \
-#   --bind ${INPUT_DIR}:/input \
-#   --bind ${STORE_DIR}:/opt/_targets   \
-#   --bind ${SLURM_MUNGE}:/run/munge \
-#   --bind ${SLURM_ETC}:/etc/slurm \
-#   container_models.sif \
-#   /usr/local/lib/R/bin/Rscript --no-init-file -e "targets::tar_make()"
-
-# Fit CPU-enabled base learner models via container_models.sif.
-# apptainer shell \
-#   --env-file beethoven_env.txt \
-#   --bind ${ROOT_DIR}:/mnt \
-#   --bind ${INST_DIR}:/inst \
-#   --bind ${INPUT_DIR}:/input \
-#   --bind ${STORE_DIR}:/opt/_targets   \
-#   --bind ${SLURM_MUNGE}:/run/munge \
-#   --bind ${SLURM_ETC}:/etc/slurm \
-#   container_models.sif 
-
 
 Rscript -e "targets::tar_make()"
