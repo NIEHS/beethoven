@@ -140,3 +140,5 @@ inst/extdata/filesize_checks.R
 inst/extdata/bigdata.sh
 *.parquet
 pipeline/
+
+inst/test_download/

@@ -9,13 +9,23 @@ target_initiate <-
         chr_daterange[2],
         sub_hyphen = FALSE
       ),
-      description = "Date range as character | initiate"
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_initiate"
+        )
+      ),
+      description = "initiate | Date range as character"
     ),
     targets::tar_target(
       chr_years,
       command = unique(lubridate::year(chr_dates)),
       iteration = "list",
-      description = "Year range | initiate"
+      description = "initiate | Year range ",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_initiate"
+        )
+      )
     ),
     targets::tar_target(
       list_dates,
@@ -24,12 +34,22 @@ target_initiate <-
         n = num_dates_split,
         year = TRUE
       ),
-      description = "Dates as list (YYYY-MM-DD) | initiate"
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_initiate"
+        )
+      ),
+      description = "initiate | Dates as list (YYYY-MM-DD)"
     ),
     targets::tar_target(
       list_dates_julian,
       command = lapply(list_dates, function(x) format(as.Date(x), "%Y%j")),
-      description = "Dates as list (YYYYDDD) | initiate"
+      description = "initiate | Dates as list (YYYYDDD)",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_initiate"
+        )
+      )
     ),
     targets::tar_target(
       list_dates_small,
@@ -38,12 +58,22 @@ target_initiate <-
         n = 10,
         year = TRUE
       ),
-      description = "Dates as list (YYYY-MM-DD) | GEOS-CF | initiate"
+      description = "initiate | Dates as list (YYYY-MM-DD) | GEOS-CF",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_initiate"
+        )
+      )
     ),
     targets::tar_target(
       chr_iter_radii,
       command = c(1000, 10000, 50000),
-      description = "Buffer radii"
+      description = "initiate | Buffer radii",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_initiate"
+        )
+      )
     ),
     targets::tar_target(
       arglist_common,
@@ -55,6 +85,11 @@ target_initiate <-
         char_user_email = paste0(Sys.getenv("USER"), "@nih.gov"),
         char_input_dir = chr_input_dir
       ),
-      description = "Calculation arguments | initiate"
+      description = "initiate | Calculation arguments",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_initiate"
+        )
+      )
     )
   )

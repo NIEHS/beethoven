@@ -1,29 +1,36 @@
 #!/bin/bash
 
 #SBATCH --job-name=beethoven
+#SBATCH --mail-user=kyle.messier@nih.gov
+#SBATCH --mail-type=END,FAIL
 #SBATCH --partition=normal
 #SBATCH --ntasks=1
+#SBATCH --mem=4G
 #SBATCH --cpus-per-task=1
-#SBATCH --mem=1G
+#SBATCH --error=slurm/beethoven_%j.err
 #SBATCH --output=slurm/beethoven_%j.out
 
-#############################      COVARIATES      #############################
-# Download and calculate AQS sites covariates via container_covariates.sif
-# echo "Submitting {beethoven} covariates targets ..."
-# sbatch --wait inst/scripts/run_covariates.sh
 
-#############################        MODELS        #############################
-# Fit CPU-enbaled meta learner models via container_models.sif.
-# echo "Submitting {beethoven} models targets ..."
-# sbatch --wait inst/scripts/run_models.sh
+############################################
+# BIND PATHS 
+############################################
+ROOT_DIR=/ddn/gs1/home/messierkp/projects/beethoven
+INPUT_DIR=/ddn/gs1/home/messierkp/projects/beethoven/input
+STORE_DIR=/ddn/gs1/home/messierkp/projects/beethoven/opt/_targets
+INST_DIR=/ddn/gs1/home/messierkp/projects/beethoven/inst
+SLURM_MUNGE=/run/munge
+SLURM_ETC=/ddn/gs1/tools/slurm/etc/slurm
 
-#############################        GRID CALC        #############################
-# Fit CPU-enbaled meta learner models via container_models.sif.
+export APPTAINER_BINDPATH="\
+$PWD:/mnt,\
+$PWD/inst:/inst,\
+$PWD/input:/input,\
+$PWD/opt/_targets:/opt/_targets,\
+$SLURM_MUNGE:/run/munge,\
+$SLURM_ETC:/etc/slurm,\
+$PWD/.netrc:/mnt/.netrc,\
+$PWD/.dodsrc:/mnt/.dodsrc,\
+$PWD/.urs_cookies:/mnt/.urs_cookies"
 
-echo "Submitting {beethoven} prediction grid targets ..."
-sbatch --wait inst/scripts/run_models.sh
 
-#############################      PREDICTION      #############################
-# Calculate prediction grid covariates and predict via container_covariates.sif
-# echo "Submitting {beethoven} prediction targets ..."
-# sbatch --wait inst/scripts/run_predict.sh
+apptainer exec container_models.sif Rscript -e "targets::tar_make()"

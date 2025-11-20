@@ -29,15 +29,20 @@ target_aqs <-
             split(
               names(list_feat_split_aqs_sites),
               substr(names(list_feat_split_aqs_sites), 1, 2)
-            ), function(x) list_feat_split_aqs_sites[x]
+            ),
+            function(x) list_feat_split_aqs_sites[x]
           ),
           function(x) dplyr::bind_rows(x)
         )
         list_feat_state_aqs_sites
       },
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_aqs"
+        )
+      ),
       description = "AQS locations | aqs"
-    )
-    ,
+    ),
     targets::tar_target(
       dt_feat_proc_aqs_sites_time,
       command = {
@@ -58,6 +63,11 @@ target_aqs <-
           return_format = "data.table"
         )
       },
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_aqs"
+        )
+      ),
       description = "AQS locations with time and data | aqs"
     )
   )

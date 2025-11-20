@@ -93,7 +93,7 @@ target_calculate_fit <-
       },
       pattern = cross(list_feat_proc_aqs_sites, list_dates),
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_super")
+        crew = targets::tar_resources_crew(controller = "controller_super_cov")
       ),
       iteration = "list",
       description = "Calculate GEOS-CF features | aqc | fit"
@@ -111,7 +111,7 @@ target_calculate_fit <-
       },
       pattern = cross(list_feat_proc_aqs_sites, list_dates),
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_super")
+        crew = targets::tar_resources_crew(controller = "controller_super_cov")
       ),
       iteration = "list",
       description = "Calculate GEOS-CF features | chm | fit"
@@ -311,7 +311,7 @@ target_calculate_fit <-
       pattern = cross(chr_list_calc_mod11_files, chr_iter_radii),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_super")
+        crew = targets::tar_resources_crew(controller = "controller_super_cov")
       ),
       description = "Calculate MODIS - MOD11 features | fit"
     ),
@@ -375,7 +375,7 @@ target_calculate_fit <-
       pattern = cross(chr_list_calc_mod06_files, chr_iter_radii),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_super")
+        crew = targets::tar_resources_crew(controller = "controller_super_cov")
       ),
       description = "Calculate MODIS - MOD06 features | fit"
     ),
@@ -438,7 +438,7 @@ target_calculate_fit <-
       pattern = cross(chr_list_calc_mod13_files, chr_iter_radii),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_super")
+        crew = targets::tar_resources_crew(controller = "controller_super_cov")
       ),
       description = "Calculate MODIS - MOD13 features | fit"
     ),
@@ -501,7 +501,7 @@ target_calculate_fit <-
       pattern = cross(chr_list_calc_mcd19_1km_files, chr_iter_radii),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_super")
+        crew = targets::tar_resources_crew(controller = "controller_super_cov")
       ),
       description = "Calculate MODIS - MCD19_1km features | fit"
     ),
@@ -555,7 +555,7 @@ target_calculate_fit <-
       pattern = cross(chr_list_calc_mcd19_5km_files, chr_iter_radii),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_super")
+        crew = targets::tar_resources_crew(controller = "controller_super_cov")
       ),
       description = "Calculate MODIS - MCD19_5km features | fit"
     ),
@@ -626,7 +626,7 @@ target_calculate_fit <-
       pattern = cross(chr_list_calc_mod09_files, chr_iter_radii),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_super")
+        crew = targets::tar_resources_crew(controller = "controller_super_cov")
       ),
       description = "Calculate MODIS - MOD09GA features | fit"
     ),
@@ -688,7 +688,7 @@ target_calculate_fit <-
       pattern = cross(chr_list_calc_viirs_files, chr_iter_radii),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_super")
+        crew = targets::tar_resources_crew(controller = "controller_super_cov")
       ),
       description = "Calculate MODIS - VIIRS features | fit"
     ),

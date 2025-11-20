@@ -13,7 +13,12 @@ target_critical <-
     targets::tar_target(
       chr_daterange,
       command = c("2018-01-01", "2022-12-31"),
-      description = "Date range | critical"
+      description = "critical | Date range ",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_initiate"
+        )
+      )
     ),
     ##### 2. chr_nasa_token sets the file path to the user's NASA Earthdata
     #####    account credentials. We can create a group credential file,
@@ -23,7 +28,12 @@ target_critical <-
     targets::tar_target(
       chr_nasa_token,
       command = readLines("/inst/extdata/nasa_token.txt"),
-      description = "NASA Earthdata token | critical"
+      description = "critical | NASA Earthdata token",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_initiate"
+        )
+      )
     ),
     ##### 3. chr_mod06_links is the file path to the MOD06 links file. These
     #####    links must be manually downloaded per the `amadeus::download_modis`
@@ -33,7 +43,12 @@ target_critical <-
     targets::tar_target(
       chr_mod06_links,
       command = "/inst/extdata/mod06_links_2018_2022.csv",
-      description = "File of MOD06 links | critical"
+      description = "critical | File of MOD06 links",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_initiate"
+        )
+      )
     ),
     ##### 4. chr_input_dir is the file path to the input directory. This target
     #####    controls where the raw data files are downloaded to and imported
@@ -42,7 +57,12 @@ target_critical <-
     targets::tar_target(
       chr_input_dir,
       command = "/input",
-      description = "Data directory | critical"
+      description = "critical | Data directory",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_initiate"
+        )
+      )
     ),
     ##### 5. chr_dates_split controls the size of temporal splits. Splitting the
     #####    temporal range into smaller chunks allows for parallel processing
@@ -51,7 +71,12 @@ target_critical <-
     targets::tar_target(
       num_dates_split,
       command = 122,
-      description = "Number of days in each temporal split | critical"
+      description = "critical | Number of days in each temporal split",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_initiate"
+        )
+      )
     ),
     ##### 6. chr_store defines the path to the {targets} store **relative**
     #####    to the container-mounted file paths. Used for querying parquet
@@ -59,7 +84,12 @@ target_critical <-
     targets::tar_target(
       chr_store,
       command = "/opt/_targets/objects/",
-      description = "{targets} store | critical"
+      description = "critical | {targets} store",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_initiate"
+        )
+      )
     )
     ############################################################################
     ############################################################################

@@ -2,8 +2,8 @@
 # BIND PATHS 
 ############################################
 ROOT_DIR=/ddn/gs1/home/messierkp/projects/beethoven
-INPUT_DIR=/ddn/gs1/group/set/Projects/NRT-AP-Model/input
-STORE_DIR=/ddn/gs1/group/set/Projects/beethoven/targets
+INPUT_DIR=/ddn/gs1/home/messierkp/projects/beethoven/input
+STORE_DIR=/ddn/gs1/home/messierkp/projects/beethoven/opt/_targets
 INST_DIR=/ddn/gs1/home/messierkp/projects/beethoven/inst
 SLURM_MUNGE=/run/munge
 SLURM_ETC=/ddn/gs1/tools/slurm/etc/slurm

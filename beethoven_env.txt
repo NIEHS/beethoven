@@ -1,49 +1,50 @@
 ############################################
 # R ENVIRONMENT
 ############################################
-APPTAINERENV_R_LIBS=/opt/Rlibs
-APPTAINERENV_R_LIBS_USER=/opt/Rlibs
-APPTAINERENV_R_LIBS_SITE=/opt/Rlibs
+R_LIBS=/opt/Rlibs
+# R_LIBS_USER=/opt/Rlibs
+# R_LIBS_SITE=/opt/Rlibs
 
 # Use the container’s real R installation
-APPTAINERENV_R_HOME=/usr/local/lib/R
+R_HOME=/usr/local/lib/R
 
 # Prepend R to PATH (do not override)
-APPTAINERENV_PATH=/usr/local/lib/R/bin:$PATH
+PATH=/usr/local/lib/R/bin:$PATH
 
+TAR_ASK=FALSE
 ############################################
 # R TEMP & UTF SETTINGS
 ############################################
-APPTAINERENV_LANG=en_US.UTF-8
-APPTAINERENV_LC_ALL=en_US.UTF-8
+LANG=en_US.UTF-8
+LC_ALL=en_US.UTF-8
 
 ############################################
 # CUDA / GPU
 ############################################
-APPTAINERENV_CUDA_HOME=/usr/local/cuda
-APPTAINERENV_CUDA_VERSION=11.8.0
+CUDA_HOME=/usr/local/cuda
+CUDA_VERSION=11.8.0
 
 # Prepend CUDA to PATH
-APPTAINERENV_PATH=/usr/local/cuda/bin:/usr/local/nvidia/bin:$APPTAINERENV_PATH
+PATH=/usr/local/cuda/bin:/usr/local/nvidia/bin:$PATH
 
 # Prepend shared libs (critical: PREPEND, don’t overwrite)
-APPTAINERENV_LD_LIBRARY_PATH=/opt/Rlibs/lib:/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+LD_LIBRARY_PATH=/opt/Rlibs/lib:/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 
 ############################################
 # OTHER TOOLS
 ############################################
-APPTAINERENV_EDITOR=vi
-APPTAINERENV_PAGER=/usr/bin/less
+EDITOR=vi
+PAGER=/usr/bin/less
 
 
 ############################      CERTIFICATES      ############################
 # Export CURL_CA_BUNDLE and SSL_CERT_FILE environmental variables to vertify
 # servers' SSL certificates during download.
-APPTAINERENV_CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
-APPTAINERENV_SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 
 ############################################ THREADS ############################################
 # Set default number of threads for parallel processing within R.
-APPTAINERENV_OMP_NUM_THREADS=1
-APPTAINERENV_LIGHTGBM_NUM_THREADS=1
+OMP_NUM_THREADS=1
+LIGHTGBM_NUM_THREADS=1
 
