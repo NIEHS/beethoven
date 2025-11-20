@@ -10,15 +10,6 @@ scriptlines_regular <- glue::glue(
 #SBATCH --error=slurm/%x_%j.err \
   apptainer exec ",
     "--env-file beethoven_env.txt ",
-    "--bind {chr_root_dir}:/mnt ",
-    "--bind {chr_inst_dir}:/inst ",
-    "--bind {chr_raw_files_dir}:/input ",
-    "--bind {chr_store_dir}:/opt/_targets ",
-    "--bind {chr_slurm_munge}:/run/munge ",
-    "--bind {chr_slurm_etc}:/etc/slurm ",
-    "--bind {chr_root_dir}/.netrc:/mnt/.netrc ",
-    "--bind {chr_root_dir}/.dodsrc:/mnt/.dodsrc ",
-    "--bind {chr_root_dir}/.urs_cookies:/mnt/.urs_cookies ",
     "container_models.sif \\"
 )
 
@@ -45,13 +36,6 @@ scriptlines_download_geo <- glue::glue(
 #SBATCH --error=slurm/%x_%j.err \
 apptainer exec --nv ",
     "--env-file beethoven_env.txt ",
-    "--bind {chr_root_dir}:/mnt ",
-    "--bind {chr_inst_dir}:/inst ",
-    "--bind {chr_raw_files_dir}:/input ",
-    "--bind {chr_store_dir}:/opt/_targets ",
-    "--bind {chr_root_dir}/.netrc:/mnt/.netrc ",
-    "--bind {chr_root_dir}/.dodsrc:/mnt/.dodsrc ",
-    "--bind {chr_root_dir}/.urs_cookies:/mnt/.urs_cookies ",
     "container_models.sif \\"
 )
 
@@ -73,15 +57,6 @@ scriptlines_download_norm <- glue::glue(
 #SBATCH --error=slurm/%x_%j.err \
   apptainer exec ",
     "--env-file beethoven_env.txt ",
-    "--bind {chr_root_dir}:/mnt ",
-    "--bind {chr_inst_dir}:/inst ",
-    "--bind {chr_raw_files_dir}:/input ",
-    "--bind {chr_store_dir}:/opt/_targets ",
-    "--bind {chr_slurm_munge}:/run/munge ",
-    "--bind {chr_slurm_etc}:/etc/slurm ",
-    "--bind {chr_root_dir}/.netrc:/mnt/.netrc ",
-    "--bind {chr_root_dir}/.dodsrc:/mnt/.dodsrc ",
-    "--bind {chr_root_dir}/.urs_cookies:/mnt/.urs_cookies ",
     "container_models.sif \\"
 )
 
@@ -146,10 +121,6 @@ scriptlines_calc_fit_geo <- glue::glue(
 #SBATCH --error=slurm/%x_%j.err \
 apptainer exec --nv ",
     "--env-file beethoven_env.txt ",
-    "--bind {chr_root_dir}:/mnt ",
-    "--bind {chr_inst_dir}:/inst ",
-    "--bind {chr_raw_files_dir}:/input ",
-    "--bind {chr_store_dir}:/opt/_targets ",
     "container_models.sif \\"
 )
 
@@ -172,12 +143,6 @@ scriptlines_calc_fit_norm <- glue::glue(
 #SBATCH --error=slurm/%x_%j.err \
   apptainer exec ",
     "--env-file beethoven_env.txt ",
-    "--bind {chr_root_dir}:/mnt ",
-    "--bind {chr_inst_dir}:/inst ",
-    "--bind {chr_raw_files_dir}:/input ",
-    "--bind {chr_store_dir}:/opt/_targets ",
-    "--bind {chr_slurm_munge}:/run/munge ",
-    "--bind {chr_slurm_etc}:/etc/slurm ",
     "container_models.sif \\"
 )
 
@@ -226,10 +191,6 @@ scriptlines_calc_pred_geo <- glue::glue(
 #SBATCH --error=slurm/%x_%j.err \
 apptainer exec --nv ",
     "--env-file beethoven_env.txt ",
-    "--bind {chr_root_dir}:/mnt ",
-    "--bind {chr_inst_dir}:/inst ",
-    "--bind {chr_raw_files_dir}:/input ",
-    "--bind {chr_store_dir}:/opt/_targets ",
     "container_models.sif \\"
 )
 
@@ -252,12 +213,6 @@ scriptlines_calc_pred_norm <- glue::glue(
 #SBATCH --error=slurm/%x_%j.err \
   apptainer exec ",
     "--env-file beethoven_env.txt ",
-    "--bind {chr_root_dir}:/mnt ",
-    "--bind {chr_inst_dir}:/inst ",
-    "--bind {chr_raw_files_dir}:/input ",
-    "--bind {chr_store_dir}:/opt/_targets ",
-    "--bind {chr_slurm_munge}:/run/munge ",
-    "--bind {chr_slurm_etc}:/etc/slurm ",
     "container_models.sif \\"
 )
 
@@ -305,10 +260,6 @@ scriptlines_baselearners_geo <- glue::glue(
 #SBATCH --error=slurm/%x_%j.err \
 apptainer exec --nv ",
     "--env-file beethoven_env.txt ",
-    "--bind {chr_root_dir}:/mnt ",
-    "--bind {chr_inst_dir}:/inst ",
-    "--bind {chr_raw_files_dir}:/input ",
-    "--bind {chr_store_dir}:/opt/_targets ",
     "container_models.sif \\"
 )
 
@@ -331,12 +282,6 @@ scriptlines_baselearners_norm <- glue::glue(
 #SBATCH --error=slurm/%x_%j.err \
   apptainer exec ",
     "--env-file beethoven_env.txt ",
-    "--bind {chr_root_dir}:/mnt ",
-    "--bind {chr_inst_dir}:/inst ",
-    "--bind {chr_raw_files_dir}:/input ",
-    "--bind {chr_store_dir}:/opt/_targets ",
-    "--bind {chr_slurm_munge}:/run/munge ",
-    "--bind {chr_slurm_etc}:/etc/slurm ",
     "container_models.sif \\"
 )
 
@@ -385,10 +330,6 @@ scriptlines_metalearners_geo <- glue::glue(
 #SBATCH --error=slurm/%x_%j.err \
 apptainer exec --nv ",
     "--env-file beethoven_env.txt ",
-    "--bind {chr_root_dir}:/mnt ",
-    "--bind {chr_inst_dir}:/inst ",
-    "--bind {chr_raw_files_dir}:/input ",
-    "--bind {chr_store_dir}:/opt/_targets ",
     "container_models.sif \\"
 )
 
@@ -411,12 +352,6 @@ scriptlines_metalearners_norm <- glue::glue(
 #SBATCH --error=slurm/%x_%j.err \
   apptainer exec ",
     "--env-file beethoven_env.txt ",
-    "--bind {chr_root_dir}:/mnt ",
-    "--bind {chr_inst_dir}:/inst ",
-    "--bind {chr_raw_files_dir}:/input ",
-    "--bind {chr_store_dir}:/opt/_targets ",
-    "--bind {chr_slurm_munge}:/run/munge ",
-    "--bind {chr_slurm_etc}:/etc/slurm ",
     "container_models.sif \\"
 )
 
@@ -465,10 +400,6 @@ scriptlines_predict_geo <- glue::glue(
 #SBATCH --error=slurm/%x_%j.err \
 apptainer exec --nv ",
     "--env-file beethoven_env.txt ",
-    "--bind {chr_root_dir}:/mnt ",
-    "--bind {chr_inst_dir}:/inst ",
-    "--bind {chr_raw_files_dir}:/input ",
-    "--bind {chr_store_dir}:/opt/_targets ",
     "container_models.sif \\"
 )
 
@@ -491,12 +422,6 @@ scriptlines_predict_norm <- glue::glue(
 #SBATCH --error=slurm/%x_%j.err \
   apptainer exec ",
     "--env-file beethoven_env.txt ",
-    "--bind {chr_root_dir}:/mnt ",
-    "--bind {chr_inst_dir}:/inst ",
-    "--bind {chr_raw_files_dir}:/input ",
-    "--bind {chr_store_dir}:/opt/_targets ",
-    "--bind {chr_slurm_munge}:/run/munge ",
-    "--bind {chr_slurm_etc}:/etc/slurm ",
     "container_models.sif \\"
 )
 
@@ -544,12 +469,6 @@ scriptlines_aqs <- glue::glue(
 #SBATCH --error=slurm/%x_%j.err \
 apptainer exec ",
     "--env-file beethoven_env.txt ",
-    "--bind {chr_root_dir}:/mnt ",
-    "--bind {chr_inst_dir}:/inst ",
-    "--bind {chr_raw_files_dir}:/input ",
-    "--bind {chr_store_dir}:/opt/_targets ",
-    "--bind {chr_slurm_munge}:/run/munge ",
-    "--bind {chr_slurm_etc}:/etc/slurm ",
     "container_models.sif \\"
 )
 
