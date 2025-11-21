@@ -10,16 +10,15 @@
 #SBATCH --error=slurm/beethoven_%j.err
 #SBATCH --output=slurm/beethoven_%j.out
 
-
 ############################################
-# BIND PATHS 
+# BIND PATHS AND EXPORT
 ############################################
-ROOT_DIR=/ddn/gs1/home/messierkp/projects/beethoven
-INPUT_DIR=/ddn/gs1/home/messierkp/projects/beethoven/input
-STORE_DIR=/ddn/gs1/home/messierkp/projects/beethoven/opt/_targets
-INST_DIR=/ddn/gs1/home/messierkp/projects/beethoven/inst
 SLURM_MUNGE=/run/munge
 SLURM_ETC=/ddn/gs1/tools/slurm/etc/slurm
+# SLURM_BIN=/ddn/gs1/tools/slurm/bin
+# SLURM_LIB=/ddn/gs1/tools/slurm/lib64
+# SLURM_CONFIG=/ddn/gs1/tools/slurm/config 
+# SLURM_SBIN=/ddn/gs1/tools/slurm/sbin
 
 export APPTAINER_BINDPATH="\
 $PWD:/mnt,\
@@ -33,4 +32,8 @@ $PWD/.dodsrc:/mnt/.dodsrc,\
 $PWD/.urs_cookies:/mnt/.urs_cookies"
 
 
-apptainer exec container_models.sif Rscript -e "targets::tar_make()"
+
+apptainer exec --env-file beethoven_env.txt container_models.sif Rscript -e "targets::tar_make()"
+
+
+# Add paths from sys_beethoven.sh if needed

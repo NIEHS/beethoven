@@ -1,9 +1,9 @@
 ############################################
 # R ENVIRONMENT
 ############################################
-R_LIBS=/opt/Rlibs
-# R_LIBS_USER=/opt/Rlibs
-# R_LIBS_SITE=/opt/Rlibs
+ R_LIBS=/opt/Rlibs
+ R_LIBS_USER=/opt/Rlibs
+ R_LIBS_SITE=/opt/Rlibs
 
 # Use the container’s real R installation
 R_HOME=/usr/local/lib/R
@@ -12,23 +12,28 @@ R_HOME=/usr/local/lib/R
 PATH=/usr/local/lib/R/bin:$PATH
 
 TAR_ASK=FALSE
-############################################
-# R TEMP & UTF SETTINGS
-############################################
-LANG=en_US.UTF-8
-LC_ALL=en_US.UTF-8
+
 
 ############################################
-# CUDA / GPU
+# CUDA / GPU  (Matches sys_beethoven)
 ############################################
-CUDA_HOME=/usr/local/cuda
 CUDA_VERSION=11.8.0
 
-# Prepend CUDA to PATH
-PATH=/usr/local/cuda/bin:/usr/local/nvidia/bin:$PATH
+# CUDA_HOME explicitly set by sys_beethoven()
+CUDA_HOME=/usr/local/cuda
 
-# Prepend shared libs (critical: PREPEND, don’t overwrite)
-LD_LIBRARY_PATH=/opt/Rlibs/lib:/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+PATH=/usr/local/cuda/bin:\
+/usr/local/nvidia/bin:\
+/usr/local/sbin:\
+/usr/local/bin:\
+/usr/sbin:\
+/usr/bin:\
+/sbin:\
+/bin:$PATH
+
+# Only CUDA lib64 is added — prepend, don't overwrite
+LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+
 
 ############################################
 # OTHER TOOLS
@@ -38,13 +43,13 @@ PAGER=/usr/bin/less
 
 
 ############################      CERTIFICATES      ############################
-# Export CURL_CA_BUNDLE and SSL_CERT_FILE environmental variables to vertify
+# Export CURL_CA_BUNDLE and SSL_CERT_FILE environmental variables to verify
 # servers' SSL certificates during download.
 CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+
 
 ############################################ THREADS ############################################
 # Set default number of threads for parallel processing within R.
 OMP_NUM_THREADS=1
 LIGHTGBM_NUM_THREADS=1
-

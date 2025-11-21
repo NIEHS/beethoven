@@ -5,29 +5,21 @@ library(tidyverse)
 library(crew)
 library(crew.cluster)
 
-################ Read in ENV and VARS from the beethoven_env.txt file ######
-readRenviron("beethoven_binds.txt")
-chr_raw_files_dir <- Sys.getenv("INPUT_DIR")
-chr_root_dir <- Sys.getenv("ROOT_DIR")
-chr_inst_dir <- Sys.getenv("INST_DIR")
-chr_slurm_munge <- Sys.getenv("SLURM_MUNGE")
-chr_slurm_etc <- Sys.getenv("SLURM_ETC")
-chr_store_dir <- Sys.getenv("STORE_DIR")
 
 ##############################        STORE       ##############################
-targets::tar_config_set(store = chr_store_dir)
+targets::tar_config_set(store = "/opt/_targets/")
 
 ###########################      SOURCE TARGETS      ###########################
-targets::tar_source("inst/targets/targets_critical.R")
-targets::tar_source("inst/targets/targets_initiate.R")
-targets::tar_source("inst/targets/targets_download.R")
-targets::tar_source("inst/targets/targets_aqs.R")
-targets::tar_source("inst/targets/targets_calculate_fit.R")
-targets::tar_source("inst/targets/targets_baselearner.R")
-targets::tar_source("inst/targets/targets_metalearner.R")
-targets::tar_source("inst/targets/targets_calculate_predict.R")
-targets::tar_source("R/controllers.R")
-targets::tar_source() #All of the R/
+targets::tar_source("/inst/targets/targets_critical.R")
+targets::tar_source("/inst/targets/targets_initiate.R")
+targets::tar_source("/inst/targets/targets_download.R")
+targets::tar_source("/inst/targets/targets_aqs.R")
+targets::tar_source("/inst/targets/targets_calculate_fit.R")
+targets::tar_source("/inst/targets/targets_baselearner.R")
+targets::tar_source("/inst/targets/targets_metalearner.R")
+targets::tar_source("/inst/targets/targets_calculate_predict.R")
+targets::tar_source("/mnt/R/controllers.R")
+targets::tar_source("/mnt/R/")
 
 beethoven_packages <- c(
   "amadeus",
@@ -104,7 +96,7 @@ targets::tar_option_set(
 )
 # sqltargets::sqltargets_option_set("sqltargets.template_engine", "jinjar")
 
-# targets::tar_source("inst/targets/targets_predict.R")
+# targets::tar_source("/inst/targets/targets_predict.R")
 
 ##############################      PIPELINE      ##############################
 list(
