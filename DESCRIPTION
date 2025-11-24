@@ -45,7 +45,6 @@ Imports:
   purrr,
   finetune,
   butcher,
-  amadeus,
   chopin
 Suggests:
   testthat (>= 3.0.0),
