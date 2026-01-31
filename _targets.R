@@ -7,19 +7,22 @@ library(crew.cluster)
 
 
 ##############################        STORE       ##############################
-targets::tar_config_set(store = "/opt/_targets/")
+# targets::tar_config_set(store = "/ddn/gs1/group/set/beethoven_store/_targets")
+# targets::tar_config_set(
+#   store = "/opt/_targets/"
+# )
 
 ###########################      SOURCE TARGETS      ###########################
-targets::tar_source("/inst/targets/targets_critical.R")
-targets::tar_source("/inst/targets/targets_initiate.R")
-targets::tar_source("/inst/targets/targets_download.R")
-targets::tar_source("/inst/targets/targets_aqs.R")
-targets::tar_source("/inst/targets/targets_calculate_fit.R")
-targets::tar_source("/inst/targets/targets_baselearner.R")
-targets::tar_source("/inst/targets/targets_metalearner.R")
-targets::tar_source("/inst/targets/targets_calculate_predict.R")
-targets::tar_source("/mnt/R/controllers.R")
-targets::tar_source("/mnt/R/")
+targets::tar_source("inst/targets/targets_critical.R")
+targets::tar_source("inst/targets/targets_initiate.R")
+targets::tar_source("inst/targets/targets_download.R")
+targets::tar_source("inst/targets/targets_aqs.R")
+targets::tar_source("inst/targets/targets_calculate_fit.R")
+targets::tar_source("inst/targets/targets_baselearner.R")
+targets::tar_source("inst/targets/targets_metalearner.R")
+targets::tar_source("inst/targets/targets_calculate_predict.R")
+targets::tar_source("R/controllers.R")
+targets::tar_source("R/")
 
 beethoven_packages <- c(
   "amadeus",
@@ -49,7 +52,9 @@ beethoven_packages <- c(
 )
 
 targets::tar_option_set(
-  repository = "local",
+  repository = tar_repository_cas_local(
+    path = "/ddn/gs1/group/set/beethoven_store/cas/_targets"
+  ),
   packages = beethoven_packages,
   error = "continue",
   memory = "auto",

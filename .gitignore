@@ -142,3 +142,7 @@ inst/extdata/bigdata.sh
 pipeline/
 
 inst/test_download/
+
+dispatch.sh
+pkg.lock
+resolv.conf

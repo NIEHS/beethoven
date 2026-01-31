@@ -12,7 +12,7 @@ target_critical <-
     #####    chr_daterange.
     targets::tar_target(
       chr_daterange,
-      command = c("2018-01-01", "2022-12-31"),
+      command = c("2018-01-01", "2020-12-31"),
       description = "critical | Date range ",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(
@@ -27,7 +27,7 @@ target_critical <-
     #####    credential file, the token must be updated every 90 days.
     targets::tar_target(
       chr_nasa_token,
-      command = readLines("/inst/extdata/nasa_token.txt"),
+      command = Sys.getenv("EARTH_DATA"),
       description = "critical | NASA Earthdata token",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(
@@ -40,23 +40,24 @@ target_critical <-
     #####    function. The links are then stored in a CSV file that is read
     #####    by the function. The new file with links must be updated to match
     #####    the new date range.
-    targets::tar_target(
-      chr_mod06_links,
-      command = "/inst/extdata/mod06_links_2018_2022.csv",
-      description = "critical | File of MOD06 links",
-      resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(
-          controller = "controller_initiate"
-        )
-      )
-    ),
+    ###### DEPRECATED BY AMADEUS
+    # targets::tar_target(
+    #   chr_mod06_links,
+    #   command = "/inst/extdata/mod06_links_2018_2022.csv",
+    #   description = "critical | File of MOD06 links",
+    #   resources = targets::tar_resources(
+    #     crew = targets::tar_resources_crew(
+    #       controller = "controller_initiate"
+    #     )
+    #   )
+    # ),
     ##### 4. chr_input_dir is the file path to the input directory. This target
     #####    controls where the raw data files are downloaded to and imported
     #####    from. This file path **MUST** be mounted to the container at run
     #####    time in the `run.sh` script.
     targets::tar_target(
       chr_input_dir,
-      command = "/input",
+      command = "input",
       description = "critical | Data directory",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(

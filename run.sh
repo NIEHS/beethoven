@@ -13,8 +13,8 @@
 ############################################
 # BIND PATHS AND EXPORT
 ############################################
-SLURM_MUNGE=/run/munge
-SLURM_ETC=/ddn/gs1/tools/slurm/etc/slurm
+# SLURM_MUNGE=/run/munge
+# SLURM_ETC=/ddn/gs1/tools/slurm/etc/slurm
 # SLURM_BIN=/ddn/gs1/tools/slurm/bin
 # SLURM_LIB=/ddn/gs1/tools/slurm/lib64
 # SLURM_CONFIG=/ddn/gs1/tools/slurm/config 
@@ -24,12 +24,9 @@ export APPTAINER_BINDPATH="\
 $PWD:/mnt,\
 $PWD/inst:/inst,\
 $PWD/input:/input,\
-$PWD/opt/_targets:/opt/_targets,\
-$SLURM_MUNGE:/run/munge,\
-$SLURM_ETC:/etc/slurm,\
-$PWD/.netrc:/mnt/.netrc,\
-$PWD/.dodsrc:/mnt/.dodsrc,\
-$PWD/.urs_cookies:/mnt/.urs_cookies"
+/ddn/gs1/group/set/beethoven_store/cas/_targets:/opt/_targets,\
+/run/munge:/run/munge,\
+/ddn/gs1/tools/slurm/etc/slurm:/etc/slurm"
 
 
 
