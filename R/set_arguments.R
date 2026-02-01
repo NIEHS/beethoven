@@ -285,7 +285,7 @@ set_args_download <-
 
     if (export) {
       if (endsWith(path_export, "qs")) {
-        qs::qsave(list_download_config, path_export)
+        qs2::qs_save(list_download_config, path_export)
         message("Download configuration is saved to ", path_export)
       } else if (endsWith(path_export, "rds")) {
         saveRDS(list_download_config, path_export)
@@ -702,7 +702,7 @@ set_args_calc <-
         return(list_common)
       } else {
         if (endsWith(path_export, "qs")) {
-          qs::qsave(list_calcspec, path_export)
+          qs2::qs_save(list_calcspec, path_export)
         } else if (endsWith(path_export, "rds")) {
           saveRDS(list_calcspec, path_export)
         } else {
