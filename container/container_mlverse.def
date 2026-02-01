@@ -28,14 +28,6 @@ From: rocker/ml-spatial:latest
     DEBIAN_FRONTEND=noninteractive apt-get install -y slurm-client munge && \
     apt-get clean && rm -rf /var/lib/apt/lists/*        
 
-
-    # Set default library to /opt/Rlibs
-    echo 'R_LIBS_USER=/opt/Rlibs' >> /etc/environment
-    echo 'R_LIBS=/opt/Rlibs' >> /etc/environment
-    echo 'R_LIBS_SITE=/opt/Rlibs' >> /etc/environment
-
-
-
     # Set locale for the environment
     echo "LANG=en_US.UTF-8" >> /etc/default/locale
     echo "LC_ALL=en_US.UTF-8" >> /etc/default/locale
@@ -48,6 +40,12 @@ From: rocker/ml-spatial:latest
     mkdir /opt/_targets
     mkdir /opt/Rlibs
     chmod -R 777 /opt/Rlibs
+
+    # Set default library to /opt/Rlibs
+    echo 'R_LIBS_USER=/opt/Rlibs' >> /etc/environment
+    echo 'R_LIBS=/opt/Rlibs' >> /etc/environment
+    echo 'R_LIBS_SITE=/opt/Rlibs' >> /etc/environment
+
 
     export R_LIBS_USER=/opt/Rlibs
     export RENV_PATHS_LIBRARY=/opt/Rlibs        
@@ -64,7 +62,7 @@ From: rocker/ml-spatial:latest
     
     Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('DBI', upgrade = TRUE)"
     Rscript -e ".libPaths('/opt/Rlibs'); pak::pak(c('tarchetypes', 'testthat', 'tidymodels', \
-        'bonsai', 'qs', 'qs2', 'kernlab', 'sqltargets'), upgrade = TRUE)"
+        'bonsai', 'qs2', 'kernlab', 'sqltargets'), upgrade = TRUE)"
     Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('NIEHS/amadeus', upgrade = TRUE)"
     Rscript -e ".libPaths('/opt/Rlibs'); pak::pak(c('scoringRules', 'future.mirai', 'vetiver', \
         'lwgeom', 'doRNG', 'quarto', 'kernlab'), upgrade = TRUE)"

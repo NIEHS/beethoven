@@ -1,5 +1,5 @@
 BootStrap: docker
-From: rocker/ml-spatial:latest
+From: rocker/geospatial:latest
 
 %post
     # Update package list
