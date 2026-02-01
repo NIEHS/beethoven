@@ -74,7 +74,7 @@ not the dates without available tiles.
 }
 }
 \description{
-\code{calculate_modis} essentially runs \code{\link{calculate_modis_daily}} function
+\code{calculate_modis} essentially runs \code{\link[amadeus:calculate_modis_daily]{amadeus::calculate_modis_daily}} function
 in each thread (subprocess). Based on daily resolution, each day's workload
 will be distributed to each thread. With \code{product} argument,
 the files are processed by a customized function where the unique structure
@@ -133,14 +133,14 @@ calculate_modis(
 This function leverages the calculation of single-day MODIS
 covariates:
 \itemize{
-\item \code{\link[=calculate_modis_daily]{calculate_modis_daily()}}
+\item \code{\link[amadeus:calculate_modis_daily]{amadeus::calculate_modis_daily()}}
 }
 
 Also, for preprocessing, please refer to:
 \itemize{
-\item \code{\link[=process_modis_merge]{process_modis_merge()}}
-\item \code{\link[=process_modis_swath]{process_modis_swath()}}
-\item \code{\link[=process_blackmarble]{process_blackmarble()}}
+\item \code{\link[amadeus:process_modis_merge]{amadeus::process_modis_merge()}}
+\item \code{\link[amadeus:process_modis_swath]{amadeus::process_modis_swath()}}
+\item \code{\link[amadeus:process_blackmarble]{amadeus::process_blackmarble()}}
 }
 }
 \keyword{Calculation}

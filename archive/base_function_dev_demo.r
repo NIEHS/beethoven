@@ -1,61 +1,71 @@
-
 system.time(
-    rlang::inject(
+  rlang::inject(
     calc_geos_strict(
-        locs = sf::st_as_sf(data.frame(x = -88.9, y = 34, site_id = "1", time = "2021-01-01"), coords = 1:2, crs = 4326),
-        locs_id = "site_id",
-        win = c(-126, -66, 23, 50),
-        snap = "out",
-        !!!loadargs("inst/targets/punchcard_calc.rds", "geoscf_chm")
-    ))
+      locs = sf::st_as_sf(
+        data.frame(x = -88.9, y = 34, site_id = "1", time = "2021-01-01"),
+        coords = 1:2,
+        crs = 4326
+      ),
+      locs_id = "site_id",
+      win = c(-126, -66, 23, 50),
+      snap = "out",
+      !!!loadargs("inst/targets/punchcard_calc.rds", "geoscf_chm")
+    )
+  )
 )
 
 
 loadargs("inst/targets/punchcard_calc.rds", "geoscf_chm")$path |>
-    list.files("*.nc", full.names = T) |>
-    _[[1]]
+  list.files("*.nc", full.names = T) |>
+  _[[1]]
 terra::describe(
-    "input/geos/aqc_tavg_1hr_g1440x721_v1/GEOS-CF.v01.rpl.aqc_tavg_1hr_g1440x721_v1.20180101_0030z.nc4",
-    sds = TRUE)$var
+  "input/geos/aqc_tavg_1hr_g1440x721_v1/GEOS-CF.v01.rpl.aqc_tavg_1hr_g1440x721_v1.20180101_0030z.nc4",
+  sds = TRUE
+)$var
 
 amadeus::process_gmted(path = "input/gmted", variable = x)
 amadeus::generate_date_sequence(
-    "2021-01-01",
-    "2021-01-02",
-    sub_hyphen = F
+  "2021-01-01",
+  "2021-01-02",
+  sub_hyphen = F
 )
 
 source("inst/targets/pipeline_base_functions.R")
 varn <- "hms"
 system.time(
-    jj <-
+  jj <-
     inject_calculate(
-        covariate = varn,
-        locs = tar_read(sf_feat_proc_aqs_sites)[1:50,],
-        #nthreads = 1L,
-        injection = loadargs("inst/targets/punchcard_calc.rds", varn))
+      covariate = varn,
+      locs = tar_read(sf_feat_proc_aqs_sites)[1:50, ],
+      #nthreads = 1L,
+      injection = loadargs("inst/targets/punchcard_calc.rds", varn)
     )
+)
 jj
 
 profvis::profvis(
-kx <- amadeus::calculate_covariates(
+  kx <- amadeus::calculate_covariates(
     covariate = "nlcd",
-    from = amadeus::process_covariates(covariate = "nlcd", path = "input/nlcd/raw", year = 2019L),
-    locs = tar_read(sf_feat_proc_aqs_sites)[1:200,],
+    from = amadeus::process_covariates(
+      covariate = "nlcd",
+      path = "input/nlcd/raw",
+      year = 2019L
+    ),
+    locs = tar_read(sf_feat_proc_aqs_sites)[1:200, ],
     locs_id = "site_id",
     radius = 50000,
     max_cells = 1e8
-)
+  )
 )
 
 system.time(
-    jk <-
+  jk <-
     calc_gmted_direct(
-        locs = tar_read(sf_feat_proc_aqs_sites)[1:100,],
-        locs_id = "site_id",
-        path = "input/gmted",
-        radius = 1000,
-        variable = c("Breakline Emphasis", "7.5 arc-seconds")
+      locs = tar_read(sf_feat_proc_aqs_sites)[1:100, ],
+      locs_id = "site_id",
+      path = "input/gmted",
+      radius = 1000,
+      variable = c("Breakline Emphasis", "7.5 arc-seconds")
     )
 )
 head(jk)
@@ -63,42 +73,70 @@ jj
 
 kl <- terra::rast("input/narr/omega/omega.202101.nc")
 kk <-
-process_narr(path = "input/narr", variable = c("shum"), date = c("2021-01-31", "2021-02-02"))
+  process_narr(
+    path = "input/narr",
+    variable = c("shum"),
+    date = c("2021-01-31", "2021-02-02")
+  )
 
-kke <- (calc_narr(from = kk, locs = targets::tar_read(sf_feat_proc_aqs_sites), locs_id = "site_id"))
+kke <- (calc_narr(
+  from = kk,
+  locs = targets::tar_read(sf_feat_proc_aqs_sites),
+  locs_id = "site_id"
+))
 
-xj <- terra::extract(kk, targets::tar_read(sf_feat_proc_aqs_sites) |> terra::vect(), bind = TRUE)
-xjj <- exactextractr::exact_extract(kk, targets::tar_read(sf_feat_proc_aqs_sites) |> sf::st_buffer(0.000001), stack_apply =TRUE, fun = "mean", force_df = TRUE) 
-kk[targets::tar_read(sf_feat_proc_aqs_sites)[1,] |> terra::vect()]
-targets::tar_read(sf_feat_proc_aqs_sites)[1,] |> terra::vect() -> vc1
+xj <- terra::extract(
+  kk,
+  targets::tar_read(sf_feat_proc_aqs_sites) |> terra::vect(),
+  bind = TRUE
+)
+xjj <- exactextractr::exact_extract(
+  kk,
+  targets::tar_read(sf_feat_proc_aqs_sites) |> sf::st_buffer(0.000001),
+  stack_apply = TRUE,
+  fun = "mean",
+  force_df = TRUE
+)
+kk[targets::tar_read(sf_feat_proc_aqs_sites)[1, ] |> terra::vect()]
+targets::tar_read(sf_feat_proc_aqs_sites)[1, ] |> terra::vect() -> vc1
 vc1 <- terra::project(vc1, terra::crs(kk))
 xj <- terra::extract(kk, vc1, bind = TRUE)
 
 system.time(
-    jk <-
+  jk <-
     inject_gmted(
-        locs = tar_read(sf_feat_proc_aqs_sites)[1:10,],
-        #locs_id = "site_id",
-        #path = "input/gmted",
-        radii = c(0,1000),
-        variable = c("Breakline Emphasis"),
-        injection = loadargs("inst/targets/punchcard_calc.rds", "gmted")
+      locs = tar_read(sf_feat_proc_aqs_sites)[1:10, ],
+      #locs_id = "site_id",
+      #path = "input/gmted",
+      radii = c(0, 1000),
+      variable = c("Breakline Emphasis"),
+      injection = loadargs("inst/targets/punchcard_calc.rds", "gmted")
     )
 )
 
 
 system.time(
-    hx <-
-      amadeus::process_hms(date = c("2020-01-01", "2020-04-30"),
-        variable = "Medium", path = "input/HMS_Smoke/data")
+  hx <-
+    amadeus::process_hms(
+      date = c("2020-01-01", "2020-04-30"),
+      variable = "Medium",
+      path = "input/HMS_Smoke/data"
+    )
 )
 system.time(
-    hxe <-
-      amadeus::calc_hms(hx, targets::tar_read(sf_feat_proc_aqs_sites), locs_id = "site_id")
+  hxe <-
+    amadeus::calc_hms(
+      hx,
+      targets::tar_read(sf_feat_proc_aqs_sites),
+      locs_id = "site_id"
+    )
 )
 
 
-amadeus::process_gmted(path = "input/gmted/", variable = c("Breakline Emphasis", "7.5 arc-seconds"))
+amadeus::process_gmted(
+  path = "input/gmted/",
+  variable = c("Breakline Emphasis", "7.5 arc-seconds")
+)
 terra::rast("input/gmted/be75_grd")
 
 
@@ -107,41 +145,40 @@ amadeus::process_gmted
 
 process_covariates(covariate = "hms")
 calculate(
-    covariate = "hms",
-    path = "input/HMS_Smoke/data",
-    locs = tar_read(sf_feat_proc_aqs_sites),
-    variable = "Medium",
-    domain_name = "whatever"
-
+  covariate = "hms",
+  path = "input/HMS_Smoke/data",
+  locs = tar_read(sf_feat_proc_aqs_sites),
+  variable = "Medium",
+  domain_name = "whatever"
 )
 
 calculate(
-    locs = targets::tar_read(sf_feat_proc_aqs_sites),
-    locs_id = "site_id",
-    domain = rep(2020),
-    path = "input/sedac_groads/groads-v1-americas-gdb/gROADS-v1-americas.gdb",
-    covariate = "groads",
+  locs = targets::tar_read(sf_feat_proc_aqs_sites),
+  locs_id = "site_id",
+  domain = rep(2020),
+  path = "input/sedac_groads/groads-v1-americas-gdb/gROADS-v1-americas.gdb",
+  covariate = "groads",
+  domain_name = "year",
+  radius = c(1e3, 1e4, 5e4),
+  nthreads = 3L
+)
+
+
+calculate(
+  population = list(
+    domain = rep(2020, 5),
     domain_name = "year",
+    path = "input/sedac_population/gpw_v4_population_density_adjusted_to_2015_unwpp_country_totals_rev11_2020_30_sec.tif",
+    covariate = "population",
+    fun = "mean",
     radius = c(1e3, 1e4, 5e4),
     nthreads = 3L
-)
-
-
-calculate(
-        population = list(
-      domain = rep(2020, 5),
-      domain_name = "year",
-      path = "input/sedac_population/gpw_v4_population_density_adjusted_to_2015_unwpp_country_totals_rev11_2020_30_sec.tif",
-      covariate = "population", fun = "mean",
-      radius = c(1e3, 1e4, 5e4),
-      nthreads = 3L
-    )
-
+  )
 )
 
 
 narrd <-
-calculate(
+  calculate(
     covariate = "narr",
     path = "input/narr",
     locs = targets::tar_read(sf_feat_proc_aqs_sites),
@@ -152,21 +189,35 @@ calculate(
     process_function = process_narr2,
     calc_function = calc_narr2,
     nthreads = 1L
-)
+  )
 
 kk <-
-process_narr(path = "input/narr", variable = c("omega"), date = c("2021-01-31", "2021-02-05"))
+  process_narr(
+    path = "input/narr",
+    variable = c("omega"),
+    date = c("2021-01-31", "2021-02-05")
+  )
 
-kke <- (calc_narr(from = kk, locs = targets::tar_read(sf_feat_proc_aqs_sites), locs_id = "site_id"))
+kke <- (calc_narr(
+  from = kk,
+  locs = targets::tar_read(sf_feat_proc_aqs_sites),
+  locs_id = "site_id"
+))
 
 
 kk <- amadeus::process_ecoregion(path = "input/ecoregions/raw")
-kx <- amadeus::calc_ecoregion(from = kk, locs = tar_read(sf_feat_proc_aqs_sites) |> terra::vect())
+kx <- amadeus::calc_ecoregion(
+  from = kk,
+  locs = tar_read(sf_feat_proc_aqs_sites) |> terra::vect()
+)
 
 kl <- amadeus::process_covariates("ecoregions", path = "input/ecoregions/raw")
-kz <- amadeus::calculate_covariates("ecoregions", from = kl, locs = tar_read(sf_feat_proc_aqs_sites) |> terra::vect())
+kz <- amadeus::calculate_covariates(
+  "ecoregions",
+  from = kl,
+  locs = tar_read(sf_feat_proc_aqs_sites) |> terra::vect()
+)
 as.data.table(kz)
-
 
 
 ## R code example for temporal join utilizing join_by and between in dplyr package
@@ -174,21 +225,27 @@ library(dplyr)
 
 # Create two data frames for the example
 df1 <- data.frame(
-    id = 1:3,
-    start_date = as.Date(c("2020-01-01", "2020-02-01", "2020-03-01")),
-    end_date = as.Date(c("2020-01-31", "2020-02-29", "2020-03-31"))
+  id = 1:3,
+  start_date = as.Date(c("2020-01-01", "2020-02-01", "2020-03-01")),
+  end_date = as.Date(c("2020-01-31", "2020-02-29", "2020-03-31"))
 )
 
 df2 <- data.frame(
-    id = c(1, 2, 2, 3, 3),
-    date = as.Date(c("2020-01-15", "2020-02-15", "2020-02-20", "2020-03-15", "2020-03-20"))
+  id = c(1, 2, 2, 3, 3),
+  date = as.Date(c(
+    "2020-01-15",
+    "2020-02-15",
+    "2020-02-20",
+    "2020-03-15",
+    "2020-03-20"
+  ))
 )
 
 btw <- function(x, from, to) (x >= from & x <= to)
 # Perform the temporal join
 result <- df2 %>%
-    left_join(df1, by = join_by(id == id, !!rlang::sym("date") <= end_date))# %>%
-    #filter(between(date, start_date, end_date))
+  left_join(df1, by = join_by(id == id, !!rlang::sym("date") <= end_date)) # %>%
+#filter(between(date, start_date, end_date))
 
 result
 
@@ -205,11 +262,12 @@ post_calc_join_yeardate <-
       stop("Both inputs should be data.frame.")
     }
     df_date_joined <-
-    df_date[df_year,
-            on = .(spid == spid, field_year == as.POSIXlt(field_date)$year)
-            #union(names(df_year), names(df_date)),
-            #with = FALSE
-           ]
+      df_date[
+        df_year,
+        on = .(spid == spid, field_year == as.POSIXlt(field_date)$year)
+        #union(names(df_year), names(df_date)),
+        #with = FALSE
+      ]
 
     # names(df_year)[names(df_year) %in% field_year] <- "year"
     # df_date$year <- as.integer(substr(df_date[[field_date]], 1, 4))
@@ -225,47 +283,51 @@ post_calc_join_yeardate <-
     return(df_date_joined)
   }
 
-jj <- \(x) eval(x);quote(x)
+jj <- \(x) eval(x)
+quote(x)
 jj("joy")
 eval("joy")
 quote("joy")
-  library(data.table)
+library(data.table)
 
-  # Generate sample data
-  df_year <- data.table(
-    site_id = rep(1:10, each = 10),
-    time = rep(2000:2009, times = 10),
-    x = rnorm(100, 3, 1)
-  )
-  df_year[["year"]] = 1:100
-  df_date <- data.table(
-    site_id = rep(1:10, each = 10),
-    time = rep(as.Date("2000-01-01") + 0:9, times = 10),
-    y = rpois(100, 4)
-  )
-  
-  # Call the function
-  result <- post_calc_join_yeardate(df_year, df_date)
-  
+# Generate sample data
+df_year <- data.table(
+  site_id = rep(1:10, each = 10),
+  time = rep(2000:2009, times = 10),
+  x = rnorm(100, 3, 1)
+)
+df_year[["year"]] = 1:100
+df_date <- data.table(
+  site_id = rep(1:10, each = 10),
+  time = rep(as.Date("2000-01-01") + 0:9, times = 10),
+  y = rpois(100, 4)
+)
+
+# Call the function
+result <- post_calc_join_yeardate(df_year, df_date)
 
 
 ## read_locs
 rr <- read_locs(
-    fun_aqs = amadeus::process_aqs,
-    path = 
-      list.files("input/aqs", pattern = "daily_88101_2018.csv$", full.names = TRUE),
-    date = c("2018-01-15", "2018-02-21"),
-    mode = "sparse",
-    return_format = "data.table")
+  fun_aqs = amadeus::process_aqs,
+  path = list.files(
+    "input/aqs",
+    pattern = "daily_88101_2018.csv$",
+    full.names = TRUE
+  ),
+  date = c("2018-01-15", "2018-02-21"),
+  mode = "sparse",
+  return_format = "data.table"
+)
 
 
 terra::crs("EPSG:4326")
 
 kx <-
-amadeus::process_nlcd(
-  path = "input/nlcd/raw",
-  year = 2019
-)
+  amadeus::process_nlcd(
+    path = "input/nlcd/raw",
+    year = 2019
+  )
 
 kxt <- amadeus::calc_nlcd(
   from = kx,
@@ -279,12 +341,14 @@ tar_read(sf_feat_proc_aqs_sites) -> kk
 sf::st_as_sf(kk, coords = 2:3, crs = 4326) -> kk
 
 
-calc_nlcd <- function(from,
-                      locs,
-                      locs_id = "site_id",
-                      radius = 1000,
-                      max_cells = 1e8,
-                      ...) {
+calc_nlcd <- function(
+  from,
+  locs,
+  locs_id = "site_id",
+  radius = 1000,
+  max_cells = 1e8,
+  ...
+) {
   # check inputs
   if (!is.numeric(radius)) {
     stop("radius is not a numeric.")
@@ -294,20 +358,21 @@ calc_nlcd <- function(from,
   }
   if (!methods::is(locs, "SpatVector")) {
     message("locs is not a terra::SpatVector.")
-    locs <- tryCatch({
-      if (data.table::is.data.table(locs)) {
-        locs <- as.data.frame(locs)
+    locs <- tryCatch(
+      {
+        if (data.table::is.data.table(locs)) {
+          locs <- as.data.frame(locs)
+        }
+        locsa <- terra::deepcopy(terra::vect(locs))
+        locs_crs <- terra::crs(locsa)
+        if (locs_crs == "" || is.na(locs_crs)) {
+          terra::crs(locsa) <- "EPSG:4326"
+        }
+        locsa
+      },
+      error = function(e) {
+        stop("Failed to locs to a terra::SpatVector.")
       }
-      locsa <- terra::deepcopy(terra::vect(locs))
-      locs_crs <- terra::crs(locsa)
-      if (locs_crs == "" || is.na(locs_crs)) {
-        terra::crs(locsa) <- "EPSG:4326"
-      }
-      locsa
-    },
-    error = function(e) {
-      stop("Failed to locs to a terra::SpatVector.")
-    }
     )
   }
   if (!methods::is(from, "SpatRaster")) {
@@ -336,15 +401,18 @@ calc_nlcd <- function(from,
       #stack_apply = TRUE,
       force_df = TRUE,
       progress = FALSE,
-      max_cells_in_memory = max_cells)
+      max_cells_in_memory = max_cells
+    )
   # select only the columns of interest
   cfpath <- system.file("extdata", "nlcd_classes.csv", package = "amadeus")
   nlcd_classes <- utils::read.csv(cfpath)
   nlcd_at_bufs <-
     nlcd_at_bufs[
       sort(names(nlcd_at_bufs)[
-        grepl(paste0("frac_(", paste(nlcd_classes$value, collapse = "|"), ")"),
-              names(nlcd_at_bufs))
+        grepl(
+          paste0("frac_(", paste(nlcd_classes$value, collapse = "|"), ")"),
+          names(nlcd_at_bufs)
+        )
       ])
     ]
   # change column names
@@ -368,17 +436,21 @@ calc_nlcd <- function(from,
 
 
 system.time(
-kxt <- amadeus::calc_nlcd(
-  from = kx,
-  locs = tar_read(sf_feat_proc_aqs_sites),
-  locs_id = "site_id",
-  radius = 1000,
-  max_cells = 1e6
-)
+  kxt <- amadeus::calc_nlcd(
+    from = kx,
+    locs = tar_read(sf_feat_proc_aqs_sites),
+    locs_id = "site_id",
+    radius = 1000,
+    max_cells = 1e6
+  )
 )
 
 read_locs(
-  path = list.files("input/aqs", pattern = "daily_88101_*.*.csv$", full.names = TRUE),
+  path = list.files(
+    "input/aqs",
+    pattern = "daily_88101_*.*.csv$",
+    full.names = TRUE
+  ),
   date = c("2018-01-15", "2018-02-21"),
   mode = "location",
   return_format = "sf"
@@ -391,9 +463,6 @@ xlr <- lapply(xl, \(dt) dt[, time := as.character(time)])
 reduce_merge(xlr)
 
 
-
-
-
 # list_feat_calc_narr_08994ec6855ea923
 source("inst/targets/pipeline_base_functions.R")
 gg <-
@@ -404,13 +473,12 @@ gg <-
   )
 
 gge <-
-calc_narr2(
-  from = gg,
-  locs = tar_read(sf_feat_proc_aqs_sites),
-  locs_id = "site_id",
-  radius = 0
-)
-
+  calc_narr2(
+    from = gg,
+    locs = tar_read(sf_feat_proc_aqs_sites),
+    locs_id = "site_id",
+    radius = 0
+  )
 
 
 # post_calc_df_year_expand example
@@ -419,27 +487,27 @@ dtnlcd <- tar_read(list_feat_calc_base_flat)[[2]]
 dtnei <- tar_read(list_feat_calc_base_flat)[[4]]
 
 dtnlcde <-
-post_calc_df_year_expand(
-  dtnlcd,
-  time_start = 2018L,
-  time_end = 2022L,
-  time_available = c(2019L, 2021L)
-)
+  post_calc_df_year_expand(
+    dtnlcd,
+    time_start = 2018L,
+    time_end = 2022L,
+    time_available = c(2019L, 2021L)
+  )
 dtnlcd
 dtneie <-
-post_calc_df_year_expand(
-  dtnei,
-  time_start = 2018L,
-  time_end = 2022L,
-  time_available = c(2017L, 2020L)
-)
+  post_calc_df_year_expand(
+    dtnei,
+    time_start = 2018L,
+    time_end = 2022L,
+    time_available = c(2017L, 2020L)
+  )
 table(dtneie$time, dtneie$nei_year)
 
 datf <- tar_read(dt_feat_calc_date)
 post_calc_drop_cols(dtnlcd)
 datjj <- post_calc_autojoin(datf, dtnlcd)
 dtnlcdv <- data.table::setkeyv(dtnlcd, c("site_id", "time"))
-datkk <- post_calc_join_yeardate(dtnlcdv[, -c("year"), with=F], datf)
+datkk <- post_calc_join_yeardate(dtnlcdv[, -c("year"), with = F], datf)
 
 datff <- datf[, `:=`(year = as.integer(substr(time, 1, 4)))]
 datkkk <- merge(dtnlcde, datff, by = c("site_id", "year"))
@@ -447,41 +515,47 @@ datkkk <- merge(dtnlcde, datff, by = c("site_id", "year"))
 which(names(datf) %in% "time")
 
 post_calc_year_expand(
-  2018, 2022, time_available = c(2017, 2021)
+  2018,
+  2022,
+  time_available = c(2017, 2021)
 )
 post_calc_year_expand(
-  2018, 2022, time_available = c(2019, 2021)
+  2018,
+  2022,
+  time_available = c(2019, 2021)
 )
 sort(unique(unlist(dtneie[["time"]])))
 
 
 datex1 <-
-post_calc_df_year_expand(
-  dtneie,
-  time_start = 2018,
-  time_end = 2022,
-  time_available = c(2017, 2021)
-)
+  post_calc_df_year_expand(
+    dtneie,
+    time_start = 2018,
+    time_end = 2022,
+    time_available = c(2017, 2021)
+  )
 datex2 <-
-post_calc_df_year_expand(
-  dtnlcd,
-  time_start = 2018,
-  time_end = 2022,
-  time_available = c(2019, 2021)
-)
+  post_calc_df_year_expand(
+    dtnlcd,
+    time_start = 2018,
+    time_end = 2022,
+    time_available = c(2019, 2021)
+  )
 
 
 sfsts <- tar_read(sf_feat_proc_aqs_sites)
 nlcd <- amadeus::process_nlcd(path = "input/nlcd/raw", year = 2019L)
 nlcdcalc <- amadeus::calc_nlcd(nlcd, sfsts, max_cells = 3e7)
 
-calc_nlcd0 <- function(from,
-                      locs,
-                      locs_id = "site_id",
-                      radius = 1000,
-                      max_cells = 1e8,
-                      geom = FALSE,
-                      ...) {
+calc_nlcd0 <- function(
+  from,
+  locs,
+  locs_id = "site_id",
+  radius = 1000,
+  max_cells = 1e8,
+  geom = FALSE,
+  ...
+) {
   # check inputs
   if (!is.numeric(radius)) {
     stop("radius is not a numeric.")
@@ -537,8 +611,10 @@ calc_nlcd0 <- function(from,
   nlcd_at_bufs <-
     nlcd_at_bufs[
       sort(names(nlcd_at_bufs)[
-        grepl(paste0("frac_(", paste(nlcd_classes$value, collapse = "|"), ")"),
-              names(nlcd_at_bufs))
+        grepl(
+          paste0("frac_(", paste(nlcd_classes$value, collapse = "|"), ")"),
+          names(nlcd_at_bufs)
+        )
       ])
     ]
   # change column names
@@ -566,10 +642,6 @@ calc_nlcd0 <- function(from,
 
 nlcdcalc0 <- calc_nlcd0(nlcd, sfsts, radius = 1e4, max_cells = 5e7)
 nlcdcalc <- amadeus::calc_nlcd(nlcd, sfsts, radius = 1e4, max_cells = 3e8)
-
-
-
-
 
 
 ## tidymodel specification
@@ -601,35 +673,55 @@ mlp_workflow <- workflow() |>
   fit_resamples(dfcovarstdt_cv, yardstick::metric_set(rmse, mae))
 
 
-
-## 
+##
 t1 <-
-process_narr2(
-  date = c("2018-01-01", "2018-03-31"),
-  variable = "omega",
-  path = "input/narr"
-)
+  process_narr2(
+    date = c("2018-01-01", "2018-03-31"),
+    variable = "omega",
+    path = "input/narr"
+  )
 cc <-
-calc_narr2(
-  from = t1,
-  locs = tar_read(sf_feat_proc_aqs_sites)[1:10,],
-  locs_id = "site_id",
-  radius = 0
-)
+  calc_narr2(
+    from = t1,
+    locs = tar_read(sf_feat_proc_aqs_sites)[1:10, ],
+    locs_id = "site_id",
+    radius = 0
+  )
 
 
 # NLCD rerun: "list_feat_calc_base_80d971c6df0131b6"
 # tar_make_future(c(list_feat_calc_base_80d971c6df0131b6, list_feat_calc_narr), workers = 2)
 # tar_make_future(list_feat_calc_base_80d971c6df0131b6, workers = 2)
 
-
 # NARR error in 1+ year runs
 # Warning: [rast] GDAL did not find an extent. Cells not equally spaced?
 narrk <- "input/narr"
-narrvars = c("air.sfc", "albedo", "apcp", "dswrf", "evap", "hcdc",
-              "hpbl", "lcdc", "lhtfl", "mcdc", "omega", "pr_wtr",
-              "prate", "pres.sfc", "shtfl", "shum", "snowc", "soilm",    
-              "tcdc", "ulwrf.sfc", "uwnd.10m", "vis", "vwnd.10m", "weasd")
+narrvars = c(
+  "air.sfc",
+  "albedo",
+  "apcp",
+  "dswrf",
+  "evap",
+  "hcdc",
+  "hpbl",
+  "lcdc",
+  "lhtfl",
+  "mcdc",
+  "omega",
+  "pr_wtr",
+  "prate",
+  "pres.sfc",
+  "shtfl",
+  "shum",
+  "snowc",
+  "soilm",
+  "tcdc",
+  "ulwrf.sfc",
+  "uwnd.10m",
+  "vis",
+  "vwnd.10m",
+  "weasd"
+)
 
 for (i in narrvars) {
   cat(sprintf("processing %s\n", i))
@@ -651,22 +743,29 @@ post_calc_autojoin(dtt, fl)
 
 
 library(beethoven)
-qt <- qs::qread("inst/targets/punchcard_calc.qs")
+qt <- qs2::qread2("inst/targets/punchcard_calc.qs")
 ld <- loadargs("inst/targets/punchcard_calc.qs", "nlcd")
 sts <- targets::tar_read(sf_feat_proc_aqs_sites)
 
 rr <- rlang::inject(calculate(locs = sts, !!!ld))
 
 
-
 nlcd21 <- "/ddn/gs1/group/set/Projects/NRT-AP-Model/input/nlcd/data_files/nlcd_2021_land_cover_l48_20230630.img"
 nlcd21 <- terra::rast(nlcd21)
-terra::vect(cbind(-88, 36), crs = "EPSG:4326") |> terra::project(terra::crs(nlcd21)) |> terra::buffer(50000) -> buf
+terra::vect(cbind(-88, 36), crs = "EPSG:4326") |>
+  terra::project(terra::crs(nlcd21)) |>
+  terra::buffer(50000) -> buf
 bufs <- sf::st_as_sf(buf)
 bufs$id <- 1
 terra::extract(nlcd21, buf, fun = table, exact = TRUE)
 
-xx <- exactextractr::exact_extract(nlcd21, bufs, fun = "frac", force_df = TRUE, append_cols = "id")
+xx <- exactextractr::exact_extract(
+  nlcd21,
+  bufs,
+  fun = "frac",
+  force_df = TRUE,
+  append_cols = "id"
+)
 Sys.time()
 
 
@@ -676,12 +775,13 @@ library(dplyr)
 
 tar_read(dt_feat_calc_imputed) -> dff
 dffs <- dff[, c("site_id", "time"), with = F]
-dffss <- dffs[1:1e4,]
+dffss <- dffs[1:1e4, ]
 rsample::vfold_cv(dffss, v = 5) -> cv
 
 cvrestore <-
   beethoven:::restore_rset_full(
-    cv, dff
+    cv,
+    dff
   )
 
 # define a simple tidymodels workflow to use cvrestore object
@@ -701,9 +801,14 @@ pm25mod <- workflows::workflow() |>
   tune::tune_bayes(
     resamples = cvrestore,
     iter = 2,
-    metrics = yardstick::metric_set(yardstick::rmse, yardstick::mae, yardstick::mape),
-    control = control_bayes(save_workflow = F, save_pred = FALSE)) #|>
-  # tune::fit_resamples(metrics = yardstick::metric_set(rmse, mae))
+    metrics = yardstick::metric_set(
+      yardstick::rmse,
+      yardstick::mae,
+      yardstick::mape
+    ),
+    control = control_bayes(save_workflow = F, save_pred = FALSE)
+  ) #|>
+# tune::fit_resamples(metrics = yardstick::metric_set(rmse, mae))
 
 pm25mod[pm25mod$.iter == 1, ".metrics"][[1]]
 
@@ -711,18 +816,20 @@ pm25modbdf <- tune::select_best(pm25mod, metric = "rmse")
 pm25modbest <- finalize_workflow(pm25mod, pm25modbdf)
 pm25modb <- tune::fit_best(pm25mod)
 pm25pred <- predict(pm25modb, dff[seq_len(1e4L), ])
-yardstick::rmse_vec(unlist(dff[seq_len(1e4L), "Arithmetic.Mean"]), pm25pred$.pred)
+yardstick::rmse_vec(
+  unlist(dff[seq_len(1e4L), "Arithmetic.Mean"]),
+  pm25pred$.pred
+)
 
 dffsu <- unique(dffs)
 dffx <- collapse::join(dffsu, dff, on = c("site_id", "time"), how = "anti")
 dffx
 
 # subset dff with duplicate site_id and time
-dffd <- dff[duplicated(dffs) | duplicated(dffs, fromLast = TRUE),]
+dffd <- dff[duplicated(dffs) | duplicated(dffs, fromLast = TRUE), ]
 
 dfbs <- dfb[, c("site_id", "time"), with = F]
-dfbd <- dfb[duplicated(dfbs) | duplicated(dfbs, fromLast = TRUE),]
-
+dfbd <- dfb[duplicated(dfbs) | duplicated(dfbs, fromLast = TRUE), ]
 
 
 dim(dff)
@@ -731,7 +838,7 @@ dtt
 
 dtb <- tar_read(dt_feat_calc_base)
 dtbt <- dtb[, c("site_id", "time"), with = F]
-dtbd <- dtb[duplicated(dtbt) | duplicated(dtbt, fromLast = TRUE),]
+dtbd <- dtb[duplicated(dtbt) | duplicated(dtbt, fromLast = TRUE), ]
 dim(dtbd)
 
 
@@ -740,7 +847,7 @@ lfn <- tar_read(list_feat_calc_nasa)
 library(data.table)
 lapply(lfn, function(x) {
   xx <- as.data.table(x)[, c("site_id", "time"), with = F]
-  xxd <- x[duplicated(xx) | duplicated(xx, fromLast = TRUE),]
+  xxd <- x[duplicated(xx) | duplicated(xx, fromLast = TRUE), ]
   dim(xxd)
 })
 
@@ -748,10 +855,9 @@ lfg <- tar_read(list_feat_calc_gmted)
 lfna <- tar_read(list_feat_calc_narr)
 lapply(lfna, function(x) {
   xx <- as.data.table(x)[, c("site_id", "time"), with = F]
-  xxd <- x[duplicated(xx) | duplicated(xx, fromLast = TRUE),]
+  xxd <- x[duplicated(xx) | duplicated(xx, fromLast = TRUE), ]
   dim(xxd)
 })
-
 
 
 library(sf)
@@ -767,18 +873,19 @@ point <- st_as_sf(point)
 point$site_id <- "1"
 point$time <- "2024-01-01"
 
-inject_nlcd(year = 2021,
-                            radius = 1000,
-                            from = amadeus::process_nlcd(
-                              path = "/ddn/gs1/group/set/Projects/NRT-AP-Model/input/nlcd/data_files",
-                              year = 2021
-                            ),
-                            locs = point,
-                            locs_id = "site_id",
-                            nthreads = 1L,
-                            mode = "exact",
-                            max_cells = 3e7
-                            )
+inject_nlcd(
+  year = 2021,
+  radius = 1000,
+  from = amadeus::process_nlcd(
+    path = "/ddn/gs1/group/set/Projects/NRT-AP-Model/input/nlcd/data_files",
+    year = 2021
+  ),
+  locs = point,
+  locs_id = "site_id",
+  nthreads = 1L,
+  mode = "exact",
+  max_cells = 3e7
+)
 
 df_feat_calc_nlcd_params <- data.frame(
   year = 2021,
@@ -786,18 +893,19 @@ df_feat_calc_nlcd_params <- data.frame(
 )
 file_prep_calc_args <- "inst/targets/calc_spec.qs"
 
-inject_nlcd(year = df_feat_calc_nlcd_params$year,
-                            radius = df_feat_calc_nlcd_params$radius,
-                            from = amadeus::process_nlcd(
-                              path = loadargs(file_prep_calc_args, "nlcd")$path,
-                              year = df_feat_calc_nlcd_params$year
-                            ),
-                            locs = point,
-                            locs_id = arglist_common$char_siteid,
-                            nthreads = 10L,
-                            mode = "exact",
-                            max_cells = 3e7
-                            )
+inject_nlcd(
+  year = df_feat_calc_nlcd_params$year,
+  radius = df_feat_calc_nlcd_params$radius,
+  from = amadeus::process_nlcd(
+    path = loadargs(file_prep_calc_args, "nlcd")$path,
+    year = df_feat_calc_nlcd_params$year
+  ),
+  locs = point,
+  locs_id = arglist_common$char_siteid,
+  nthreads = 10L,
+  mode = "exact",
+  max_cells = 3e7
+)
 
 #' Generate spatio-temporal cross-validation index with anticlust
 #'
@@ -931,7 +1039,7 @@ generate_cv_index_spt <-
       data_exs <- data_ex |>
         dplyr::group_by(cv_index) |>
         dplyr::summarize(
-          dplyr::across(dplyr::all_of(target_cols), ~mean(as.numeric(.x)))
+          dplyr::across(dplyr::all_of(target_cols), ~ mean(as.numeric(.x)))
         ) |>
         dplyr::ungroup()
 

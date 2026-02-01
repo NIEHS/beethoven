@@ -121,7 +121,7 @@ load_modis_files <- function(path, pattern = "hdf$", date = character(2)) {
 #' @param export Export the file to qs. Default is FALSE.
 #' @param ... Passed arguments to `fun_aqs`
 #' @return Depending on `fun_aqs` specification.
-#' @importFrom qs qsave
+#' @importFrom qs2 qs_save
 #' @importFrom amadeus process_aqs
 #' @export
 read_locs <-

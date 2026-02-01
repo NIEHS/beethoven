@@ -382,7 +382,7 @@ set_args_download <-
 #' * nthreads_append: Number of threads for appending data.
 #' * nthreads_impute: Number of threads for imputing data.
 #' @author Insang Song
-#' @importFrom qs qsave
+#' @importFrom qs2 qs_save
 #' @importFrom tibble tribble
 #' @export
 set_args_calc <-

@@ -371,7 +371,7 @@ testthat::test_that("post_calc_autojoin expands and joins data.frames with diffe
 testthat::test_that("impute_all", {
   # sample data
   # sample data is 3 sites for 5 days
-  dt_full <- qs::qread(
+  dt_full <- qs2::qread2(
     testthat::test_path("..", "testdata", "postprocessing", "dt_full.qs")
   )
 
@@ -480,7 +480,7 @@ testthat::test_that("append_predecessors", {
   testthat::expect_true(file.exists(paste0(append_directory, path_append1)))
   # expect no error on re-read
   testthat::expect_no_error(
-    dt_append1 <- qs::qread(paste0(append_directory, path_append1))
+    dt_append1 <- qs2::qread2(paste0(append_directory, path_append1))
   )
   # expect data.frame
   testthat::expect_s3_class(dt_append1, "data.frame")

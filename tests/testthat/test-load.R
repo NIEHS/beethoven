@@ -83,14 +83,13 @@ testthat::test_that("load_modis_files", {
 ################################################################################
 ##### read_locs
 
-
 ################################################################################
 ##### unmarshal_function
 testthat::test_that("unmarshal_function", {
-  withr::local_package("qs")
+  withr::local_package("qs2")
   # expect no error for function name
   testthat::expect_no_error(
-    unmarshal_example <- beethoven::unmarshal_function("qs::qread")
+    unmarshal_example <- beethoven::unmarshal_function("qs2::qread2")
   )
   # expect the output to be a function
   testthat::expect_true(is.function(unmarshal_example))
