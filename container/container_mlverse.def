@@ -62,9 +62,9 @@ From: rocker/ml-spatial:latest
     Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('mirai', upgrade = TRUE)"    
     Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('nanonext', upgrade = TRUE)"   
     
-    Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('DBI', upgrade = TRUE); pak::pak('duckdb', upgrade = TRUE)"
+    Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('DBI', upgrade = TRUE)"
     Rscript -e ".libPaths('/opt/Rlibs'); pak::pak(c('tarchetypes', 'testthat', 'tidymodels', \
-        'bonsai', 'qs2', 'kernlab', 'sqltargets'), upgrade = TRUE)"
+        'bonsai', 'qs', 'qs2', 'kernlab', 'sqltargets'), upgrade = TRUE)"
     Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('NIEHS/amadeus', upgrade = TRUE)"
     Rscript -e ".libPaths('/opt/Rlibs'); pak::pak(c('scoringRules', 'future.mirai', 'vetiver', \
         'lwgeom', 'doRNG', 'quarto', 'kernlab'), upgrade = TRUE)"
