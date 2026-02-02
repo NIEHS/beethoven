@@ -130,7 +130,7 @@ target_metalearner <-
       pattern = map(num_cv_index),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_50")
+        crew = targets::tar_resources_crew(controller = "controller_big")
       )
     ),
     targets::tar_target(
@@ -167,7 +167,7 @@ target_metalearner <-
       pattern = map(list_meta_rset_train),
       iteration = "list",
       resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(controller = "controller_lgb")
+        crew = targets::tar_resources_crew(controller = "controller_gpu")
       ),
       description = "Fit meta learner | lightgbm | cpu | meta"
     )
@@ -188,7 +188,7 @@ target_metalearner <-
     #   iteration = "list",
     #   description = "Predict on test data | elnet | meta",
     #   resources = targets::tar_resources(
-    #     crew = targets::tar_resources_crew(controller = "controller_50")
+    #     crew = targets::tar_resources_crew(controller = "controller_big")
     #   )
     # ),
     # targets::tar_target(

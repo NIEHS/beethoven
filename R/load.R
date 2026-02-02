@@ -34,13 +34,13 @@
 #' @param dataset character(1). Dataset name.
 #' @return A list of arguments stored in `dataset` slot of the
 #'   argument file.
-#' @importFrom qs qread
+#' @importFrom qs2 qs_read
 #' @export
 loadargs <- function(argfile, dataset) {
   if (endsWith(argfile, ".rds")) {
     arglist <- readRDS(argfile)
   } else if (endsWith(argfile, ".qs")) {
-    arglist <- qs::qread(argfile)
+    arglist <- qs2::qs_read(argfile)
   } else {
     stop("Invalid format.")
   }
@@ -121,7 +121,7 @@ load_modis_files <- function(path, pattern = "hdf$", date = character(2)) {
 #' @param export Export the file to qs. Default is FALSE.
 #' @param ... Passed arguments to `fun_aqs`
 #' @return Depending on `fun_aqs` specification.
-#' @importFrom qs qsave
+#' @importFrom qs2 qs_save
 #' @importFrom amadeus process_aqs
 #' @export
 read_locs <-
@@ -131,7 +131,9 @@ read_locs <-
     ...
   ) {
     aqs_read <- fun_aqs(...)
-    if (export) qs::qsave(aqs_read, file = "input/sf_feat_proc_aqs_sites.qs")
+    if (export) {
+      qs2::qs_save(aqs_read, file = "input/sf_feat_proc_aqs_sites.qs")
+    }
     return(aqs_read)
   }
 # nocov end
@@ -145,7 +147,7 @@ read_locs <-
 #' current environment.
 #' @description this function is developed to avoid
 #'   random errors in compressing and decompressing R function objects
-#'   with `qs::qsave` and `qs::qread`. If you encounter such errors, please use
+#'   with `qs2::qs_save` and `qs2::qs_read`. If you encounter such errors, please use
 #'   this function with function name strings to save and load the function
 #'   objects.
 #' @export

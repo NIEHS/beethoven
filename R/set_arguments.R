@@ -285,7 +285,7 @@ set_args_download <-
 
     if (export) {
       if (endsWith(path_export, "qs")) {
-        qs::qsave(list_download_config, path_export)
+        qs2::qs_save(list_download_config, path_export)
         message("Download configuration is saved to ", path_export)
       } else if (endsWith(path_export, "rds")) {
         saveRDS(list_download_config, path_export)
@@ -382,7 +382,7 @@ set_args_download <-
 #' * nthreads_append: Number of threads for appending data.
 #' * nthreads_impute: Number of threads for imputing data.
 #' @author Insang Song
-#' @importFrom qs qsave
+#' @importFrom qs2 qs_save
 #' @importFrom tibble tribble
 #' @export
 set_args_calc <-
@@ -656,45 +656,45 @@ set_args_calc <-
 
       attr(list_calcspec, "description") <-
         tibble::tribble(
-          ~dataset,
-          ~description,
-          "mod11",
-          "MODIS Land Surface Temperature Day/Night",
-          "mod06",
-          "MODIS Cloud Fraction Day/Night",
-          "mod09",
-          "MODIS Surface Reflectance",
-          "mcd19_1km",
-          "MCD19A2 1km",
-          "mcd19_5km",
-          "MCD19A2 5km",
-          "mod13",
-          "MODIS Normalized Difference Vegetation Index",
-          "viirs",
-          "VIIRS Nighttime Lights",
-          "hms",
-          "NOAA Hazard Mapping System Smoke",
-          "geoscf_aqc",
-          "GEOS-CF AQC",
-          "geoscf_chm",
-          "GEOS-CF CHM",
-          "gmted",
-          "GMTED elevation",
-          "nei",
-          "National Emission Inventory",
-          "tri",
-          "Toxic Release Inventory",
-          "nlcd",
-          "National Land Cover Database",
-          "koppen",
-          "Koppen-Geiger Climate Classification",
-          "ecoregions",
-          "EPA Ecoregions",
-          "narr",
-          "NARR",
-          "groads",
-          "SEDAC Global Roads",
-          "population",
+          ~dataset                                       ,
+          ~description                                   ,
+          "mod11"                                        ,
+          "MODIS Land Surface Temperature Day/Night"     ,
+          "mod06"                                        ,
+          "MODIS Cloud Fraction Day/Night"               ,
+          "mod09"                                        ,
+          "MODIS Surface Reflectance"                    ,
+          "mcd19_1km"                                    ,
+          "MCD19A2 1km"                                  ,
+          "mcd19_5km"                                    ,
+          "MCD19A2 5km"                                  ,
+          "mod13"                                        ,
+          "MODIS Normalized Difference Vegetation Index" ,
+          "viirs"                                        ,
+          "VIIRS Nighttime Lights"                       ,
+          "hms"                                          ,
+          "NOAA Hazard Mapping System Smoke"             ,
+          "geoscf_aqc"                                   ,
+          "GEOS-CF AQC"                                  ,
+          "geoscf_chm"                                   ,
+          "GEOS-CF CHM"                                  ,
+          "gmted"                                        ,
+          "GMTED elevation"                              ,
+          "nei"                                          ,
+          "National Emission Inventory"                  ,
+          "tri"                                          ,
+          "Toxic Release Inventory"                      ,
+          "nlcd"                                         ,
+          "National Land Cover Database"                 ,
+          "koppen"                                       ,
+          "Koppen-Geiger Climate Classification"         ,
+          "ecoregions"                                   ,
+          "EPA Ecoregions"                               ,
+          "narr"                                         ,
+          "NARR"                                         ,
+          "groads"                                       ,
+          "SEDAC Global Roads"                           ,
+          "population"                                   ,
           "SEDAC Population Density"
         )
       if (is.null(path_export)) {
@@ -702,7 +702,7 @@ set_args_calc <-
         return(list_common)
       } else {
         if (endsWith(path_export, "qs")) {
-          qs::qsave(list_calcspec, path_export)
+          qs2::qs_save(list_calcspec, path_export)
         } else if (endsWith(path_export, "rds")) {
           saveRDS(list_calcspec, path_export)
         } else {
@@ -717,7 +717,7 @@ set_args_calc <-
 
 #' Configure Library Paths and Environment Variables for Beethoven Workflow
 #'
-#' This function sets up the library paths and environmental variables required
+#' This function sets up the library paths and environmental variables requireds_
 #' for running the Beethoven workflow in a containerized environment.
 #' @keywords Utility
 #' @param libpaths A character vector specifying the library paths to use.

@@ -1,0 +1,47 @@
+############################################
+# R ENVIRONMENT
+############################################
+R_LIBS_SITE=/opt/Rlibs
+R_LIBS_USER=/opt/Rlibs
+
+# Prepend R and CUDA to PATH (do not override)
+PATH=/usr/local/lib/R/bin:/usr/local/cuda/bin:\
+/usr/local/nvidia/bin:\
+/usr/local/sbin:\
+/usr/local/bin:\
+/usr/sbin:\
+/usr/bin:\
+/sbin:\
+/bin:$PATH
+
+# Only CUDA lib64 is added — prepend, don't overwrite
+LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+CUDA_VISIBLE_DEVICES=0,1,2,3
+
+
+############################################
+# OTHER TOOLS
+############################################
+EDITOR=vi
+PAGER=/usr/bin/less
+SLURM_CONF=/ddn/gs1/tools/slurm/etc/slurm/slurm.conf
+
+
+############################      CERTIFICATES      ############################
+# Export CURL_CA_BUNDLE and SSL_CERT_FILE environmental variables to verify
+# servers' SSL certificates during download.
+CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+
+
+############################################ THREADS ############################################
+# Set default number of threads for parallel processing within R.
+OMP_NUM_THREADS=1
+LIGHTGBM_NUM_THREADS=1
+
+
+########### NASA TOKEN ########
+EARTH_DATA=eyJ0eXAiOiJKV1QiLCJvcmlnaW4iOiJFYXJ0aGRhdGEgTG9naW4iLCJzaWciOiJlZGxqd3RwdWJrZXlfb3BzIiwiYWxnIjoiUlMyNTYifQ.eyJ0eXBlIjoiVXNlciIsInVpZCI6Im1lc3NpZXJrcCIsImV4cCI6MTc3MzU4MzAxMCwiaWF0IjoxNzY4Mzk5MDEwLCJpc3MiOiJodHRwczovL3Vycy5lYXJ0aGRhdGEubmFzYS5nb3YiLCJpZGVudGl0eV9wcm92aWRlciI6ImVkbF9vcHMiLCJhY3IiOiJlZGwiLCJhc3N1cmFuY2VfbGV2ZWwiOjN9.G5BSSyhh-xFvhnAiwr6Ty5tj7i2vsFRPaZXxTYrtwSqlh3rKovsXgwQJ0JPDQCc8nisi8_aJc2ap1BWIymqfFaUgBcQF_rtg8XS3RjwFeeW8bGfekews_-otDKpHkvEcSER54_MiJ4Rqwaxq1uRxW1qtVYqidS24ON8oPkQZqsCEFKyLozpzA3FiJB0F_45pGX0pTGBi-OZlCcfGx2TO6bC5Q2sOK7lqVjcOt9kCP5YoKxv_H4gNnvRg7ZGPFe-lxQ42Rq3dQEU1Y9v9tYqeZV1fctqyoj_ImJJVjgdUC8x9uFQIvTIvEBXb_j7WlxLlhUxi2iq6eCBhl0vLnagVLw
+
+
+

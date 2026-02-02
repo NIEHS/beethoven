@@ -60,6 +60,18 @@ From: nvidia/cuda:11.8.0-devel-ubuntu22.04
         build-essential \
         && rm -rf /var/lib/apt/lists/*
 
+    apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y slurm-client munge && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*        
+
+
+    # Set default library to /opt/Rlibs
+    echo 'R_LIBS_USER=/opt/Rlibs' >> /etc/environment
+    echo 'R_LIBS=/opt/Rlibs' >> /etc/environment
+    echo 'R_LIBS_SITE=/opt/Rlibs' >> /etc/environment
+
+
+
     # Install CMake 3.28 or newer
     wget https://github.com/Kitware/CMake/releases/download/v3.28.0/cmake-3.28.0-linux-x86_64.tar.gz
     tar -xvzf cmake-3.28.0-linux-x86_64.tar.gz --strip-components=1 -C /usr/local
@@ -88,41 +100,54 @@ From: nvidia/cuda:11.8.0-devel-ubuntu22.04
     mkdir /pipeline
     mkdir /input
     mkdir /opt/_targets
+    mkdir /opt/Rlibs
+    mkdir /inst
+    chmod -R 777 /opt/Rlibs
+
+    
+    export R_LIBS_USER=/opt/Rlibs
+    export RENV_PATHS_LIBRARY=/opt/Rlibs
+
+    # Pre-install some bootstrap packages so renv can resolve dependencies faster
+    Rscript -e ".libPaths('/opt/Rlibs'); install.packages(c('renv','pak','devtools'), repos = 'https://cloud.r-project.org')"
+    Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('targets', upgrade = TRUE)"
+    Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('tarchetypes', upgrade = TRUE)"    
+    Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('crew', upgrade = TRUE)"    
+    Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('crew.cluster', upgrade = TRUE)"    
+    Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('mirai', upgrade = TRUE)"    
+    Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('nanonext', upgrade = TRUE)"        
 
     # Install R packages (mimicking rocker/ml-verse setup)
-    Rscript -e "install.packages(c('R6', 'data.table', 'jsonlite', 'knitr'), \
-        repos = 'https://cran.r-project.org')"
-    Rscript -e "install.packages(c('pak', 'devtools'))"
-    Rscript -e "devtools::install_version('targets', version = '1.10.0')"
-    Rscript -e "pak::pak('mitchellmanware/parsnip@beethoven')"
-    Rscript -e "install.packages(c('tarchetypes', 'sqltargets', \
+    Rscript -e ".libPaths('/opt/Rlibs'); pak::pak(c('R6', 'data.table', 'jsonlite', 'knitr'), upgrade = TRUE)"
+    Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('mitchellmanware/parsnip@beethoven')"
+    Rscript -e ".libPaths('/opt/Rlibs'); pak::pak(c('tarchetypes', 'sqltargets', \
         'testthat', 'tidymodels', 'bonsai', 'qs2', \
-        'tidyverse', 'glmnet', 'covr', 'lightgbm'))"
-    Rscript -e "devtools::install_version('torch', version = '0.15.1')"
-    Rscript -e "options(timeout = 1800); torch::install_torch(version = 'latest', type = 'gpu')"
-    Rscript -e "pak::pak('tidymodels/brulee@gpu')"
-    Rscript -e "pak::pak('shikokuchuo/nanonext'); pak::pak('shikokuchuo/mirai')"
-    Rscript -e "devtools::install_version('crew', version = '1.1.2')"
-    Rscript -e "devtools::install_version('crew.cluster', version = '0.3.7')"
-    # Rscript -e "pak::pak('wlandau/crew'); pak::pak('wlandau/crew.cluster')"
-    Rscript -e "install.packages(c('scoringRules', 'future.mirai', 'vetiver', \
-        'lwgeom', 'doRNG', 'quarto', 'kernlab', 'arrow', 'h3r'))"
-    Rscript -e "pak::pak('finetune')"
-    Rscript -e "pak::pak('lme4',upgrade = TRUE)"
-    Rscript -e "remotes::install_github('crazycapivara/h3-r')"
-    Rscript -e "pak::pak('ropensci/chopin')"
-    Rscript -e "pak::pak('NIEHS/beethoven@mm-0701')"
-    Rscript -e "pak::pak('r-lib/ps', upgrade = TRUE)"
+        'tidyverse', 'glmnet', 'covr', 'lightgbm'), upgrade = TRUE)"
+    Rscript -e ".libPaths('/opt/Rlibs'); devtools::install_version('torch', version = '0.15.1')"
+    Rscript -e ".libPaths('/opt/Rlibs'); options(timeout = 1800); torch::install_torch(version = 'latest', type = 'gpu')"
+    Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('tidymodels/brulee@gpu')"
+    Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('wlandau/autometric', upgrade = TRUE)"
+    Rscript -e ".libPaths('/opt/Rlibs'); pak::pak(c('scoringRules', 'future.mirai', 'vetiver', \
+        'lwgeom', 'doRNG', 'quarto', 'kernlab', 'arrow', 'h3r'), upgrade = TRUE)"
+    Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('finetune', upgrade = TRUE)"
+    Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('lme4',upgrade = TRUE)"
+    Rscript -e ".libPaths('/opt/Rlibs'); remotes::install_github('crazycapivara/h3-r')"
+    Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('ropensci/chopin', upgrade = TRUE)"
+    Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('NIEHS/amadeus', upgrade = TRUE)"
+    Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('NIEHS/beethoven@h3_pred', upgrade = TRUE)"
+    Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('r-lib/ps', upgrade = TRUE)"    
+    Rscript -e ".libPaths('/opt/Rlibs'); pak::pak('tidymodels', upgrade = TRUE)"    
+
 
 %environment
     # Set locale and CUDA environment variables
     export LANG=en_US.UTF-8
     export LC_ALL=en_US.UTF-8
     export TERM=xterm-256color
-    export CUDA_VISIBLE_DEVICES=0,1,2,3
-    export PATH="/usr/local/cuda/bin:$PATH"
-    export CUDA_HOME="/usr/local/cuda"
-    export LD_LIBRARY_PATH="/usr/local/cuda/lib64:$LD_LIBRARY_PATH"
+
+
+    # Optionally preconfigure R
+    export R_LIBS_USER=/opt/Rlibs          
 
 %runscript
     # Define the default run behavior of the container

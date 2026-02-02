@@ -12,8 +12,13 @@ target_critical <-
     #####    chr_daterange.
     targets::tar_target(
       chr_daterange,
-      command = c("2018-01-01", "2022-12-31"),
-      description = "Date range | critical"
+      command = c("2018-01-01", "2020-12-31"),
+      description = "critical | Date range ",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_initiate"
+        )
+      )
     ),
     ##### 2. chr_nasa_token sets the file path to the user's NASA Earthdata
     #####    account credentials. We can create a group credential file,
@@ -22,27 +27,43 @@ target_critical <-
     #####    credential file, the token must be updated every 90 days.
     targets::tar_target(
       chr_nasa_token,
-      command = readLines("/inst/extdata/nasa_token.txt"),
-      description = "NASA Earthdata token | critical"
+      command = Sys.getenv("EARTH_DATA"),
+      description = "critical | NASA Earthdata token",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_initiate"
+        )
+      )
     ),
     ##### 3. chr_mod06_links is the file path to the MOD06 links file. These
     #####    links must be manually downloaded per the `amadeus::download_modis`
     #####    function. The links are then stored in a CSV file that is read
     #####    by the function. The new file with links must be updated to match
     #####    the new date range.
-    targets::tar_target(
-      chr_mod06_links,
-      command = "/inst/extdata/mod06_links_2018_2022.csv",
-      description = "File of MOD06 links | critical"
-    ),
+    ###### DEPRECATED BY AMADEUS
+    # targets::tar_target(
+    #   chr_mod06_links,
+    #   command = "/inst/extdata/mod06_links_2018_2022.csv",
+    #   description = "critical | File of MOD06 links",
+    #   resources = targets::tar_resources(
+    #     crew = targets::tar_resources_crew(
+    #       controller = "controller_initiate"
+    #     )
+    #   )
+    # ),
     ##### 4. chr_input_dir is the file path to the input directory. This target
     #####    controls where the raw data files are downloaded to and imported
     #####    from. This file path **MUST** be mounted to the container at run
     #####    time in the `run.sh` script.
     targets::tar_target(
       chr_input_dir,
-      command = "/input",
-      description = "Data directory | critical"
+      command = "/ddn/gs1/group/set/beethoven_store/input/",
+      description = "critical | Data directory",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_initiate"
+        )
+      )
     ),
     ##### 5. chr_dates_split controls the size of temporal splits. Splitting the
     #####    temporal range into smaller chunks allows for parallel processing
@@ -51,15 +72,25 @@ target_critical <-
     targets::tar_target(
       num_dates_split,
       command = 122,
-      description = "Number of days in each temporal split | critical"
+      description = "critical | Number of days in each temporal split",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_initiate"
+        )
+      )
     ),
     ##### 6. chr_store defines the path to the {targets} store **relative**
     #####    to the container-mounted file paths. Used for querying parquet
     #####    files for SQL merges.
     targets::tar_target(
       chr_store,
-      command = "/opt/_targets/objects/",
-      description = "{targets} store | critical"
+      command = "/ddn/gs1/group/set/beethoven_store/_targets/objects/",
+      description = "critical | {targets} store",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_initiate"
+        )
+      )
     )
     ############################################################################
     ############################################################################

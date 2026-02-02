@@ -27,7 +27,7 @@ environment variable. Defaults to \code{"/usr/local/cuda/lib64"}.}
 variable. Defaults to \code{"/usr/local/cuda"}.}
 }
 \description{
-This function sets up the library paths and environmental variables required
+This function sets up the library paths and environmental variables requireds_
 for running the Beethoven workflow in a containerized environment.
 }
 \keyword{Utility}

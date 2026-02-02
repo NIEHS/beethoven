@@ -411,14 +411,18 @@ reduce_merge <-
   ) {
     list_check <- sapply(list_in, nrow)
     list_checkdiff <- diff(list_check)
-    if (any(list_checkdiff > 0)) all.y <- TRUE
+    if (any(list_checkdiff > 0)) {
+      all.y <- TRUE
+    }
     for (i in seq_len(length(list_in))) {
       list_in[[i]] <- data.table::as.data.table(list_in[[i]])
     }
 
     Reduce(
       function(x, y) {
-        if (is.null(by)) by <- intersect(names(x), names(y))
+        if (is.null(by)) {
+          by <- intersect(names(x), names(y))
+        }
         data.table::merge.data.table(
           x,
           y,
@@ -453,7 +457,9 @@ reduce_merge_iter <- function(
 ) {
   list_check <- sapply(list_in, nrow)
   list_checkdiff <- diff(list_check)
-  if (any(list_checkdiff > 0)) all.y <- TRUE
+  if (any(list_checkdiff > 0)) {
+    all.y <- TRUE
+  }
   for (i in seq_len(length(list_in))) {
     list_in[[i]] <- data.table::setDT(list_in[[i]])
   }

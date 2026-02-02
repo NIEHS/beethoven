@@ -502,7 +502,7 @@ post_calc_autojoin <-
 #'
 #' @importFrom collapse set_collapse replace_inf replace_na fvar fnth
 #' @importFrom data.table setDTthreads setnafill
-#' @importFrom qs qread
+#' @importFrom qs2 qs_read
 #' @importFrom stats setNames
 #' @importFrom stringi stri_replace_all_regex
 #' @importFrom missRanger missRanger
@@ -524,7 +524,7 @@ impute_all <-
           )
         )
       }
-      dt <- qs::qread(file.path(dt))
+      dt <- qs2::qs_read(file.path(dt))
     }
     dt$time <- as.POSIXct(dt$time)
     # remove unnecessary columns
@@ -753,19 +753,19 @@ append_predecessors <-
         time_create
       )
     if (length(input_old) == 0) {
-      qs::qsave(input_new, file = file.path(path_qs, name_qs))
+      qs2::qs_save(input_new, file = file.path(path_qs, name_qs))
       return(name_qs)
     } else {
       # vv <- list()
-      qs::qsave(input_new, file = file.path(path_qs, name_qs))
+      qs2::qs_save(input_new, file = file.path(path_qs, name_qs))
       input_update <- list.files(path_qs, "*.*.qs$", full.names = TRUE)
       bound_large <-
         Reduce(
           function(x, y) {
             if (inherits(x, "data.frame")) {
-              bound <- rbind(x, qs::qread(y))
+              bound <- rbind(x, qs2::qs_read(y))
             } else {
-              bound <- rbind(qs::qread(x), qs::qread(y))
+              bound <- rbind(qs2::qs_read(x), qs2::qs_read(y))
             }
             return(bound)
           },

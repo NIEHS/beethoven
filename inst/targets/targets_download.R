@@ -1,16 +1,31 @@
 target_download <-
   list(
     targets::tar_target(
+      myenv,
+      Sys.getenv(),
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_download_norm"
+        )
+      ),
+      description = "Download | Environment variables"
+    ),
+    targets::tar_target(
       list_download_args,
       command = list(
         unzip = TRUE,
-        remove_zip = FALSE,
-        remove_command = TRUE,
+        remove_zip = TRUE,
+        remove_command = FALSE,
         acknowledgement = TRUE,
         download = TRUE,
-        hash = FALSE
+        hash = TRUE
       ),
-      description = "Common download arguments | download"
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_general_beethoven"
+        )
+      ),
+      description = "Download | Common download arguments"
     ),
     ###########################         AQS          ###########################
     targets::tar_target(
@@ -26,21 +41,30 @@ target_download <-
           download = list_download_args$download,
           hash = list_download_args$hash
         )
-        TRUE
       },
       pattern = map(chr_years),
-      description = "Download AQS data | download"
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_download_norm"
+        )
+      ),
+      description = "Download | Download AQS data"
     ),
     ###########################         GEOS         ###########################
     targets::tar_target(
       chr_iter_calc_geos,
       command = c("aqc_tavg_1hr_g1440x721_v1", "chm_tavg_1hr_g1440x721_v1"),
-      description = "GEOS-CF features | download"
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_download_norm"
+        )
+      ),
+      description = "Download | GEOS-CF features"
     ),
     targets::tar_target(
       download_geos,
       command = amadeus::download_geos(
-        collection = chr_iter_calc_geos,
+        collection = chr_iter_calc_geos[[1]],
         directory_to_save = file.path(chr_input_dir, "geos"),
         date = beethoven::fl_dates(unlist(list_dates)),
         remove_command = list_download_args$remove_command,
@@ -49,7 +73,12 @@ target_download <-
         hash = list_download_args$hash
       ),
       pattern = cross(chr_iter_calc_geos, list_dates),
-      description = "Download GEOS-CF data | download"
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_download_norm_big"
+        )
+      ),
+      description = "Download | Download GEOS-CF data"
     ),
     targets::tar_target(
       download_geos_buffer,
@@ -57,7 +86,7 @@ target_download <-
         download_geos
         TRUE
       },
-      description = "Download GEOS-CF data | buffer | download"
+      description = "Download GEOS-CF data | buffer"
     ),
     ###########################         NARR         ###########################
     targets::tar_target(
@@ -88,7 +117,12 @@ target_download <-
         "omega",
         "shum"
       ),
-      description = "NARR features"
+      description = "Download | NARR features",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_initiate"
+        )
+      )
     ),
     targets::tar_target(
       chr_iter_calc_narr_lag,
@@ -100,7 +134,12 @@ target_download <-
         "uwnd.10m",
         "vwnd.10m"
       ),
-      description = "NARR features | lag"
+      description = "Download | NARR features | lag",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_initiate"
+        )
+      )
     ),
     targets::tar_target(
       download_narr,
@@ -114,6 +153,11 @@ target_download <-
         hash = list_download_args$hash
       ),
       pattern = cross(chr_iter_calc_narr, chr_years),
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_download_norm_big"
+        )
+      ),
       description = "Download NARR data | download"
     ),
     targets::tar_target(
@@ -128,6 +172,11 @@ target_download <-
         hash = list_download_args$hash
       ),
       pattern = cross(chr_iter_calc_narr_lag),
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_download_norm_big"
+        )
+      ),
       description = "Download NARR data | lag | download"
     ),
     targets::tar_target(
@@ -153,6 +202,11 @@ target_download <-
         hash = list_download_args$hash
       ),
       pattern = map(list_dates),
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_download_norm_big"
+        )
+      ),
       description = "Download HMS data | download"
     ),
     targets::tar_target(
@@ -183,9 +237,13 @@ target_download <-
           download = list_download_args$download,
           hash = list_download_args$hash
         )
-        TRUE
       },
       pattern = map(list_dates),
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_download_norm_big"
+        )
+      ),
       description = "Download MODIS - MOD11 data | download"
     ),
     ###########################       MODIS - MOD06       ######################
@@ -195,13 +253,12 @@ target_download <-
         amadeus::download_modis(
           product = "MOD06_L2",
           nasa_earth_data_token = chr_nasa_token,
-          mod06_links = chr_mod06_links,
           date = beethoven::fl_dates(unlist(list_dates)),
           directory_to_save = file.path(
             chr_input_dir,
             "modis",
             "raw",
-            "61",
+            "061",
             "MOD06_L2"
           ),
           remove_command = list_download_args$remove_command,
@@ -209,9 +266,13 @@ target_download <-
           download = list_download_args$download,
           hash = list_download_args$hash
         )
-        TRUE
       },
       pattern = map(list_dates),
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_download_norm_big"
+        )
+      ),
       description = "Download MODIS - MOD06 data | download"
     ),
     ###########################       MODIS - MOD13       ######################
@@ -234,9 +295,13 @@ target_download <-
           download = list_download_args$download,
           hash = list_download_args$hash
         )
-        TRUE
       },
       pattern = map(list_dates),
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_download_norm_big"
+        )
+      ),
       description = "Download MODIS - MOD13 data | download"
     ),
     ###########################       MODIS - MCD19       ######################
@@ -259,9 +324,13 @@ target_download <-
           download = list_download_args$download,
           hash = list_download_args$hash
         )
-        TRUE
       },
       pattern = map(list_dates),
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_download_norm_big"
+        )
+      ),
       description = "Download MODIS - MCD19 data | download"
     ),
     ###########################       MODIS - MOD09       ######################
@@ -284,11 +353,16 @@ target_download <-
           download = list_download_args$download,
           hash = list_download_args$hash
         )
-        TRUE
       },
       pattern = map(list_dates),
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_download_norm"
+        )
+      ),
       description = "Download MODIS - MOD09 data | download"
     ),
+
     ###########################       MODIS - VIIRS       ######################
     targets::tar_target(
       download_viirs,
@@ -310,9 +384,13 @@ target_download <-
           download = list_download_args$download,
           hash = list_download_args$hash
         )
-        TRUE
       },
       pattern = map(list_dates),
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_download_norm_big"
+        )
+      ),
       description = "Download MODIS - VIIRS data | download"
     ),
     ###########################         GMTED        ###########################
@@ -327,7 +405,7 @@ target_download <-
         "Maximum Statistic",
         "Standard Deviation Statistic"
       ),
-      description = "GMTED features | download"
+      description = "Download | GMTED features"
     ),
     targets::tar_target(
       download_gmted,
@@ -343,16 +421,20 @@ target_download <-
           download = list_download_args$download,
           hash = list_download_args$hash
         )
-        TRUE
       },
       pattern = map(chr_iter_calc_gmted_vars),
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_download_norm_big"
+        )
+      ),
       description = "Download GMTED data | download"
     ),
     ###########################         NLCD         ###########################
     targets::tar_target(
       chr_iter_calc_nlcd,
-      command = c(2019, 2021),
-      description = "NLCD years | download"
+      command = c(2018, 2019, 2020, 2021, 2022),
+      description = "Download | NLCD years"
     ),
     targets::tar_target(
       download_nlcd,
@@ -367,10 +449,14 @@ target_download <-
           download = list_download_args$download,
           hash = list_download_args$hash
         )
-        TRUE
       },
       pattern = map(chr_iter_calc_nlcd),
-      description = "Download NLCD data | download"
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_download_norm_big"
+        )
+      ),
+      description = "Download NLCD data"
     ),
     ###########################        KOPPEN        ###########################
     targets::tar_target(
@@ -387,8 +473,12 @@ target_download <-
           download = list_download_args$download,
           hash = list_download_args$hash
         )
-        TRUE
       },
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_download_norm_big"
+        )
+      ),
       description = "Download Koppen-Geiger data | download"
     ),
     ###########################      POPULATION      ###########################
@@ -407,8 +497,12 @@ target_download <-
           download = list_download_args$download,
           hash = list_download_args$hash
         )
-        TRUE
       },
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_download_norm_big"
+        )
+      ),
       description = "Download population data | download"
     ),
     ###########################         TRI          ###########################
@@ -423,13 +517,18 @@ target_download <-
         hash = list_download_args$hash
       ),
       pattern = map(chr_years),
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_download_norm_big"
+        )
+      ),
       description = "Download TRI data | download"
     ),
     ###########################         NEI          ###########################
     targets::tar_target(
       chr_iter_calc_nei,
       command = c(2017, 2020),
-      description = "NEI features | download"
+      description = "Download | NEI features"
     ),
     targets::tar_target(
       download_nei,
@@ -443,9 +542,13 @@ target_download <-
           download = list_download_args$download,
           hash = list_download_args$hash
         )
-        TRUE
       },
       pattern = map(chr_iter_calc_nei),
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_download_norm"
+        )
+      ),
       description = "Download NEI data | download"
     ),
     ###########################      ECOREGIONS      ###########################
@@ -461,8 +564,12 @@ target_download <-
           download = list_download_args$download,
           hash = list_download_args$hash
         )
-        TRUE
       },
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_download_norm_big"
+        )
+      ),
       description = "Download ecoregions data | download"
     ),
     ###########################        GROADS        ###########################
@@ -480,8 +587,12 @@ target_download <-
           download = list_download_args$download,
           hash = list_download_args$hash
         )
-        TRUE
       },
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_download_norm_big"
+        )
+      ),
       description = "Download gRoads data | download"
     )
   )
