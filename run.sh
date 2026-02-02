@@ -24,8 +24,7 @@
 # export TAR_PROJECT=/ddn/gs1/group/set/beethoven_store/cas/_targets
 
 
-Rscript -e "targets::tar_make()"
-
+Rscript  inst/targets/targets_start.R
 
 
 # Add paths from sys_beethoven.sh if needed

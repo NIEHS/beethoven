@@ -1,87 +1,58 @@
 #############################      SCRIPTLINES      #############################
 #####################################################################################
 
-scriptlines_general <- paste(
-    "#SBATCH --job-name=general",
-    "#SBATCH --partition=normal",
-    "#SBATCH --ntasks=1",
-    "#SBATCH --mem=12G",
-    "#SBATCH --output=slurm/%x_%j.out",
-    "#SBATCH --error=slurm/%x_%j.err",
-    "apptainer exec --bind $PWD:/mnt --bind $PWD/inst:/inst --bind /ddn/gs1/group/set/beethoven_store/cas/input:/input --bind /ddn/gs1/group/set/beethoven_store/cas/_targets:/opt/_targets --bind /run/munge:/run/munge --bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm --env-file beethoven_env.txt container_mlverse.sif \\",
-    sep = "\n"
+scriptlines_general <- glue::glue(
+    "#SBATCH --job-name=general \
+  #SBATCH --partition=normal \
+  #SBATCH --ntasks=1 \
+  #SBATCH --mem=12G \
+  #SBATCH --output=slurm/%x_%j.out \
+  #SBATCH --error=slurm/%x_%j.err \
+  apptainer exec --bind $PWD:/mnt --bind $PWD/inst:/inst --bind /ddn/gs1/group/set/beethoven_store/input:/input --bind /ddn/gs1/group/set/beethoven_store/_targets:/opt/_targets --bind /run/munge:/run/munge --bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm --env-file beethoven_env.txt container_mlverse.sif \\"
 )
 
-scriptlines_download_geo <- paste(
-    "#SBATCH --job-name=download",
-    "#SBATCH --partition=geo",
-    "#SBATCH --ntasks=1",
-    "#SBATCH --mem=12G",
-    "#SBATCH --gres=gpu:1",
-    "#SBATCH --output=slurm/%x_%j.out",
-    "#SBATCH --error=slurm/%x_%j.err",
-    "apptainer exec --bind $PWD:/mnt --bind $PWD/inst:/inst --bind /ddn/gs1/group/set/beethoven_store/cas/input:/input --bind /ddn/gs1/group/set/beethoven_store/cas/_targets:/opt/_targets --bind /run/munge:/run/munge --bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm --env-file beethoven_env.txt container_mlverse.sif \\",
-    sep = "\n"
+scriptlines_download_geo <- glue::glue(
+    "#SBATCH --job-name=download \
+  #SBATCH --partition=geo \
+  #SBATCH --ntasks=1 \
+  #SBATCH --mem=12G \
+  #SBATCH --gres=gpu:1 \
+  #SBATCH --output=slurm/%x_%j.out \
+  #SBATCH --error=slurm/%x_%j.err \
+  apptainer exec --bind $PWD:/mnt --bind $PWD/inst:/inst --bind /ddn/gs1/group/set/beethoven_store/input:/input --bind /ddn/gs1/group/set/beethoven_store/_targets:/opt/_targets --bind /run/munge:/run/munge --bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm --env-file beethoven_env.txt container_mlverse.sif \\"
 )
 
-scriptlines_initiate <- paste(
+scriptlines_initiate <- glue::glue(
     "#SBATCH --job-name=initiate \
   #SBATCH --partition=normal \
   #SBATCH --ntasks=1 \
   #SBATCH --mem=12G \
   #SBATCH --output=slurm/initiate_%j.out \
   #SBATCH --error=slurm/initiate_%j.err \
-  apptainer exec ",
-    "--bind $PWD:/mnt ",
-    "--bind $PWD/inst:/inst ",
-    "--bind /ddn/gs1/group/set/beethoven_store/cas/input:/input ",
-    "--bind /ddn/gs1/group/set/beethoven_store/cas/_targets:/opt/_targets ",
-    "--bind /run/munge:/run/munge ",
-    "--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm ",
-    "--env-file beethoven_env.txt ",
-    "container_mlverse.sif \\",
-    sep = "\n"
+  apptainer exec --bind $PWD:/mnt --bind $PWD/inst:/inst --bind /ddn/gs1/group/set/beethoven_store/input:/input --bind /ddn/gs1/group/set/beethoven_store/_targets:/opt/_targets --bind /run/munge:/run/munge --bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm --env-file beethoven_env.txt container_mlverse.sif \\"
 )
 
-scriptlines_download_normal <- paste(
+scriptlines_download_normal <- glue::glue(
     "#SBATCH --job-name=download_normal \
   #SBATCH --partition=normal \
   #SBATCH --ntasks=1 \
   #SBATCH --mem=25G \
   #SBATCH --output=slurm/download_normal_%j.out \
   #SBATCH --error=slurm/download_normal_%j.err \
-  apptainer exec ",
-    "--bind $PWD:/mnt ",
-    "--bind $PWD/inst:/inst ",
-    "--bind /ddn/gs1/group/set/beethoven_store/cas/input:/input ",
-    "--bind /ddn/gs1/group/set/beethoven_store/cas/_targets:/opt/_targets ",
-    "--bind /run/munge:/run/munge ",
-    "--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm ",
-    "--env-file beethoven_env.txt ",
-    "container_mlverse.sif \\",
-    sep = "\n"
+  apptainer exec --bind $PWD:/mnt --bind $PWD/inst:/inst --bind /ddn/gs1/group/set/beethoven_store/input:/input --bind /ddn/gs1/group/set/beethoven_store/_targets:/opt/_targets --bind /run/munge:/run/munge --bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm --env-file beethoven_env.txt container_mlverse.sif \\"
 )
 
-scriptlines_download_big <- paste(
+scriptlines_download_big <- glue::glue(
     "#SBATCH --job-name=download_big \
   #SBATCH --partition=normal \
   #SBATCH --ntasks=1 \
   #SBATCH --mem=50G \
   #SBATCH --output=slurm/download_big_%j.out \
   #SBATCH --error=slurm/download_big_%j.err \
-  apptainer exec ",
-    "--bind $PWD:/mnt ",
-    "--bind $PWD/inst:/inst ",
-    "--bind /ddn/gs1/group/set/beethoven_store/cas/input:/input ",
-    "--bind /ddn/gs1/group/set/beethoven_store/cas/_targets:/opt/_targets ",
-    "--bind /run/munge:/run/munge ",
-    "--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm ",
-    "--env-file beethoven_env.txt ",
-    "container_mlverse.sif \\",
-    sep = "\n"
+  apptainer exec --bind $PWD:/mnt --bind $PWD/inst:/inst --bind /ddn/gs1/group/set/beethoven_store/input:/input --bind /ddn/gs1/group/set/beethoven_store/_targets:/opt/_targets --bind /run/munge:/run/munge --bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm --env-file beethoven_env.txt container_mlverse.sif \\"
 )
 
-scriptlines_calc_fit_geo <- paste(
+scriptlines_calc_fit_geo <- glue::glue(
     "#SBATCH --job-name=calc_fit \
   #SBATCH --partition=geo \
   #SBATCH --gres=gpu:1 \
@@ -89,38 +60,20 @@ scriptlines_calc_fit_geo <- paste(
   #SBATCH --mem=12G \
   #SBATCH --output=slurm/%x_%j.out \
   #SBATCH --error=slurm/%x_%j.err \
-  apptainer exec --nv ",
-    "--bind $PWD:/mnt ",
-    "--bind $PWD/inst:/inst ",
-    "--bind /ddn/gs1/group/set/beethoven_store/cas/input:/input ",
-    "--bind /ddn/gs1/group/set/beethoven_store/cas/_targets:/opt/_targets ",
-    "--bind /run/munge:/run/munge ",
-    "--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm ",
-    "--env-file beethoven_env.txt ",
-    "container_mlverse.sif \\",
-    sep = "\n"
+  apptainer exec --nv --bind $PWD:/mnt --bind $PWD/inst:/inst --bind /ddn/gs1/group/set/beethoven_store/input:/input --bind /ddn/gs1/group/set/beethoven_store/_targets:/opt/_targets --bind /run/munge:/run/munge --bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm --env-file beethoven_env.txt container_mlverse.sif \\"
 )
 
-scriptlines_calc_fit_norm <- paste(
+scriptlines_calc_fit_norm <- glue::glue(
     "#SBATCH --job-name=calc_fit \
   #SBATCH --partition=normal \
   #SBATCH --ntasks=1 \
   #SBATCH --mem=25G \
   #SBATCH --output=slurm/%x_%j.out \
   #SBATCH --error=slurm/%x_%j.err \
-  apptainer exec ",
-    "--bind $PWD:/mnt ",
-    "--bind $PWD/inst:/inst ",
-    "--bind /ddn/gs1/group/set/beethoven_store/cas/input:/input ",
-    "--bind /ddn/gs1/group/set/beethoven_store/cas/_targets:/opt/_targets ",
-    "--bind /run/munge:/run/munge ",
-    "--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm ",
-    "--env-file beethoven_env.txt ",
-    "container_mlverse.sif \\",
-    sep = "\n"
+  apptainer exec --bind $PWD:/mnt --bind $PWD/inst:/inst --bind /ddn/gs1/group/set/beethoven_store/input:/input --bind /ddn/gs1/group/set/beethoven_store/_targets:/opt/_targets --bind /run/munge:/run/munge --bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm --env-file beethoven_env.txt container_mlverse.sif \\"
 )
 
-scriptlines_calc_pred_geo <- paste(
+scriptlines_calc_pred_geo <- glue::glue(
     "#SBATCH --job-name=calc_pred \
   #SBATCH --partition=geo \
   #SBATCH --gres=gpu:1 \
@@ -128,38 +81,20 @@ scriptlines_calc_pred_geo <- paste(
   #SBATCH --mem=12G \
   #SBATCH --output=slurm/%x_%j.out \
   #SBATCH --error=slurm/%x_%j.err \
-  apptainer exec --nv ",
-    "--bind $PWD:/mnt ",
-    "--bind $PWD/inst:/inst ",
-    "--bind /ddn/gs1/group/set/beethoven_store/cas/input:/input ",
-    "--bind /ddn/gs1/group/set/beethoven_store/cas/_targets:/opt/_targets ",
-    "--bind /run/munge:/run/munge ",
-    "--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm ",
-    "--env-file beethoven_env.txt ",
-    "container_mlverse.sif \\",
-    sep = "\n"
+  apptainer exec --nv --bind $PWD:/mnt --bind $PWD/inst:/inst --bind /ddn/gs1/group/set/beethoven_store/input:/input --bind /ddn/gs1/group/set/beethoven_store/_targets:/opt/_targets --bind /run/munge:/run/munge --bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm --env-file beethoven_env.txt container_mlverse.sif \\"
 )
 
-scriptlines_calc_pred_norm <- paste(
+scriptlines_calc_pred_norm <- glue::glue(
     "#SBATCH --job-name=calc_pred \
   #SBATCH --partition=normal \
   #SBATCH --ntasks=1 \
   #SBATCH --mem=25G \
   #SBATCH --output=slurm/%x_%j.out \
   #SBATCH --error=slurm/%x_%j.err \
-  apptainer exec ",
-    "--bind $PWD:/mnt ",
-    "--bind $PWD/inst:/inst ",
-    "--bind /ddn/gs1/group/set/beethoven_store/cas/input:/input ",
-    "--bind /ddn/gs1/group/set/beethoven_store/cas/_targets:/opt/_targets ",
-    "--bind /run/munge:/run/munge ",
-    "--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm ",
-    "--env-file beethoven_env.txt ",
-    "container_mlverse.sif \\",
-    sep = "\n"
+  apptainer exec --bind $PWD:/mnt --bind $PWD/inst:/inst --bind /ddn/gs1/group/set/beethoven_store/input:/input --bind /ddn/gs1/group/set/beethoven_store/_targets:/opt/_targets --bind /run/munge:/run/munge --bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm --env-file beethoven_env.txt container_mlverse.sif \\"
 )
 
-scriptlines_baselearners_geo <- paste(
+scriptlines_baselearners_geo <- glue::glue(
     "#SBATCH --job-name=baselearners \
   #SBATCH --partition=geo \
   #SBATCH --gres=gpu:1 \
@@ -167,38 +102,20 @@ scriptlines_baselearners_geo <- paste(
   #SBATCH --mem=12G \
   #SBATCH --output=slurm/%x_%j.out \
   #SBATCH --error=slurm/%x_%j.err \
-  apptainer exec --nv ",
-    "--bind $PWD:/mnt ",
-    "--bind $PWD/inst:/inst ",
-    "--bind /ddn/gs1/group/set/beethoven_store/cas/input:/input ",
-    "--bind /ddn/gs1/group/set/beethoven_store/cas/_targets:/opt/_targets ",
-    "--bind /run/munge:/run/munge ",
-    "--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm ",
-    "--env-file beethoven_env.txt ",
-    "container_mlverse.sif \\",
-    sep = "\n"
+  apptainer exec --nv --bind $PWD:/mnt --bind $PWD/inst:/inst --bind /ddn/gs1/group/set/beethoven_store/input:/input --bind /ddn/gs1/group/set/beethoven_store/_targets:/opt/_targets --bind /run/munge:/run/munge --bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm --env-file beethoven_env.txt container_mlverse.sif \\"
 )
 
-scriptlines_baselearners_norm <- paste(
+scriptlines_baselearners_norm <- glue::glue(
     "#SBATCH --job-name=baselearners \
   #SBATCH --partition=normal \
   #SBATCH --ntasks=1 \
   #SBATCH --mem=25G \
   #SBATCH --output=slurm/%x_%j.out \
   #SBATCH --error=slurm/%x_%j.err \
-  apptainer exec ",
-    "--bind $PWD:/mnt ",
-    "--bind $PWD/inst:/inst ",
-    "--bind /ddn/gs1/group/set/beethoven_store/cas/input:/input ",
-    "--bind /ddn/gs1/group/set/beethoven_store/cas/_targets:/opt/_targets ",
-    "--bind /run/munge:/run/munge ",
-    "--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm ",
-    "--env-file beethoven_env.txt ",
-    "container_mlverse.sif \\",
-    sep = "\n"
+  apptainer exec --bind $PWD:/mnt --bind $PWD/inst:/inst --bind /ddn/gs1/group/set/beethoven_store/input:/input --bind /ddn/gs1/group/set/beethoven_store/_targets:/opt/_targets --bind /run/munge:/run/munge --bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm --env-file beethoven_env.txt container_mlverse.sif \\"
 )
 
-scriptlines_metalearners_geo <- paste(
+scriptlines_metalearners_geo <- glue::glue(
     "#SBATCH --job-name=metalearners \
   #SBATCH --partition=geo \
   #SBATCH --gres=gpu:1 \
@@ -206,38 +123,20 @@ scriptlines_metalearners_geo <- paste(
   #SBATCH --mem=12G \
   #SBATCH --output=slurm/%x_%j.out \
   #SBATCH --error=slurm/%x_%j.err \
-  apptainer exec --nv ",
-    "--bind $PWD:/mnt ",
-    "--bind $PWD/inst:/inst ",
-    "--bind /ddn/gs1/group/set/beethoven_store/cas/input:/input ",
-    "--bind /ddn/gs1/group/set/beethoven_store/cas/_targets:/opt/_targets ",
-    "--bind /run/munge:/run/munge ",
-    "--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm ",
-    "--env-file beethoven_env.txt ",
-    "container_mlverse.sif \\",
-    sep = "\n"
+  apptainer exec --nv --bind $PWD:/mnt --bind $PWD/inst:/inst --bind /ddn/gs1/group/set/beethoven_store/input:/input --bind /ddn/gs1/group/set/beethoven_store/_targets:/opt/_targets --bind /run/munge:/run/munge --bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm --env-file beethoven_env.txt container_mlverse.sif \\"
 )
 
-scriptlines_metalearners_norm <- paste(
+scriptlines_metalearners_norm <- glue::glue(
     "#SBATCH --job-name=metalearners \
   #SBATCH --partition=normal \
   #SBATCH --ntasks=1 \
   #SBATCH --mem=25G \
   #SBATCH --output=slurm/%x_%j.out \
   #SBATCH --error=slurm/%x_%j.err \
-  apptainer exec ",
-    "--bind $PWD:/mnt ",
-    "--bind $PWD/inst:/inst ",
-    "--bind /ddn/gs1/group/set/beethoven_store/cas/input:/input ",
-    "--bind /ddn/gs1/group/set/beethoven_store/cas/_targets:/opt/_targets ",
-    "--bind /run/munge:/run/munge ",
-    "--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm ",
-    "--env-file beethoven_env.txt ",
-    "container_mlverse.sif \\",
-    sep = "\n"
+  apptainer exec --bind $PWD:/mnt --bind $PWD/inst:/inst --bind /ddn/gs1/group/set/beethoven_store/input:/input --bind /ddn/gs1/group/set/beethoven_store/_targets:/opt/_targets --bind /run/munge:/run/munge --bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm --env-file beethoven_env.txt container_mlverse.sif \\"
 )
 
-scriptlines_predict_geo <- paste(
+scriptlines_predict_geo <- glue::glue(
     "#SBATCH --job-name=predict \
   #SBATCH --partition=geo \
   #SBATCH --gres=gpu:1 \
@@ -245,54 +144,27 @@ scriptlines_predict_geo <- paste(
   #SBATCH --mem=12G \
   #SBATCH --output=slurm/%x_%j.out \
   #SBATCH --error=slurm/%x_%j.err \
-  apptainer exec --nv ",
-    "--bind $PWD:/mnt ",
-    "--bind $PWD/inst:/inst ",
-    "--bind /ddn/gs1/group/set/beethoven_store/cas/input:/input ",
-    "--bind /ddn/gs1/group/set/beethoven_store/cas/_targets:/opt/_targets ",
-    "--bind /run/munge:/run/munge ",
-    "--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm ",
-    "--env-file beethoven_env.txt ",
-    "container_mlverse.sif \\",
-    sep = "\n"
+  apptainer exec --nv --bind $PWD:/mnt --bind $PWD/inst:/inst --bind /ddn/gs1/group/set/beethoven_store/input:/input --bind /ddn/gs1/group/set/beethoven_store/_targets:/opt/_targets --bind /run/munge:/run/munge --bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm --env-file beethoven_env.txt container_mlverse.sif \\"
 )
 
-scriptlines_predict_norm <- paste(
+scriptlines_predict_norm <- glue::glue(
     "#SBATCH --job-name=predict \
   #SBATCH --partition=normal \
   #SBATCH --ntasks=1 \
   #SBATCH --mem=25G \
   #SBATCH --output=slurm/%x_%j.out \
   #SBATCH --error=slurm/%x_%j.err \
-  apptainer exec ",
-    "--bind $PWD:/mnt ",
-    "--bind $PWD/inst:/inst ",
-    "--bind /ddn/gs1/group/set/beethoven_store/cas/input:/input ",
-    "--bind /ddn/gs1/group/set/beethoven_store/cas/_targets:/opt/_targets ",
-    "--bind /run/munge:/run/munge ",
-    "--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm ",
-    "--env-file beethoven_env.txt ",
-    "container_mlverse.sif \\",
-    sep = "\n"
+  apptainer exec --bind $PWD:/mnt --bind $PWD/inst:/inst --bind /ddn/gs1/group/set/beethoven_store/input:/input --bind /ddn/gs1/group/set/beethoven_store/_targets:/opt/_targets --bind /run/munge:/run/munge --bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm --env-file beethoven_env.txt container_mlverse.sif \\"
 )
 
-scriptlines_aqs <- paste(
+scriptlines_aqs <- glue::glue(
     "#SBATCH --job-name=aqs \
   #SBATCH --partition=normal \
   #SBATCH --ntasks=1 \
   #SBATCH --mem=50G \
   #SBATCH --output=slurm/%x_%j.out \
   #SBATCH --error=slurm/%x_%j.err \
-  apptainer exec ",
-    "--bind $PWD:/mnt ",
-    "--bind $PWD/inst:/inst ",
-    "--bind /ddn/gs1/group/set/beethoven_store/cas/input:/input ",
-    "--bind /ddn/gs1/group/set/beethoven_store/cas/_targets:/opt/_targets ",
-    "--bind /run/munge:/run/munge ",
-    "--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm ",
-    "--env-file beethoven_env.txt ",
-    "container_mlverse.sif \\",
-    sep = "\n"
+  apptainer exec --bind $PWD:/mnt --bind $PWD/inst:/inst --bind /ddn/gs1/group/set/beethoven_store/input:/input --bind /ddn/gs1/group/set/beethoven_store/_targets:/opt/_targets --bind /run/munge:/run/munge --bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm --env-file beethoven_env.txt container_mlverse.sif \\"
 )
 
 
