@@ -23,7 +23,6 @@ targets::tar_source("R/")
 
 beethoven_packages <- c(
   "amadeus",
-  "beethoven",
   "targets",
   "tarchetypes",
   "dplyr",
