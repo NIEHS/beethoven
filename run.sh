@@ -10,27 +10,22 @@
 #SBATCH --error=slurm/beethoven_%j.err
 #SBATCH --output=slurm/beethoven_%j.out
 
-############################################
-# BIND PATHS AND EXPORT
-############################################
-# SLURM_MUNGE=/run/munge
-# SLURM_ETC=/ddn/gs1/tools/slurm/etc/slurm
-# SLURM_BIN=/ddn/gs1/tools/slurm/bin
-# SLURM_LIB=/ddn/gs1/tools/slurm/lib64
-# SLURM_CONFIG=/ddn/gs1/tools/slurm/config 
-# SLURM_SBIN=/ddn/gs1/tools/slurm/sbin
-
-export APPTAINER_BINDPATH="\
-$PWD:/mnt,\
-$PWD/inst:/inst,\
-$PWD/input:/input,\
-/ddn/gs1/group/set/beethoven_store/cas/_targets:/opt/_targets,\
-/run/munge:/run/munge,\
-/ddn/gs1/tools/slurm/etc/slurm:/etc/slurm"
 
 
+# apptainer exec \
+#   --bind $PWD:/mnt \
+#   --bind $PWD/inst:/inst \
+#   --bind /ddn/gs1/group/set/beethoven_store/cas/input:/input \
+#   --bind /ddn/gs1/group/set/beethoven_store/cas/_targets:/opt/_targets \
+#   --bind /run/munge:/run/munge \
+#   --bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm \
+#   --env-file beethoven_env.txt \
+#   container_mlverse.sif  \
+# export TAR_PROJECT=/ddn/gs1/group/set/beethoven_store/cas/_targets
 
-apptainer exec --env-file beethoven_env.txt container_models.sif Rscript -e "targets::tar_make()"
+
+Rscript -e "targets::tar_make()"
+
 
 
 # Add paths from sys_beethoven.sh if needed

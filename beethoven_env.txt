@@ -1,28 +1,11 @@
 ############################################
 # R ENVIRONMENT
 ############################################
- R_LIBS=/opt/Rlibs
- R_LIBS_USER=/opt/Rlibs
- R_LIBS_SITE=/opt/Rlibs
+R_LIBS_SITE=/opt/Rlibs
+R_LIBS_USER=/opt/Rlibs
 
-# Use the container’s real R installation
-R_HOME=/usr/local/lib/R
-
-# Prepend R to PATH (do not override)
-PATH=/usr/local/lib/R/bin:$PATH
-
-TAR_ASK=FALSE
-
-
-############################################
-# CUDA / GPU  (Matches sys_beethoven)
-############################################
-CUDA_VERSION=11.8.0
-
-# CUDA_HOME explicitly set by sys_beethoven()
-CUDA_HOME=/usr/local/cuda
-
-PATH=/usr/local/cuda/bin:\
+# Prepend R and CUDA to PATH (do not override)
+PATH=/usr/local/lib/R/bin:/usr/local/cuda/bin:\
 /usr/local/nvidia/bin:\
 /usr/local/sbin:\
 /usr/local/bin:\
@@ -41,6 +24,7 @@ CUDA_VISIBLE_DEVICES=0,1,2,3
 ############################################
 EDITOR=vi
 PAGER=/usr/bin/less
+SLURM_CONF=/ddn/gs1/tools/slurm/etc/slurm/slurm.conf
 
 
 ############################      CERTIFICATES      ############################

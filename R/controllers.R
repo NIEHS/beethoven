@@ -1,6 +1,302 @@
+#############################      SCRIPTLINES      #############################
+#####################################################################################
+
+scriptlines_general <- paste(
+    "#SBATCH --job-name=general",
+    "#SBATCH --partition=normal",
+    "#SBATCH --ntasks=1",
+    "#SBATCH --mem=12G",
+    "#SBATCH --output=slurm/%x_%j.out",
+    "#SBATCH --error=slurm/%x_%j.err",
+    "apptainer exec --bind $PWD:/mnt --bind $PWD/inst:/inst --bind /ddn/gs1/group/set/beethoven_store/cas/input:/input --bind /ddn/gs1/group/set/beethoven_store/cas/_targets:/opt/_targets --bind /run/munge:/run/munge --bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm --env-file beethoven_env.txt container_mlverse.sif \\",
+    sep = "\n"
+)
+
+scriptlines_download_geo <- paste(
+    "#SBATCH --job-name=download",
+    "#SBATCH --partition=geo",
+    "#SBATCH --ntasks=1",
+    "#SBATCH --mem=12G",
+    "#SBATCH --gres=gpu:1",
+    "#SBATCH --output=slurm/%x_%j.out",
+    "#SBATCH --error=slurm/%x_%j.err",
+    "apptainer exec --bind $PWD:/mnt --bind $PWD/inst:/inst --bind /ddn/gs1/group/set/beethoven_store/cas/input:/input --bind /ddn/gs1/group/set/beethoven_store/cas/_targets:/opt/_targets --bind /run/munge:/run/munge --bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm --env-file beethoven_env.txt container_mlverse.sif \\",
+    sep = "\n"
+)
+
+scriptlines_initiate <- paste(
+    "#SBATCH --job-name=initiate \
+  #SBATCH --partition=normal \
+  #SBATCH --ntasks=1 \
+  #SBATCH --mem=12G \
+  #SBATCH --output=slurm/initiate_%j.out \
+  #SBATCH --error=slurm/initiate_%j.err \
+  apptainer exec ",
+    "--bind $PWD:/mnt ",
+    "--bind $PWD/inst:/inst ",
+    "--bind /ddn/gs1/group/set/beethoven_store/cas/input:/input ",
+    "--bind /ddn/gs1/group/set/beethoven_store/cas/_targets:/opt/_targets ",
+    "--bind /run/munge:/run/munge ",
+    "--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm ",
+    "--env-file beethoven_env.txt ",
+    "container_mlverse.sif \\",
+    sep = "\n"
+)
+
+scriptlines_download_normal <- paste(
+    "#SBATCH --job-name=download_normal \
+  #SBATCH --partition=normal \
+  #SBATCH --ntasks=1 \
+  #SBATCH --mem=25G \
+  #SBATCH --output=slurm/download_normal_%j.out \
+  #SBATCH --error=slurm/download_normal_%j.err \
+  apptainer exec ",
+    "--bind $PWD:/mnt ",
+    "--bind $PWD/inst:/inst ",
+    "--bind /ddn/gs1/group/set/beethoven_store/cas/input:/input ",
+    "--bind /ddn/gs1/group/set/beethoven_store/cas/_targets:/opt/_targets ",
+    "--bind /run/munge:/run/munge ",
+    "--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm ",
+    "--env-file beethoven_env.txt ",
+    "container_mlverse.sif \\",
+    sep = "\n"
+)
+
+scriptlines_download_big <- paste(
+    "#SBATCH --job-name=download_big \
+  #SBATCH --partition=normal \
+  #SBATCH --ntasks=1 \
+  #SBATCH --mem=50G \
+  #SBATCH --output=slurm/download_big_%j.out \
+  #SBATCH --error=slurm/download_big_%j.err \
+  apptainer exec ",
+    "--bind $PWD:/mnt ",
+    "--bind $PWD/inst:/inst ",
+    "--bind /ddn/gs1/group/set/beethoven_store/cas/input:/input ",
+    "--bind /ddn/gs1/group/set/beethoven_store/cas/_targets:/opt/_targets ",
+    "--bind /run/munge:/run/munge ",
+    "--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm ",
+    "--env-file beethoven_env.txt ",
+    "container_mlverse.sif \\",
+    sep = "\n"
+)
+
+scriptlines_calc_fit_geo <- paste(
+    "#SBATCH --job-name=calc_fit \
+  #SBATCH --partition=geo \
+  #SBATCH --gres=gpu:1 \
+  #SBATCH --ntasks=1 \
+  #SBATCH --mem=12G \
+  #SBATCH --output=slurm/%x_%j.out \
+  #SBATCH --error=slurm/%x_%j.err \
+  apptainer exec --nv ",
+    "--bind $PWD:/mnt ",
+    "--bind $PWD/inst:/inst ",
+    "--bind /ddn/gs1/group/set/beethoven_store/cas/input:/input ",
+    "--bind /ddn/gs1/group/set/beethoven_store/cas/_targets:/opt/_targets ",
+    "--bind /run/munge:/run/munge ",
+    "--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm ",
+    "--env-file beethoven_env.txt ",
+    "container_mlverse.sif \\",
+    sep = "\n"
+)
+
+scriptlines_calc_fit_norm <- paste(
+    "#SBATCH --job-name=calc_fit \
+  #SBATCH --partition=normal \
+  #SBATCH --ntasks=1 \
+  #SBATCH --mem=25G \
+  #SBATCH --output=slurm/%x_%j.out \
+  #SBATCH --error=slurm/%x_%j.err \
+  apptainer exec ",
+    "--bind $PWD:/mnt ",
+    "--bind $PWD/inst:/inst ",
+    "--bind /ddn/gs1/group/set/beethoven_store/cas/input:/input ",
+    "--bind /ddn/gs1/group/set/beethoven_store/cas/_targets:/opt/_targets ",
+    "--bind /run/munge:/run/munge ",
+    "--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm ",
+    "--env-file beethoven_env.txt ",
+    "container_mlverse.sif \\",
+    sep = "\n"
+)
+
+scriptlines_calc_pred_geo <- paste(
+    "#SBATCH --job-name=calc_pred \
+  #SBATCH --partition=geo \
+  #SBATCH --gres=gpu:1 \
+  #SBATCH --ntasks=1 \
+  #SBATCH --mem=12G \
+  #SBATCH --output=slurm/%x_%j.out \
+  #SBATCH --error=slurm/%x_%j.err \
+  apptainer exec --nv ",
+    "--bind $PWD:/mnt ",
+    "--bind $PWD/inst:/inst ",
+    "--bind /ddn/gs1/group/set/beethoven_store/cas/input:/input ",
+    "--bind /ddn/gs1/group/set/beethoven_store/cas/_targets:/opt/_targets ",
+    "--bind /run/munge:/run/munge ",
+    "--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm ",
+    "--env-file beethoven_env.txt ",
+    "container_mlverse.sif \\",
+    sep = "\n"
+)
+
+scriptlines_calc_pred_norm <- paste(
+    "#SBATCH --job-name=calc_pred \
+  #SBATCH --partition=normal \
+  #SBATCH --ntasks=1 \
+  #SBATCH --mem=25G \
+  #SBATCH --output=slurm/%x_%j.out \
+  #SBATCH --error=slurm/%x_%j.err \
+  apptainer exec ",
+    "--bind $PWD:/mnt ",
+    "--bind $PWD/inst:/inst ",
+    "--bind /ddn/gs1/group/set/beethoven_store/cas/input:/input ",
+    "--bind /ddn/gs1/group/set/beethoven_store/cas/_targets:/opt/_targets ",
+    "--bind /run/munge:/run/munge ",
+    "--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm ",
+    "--env-file beethoven_env.txt ",
+    "container_mlverse.sif \\",
+    sep = "\n"
+)
+
+scriptlines_baselearners_geo <- paste(
+    "#SBATCH --job-name=baselearners \
+  #SBATCH --partition=geo \
+  #SBATCH --gres=gpu:1 \
+  #SBATCH --ntasks=1 \
+  #SBATCH --mem=12G \
+  #SBATCH --output=slurm/%x_%j.out \
+  #SBATCH --error=slurm/%x_%j.err \
+  apptainer exec --nv ",
+    "--bind $PWD:/mnt ",
+    "--bind $PWD/inst:/inst ",
+    "--bind /ddn/gs1/group/set/beethoven_store/cas/input:/input ",
+    "--bind /ddn/gs1/group/set/beethoven_store/cas/_targets:/opt/_targets ",
+    "--bind /run/munge:/run/munge ",
+    "--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm ",
+    "--env-file beethoven_env.txt ",
+    "container_mlverse.sif \\",
+    sep = "\n"
+)
+
+scriptlines_baselearners_norm <- paste(
+    "#SBATCH --job-name=baselearners \
+  #SBATCH --partition=normal \
+  #SBATCH --ntasks=1 \
+  #SBATCH --mem=25G \
+  #SBATCH --output=slurm/%x_%j.out \
+  #SBATCH --error=slurm/%x_%j.err \
+  apptainer exec ",
+    "--bind $PWD:/mnt ",
+    "--bind $PWD/inst:/inst ",
+    "--bind /ddn/gs1/group/set/beethoven_store/cas/input:/input ",
+    "--bind /ddn/gs1/group/set/beethoven_store/cas/_targets:/opt/_targets ",
+    "--bind /run/munge:/run/munge ",
+    "--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm ",
+    "--env-file beethoven_env.txt ",
+    "container_mlverse.sif \\",
+    sep = "\n"
+)
+
+scriptlines_metalearners_geo <- paste(
+    "#SBATCH --job-name=metalearners \
+  #SBATCH --partition=geo \
+  #SBATCH --gres=gpu:1 \
+  #SBATCH --ntasks=1 \
+  #SBATCH --mem=12G \
+  #SBATCH --output=slurm/%x_%j.out \
+  #SBATCH --error=slurm/%x_%j.err \
+  apptainer exec --nv ",
+    "--bind $PWD:/mnt ",
+    "--bind $PWD/inst:/inst ",
+    "--bind /ddn/gs1/group/set/beethoven_store/cas/input:/input ",
+    "--bind /ddn/gs1/group/set/beethoven_store/cas/_targets:/opt/_targets ",
+    "--bind /run/munge:/run/munge ",
+    "--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm ",
+    "--env-file beethoven_env.txt ",
+    "container_mlverse.sif \\",
+    sep = "\n"
+)
+
+scriptlines_metalearners_norm <- paste(
+    "#SBATCH --job-name=metalearners \
+  #SBATCH --partition=normal \
+  #SBATCH --ntasks=1 \
+  #SBATCH --mem=25G \
+  #SBATCH --output=slurm/%x_%j.out \
+  #SBATCH --error=slurm/%x_%j.err \
+  apptainer exec ",
+    "--bind $PWD:/mnt ",
+    "--bind $PWD/inst:/inst ",
+    "--bind /ddn/gs1/group/set/beethoven_store/cas/input:/input ",
+    "--bind /ddn/gs1/group/set/beethoven_store/cas/_targets:/opt/_targets ",
+    "--bind /run/munge:/run/munge ",
+    "--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm ",
+    "--env-file beethoven_env.txt ",
+    "container_mlverse.sif \\",
+    sep = "\n"
+)
+
+scriptlines_predict_geo <- paste(
+    "#SBATCH --job-name=predict \
+  #SBATCH --partition=geo \
+  #SBATCH --gres=gpu:1 \
+  #SBATCH --ntasks=1 \
+  #SBATCH --mem=12G \
+  #SBATCH --output=slurm/%x_%j.out \
+  #SBATCH --error=slurm/%x_%j.err \
+  apptainer exec --nv ",
+    "--bind $PWD:/mnt ",
+    "--bind $PWD/inst:/inst ",
+    "--bind /ddn/gs1/group/set/beethoven_store/cas/input:/input ",
+    "--bind /ddn/gs1/group/set/beethoven_store/cas/_targets:/opt/_targets ",
+    "--bind /run/munge:/run/munge ",
+    "--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm ",
+    "--env-file beethoven_env.txt ",
+    "container_mlverse.sif \\",
+    sep = "\n"
+)
+
+scriptlines_predict_norm <- paste(
+    "#SBATCH --job-name=predict \
+  #SBATCH --partition=normal \
+  #SBATCH --ntasks=1 \
+  #SBATCH --mem=25G \
+  #SBATCH --output=slurm/%x_%j.out \
+  #SBATCH --error=slurm/%x_%j.err \
+  apptainer exec ",
+    "--bind $PWD:/mnt ",
+    "--bind $PWD/inst:/inst ",
+    "--bind /ddn/gs1/group/set/beethoven_store/cas/input:/input ",
+    "--bind /ddn/gs1/group/set/beethoven_store/cas/_targets:/opt/_targets ",
+    "--bind /run/munge:/run/munge ",
+    "--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm ",
+    "--env-file beethoven_env.txt ",
+    "container_mlverse.sif \\",
+    sep = "\n"
+)
+
+scriptlines_aqs <- paste(
+    "#SBATCH --job-name=aqs \
+  #SBATCH --partition=normal \
+  #SBATCH --ntasks=1 \
+  #SBATCH --mem=50G \
+  #SBATCH --output=slurm/%x_%j.out \
+  #SBATCH --error=slurm/%x_%j.err \
+  apptainer exec ",
+    "--bind $PWD:/mnt ",
+    "--bind $PWD/inst:/inst ",
+    "--bind /ddn/gs1/group/set/beethoven_store/cas/input:/input ",
+    "--bind /ddn/gs1/group/set/beethoven_store/cas/_targets:/opt/_targets ",
+    "--bind /run/munge:/run/munge ",
+    "--bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm ",
+    "--env-file beethoven_env.txt ",
+    "container_mlverse.sif \\",
+    sep = "\n"
+)
+
+
 #############################      CONTROLLER  SETUP    #############################
-#####################################################################################
-#####################################################################################
 #####################################################################################
 
 controller_general_beethoven <- crew.cluster::crew_controller_slurm(
@@ -8,29 +304,13 @@ controller_general_beethoven <- crew.cluster::crew_controller_slurm(
     workers = 1000,
     options_cluster = crew.cluster::crew_options_slurm(
         verbose = TRUE,
-        partition = "normal,highmem,geo",
-        script_lines = "apptainer exec container_models.sif ",
-        log_output = "slurm/general_%j.out",
-        log_error = "slurm/general_%j.err",
-        n_tasks = 1,
-        memory_gigabytes_required = 12
+        script_lines = scriptlines_general,
     ),
-    tasks_max = 1
+    tasks_max = Inf
 )
+
 
 #############################      DOWNLOAD    #############################
-
-scriptlines_download_geo <- glue::glue(
-    "#SBATCH --job-name=download \
-#SBATCH --partition=geo \
-#SBATCH --gres=gpu:1 
-#SBATCH --ntasks=1 \
-#SBATCH --output=slurm/%x_%j.out \
-#SBATCH --error=slurm/%x_%j.err \
-apptainer exec --nv ",
-    "--env-file beethoven_env.txt ",
-    "container_models.sif \\"
-)
 
 controller_download_geo <- crew.cluster::crew_controller_slurm(
     name = "controller_download_geo",
@@ -48,12 +328,7 @@ controller_initiate <- crew.cluster::crew_controller_slurm(
     workers = 1000,
     options_cluster = crew.cluster::crew_options_slurm(
         verbose = TRUE,
-        partition = "normal,highmem,geo",
-        script_lines = "apptainer exec container_models.sif ",
-        log_output = "slurm/initial_%j.out",
-        log_error = "slurm/initial_%j.err",
-        n_tasks = 1,
-        memory_gigabytes_required = 12
+        script_lines = scriptlines_initiate
     ),
     tasks_max = Inf
 )
@@ -63,12 +338,7 @@ controller_download_norm <- crew.cluster::crew_controller_slurm(
     workers = 500,
     options_cluster = crew.cluster::crew_options_slurm(
         verbose = TRUE,
-        partition = "normal,highmem,geo",
-        script_lines = "apptainer exec container_models.sif ",
-        log_output = "slurm/download_%j.out",
-        log_error = "slurm/download_%j.err",
-        n_tasks = 1,
-        memory_gigabytes_required = 25
+        script_lines = scriptlines_download_normal
     ),
     tasks_max = Inf
 )
@@ -78,45 +348,13 @@ controller_download_norm_big <- crew.cluster::crew_controller_slurm(
     workers = 250,
     options_cluster = crew.cluster::crew_options_slurm(
         verbose = TRUE,
-        partition = "normal,highmem,geo",
-        script_lines = "apptainer exec container_models.sif ",
-        log_output = "slurm/download_%j.out",
-        log_error = "slurm/download_%j.err",
-        n_tasks = 1,
-        memory_gigabytes_required = 50
+        script_lines = scriptlines_download_big
     ),
     tasks_max = Inf
 )
 
-controller_download_noenv <- crew.cluster::crew_controller_slurm(
-    name = "controller_download_noenv",
-    workers = 250,
-    options_cluster = crew.cluster::crew_options_slurm(
-        verbose = TRUE,
-        partition = "normal,highmem,geo",
-        script_lines = "apptainer exec container_models.sif ",
-        log_output = "slurm/download_%j.out",
-        log_error = "slurm/download_%j.err",
-        n_tasks = 1,
-        memory_gigabytes_required = 50
-    ),
-    tasks_max = 1
-)
-
 
 #############################      CALCULATE FIT    #############################
-
-scriptlines_calc_fit_geo <- glue::glue(
-    "#SBATCH --job-name=calc_fit \
-#SBATCH --partition=geo \
-#SBATCH --gres=gpu:1 
-#SBATCH --ntasks=1 \
-#SBATCH --output=slurm/%x_%j.out \
-#SBATCH --error=slurm/%x_%j.err \
-apptainer exec --nv ",
-    "--env-file beethoven_env.txt ",
-    "container_models.sif \\"
-)
 
 controller_calc_fit_geo <- crew.cluster::crew_controller_slurm(
     name = "controller_calc_fit_geo",
@@ -126,18 +364,6 @@ controller_calc_fit_geo <- crew.cluster::crew_controller_slurm(
         script_lines = scriptlines_calc_fit_geo
     ),
     tasks_max = 1
-)
-
-
-scriptlines_calc_fit_norm <- glue::glue(
-    "#SBATCH --partition=normal \
-#SBATCH --job-name=calc_fit \
-#SBATCH --ntasks=1 \
-#SBATCH --output=slurm/%x_%j.out \
-#SBATCH --error=slurm/%x_%j.err \
-  apptainer exec ",
-    "--env-file beethoven_env.txt ",
-    "container_models.sif \\"
 )
 
 controller_calc_fit_norm <- crew.cluster::crew_controller_slurm(
@@ -151,42 +377,7 @@ controller_calc_fit_norm <- crew.cluster::crew_controller_slurm(
     tasks_max = 1
 )
 
-controller_calc_fit_norm_big <- crew.cluster::crew_controller_slurm(
-    name = "controller_calc_fit_norm_big",
-    workers = 250,
-    options_cluster = crew.cluster::crew_options_slurm(
-        verbose = TRUE,
-        script_lines = scriptlines_calc_fit_norm,
-        memory_gigabytes_required = 50
-    ),
-    tasks_max = 1
-)
-
-controller_calc_fit_norm_huge <- crew.cluster::crew_controller_slurm(
-    name = "controller_calc_fit_norm_huge",
-    workers = 100,
-    options_cluster = crew.cluster::crew_options_slurm(
-        verbose = TRUE,
-        script_lines = scriptlines_calc_fit_norm,
-        memory_gigabytes_required = 100
-    ),
-    tasks_max = 1
-)
-
-
 #############################      CALCULATE PREDICT    #############################
-
-scriptlines_calc_pred_geo <- glue::glue(
-    "#SBATCH --job-name=calc_pred \
-#SBATCH --partition=geo \
-#SBATCH --gres=gpu:1 
-#SBATCH --ntasks=1 \
-#SBATCH --output=slurm/%x_%j.out \
-#SBATCH --error=slurm/%x_%j.err \
-apptainer exec --nv ",
-    "--env-file beethoven_env.txt ",
-    "container_models.sif \\"
-)
 
 controller_calc_pred_geo <- crew.cluster::crew_controller_slurm(
     name = "controller_calc_pred_geo",
@@ -196,18 +387,6 @@ controller_calc_pred_geo <- crew.cluster::crew_controller_slurm(
         script_lines = scriptlines_calc_pred_geo
     ),
     tasks_max = 1
-)
-
-
-scriptlines_calc_pred_norm <- glue::glue(
-    "#SBATCH --partition=normal \
-#SBATCH --job-name=calc_pred \
-#SBATCH --ntasks=1 \
-#SBATCH --output=slurm/%x_%j.out \
-#SBATCH --error=slurm/%x_%j.err \
-  apptainer exec ",
-    "--env-file beethoven_env.txt ",
-    "container_models.sif \\"
 )
 
 controller_calc_pred_norm <- crew.cluster::crew_controller_slurm(
@@ -245,18 +424,6 @@ controller_calc_pred_norm_huge <- crew.cluster::crew_controller_slurm(
 
 #############################      baselearners   #############################
 
-scriptlines_baselearners_geo <- glue::glue(
-    "#SBATCH --job-name=baselearners \
-#SBATCH --partition=geo \
-#SBATCH --gres=gpu:1 
-#SBATCH --ntasks=1 \
-#SBATCH --output=slurm/%x_%j.out \
-#SBATCH --error=slurm/%x_%j.err \
-apptainer exec --nv ",
-    "--env-file beethoven_env.txt ",
-    "container_models.sif \\"
-)
-
 controller_baselearners_geo <- crew.cluster::crew_controller_slurm(
     name = "controller_baselearners_geo",
     workers = 4,
@@ -265,18 +432,6 @@ controller_baselearners_geo <- crew.cluster::crew_controller_slurm(
         script_lines = scriptlines_baselearners_geo
     ),
     tasks_max = 1
-)
-
-
-scriptlines_baselearners_norm <- glue::glue(
-    "#SBATCH --partition=normal \
-#SBATCH --job-name=baselearners \
-#SBATCH --ntasks=1 \
-#SBATCH --output=slurm/%x_%j.out \
-#SBATCH --error=slurm/%x_%j.err \
-  apptainer exec ",
-    "--env-file beethoven_env.txt ",
-    "container_models.sif \\"
 )
 
 controller_baselearners_norm <- crew.cluster::crew_controller_slurm(
@@ -315,18 +470,6 @@ controller_baselearners_norm_huge <- crew.cluster::crew_controller_slurm(
 
 #############################      metalearners   #############################
 
-scriptlines_metalearners_geo <- glue::glue(
-    "#SBATCH --job-name=metalearners \
-#SBATCH --partition=geo \
-#SBATCH --gres=gpu:1 
-#SBATCH --ntasks=1 \
-#SBATCH --output=slurm/%x_%j.out \
-#SBATCH --error=slurm/%x_%j.err \
-apptainer exec --nv ",
-    "--env-file beethoven_env.txt ",
-    "container_models.sif \\"
-)
-
 controller_metalearners_geo <- crew.cluster::crew_controller_slurm(
     name = "controller_metalearners_geo",
     workers = 4,
@@ -335,18 +478,6 @@ controller_metalearners_geo <- crew.cluster::crew_controller_slurm(
         script_lines = scriptlines_metalearners_geo
     ),
     tasks_max = 1
-)
-
-
-scriptlines_metalearners_norm <- glue::glue(
-    "#SBATCH --partition=normal \
-#SBATCH --job-name=metalearners \
-#SBATCH --ntasks=1 \
-#SBATCH --output=slurm/%x_%j.out \
-#SBATCH --error=slurm/%x_%j.err \
-  apptainer exec ",
-    "--env-file beethoven_env.txt ",
-    "container_models.sif \\"
 )
 
 controller_metalearners_norm <- crew.cluster::crew_controller_slurm(
@@ -385,18 +516,6 @@ controller_metalearners_norm_huge <- crew.cluster::crew_controller_slurm(
 
 #############################      predict   #############################
 
-scriptlines_predict_geo <- glue::glue(
-    "#SBATCH --job-name=predict \
-#SBATCH --partition=geo \
-#SBATCH --gres=gpu:1 
-#SBATCH --ntasks=1 \
-#SBATCH --output=slurm/%x_%j.out \
-#SBATCH --error=slurm/%x_%j.err \
-apptainer exec --nv ",
-    "--env-file beethoven_env.txt ",
-    "container_models.sif \\"
-)
-
 controller_predict_geo <- crew.cluster::crew_controller_slurm(
     name = "controller_predict_geo",
     workers = 4,
@@ -405,18 +524,6 @@ controller_predict_geo <- crew.cluster::crew_controller_slurm(
         script_lines = scriptlines_predict_geo
     ),
     tasks_max = 1
-)
-
-
-scriptlines_predict_norm <- glue::glue(
-    "#SBATCH --partition=normal \
-#SBATCH --job-name=predict \
-#SBATCH --ntasks=1 \
-#SBATCH --output=slurm/%x_%j.out \
-#SBATCH --error=slurm/%x_%j.err \
-  apptainer exec ",
-    "--env-file beethoven_env.txt ",
-    "container_models.sif \\"
 )
 
 controller_predict_norm <- crew.cluster::crew_controller_slurm(
@@ -455,28 +562,12 @@ controller_predict_norm_huge <- crew.cluster::crew_controller_slurm(
 
 #############################      AQS   #############################
 
-scriptlines_aqs <- glue::glue(
-    "#SBATCH --job-name=aqs \
-#SBATCH --partition=normal \
-#SBATCH --ntasks=1 \
-#SBATCH --output=slurm/%x_%j.out \
-#SBATCH --error=slurm/%x_%j.err \
-apptainer exec ",
-    "--env-file beethoven_env.txt ",
-    "container_models.sif \\"
-)
-
 controller_aqs <- crew.cluster::crew_controller_slurm(
     name = "controller_aqs",
     workers = 100,
     options_cluster = crew.cluster::crew_options_slurm(
         verbose = TRUE,
-        partition = "normal,highmem,geo",
-        n_tasks = 1,
-        script_lines = scriptlines_aqs,
-        log_output = "slurm/%x_%j.out",
-        log_error = "slurm/%x_%j.err",
-        memory_gigabytes_required = 50
+        script_lines = scriptlines_aqs
     ),
-    tasks_max = 1
+    tasks_max = Inf
 )

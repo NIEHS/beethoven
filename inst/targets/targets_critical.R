@@ -57,7 +57,7 @@ target_critical <-
     #####    time in the `run.sh` script.
     targets::tar_target(
       chr_input_dir,
-      command = "input",
+      command = "/ddn/gs1/group/set/beethoven_store/input/",
       description = "critical | Data directory",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(
@@ -84,7 +84,7 @@ target_critical <-
     #####    files for SQL merges.
     targets::tar_target(
       chr_store,
-      command = "/opt/_targets/objects/",
+      command = "/ddn/gs1/group/set/beethoven_store/_targets/objects/",
       description = "critical | {targets} store",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(

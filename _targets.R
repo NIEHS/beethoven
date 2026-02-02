@@ -1,16 +1,13 @@
 ##### Libraries for the _targets.R file #####
 library(targets)
-library(tarchetypes)
-library(tidyverse)
 library(crew)
 library(crew.cluster)
 
 
 ##############################        STORE       ##############################
-# targets::tar_config_set(store = "/ddn/gs1/group/set/beethoven_store/_targets")
-# targets::tar_config_set(
-#   store = "/opt/_targets/"
-# )
+targets::tar_config_set(
+  store = "/ddn/gs1/group/set/beethoven_store/_targets"
+)
 
 ###########################      SOURCE TARGETS      ###########################
 targets::tar_source("inst/targets/targets_critical.R")
@@ -30,7 +27,6 @@ beethoven_packages <- c(
   "targets",
   "tarchetypes",
   "dplyr",
-  "tidyverse",
   "data.table",
   "sf",
   "crew",
@@ -52,13 +48,11 @@ beethoven_packages <- c(
 )
 
 targets::tar_option_set(
-  repository = tar_repository_cas_local(
-    path = "/ddn/gs1/group/set/beethoven_store/cas/_targets"
-  ),
+  repository = "local",
   packages = beethoven_packages,
   error = "continue",
   memory = "auto",
-  format = "qs",
+  format = "auto",
   storage = "worker",
   deployment = "worker",
   garbage_collection = 10L,
@@ -69,11 +63,8 @@ targets::tar_option_set(
     controller_download_geo,
     controller_download_norm,
     controller_download_norm_big,
-    controller_download_noenv,
     controller_calc_fit_geo,
     controller_calc_fit_norm,
-    controller_calc_fit_norm_big,
-    controller_calc_fit_norm_huge,
     controller_calc_pred_geo,
     controller_calc_pred_norm,
     controller_calc_pred_norm_big,

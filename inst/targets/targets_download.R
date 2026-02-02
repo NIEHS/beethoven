@@ -243,13 +243,12 @@ target_download <-
         amadeus::download_modis(
           product = "MOD06_L2",
           nasa_earth_data_token = chr_nasa_token,
-          mod06_links = chr_mod06_links,
           date = beethoven::fl_dates(unlist(list_dates)),
           directory_to_save = file.path(
             chr_input_dir,
             "modis",
             "raw",
-            "61",
+            "061",
             "MOD06_L2"
           ),
           remove_command = list_download_args$remove_command,
