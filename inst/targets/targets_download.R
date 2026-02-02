@@ -117,7 +117,12 @@ target_download <-
         "omega",
         "shum"
       ),
-      description = "Download | NARR features"
+      description = "Download | NARR features",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_initiate"
+        )
+      )
     ),
     targets::tar_target(
       chr_iter_calc_narr_lag,
@@ -129,7 +134,12 @@ target_download <-
         "uwnd.10m",
         "vwnd.10m"
       ),
-      description = "Download | NARR features | lag"
+      description = "Download | NARR features | lag",
+      resources = targets::tar_resources(
+        crew = targets::tar_resources_crew(
+          controller = "controller_initiate"
+        )
+      )
     ),
     targets::tar_target(
       download_narr,
