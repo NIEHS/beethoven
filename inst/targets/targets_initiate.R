@@ -34,6 +34,7 @@ target_initiate <-
         n = num_dates_split,
         year = TRUE
       ),
+      iteration = "list",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(
           controller = "controller_initiate"
@@ -44,6 +45,7 @@ target_initiate <-
     targets::tar_target(
       list_dates_julian,
       command = lapply(list_dates, function(x) format(as.Date(x), "%Y%j")),
+      iteration = "list",
       description = "initiate | Dates as list (YYYYDDD)",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(
@@ -58,7 +60,7 @@ target_initiate <-
         n = 10,
         year = TRUE
       ),
-      description = "initiate | Dates as list (YYYY-MM-DD) | GEOS-CF",
+      iteration = "list",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(
           controller = "controller_initiate"
@@ -68,6 +70,7 @@ target_initiate <-
     targets::tar_target(
       chr_iter_radii,
       command = c(1000, 10000, 50000),
+      iteration = "list",
       description = "initiate | Buffer radii",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(

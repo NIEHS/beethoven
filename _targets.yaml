@@ -1,2 +1,20 @@
 main:
-  store: /ddn/gs1/group/set/beethoven_store/_targets
+download:
+  script: _targets_download.R
+  store: /ddn/gs1/group/set/beethoven_store/_download
+cov_data:
+  script: _targets_cov_data.R
+  store: /ddn/gs1/group/set/beethoven_store/_cov_data
+cov_pred:
+  script: _targets_cov_pred.R
+  store: /ddn/gs1/group/set/beethoven_store/_cov_pred
+base_learner:
+  script: _targets_base_learner.R
+  store: /ddn/gs1/group/set/beethoven_store/_base_learner
+meta_learner:
+  script: _targets_meta_learner.R
+  store: /ddn/gs1/group/set/beethoven_store/_meta_learner
+deploy:
+  script: _targets_deploy.R
+  store: /ddn/gs1/group/set/beethoven_store/_deploy
+    

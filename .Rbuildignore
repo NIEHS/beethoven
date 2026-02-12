@@ -18,6 +18,13 @@ inst/targets-wide
 ^.future/
 ^_targets/
 _targets.R
+_targets_packages.R
+_targets_download.R 
+_targets_cov_pred.R 
+_targets_cov_data.R 
+_targets_base_learner.R 
+_targets_meta_learner.R 
+_targets_deploy.R
 _targets.yaml
 \*.Rproj
 \.out$

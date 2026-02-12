@@ -1,16 +1,6 @@
 target_download <-
   list(
     targets::tar_target(
-      myenv,
-      Sys.getenv(),
-      resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(
-          controller = "controller_download_norm"
-        )
-      ),
-      description = "Download | Environment variables"
-    ),
-    targets::tar_target(
       list_download_args,
       command = list(
         unzip = TRUE,
@@ -54,6 +44,7 @@ target_download <-
     targets::tar_target(
       chr_iter_calc_geos,
       command = c("aqc_tavg_1hr_g1440x721_v1", "chm_tavg_1hr_g1440x721_v1"),
+      iteration = "list",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(
           controller = "controller_download_norm"
@@ -64,7 +55,7 @@ target_download <-
     targets::tar_target(
       download_geos,
       command = amadeus::download_geos(
-        collection = chr_iter_calc_geos[[1]],
+        collection = chr_iter_calc_geos,
         directory_to_save = file.path(chr_input_dir, "geos"),
         date = beethoven::fl_dates(unlist(list_dates)),
         remove_command = list_download_args$remove_command,
@@ -79,14 +70,6 @@ target_download <-
         )
       ),
       description = "Download | Download GEOS-CF data"
-    ),
-    targets::tar_target(
-      download_geos_buffer,
-      command = {
-        download_geos
-        TRUE
-      },
-      description = "Download GEOS-CF data | buffer"
     ),
     ###########################         NARR         ###########################
     targets::tar_target(
@@ -134,6 +117,7 @@ target_download <-
         "uwnd.10m",
         "vwnd.10m"
       ),
+      iteration = "list",
       description = "Download | NARR features | lag",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(
@@ -171,7 +155,7 @@ target_download <-
         download = list_download_args$download,
         hash = list_download_args$hash
       ),
-      pattern = cross(chr_iter_calc_narr_lag),
+      pattern = map(chr_iter_calc_narr_lag),
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(
           controller = "controller_download_norm_big"
@@ -179,15 +163,7 @@ target_download <-
       ),
       description = "Download NARR data | lag | download"
     ),
-    targets::tar_target(
-      download_narr_buffer,
-      command = {
-        download_narr
-        download_narr_lag
-        TRUE
-      },
-      description = "Download NARR data | buffer | download"
-    ),
+
     ###########################         HMS          ###########################
     targets::tar_target(
       download_hms,
@@ -209,14 +185,6 @@ target_download <-
       ),
       description = "Download HMS data | download"
     ),
-    targets::tar_target(
-      download_hms_buffer,
-      command = {
-        download_hms
-        TRUE
-      },
-      description = "Download HMS data | buffer | download"
-    ),
     ###########################       MODIS - MOD11       ######################
     targets::tar_target(
       download_mod11,
@@ -229,7 +197,7 @@ target_download <-
             chr_input_dir,
             "modis",
             "raw",
-            "61",
+            "061",
             "MOD11A1"
           ),
           remove_command = list_download_args$remove_command,
@@ -287,7 +255,7 @@ target_download <-
             chr_input_dir,
             "modis",
             "raw",
-            "61",
+            "061",
             "MOD13A2"
           ),
           remove_command = list_download_args$remove_command,
@@ -345,7 +313,7 @@ target_download <-
             chr_input_dir,
             "modis",
             "raw",
-            "61",
+            "061",
             "MOD09GA"
           ),
           remove_command = list_download_args$remove_command,
@@ -434,6 +402,7 @@ target_download <-
     targets::tar_target(
       chr_iter_calc_nlcd,
       command = c(2018, 2019, 2020, 2021, 2022),
+      iteration = "list",
       description = "Download | NLCD years"
     ),
     targets::tar_target(
@@ -441,7 +410,11 @@ target_download <-
       command = {
         amadeus::download_nlcd(
           year = chr_iter_calc_nlcd,
-          directory_to_save = file.path(chr_input_dir, "nlcd"),
+          directory_to_save = file.path(
+            chr_input_dir,
+            chr_iter_calc_nlcd,
+            "nlcd"
+          ),
           unzip = list_download_args$unzip,
           remove_zip = list_download_args$remove_zip,
           remove_command = list_download_args$remove_command,
@@ -451,6 +424,7 @@ target_download <-
         )
       },
       pattern = map(chr_iter_calc_nlcd),
+      iteration = "list",
       resources = targets::tar_resources(
         crew = targets::tar_resources_crew(
           controller = "controller_download_norm_big"

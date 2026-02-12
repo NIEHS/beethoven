@@ -1,9 +1,3 @@
-############################################
-# R ENVIRONMENT
-############################################
-R_LIBS_SITE=/opt/Rlibs
-R_LIBS_USER=/opt/Rlibs
-
 # Prepend R and CUDA to PATH (do not override)
 PATH=/usr/local/lib/R/bin:/usr/local/cuda/bin:\
 /usr/local/nvidia/bin:\

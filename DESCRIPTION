@@ -49,10 +49,8 @@ Suggests:
   covr,
   withr,
   bonsai,
-  brulee,
   glmnet,
   lightgbm,
-  scoringRules,
   vetiver,
   tarchetypes,
   tidymodels,
@@ -66,14 +64,9 @@ Suggests:
   doRNG,
   furrr,
   quarto,
-  torch,
-  kernlab,
   arrow
 Remotes:
   ropensci/chopin,
-  tidymodels/brulee@gpu,
-  mitchellmanware/parsnip@beethoven,
-  NIEHS/amadeus
 SystemRequirements: NetCDF4, CUDA (>= 10.0)
 Encoding: UTF-8
 VignetteBuilder: knitr, rmarkdown

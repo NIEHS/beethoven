@@ -78,20 +78,20 @@ target_critical <-
           controller = "controller_initiate"
         )
       )
-    ),
+    )
     ##### 6. chr_store defines the path to the {targets} store **relative**
     #####    to the container-mounted file paths. Used for querying parquet
     #####    files for SQL merges.
-    targets::tar_target(
-      chr_store,
-      command = "/ddn/gs1/group/set/beethoven_store/_targets/objects/",
-      description = "critical | {targets} store",
-      resources = targets::tar_resources(
-        crew = targets::tar_resources_crew(
-          controller = "controller_initiate"
-        )
-      )
-    )
+    # targets::tar_target(
+    #   chr_store,
+    #   command = "/ddn/gs1/group/set/beethoven_store/_targets/objects/",
+    #   description = "critical | {targets} store",
+    #   resources = targets::tar_resources(
+    #     crew = targets::tar_resources_crew(
+    #       controller = "controller_initiate"
+    #     )
+    #   )
+    # )
     ############################################################################
     ############################################################################
     ############################################################################

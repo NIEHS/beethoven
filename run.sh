@@ -10,23 +10,22 @@
 #SBATCH --error=slurm/beethoven_%j.err
 #SBATCH --output=slurm/beethoven_%j.out
 
+# Source and read in the environment variables from beethoven_env.txt
+source beethoven_env.txt
 
+# Activate conda environment
+eval "$(conda shell.bash hook)"
+conda activate beethoven-conda-env
 
-# apptainer exec \
-#   --bind $PWD:/mnt \
-#   --bind $PWD/inst:/inst \
-#   --bind /ddn/gs1/group/set/beethoven_store/cas/input:/input \
-#   --bind /ddn/gs1/group/set/beethoven_store/cas/_targets:/opt/_targets \
-#   --bind /run/munge:/run/munge \
-#   --bind /ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm \
-#   --env-file beethoven_env.txt \
-#   container_mlverse.sif  \
-# export TAR_PROJECT=/ddn/gs1/group/set/beethoven_store/cas/_targets
+# Get TAR_PROJECT from command line argument or use default
+TAR_PROJECT=${1:-download}
 
-APPTAINER_BINDPATH=$PWD:/mnt,$PWD/inst:/inst,/ddn/gs1/group/set/beethoven_store/input:/input,/ddn/gs1/group/set/beethoven_store/_targets:/opt/_targets,/run/munge:/run/munge,/ddn/gs1/tools/slurm/etc/slurm:/ddn/gs1/tools/slurm/etc/slurm
-export APPTAINER_BINDPATH
+# Validate TAR_PROJECT value
+if [[ "$TAR_PROJECT" != "download" && "$TAR_PROJECT" != "cov_data" && "$TAR_PROJECT" != "cov_pred" && "$TAR_PROJECT" != "base_learner" && "$TAR_PROJECT" != "meta_learner" && "$TAR_PROJECT" != "deploy" ]]; then
+    echo "Error: TAR_PROJECT must be one of 'download', 'cov_data', 'cov_pred', 'base_learner', 'meta_learner', or 'deploy', got '$TAR_PROJECT'"
+    exit 1
+fi
 
-Rscript  inst/targets/targets_start.R
+export TAR_PROJECT
 
-
-# Add paths from sys_beethoven.sh if needed
+Rscript -e "targets::tar_make()"

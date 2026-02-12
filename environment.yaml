@@ -1,0 +1,50 @@
+name: beethoven-conda-env
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+
+dependencies:
+  # ---- Core R ----
+  - r-base=4.5.*
+
+  # ---- GIS / Spatial ----
+  - r-sf=1.0_24
+  - r-terra=1.8_93
+  - gdal=3.12.1
+  - geos=3.14.1
+  - proj=9.7.1
+
+  # ---- Data ----
+  - r-dplyr
+  - r-data.table
+  - r-lubridate
+  - r-arrow
+  - r-visnetwork
+
+  # ---- Workflow / HPC ----
+  - r-targets
+  - r-tarchetypes
+  - r-crew
+
+  # ---- Modeling / ML ----
+  - r-parsnip
+  - r-bonsai
+  - r-dials
+  - r-lightgbm
+  - r-xgboost
+  - r-mgcv
+  - r-glmnet
+  - r-finetune
+  - r-spatialsample
+  - r-tidymodels
+  - r-workflows
+  - r-devtools
+
+  # ---- Build / compilers ----
+  - compilers
+  - make
+  - pkg-config
+
+  # ---- Tooling ----
+  - quarto
