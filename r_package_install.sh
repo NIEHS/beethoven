@@ -60,5 +60,7 @@ Rscript -e "install.packages('missRanger', repos = 'https://cran.r-project.org')
 # Remove this block once the local version is published to CRAN/conda-forge.
 Rscript -e "install.packages('/ddn/gs1/group/set/crew.cluster', repos = NULL, type = 'source')"
 
-# Install beethoven itself from local source
-Rscript -e "remotes::install_local('.', upgrade = FALSE)"
+# Install beethoven itself from local source.
+# Use R CMD INSTALL (not remotes::install_local) to avoid hanging on
+# GitHub SHA checks for packages listed in DESCRIPTION Remotes:.
+R CMD INSTALL .
