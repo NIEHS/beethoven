@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=env 
-#SBATCH --partition=geo
+#SBATCH --partition=highmem
 #SBATCH --mem=4G
 #SBATCH --cpus-per-task=1
 #SBATCH --ntasks=1

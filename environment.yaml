@@ -6,14 +6,16 @@ channels:
 
 dependencies:
   # ---- Core R ----
-  - r-base=4.5.*
+  - r-base=4.5.2
 
-  # ---- GIS / Spatial ----
+  # ---- GIS / Spatial (pinned — pipeline correctness depends on these) ----
   - r-sf=1.0_24
   - r-terra=1.8_93
   - gdal=3.12.1
   - geos=3.14.1
   - proj=9.7.1
+  - libgdal-hdf4=3.12.1
+  - libgdal-hdf5=3.12.1
 
   # ---- Data ----
   - r-dplyr
@@ -26,6 +28,12 @@ dependencies:
   - r-targets
   - r-tarchetypes
   - r-crew
+  # r-crew.cluster: conda version; r_package_install.sh overrides with dev build
+  - r-crew.cluster
+  - r-rdpack
+  - r-mirai
+  - r-nanonext
+  - r-qs2
 
   # ---- Modeling / ML ----
   - r-parsnip
@@ -38,8 +46,31 @@ dependencies:
   - r-finetune
   - r-spatialsample
   - r-tidymodels
+  - r-tidyverse
   - r-workflows
+
+  # ---- DESCRIPTION Imports (conda-available) ----
+  - r-collapse
+  - r-tigris
+  - r-scatterplot3d
+  - r-parallelly
+  - r-butcher
+  - r-recipes
+  - r-rsample
+  - r-tune
+  - r-rlang
+  - r-tibble
+  - r-tidyr
+  - r-tidyselect
+  - r-yardstick
+  - r-stringi
+  - r-purrr
+  - r-magrittr
+
+  # ---- Dev / Build tooling ----
   - r-devtools
+  - r-pak
+  - r-rcpp
 
   # ---- Build / compilers ----
   - compilers
