@@ -25,17 +25,20 @@
 # To recreate from the lock: USE_LOCK=1 sbatch create_env.sh
 
 eval "$(conda shell.bash hook)"
-conda activate base
 
-# Install conda-lock into the base env if not already present
-if ! conda run -n base conda-lock --version &>/dev/null; then
-  conda install -n base conda-lock -y --solver libmamba
+# Install conda-lock into the project env (user-writable) if not present.
+# The system base env (/ddn/gs1/biotools/anaconda3) is read-only.
+CONDA_ENV="beethoven-conda-env"
+
+if ! conda run -n "${CONDA_ENV}" conda-lock --version &>/dev/null; then
+  conda install -n "${CONDA_ENV}" conda-lock -y -c conda-forge \
+    --solver libmamba
 fi
 
 # Use libmamba solver for faster resolution
 export CONDA_SOLVER=libmamba
 
-conda-lock lock \
+conda run -n "${CONDA_ENV}" conda-lock lock \
   --file environment.yaml \
   --platform linux-64 \
   --lockfile conda-lock.yml
