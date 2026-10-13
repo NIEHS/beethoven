@@ -271,34 +271,34 @@ target_calculate_predict <-
         parquet = targets::tar_resources_parquet(compression = "lz4")
       ),
       description = "Calculate GMTED features | prediction"
-    ),
+    )
     ############################################################################
     ############################################################################
     ############################################################################
-    targets::tar_target(
-      chr_pred_calc_hms,
-      command = list.files(
-        chr_store,
-        pattern = paste0(deparse(substitute(list_pred_calc_hms))),
-        full.names = TRUE,
-        recursive = TRUE
-      ),
-      description = "{parquet} file paths for HMS features | prediction"
-    ),
-    targets::tar_target(
-      chr_duckdb,
-      command = {
-        chr_duckdb <- file.path(
-          chr_input_dir,
-          "prediction",
-          "db_prediction.duckdb"
-        )
-        con_prediction <- DBI::dbConnect(duckdb::duckdb(), dbdir = chr_duckdb)
-        on.exit(DBI::dbDisconnect(con_prediction, shutdown = TRUE))
-        chr_duckdb
-      },
-      description = "Initiate {duckdb} for prediction grid | prediction"
-    ),
+    # targets::tar_target(
+    #   chr_pred_calc_hms,
+    #   command = list.files(
+    #     chr_store,
+    #     pattern = paste0(deparse(substitute(list_pred_calc_hms))),
+    #     full.names = TRUE,
+    #     recursive = TRUE
+    #   ),
+    #   description = "{parquet} file paths for HMS features | prediction"
+    # ),
+    # targets::tar_target(
+    #   chr_duckdb,
+    #   command = {
+    #     chr_duckdb <- file.path(
+    #       chr_input_dir,
+    #       "prediction",
+    #       "db_prediction.duckdb"
+    #     )
+    #     con_prediction <- DBI::dbConnect(duckdb::duckdb(), dbdir = chr_duckdb)
+    #     on.exit(DBI::dbDisconnect(con_prediction, shutdown = TRUE))
+    #     chr_duckdb
+    #   },
+    #   description = "Initiate {duckdb} for prediction grid | prediction"
+    # ),
     # targets::tar_target(
     #   db_pred_calc_hms,
     #   command = {
@@ -342,16 +342,16 @@ target_calculate_predict <-
     #     crew = targets::tar_resources_crew(controller = "controller_1")
     #   )
     # ),
-    targets::tar_target(
-      chr_pred_calc_gmted,
-      command = list.files(
-        chr_store,
-        pattern = paste0(deparse(substitute(list_pred_calc_gmted))),
-        full.names = TRUE,
-        recursive = TRUE
-      ),
-      description = "{parquet} file paths for GMTED features | prediction"
-    )
+    # targets::tar_target(
+    #   chr_pred_calc_gmted,
+    #   command = list.files(
+    #     chr_store,
+    #     pattern = paste0(deparse(substitute(list_pred_calc_gmted))),
+    #     full.names = TRUE,
+    #     recursive = TRUE
+    #   ),
+    #   description = "{parquet} file paths for GMTED features | prediction"
+    # )
     # targets::tar_target(
     #   db_pred_calc_gmted,
     #   command = {
