@@ -1,141 +1,35 @@
-# History files
+# Ignore specific folders
+doc/
+input/
+output/
+slurm/
+_targets/
+
+# Vignettes
+vignettes/*.html
+vignettes/*.pdf
+
+# Large container files
+*.sif
+
+# Slurm-related error files
+*.err
+*.out
+
+# R user/session files.
 .Rhistory
 .Rapp.history
-
-# Session Data files
+.Ruserdata
 .RData
 .RDataTmp
+.Renviron
 
-# Ignore specific folders
-output/
-manuscript/
-
-# README html 
-README.html
-
-# User-specific files
-.Ruserdata
-
-# Example code in package build process
-*-Ex.R
-
-# Other files
-**/.DS_Store
-**/._.DS_Store
-../._create-prediction-grid.Rmd
-../._map-nc-land-covariates.Rmd
-# Hidden folders
+# Hidden and temporary folders
+._.*
+._.gitignore
+._*
 .DS_Store/
 ._.DS_Store/
 /.DS_Store
 /._.DS_Store
 *.zip
-
-# Output files from R CMD build
-/*.tar.gz
-
-# Output files from R CMD check
-/*.Rcheck/
-
-# RStudio files
-.Rproj.user/
-
-# produced vignettes
-vignettes/*.html
-vignettes/*.pdf
-
-# Specific vignettes
-vignettes/calc_nlcd_ratio_monitors.Rmd
-
-# OAuth2 token, see https://github.com/hadley/httr/releases/tag/v0.3
-.httr-oauth
-
-# knitr and R markdown default cache directories
-*_cache/
-/cache/
-
-# Temporary files created by R markdown
-*.utf8.md
-*.knit.md
-
-# R Environment Variables
-.Renviron
-
-# pkgdown site
-docs/
-
-# translation temp files
-po/*~
-
-# RStudio Connect folder
-rsconnect/
-
-# Generic open or temporary files
-._.*
-._.gitignore
-._*
-
-# Insang's negative value exploration script
-tools/negative_exploration
-tools/metalearner_test
-tools/shiny_explore_pm/missingness_exploration_pm_quarto_shiny_data/
-
-# NASA Earthdata login credentials
-.dodsrc
-
-# raw data
-input
-
-# pipeline
-_targets
-
-# future batchtools outputs
-.future
-slurm_error.log
-slurm/
-
-# SLURM messages and logs
-**/*.err
-**/*.out
-
-# Apptainer images
-**/*.sif
-/Meta/
-/doc/
-
-# interactive targets
-targets_start.Rout
-
-.netrc
-.urs_cookies
-beethoven_branching_notes.txt
-
-# NASA Earthdata login credentials
-inst/extdata/nasa_token.txt
-
-debug/
-debug*
-
-# dev
-lib-flex/**
-
-# local coverage RDS files
-cov/
-
-# images
-*.png
-
-# dev + debugging folders
-dev/
-save/
-debug/
-inst/extdata/bdp/
-inst/extdata/bdp2/
-inst/extdata/bdp3/
-inst/extdata/bdp4/
-inst/extdata/filesize.R
-inst/extdata/filesize_hex.R
-inst/extdata/filesize_hex_wide.R
-inst/extdata/filesize_checks.R
-inst/extdata/bigdata.sh
-*.parquet
