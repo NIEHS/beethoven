@@ -75,7 +75,6 @@ Suggests:
 Remotes:
   ropensci/chopin,
   tidymodels/brulee@gpu,
-  mitchellmanware/parsnip@beethoven,
   NIEHS/amadeus
 SystemRequirements: NetCDF4, CUDA (>= 10.0)
 Encoding: UTF-8
