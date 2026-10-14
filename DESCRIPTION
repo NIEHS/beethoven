@@ -74,7 +74,6 @@ Suggests:
   arrow
 Remotes:
   ropensci/chopin,
-  tidymodels/brulee@gpu,
   NIEHS/amadeus
 SystemRequirements: NetCDF4, CUDA (>= 10.0)
 Encoding: UTF-8
