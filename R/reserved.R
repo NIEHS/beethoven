@@ -309,7 +309,7 @@ fit_base_brulee <-
     return(base_wftune)
   }
 
-# dt <- qs::qread("output/dt_feat_design_imputed_061024.qs")
+# dt <- qs2::qs_read("output/dt_feat_design_imputed_061024.qs")
 # dtd <- dplyr::as_tibble(dt)
 # dtfit <- fit_base_brulee(dtd, r_subsample = 0.3)
 
@@ -436,7 +436,7 @@ fit_base_xgb <-
     return(base_wftune)
   }
 
-# dt <- qs::qread("output/dt_feat_design_imputed_061024.qs")
+# dt <- qs2::qs_read("output/dt_feat_design_imputed_061024.qs")
 # dtd <- dplyr::as_tibble(dt)
 # dtfitx <- fit_base_xgb(dtd, xvar = names(dtd)[6:105], r_subsample = 0.3)
 

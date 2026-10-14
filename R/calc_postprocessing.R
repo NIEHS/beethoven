@@ -1,3 +1,5 @@
+# Calculation tier post-processing functions.
+
 #' Add Time Column
 #'
 #' This function adds a time column to a data frame.
@@ -24,7 +26,7 @@ add_time_col <- function(df, time_value, time_id = "time") {
 
 
 #' Merge input data.frame objects
-#' @param by character. Joining keys. See [`merge`] for details.
+#' @param by character. Joining keys. See [`data.table::merge`] for details.
 #' @param time logical(1). Whether or not include time identifier.
 #' Set this `TRUE` will supersede `by` value by appending time identifier.
 #' @param ... data.frame objects to merge
@@ -102,7 +104,7 @@ post_calc_unify_timecols <-
 #' @note This function takes preprocessed data.table with
 #'   a column named `"time"`.
 #' @importFrom data.table as.data.table copy
-#' @importFrom data.table `:=`
+#' @importFrom data.table :=
 #' @export
 post_calc_convert_time <-
   function(
@@ -128,7 +130,7 @@ post_calc_convert_time <-
 #' @param spid character(1). Name of the unique location identifier field.
 #' @importFrom methods is
 #' @importFrom data.table merge.data.table
-#' @importFrom data.table `:=`
+#' @importFrom data.table :=
 #' @return data.frame
 post_calc_join_yeardate <-
   function(
@@ -334,8 +336,6 @@ post_calc_merge_all <-
 
 
 #' Remove columns from a data frame based on regular expression patterns.
-#' @keywords Post-calculation
-#'
 #' This function removes columns from a data frame that match
 #'  any of the specified
 #' regular expression patterns. By default, it removes columns with names that
@@ -348,6 +348,7 @@ post_calc_merge_all <-
 #'   "^lon$|^lat$|geoid|year$|description".
 #' @param strict logical(1). If `TRUE`,
 #'   only `c("site_id", "time")` will be kept.
+#' @keywords Post-calculation
 #' @return The modified data frame with the specified columns removed.
 #'
 #' @examples
@@ -502,7 +503,7 @@ post_calc_autojoin <-
 #'
 #' @importFrom collapse set_collapse replace_inf replace_na fvar fnth
 #' @importFrom data.table setDTthreads setnafill
-#' @importFrom qs qread
+#' @importFrom qs2 qs_read
 #' @importFrom stats setNames
 #' @importFrom stringi stri_replace_all_regex
 #' @importFrom missRanger missRanger
@@ -524,7 +525,7 @@ impute_all <-
           )
         )
       }
-      dt <- qs::qread(file.path(dt))
+      dt <- qs2::qs_read(file.path(dt))
     }
     dt$time <- as.POSIXct(dt$time)
     # remove unnecessary columns
@@ -753,19 +754,19 @@ append_predecessors <-
         time_create
       )
     if (length(input_old) == 0) {
-      qs::qsave(input_new, file = file.path(path_qs, name_qs))
+      qs2::qs_save(input_new, file = file.path(path_qs, name_qs))
       return(name_qs)
     } else {
       # vv <- list()
-      qs::qsave(input_new, file = file.path(path_qs, name_qs))
+      qs2::qs_save(input_new, file = file.path(path_qs, name_qs))
       input_update <- list.files(path_qs, "*.*.qs$", full.names = TRUE)
       bound_large <-
         Reduce(
           function(x, y) {
             if (inherits(x, "data.frame")) {
-              bound <- rbind(x, qs::qread(y))
+              bound <- rbind(x, qs2::qs_readd(y))
             } else {
-              bound <- rbind(qs::qread(x), qs::qread(y))
+              bound <- rbind(qs2::qs_read(x), qs2::qs_read(y))
             }
             return(bound)
           },

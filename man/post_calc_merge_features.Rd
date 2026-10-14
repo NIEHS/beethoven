@@ -7,7 +7,7 @@
 post_calc_merge_features(by = c("site_id"), time = FALSE, ...)
 }
 \arguments{
-\item{by}{character. Joining keys. See \code{\link{merge}} for details.}
+\item{by}{character. Joining keys. See \code{\link[data.table:merge]{data.table::merge}} for details.}
 
 \item{time}{logical(1). Whether or not include time identifier.
 Set this \code{TRUE} will supersede \code{by} value by appending time identifier.}
