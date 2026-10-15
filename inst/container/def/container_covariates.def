@@ -16,6 +16,7 @@ From: rocker/geospatial:latest
 
     Rscript -e "install.packages(c('pak', 'qs2', 'mirai', 'mori', 'h3jsr'))"
     Rscript -e "pak::pak('NIEHS/amadeus')"
+    Rscript -e 'pak::pkg_install("NIEHS/beethoven@mm-1013", dependencies = TRUE)'
 
 %environment
     export LANG=en_US.UTF-8

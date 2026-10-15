@@ -5,6 +5,8 @@ output/
 slurm/
 _targets/
 .snakemake/
+inst/container/def/container_dev.def
+inst/container/sh/build_container_dev.sh
 
 # Vignettes
 vignettes/*.html
