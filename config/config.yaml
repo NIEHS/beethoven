@@ -23,7 +23,7 @@ int_config_radii:
 
 ###############################################################################
 # Shared data repository file path.
-chr_config_dir: "input/"
+chr_config_dir: "beethoven/beethoven/input/"
 
 ###############################################################################
 # Uber H3 grid resolution for prediction grid resolution. Resolution 8 is

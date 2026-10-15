@@ -1,6 +1,6 @@
 ########################################################################################
 ##############################            GRID            ##############################
-rule prediction_h3r8:
+rule prediction_grid:
     input:
         dt_feat_merge_sptmpl="output/dt_feat_merge_sptmpl.qs"
 
