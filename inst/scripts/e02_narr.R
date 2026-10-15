@@ -46,7 +46,7 @@ mirai::daemons(0)
 ################################################################################
 dt_pred_narr_sptmpl <- beethoven::reduce_merge(
   list_pred_narr_sptmpl,
-  by = c(chr_pred_h3r8, "time")
+  by = c("site_id", "time")
 )
 
 ################################################################################
