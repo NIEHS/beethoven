@@ -44,7 +44,7 @@ list_feat_narr_sptmpl <- lapply(
 mirai::daemons(0)
 
 ################################################################################
-dt_feat_narr_sptmpl <- reduce_merge(list_feat_narr_sptmpl)
+dt_feat_narr_sptmpl <- beethoven::reduce_merge(list_feat_narr_sptmpl)
 
 ################################################################################
 qs2::qs_save(
