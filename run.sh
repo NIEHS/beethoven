@@ -7,8 +7,8 @@
 #SBATCH --ntasks=1
 #SBATCH --mem=10G
 #SBATCH --cpus-per-task=20
-#SBATCH --error=slurm/cov_%j.err
-#SBATCH --output=slurm/cov_%j.out
+#SBATCH --error=slurm/beethoven_%j.err
+#SBATCH --output=slurm/beethoven_%j.out
 
 ############################      CERTIFICATES      ############################
 # Export CURL_CA_BUNDLE and SSL_CERT_FILE environmental variables to vertify
