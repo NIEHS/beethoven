@@ -1,0 +1,36 @@
+###############################################################################
+# BEETHOVEN Snakemake configuration (dev)
+# 06 October 2026
+# Mitchell Manware
+
+###############################################################################
+# Define critical pipeline configuration and decisions, roughly equivalent to
+# previous inst/targets/targets_critical.R
+
+###############################################################################
+# Date range controls all time-related objects for the entire pipeline. This
+# is the only target that needs to be chagne to update the pipeline with a new
+# temporal range. Relevant months and years are are derived from the explicilty
+# defined date range.
+chr_config_daterange:
+  start: "2021-01-01"
+  end: "2022-12-31"
+
+###############################################################################
+# Buffer radii define the buffer distances, in meters, for covariate
+# calculations at all AQS model fitting and H3 grid prediction locations.
+# Buffer radii are 1000 (1km), 5000 (5km), and 10,000 (10km).
+int_config_radii:
+  - 1000
+  - 5000
+  - 10000
+
+###############################################################################
+# Shared data repository file path.
+chr_config_dir: "beethoven/beethoven-sm/input/"
+
+###############################################################################
+# Uber H3 grid resolution for prediction grid resolution. Resolution 8 is
+# roughly equal to 1km x 1km grid, having hexagonal area of 0.737 km^2.
+# Set to lower resolution (6; ~36.129 km^2) for development work.
+int_grid_res: 6

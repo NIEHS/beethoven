@@ -1,23 +1,26 @@
 #!/bin/bash
 
 #SBATCH --job-name=beethoven
+#SBATCH --mail-user=mitchell.manware@nih.gov
+#SBATCH --mail-type=END,FAIL
 #SBATCH --partition=geo
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=1
-#SBATCH --mem=1G
-#SBATCH --output=slurm/beethoven_%j.out
+#SBATCH --mem=10G
+#SBATCH --cpus-per-task=20
+#SBATCH --error=slurm/cov_%j.err
+#SBATCH --output=slurm/cov_%j.out
 
-#############################      COVARIATES      #############################
-# Download and calculate AQS sites covariates via container_covariates.sif
-echo "Submitting {beethoven} covariates targets ..."
-sbatch --wait inst/scripts/run_covariates.sh
+############################      CERTIFICATES      ############################
+# Export CURL_CA_BUNDLE and SSL_CERT_FILE environmental variables to vertify
+# servers' SSL certificates during download.
+export CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 
-#############################        MODELS        #############################
-# Fit CPU-enbaled meta learner models via container_models.sif.
-echo "Submitting {beethoven} models targets ..."
-sbatch --wait inst/scripts/run_models.sh
+############################          CORES         ############################
+cores="${1:-${SLURM_CPUS_PER_TASK:-1}}"
 
-#############################      PREDICTION      #############################
-# Calculate prediction grid covariates and predict via container_covariates.sif
-# echo "Submitting {beethoven} prediction targets ..."
-# sbatch --wait inst/scripts/run_predict.sh
+############################       COVARIATES       ############################
+snakemake \
+    --cores "${cores}" \
+    --use-apptainer \
+    -p

@@ -1,0 +1,58 @@
+################################################################################
+# Calculate NARR covariates at Uber H3 (resolution 8) locations (spatial only).
+
+################################################################################
+# Load libraries and source local functions.
+library(amadeus)
+source("R/amadeus.R")
+source("R/beethoven.R")
+
+################################################################################
+# Import configured variables and inputs.
+chr_config_dir <- snakemake@params[["chr_config_dir"]]
+chr_init_dates <- qs2::qs_read(snakemake@input[["chr_init_dates"]])
+chr_iter_narr <- qs2::qs_read(snakemake@input[["chr_iter_narr"]])
+chr_pred_h3r8 <- qs2::qs_read(snakemake@input[["chr_pred_h3r8"]])
+sf_pred_grid_sp <- qs2::qs_read(snakemake@input[["sf_pred_grid_sp"]])
+
+################################################################################
+mirai::daemons(100)
+list_pred_narr_sptmpl <- lapply(
+  chr_iter_narr,
+  function(x) {
+    dt_pred_x_sptmpl <- suppressMessages(
+      calculate_narr_mirai(
+        from = amadeus::process_narr(
+          path = file.path(chr_config_dir, "narr", x),
+          variable = x,
+          date = fl_dates(chr_init_dates)
+        ),
+        locs = sf_pred_grid_sp,
+        locs_id = chr_pred_h3r8,
+        radius = 0,
+        fun = "mean",
+        geom = FALSE
+      )
+    )
+    if ("level" %in% names(dt_pred_x_sptmpl)) {
+      dt_pred_x_sptmpl |>
+        dplyr::filter(level == 1000) |>
+        dplyr::select(-level)
+    } else {
+      dt_pred_x_sptmpl
+    }
+  }
+)
+mirai::daemons(0)
+
+################################################################################
+dt_pred_narr_sptmpl <- reduce_merge(
+  list_pred_narr_sptmpl,
+  by = c(chr_pred_h3r8, "time")
+)
+
+################################################################################
+qs2::qs_save(
+  data.table::data.table(dt_pred_narr_sptmpl),
+  snakemake@output[["dt_pred_narr_sptmpl"]]
+)
