@@ -245,9 +245,9 @@ fit_base_learner <-
       recipes::step_zv(recipes::all_predictors())
 
     if (!is.null(drop_vars)) {
-      base_recipe <-
-        base_recipe %>%
-        recipes::update_role(!!drop_vars, new_role = "id")
+      base_recipe <- base_recipe %>%
+        recipes::update_role(dplyr::all_of(drop_vars), new_role = "id") %>%
+        recipes::update_role_requirements("id", bake = FALSE)
     }
 
     if (normalize) {
