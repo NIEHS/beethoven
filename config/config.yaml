@@ -1,11 +1,7 @@
 ###############################################################################
-# BEETHOVEN Snakemake configuration (dev)
-# 06 October 2026
+######################             BEETHOVEN             ######################
+# 15 October 2026
 # Mitchell Manware
-
-###############################################################################
-# Define critical pipeline configuration and decisions, roughly equivalent to
-# previous inst/targets/targets_critical.R
 
 ###############################################################################
 # Date range controls all time-related objects for the entire pipeline. This
@@ -27,7 +23,7 @@ int_config_radii:
 
 ###############################################################################
 # Shared data repository file path.
-chr_config_dir: "beethoven/beethoven-sm/input/"
+chr_config_dir: "input/"
 
 ###############################################################################
 # Uber H3 grid resolution for prediction grid resolution. Resolution 8 is

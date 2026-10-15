@@ -8,7 +8,6 @@
 ################################################################################
 # Load libraries and source local functions.
 library(amadeus)
-source("R/beethoven.R")
 
 ################################################################################
 # Import configured variables and inputs.
@@ -30,7 +29,7 @@ int_init_years <- unique(lubridate::year(chr_init_dates))
 ################################################################################
 # Chunks of 100 sequential dates for parallelization. Chunks include only dates
 # within the same year to adhere to {amadeus::download_modis} requirements.
-list_init_dates <- split_dates(
+list_init_dates <- beethoven::split_dates(
   dates = c(chr_init_dates[1], chr_init_dates[length(chr_init_dates)]),
   n = 100,
   year = TRUE

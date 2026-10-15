@@ -4,7 +4,6 @@
 ################################################################################
 # Load libraries and source local functions.
 library(amadeus)
-source("R/beethoven.R")
 
 ################################################################################
 # Import configured variables and inputs.
@@ -28,7 +27,7 @@ list_dl_collect <- list(
 # !!! identifiers and latitude/longitude coordinates only.        !!!
 sf_feat_aqs_sp <- amadeus::process_aqs(
   path = file.path(chr_config_dir, "aqs", "data_files"),
-  date = fl_dates(chr_init_dates),
+  date = beethoven::fl_dates(chr_init_dates),
   mode = "location",
   data_field = "Arithmetic.Mean",
   return_format = "sf"
@@ -43,7 +42,7 @@ dt_feat_aqs_sptmpl <- amadeus::process_aqs(
     pattern = "daily_88101_[0-9]{4}.csv",
     full.names = TRUE
   ),
-  date = fl_dates(chr_init_dates),
+  date = beethoven::fl_dates(chr_init_dates),
   mode = "available-data",
   data_field = c("Arithmetic.Mean", "Event.Type"),
   return_format = "data.table"

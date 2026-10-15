@@ -5,7 +5,6 @@
 # Load libraries and source local functions.
 library(amadeus)
 source("R/amadeus.R")
-source("R/beethoven.R")
 
 ################################################################################
 # Import configured variables and inputs.
@@ -24,7 +23,7 @@ list_feat_narr_sptmpl <- lapply(
         from = amadeus::process_narr(
           path = file.path(chr_config_dir, "narr", x),
           variable = x,
-          date = fl_dates(chr_init_dates)
+          date = beethoven::fl_dates(chr_init_dates)
         ),
         locs = sf_feat_aqs_sp,
         locs_id = "site_id",

@@ -3,8 +3,7 @@
 
 ################################################################################
 # Load libraries and source local functions.
-library(amadeus)
-source("R/beethoven.R")
+library(beethoven)
 
 ################################################################################
 # Import configured variables and inputs.
@@ -23,7 +22,7 @@ list_feat_merge_sptmpl <- lapply(
 )
 
 ################################################################################
-dt_feat_merge_sptmpl <- reduce_merge(
+dt_feat_merge_sptmpl <- beethoven::reduce_merge(
   list_feat_merge_sptmpl,
   by = c("site_id", "time")
 )

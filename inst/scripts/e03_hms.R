@@ -5,7 +5,6 @@
 # Load libraries and source local functions.
 library(amadeus)
 source("R/amadeus.R")
-source("R/beethoven.R")
 
 ################################################################################
 # Import configured variables and inputs.
@@ -18,7 +17,7 @@ mirai::daemons(100)
 dt_pred_hms_sptmpl <- suppressMessages(
   calculate_hms_map(
     from = amadeus::process_hms(
-      date = fl_dates(chr_init_dates),
+      date = beethoven::fl_dates(chr_init_dates),
       path = file.path(chr_config_dir, "hms", "data_files")
     ),
     locs = sf_pred_grid_sp,

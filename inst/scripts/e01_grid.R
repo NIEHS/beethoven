@@ -3,10 +3,7 @@
 
 ################################################################################
 # Load libraries and source local functions.
-library(amadeus)
 library(h3jsr)
-source("R/amadeus.R")
-source("R/beethoven.R")
 
 ################################################################################
 # Import configured variables and inputs.
@@ -38,7 +35,7 @@ chr_gridid <- chr_gridid[!is.na(chr_gridid)]
 
 ################################################################################
 sf_pred_grid_sp <- sf::st_sf(
-  h3r8_id = chr_gridid,
+  site_id = chr_gridid,
   geometry = h3jsr::cell_to_polygon(chr_gridid)
 )
 
