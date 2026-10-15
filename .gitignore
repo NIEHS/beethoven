@@ -4,6 +4,7 @@ input/
 output/
 slurm/
 _targets/
+.snakemake/
 
 # Vignettes
 vignettes/*.html

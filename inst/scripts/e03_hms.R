@@ -11,7 +11,6 @@ source("R/beethoven.R")
 # Import configured variables and inputs.
 chr_config_dir <- snakemake@params[["chr_config_dir"]]
 chr_init_dates <- qs2::qs_read(snakemake@input[["chr_init_dates"]])
-chr_pred_h3r8 <- qs2::qs_read(snakemake@input[["chr_pred_h3r8"]])
 sf_pred_grid_sp <- qs2::qs_read(snakemake@input[["sf_pred_grid_sp"]])
 
 ################################################################################
@@ -23,7 +22,7 @@ dt_pred_hms_sptmpl <- suppressMessages(
       path = file.path(chr_config_dir, "hms", "data_files")
     ),
     locs = sf_pred_grid_sp,
-    locs_id = chr_pred_h3r8,
+    locs_id = "site_id",
     radius = 0,
     fun = "mean",
     geom = FALSE

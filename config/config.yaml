@@ -32,5 +32,5 @@ chr_config_dir: "beethoven/beethoven-sm/input/"
 ###############################################################################
 # Uber H3 grid resolution for prediction grid resolution. Resolution 8 is
 # roughly equal to 1km x 1km grid, having hexagonal area of 0.737 km^2.
-# Set to lower resolution (6; ~36.129 km^2) for development work.
-int_grid_res: 6
+# Set to lower resolution (5; ~36.129 km^2) for development work.
+int_grid_res: 5

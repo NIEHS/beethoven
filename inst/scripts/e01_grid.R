@@ -28,20 +28,19 @@ sf_geometry <- sf::st_sf(
 )
 
 ################################################################################
-chr_r8ids <- unique(
+chr_gridid <- unique(
   unlist(
     h3jsr::polygon_to_cells(sf_geometry, res = int_grid_res),
     use.names = FALSE
   )
 )
-chr_r8ids <- chr_r8ids[!is.na(chr_r8ids)]
+chr_gridid <- chr_gridid[!is.na(chr_gridid)]
 
 ################################################################################
 sf_pred_grid_sp <- sf::st_sf(
-  h3r8_id = chr_r8ids,
-  geometry = h3jsr::cell_to_polygon(chr_r8ids)
+  h3r8_id = chr_gridid,
+  geometry = h3jsr::cell_to_polygon(chr_gridid)
 )
 
 ################################################################################
-qs2::qs_save("h3r8_id", snakemake@output[["chr_pred_h3r8"]])
 qs2::qs_save(sf_pred_grid_sp, snakemake@output[["sf_pred_grid_sp"]])

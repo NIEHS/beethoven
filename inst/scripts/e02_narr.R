@@ -12,7 +12,6 @@ source("R/beethoven.R")
 chr_config_dir <- snakemake@params[["chr_config_dir"]]
 chr_init_dates <- qs2::qs_read(snakemake@input[["chr_init_dates"]])
 chr_iter_narr <- qs2::qs_read(snakemake@input[["chr_iter_narr"]])
-chr_pred_h3r8 <- qs2::qs_read(snakemake@input[["chr_pred_h3r8"]])
 sf_pred_grid_sp <- qs2::qs_read(snakemake@input[["sf_pred_grid_sp"]])
 
 ################################################################################
@@ -28,7 +27,7 @@ list_pred_narr_sptmpl <- lapply(
           date = fl_dates(chr_init_dates)
         ),
         locs = sf_pred_grid_sp,
-        locs_id = chr_pred_h3r8,
+        locs_id = "site_id",
         radius = 0,
         fun = "mean",
         geom = FALSE

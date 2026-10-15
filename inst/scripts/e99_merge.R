@@ -8,7 +8,6 @@ source("R/beethoven.R")
 
 ################################################################################
 # Import configured variables and inputs.
-chr_pred_h3r8 <- qs2::qs_read(snakemake@input[["chr_pred_h3r8"]])
 dt_pred_narr_sptmpl <- qs2::qs_read(snakemake@input[["dt_pred_narr_sptmpl"]])
 dt_pred_hms_sptmpl <- qs2::qs_read(snakemake@input[["dt_pred_hms_sptmpl"]])
 
@@ -24,7 +23,7 @@ list_pred_merge_sptmpl <- lapply(
 ################################################################################
 dt_pred_merge_sptmpl <- reduce_merge(
   list_pred_merge_sptmpl,
-  by = c(chr_pred_h3r8, "time")
+  by = c("site_id", "time")
 )
 
 ################################################################################
