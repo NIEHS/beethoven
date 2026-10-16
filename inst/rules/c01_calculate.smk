@@ -74,7 +74,7 @@ rule calculate_merge:
         dt_feat_hms_sptmpl="output/dt_feat_hms_sptmpl.qs"
 
     output:
-        dt_feat_merge_sptmpl="output/dt_feat_merge_sptmpl.qs"
+        dt_feat_merge_sptmpl="output/dt_feat_merge_sptmpl.parquet"
 
     params:
         chr_config_dir=os.path.join(

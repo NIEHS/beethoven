@@ -5,6 +5,9 @@ output/
 slurm/
 _targets/
 .snakemake/
+
+# Development files and folers.
+inst/devel/
 inst/container/def/container_dev.def
 inst/container/sh/build_container_dev.sh
 

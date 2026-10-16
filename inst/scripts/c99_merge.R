@@ -28,4 +28,11 @@ dt_feat_merge_sptmpl <- beethoven::reduce_merge(
 )
 
 ################################################################################
-qs2::qs_save(dt_feat_merge_sptmpl, snakemake@output[["dt_feat_merge_sptmpl"]])
+# Substitute "_" for "." in column names for easier SQL integration.
+names(dt_feat_merge_sptmpl) <- gsub("\\.", "_", names(dt_feat_merge_sptmpl))
+
+################################################################################
+arrow::write_parquet(
+  dt_feat_merge_sptmpl,
+  snakemake@output[["dt_feat_merge_sptmpl"]]
+)

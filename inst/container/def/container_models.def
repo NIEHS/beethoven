@@ -36,6 +36,8 @@ From: rocker/geospatial:latest
     Rscript -e 'pak::pkg_install("NIEHS/beethoven@mm-1013", dependencies = TRUE)'
     Rscript -e 'pak::pkg_install(c("glmnet", "lme4"))'
     Rscript -e 'install.packages("torch"); torch::install_torch(version = "latest", update = TRUE)'
+    Rscript -e 'options(timeout = 1800); pak::pkg_install("sparklyr", dependencies = TRUE); sparklyr::spark_install()'
+    Rscript -e 'options(timeout = 1800); install.packages("arrow")'
 
 %environment
     export LANG=en_US.UTF-8
