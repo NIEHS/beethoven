@@ -13,7 +13,7 @@ dt_pred_merge_sptmpl <- qs2::qs_read(snakemake@input[["dt_pred_merge_sptmpl"]])
 ################################################################################
 # Post-append latitude and longitude coordinates to H3 grid cells.
 dt_pred_xy_sptmpl <- sf::st_coordinates(
-  h3jsr::cell_to_point(dt_pred_merge_sptmpl$h3r8_id)
+  h3jsr::cell_to_point(dt_pred_merge_sptmpl$site_id)
 )
 dt_pred_merge_sptmpl$lon <- dt_pred_xy_sptmpl[, "X"]
 dt_pred_merge_sptmpl$lat <- dt_pred_xy_sptmpl[, "Y"]
