@@ -22,5 +22,6 @@ cores="${1:-${SLURM_CPUS_PER_TASK:-1}}"
 ############################       COVARIATES       ############################
 snakemake \
     --cores "${cores}" \
+    --use-conda \
     --use-apptainer \
     -p

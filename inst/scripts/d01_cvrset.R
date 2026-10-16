@@ -9,27 +9,23 @@ library(beethoven)
 
 ################################################################################
 # Import configured variables and inputs.
-dt_feat_merge_sptmpl <- qs2::qs_read(snakemake@input[["dt_feat_merge_sptmpl"]])
-
-################################################################################
-# !!! For full dispatch NAs will be imputed, not omitted. !!!
-dt_feat_merge_sptmpl <- na.omit(dt_feat_merge_sptmpl)
-dt_feat_merge_sptmpl <- dt_feat_merge_sptmpl |> dplyr::select(-Event.Type)
+dt_feat_merge_sptmpl <- arrow::read_parquet(snakemake@input[[
+  "dt_feat_merge_sptmpl"
+]])
 
 ################################################################################
 # Define common parameters across all base learner models.
 list_base_params_static <- list(
   data = mori::share(dt_feat_merge_sptmpl),
-  yvar = "Arithmetic.Mean",
+  yvar = "Arithmetic_Mean",
   xvar = setdiff(
     names(dt_feat_merge_sptmpl),
-    c("site_id", "time", "Event.Type", "Arithmetic.Mean", ".row")
+    c("site_id", "time", "Event_Type", "Arithmetic_Mean")
   ),
   dvar = c("site_id", "time"),
   normalize = TRUE,
-  n_models = 20L,
+  n_models = 1L,
   metric = "mae",
-  # dev with small tune grid
   tune = 3L,
   crs = 5070L,
   cellsize = 250000L,

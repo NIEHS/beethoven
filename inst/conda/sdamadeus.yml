@@ -1,0 +1,50 @@
+name: sdamadeus
+
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+
+dependencies:
+  # ---- R runtime ----
+  - r-base=4.6.*
+  # Prefer conda-forge r-* packages once R 4.6 builds are published. At
+  # present, adding r-httr2/r-covr/r-sf/r-terra makes the R 4.6 solve
+  # unsatisfiable, so the bootstrap obtains their compiled PPM builds instead.
+
+  # ---- Native geospatial/runtime libraries ----
+  - gdal
+  - libgdal-netcdf
+  - libgdal-hdf4
+  - libgdal-hdf5
+  - geos
+  - proj
+  - libsqlite
+  - libxml2
+  # R links to liblzma when compiling packages such as rpy2. The runtime
+  # liblzma package lacks the unversioned liblzma.so linker file.
+  - liblzma-devel
+  - udunits2
+  - openjdk=17
+
+  # ---- SedonaDB native build ----
+  - rust=1.97
+  - compilers
+  - make
+  - pkg-config
+
+  # ---- Development tools ----
+  - git
+  - qpdf
+
+# After creating the environment, install R packages using compiled
+# repositories without changing the conda-managed R runtime:
+#
+#   conda env create -f environment.yml
+#   conda activate sdamadeus
+#   export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:${LD_LIBRARY_PATH}"
+#   export PROJ_LIB="$CONDA_PREFIX/share/proj"
+#   ./scripts/bootstrap-conda-r.sh
+#
+# The bootstrap isolates R_LIBS_USER inside this environment. Do not mix
+# system-built sf/terra/SedonaDB libraries with the conda GDAL/GEOS runtime.

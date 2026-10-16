@@ -32,6 +32,11 @@ dt_feat_merge_sptmpl <- beethoven::reduce_merge(
 names(dt_feat_merge_sptmpl) <- gsub("\\.", "_", names(dt_feat_merge_sptmpl))
 
 ################################################################################
+# !!! For full dispatch NAs will be imputed, not omitted. !!!
+dt_feat_merge_sptmpl <- na.omit(dt_feat_merge_sptmpl)
+dt_feat_merge_sptmpl <- dt_feat_merge_sptmpl |> dplyr::select(-Event_Type)
+
+################################################################################
 arrow::write_parquet(
   dt_feat_merge_sptmpl,
   snakemake@output[["dt_feat_merge_sptmpl"]]
