@@ -51,7 +51,6 @@ sc_beethoven <- sparklyr::spark_connect(
   config = config_beethoven
   # app_name = "beethoven-devel"
 )
-on.exit()
 
 ################################################################################
 # Load .parquet file into Spark memory.

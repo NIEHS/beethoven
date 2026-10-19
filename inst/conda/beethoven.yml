@@ -1,4 +1,4 @@
-name: sdamadeus
+name: beethoven
 
 channels:
   - conda-forge
@@ -11,6 +11,9 @@ dependencies:
   # Prefer conda-forge r-* packages once R 4.6 builds are published. At
   # present, adding r-httr2/r-covr/r-sf/r-terra makes the R 4.6 solve
   # unsatisfiable, so the bootstrap obtains their compiled PPM builds instead.
+  # ---- Manual R package installations after environment creation
+  # ---- pak, amadeus, beethoven@mm-1013, sparklyr, DBI, sedonadb,
+  # ---- tidymodels, arrow
 
   # ---- Native geospatial/runtime libraries ----
   - gdal
@@ -40,8 +43,8 @@ dependencies:
 # After creating the environment, install R packages using compiled
 # repositories without changing the conda-managed R runtime:
 #
-#   conda env create -f environment.yml
-#   conda activate sdamadeus
+#   conda env create -f beethoven.yml
+#   conda activate beethoven
 #   export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:${LD_LIBRARY_PATH}"
 #   export PROJ_LIB="$CONDA_PREFIX/share/proj"
 #   ./scripts/bootstrap-conda-r.sh
