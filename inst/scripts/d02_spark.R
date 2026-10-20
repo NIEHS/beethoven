@@ -47,5 +47,8 @@ time_base_fit <- system.time({
 message("100 models run in ", unname(time_base_fit[["elapsed"]]), "seconds.")
 
 ################################################################################
-qs2::qs_save(list_base_xgb_pred$pred, snakemake@output[["dt_base_xgb_pred"]])
+arrow::write_parquet(
+  list_base_xgb_pred$pred,
+  snakemake@output[["dt_base_xgb_pred"]]
+)
 qs2::qs_save(list_base_xgb_pred$eval, snakemake@output[["dt_base_xgb_eval"]])

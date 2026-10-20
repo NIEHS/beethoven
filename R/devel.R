@@ -215,6 +215,7 @@ fit_base_spark <-
     )
     int_seeds <- sample(seq(1:1e5), iter)
 
+    # --------------------------------------------------------------------------
     for (i in seq_along(int_seeds)) {
       message(sprintf(
         "Fitting model %03d/%03d; seed = %05d...",

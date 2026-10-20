@@ -27,7 +27,7 @@ rule model_base:
         dt_feat_merge_sptmpl="output/dt_feat_merge_sptmpl.parquet"
 
     output:
-        dt_base_xgb_pred="output/dt_base_xgb_pred.qs",
+        dt_base_xgb_pred="output/dt_base_xgb_pred.parquet",
         dt_base_xgb_eval="output/dt_base_xgb_eval.qs"
 
     params:
