@@ -1,12 +1,12 @@
 ################################################################################
-fit_base_spark <-
+fit_xgb_spark <-
   function(
     master,
     home,
     workspace,
     database = "duckdb",
-    path = NULL, # path to full AQS data stored as parquet path
-    iter = 1L,
+    path = NULL, # path to full AQS data stored as parquet file
+    rset,
     xvar,
     yvar,
     dvar,
@@ -198,6 +198,7 @@ fit_base_spark <-
       sparklyr::invoke("setNumWorkers", int_nworkers) |>
       sparklyr::invoke("setNthread", int_nthreads) |>
       sparklyr::invoke("setNumRound", int_nround) |>
+      sparklyr::invoke("setSeed", int_seed) |>
       sparklyr::invoke("setMaxDepth", 8L) |>
       sparklyr::invoke("setEta", 0.1) |>
       sparklyr::invoke("setSubsample", 0.8) |>
@@ -213,7 +214,7 @@ fit_base_spark <-
     # Generate list of seeds for random split (temporary).
     message(
       "Fitting ",
-      iter,
+      length(rset),
       " XGBoost model(s) with ",
       int_nworkers,
       " workers ",
@@ -222,109 +223,94 @@ fit_base_spark <-
       int_nround,
       " boosting rounds..."
     )
-    int_seeds <- sample(seq(1:1e5), iter)
 
     # --------------------------------------------------------------------------
-    for (i in seq_along(int_seeds)) {
-      message(sprintf(
-        "Fitting model %03d/%03d; seed = %05d...",
-        i,
-        length(int_seeds),
-        int_seeds[i]
-      ))
+    for (r in seq_along(rset)) {
+      message(sprintf("Fitting model %03d/%03d...", r, length(rset)))
+      folds <- rset[[r]]
 
       # ------------------------------------------------------------------------
-      # Set seed estimator seed within the loop.
-      sprk_estimator <- sprk_estimator |>
-        sparklyr::invoke("setSeed", int_seeds[i])
+      # Initiate lists for storing fold predictions and performance metrics.
+      list_base_xgb_pred[[r]] <- list()
+      list_base_xgb_eval[[r]] <- list()
 
-      # ------------------------------------------------------------------------
-      # Split data into train and test sets.
-      list_feat_merge_splits <- sparklyr::sdf_random_split(
-        tbl_feat_merge_assemble,
-        training = 0.8,
-        test = 0.2,
-        seed = int_seeds[i]
-      )
-      tbl_feat_merge_train <- sparklyr::sdf_persist(
-        list_feat_merge_splits$training,
-        storage.level = "MEMORY_AND_DISK",
-        name = "beethoven_xgb_training"
-      )
-      tbl_feat_merge_test <- sparklyr::sdf_persist(
-        list_feat_merge_splits$test,
-        storage.level = "MEMORY_AND_DISK",
-        name = "beethoven_xgb_test"
-      )
-
-      # ------------------------------------------------------------------------
-      # Fit XGBoost model on Spark cluster.
-      time_base_xgb_model <- system.time({
-        sprk_base_xgb_model <- sparklyr::invoke(
-          sprk_estimator,
-          "fit",
-          sparklyr::spark_dataframe(tbl_feat_merge_train)
+      for (f in seq_along(folds)) {
+        # ----------------------------------------------------------------------
+        # Manual split into train and test sets based on spatial cv indices.
+        chr_training <- folds[[f]]$analysis
+        chr_test <- folds[[f]]$assessment
+        list_feat_merge_splits <- list(
+          training = tbl_feat_merge_assemble |>
+            dplyr::filter(site_id %in% !!chr_training),
+          test = tbl_feat_merge_assemble |>
+            dplyr::filter(site_id %in% !!chr_test)
         )
-      })
-
-      # ------------------------------------------------------------------------
-      # Predict model on withheld test data.
-      sprk_base_xgb_test <- sparklyr::invoke(
-        sprk_base_xgb_model,
-        "transform",
-        sparklyr::spark_dataframe(tbl_feat_merge_test)
-      )
-      sprk_base_xgb_pred <- sparklyr::sdf_register(
-        sprk_base_xgb_test,
-        name = "beethoven_xgb_predictions"
-      )
-
-      # ------------------------------------------------------------------------
-      # Evaluate model performance on test data.
-      dt_base_xgb_eval <- evaluate(
-        sc,
-        pred = sprk_base_xgb_pred,
-        seed = int_seeds[i]
-      )
-      unpersist(list(tbl_feat_merge_train, tbl_feat_merge_test))
-
-      # ------------------------------------------------------------------------
-      # Fit model to full data for pass to meta learner.
-      sprk_base_xgb_full <- sparklyr::invoke(
-        sprk_base_xgb_model,
-        "transform",
-        sparklyr::spark_dataframe(tbl_feat_merge_assemble)
-      )
-
-      # ------------------------------------------------------------------------
-      # Retain predictions in the database.
-      sprk_base_xgb_fullpred <- sparklyr::sdf_register(
-        sprk_base_xgb_full,
-        name = sprintf(
-          "beethoven_xgb_full_predictions_%05d",
-          int_seeds[i]
+        tbl_feat_merge_train <- sparklyr::sdf_persist(
+          list_feat_merge_splits$training,
+          storage.level = "MEMORY_AND_DISK",
+          name = "beethoven_xgb_training"
         )
-      )
+        tbl_feat_merge_test <- sparklyr::sdf_persist(
+          list_feat_merge_splits$test,
+          storage.level = "MEMORY_AND_DISK",
+          name = "beethoven_xgb_test"
+        )
 
-      # ------------------------------------------------------------------------
-      # Filter to model predictions and original identification values.
-      list_base_xgb_pred[[i]] <- sprk_base_xgb_fullpred |>
-        dplyr::select(site_id, time, lon, lat, label, prediction) |>
-        dplyr::rename(
-          !!yvar := label,
-          !!sprintf("%s_%05d", stage, int_seeds[i]) := prediction
-        ) |>
-        dplyr::collect()
+        # ----------------------------------------------------------------------
+        # Fit XGBoost model on Spark cluster.
+        time_base_xgb_model <- system.time({
+          sprk_base_xgb_model <- sparklyr::invoke(
+            sprk_estimator,
+            "fit",
+            sparklyr::spark_dataframe(tbl_feat_merge_train)
+          )
+        })
 
-      # ------------------------------------------------------------------------
-      # Retain model predictios and evaluation statistics.
-      list_base_xgb_eval[[i]] <- data.frame(
-        seed = int_seeds[i],
-        time = unname(time_base_xgb_model[["elapsed"]]),
-        dt_base_xgb_eval
-      )
+        # ----------------------------------------------------------------------
+        # Predict model on withheld test data.
+        sprk_base_xgb_test <- sparklyr::invoke(
+          sprk_base_xgb_model,
+          "transform",
+          sparklyr::spark_dataframe(tbl_feat_merge_test)
+        )
+        sprk_base_xgb_pred <- sparklyr::sdf_register(
+          sprk_base_xgb_test,
+          name = sprintf("beethoven_xgb_preds_%03d_%02d", r, f)
+        )
+
+        # ----------------------------------------------------------------------
+        # Evaluate model performance on test data.
+        dt_base_xgb_eval <- evaluate(
+          sc,
+          pred = sprk_base_xgb_pred,
+          r = sprintf("%03d", r),
+          f = sprintf("%02d", f),
+        )
+        unpersist(list(tbl_feat_merge_train, tbl_feat_merge_test))
+
+        # ----------------------------------------------------------------------
+        # Filter to model predictions and original identification values.
+        list_base_xgb_pred[[r]][[f]] <- sprk_base_xgb_pred |>
+          dplyr::select(site_id, time, lon, lat, label, prediction) |>
+          dplyr::rename(
+            !!yvar := label,
+            !!sprintf("%s_%03d", stage, r) := prediction
+          ) |>
+          dplyr::collect()
+
+        # ----------------------------------------------------------------------
+        # Retain model predictios and evaluation statistics.
+        list_base_xgb_eval[[r]][[f]] <- data.frame(
+          dt_base_xgb_eval,
+          time = unname(time_base_xgb_model[["elapsed"]])
+        )
+      }
     }
     message("All models fit; proceeding with collection.")
+
+    # --------------------------------------------------------------------------
+    # Stack out of fold predictions from each independent rset object.
+    list_base_xgb_oof <- lapply(list_base_xgb_pred, dplyr::bind_rows)
 
     # --------------------------------------------------------------------------
     # Merge predictions from each model into a single data table for return.
@@ -341,7 +327,7 @@ fit_base_spark <-
           by = chr_joinkeys
         )
       },
-      list_base_xgb_pred
+      list_base_xgb_oof
     )
 
     # --------------------------------------------------------------------------
@@ -358,8 +344,9 @@ fit_base_spark <-
 ################################################################################
 evaluate <- function(
   sc,
+  r,
+  f,
   pred,
-  seed,
   metric = c("rmse", "mse", "r2", "mae")
 ) {
   # --------------------------------------------------------------------------
@@ -390,6 +377,8 @@ evaluate <- function(
   # --------------------------------------------------------------------------
   # Collect evaluation metrics and drop row names.
   eval <- data.frame(
+    rset = r,
+    fold = f,
     metric = metric,
     value = vapply(
       unname(methods[metric]),

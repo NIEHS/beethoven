@@ -16,6 +16,7 @@ source("R/devel.R")
 list_base_params_static <- qs2::qs_read(snakemake@input[[
   "list_base_params_static"
 ]])
+list_base_cv_idx <- qs2::qs_read(snakemake@input[["list_base_cv_idx"]])
 chr_path_merge_sptmpl <- snakemake@input[["dt_feat_merge_sptmpl"]]
 
 ################################################################################
@@ -26,13 +27,13 @@ chr_spark_home <- readLines("input/.hidden/chr_spark_home.txt")
 ################################################################################
 # Fit XGBoost models in Spark; collect full predictions and performance metrics.
 time_base_fit <- system.time({
-  list_base_xgb_pred <- fit_base_spark(
+  list_base_xgb_pred <- fit_xgb_spark(
     master = chr_spark_master,
     home = chr_spark_home,
     workspace = file.path(getwd(), "spark-warehouse"),
     database = "duckdb",
     path = chr_path_merge_sptmpl,
-    iter = list_base_params_static$nmodels,
+    rset = list_base_cv_idx,
     xvar = list_base_params_static$xvar,
     yvar = list_base_params_static$yvar,
     dvar = list_base_params_static$dvar,

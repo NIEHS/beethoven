@@ -17,7 +17,7 @@ list_base_params_static <- qs2::qs_read(snakemake@input[[
   "list_base_params_static"
 ]])
 chr_path_base_sptmpl <- snakemake@input[["dt_base_xgb_pred"]]
-int_meta_iter <- snakemake@params[["int_meta_iter"]]
+list_meta_cv_idx <- qs2::qs_read(snakemake@input[["list_meta_cv_idx"]])
 
 ################################################################################
 # Import Spark connection details.
@@ -42,13 +42,13 @@ chr_feat_base_xgb <- grep(
 ################################################################################
 # Fit XGBoost models in Spark; collect full predictions and performance metrics.
 time_meta_fit <- system.time({
-  list_meta_xgb_pred <- fit_base_spark(
+  list_meta_xgb_pred <- fit_xgb_spark(
     master = chr_spark_master,
     home = chr_spark_home,
     workspace = file.path(getwd(), "spark-warehouse"),
     database = "duckdb",
     path = chr_path_base_sptmpl,
-    iter = int_meta_iter,
+    rset = list_meta_cv_idx,
     xvar = c("lon", "lat", chr_feat_base_xgb),
     yvar = list_base_params_static$yvar,
     dvar = list_base_params_static$dvar,
