@@ -1,13 +1,7 @@
 ################################################################################
-# Development script for spark-dispatched XGBoost base learner models.
+# Development script for spark-dispatched XGBoost meta learner models.
 # Mitchell Manware
-# 16 October 2026
-
-################################################################################
-# Reference scripts from Kyle:
-# -- 01_sparklyr_shuffle.R
-# -- 02_create_sedonadb_table.R
-# -- 02_sparklyr_xgboost.R
+# 20 October 2026
 
 ################################################################################
 # Load libraries and source local functions.
@@ -22,7 +16,7 @@ source("R/devel.R")
 list_base_params_static <- qs2::qs_read(snakemake@input[[
   "list_base_params_static"
 ]])
-chr_path_merge_sptmpl <- snakemake@input[["dt_feat_merge_sptmpl"]]
+chr_path_base_sptmpl <- snakemake@input[["dt_base_xgb_eval"]]
 
 ################################################################################
 # Import Spark connection details.
@@ -31,24 +25,27 @@ chr_spark_home <- readLines("input/.hidden/chr_spark_home.txt")
 
 ################################################################################
 # Fit XGBoost models in Spark; collect full predictions and performance metrics.
-time_base_fit <- system.time({
-  list_base_xgb_pred <- fit_base_spark(
+time_meta_fit <- system.time({
+  list_meta_xgb_pred <- fit_base_spark(
     master = chr_spark_master,
     home = chr_spark_home,
     workspace = file.path(getwd(), "spark-warehouse"),
     database = "duckdb",
-    path = chr_path_merge_sptmpl,
-    iter = 50L,
-    xvar = list_base_params_static$xvar,
+    path = chr_path_base_sptmpl,
+    iter = 25L,
+    xvar = setdiff(
+      names(arrow::read_parquet(chr_path_base_sptmpl)),
+      c(list_base_params_static$yvar, list_base_params_static$dvar)
+    ),
     yvar = list_base_params_static$yvar,
-    dvar = list_base_params_static$dvar
+    dvar = list_base_params_static$dvar,
+    stage = "meta"
   )
 })
-message("100 models run in ", unname(time_base_fit[["elapsed"]]), "seconds.")
 
 ################################################################################
 arrow::write_parquet(
-  list_base_xgb_pred$pred,
-  snakemake@output[["dt_base_xgb_pred"]]
+  list_meta_xgb_pred$pred,
+  snakemake@output[["dt_meta_xgb_pred"]]
 )
-qs2::qs_save(list_base_xgb_pred$eval, snakemake@output[["dt_base_xgb_eval"]])
+qs2::qs_save(list_meta_xgb_pred$eval, snakemake@output[["dt_meta_xgb_eval"]])

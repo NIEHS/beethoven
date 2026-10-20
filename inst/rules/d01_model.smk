@@ -43,8 +43,31 @@ rule model_base:
         "beethoven"
 
     script:
-        "../scripts/d02_spark.R"
+        "../scripts/d02_base.R"
 
 ##############################            META            ##############################
+rule model_meta:
+    input:
+        list_base_params_static="output/list_base_params_static.qs",
+        dt_base_xgb_eval="output/dt_base_xgb_eval.parquet"
+
+    output:
+        dt_meta_xgb_pred="output/dt_meta_xgb_pred.parquet",
+        dt_meta_xgb_eval="output/dt_meta_xgb_eval.qs"
+
+    params:
+        chr_config_dir=os.path.join(
+            os.environ["HOME"],
+            config["chr_config_dir"],
+        )
+
+    container:
+        None
+
+    conda:
+        "beethoven"
+
+    script:
+        "../scripts/d03_meta.R"
 
 ########################################################################################

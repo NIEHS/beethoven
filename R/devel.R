@@ -10,6 +10,7 @@ fit_base_spark <-
     xvar,
     yvar,
     dvar,
+    stage = "base",
     ...
   ) {
     # --------------------------------------------------------------------------
@@ -303,7 +304,7 @@ fit_base_spark <-
         dplyr::select(site_id, time, lon, lat, label, prediction) |>
         dplyr::rename(
           !!yvar := label,
-          !!sprintf("pred_%05d", int_seeds[i]) := prediction
+          !!sprintf("%s_%05d", stage, int_seeds[i]) := prediction
         ) |>
         dplyr::collect()
 
@@ -327,7 +328,7 @@ fit_base_spark <-
           dplyr::select(
             y,
             dplyr::all_of(chr_joinkeys),
-            dplyr::starts_with("pred_")
+            dplyr::starts_with(paste0(stage, "_"))
           ),
           by = chr_joinkeys
         )
