@@ -1,7 +1,9 @@
+################################################################################
 fit_base_spark <-
   function(
     master,
     home,
+    workspace,
     database = "duckdb",
     path = NULL, # path to full AQS data stored as parquet path
     iter = 1L,
@@ -12,7 +14,7 @@ fit_base_spark <-
   ) {
     # --------------------------------------------------------------------------
     # Spark configuration
-    environment(workspace = "beethoven/beethoven/", database = database)
+    environment(workspace = workspace, database = database)
     config_base <- sparklyr::spark_config()
     chr_xgboost_jars <- Sys.getenv("XGBOOST_JARS", unset = "")
     if (nzchar(chr_xgboost_jars)) {
@@ -27,8 +29,15 @@ fit_base_spark <-
     sc <- sparklyr::spark_connect(
       master = master,
       spark_home = home,
-      config = config_base
-      # app_name = "beethoven-devel"
+      config = config_base,
+      app_name = "beethoven-devel"
+    )
+    on.exit(
+      {
+        sparklyr::spark_disconnect(sc)
+        message("Disconnected from Spark.")
+      },
+      add = TRUE
     )
     message("Spark connected; proceeding with model fitting.")
 
@@ -38,7 +47,8 @@ fit_base_spark <-
     db_feat_merge_sptmpl <- sparklyr::spark_read_parquet(
       sc,
       name = chr_feat_merge_sptmpl,
-      path = path
+      path = path,
+      memory = FALSE
     )
 
     # --------------------------------------------------------------------------
@@ -149,6 +159,15 @@ fit_base_spark <-
       sprk_feat_merge_dense
     ) |>
       sparklyr::sdf_register()
+    tbl_feat_merge_assemble <- sparklyr::sdf_persist(
+      tbl_feat_merge_assemble,
+      storage.level = "MEMORY_AND_DISK",
+      name = "beethoven_xgb_features"
+    )
+    sparklyr::invoke(
+      sparklyr::spark_dataframe(tbl_feat_merge_assemble),
+      "count"
+    )
 
     # --------------------------------------------------------------------------
     # Set Spark estimator and invoke XGBoost.
@@ -174,7 +193,6 @@ fit_base_spark <-
       sparklyr::invoke("setEta", 0.1) |>
       sparklyr::invoke("setSubsample", 0.8) |>
       sparklyr::invoke("setColsampleBytree", 0.8) |>
-      # sparklyr::invoke("setSeed", int_seed) |>
       sparklyr::invoke("setForceRepartition", TRUE)
 
     # --------------------------------------------------------------------------
@@ -198,6 +216,13 @@ fit_base_spark <-
     int_seeds <- sample(seq(1:1e5), iter)
 
     for (i in seq_along(int_seeds)) {
+      message(sprintf(
+        "Fitting model %03d/%03d; seed = %05d...",
+        i,
+        length(int_seeds),
+        int_seeds[i]
+      ))
+
       # ------------------------------------------------------------------------
       # Set seed estimator seed within the loop.
       sprk_estimator <- sprk_estimator |>
@@ -251,6 +276,7 @@ fit_base_spark <-
         pred = sprk_base_xgb_pred,
         seed = int_seeds[i]
       )
+      unpersist(list(tbl_feat_merge_train, tbl_feat_merge_test))
 
       # ------------------------------------------------------------------------
       # Fit model to full data for pass to meta learner.
@@ -261,7 +287,7 @@ fit_base_spark <-
       )
 
       # ------------------------------------------------------------------------
-      # Retain predictions in the database. !!! Not collected in to R !!!
+      # Retain predictions in the database.
       sprk_base_xgb_fullpred <- sparklyr::sdf_register(
         sprk_base_xgb_full,
         name = sprintf(
@@ -273,11 +299,12 @@ fit_base_spark <-
       # ------------------------------------------------------------------------
       # Filter to model predictions and original identification values.
       list_base_xgb_pred[[i]] <- sprk_base_xgb_fullpred |>
-        sparklyr::select(site_id, time, lon, lat, label, prediction) |>
+        dplyr::select(site_id, time, lon, lat, label, prediction) |>
         dplyr::rename(
           !!yvar := label,
           !!sprintf("pred_%05d", int_seeds[i]) := prediction
-        )
+        ) |>
+        dplyr::collect()
 
       # ------------------------------------------------------------------------
       # Retain model predictios and evaluation statistics.
@@ -287,6 +314,7 @@ fit_base_spark <-
         dt_base_xgb_eval
       )
     }
+    message("All models fit; proceeding with collection.")
 
     # --------------------------------------------------------------------------
     # Merge predictions from each model into a single data table for return.
@@ -307,37 +335,72 @@ fit_base_spark <-
     )
 
     # --------------------------------------------------------------------------
-    # Collect merged predictions from database and evaluation metrics from R.
-    dt_base_xgb_preds <- dplyr::collect(tbl_base_xgb_preds)
+    # Collect evaluation metrics.
     dt_base_xgb_eval <- dplyr::bind_rows(list_base_xgb_eval)
 
     # --------------------------------------------------------------------------
-    # Disconnect from local Spark cluster.
-    message("All models fit; disconnecting from Spark.")
-    sparklyr::spark_disconnect(sc)
-
-    # --------------------------------------------------------------------------
-    return(list(pred = dt_base_xgb_preds, eval = dt_base_xgb_eval))
+    return(list(
+      pred = data.table::data.table(tbl_base_xgb_preds),
+      eval = data.frame(dt_base_xgb_eval)
+    ))
   }
 
-evaluate <- function(sc, pred, seed, metric = c("rmse", "mse", "r2", "mae")) {
-  do.call(
-    rbind,
-    lapply(
-      metric,
-      function(x) {
-        eval <- sparklyr::ml_regression_evaluator(
-          sc,
-          label_col = "label",
-          prediction_col = "prediction",
-          metric_name = x
-        )
-        num_eval <- sparklyr::ml_evaluate(
-          eval,
-          pred
-        )
-        data.frame(metric = x, value = num_eval)
-      }
+################################################################################
+evaluate <- function(
+  sc,
+  pred,
+  seed,
+  metric = c("rmse", "mse", "r2", "mae")
+) {
+  # --------------------------------------------------------------------------
+  # Define and check evaluation metric(s).
+  methods <- c(
+    rmse = "rootMeanSquaredError",
+    mse = "meanSquaredError",
+    r2 = "r2",
+    mae = "meanAbsoluteError",
+    var = "explainedVariance"
+  )
+  stopifnot(all(metric %in% names(methods)))
+
+  # --------------------------------------------------------------------------
+  # Evaluate predictions for each of the included metrics.
+  evaluator <- sparklyr::invoke_new(
+    sc,
+    "org.apache.spark.ml.evaluation.RegressionEvaluator"
+  ) |>
+    sparklyr::invoke("setLabelCol", "label") |>
+    sparklyr::invoke("setPredictionCol", "prediction")
+  metrics <- sparklyr::invoke(
+    evaluator,
+    "getMetrics",
+    sparklyr::spark_dataframe(pred)
+  )
+
+  # --------------------------------------------------------------------------
+  # Collect evaluation metrics and drop row names.
+  eval <- data.frame(
+    metric = metric,
+    value = vapply(
+      unname(methods[metric]),
+      function(method) sparklyr::invoke(metrics, method),
+      numeric(1)
     )
   )
+  rownames(eval) <- NULL
+
+  # --------------------------------------------------------------------------
+  eval
+}
+
+################################################################################
+unpersist <- function(tables) {
+  for (t in tables) {
+    sparklyr::invoke(
+      sparklyr::spark_dataframe(t),
+      "unpersist",
+      TRUE
+    )
+  }
+  invisible(NULL)
 }

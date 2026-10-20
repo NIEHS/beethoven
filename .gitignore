@@ -5,6 +5,7 @@ output/
 slurm/
 _targets/
 .snakemake/
+spark-warehouse/
 
 # Database files and folders.
 metastore_db/
