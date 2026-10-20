@@ -3,8 +3,6 @@
 
 ################################################################################
 # Load libraries and source local functions.
-library(mirai)
-library(mori)
 library(beethoven)
 
 ################################################################################
@@ -12,11 +10,13 @@ library(beethoven)
 dt_feat_merge_sptmpl <- arrow::read_parquet(snakemake@input[[
   "dt_feat_merge_sptmpl"
 ]])
+sf_feat_aqs_sp <- qs2::qs_read(snakemake@input[["sf_feat_aqs_sp"]])
+int_base_iter <- snakemake@params[["int_base_iter"]]
 
 ################################################################################
 # Define common parameters across all base learner models.
 list_base_params_static <- list(
-  data = mori::share(dt_feat_merge_sptmpl),
+  data = dt_feat_merge_sptmpl,
   yvar = "Arithmetic_Mean",
   xvar = setdiff(
     names(dt_feat_merge_sptmpl),
@@ -24,86 +24,50 @@ list_base_params_static <- list(
   ),
   dvar = c("site_id", "time"),
   normalize = TRUE,
-  n_models = 100L,
+  nmodels = int_base_iter,
   metric = "mae",
-  tune = 3L,
+  v = 5L,
   crs = 5070L,
-  cellsize = 250000L,
-  cvsize = 5L
+  cellsize = 100000,
+  buffer = 50000
 )
-stopifnot(mori::is_shared(list_base_params_static$data))
 
 ################################################################################
-# Derive sequence for number of models.
-# int_base_cv_index <- seq_len(list_base_params_static$n_models)
-int_base_cv_index <- 1L
+# Project AQS site locations to meter-based coordinate reference system.
+sf_feat_aqs_5070 <- sf::st_transform(
+  sf_feat_aqs_sp,
+  crs = list_base_params_static$crs
+)
 
 ################################################################################
-# Create training and testing split indices.
-# mirai::daemons(length(int_base_cv_index))
-# mirai_base_cv_index <- mirai::mirai_map(
-#   int_base_cv_index,
-#   function(x) {
-#     message(sprintf("Generating spatiotemporal CV rset %03d", x))
-#     beethoven::generate_cv_index_spt(
-#       data = list_base_params_static$data,
-#       locs_id = "site_id",
-#       time_id = "time",
-#       coords = c("lon", "lat"),
-#       crs = list_base_params_static$crs,
-#       cellsize = list_base_params_static$cellsize,
-#       v = list_base_params_static$cvsize
-#     )
-#   },
-#   list_base_params_static = list_base_params_static
-# )
-# list_base_cv_index <- mirai::collect_mirai(
-#   mirai_base_cv_index,
-#   options = ".stop"
-# )
+# Generate spatial v-fold rset objects with pre-defined cell sizes and buffers.
+rset_feat_aqs_sp <- spatialsample::spatial_block_cv(
+  sf_feat_aqs_5070,
+  v = list_base_params_static$v,
+  repeats = list_base_params_static$nmodels,
+  cellsize = list_base_params_static$cellsize,
+  buffer = list_base_params_static$buffer,
+  square = TRUE,
+  radius = NULL
+)
 
 ################################################################################
-# !!! Ensure that training/testing indices are unique for 100 model runs. !!!
-# list_keys <- lapply(list_base_cv_index, function(x) match(x, unique(x)))
-# int_duplicates <- vapply(
-#   seq_along(list_keys),
-#   function(i) {
-#     i > 1L &&
-#       any(
-#         vapply(
-#           seq_len(i - 1L),
-#           function(j) identical(list_keys[[i]], list_keys[[j]]),
-#           logical(1)
-#         )
-#       )
-#   },
-#   logical(1)
-# )
-# stopifnot(!any(int_duplicates))
-
-################################################################################
-# Generate training/testing rset objects from indices after unqiueness check.
-# mirai_base_cv_rset <- mirai::mirai_map(
-#   list_base_cv_index,
-#   function(x) {
-#     beethoven::convert_cv_index_rset(
-#       cvindex = x,
-#       data = list_base_params_static$data,
-#       cv_mode = "spatiotemporal"
-#     )
-#   },
-#   list_base_params_static = list_base_params_static
-# )
-# list_base_cv_rset <- mirai::collect_mirai(
-#   mirai_base_cv_rset,
-#   options = ".stop"
-# )
-# mirai::daemons(0)
-
-################################################################################
-# Store row identifiers used for full training data.
-# list_base_params_static$data <- list_base_params_static$data |>
-#   dplyr::mutate(.row = dplyr::row_number())
+# Extract site_id per repeat and fold for pass to Spark in model train/test/fit.
+list_base_cv_idx <- lapply(
+  split(seq_len(nrow(rset_feat_aqs_sp)), rset_feat_aqs_sp$id),
+  function(i) {
+    stats::setNames(
+      lapply(i, function(j) {
+        split_j <- rset_feat_aqs_sp$splits[[j]]
+        list(
+          analysis = rsample::analysis(split_j)$site_id,
+          assessment = rsample::assessment(split_j)$site_id
+        )
+      }),
+      rset_feat_aqs_sp$id2[i]
+    )
+  }
+)
 
 ################################################################################
 qs2::qs_save(
@@ -111,7 +75,6 @@ qs2::qs_save(
   snakemake@output[["list_base_params_static"]]
 )
 qs2::qs_save(
-  # rlang::duplicate(list_base_cv_rset),
-  1L,
-  snakemake@output[["list_base_cv_rset"]]
+  list_base_cv_idx,
+  snakemake@output[["list_base_cv_idx"]]
 )
