@@ -44,7 +44,7 @@ environment <- function(workspace = Sys.getenv("HOME"), database = "sedonadb") {
     chr_workdir = workspace,
     int_maxcores = env_integer("SPARK_CORES_MAX", 64L),
     int_executorcores = env_integer("SPARK_EXECUTOR_CORES", 2L),
-    executor_memory = Sys.getenv("SPARK_EXECUTOR_MEMORY", unset = "2g"),
+    int_executormem = Sys.getenv("SPARK_EXECUTOR_MEMORY", unset = "2g"),
     int_partitions = env_integer("SPARK_SHUFFLE_PARTITIONS", 32L),
     int_nround = env_integer("XGB_NUM_ROUND", 50L),
     int_seed = env_integer("XGB_SEED", 20260904L, minimum = 0L),

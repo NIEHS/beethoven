@@ -14,7 +14,7 @@ fit_base_spark <-
     ...
   ) {
     # --------------------------------------------------------------------------
-    # Spark configuration
+    # Spark configuration.
     environment(workspace = workspace, database = database)
     config_base <- sparklyr::spark_config()
     chr_xgboost_jars <- Sys.getenv("XGBOOST_JARS", unset = "")
@@ -23,9 +23,17 @@ fit_base_spark <-
     } else {
       config_base[["sparklyr.shell.packages"]] <- chr_xgboost_package
     }
+    config_base[["spark.cores.max"]] <- as.character(int_maxcores)
+    config_base[["spark.executor.cores"]] <- as.character(int_executorcores)
+    config_base[["spark.executor.memory"]] <- int_executormem
+    config_base[["spark.sql.shuffle.partitions"]] <- as.character(
+      int_partitions
+    )
+    config_base[["spark.sql.warehouse.dir"]] <- paste0("file:", chr_warehouse)
+    config_base[["spark.sql.parquet.compression.codec"]] <- "zstd"
 
     # --------------------------------------------------------------------------
-    # Connect to local Spark cluster
+    # Connect to local Spark cluster.
     message("Connecting to Spark...")
     sc <- sparklyr::spark_connect(
       master = master,
@@ -43,7 +51,7 @@ fit_base_spark <-
     message("Spark connected; proceeding with model fitting.")
 
     # --------------------------------------------------------------------------
-    # Load .parquet file into Spark memory
+    # Load .parquet file into Spark memory.
     chr_feat_merge_sptmpl <- gsub("output/|\\.parquet", "", path)
     db_feat_merge_sptmpl <- sparklyr::spark_read_parquet(
       sc,

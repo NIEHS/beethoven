@@ -17,6 +17,7 @@ list_base_params_static <- qs2::qs_read(snakemake@input[[
   "list_base_params_static"
 ]])
 chr_path_merge_sptmpl <- snakemake@input[["dt_feat_merge_sptmpl"]]
+int_base_iter <- snakemake@params[["int_base_iter"]]
 
 ################################################################################
 # Import Spark connection details.
@@ -32,7 +33,7 @@ time_base_fit <- system.time({
     workspace = file.path(getwd(), "spark-warehouse"),
     database = "duckdb",
     path = chr_path_merge_sptmpl,
-    iter = 100L,
+    iter = int_base_iter,
     xvar = list_base_params_static$xvar,
     yvar = list_base_params_static$yvar,
     dvar = list_base_params_static$dvar,

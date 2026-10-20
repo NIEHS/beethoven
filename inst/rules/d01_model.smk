@@ -31,6 +31,7 @@ rule model_base:
         dt_base_xgb_eval="output/dt_base_xgb_eval.qs"
 
     params:
+        int_base_iter=lambda wildcards: config["int_base_iter"],
         chr_config_dir=os.path.join(
             os.environ["HOME"],
             config["chr_config_dir"],
@@ -49,13 +50,14 @@ rule model_base:
 rule model_meta:
     input:
         list_base_params_static="output/list_base_params_static.qs",
-        dt_base_xgb_eval="output/dt_base_xgb_eval.parquet"
+        dt_base_xgb_pred="output/dt_base_xgb_pred.parquet"
 
     output:
         dt_meta_xgb_pred="output/dt_meta_xgb_pred.parquet",
         dt_meta_xgb_eval="output/dt_meta_xgb_eval.qs"
 
     params:
+        int_meta_iter=lambda wildcards: config["int_meta_iter"],
         chr_config_dir=os.path.join(
             os.environ["HOME"],
             config["chr_config_dir"],

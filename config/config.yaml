@@ -30,3 +30,11 @@ chr_config_dir: "beethoven/beethoven/input/"
 # roughly equal to 1km x 1km grid, having hexagonal area of 0.737 km^2.
 # Set to lower resolution (5; ~36.129 km^2) for development work.
 int_grid_res: 5
+
+###############################################################################
+# Number of base learner models.
+int_base_iter: 10
+
+###############################################################################
+# Number of meta learner models.
+int_meta_iter: 5

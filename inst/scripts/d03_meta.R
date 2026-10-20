@@ -16,12 +16,28 @@ source("R/devel.R")
 list_base_params_static <- qs2::qs_read(snakemake@input[[
   "list_base_params_static"
 ]])
-chr_path_base_sptmpl <- snakemake@input[["dt_base_xgb_eval"]]
+chr_path_base_sptmpl <- snakemake@input[["dt_base_xgb_pred"]]
+int_meta_iter <- snakemake@params[["int_meta_iter"]]
 
 ################################################################################
 # Import Spark connection details.
 chr_spark_master <- readLines("input/.hidden/chr_spark_master.txt")
 chr_spark_home <- readLines("input/.hidden/chr_spark_home.txt")
+
+################################################################################
+# Increase executor memory for meta learner model with 100 features.
+Sys.setenv("SPARK_EXECUTOR_MEMORY" = "4g")
+
+################################################################################
+# Extract base learner column names from parquet file.
+chr_feat_base_xgb <- grep(
+  "base_",
+  arrow::open_dataset(
+    chr_path_base_sptmpl,
+    format = "parquet"
+  )$schema$names,
+  value = TRUE
+)
 
 ################################################################################
 # Fit XGBoost models in Spark; collect full predictions and performance metrics.
@@ -32,11 +48,8 @@ time_meta_fit <- system.time({
     workspace = file.path(getwd(), "spark-warehouse"),
     database = "duckdb",
     path = chr_path_base_sptmpl,
-    iter = 25L,
-    xvar = setdiff(
-      names(arrow::read_parquet(chr_path_base_sptmpl)),
-      c(list_base_params_static$yvar, list_base_params_static$dvar)
-    ),
+    iter = int_meta_iter,
+    xvar = c("lon", "lat", chr_feat_base_xgb),
     yvar = list_base_params_static$yvar,
     dvar = list_base_params_static$dvar,
     stage = "meta"
