@@ -20,6 +20,10 @@ list_base_cv_idx <- qs2::qs_read(snakemake@input[["list_base_cv_idx"]])
 chr_path_merge_sptmpl <- snakemake@input[["dt_feat_merge_sptmpl"]]
 
 ################################################################################
+# Set Spark cluster environmental variables.
+Sys.setenv("SPARK_CORES_MAX" = 128L)
+
+################################################################################
 # Import Spark connection details.
 chr_spark_master <- readLines("input/.hidden/chr_spark_master.txt")
 chr_spark_home <- readLines("input/.hidden/chr_spark_home.txt")

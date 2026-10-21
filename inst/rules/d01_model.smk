@@ -10,7 +10,7 @@ rule model_cvbase:
         list_base_cv_idx="output/list_base_cv_idx.qs"
     
     params:
-        int_base_iter=lambda wildcards: config["int_base_iter"],
+        int_base_iter=config["int_base_iter"],
         chr_config_dir=os.path.join(
             os.environ["HOME"],
             config["chr_config_dir"],
@@ -60,7 +60,7 @@ rule model_cvmeta:
         list_meta_cv_idx="output/list_meta_cv_idx.qs"
     
     params:
-        int_meta_iter=lambda wildcards: config["int_meta_iter"],
+        int_meta_iter=config["int_meta_iter"],
         chr_config_dir=os.path.join(
             os.environ["HOME"],
             config["chr_config_dir"],

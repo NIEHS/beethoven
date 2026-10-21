@@ -25,7 +25,8 @@ chr_spark_master <- readLines("input/.hidden/chr_spark_master.txt")
 chr_spark_home <- readLines("input/.hidden/chr_spark_home.txt")
 
 ################################################################################
-# Increase executor memory for meta learner model with 100 features.
+# Set Spark cluster environmental variables.
+Sys.setenv("SPARK_CORES_MAX" = 128L)
 Sys.setenv("SPARK_EXECUTOR_MEMORY" = "4g")
 
 ################################################################################
