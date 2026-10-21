@@ -4,6 +4,7 @@
 ################################################################################
 # Load libraries and source local functions.
 library(amadeus)
+source("R/amadeus.R")
 
 ################################################################################
 # Import configured variables and inputs.
@@ -13,11 +14,11 @@ chr_init_dates <- qs2::qs_read(snakemake@input[["chr_init_dates"]])
 ################################################################################
 # Import download lists.
 list_dl_aqs <- qs2::qs_read(snakemake@input[["list_dl_aqs"]])
-list_dl_narr <- qs2::qs_read(snakemake@input[["list_dl_narr"]])
+# list_dl_narr <- qs2::qs_read(snakemake@input[["list_dl_narr"]])
 list_dl_hms <- qs2::qs_read(snakemake@input[["list_dl_hms"]])
 list_dl_collect <- list(
   aqs = list_dl_aqs,
-  narr = list_dl_narr,
+  # narr = list_dl_narr,
   hms = list_dl_hms
 )
 
@@ -25,26 +26,24 @@ list_dl_collect <- list(
 # Import unique AQS monitoring locations across defined time period.
 # !!! Does not import the monitored data values - location unique !!!
 # !!! identifiers and latitude/longitude coordinates only.        !!!
-sf_feat_aqs_sp <- amadeus::process_aqs(
+sf_feat_aqs_sp <- process_aqs2(
   path = file.path(chr_config_dir, "aqs", "data_files"),
   date = beethoven::fl_dates(chr_init_dates),
   mode = "location",
-  data_field = "Arithmetic.Mean",
+  data_field = "Sample.Measurement",
+  resolution_temporal = "hourly",
   return_format = "sf"
 )
 
 ################################################################################
 # Import spatiotemporal AQS monitoring locations with monitored data values
 # across defined time period.
-dt_feat_aqs_sptmpl <- amadeus::process_aqs(
-  path = list.files(
-    path = file.path(chr_config_dir, "aqs", "data_files"),
-    pattern = "daily_88101_[0-9]{4}.csv",
-    full.names = TRUE
-  ),
+dt_feat_aqs_sptmpl <- process_aqs2(
+  path = file.path(chr_config_dir, "aqs", "data_files"),
   date = beethoven::fl_dates(chr_init_dates),
   mode = "available-data",
-  data_field = c("Arithmetic.Mean", "Event.Type"),
+  data_field = "Sample.Measurement",
+  resolution_temporal = "hourly",
   return_format = "data.table"
 )
 

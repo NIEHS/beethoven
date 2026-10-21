@@ -8,8 +8,8 @@ rule initiate:
         list_init_datesj="output/list_init_datesj.qs"
 
     params:
-        start=lambda wildcards: config["chr_config_daterange"]["start"],
-        end=lambda wildcards: config["chr_config_daterange"]["end"],
+        start=config["chr_config_daterange"]["start"],
+        end=config["chr_config_daterange"]["end"],
 
     container:
         "inst/container/sif/container_covariates.sif"

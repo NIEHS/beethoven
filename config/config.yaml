@@ -9,8 +9,8 @@
 # temporal range. Relevant months and years are are derived from the explicilty
 # defined date range.
 chr_config_daterange:
-  start: "2021-01-01"
-  end: "2022-12-31"
+  start: "2018-01-01"
+  end: "2019-12-31"
 
 ###############################################################################
 # Buffer radii define the buffer distances, in meters, for covariate

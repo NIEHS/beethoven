@@ -17,10 +17,10 @@ int_base_iter <- snakemake@params[["int_base_iter"]]
 # Define common parameters across all base learner models.
 list_base_params_static <- list(
   data = dt_feat_merge_sptmpl,
-  yvar = "Arithmetic_Mean",
+  yvar = "Sample_Measurement",
   xvar = setdiff(
     names(dt_feat_merge_sptmpl),
-    c("site_id", "time", "Event_Type", "Arithmetic_Mean")
+    c("site_id", "time", "Event_Type", "Sample_Measurement")
   ),
   dvar = c("site_id", "time"),
   normalize = TRUE,

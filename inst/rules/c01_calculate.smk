@@ -23,15 +23,14 @@ rule calculate_aqs:
     script:
         "../scripts/c01_aqs.R"
 
-##############################            NARR            ##############################
-rule calculate_narr:
+##############################            GEOS            ##############################
+rule calculate_geos:
     input:
         chr_init_dates="output/chr_init_dates.qs",
-        chr_iter_narr="output/chr_iter_narr.qs",
         sf_feat_aqs_sp="output/sf_feat_aqs_sp.qs",
 
     output:
-        dt_feat_narr_sptmpl="output/dt_feat_narr_sptmpl.qs"
+        dt_feat_geos_sptmpl="output/dt_feat_geos_sptmpl.parquet"
 
     params:
         chr_config_dir=os.path.join(
@@ -40,10 +39,13 @@ rule calculate_narr:
         )
 
     container:
-        "inst/container/sif/container_covariates.sif"
+        None
+
+    conda:
+        "beethoven"
 
     script:
-        "../scripts/c02_narr.R"
+        "../scripts/c02_geos.R"
 
 ##############################            HMS             ##############################
 rule calculate_hms:
@@ -70,8 +72,9 @@ rule calculate_hms:
 rule calculate_merge:
     input:
         dt_feat_aqs_sptmpl="output/dt_feat_aqs_sptmpl.qs",
-        dt_feat_narr_sptmpl="output/dt_feat_narr_sptmpl.qs",
-        dt_feat_hms_sptmpl="output/dt_feat_hms_sptmpl.qs"
+        # dt_feat_narr_sptmpl="output/dt_feat_narr_sptmpl.qs",
+        dt_feat_hms_sptmpl="output/dt_feat_hms_sptmpl.qs",
+        dt_feat_geos_sptmpl="output/dt_feat_geos_sptmpl.parquet"
 
     output:
         dt_feat_merge_sptmpl="output/dt_feat_merge_sptmpl.parquet"

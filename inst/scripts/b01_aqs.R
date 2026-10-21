@@ -15,6 +15,7 @@ list_dl_aqs <- amadeus::download_data(
   dataset_name = "aqs",
   directory_to_save = file.path(chr_config_dir, "aqs"),
   year = int_init_years,
+  resolution_temporal = "hourly",
   acknowledgement = TRUE,
   hash = FALSE,
   remove_zip = FALSE
