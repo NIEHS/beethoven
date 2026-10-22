@@ -93,7 +93,7 @@ list_iter_geos <- split(df_iter_geos, seq_len(nrow(df_iter_geos)))
 ################################################################################
 source("R/sedona.R")
 list_feat_geos_sptmpl <- lapply(
-  list_iter_geos[1:2],
+  list_iter_geos[1:10],
   function(x) {
     sedona_geos(
       date = beethoven::fl_dates(chr_init_dates),
