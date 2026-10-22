@@ -1368,8 +1368,6 @@ process_aqs2 <-
     # subset mainland
     sites_v <- sites_v[!grepl("^(02|15|72|78|6|80)", site_id), ]
 
-    return(sites_v)
-
     # NAD83 to WGS84
     sites_v_nad <-
       sites_v[sites_v$Datum == "NAD83", ]

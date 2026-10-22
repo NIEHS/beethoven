@@ -4,7 +4,7 @@
 ################################################################################
 # Load libraries and source local functions.
 library(amadeus)
-source("R/amadeus.R")
+source("R/sedona.R")
 
 ################################################################################
 # Import configured variables and inputs.
@@ -13,24 +13,26 @@ chr_init_dates <- qs2::qs_read(snakemake@input[["chr_init_dates"]])
 sf_feat_aqs_sp <- qs2::qs_read(snakemake@input[["sf_feat_aqs_sp"]])
 
 ################################################################################
-mirai::daemons(100)
-dt_feat_hms_sptmpl <- suppressMessages(
-  calculate_hms_map(
-    from = amadeus::process_hms(
-      date = beethoven::fl_dates(chr_init_dates),
-      path = file.path(chr_config_dir, "hms", "data_files")
-    ),
-    locs = sf_feat_aqs_sp,
-    locs_id = "site_id",
-    radius = 0,
-    fun = "mean",
-    geom = FALSE
-  )
+# Dynamic load of GDAL library to be used by SedonaDB.
+dyn.load(
+  file.path(Sys.getenv("HOME"), ".conda/envs/beethoven/lib/libgdal.so.39"),
+  local = FALSE,
+  now = TRUE
 )
-mirai::daemons(0)
 
 ################################################################################
-qs2::qs_save(
+dt_feat_hms_sptmpl <- sedona_hms(
+  date = beethoven::fl_dates(chr_init_dates),
+  path = file.path(chr_config_dir, "hms", "data_files"),
+  locs = sf_feat_aqs_sp,
+  locs_id = "site_id",
+  radius = 0,
+  geom = FALSE,
+  batch = 50L
+)
+
+################################################################################
+arrow::write_parquet(
   data.table::data.table(dt_feat_hms_sptmpl),
   snakemake@output[["dt_feat_hms_sptmpl"]]
 )

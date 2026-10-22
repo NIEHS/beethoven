@@ -13,7 +13,7 @@ print(
 # Define pipeline endpoint.
 rule all:
     input:
-        "output/dt_meta_xgb_pred.parquet",
+        "output/dt_feat_geos_sptmpl.parquet"
 
 ###############################      PIPELINE RULES      ###############################
 include: "inst/rules/a01_initiate.smk"

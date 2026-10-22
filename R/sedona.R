@@ -11,8 +11,19 @@ sedona_hms <- function(
   locs,
   locs_id,
   radius,
-  geom
+  geom,
+  batch = 50L
 ) {
+  # ----------------------------------------------------------------------------
+  # Validate batch size.
+  stopifnot(
+    length(batch) == 1L,
+    is.numeric(batch),
+    !is.na(batch),
+    is.finite(batch),
+    batch >= 1,
+    batch == floor(batch)
+  )
   # ----------------------------------------------------------------------------
   # Identify HMS shapefile paths from all files in the path.
   chr_paths <- list.files(
@@ -28,7 +39,7 @@ sedona_hms <- function(
     sub_hyphen = TRUE
   )
   # ----------------------------------------------------------------------------
-  # Select only those file paths which align with user supplied date sequence.
+  # Select paths which align with the requested date sequence.
   chr_datapaths <- unique(
     grep(
       paste(
@@ -40,14 +51,17 @@ sedona_hms <- function(
     )
   )
   # ----------------------------------------------------------------------------
-  # Store file path, date from file, and generated db names.
+  # Store file path, date from file, and generated database view names.
   df_hmspaths <- data.frame(
     path = chr_datapaths,
     date = hmsdates(chr_datapaths)
   )
-  df_hmspaths$view <- sprintf("db_hms_%08s", gsub("-", "", df_hmspaths$date))
+  df_hmspaths$view <- sprintf(
+    "db_hms_%08s",
+    gsub("-", "", df_hmspaths$date)
+  )
   # ----------------------------------------------------------------------------
-  # Check dates, paths, and db names are set, and all exist with no NAs/NULLs.
+  # Validate dates, paths, and database view names.
   stopifnot(
     all(c("date", "path", "view") %in% names(df_hmspaths)),
     !anyNA(df_hmspaths$date),
@@ -67,33 +81,33 @@ sedona_hms <- function(
   # Define SQL code for processing HMS data.
   sql_processhms <- glue::glue(
     "
-    SELECT
-      db_locs.{locs_id_sql} AS {locs_id_sql},
-      CAST($1 AS DATE) AS date,
+      SELECT
+        db_locs.{locs_id_sql} AS {locs_id_sql},
+        CAST($1 AS DATE) AS date,
 
-      MAX(CASE
-        WHEN LOWER(TRIM(db_hms.\"Density\")) = 'light' THEN 1
-        ELSE 0
-      END) AS light,
+        MAX(CASE
+          WHEN LOWER(TRIM(db_hms.\"Density\")) = 'light' THEN 1
+          ELSE 0
+        END) AS light,
 
-      MAX(CASE
-        WHEN LOWER(TRIM(db_hms.\"Density\")) = 'medium' THEN 1
-        ELSE 0
-      END) AS medium,
+        MAX(CASE
+          WHEN LOWER(TRIM(db_hms.\"Density\")) = 'medium' THEN 1
+          ELSE 0
+        END) AS medium,
 
-      MAX(CASE
-        WHEN LOWER(TRIM(db_hms.\"Density\")) = 'heavy' THEN 1
-        ELSE 0
-      END) AS heavy
+        MAX(CASE
+          WHEN LOWER(TRIM(db_hms.\"Density\")) = 'heavy' THEN 1
+          ELSE 0
+        END) AS heavy
 
-    FROM db_locs
-    LEFT JOIN db_hms
-      ON ST_Intersects(db_locs.geometry, db_hms.wkb_geometry)
-    GROUP BY db_locs.{locs_id_sql}
-  "
+      FROM db_locs
+      LEFT JOIN db_hms
+        ON ST_Intersects(db_locs.geometry, db_hms.wkb_geometry)
+      GROUP BY db_locs.{locs_id_sql}
+    "
   )
   # ----------------------------------------------------------------------------
-  # Convert extraction points to SedonaDB data frame.
+  # Convert extraction locations to a SedonaDB data frame.
   db_locs <- sedonadb::as_sedonadb_dataframe(locs)
   # ----------------------------------------------------------------------------
   # Register the extraction point data object in the SedonaDB session ! once !.
@@ -103,49 +117,113 @@ sedona_hms <- function(
     overwrite = TRUE
   )
   # ----------------------------------------------------------------------------
-  # Peform spatial join as defined by SQL code for each date in the sequence.
-  for (i in seq_len(nrow(df_hmspaths))) {
-    db_hms <- sedonadb::sd_read_sf(
-      df_hmspaths$path[i],
-      lazy = FALSE
-    )
-
-    sedonadb::sd_to_view(
-      db_hms,
-      "db_hms",
-      overwrite = TRUE
-    )
-
-    db_date <- sedonadb::sd_sql(
-      sql_processhms,
-      params = list(as.character(df_hmspaths$date[i]))
+  # Split date row indices into batches.
+  list_hms_batch <- split(
+    seq_len(nrow(df_hmspaths)),
+    ceiling(seq_len(nrow(df_hmspaths)) / batch)
+  )
+  # ----------------------------------------------------------------------------
+  # Generate a database view name for each batch.
+  chr_hms_batch <- sprintf(
+    "db_batch_%03d",
+    seq_along(list_hms_batch)
+  )
+  # ----------------------------------------------------------------------------
+  # Perform daily spatial joins within each batch.
+  for (l in seq_along(list_hms_batch)) {
+    # --------------------------------------------------------------------------
+    # Index data files, dates, and names to active batch.
+    df_hms_batch <- df_hmspaths[
+      list_hms_batch[[l]],
+      ,
+      drop = FALSE
+    ]
+    # --------------------------------------------------------------------------
+    # Generate daily view names for active batch.
+    chr_hms_daily <- sprintf("db_day_%03d", seq_len(nrow(df_hms_batch)))
+    # --------------------------------------------------------------------------
+    message("Processing batch ", l, "/", length(list_hms_batch))
+    for (i in seq_len(nrow(df_hms_batch))) {
+      # ------------------------------------------------------------------------
+      # Read HMS data shapefile into the database.
+      db_hms <- sedonadb::sd_read_sf(
+        df_hms_batch$path[i],
+        lazy = FALSE
+      )
+      # ------------------------------------------------------------------------
+      # Register polygons in the database.
+      sedonadb::sd_to_view(
+        db_hms,
+        "db_hms",
+        overwrite = TRUE
+      )
+      # ------------------------------------------------------------------------
+      # Compute the spatial join.
+      db_date <- sedonadb::sd_sql(
+        sql_processhms,
+        params = list(as.character(df_hms_batch$date[i]))
+      ) |>
+        sedonadb::sd_compute()
+      # ------------------------------------------------------------------------
+      # Register post-spatial join data in the database.
+      sedonadb::sd_to_view(
+        db_date,
+        chr_hms_daily[i],
+        overwrite = TRUE
+      )
+    }
+    # --------------------------------------------------------------------------
+    # Materialize and union the batch before removing its daily views.
+    db_batch <- sedonadb::sd_sql(
+      hmsunion(locs_id_sql, chr_hms_daily)
     ) |>
       sedonadb::sd_compute()
-
+    # --------------------------------------------------------------------------
+    # Register batch data in the database.
     sedonadb::sd_to_view(
-      db_date,
-      df_hmspaths$view[i],
+      db_batch,
+      chr_hms_batch[l],
       overwrite = TRUE
     )
+    # --------------------------------------------------------------------------
+    # Remove daily views now represented by the registered batch.
+    for (d in chr_hms_daily) {
+      sedonadb::sd_drop_view(d)
+    }
   }
   # ----------------------------------------------------------------------------
-  # Stack daily extractions inside SedonaDB.
-  sql_stack <- paste(
+  # Remove batch views when the function exits.
+  on.exit(
+    for (d in chr_hms_batch) {
+      sedonadb::sd_drop_view(d)
+    },
+    add = TRUE
+  )
+  # ----------------------------------------------------------------------------
+  # Combine and sort registered batches, and return to R.
+  message("Combining and collecting ", length(chr_hms_batch), " batches...")
+  sedonadb::sd_sql(
+    paste0(
+      hmsunion(locs_id_sql, chr_hms_batch),
+      "\nORDER BY ",
+      locs_id_sql,
+      ", date"
+    )
+  ) |>
+    sedonadb::sd_collect()
+}
+
+################################################################################
+# Define SQL code for stacking daily or batch results.
+hmsunion <- function(l, v) {
+  paste(
     sprintf(
-      paste(
-        "SELECT ",
-        locs_id,
-        ", date,",
-        "light, medium, heavy FROM %s"
-      ),
-      df_hmspaths$view
+      "SELECT %s, date, light, medium, heavy FROM %s",
+      l,
+      v
     ),
     collapse = "\nUNION ALL\n"
   )
-  # ----------------------------------------------------------------------------
-  # Stack daily extractions inside SedonaDB and return to R.
-  sedonadb::sd_sql(paste0(sql_stack, "\nORDER BY ", locs_id, ", date")) |>
-    sedonadb::sd_collect()
 }
 
 ################################################################################
@@ -178,8 +256,19 @@ sedona_geos <- function(
   geom,
   fun = "mean",
   touches = TRUE,
-  exclude_nodata = TRUE
+  exclude_nodata = TRUE,
+  batch = 50L
 ) {
+  # ----------------------------------------------------------------------------
+  # Validate batch size.
+  stopifnot(
+    length(batch) == 1L,
+    is.numeric(batch),
+    !is.na(batch),
+    is.finite(batch),
+    batch >= 1,
+    batch == floor(batch)
+  )
   # ----------------------------------------------------------------------------
   # Check zonal statistic function against SedonaDB supported (as of 10/21/26)
   fun <- match.arg(
@@ -200,7 +289,7 @@ sedona_geos <- function(
   # Derive extraction location geometries.
   chr_locsgeom <- as.character(unique(sf::st_geometry_type(locs)))
   # ----------------------------------------------------------------------------
-  # Identify GEOS shapefile paths from all files in the path.
+  # Identify GEOS file paths from all files in the path.
   chr_paths <- list.files(
     path,
     pattern = "GEOS-CF.v01.rpl",
@@ -250,6 +339,7 @@ sedona_geos <- function(
   # ----------------------------------------------------------------------------
   # Check dates, paths, and db names are set, and all exist with no NAs/NULLs.
   stopifnot(
+    nrow(df_geospaths) > 0L,
     all(c("time", "path", "view") %in% names(df_geospaths)),
     !anyNA(df_geospaths$time),
     !anyDuplicated(df_geospaths$time),
@@ -265,7 +355,7 @@ sedona_geos <- function(
     '"'
   )
   # ----------------------------------------------------------------------------
-  # Define location identifiers in SQL-friendly format.
+  # Define variable identifiers in SQL-friendly format.
   variable_sql <- paste0(
     '"',
     gsub('"', '""', variable, fixed = TRUE),
@@ -283,10 +373,11 @@ sedona_geos <- function(
         ($4 = 1),
         ($5 = 1)
       )
-  "
+    "
   } else {
     "RS_Value(r.raster, db_locs.geometry, 1)"
   }
+
   sql_processgeos <- glue::glue(
     "
       WITH r AS (
@@ -302,7 +393,7 @@ sedona_geos <- function(
         {sql_extraction} AS {variable_sql}
       FROM db_locs
       CROSS JOIN r
-  "
+    "
   )
   # ----------------------------------------------------------------------------
   # Convert extraction points to SedonaDB data frame.
@@ -315,51 +406,118 @@ sedona_geos <- function(
     overwrite = TRUE
   )
   # ----------------------------------------------------------------------------
-  # Peform spatial join as defined by SQL code for each date in the sequence.
-  for (i in seq_len(nrow(df_geospaths))) {
+  # Split hourly file row indices into `batch` sized batches.
+  list_geos_batch <- split(
+    seq_len(nrow(df_geospaths)),
+    ceiling(seq_len(nrow(df_geospaths)) / batch)
+  )
+  # ----------------------------------------------------------------------------
+  # Iterative naming for database batch view objects.
+  chr_geos_batch <- sprintf(
+    "db_batch_%03d",
+    seq_along(list_geos_batch)
+  )
+  # ----------------------------------------------------------------------------
+  # Perform spatial extraction within each batch.
+  for (l in seq_along(list_geos_batch)) {
     # --------------------------------------------------------------------------
-    # Time extraction directly from NetCDF not supported (as of 10/21/26)
-    list_params <- list(
-      as.character(df_geospaths$var[i]), # $1: raster source
-      df_geospaths$date[i] # $2: timestamp
+    # Index data files, times, and names to active batch.
+    df_geos_batch <- df_geospaths[
+      list_geos_batch[[l]],
+      ,
+      drop = FALSE
+    ]
+    # --------------------------------------------------------------------------
+    # Generate daily view names for active batch.
+    chr_geos_hourly <- sprintf(
+      "db_time_%03d",
+      seq_len(nrow(df_geos_batch))
     )
-    # --------------------------------------------------------------------------
-    # Include additional arguments for zonal statistics.
-    if (chr_locsgeom == "POLYGON") {
-      list_params <- c(
-        list_params,
-        list(
-          fun, # $3: statistic
-          as.integer(touches), # $4: 0/1
-          as.integer(exclude_nodata) # $5: 0/1
+    message("Processing batch ", l, "/", length(list_geos_batch))
+    for (i in seq_len(nrow(df_geos_batch))) {
+      # ------------------------------------------------------------------------
+      # Time extraction directly from NetCDF not supported (as of 10/21/26)
+      list_params <- list(
+        as.character(df_geos_batch$var[i]), # $1: raster source
+        df_geos_batch$date[i] # $2: timestamp
+      )
+      # ------------------------------------------------------------------------
+      # Include additional arguments for zonal statistics.
+      if (chr_locsgeom == "POLYGON") {
+        list_params <- c(
+          list_params,
+          list(
+            fun, # $3: statistic
+            as.integer(touches), # $4: 0/1
+            as.integer(exclude_nodata) # $5: 0/1
+          )
         )
+      }
+      # ------------------------------------------------------------------------
+      # Compute and register the hourly extraction.
+      db_time <- sedonadb::sd_sql(
+        sql_processgeos,
+        params = list_params
+      ) |>
+        sedonadb::sd_compute()
+
+      sedonadb::sd_to_view(
+        db_time,
+        chr_geos_hourly[i],
+        overwrite = TRUE
       )
     }
-    db_time <- sedonadb::sd_sql(
-      sql_processgeos,
-      params = list_params
+    # --------------------------------------------------------------------------
+    # Materialize and union the batch before removing its daily views.
+    db_batch <- sedonadb::sd_sql(
+      geosunion(locs_id_sql, variable_sql, chr_geos_hourly)
     ) |>
       sedonadb::sd_compute()
-
+    # --------------------------------------------------------------------------
+    # Register batch data in the database.
     sedonadb::sd_to_view(
-      db_time,
-      df_geospaths$view[i],
+      db_batch,
+      chr_geos_batch[l],
       overwrite = TRUE
     )
+    # --------------------------------------------------------------------------
+    # Remove daily views now represented by the registered batch.
+    for (h in chr_geos_hourly) {
+      sedonadb::sd_drop_view(h)
+    }
   }
   # ----------------------------------------------------------------------------
-  # Stack daily extractions inside SedonaDB.
-  sql_stack <- paste(
+  # Remove batch views when the function exits.
+  on.exit(
+    for (d in chr_geos_batch) {
+      sedonadb::sd_drop_view(d)
+    },
+    add = TRUE
+  )
+  # ----------------------------------------------------------------------------
+  # Combine materialized batches, sort once, and return to R.
+  message("Combining and collecting ", length(chr_geos_batch), " batches...")
+  sedonadb::sd_sql(
+    paste0(
+      geosunion(locs_id_sql, variable_sql, chr_geos_batch),
+      "\nORDER BY ",
+      locs_id_sql,
+      ", time"
+    )
+  ) |>
+    sedonadb::sd_collect()
+}
+
+################################################################################
+# Define SQL code for stacking hourly or batch results.
+geosunion <- function(l, var, views) {
+  paste(
     sprintf(
       "SELECT %s, time, %s FROM %s",
-      locs_id_sql,
-      variable_sql,
-      df_geospaths$view
+      l,
+      var,
+      views
     ),
     collapse = "\nUNION ALL\n"
   )
-  # ----------------------------------------------------------------------------
-  # Stack daily extractions inside SedonaDB and return to R.
-  sedonadb::sd_sql(paste0(sql_stack, "\nORDER BY ", locs_id, ", time")) |>
-    sedonadb::sd_collect()
 }

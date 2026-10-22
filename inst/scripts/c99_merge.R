@@ -7,10 +7,16 @@ library(beethoven)
 
 ################################################################################
 # Import configured variables and inputs.
-dt_feat_aqs_sptmpl <- qs2::qs_read(snakemake@input[["dt_feat_aqs_sptmpl"]])
+dt_feat_aqs_sptmpl <- arrow::read_parquet(snakemake@input[[
+  "dt_feat_aqs_sptmpl"
+]])
 # dt_feat_narr_sptmpl <- qs2::qs_read(snakemake@input[["dt_feat_narr_sptmpl"]])
-dt_feat_hms_sptmpl <- qs2::qs_read(snakemake@input[["dt_feat_hms_sptmpl"]])
-dt_feat_geos_sptmpl <- qs2::qs_read(snakemake@input[["dt_feat_geos_sptmpl"]])
+dt_feat_hms_sptmpl <- arrow::read_parquet(snakemake@input[[
+  "dt_feat_hms_sptmpl"
+]])
+dt_feat_geos_sptmpl <- arrow::read_parquet(snakemake@input[[
+  "dt_feat_geos_sptmpl"
+]])
 
 ################################################################################
 list_feat_merge_sptmpl <- lapply(
