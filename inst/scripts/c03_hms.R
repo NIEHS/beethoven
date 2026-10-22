@@ -21,9 +21,10 @@ dyn.load(
 )
 
 ################################################################################
-dt_feat_hms_sptmpl <- sedona_hms(
+chr_feat_hms_sptmpl <- sedona_hms(
   date = beethoven::fl_dates(chr_init_dates),
-  path = file.path(chr_config_dir, "hms", "data_files"),
+  input = file.path(chr_config_dir, "hms", "data_files"),
+  output = "output/hms/",
   locs = sf_feat_aqs_sp,
   locs_id = "site_id",
   radius = 0,
@@ -32,7 +33,4 @@ dt_feat_hms_sptmpl <- sedona_hms(
 )
 
 ################################################################################
-arrow::write_parquet(
-  data.table::data.table(dt_feat_hms_sptmpl),
-  snakemake@output[["dt_feat_hms_sptmpl"]]
-)
+qs2::qs_save(chr_feat_hms_sptmpl, snakemake@output[["chr_feat_hms_sptmpl"]])

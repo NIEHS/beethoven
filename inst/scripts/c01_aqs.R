@@ -14,7 +14,6 @@ chr_init_dates <- qs2::qs_read(snakemake@input[["chr_init_dates"]])
 ################################################################################
 # Import download lists.
 list_dl_aqs <- qs2::qs_read(snakemake@input[["list_dl_aqs"]])
-# list_dl_narr <- qs2::qs_read(snakemake@input[["list_dl_narr"]])
 list_dl_hms <- qs2::qs_read(snakemake@input[["list_dl_hms"]])
 list_dl_collect <- list(
   aqs = list_dl_aqs,
@@ -25,26 +24,35 @@ list_dl_collect <- list(
 # Import unique AQS monitoring locations across defined time period.
 # !!! Does not import the monitored data values - location unique !!!
 # !!! identifiers and latitude/longitude coordinates only.        !!!
-sf_feat_aqs_sp <- amadeus::process_aqs(
+sf_feat_aqs_sp <- process_aqs2(
   path = file.path(chr_config_dir, "aqs", "data_files"),
   date = beethoven::fl_dates(chr_init_dates),
   mode = "location",
   data_field = "Sample.Measurement",
   resolution_temporal = "hourly",
-  return_format = "sf"
+  return_format = "sf",
+  tz = "gmt"
 )
 
 ################################################################################
 # Import spatiotemporal AQS monitoring locations with monitored data values
 # across defined time period.
-dt_feat_aqs_sptmpl <- amadeus::process_aqs(
+dt_feat_aqs_sptmpl <- process_aqs2(
   path = file.path(chr_config_dir, "aqs", "data_files"),
   date = beethoven::fl_dates(chr_init_dates),
   mode = "available-data",
   data_field = "Sample.Measurement",
   resolution_temporal = "hourly",
-  return_format = "data.table"
+  return_format = "data.table",
+  tz = "gmt"
 )
+dt_feat_aqs_sptmpl[,
+  time := as.POSIXct(
+    time,
+    format = "%Y-%m-%d %H:%M",
+    tz = "UTC"
+  )
+]
 
 ################################################################################
 qs2::qs_save(sf_feat_aqs_sp, snakemake@output[["sf_feat_aqs_sp"]])

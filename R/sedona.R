@@ -7,7 +7,8 @@
 # Process and calculate covariates from NOAA HMS data with SedonaDB backend.
 sedona_hms <- function(
   date,
-  path,
+  input,
+  output,
   locs,
   locs_id,
   radius,
@@ -27,7 +28,7 @@ sedona_hms <- function(
   # ----------------------------------------------------------------------------
   # Identify HMS shapefile paths from all files in the path.
   chr_paths <- list.files(
-    path,
+    input,
     pattern = "hms_smoke*.*.shp$",
     full.names = TRUE
   )
@@ -107,6 +108,22 @@ sedona_hms <- function(
     "
   )
   # ----------------------------------------------------------------------------
+  # Initiate database cleanup upon exit.
+  chr_hms_views <- character(0)
+  on.exit(
+    {
+      for (h in rev(chr_hms_views)) {
+        tryCatch(
+          sedonadb::sd_drop_view(h),
+          error = function(e) {
+            message("Could not remove view ", h, ": ", conditionMessage(e))
+          }
+        )
+      }
+    },
+    add = TRUE
+  )
+  # ----------------------------------------------------------------------------
   # Convert extraction locations to a SedonaDB data frame.
   db_locs <- sedonadb::as_sedonadb_dataframe(locs)
   # ----------------------------------------------------------------------------
@@ -124,13 +141,63 @@ sedona_hms <- function(
   )
   # ----------------------------------------------------------------------------
   # Generate a database view name for each batch.
-  chr_hms_batch <- sprintf(
-    "db_batch_%03d",
-    seq_along(list_hms_batch)
+  chr_hms_batch <- vapply(
+    list_hms_batch,
+    function(i) {
+      chr_range <- range(as.character(df_hmspaths$date[i]))
+      sprintf(
+        "%s_%s_%s",
+        "hms",
+        gsub("-", "", chr_range[1]),
+        gsub("-", "", chr_range[2])
+      )
+    },
+    FUN.VALUE = character(1),
+    USE.NAMES = FALSE
+  )
+  # ----------------------------------------------------------------------------
+  # Prepare one Parquet output path per batch.
+  stopifnot(
+    is.character(output),
+    length(output) == 1L,
+    !is.na(output),
+    nzchar(output)
+  )
+  # ----------------------------------------------------------------------------
+  # Create output path if does not exist.
+  if (!dir.exists(output)) {
+    dir.create(output, recursive = TRUE, showWarnings = FALSE)
+  }
+  # ----------------------------------------------------------------------------
+  # Create output path if does not exist.
+  if (!dir.exists(output)) {
+    stop("Could not create output directory: ", output)
+  }
+  # ----------------------------------------------------------------------------
+  # Generate .parquet paths for each batch view.
+  chr_output <- normalizePath(
+    output,
+    winslash = "/",
+    mustWork = TRUE
+  )
+  chr_hms_parquet <- file.path(
+    chr_output,
+    paste0(chr_hms_batch, ".parquet")
   )
   # ----------------------------------------------------------------------------
   # Perform daily spatial joins within each batch.
   for (l in seq_along(list_hms_batch)) {
+    # --------------------------------------------------------------------------
+    # Skip if batch exists.
+    if (file.exists(chr_hms_parquet[l])) {
+      message(
+        "Skipping existing batch ",
+        l,
+        ": ",
+        chr_hms_parquet[l]
+      )
+      next
+    }
     # --------------------------------------------------------------------------
     # Index data files, dates, and names to active batch.
     df_hms_batch <- df_hmspaths[
@@ -176,41 +243,23 @@ sedona_hms <- function(
     # Materialize and union the batch before removing its daily views.
     db_batch <- sedonadb::sd_sql(
       hmsunion(locs_id_sql, chr_hms_daily)
-    ) |>
-      sedonadb::sd_compute()
-    # --------------------------------------------------------------------------
-    # Register batch data in the database.
-    sedonadb::sd_to_view(
+    )
+    sedonadb::sd_write_parquet(
       db_batch,
-      chr_hms_batch[l],
-      overwrite = TRUE
+      chr_hms_parquet[l],
+      single_file_output = TRUE
     )
     # --------------------------------------------------------------------------
     # Remove daily views now represented by the registered batch.
     for (d in chr_hms_daily) {
       sedonadb::sd_drop_view(d)
+      chr_hms_views <- chr_hms_views[chr_hms_views != d]
     }
+    rm(db_date, db_batch)
   }
   # ----------------------------------------------------------------------------
-  # Remove batch views when the function exits.
-  on.exit(
-    for (d in chr_hms_batch) {
-      sedonadb::sd_drop_view(d)
-    },
-    add = TRUE
-  )
-  # ----------------------------------------------------------------------------
-  # Combine and sort registered batches, and return to R.
-  message("Combining and collecting ", length(chr_hms_batch), " batches...")
-  sedonadb::sd_sql(
-    paste0(
-      hmsunion(locs_id_sql, chr_hms_batch),
-      "\nORDER BY ",
-      locs_id_sql,
-      ", date"
-    )
-  ) |>
-    sedonadb::sd_collect()
+  # Return parquet file out paths.
+  invisible(chr_hms_parquet)
 }
 
 ################################################################################
@@ -248,7 +297,8 @@ hmsdates <- function(x) {
 # Process and calculate covariates from NASA GEOS-CF data with SedonaDB backend.
 sedona_geos <- function(
   date,
-  path,
+  input,
+  output,
   variable,
   locs,
   locs_id,
@@ -291,7 +341,7 @@ sedona_geos <- function(
   # ----------------------------------------------------------------------------
   # Identify GEOS file paths from all files in the path.
   chr_paths <- list.files(
-    path,
+    input,
     pattern = "GEOS-CF.v01.rpl",
     full.names = TRUE,
     recursive = TRUE
@@ -396,6 +446,22 @@ sedona_geos <- function(
     "
   )
   # ----------------------------------------------------------------------------
+  # Initiate database cleanup upon exit.
+  chr_geos_views <- character(0)
+  on.exit(
+    {
+      for (h in rev(chr_geos_views)) {
+        tryCatch(
+          sedonadb::sd_drop_view(h),
+          error = function(e) {
+            message("Could not remove view ", h, ": ", conditionMessage(e))
+          }
+        )
+      }
+    },
+    add = TRUE
+  )
+  # ----------------------------------------------------------------------------
   # Convert extraction points to SedonaDB data frame.
   db_locs <- sedonadb::as_sedonadb_dataframe(locs)
   # ----------------------------------------------------------------------------
@@ -405,6 +471,7 @@ sedona_geos <- function(
     "db_locs",
     overwrite = TRUE
   )
+  chr_geos_views <- c(chr_geos_views, "db_locs")
   # ----------------------------------------------------------------------------
   # Split hourly file row indices into `batch` sized batches.
   list_geos_batch <- split(
@@ -412,14 +479,65 @@ sedona_geos <- function(
     ceiling(seq_len(nrow(df_geospaths)) / batch)
   )
   # ----------------------------------------------------------------------------
-  # Iterative naming for database batch view objects.
-  chr_geos_batch <- sprintf(
-    "db_batch_%03d",
-    seq_along(list_geos_batch)
+  # Name output parquet paths based on variable and time inclusions.
+  chr_geos_batch <- vapply(
+    list_geos_batch,
+    function(i) {
+      chr_range <- range(as.character(df_geospaths$time[i]))
+      sprintf(
+        "%s_%s_%s_%s",
+        "geos",
+        variable,
+        chr_range[1],
+        chr_range[2]
+      )
+    },
+    FUN.VALUE = character(1),
+    USE.NAMES = FALSE
+  )
+  # ----------------------------------------------------------------------------
+  # Prepare one Parquet output path per batch.
+  stopifnot(
+    is.character(output),
+    length(output) == 1L,
+    !is.na(output),
+    nzchar(output)
+  )
+  # ----------------------------------------------------------------------------
+  # Create output path if does not exist.
+  if (!dir.exists(output)) {
+    dir.create(output, recursive = TRUE, showWarnings = FALSE)
+  }
+  # ----------------------------------------------------------------------------
+  # Create output path if does not exist.
+  if (!dir.exists(output)) {
+    stop("Could not create output directory: ", output)
+  }
+  # ----------------------------------------------------------------------------
+  # Generate .parquet paths for each batch view.
+  chr_output <- normalizePath(
+    output,
+    winslash = "/",
+    mustWork = TRUE
+  )
+  chr_geos_parquet <- file.path(
+    chr_output,
+    paste0(chr_geos_batch, ".parquet")
   )
   # ----------------------------------------------------------------------------
   # Perform spatial extraction within each batch.
   for (l in seq_along(list_geos_batch)) {
+    # --------------------------------------------------------------------------
+    # Skip if batch exists.
+    if (file.exists(chr_geos_parquet[l])) {
+      message(
+        "Skipping existing batch ",
+        l,
+        ": ",
+        chr_geos_parquet[l]
+      )
+      next
+    }
     # --------------------------------------------------------------------------
     # Index data files, times, and names to active batch.
     df_geos_batch <- df_geospaths[
@@ -433,7 +551,7 @@ sedona_geos <- function(
       "db_time_%03d",
       seq_len(nrow(df_geos_batch))
     )
-    message("Processing batch ", l, "/", length(list_geos_batch))
+    message(variable, ": batch ", l, "/", length(list_geos_batch))
     for (i in seq_len(nrow(df_geos_batch))) {
       # ------------------------------------------------------------------------
       # Time extraction directly from NetCDF not supported (as of 10/21/26)
@@ -460,7 +578,7 @@ sedona_geos <- function(
         params = list_params
       ) |>
         sedonadb::sd_compute()
-
+      # ------------------------------------------------------------------------
       sedonadb::sd_to_view(
         db_time,
         chr_geos_hourly[i],
@@ -468,44 +586,26 @@ sedona_geos <- function(
       )
     }
     # --------------------------------------------------------------------------
-    # Materialize and union the batch before removing its daily views.
+    # Write batch directly to Parquet without materializing another copy.
     db_batch <- sedonadb::sd_sql(
       geosunion(locs_id_sql, variable_sql, chr_geos_hourly)
-    ) |>
-      sedonadb::sd_compute()
-    # --------------------------------------------------------------------------
-    # Register batch data in the database.
-    sedonadb::sd_to_view(
+    )
+    sedonadb::sd_write_parquet(
       db_batch,
-      chr_geos_batch[l],
-      overwrite = TRUE
+      chr_geos_parquet[l],
+      single_file_output = TRUE
     )
     # --------------------------------------------------------------------------
-    # Remove daily views now represented by the registered batch.
+    # Remove hourly views after the batch has been written successfully.
     for (h in chr_geos_hourly) {
       sedonadb::sd_drop_view(h)
+      chr_geos_views <- chr_geos_views[chr_geos_views != h]
     }
+    rm(db_time, db_batch)
   }
   # ----------------------------------------------------------------------------
-  # Remove batch views when the function exits.
-  on.exit(
-    for (d in chr_geos_batch) {
-      sedonadb::sd_drop_view(d)
-    },
-    add = TRUE
-  )
-  # ----------------------------------------------------------------------------
-  # Combine materialized batches, sort once, and return to R.
-  message("Combining and collecting ", length(chr_geos_batch), " batches...")
-  sedonadb::sd_sql(
-    paste0(
-      geosunion(locs_id_sql, variable_sql, chr_geos_batch),
-      "\nORDER BY ",
-      locs_id_sql,
-      ", time"
-    )
-  ) |>
-    sedonadb::sd_collect()
+  # Return parquet file out paths.
+  invisible(chr_geos_parquet)
 }
 
 ################################################################################

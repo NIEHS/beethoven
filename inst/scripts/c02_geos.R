@@ -91,30 +91,32 @@ df_iter_geos <- rbind(df_iter_aqc, df_iter_chm)
 list_iter_geos <- split(df_iter_geos, seq_len(nrow(df_iter_geos)))
 
 ################################################################################
+source("R/sedona.R")
 list_feat_geos_sptmpl <- lapply(
-  list_iter_geos[1:10],
+  list_iter_geos[1:2],
   function(x) {
     sedona_geos(
       date = beethoven::fl_dates(chr_init_dates),
-      path = file.path(
+      input = file.path(
         chr_group_store,
         "input/geos/",
         x$asset,
         "/"
       ),
+      output = "output/geos/",
       variable = x$variable,
       locs = sf_feat_aqs_sp,
       locs_id = "site_id",
-      batch = 50L
+      batch = 240L
     )
   }
 )
 
 ################################################################################
-dt_feat_geos_sptmpl <- beethoven::reduce_merge(list_feat_geos_sptmpl)
+chr_feat_geos_sptmpl <- unname(do.call(c, list_feat_geos_sptmpl))
 
 ################################################################################
-arrow::write_parquet(
-  data.table::data.table(dt_feat_geos_sptmpl),
-  snakemake@output[["dt_feat_geos_sptmpl"]]
+qs2::qs_save(
+  chr_feat_geos_sptmpl,
+  snakemake@output[["chr_feat_geos_sptmpl"]]
 )

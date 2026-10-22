@@ -33,7 +33,7 @@ rule calculate_geos:
         sf_feat_aqs_sp="output/sf_feat_aqs_sp.qs",
 
     output:
-        dt_feat_geos_sptmpl="output/dt_feat_geos_sptmpl.parquet"
+        chr_feat_geos_sptmpl="output/chr_feat_geos_sptmpl.qs"
 
     params:
         chr_config_dir=os.path.join(
@@ -57,7 +57,7 @@ rule calculate_hms:
         sf_feat_aqs_sp="output/sf_feat_aqs_sp.qs",
 
     output:
-        dt_feat_hms_sptmpl="output/dt_feat_hms_sptmpl.parquet"
+        chr_feat_hms_sptmpl="output/chr_feat_hms_sptmpl.qs"
 
     params:
         chr_config_dir=os.path.join(
@@ -77,9 +77,9 @@ rule calculate_hms:
 ##############################           MERGE            ##############################
 rule calculate_merge:
     input:
-        dt_feat_aqs_sptmpl="output/dt_feat_aqs_sptmpl.qs",
-        dt_feat_geos_sptmpl="output/dt_feat_geos_sptmpl.parquet",
-        dt_feat_hms_sptmpl="output/dt_feat_hms_sptmpl.parquet",
+        dt_feat_aqs_sptmpl="output/dt_feat_aqs_sptmpl.parquet",
+        chr_feat_geos_sptmpl="output/dt_feat_geos_sptmpl.qs",
+        chr_feat_hms_sptmpl="output/dt_feat_hms_sptmpl.qs",
 
     output:
         dt_feat_merge_sptmpl="output/dt_feat_merge_sptmpl.parquet"
