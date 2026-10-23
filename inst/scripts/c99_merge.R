@@ -4,47 +4,28 @@
 ################################################################################
 # Load libraries and source local functions.
 library(beethoven)
+library(amadeusdb)
 
 ################################################################################
 # Import configured variables and inputs.
-dt_feat_aqs_sptmpl <- arrow::read_parquet(snakemake@input[[
-  "dt_feat_aqs_sptmpl"
+db_feat_aqs_sptmpl <- snakemake@input[["db_feat_aqs_sptmpl"]]
+db_feat_geos_sptmpl <- qs2::qs_read(snakemake@input[[
+  "db_feat_geos_sptmpl"
 ]])
-# dt_feat_narr_sptmpl <- qs2::qs_read(snakemake@input[["dt_feat_narr_sptmpl"]])
-dt_feat_hms_sptmpl <- arrow::read_parquet(snakemake@input[[
-  "dt_feat_hms_sptmpl"
-]])
-dt_feat_geos_sptmpl <- arrow::read_parquet(snakemake@input[[
-  "dt_feat_geos_sptmpl"
+db_feat_hms_sptmpl <- qs2::qs_read(snakemake@input[[
+  "db_feat_hms_sptmpl"
 ]])
 
 ################################################################################
-list_feat_merge_sptmpl <- lapply(
-  list(
-    dt_feat_aqs_sptmpl,
-    dt_feat_geos_sptmpl,
-    dt_feat_hms_sptmpl
-  ),
-  \(x) x[, time := as.character(time)]
+db_feat_merge_sptmpl <- amadeusdb:::join_covariates(
+  input = db_feat_aqs_sptmpl,
+  output = "output/join/",
+  hourly = list(geos = db_feat_geos_sptmpl[1:4]),
+  daily = list(hms = db_feat_hms_sptmpl),
+  static = NULL,
+  locs_id = "site_id",
+  prefix = FALSE
 )
 
 ################################################################################
-dt_feat_merge_sptmpl <- beethoven::reduce_merge(
-  list_feat_merge_sptmpl,
-  by = c("site_id", "time")
-)
-
-################################################################################
-# Substitute "_" for "." in column names for easier SQL integration.
-names(dt_feat_merge_sptmpl) <- gsub("\\.", "_", names(dt_feat_merge_sptmpl))
-
-################################################################################
-# !!! For full dispatch NAs will be imputed, not omitted. !!!
-dt_feat_merge_sptmpl <- na.omit(dt_feat_merge_sptmpl)
-dt_feat_merge_sptmpl <- dt_feat_merge_sptmpl |> dplyr::select(-Event_Type)
-
-################################################################################
-arrow::write_parquet(
-  dt_feat_merge_sptmpl,
-  snakemake@output[["dt_feat_merge_sptmpl"]]
-)
+qs2::qs_save(db_feat_merge_sptmpl, snakemake@output[["db_feat_merge_sptmpl"]])

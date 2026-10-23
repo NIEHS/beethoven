@@ -2,7 +2,7 @@
 ##############################            BASE            ##############################
 rule model_cvbase:
     input:
-        dt_feat_merge_sptmpl="output/dt_feat_merge_sptmpl.parquet",
+        db_feat_merge_sptmpl="output/db_feat_merge_sptmpl.qs",
         sf_feat_aqs_sp="output/sf_feat_aqs_sp.qs",
 
     output:
@@ -28,7 +28,7 @@ rule model_cvbase:
 rule model_base:
     input:
         list_base_params_static="output/list_base_params_static.qs",
-        dt_feat_merge_sptmpl="output/dt_feat_merge_sptmpl.parquet",
+        db_feat_merge_sptmpl="output/db_feat_merge_sptmpl.qs",
         list_base_cv_idx="output/list_base_cv_idx.qs"
 
     output:

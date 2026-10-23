@@ -58,5 +58,5 @@ dt_feat_aqs_sptmpl[,
 qs2::qs_save(sf_feat_aqs_sp, snakemake@output[["sf_feat_aqs_sp"]])
 arrow::write_parquet(
   data.table::data.table(dt_feat_aqs_sptmpl),
-  snakemake@output[["dt_feat_aqs_sptmpl"]]
+  snakemake@output[["db_feat_aqs_sptmpl"]]
 )

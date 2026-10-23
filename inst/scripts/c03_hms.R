@@ -3,8 +3,7 @@
 
 ################################################################################
 # Load libraries and source local functions.
-library(amadeus)
-source("R/sedona.R")
+library(amadeusdb)
 
 ################################################################################
 # Import configured variables and inputs.
@@ -21,7 +20,7 @@ dyn.load(
 )
 
 ################################################################################
-chr_feat_hms_sptmpl <- sedona_hms(
+db_feat_hms_sptmpl <- amadeusdb:::sedona_hms(
   date = beethoven::fl_dates(chr_init_dates),
   input = file.path(chr_config_dir, "hms", "data_files"),
   output = "output/hms/",
@@ -33,4 +32,4 @@ chr_feat_hms_sptmpl <- sedona_hms(
 )
 
 ################################################################################
-qs2::qs_save(chr_feat_hms_sptmpl, snakemake@output[["chr_feat_hms_sptmpl"]])
+qs2::qs_save(db_feat_hms_sptmpl, snakemake@output[["db_feat_hms_sptmpl"]])

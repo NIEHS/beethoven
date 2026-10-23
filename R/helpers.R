@@ -39,7 +39,7 @@ scancel <- function(job = NULL) {
   }
 }
 
-batch <- function(file = "run.sh") {
+beethoven <- function(file = "run.sh") {
   system(paste0("sbatch ", file))
 }
 

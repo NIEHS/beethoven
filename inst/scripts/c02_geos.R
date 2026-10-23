@@ -1,11 +1,9 @@
 ################################################################################
-# Calculate GEOS-CF covariates at unique AQS locations (spatial only).
+# Calculate GEOS covariates at unique AQS locations (spatial only).
 
 ################################################################################
 # Load libraries and source local functions.
-library(amadeus)
-library(sedonadb)
-source("R/sedona.R")
+library(amadeusdb)
 
 ################################################################################
 # Import configured variables and inputs.
@@ -14,7 +12,7 @@ chr_init_dates <- qs2::qs_read(snakemake@input[["chr_init_dates"]])
 sf_feat_aqs_sp <- qs2::qs_read(snakemake@input[["sf_feat_aqs_sp"]])
 
 ################################################################################
-# Set path to previously downloaded GEOS-CF data.
+# Set path to previously downloaded GEOS data.
 chr_group_store <- readLines("input/.hidden/chr_group_store.txt")
 
 ################################################################################
@@ -26,7 +24,7 @@ dyn.load(
 )
 
 ################################################################################
-# Define GEOS-CF variables and iteration list.
+# Define GEOS variables and iteration list.
 df_iter_aqc <- data.frame(
   asset = "aqc_tavg_1hr_g1440x721_v1",
   variable = c("CO", "NO2", "O3", "SO2")
@@ -91,11 +89,11 @@ df_iter_geos <- rbind(df_iter_aqc, df_iter_chm)
 list_iter_geos <- split(df_iter_geos, seq_len(nrow(df_iter_geos)))
 
 ################################################################################
-source("R/sedona.R")
+# Extract GEOS values at AQS locations, stored as variable-time .parquet.
 list_feat_geos_sptmpl <- lapply(
   list_iter_geos[1:10],
   function(x) {
-    sedona_geos(
+    amadeusdb:::sedona_geos(
       date = beethoven::fl_dates(chr_init_dates),
       input = file.path(
         chr_group_store,
@@ -111,12 +109,15 @@ list_feat_geos_sptmpl <- lapply(
     )
   }
 )
+names(list_feat_geos_sptmpl) <- df_iter_geos$variable[1:10]
 
 ################################################################################
-chr_feat_geos_sptmpl <- unname(do.call(c, list_feat_geos_sptmpl))
-
-################################################################################
-qs2::qs_save(
-  chr_feat_geos_sptmpl,
-  snakemake@output[["chr_feat_geos_sptmpl"]]
+# Merge disparate variable-time .parquet files into  joined GEOS database.
+db_feat_geos_sptmpl <- amadeusdb:::join_variables(
+  input = list_feat_geos_sptmpl,
+  output = "output/geos/join",
+  by = c("site_id", "time")
 )
+
+################################################################################
+qs2::qs_save(db_feat_geos_sptmpl, snakemake@output[["db_feat_geos_sptmpl"]])
