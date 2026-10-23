@@ -17,7 +17,7 @@ list_base_params_static <- qs2::qs_read(snakemake@input[[
   "list_base_params_static"
 ]])
 list_base_cv_idx <- qs2::qs_read(snakemake@input[["list_base_cv_idx"]])
-chr_path_merge_sptmpl <- snakemake@input[["dt_feat_merge_sptmpl"]]
+db_feat_merge_sptmpl <- qs2::qs_read(snakemake@input[["db_feat_merge_sptmpl"]])
 
 ################################################################################
 # Set Spark cluster environmental variables.
@@ -36,7 +36,7 @@ time_base_fit <- system.time({
     home = chr_spark_home,
     workspace = file.path(getwd(), "spark-warehouse"),
     database = "duckdb",
-    path = chr_path_merge_sptmpl,
+    path = db_feat_merge_sptmpl,
     rset = list_base_cv_idx,
     xvar = list_base_params_static$xvar,
     yvar = list_base_params_static$yvar,

@@ -156,7 +156,7 @@ fit_xgb_spark <-
 
     # --------------------------------------------------------------------------
     # Load .parquet file into Spark memory.
-    chr_feat_merge_sptmpl <- gsub("output/|\\.parquet", "", path)
+    chr_feat_merge_sptmpl <- "db_feat_merge_sptmpl"
     db_feat_merge_sptmpl <- sparklyr::spark_read_parquet(
       sc,
       name = chr_feat_merge_sptmpl,
@@ -339,6 +339,7 @@ fit_xgb_spark <-
       list_base_xgb_eval[[r]] <- list()
 
       for (f in seq_along(folds)) {
+        message(sprintf("Fitting fold %02d/%02d...", f, length(folds)))
         # ----------------------------------------------------------------------
         # Manual split into train and test sets based on spatial cv indices.
         chr_training <- folds[[f]]$analysis

@@ -33,8 +33,8 @@ int_grid_res: 5
 
 ###############################################################################
 # Number of base learner models.
-int_base_iter: 100
+int_base_iter: 10
 
 ###############################################################################
 # Number of meta learner models.
-int_meta_iter: 25
+int_meta_iter: 3
