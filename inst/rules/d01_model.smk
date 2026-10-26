@@ -2,12 +2,12 @@
 ##############################            BASE            ##############################
 rule model_cvbase:
     input:
-        db_feat_merge_sptmpl="output/db_feat_merge_sptmpl.qs",
+        db_feat_merge_sptmpl="output/feat/db_feat_merge_sptmpl.qs",
         sf_feat_aqs_sp="output/sf_feat_aqs_sp.qs",
 
     output:
-        list_base_params_static="output/list_base_params_static.qs",
-        list_base_cv_idx="output/list_base_cv_idx.qs"
+        list_base_params_static="output/base/list_base_params_static.qs",
+        list_base_cv_idx="output/base/list_base_cv_idx.qs"
     
     params:
         int_base_iter=config["int_base_iter"],
@@ -27,13 +27,13 @@ rule model_cvbase:
 
 rule model_base:
     input:
-        list_base_params_static="output/list_base_params_static.qs",
-        db_feat_merge_sptmpl="output/db_feat_merge_sptmpl.qs",
-        list_base_cv_idx="output/list_base_cv_idx.qs"
+        list_base_params_static="output/base/list_base_params_static.qs",
+        db_feat_merge_sptmpl="output/feat/db_feat_merge_sptmpl.qs",
+        list_base_cv_idx="output/base/list_base_cv_idx.qs"
 
     output:
-        dt_base_xgb_pred="output/dt_base_xgb_pred.parquet",
-        dt_base_xgb_eval="output/dt_base_xgb_eval.qs"
+        dt_base_xgb_pred="output/base/dt_base_xgb_pred.parquet",
+        dt_base_xgb_eval="output/base/dt_base_xgb_eval.qs"
 
     params:
         chr_config_dir=os.path.join(
@@ -53,11 +53,11 @@ rule model_base:
 ##############################            META            ##############################
 rule model_cvmeta:
     input:
-        list_base_params_static="output/list_base_params_static.qs",
+        list_base_params_static="output/base/list_base_params_static.qs",
         sf_feat_aqs_sp="output/sf_feat_aqs_sp.qs"
 
     output:
-        list_meta_cv_idx="output/list_meta_cv_idx.qs"
+        list_meta_cv_idx="output/meta/list_meta_cv_idx.qs"
     
     params:
         int_meta_iter=config["int_meta_iter"],
@@ -77,13 +77,13 @@ rule model_cvmeta:
 
 rule model_meta:
     input:
-        list_base_params_static="output/list_base_params_static.qs",
-        dt_base_xgb_pred="output/dt_base_xgb_pred.parquet",
-        list_meta_cv_idx="output/list_meta_cv_idx.qs"
+        list_base_params_static="output/base/list_base_params_static.qs",
+        dt_base_xgb_pred="output/base/dt_base_xgb_pred.parquet",
+        list_meta_cv_idx="output/meta/list_meta_cv_idx.qs"
 
     output:
-        dt_meta_xgb_pred="output/dt_meta_xgb_pred.parquet",
-        dt_meta_xgb_eval="output/dt_meta_xgb_eval.qs"
+        dt_meta_xgb_pred="output/meta/dt_meta_xgb_pred.parquet",
+        dt_meta_xgb_eval="output/meta/dt_meta_xgb_eval.qs"
 
     params:
         chr_config_dir=os.path.join(

@@ -22,6 +22,7 @@ db_feat_merge_sptmpl <- qs2::qs_read(snakemake@input[["db_feat_merge_sptmpl"]])
 ################################################################################
 # Set Spark cluster environmental variables.
 Sys.setenv("SPARK_CORES_MAX" = 128L)
+Sys.setenv("SPARK_EXECUTOR_MEMORY" = "8g")
 
 ################################################################################
 # Import Spark connection details.

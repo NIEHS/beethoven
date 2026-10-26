@@ -17,10 +17,10 @@ db_feat_hms_sptmpl <- qs2::qs_read(snakemake@input[[
 ]])
 
 ################################################################################
-db_feat_merge_sptmpl <- amadeusdb:::join_covariates(
+db_feat_merge_sptmpl <- amadeusdb::join_covariates(
   input = db_feat_aqs_sptmpl,
-  output = "output/join/",
-  hourly = list(geos = db_feat_geos_sptmpl[1:4]),
+  output = "output/feat/",
+  hourly = list(geos = db_feat_geos_sptmpl),
   daily = list(hms = db_feat_hms_sptmpl),
   static = NULL,
   locs_id = "site_id",

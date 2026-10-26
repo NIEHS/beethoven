@@ -20,14 +20,13 @@ dyn.load(
 )
 
 ################################################################################
-db_feat_hms_sptmpl <- amadeusdb:::sedona_hms(
+db_feat_hms_sptmpl <- amadeusdb::sedona_hms(
   date = beethoven::fl_dates(chr_init_dates),
   input = file.path(chr_config_dir, "hms", "data_files"),
-  output = "output/hms/",
+  output = "output/feat/hms/",
   locs = sf_feat_aqs_sp,
   locs_id = "site_id",
   radius = 0,
-  geom = FALSE,
   batch = 50L
 )
 

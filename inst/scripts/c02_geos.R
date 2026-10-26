@@ -93,7 +93,7 @@ list_iter_geos <- split(df_iter_geos, seq_len(nrow(df_iter_geos)))
 list_feat_geos_sptmpl <- lapply(
   list_iter_geos[1:10],
   function(x) {
-    amadeusdb:::sedona_geos(
+    amadeusdb::sedona_geos(
       date = beethoven::fl_dates(chr_init_dates),
       input = file.path(
         chr_group_store,
@@ -101,11 +101,12 @@ list_feat_geos_sptmpl <- lapply(
         x$asset,
         "/"
       ),
-      output = "output/geos/",
+      output = "output/feat/geos/",
       variable = x$variable,
       locs = sf_feat_aqs_sp,
       locs_id = "site_id",
-      batch = 240L
+      batch = 240L,
+      radius = 0L
     )
   }
 )
@@ -115,7 +116,7 @@ names(list_feat_geos_sptmpl) <- df_iter_geos$variable[1:10]
 # Merge disparate variable-time .parquet files into  joined GEOS database.
 db_feat_geos_sptmpl <- amadeusdb:::join_variables(
   input = list_feat_geos_sptmpl,
-  output = "output/geos/join",
+  output = "output/geos/feat/join",
   by = c("site_id", "time")
 )
 
