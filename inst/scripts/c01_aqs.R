@@ -24,7 +24,7 @@ list_dl_collect <- list(
 # Import unique AQS monitoring locations across defined time period.
 # !!! Does not import the monitored data values - location unique !!!
 # !!! identifiers and latitude/longitude coordinates only.        !!!
-sf_feat_aqs_sp <- process_aqs2(
+sf_feat_aqs_sp <- amadeus::process_aqs(
   path = file.path(chr_config_dir, "aqs", "data_files"),
   date = beethoven::fl_dates(chr_init_dates),
   mode = "location",
@@ -37,7 +37,7 @@ sf_feat_aqs_sp <- process_aqs2(
 ################################################################################
 # Import spatiotemporal AQS monitoring locations with monitored data values
 # across defined time period.
-dt_feat_aqs_sptmpl <- process_aqs2(
+dt_feat_aqs_sptmpl <- amadeus::process_aqs(
   path = file.path(chr_config_dir, "aqs", "data_files"),
   date = beethoven::fl_dates(chr_init_dates),
   mode = "available-data",

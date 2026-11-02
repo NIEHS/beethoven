@@ -145,10 +145,10 @@ fit_meta_learner <-
     meta_recipe <-
       recipes::recipe(
         dt_sample[1, ]
-      ) %>%
+      ) |>
       recipes::update_role(
         !!seq(length(chr_id_names), ncol(dt_sample))
-      ) %>%
+      ) |>
       recipes::update_role(!!yvar, new_role = "outcome")
 
     # fit glmnet meta learner with `fit_base_tune`

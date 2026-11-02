@@ -788,7 +788,6 @@ append_predecessors <-
 #' [`recipes::step_kpca()`]. Default is `FALSE`.
 #' @seealso [`recipes::step_pca()`] [`recipes::step_kpca()`]
 #' @importFrom recipes recipe bake prep step_normalize step_pca step_kpca
-#' @importFrom magrittr %>%
 #' @return data.table with Principal Components sufficient to satisfy the
 #' `threshold`.`
 #' @export
@@ -802,17 +801,17 @@ reduce_pca <- function(
   stopifnot(is.numeric(num_comp))
 
   data_rec <- recipes::recipe(~., data = data)
-  data_pca <- data_rec %>%
+  data_pca <- data_rec |>
     recipes::step_normalize(recipes::all_numeric())
 
   if (kernel) {
-    data_pca <- data_pca %>%
+    data_pca <- data_pca |>
       recipes::step_kpca(
         recipes::all_numeric(),
         num_comp = num_comp
       )
   } else {
-    data_pca <- data_pca %>%
+    data_pca <- data_pca |>
       recipes::step_pca(
         recipes::all_numeric(),
         threshold = threshold,

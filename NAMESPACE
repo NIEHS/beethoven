@@ -134,7 +134,6 @@ importFrom(lubridate,
   week,
   year
 )
-importFrom(magrittr,"%>%")
 importFrom(methods,
   getPackageName,
   is

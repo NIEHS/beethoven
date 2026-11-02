@@ -147,9 +147,9 @@ read_locs <-
 #' current environment.
 #' @description this function is developed to avoid
 #'   random errors in compressing and decompressing R function objects
-#'   with `qs2::qs_save` and `qs2::qs_read`. If you encounter such errors, please use
-#'   this function with function name strings to save and load the function
-#'   objects.
+#'   with `qs2::qs_save` and `qs2::qs_read`. If you encounter such errors,
+#'   please use this function with function name strings to save and load
+#'   the function objects.
 #' @export
 #' @examples
 #' unmarshal_function("amadeus::process_aqs")

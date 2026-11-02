@@ -212,7 +212,6 @@ df_params <- function(functions) {
 #'
 #' @return The fitted workflow.
 #' @importFrom recipes recipe update_role
-#' @importFrom dplyr `%>%`
 #' @importFrom parsnip mlp set_engine set_mode
 #' @importFrom workflows workflow add_recipe add_model
 #' @importFrom tune tune_grid fit_best
@@ -252,12 +251,12 @@ fit_base_brulee <-
     base_recipe <-
       recipes::recipe(
         dt_sample[1, ]
-      ) %>%
+      ) |>
       # do we want to normalize the predictors?
       # if so, an additional definition of truly continuous variables is needed
-      # recipes::step_normalize(recipes::all_numeric_predictors()) %>%
-      recipes::update_role(!!xvar) %>%
-      recipes::update_role(!!yvar, new_role = "outcome") #%>%
+      # recipes::step_normalize(recipes::all_numeric_predictors()) |>
+      recipes::update_role(!!xvar) |>
+      recipes::update_role(!!yvar, new_role = "outcome") #|>
     # recipes::step_normalize(!!yvar)
 
     if (is.null(folds)) {
@@ -290,8 +289,8 @@ fit_base_brulee <-
         epochs = 1000L,
         activation = parsnip::tune(),
         learn_rate = parsnip::tune()
-      ) %>%
-      parsnip::set_engine("brulee", device = device) %>%
+      ) |>
+      parsnip::set_engine("brulee", device = device) |>
       parsnip::set_mode("regression")
 
     base_wftune <-
@@ -348,7 +347,6 @@ fit_base_brulee <-
 #'
 #' @return The fitted workflow.
 #' @importFrom recipes recipe update_role
-#' @importFrom dplyr `%>%`
 #' @importFrom parsnip boost_tree set_engine set_mode
 #' @importFrom workflows workflow add_recipe add_model
 #' @importFrom tune tune_grid fit_best
@@ -379,7 +377,7 @@ fit_base_xgb <-
         learn_rate = learn_rate
       )
     # dt_imputed <-
-    #   dt_imputed %>%
+    #   dt_imputed |>
     #   dplyr::slice_sample(prop = r_subsample)
 
     # generate row index for restoring rset
@@ -400,9 +398,9 @@ fit_base_xgb <-
     base_recipe <-
       recipes::recipe(
         dt_imputed[1, ]
-      ) %>%
-      # recipes::step_normalize(recipes::all_numeric_predictors()) %>%
-      recipes::update_role(tidyselect::all_of(xvar)) %>%
+      ) |>
+      # recipes::step_normalize(recipes::all_numeric_predictors()) |>
+      recipes::update_role(tidyselect::all_of(xvar)) |>
       recipes::update_role(tidyselect::all_of(yvar), new_role = "outcome")
     if (is.null(folds)) {
       base_vfold <- rsample::vfold_cv(dt_imputed, v = vfold)
@@ -417,8 +415,8 @@ fit_base_xgb <-
         mtry = parsnip::tune(),
         trees = parsnip::tune(),
         learn_rate = parsnip::tune()
-      ) %>%
-      parsnip::set_engine("xgboost", device = device) %>%
+      ) |>
+      parsnip::set_engine("xgboost", device = device) |>
       parsnip::set_mode("regression")
 
     base_wftune <-
@@ -476,7 +474,6 @@ fit_base_xgb <-
 #'
 #' @return The fitted workflow.
 #' @importFrom recipes recipe update_role
-#' @importFrom dplyr `%>%`
 #' @importFrom parsnip boost_tree set_engine set_mode
 #' @importFrom workflows workflow add_recipe add_model
 #' @importFrom tune tune_grid fit_best
@@ -525,9 +522,9 @@ fit_base_lightgbm <-
     base_recipe <-
       recipes::recipe(
         dt_imputed[1, ]
-      ) %>%
-      # recipes::step_normalize(recipes::all_numeric_predictors()) %>%
-      recipes::update_role(tidyselect::all_of(xvar)) %>%
+      ) |>
+      # recipes::step_normalize(recipes::all_numeric_predictors()) |>
+      recipes::update_role(tidyselect::all_of(xvar)) |>
       recipes::update_role(tidyselect::all_of(yvar), new_role = "outcome")
     if (is.null(folds)) {
       base_vfold <- rsample::vfold_cv(dt_imputed, v = vfold)
@@ -542,8 +539,8 @@ fit_base_lightgbm <-
         mtry = parsnip::tune(),
         trees = parsnip::tune(),
         learn_rate = parsnip::tune()
-      ) %>%
-      parsnip::set_engine("lightgbm", device_type = device) %>%
+      ) |>
+      parsnip::set_engine("lightgbm", device_type = device) |>
       parsnip::set_mode("regression")
 
     base_wftune <-
@@ -584,7 +581,6 @@ fit_base_lightgbm <-
 #'
 #' @return The fitted workflow.
 #' @importFrom future plan multicore multisession
-#' @importFrom dplyr `%>%`
 #' @importFrom recipes recipe update_role
 #' @importFrom parsnip linear_reg set_engine set_mode
 #' @importFrom workflows workflow add_recipe add_model
@@ -631,9 +627,9 @@ fit_base_elnet <-
     base_recipe <-
       recipes::recipe(
         dt_imputed[1, ]
-      ) %>%
-      # recipes::step_normalize(recipes::all_numeric_predictors()) %>%
-      recipes::update_role(tidyselect::all_of(xvar)) %>%
+      ) |>
+      # recipes::step_normalize(recipes::all_numeric_predictors()) |>
+      recipes::update_role(tidyselect::all_of(xvar)) |>
       recipes::update_role(tidyselect::all_of(yvar), new_role = "outcome")
 
     if (is.null(folds)) {
@@ -648,8 +644,8 @@ fit_base_elnet <-
       parsnip::linear_reg(
         mixture = parsnip::tune(),
         penalty = parsnip::tune()
-      ) %>%
-      parsnip::set_engine("glmnet") %>%
+      ) |>
+      parsnip::set_engine("glmnet") |>
       parsnip::set_mode("regression")
 
     future::plan(future::multicore, workers = nthreads)
@@ -707,7 +703,6 @@ restore_rset_full <-
 #' @note Per introduction of fit_base_tune,
 #'  the utility of this function might be limited.
 #' @return rset object with full data in splits column.
-#' @importFrom dplyr %>%
 #' @export
 restore_fit_best <-
   function(
@@ -725,7 +720,7 @@ restore_fit_best <-
     # reassemble the branched rsets
     if (nested) {
       rset_trimmed <-
-        as.list(seq_len(nest_length)) %>%
+        as.list(seq_len(nest_length)) |>
         lapply(
           function(x) {
             # here we have list length of 4, each has .metric column,
