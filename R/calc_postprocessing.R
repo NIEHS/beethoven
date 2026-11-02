@@ -764,7 +764,7 @@ append_predecessors <-
         Reduce(
           function(x, y) {
             if (inherits(x, "data.frame")) {
-              bound <- rbind(x, qs2::qs_readd(y))
+              bound <- rbind(x, qs2::qs_read(y))
             } else {
               bound <- rbind(qs2::qs_read(x), qs2::qs_read(y))
             }

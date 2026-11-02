@@ -20,6 +20,7 @@ export(fit_base_learner)
 export(fit_base_tune)
 export(fit_meta_learner)
 export(fit_prediction)
+export(fit_xgb_spark)
 export(fl_dates)
 export(generate_cv_index_sp)
 export(generate_cv_index_spt)
@@ -68,6 +69,7 @@ export(switch_model)
 export(sys_beethoven)
 export(unmarshal_function)
 export(vis_spt_rset)
+importFrom(Rdpack,reprompt)
 importFrom(amadeus,
   calc_prepare_locs,
   calc_worker,
@@ -166,6 +168,7 @@ importFrom(recipes,
   update_role
 )
 importFrom(rlang,
+  .data,
   as_name,
   inject,
   quo_get_expr,

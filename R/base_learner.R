@@ -91,7 +91,7 @@ switch_model <-
       ) |>
         parsnip::set_engine(
           "brulee_two_layer",
-          hidden_units_2 = parnsip::tune(),
+          hidden_units_2 = parsnip::tune(),
           activation_2 = parsnip::tune(),
           device = device
         ) |>
@@ -310,7 +310,7 @@ fit_base_learner <-
     # Select best model
     best_params <- tune::select_best(base_wftune, metric = metric)
 
-    oof_predictions <- finetune:::collect_predictions.tune_race(
+    oof_predictions <- tune::collect_predictions(
       base_wftune,
       parameters = best_params
     )
@@ -767,7 +767,9 @@ generate_cv_index_spt <- function(
   )
 
   data_spatial_cv <- data_spatial_cv |>
-    dplyr::mutate(st_int = interaction(fold, as.double(yw), drop = FALSE))
+    dplyr::mutate(
+      st_int = interaction(.data$fold, as.double(.data$yw), drop = FALSE)
+    )
 
   # Create a unique list of (id1, id2) combinations
   unique_st_int <- data_spatial_cv$st_int |> unique() |> as.data.frame()
