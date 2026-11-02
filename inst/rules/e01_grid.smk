@@ -16,27 +16,24 @@ rule prediction_grid:
     script:
         "../scripts/e01_grid.R"
 
-##############################            NARR            ##############################
-rule prediction_narr:
+
+##############################            GEOS            ##############################
+rule prediction_geos:
     input:
         chr_init_dates="output/chr_init_dates.qs",
-        chr_iter_narr="output/chr_iter_narr.qs",
         sf_pred_grid_sp="output/sf_pred_grid_sp.qs"
 
     output:
-        dt_pred_narr_sptmpl="output/dt_pred_narr_sptmpl.qs"
+        db_pred_geos_sptmpl="output/grid/db_pred_geos_sptmpl.qs"
 
     params:
-        chr_config_dir=os.path.join(
-            os.environ["HOME"],
-            config["chr_config_dir"],
-        )
+        chr_config_dir=os.path.join(os.environ["HOME"], config["chr_config_dir"])
 
-    container:
-        "inst/container/sif/container_covariates.sif"
+    conda:
+        "beethoven"
 
     script:
-        "../scripts/e02_narr.R"
+        "../scripts/e02_geos.R"
 
 ##############################            HMS             ##############################
 rule prediction_hms:
@@ -45,16 +42,13 @@ rule prediction_hms:
         sf_pred_grid_sp="output/sf_pred_grid_sp.qs"
 
     output:
-        dt_pred_hms_sptmpl="output/dt_pred_hms_sptmpl.qs"
+        db_pred_hms_sptmpl="output/grid/db_pred_hms_sptmpl.qs"
 
     params:
-        chr_config_dir=os.path.join(
-            os.environ["HOME"],
-            config["chr_config_dir"],
-        )
+        chr_config_dir=os.path.join(os.environ["HOME"], config["chr_config_dir"])
 
-    container:
-        "inst/container/sif/container_covariates.sif"
+    conda:
+        "beethoven"
 
     script:
         "../scripts/e03_hms.R"
@@ -62,20 +56,18 @@ rule prediction_hms:
 ##############################           MERGE            ##############################
 rule prediction_merge:
     input:
-        dt_pred_narr_sptmpl="output/dt_pred_narr_sptmpl.qs",
-        dt_pred_hms_sptmpl="output/dt_pred_hms_sptmpl.qs"
+        sf_pred_grid_sp=""
+        db_pred_geos_sptmpl="output/grid/db_pred_geos_sptmpl.qs",
+        db_pred_hms_sptmpl="output/grid/db_pred_hms_sptmpl.qs"
 
     output:
-        dt_pred_merge_sptmpl="output/dt_pred_merge_sptmpl.qs"
+        db_pred_merge_sptmpl="output/pred/db_pred_merge_sptmpl.qs"
 
     params:
-        chr_config_dir=os.path.join(
-            os.environ["HOME"],
-            config["chr_config_dir"],
-        )
+        chr_config_dir=os.path.join(os.environ["HOME"], config["chr_config_dir"])
 
-    container:
-        "inst/container/sif/container_covariates.sif"
+    conda:
+        "beethoven"
 
     script:
         "../scripts/e99_merge.R"

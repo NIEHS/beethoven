@@ -14,9 +14,6 @@ rule calculate_aqs:
     params:
         chr_config_dir=os.path.join(os.environ["HOME"], config["chr_config_dir"])
 
-    container:
-        None
-
     conda:
         "beethoven"
 
@@ -34,9 +31,6 @@ rule calculate_geos:
 
     params:
         chr_config_dir=os.path.join(os.environ["HOME"], config["chr_config_dir"])
-
-    container:
-        None
 
     conda:
         "beethoven"
@@ -56,9 +50,6 @@ rule calculate_hms:
     params:
         chr_config_dir=os.path.join(os.environ["HOME"], config["chr_config_dir"])
 
-    container:
-        None
-
     conda:
         "beethoven"
 
@@ -77,9 +68,6 @@ rule calculate_merge:
 
     params:
         chr_config_dir=os.path.join(os.environ["HOME"], config["chr_config_dir"])
-
-    container:
-        None
 
     conda:
         "beethoven"
