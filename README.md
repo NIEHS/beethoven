@@ -43,7 +43,7 @@ beethoven/
 ├── inst/
 │   ├── conda/
 │   │   └── beethoven.yml            # Geospatial and Spark environment
-│   ├── devel/                      # Spark development examples
+│   ├── devel/                       # Spark development examples
 │   ├── rules/
 │   │   ├── a01_initiate.smk         # Initialize dates and years
 │   │   ├── b01_download.smk         # Download hourly AQS and HMS

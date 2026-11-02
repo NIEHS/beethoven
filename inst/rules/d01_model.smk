@@ -10,11 +10,7 @@ rule model_cvbase:
         list_base_cv_idx="output/base/list_base_cv_idx.qs"
     
     params:
-        int_base_iter=config["int_base_iter"],
-        chr_config_dir=os.path.join(
-            os.environ["HOME"],
-            config["chr_config_dir"],
-        )
+        int_base_iter=config["int_base_iter"]
 
     container:
         None
@@ -35,12 +31,6 @@ rule model_base:
         db_base_xgb_pred="output/base/db_base_xgb_pred.qs",
         dt_base_xgb_eval="output/base/dt_base_xgb_eval.qs"
 
-    params:
-        chr_config_dir=os.path.join(
-            os.environ["HOME"],
-            config["chr_config_dir"],
-        )
-
     container:
         None
 
@@ -60,11 +50,7 @@ rule model_cvmeta:
         list_meta_cv_idx="output/meta/list_meta_cv_idx.qs"
     
     params:
-        int_meta_iter=config["int_meta_iter"],
-        chr_config_dir=os.path.join(
-            os.environ["HOME"],
-            config["chr_config_dir"],
-        )
+        int_meta_iter=config["int_meta_iter"]
 
     container:
         None
@@ -84,12 +70,6 @@ rule model_meta:
     output:
         dt_meta_xgb_pred="output/meta/dt_meta_xgb_pred.parquet",
         dt_meta_xgb_eval="output/meta/dt_meta_xgb_eval.qs"
-
-    params:
-        chr_config_dir=os.path.join(
-            os.environ["HOME"],
-            config["chr_config_dir"],
-        )
 
     container:
         None
