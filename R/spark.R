@@ -109,7 +109,8 @@ fit_xgb_spark <-
     home,
     workspace,
     database = "duckdb",
-    path = NULL, # path to full AQS data stored as parquet file
+    input = NULL, # path to full AQS data stored as parquet file
+    output, # directory to store output parquet files
     rset,
     xvar,
     yvar,
@@ -135,6 +136,7 @@ fit_xgb_spark <-
     )
     config_base[["spark.sql.warehouse.dir"]] <- paste0("file:", chr_warehouse)
     config_base[["spark.sql.parquet.compression.codec"]] <- "zstd"
+    config_base[["spark.task.cpus"]] <- as.character(int_nthreads)
 
     # --------------------------------------------------------------------------
     # Connect to local Spark cluster.
@@ -160,7 +162,7 @@ fit_xgb_spark <-
     db_feat_merge_sptmpl <- sparklyr::spark_read_parquet(
       sc,
       name = chr_feat_merge_sptmpl,
-      path = path,
+      path = input,
       memory = FALSE
     )
 
@@ -284,9 +286,6 @@ fit_xgb_spark <-
 
     # --------------------------------------------------------------------------
     # Set Spark estimator and invoke XGBoost.
-    # !!! Manual workers and threads for development. !!!
-    int_nworkers <- 1L
-    int_nthreads <- 1L
     sprk_estimator <- sparklyr::invoke_new(
       sc,
       "ml.dmlc.xgboost4j.scala.spark.XGBoostRegressor"
@@ -311,7 +310,6 @@ fit_xgb_spark <-
 
     # --------------------------------------------------------------------------
     # Initiate lists for storing all predictions and performance metrics.
-    list_base_xgb_pred <- list()
     list_base_xgb_eval <- list()
 
     # --------------------------------------------------------------------------
@@ -321,11 +319,24 @@ fit_xgb_spark <-
       length(rset),
       " XGBoost model(s) with ",
       int_nworkers,
-      " workers ",
+      " workers, ",
       int_nthreads,
       " threads and ",
       int_nround,
       " boosting rounds..."
+    )
+
+    # --------------------------------------------------------------------------
+    # Create output directory if does not exist.
+    dir.create(dirname(output), recursive = TRUE, showWarnings = FALSE)
+
+    # --------------------------------------------------------------------------
+    # Extract file names in output before parquet file writing.
+    chr_output1 <- list.files(
+      output,
+      recursive = TRUE,
+      full.names = TRUE,
+      pattern = "\\.parquet$"
     )
 
     # --------------------------------------------------------------------------
@@ -335,7 +346,6 @@ fit_xgb_spark <-
 
       # ------------------------------------------------------------------------
       # Initiate lists for storing fold predictions and performance metrics.
-      list_base_xgb_pred[[r]] <- list()
       list_base_xgb_eval[[r]] <- list()
 
       for (f in seq_along(folds)) {
@@ -391,58 +401,60 @@ fit_xgb_spark <-
           r = sprintf("%03d", r),
           f = sprintf("%02d", f),
         )
-        unpersist(list(tbl_feat_merge_train, tbl_feat_merge_test))
 
         # ----------------------------------------------------------------------
-        # Filter to model predictions and original identification values.
-        list_base_xgb_pred[[r]][[f]] <- sprk_base_xgb_pred |>
-          dplyr::select(site_id, time, lon, lat, label, prediction) |>
-          dplyr::rename(
-            !!yvar := label,
-            !!sprintf("%s_%03d", stage, r) := prediction
-          ) |>
-          dplyr::collect()
-
-        # ----------------------------------------------------------------------
-        # Retain model predictios and evaluation statistics.
+        # Retain model evaluation statistics.
         list_base_xgb_eval[[r]][[f]] <- data.frame(
           dt_base_xgb_eval,
           time = unname(time_base_xgb_model[["elapsed"]])
         )
+
+        # ----------------------------------------------------------------------
+        # Filter to model predictions and original identification values.
+        tbl_base_xgb_pred <- sprk_base_xgb_pred |>
+          dplyr::select(site_id, time, lon, lat, label, prediction) |>
+          dplyr::rename(
+            !!yvar := label,
+            !!sprintf("%s_%03d", stage, r) := prediction
+          )
+
+        # ----------------------------------------------------------------------
+        # Generate prediction value output paths.
+        chr_base_xgb_path <- file.path(
+          output,
+          sprintf("rset_%03d_fold_%02d.parquet", r, f)
+        )
+
+        # ----------------------------------------------------------------------
+        # Save model predictions as .parquet files.
+        sparklyr::spark_write_parquet(
+          tbl_base_xgb_pred,
+          path = chr_base_xgb_path,
+          mode = "error"
+        )
+
+        # ----------------------------------------------------------------------
+        # Drop training and testing data from Spark.
+        unpersist(list(tbl_feat_merge_train, tbl_feat_merge_test))
       }
     }
     message("All models fit; proceeding with collection.")
 
     # --------------------------------------------------------------------------
-    # Stack out of fold predictions from each independent rset object.
-    list_base_xgb_oof <- lapply(list_base_xgb_pred, dplyr::bind_rows)
-
-    # --------------------------------------------------------------------------
-    # Merge predictions from each model into a single data table for return.
-    chr_joinkeys <- c("site_id", "time", "lon", "lat", yvar)
-    tbl_base_xgb_preds <- Reduce(
-      function(x, y) {
-        dplyr::left_join(
-          x,
-          dplyr::select(
-            y,
-            dplyr::all_of(chr_joinkeys),
-            dplyr::starts_with(paste0(stage, "_"))
-          ),
-          by = chr_joinkeys
-        )
-      },
-      list_base_xgb_oof
+    # Extract file names in output after parquet file writing, and limit to only
+    # the new .parquet files.
+    chr_output2 <- list.files(
+      output,
+      recursive = TRUE,
+      full.names = TRUE,
+      pattern = "\\.parquet$"
     )
 
     # --------------------------------------------------------------------------
-    # Collect evaluation metrics.
-    dt_base_xgb_eval <- dplyr::bind_rows(list_base_xgb_eval)
-
-    # --------------------------------------------------------------------------
+    # Return only the newly written .parquet file path(s) and evaluation.
     return(list(
-      pred = data.table::data.table(tbl_base_xgb_preds),
-      eval = data.frame(dt_base_xgb_eval)
+      pred = setdiff(chr_output2, chr_output1),
+      eval = data.frame(dplyr::bind_rows(list_base_xgb_eval))
     ))
   }
 

@@ -1,7 +1,7 @@
 ################################################################################
 # Development script for spark-dispatched XGBoost base learner models.
 # Mitchell Manware
-# 16 October 2026
+# 27 October 2026
 
 ################################################################################
 # Load libraries and source local functions.
@@ -31,24 +31,20 @@ chr_spark_home <- readLines("input/.hidden/chr_spark_home.txt")
 
 ################################################################################
 # Fit XGBoost models in Spark; collect full predictions and performance metrics.
-time_base_fit <- system.time({
-  list_base_xgb_pred <- fit_xgb_spark(
-    master = chr_spark_master,
-    home = chr_spark_home,
-    workspace = file.path(getwd(), "spark-warehouse"),
-    database = "duckdb",
-    path = db_feat_merge_sptmpl,
-    rset = list_base_cv_idx,
-    xvar = list_base_params_static$xvar,
-    yvar = list_base_params_static$yvar,
-    dvar = list_base_params_static$dvar,
-    stage = "base"
-  )
-})
+list_base_xgb_pred <- fit_xgb_spark(
+  master = chr_spark_master,
+  home = chr_spark_home,
+  workspace = file.path(getwd(), "spark-warehouse"),
+  database = "duckdb",
+  input = db_feat_merge_sptmpl,
+  output = "output/base/pred/",
+  rset = list_base_cv_idx,
+  xvar = list_base_params_static$xvar,
+  yvar = list_base_params_static$yvar,
+  dvar = list_base_params_static$dvar,
+  stage = "base"
+)
 
 ################################################################################
-arrow::write_parquet(
-  list_base_xgb_pred$pred,
-  snakemake@output[["dt_base_xgb_pred"]]
-)
+qs2::qs_save(list_base_xgb_pred$pred, snakemake@output[["db_base_xgb_pred"]])
 qs2::qs_save(list_base_xgb_pred$eval, snakemake@output[["dt_base_xgb_eval"]])

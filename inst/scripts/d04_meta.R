@@ -16,7 +16,7 @@ source("R/devel.R")
 list_base_params_static <- qs2::qs_read(snakemake@input[[
   "list_base_params_static"
 ]])
-chr_path_base_sptmpl <- snakemake@input[["dt_base_xgb_pred"]]
+dt_base_xgb_pred <- snakemake@input[["dt_base_xgb_pred"]]
 list_meta_cv_idx <- qs2::qs_read(snakemake@input[["list_meta_cv_idx"]])
 
 ################################################################################
@@ -34,7 +34,7 @@ Sys.setenv("SPARK_EXECUTOR_MEMORY" = "4g")
 chr_feat_base_xgb <- grep(
   "base_",
   arrow::open_dataset(
-    chr_path_base_sptmpl,
+    dt_base_xgb_pred,
     format = "parquet"
   )$schema$names,
   value = TRUE
@@ -48,7 +48,7 @@ time_meta_fit <- system.time({
     home = chr_spark_home,
     workspace = file.path(getwd(), "spark-warehouse"),
     database = "duckdb",
-    path = chr_path_base_sptmpl,
+    path = dt_base_xgb_pred,
     rset = list_meta_cv_idx,
     xvar = c("lon", "lat", chr_feat_base_xgb),
     yvar = list_base_params_static$yvar,

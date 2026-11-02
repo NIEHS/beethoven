@@ -32,7 +32,7 @@ rule model_base:
         list_base_cv_idx="output/base/list_base_cv_idx.qs"
 
     output:
-        dt_base_xgb_pred="output/base/dt_base_xgb_pred.parquet",
+        db_base_xgb_pred="output/base/db_base_xgb_pred.qs",
         dt_base_xgb_eval="output/base/dt_base_xgb_eval.qs"
 
     params:

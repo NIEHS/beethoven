@@ -1,11 +1,26 @@
-# Ignore specific folders
+# Documentation.
 doc/
+
+# Raw input files (e.g. .shp, .nc).
 input/
+
+# Intermediate and final output files (e.g. .qs, .parquet).
 output/
+
+# SLURM submission output.
 slurm/
+
+# targets objects and metadata.
 _targets/
+
+# Snakemake metadata.
 .snakemake/
+
+# Spark files and logs.
 spark-warehouse/
+
+# Developmen files.
+devel/
 
 # Database files and folders.
 metastore_db/

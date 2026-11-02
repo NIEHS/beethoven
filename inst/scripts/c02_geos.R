@@ -116,7 +116,7 @@ names(list_feat_geos_sptmpl) <- df_iter_geos$variable[1:10]
 # Merge disparate variable-time .parquet files into  joined GEOS database.
 db_feat_geos_sptmpl <- amadeusdb:::join_variables(
   input = list_feat_geos_sptmpl,
-  output = "output/geos/feat/join",
+  output = "output/feat/geos/join",
   by = c("site_id", "time")
 )
 
