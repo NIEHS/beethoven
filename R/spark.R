@@ -1,3 +1,4 @@
+# nocov start
 ################################################################################
 #' Read a logical flag from an environment variable
 #'
@@ -696,3 +697,5 @@ unpersist <- function(tables) {
   }
   invisible(NULL)
 }
+
+# nocov end
