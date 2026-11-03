@@ -243,6 +243,7 @@ spark_environment <- function(
 #'   time in seconds repeated for each metric within a fold.
 #' @seealso [spark_environment()], [sparklyr::spark_connect()]
 #' @importFrom rlang .data
+#' @keywords Baselearner
 #' @export
 fit_xgb_spark <-
   function(

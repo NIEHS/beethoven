@@ -49,7 +49,8 @@ testthat::test_that("fit_base_learner {lightGBM}", {
       xvar = seq(4, ncol(dt_base)),
       drop_vars = NULL,
       normalize = TRUE,
-      metric = "rsq"
+      metric = "rsq",
+      full_data = dt_base
     )
   )
   # expect a list
