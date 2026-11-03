@@ -4,7 +4,6 @@ rule calculate_aqs:
     input:
         chr_init_dates="output/chr_init_dates.qs",
         list_dl_aqs="output/list_dl_aqs.qs",
-        list_dl_narr="output/list_dl_narr.qs",
         list_dl_hms="output/list_dl_hms.qs"
 
     output:

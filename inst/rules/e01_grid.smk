@@ -56,7 +56,7 @@ rule prediction_hms:
 ##############################           MERGE            ##############################
 rule prediction_merge:
     input:
-        sf_pred_grid_sp=""
+        sf_pred_grid_sp="output/sf_pred_grid_sp.qs",
         db_pred_geos_sptmpl="output/grid/db_pred_geos_sptmpl.qs",
         db_pred_hms_sptmpl="output/grid/db_pred_hms_sptmpl.qs"
 

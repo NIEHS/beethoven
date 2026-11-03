@@ -94,7 +94,7 @@ list_pred_geos_sptmpl <- lapply(
   list_iter_geos[1:10],
   function(x) {
     amadeusdb::sedona_geos(
-      date = beethoven::fl_dates(chr_init_dates),
+      date = as.character(beethoven::fl_dates(chr_init_dates)),
       input = file.path(
         chr_group_store,
         "input/geos/",

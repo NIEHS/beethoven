@@ -13,7 +13,7 @@ print(
 # Define pipeline endpoint.
 rule all:
     input:
-        "output/base/list_base_cv_idx.qs"
+        "output/feat/db_feat_merge_sptmpl.qs"
 
 ###############################      PIPELINE RULES      ###############################
 include: "inst/rules/a01_initiate.smk"

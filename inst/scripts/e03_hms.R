@@ -21,10 +21,10 @@ dyn.load(
 
 ################################################################################
 db_pred_hms_sptmpl <- amadeusdb::sedona_hms(
-  date = beethoven::fl_dates(chr_init_dates),
+  date = as.character(beethoven::fl_dates(chr_init_dates)),
   input = file.path(chr_config_dir, "hms", "data_files"),
   output = "output/grid/hms/",
-  locs = sf_feat_aqs_sp,
+  locs = sf_pred_grid_sp,
   locs_id = "site_id",
   radius = 0,
   batch = 50L
@@ -32,6 +32,6 @@ db_pred_hms_sptmpl <- amadeusdb::sedona_hms(
 
 ################################################################################
 qs2::qs_save(
-  data.table::data.table(dt_pred_hms_sptmpl),
-  snakemake@output[["dt_pred_hms_sptmpl"]]
+  data.table::data.table(db_pred_hms_sptmpl),
+  snakemake@output[["db_pred_hms_sptmpl"]]
 )
