@@ -95,3 +95,4 @@ column. Each dataset can contain multiple Parquet part files.
 \seealso{
 \code{\link[=spark_environment]{spark_environment()}}, \code{\link[sparklyr:spark_connect]{sparklyr::spark_connect()}}
 }
+\keyword{Baselearner}
