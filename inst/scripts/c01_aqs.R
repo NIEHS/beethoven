@@ -3,8 +3,8 @@
 
 ################################################################################
 # Load libraries and source local functions.
+Sys.setenv(PROJ_NETWORK = "OFF")
 library(amadeus)
-source("R/amadeus.R")
 
 ################################################################################
 # Import configured variables and inputs.
