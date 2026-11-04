@@ -1,0 +1,124 @@
+################################################################################
+# Calculate GEOS covariates at Uber H3 (resolution 8) locations (spatial only).
+
+################################################################################
+# Load libraries and source local functions.
+library(amadeusdb)
+
+################################################################################
+# Import configured variables and inputs.
+chr_config_dir <- snakemake@params[["chr_config_dir"]]
+chr_init_dates <- qs2::qs_read(snakemake@input[["chr_init_dates"]])
+sf_pred_grid_sp <- qs2::qs_read(snakemake@input[["sf_pred_grid_sp"]])
+
+################################################################################
+# Set path to previously downloaded GEOS data.
+chr_group_store <- readLines("input/.hidden/chr_group_store.txt")
+
+################################################################################
+# Dynamic load of GDAL library to be used by SedonaDB.
+dyn.load(
+  file.path(Sys.getenv("HOME"), ".conda/envs/beethoven/lib/libgdal.so.39"),
+  local = FALSE,
+  now = TRUE
+)
+
+################################################################################
+# Define GEOS variables and iteration list.
+df_iter_aqc <- data.frame(
+  asset = "aqc_tavg_1hr_g1440x721_v1",
+  variable = c("CO", "NO2", "O3", "SO2")
+)
+df_iter_chm <- data.frame(
+  asset = "chm_tavg_1hr_g1440x721_v1",
+  variable = c(
+    "ACET",
+    "ALD2",
+    "ALK4",
+    "BCPI",
+    "BCPO",
+    "BENZ",
+    "C2H6",
+    "C3H8",
+    "CH4",
+    # "CO",
+    "DST1",
+    "DST2",
+    "DST3",
+    "DST4",
+    "EOH",
+    "H2O2",
+    "HCHO",
+    "HNO3",
+    "HNO4",
+    "ISOP",
+    "MACR",
+    "MEK",
+    "MVK",
+    "N2O5",
+    "NH3",
+    "NH4",
+    "NIT",
+    "NO",
+    # "NO2",
+    "NOy",
+    "OCPI",
+    "OCPO",
+    "PAN",
+    "PM25_RH35_GCC",
+    "PM25_RH35_GOCART",
+    "PM25bc_RH35_GCC",
+    "PM25du_RH35_GCC",
+    "PM25ni_RH35_GCC",
+    "PM25oc_RH35_GCC",
+    "PM25soa_RH35_GCC",
+    "PM25ss_RH35_GCC",
+    "PM25su_RH35_GCC",
+    "PRPE",
+    "RCHO",
+    "SALA",
+    "SALC",
+    # "SO2",
+    "SOAP",
+    "SOAS",
+    "TOLU",
+    "XYLE"
+  )
+)
+df_iter_geos <- rbind(df_iter_aqc, df_iter_chm)
+list_iter_geos <- split(df_iter_geos, seq_len(nrow(df_iter_geos)))
+
+################################################################################
+# Extract GEOS values at AQS locations, stored as variable-time .parquet.
+list_pred_geos_sptmpl <- lapply(
+  list_iter_geos[1:10],
+  function(x) {
+    amadeusdb::sedona_geos(
+      date = as.character(beethoven::fl_dates(chr_init_dates)),
+      input = file.path(
+        chr_group_store,
+        "input/geos/",
+        x$asset,
+        "/"
+      ),
+      output = "output/grid/geos/",
+      variable = x$variable,
+      locs = sf_pred_grid_sp,
+      locs_id = "site_id",
+      batch = 240L,
+      radius = 0L
+    )
+  }
+)
+names(list_pred_geos_sptmpl) <- df_iter_geos$variable[1:10]
+
+################################################################################
+# Merge disparate variable-time .parquet files into  joined GEOS database.
+db_pred_geos_sptmpl <- amadeusdb:::join_variables(
+  input = list_pred_geos_sptmpl,
+  output = "output/grid/geos/join",
+  by = c("site_id", "time")
+)
+
+################################################################################
+qs2::qs_save(db_pred_geos_sptmpl, snakemake@output[["db_pred_geos_sptmpl"]])

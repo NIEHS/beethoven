@@ -371,8 +371,8 @@ testthat::test_that("post_calc_autojoin expands and joins data.frames with diffe
 testthat::test_that("impute_all", {
   # sample data
   # sample data is 3 sites for 5 days
-  dt_full <- qs::qread(
-    testthat::test_path("..", "testdata", "postprocessing", "dt_full.qs")
+  dt_full <- qs2::qs_read(
+    testthat::test_path("..", "testdata", "postprocessing", "dt_full1.qs")
   )
 
   # expect no errors on imputation (read object)
@@ -406,7 +406,7 @@ testthat::test_that("impute_all", {
         "..",
         "testdata",
         "postprocessing",
-        "dt_full.qs"
+        "dt_full1.qs"
       ),
       period = c("2018-01-01", "2018-01-10"),
       nthreads_dt = 1L,
@@ -459,7 +459,7 @@ testthat::test_that("append_predecessors", {
         "..",
         "testdata",
         "postprocessing",
-        "dt_full.qs"
+        "dt_full1.qs"
       ),
       period = c("2018-01-01", "2018-01-10"),
       nthreads_dt = 1L,
@@ -480,7 +480,7 @@ testthat::test_that("append_predecessors", {
   testthat::expect_true(file.exists(paste0(append_directory, path_append1)))
   # expect no error on re-read
   testthat::expect_no_error(
-    dt_append1 <- qs::qread(paste0(append_directory, path_append1))
+    dt_append1 <- qs2::qs_read(paste0(append_directory, path_append1))
   )
   # expect data.frame
   testthat::expect_s3_class(dt_append1, "data.frame")
@@ -496,7 +496,7 @@ testthat::test_that("append_predecessors", {
         "..",
         "testdata",
         "postprocessing",
-        "dt_append.qs"
+        "dt_append1.qs"
       ),
       period = c("2018-01-11", "2018-01-20"),
       nthreads_dt = 1L,

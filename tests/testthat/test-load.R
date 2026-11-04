@@ -24,7 +24,7 @@ testthat::test_that("load_args (download)", {
   # expect no error with .qs
   testthat::expect_no_error(
     args_qs <- beethoven::loadargs(
-      testthat::test_path("..", "testdata", "load", "download_args.qs"),
+      testthat::test_path("..", "testdata", "load", "download_args1.qs"),
       dataset = "hms"
     )
   )
@@ -36,7 +36,7 @@ testthat::test_that("load_args (download)", {
   # expect no error with two datasets
   testthat::expect_no_error(
     args_2 <- beethoven::loadargs(
-      testthat::test_path("..", "testdata", "load", "download_args.qs"),
+      testthat::test_path("..", "testdata", "load", "download_args1.qs"),
       dataset = c("hms", "narr_monolevel")
     )
   )
@@ -52,7 +52,7 @@ testthat::test_that("load_args (calc)", {
   # expect no error with .qs (calc)
   testthat::expect_no_error(
     args_narr <- beethoven::loadargs(
-      testthat::test_path("..", "testdata", "load", "calc_args.qs"),
+      testthat::test_path("..", "testdata", "load", "calc_args1.qs"),
       dataset = "narr"
     )
   )
@@ -83,14 +83,13 @@ testthat::test_that("load_modis_files", {
 ################################################################################
 ##### read_locs
 
-
 ################################################################################
 ##### unmarshal_function
 testthat::test_that("unmarshal_function", {
-  withr::local_package("qs")
+  withr::local_package("qs2")
   # expect no error for function name
   testthat::expect_no_error(
-    unmarshal_example <- beethoven::unmarshal_function("qs::qread")
+    unmarshal_example <- beethoven::unmarshal_function("qs2::qs_read")
   )
   # expect the output to be a function
   testthat::expect_true(is.function(unmarshal_example))

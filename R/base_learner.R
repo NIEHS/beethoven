@@ -64,7 +64,6 @@ make_subdata <- function(
 #' `gpu`.
 #' @return A parsnip model object.
 #' @importFrom parsnip mlp set_engine set_mode boost_tree linear_reg tune
-#' @importFrom magrittr %>%
 #' @export
 switch_model <-
   function(
@@ -80,8 +79,8 @@ switch_model <-
         epochs = 1000,
         activation = parsnip::tune(),
         learn_rate = parsnip::tune()
-      ) %>%
-        parsnip::set_engine("brulee", device = device) %>%
+      ) |>
+        parsnip::set_engine("brulee", device = device) |>
         parsnip::set_mode("regression"),
       mlp2 = parsnip::mlp(
         hidden_units = parsnip::tune(),
@@ -89,40 +88,40 @@ switch_model <-
         epochs = 1000,
         activation = parsnip::tune(),
         learn_rate = parsnip::tune()
-      ) %>%
+      ) |>
         parsnip::set_engine(
           "brulee_two_layer",
-          hidden_units_2 = parnsip::tune(),
+          hidden_units_2 = parsnip::tune(),
           activation_2 = parsnip::tune(),
           device = device
-        ) %>%
+        ) |>
         parsnip::set_mode("regression"),
       lgb = parsnip::boost_tree(
         mtry = parsnip::tune(),
         trees = parsnip::tune(),
         learn_rate = parsnip::tune(),
         tree_depth = parsnip::tune()
-      ) %>%
-        parsnip::set_engine("lightgbm", device = device) %>%
+      ) |>
+        parsnip::set_engine("lightgbm", device = device) |>
         parsnip::set_mode("regression"),
       xgb = parsnip::boost_tree(
         mtry = parsnip::tune(),
         trees = parsnip::tune(),
         learn_rate = parsnip::tune()
-      ) %>%
-        parsnip::set_engine("xgboost", device = device) %>%
+      ) |>
+        parsnip::set_engine("xgboost", device = device) |>
         parsnip::set_mode("regression"),
       elnet = parsnip::linear_reg(
         mixture = parsnip::tune(),
         penalty = parsnip::tune()
-      ) %>%
-        parsnip::set_engine("glmnet") %>%
+      ) |>
+        parsnip::set_engine("glmnet") |>
         parsnip::set_mode("regression"),
       brulee_linear = parsnip::linear_reg(
         mixture = parsnip::tune(),
         penalty = parsnip::tune()
-      ) %>%
-        parsnip::set_engine("brulee", device = device) %>%
+      ) |>
+        parsnip::set_engine("brulee", device = device) |>
         parsnip::set_mode("regression")
     )
   }
@@ -188,7 +187,6 @@ switch_model <-
 #' @return The fitted workflow.
 #' @importFrom recipes recipe update_role step_normalize all_numeric_predictors
 #' @importFrom recipes all_integer_predictors
-#' @importFrom magrittr %>%
 #' @importFrom parsnip mlp set_engine set_mode fit
 #' @importFrom workflows workflow add_recipe add_model
 #' @importFrom tune tune_grid fit_best collect_metrics select_best
@@ -239,20 +237,20 @@ fit_base_learner <-
 
     # define recipe
     base_recipe <-
-      recipes::recipe(training_data[1, ]) %>%
-      recipes::update_role(!!xvar, new_role = "predictor") %>%
-      recipes::update_role(!!yvar, new_role = "outcome") %>%
+      recipes::recipe(training_data[1, ]) |>
+      recipes::update_role(!!xvar, new_role = "predictor") |>
+      recipes::update_role(!!yvar, new_role = "outcome") |>
       recipes::step_zv(recipes::all_predictors())
 
     if (!is.null(drop_vars)) {
-      base_recipe <-
-        base_recipe %>%
-        recipes::update_role(!!drop_vars, new_role = "id")
+      base_recipe <- base_recipe |>
+        recipes::update_role(dplyr::all_of(drop_vars), new_role = "id") |>
+        recipes::update_role_requirements("id", bake = FALSE)
     }
 
     if (normalize) {
       base_recipe <-
-        base_recipe %>%
+        base_recipe |>
         recipes::step_normalize(
           recipes::all_numeric_predictors(),
           -recipes::all_integer_predictors()
@@ -261,8 +259,8 @@ fit_base_learner <-
 
     # initial workflow
     base_wf <-
-      workflows::workflow() %>%
-      workflows::add_recipe(base_recipe) %>%
+      workflows::workflow() |>
+      workflows::add_recipe(base_recipe) |>
       workflows::add_model(model)
 
     # finetune race control
@@ -276,7 +274,7 @@ fit_base_learner <-
     # initial base tuning
     base_wftune <- tryCatch(
       {
-        base_wf %>%
+        base_wf |>
           finetune::tune_race_anova(
             resamples = rset,
             grid = tune_grid_size,
@@ -289,17 +287,17 @@ fit_base_learner <-
         message("Re-tuning with additional recipes::step_nzv()...")
 
         # update the recipe with near-zero variance filter
-        base_recipe_nzv <- base_recipe %>%
+        base_recipe_nzv <- base_recipe |>
           recipes::step_nzv(recipes::all_predictors())
 
         # rebuild the workflow
         base_wf <-
-          workflows::workflow() %>%
-          workflows::add_recipe(base_recipe_nzv) %>%
+          workflows::workflow() |>
+          workflows::add_recipe(base_recipe_nzv) |>
           workflows::add_model(model)
 
         # re-run base tuning
-        base_wf %>%
+        base_wf |>
           finetune::tune_race_anova(
             resamples = rset,
             grid = tune_grid_size,
@@ -312,7 +310,7 @@ fit_base_learner <-
     # Select best model
     best_params <- tune::select_best(base_wftune, metric = metric)
 
-    oof_predictions <- finetune:::collect_predictions.tune_race(
+    oof_predictions <- tune::collect_predictions(
       base_wftune,
       parameters = best_params
     )
@@ -359,7 +357,6 @@ fit_base_learner <-
 #' @importFrom parsnip fit
 #' @importFrom stats predict
 #' @importFrom rlang quo_get_expr
-#' @importFrom magrittr %>%
 #' @export
 fit_base_tune <-
   function(
@@ -378,8 +375,8 @@ fit_base_tune <-
     stopifnot("data_full must be entered." = !is.null(data_full))
     tune_mode <- match.arg(tune_mode)
     base_wf <-
-      workflows::workflow() %>%
-      workflows::add_recipe(recipe) %>%
+      workflows::workflow() |>
+      workflows::add_recipe(recipe) |>
       workflows::add_model(model)
 
     if (tune_mode == "grid") {
@@ -390,7 +387,7 @@ fit_base_tune <-
           save_workflow = TRUE
         )
       base_wftune <-
-        base_wf %>%
+        base_wf |>
         tune::tune_grid(
           resamples = resample,
           grid = grid,
@@ -409,7 +406,7 @@ fit_base_tune <-
           save_workflow = TRUE
         )
       base_wftune <-
-        base_wf %>%
+        base_wf |>
         tune::tune_bayes(
           resamples = resample,
           iter = iter_bayes,
@@ -687,7 +684,6 @@ attach_xy <-
 #' @param v integer(1). The number of partitions for the resampling.
 #' @param time_id The column name in `data` that represents the time values.
 #' @importFrom dplyr left_join select tibble
-#' @importFrom magrittr %>%
 #' @importFrom spatialsample spatial_block_cv
 #' @importFrom lubridate year week
 #' @importFrom sf st_transform
@@ -757,8 +753,8 @@ generate_cv_index_spt <- function(
     )
   })
 
-  data_spatial_cv <- data.frame(data)[, c(locs_id, coords)] %>%
-    sf::st_as_sf(coords = coords, remove = FALSE) %>%
+  data_spatial_cv <- data.frame(data)[, c(locs_id, coords)] |>
+    sf::st_as_sf(coords = coords, remove = FALSE) |>
     # Join the fold labels back to the original data
     dplyr::left_join(fold_labels, by = "site_id")
 
@@ -770,19 +766,21 @@ generate_cv_index_spt <- function(
     sprintf("%02d", lubridate::week(data[[time_id]]))
   )
 
-  data_spatial_cv <- data_spatial_cv %>%
-    dplyr::mutate(st_int = interaction(fold, as.double(yw), drop = FALSE))
+  data_spatial_cv <- data_spatial_cv |>
+    dplyr::mutate(
+      st_int = interaction(.data$fold, as.double(.data$yw), drop = FALSE)
+    )
 
   # Create a unique list of (id1, id2) combinations
-  unique_st_int <- data_spatial_cv$st_int %>% unique() %>% as.data.frame()
+  unique_st_int <- data_spatial_cv$st_int |> unique() |> as.data.frame()
   colnames(unique_st_int) <- "st_int"
 
   # Assign P groups cyclically (to balance size)
-  unique_st_int <- unique_st_int %>%
+  unique_st_int <- unique_st_int |>
     dplyr::mutate(spacetime_cv = rep(1:v, length.out = dplyr::n()))
 
   # Merge back to the full dataset
-  data_sp <- data_spatial_cv %>% dplyr::left_join(unique_st_int, by = "st_int")
+  data_sp <- data_spatial_cv |> dplyr::left_join(unique_st_int, by = "st_int")
 
   # length == nrow(data)
   spt_index_num <- data_sp$spacetime_cv
@@ -876,7 +874,6 @@ generate_cv_index_ts <-
 #' @importFrom sf st_as_sf
 #' @importFrom rsample manual_rset
 #' @importFrom dplyr slice_sample
-#' @importFrom magrittr %>%
 #' @importFrom methods getPackageName
 #' @export
 generate_cv_index_sp <-

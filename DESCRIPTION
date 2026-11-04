@@ -1,6 +1,6 @@
 Package: beethoven
 Title: Building an Extensible, rEproducible, Test-driven, Harmonized, Open-source, Versioned, ENsemble model for air quality
-Version: 0.5.2
+Version: 0.6.0
 Authors@R: c(
     person("Kyle", "Messier", , "kyle.messier@nih.gov", role = c("aut", "cre"), comment = c(ORCID = "0000-0001-9508-9623")),
     person("Mitchell", "Manware", role = c("aut", "ctb"), comment = c(ORCID = "0009-0003-6440-6106")),
@@ -20,7 +20,6 @@ Imports:
   terra,
   methods,
   data.table,
-  targets,
   tune (>= 1.2.1),
   rlang,
   parsnip,
@@ -32,7 +31,7 @@ Imports:
   workflows,
   recipes,
   missRanger,
-  qs,
+  qs2,
   stringi,
   tibble,
   collapse,
@@ -40,13 +39,13 @@ Imports:
   graphics,
   scatterplot3d,
   parallelly,
-  magrittr,
   lubridate,
   purrr,
   finetune,
   butcher,
   amadeus,
-  chopin
+  chopin,
+  Rdpack
 Suggests:
   testthat (>= 3.0.0),
   covr,
@@ -71,19 +70,20 @@ Suggests:
   quarto,
   torch,
   kernlab,
-  arrow
+  arrow,
+  DBI,
+  sparklyr
 Remotes:
   ropensci/chopin,
-  tidymodels/brulee@gpu,
-  mitchellmanware/parsnip@beethoven,
   NIEHS/amadeus
 SystemRequirements: NetCDF4, CUDA (>= 10.0)
 Encoding: UTF-8
 VignetteBuilder: knitr, rmarkdown
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+RdMacros: Rdpack
 Config/Needs/website: tidyverse/tidytemplate
 Config/testhat/edition: 3
 License: MIT + file LICENSE
 URL: https://github.com/NIEHS/beethoven, 
 https: //NIEHS.github.io/beethoven/
+Config/roxygen2/version: 8.1.1

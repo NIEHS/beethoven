@@ -1105,6 +1105,7 @@ calc_tri_mod <-
 #' @importFrom collapse set_collapse qDT
 #' @importFrom terra nearby distance buffer
 #' @importFrom rlang sym
+#' @importFrom Rdpack reprompt
 #' @export
 # nolint end
 sum_edc_mod <-

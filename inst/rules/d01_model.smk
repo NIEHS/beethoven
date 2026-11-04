@@ -1,0 +1,83 @@
+########################################################################################
+##############################            BASE            ##############################
+rule model_cvbase:
+    input:
+        db_feat_merge_sptmpl="output/feat/db_feat_merge_sptmpl.qs",
+        sf_feat_aqs_sp="output/sf_feat_aqs_sp.qs",
+
+    output:
+        list_base_params_static="output/base/list_base_params_static.qs",
+        list_base_cv_idx="output/base/list_base_cv_idx.qs"
+    
+    params:
+        int_base_iter=config["int_base_iter"]
+
+    container:
+        None
+
+    conda:
+        "beethoven"
+
+    script:
+        "../scripts/d01_cvbase.R"
+
+rule model_base:
+    input:
+        list_base_params_static="output/base/list_base_params_static.qs",
+        db_feat_merge_sptmpl="output/feat/db_feat_merge_sptmpl.qs",
+        list_base_cv_idx="output/base/list_base_cv_idx.qs"
+
+    output:
+        db_base_xgb_pred="output/base/db_base_xgb_pred.qs",
+        dt_base_xgb_eval="output/base/dt_base_xgb_eval.qs"
+
+    container:
+        None
+
+    conda:
+        "beethoven"
+
+    script:
+        "../scripts/d02_base.R"
+
+##############################            META            ##############################
+rule model_cvmeta:
+    input:
+        list_base_params_static="output/base/list_base_params_static.qs",
+        sf_feat_aqs_sp="output/sf_feat_aqs_sp.qs"
+
+    output:
+        list_meta_cv_idx="output/meta/list_meta_cv_idx.qs"
+    
+    params:
+        int_meta_iter=config["int_meta_iter"]
+
+    container:
+        None
+
+    conda:
+        "beethoven"
+
+    script:
+        "../scripts/d03_cvmeta.R"
+
+rule model_meta:
+    input:
+        list_base_params_static="output/base/list_base_params_static.qs",
+        dt_base_xgb_pred="output/base/dt_base_xgb_pred.parquet",
+        list_meta_cv_idx="output/meta/list_meta_cv_idx.qs"
+
+    output:
+        dt_meta_xgb_pred="output/meta/dt_meta_xgb_pred.parquet",
+        dt_meta_xgb_eval="output/meta/dt_meta_xgb_eval.qs"
+
+    container:
+        None
+
+    conda:
+        "beethoven"
+
+    script:
+        "../scripts/d04_meta.R"
+
+########################################################################################

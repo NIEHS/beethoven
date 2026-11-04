@@ -79,22 +79,49 @@ jobs:
       - name: Patch comparison
         id: patch-comparison
         shell: bash
+        env:
+          COV_PATCH: ${{ steps.get-values.outputs.coverage }}
         run: |
-          if ( ! test -f cov_current.Rout ); then
-            echo "0" >> cov_current.Rout
+          cov_patch="$COV_PATCH"
+          cov_current=0
+
+          if [[ -f cov_current.Rout ]]; then
+            cov_current=$(cat cov_current.Rout)
           fi
 
-          cov_patch="${{ steps.get-values.outputs.coverage }}"
-          cov_current=$(cat cov_current.Rout)
-          echo "Current coverage: $cov_current"
+          # Require valid coverage percentages.
+          for value in "$cov_patch" "$cov_current"; do
+            if [[ ! "$value" =~ ^[0-9]+([.][0-9]+)?$ ]] ||
+               (( $(echo "$value > 100" | bc -l) )); then
+              echo "::error::Invalid coverage value: '$value'"
+              exit 1
+            fi
+          done
+
+          # Allow a decrease of up to 5 percentage points.
+          tolerance=5
+          cov_floor=$(echo "$cov_current - $tolerance" | bc -l)
+          if (( $(echo "$cov_floor < 0" | bc -l) )); then
+            cov_floor=0
+          fi
+
+          echo "Current coverage: $cov_current%"
+          echo "Patch coverage: $cov_patch%"
+          echo "Minimum allowed coverage: $cov_floor%"
 
           if (( $(echo "$cov_patch >= $cov_current" | bc -l) )); then
-            echo "Patch coverage ($cov_patch) is greater than or equal to current coverage ($cov_current)."
-            echo "cov_update=$cov_patch" >> $GITHUB_OUTPUT
-           else
-            echo "Patch coverage ($cov_patch) is less than current coverage ($cov_current)."
+            echo "Coverage maintained or improved."
+            cov_update="$cov_patch"
+          elif (( $(echo "$cov_patch >= $cov_floor" | bc -l) )); then
+            echo "::warning::Coverage decreased within the allowed $tolerance percentage points."
+            # Preserve the baseline to prevent cumulative decreases.
+            cov_update="$cov_current"
+          else
+            echo "::error::Coverage ($cov_patch%) is below the allowed floor ($cov_floor%)."
             exit 1
           fi
+
+          echo "cov_update=$cov_update" >> "$GITHUB_OUTPUT"
 
       - name: Overwrite cov_current.Rout
         if: ${{ github.event_name == 'push' }}

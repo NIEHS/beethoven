@@ -51,7 +51,8 @@ testthat::test_that("fit_base_learner {brulee} MLP", {
       xvar = seq(4, ncol(dt_base)),
       drop_vars = NULL,
       normalize = TRUE,
-      metric = "rmse"
+      metric = "rmse",
+      full_data = dt_base
     )
   )
   # expect a list
@@ -117,7 +118,8 @@ testthat::test_that("fit_base_learner {brulee} MLP with ZV filter", {
       yvar = "Arithmetic.Mean",
       xvar = seq(4, ncol(dt_base1)),
       drop_vars = NULL,
-      normalize = TRUE
+      normalize = TRUE,
+      full_data = dt_base1
     )
   )
   # expect a list
