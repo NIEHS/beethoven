@@ -11,10 +11,10 @@
 #SBATCH --output=slurm/beethoven_%j.out
 
 ############################      CERTIFICATES      ############################
-# Export CURL_CA_BUNDLE and SSL_CERT_FILE environmental variables to vertify
+# Export CURL_CA_BUNDLE and SSL_CERT_FILE environment variables to verify
 # servers' SSL certificates during download.
-export CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
-export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+export CURL_CA_BUNDLE=/etc/pki/tls/certs/ca-bundle.crt
+export SSL_CERT_FILE=/etc/pki/tls/certs/ca-bundle.crt
 
 ############################          CORES         ############################
 cores="${1:-${SLURM_CPUS_PER_TASK:-1}}"

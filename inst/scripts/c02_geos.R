@@ -117,7 +117,7 @@ names(list_feat_geos_sptmpl) <- df_iter_geos$variable[1:10]
 db_feat_geos_sptmpl <- amadeusdb:::join_variables(
   input = list_feat_geos_sptmpl,
   output = "output/feat/geos/join",
-  by = c("site_id", "time")
+  by = c("site_id", "time", "level")
 )
 
 ################################################################################

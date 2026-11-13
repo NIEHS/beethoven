@@ -38,7 +38,7 @@ list_base_params_static <- list(
   yvar = chr_feat_yvar,
   xvar = setdiff(
     chr_feat_merge_names,
-    c(chr_feat_dvar, chr_feat_yvar)
+    c(chr_feat_dvar, chr_feat_yvar, "level")
   ),
   dvar = chr_feat_dvar,
   normalize = TRUE,
