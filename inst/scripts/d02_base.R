@@ -9,7 +9,6 @@ library(DBI)
 library(dplyr)
 library(sparklyr)
 source("R/spark.R")
-source("R/devel.R")
 
 ################################################################################
 # Import configured variables and inputs.
@@ -26,7 +25,7 @@ Sys.setenv("SPARK_EXECUTOR_MEMORY" = "8g")
 
 ################################################################################
 # Import Spark connection details.
-chr_spark_master <- readLines("input/.hidden/chr_spark_master.txt")
+chr_spark_master <- readLines("input/.hidden/chr_spark_local.txt")
 chr_spark_home <- readLines("input/.hidden/chr_spark_home.txt")
 
 ################################################################################
@@ -37,7 +36,7 @@ list_base_xgb_pred <- fit_xgb_spark(
   workspace = file.path(getwd(), "spark-warehouse"),
   database = "duckdb",
   input = db_feat_merge_sptmpl,
-  output = "output/base/pred/",
+  output = "output/base/pred3/",
   rset = list_base_cv_idx,
   xvar = list_base_params_static$xvar,
   yvar = list_base_params_static$yvar,

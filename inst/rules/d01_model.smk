@@ -64,11 +64,11 @@ rule model_cvmeta:
 rule model_meta:
     input:
         list_base_params_static="output/base/list_base_params_static.qs",
-        dt_base_xgb_pred="output/base/dt_base_xgb_pred.parquet",
+        db_base_xgb_pred="output/base/db_base_xgb_pred.qs",
         list_meta_cv_idx="output/meta/list_meta_cv_idx.qs"
 
     output:
-        dt_meta_xgb_pred="output/meta/dt_meta_xgb_pred.parquet",
+        db_meta_xgb_pred="output/meta/db_meta_xgb_pred.qs",
         dt_meta_xgb_eval="output/meta/dt_meta_xgb_eval.qs"
 
     container:

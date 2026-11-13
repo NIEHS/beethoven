@@ -246,369 +246,405 @@ spark_environment <- function(
 #' @importFrom rlang .data
 #' @keywords Baselearner
 #' @export
-fit_xgb_spark <-
-  function(
-    master,
-    home,
-    workspace,
-    database = "duckdb",
-    input = NULL,
-    output,
-    rset,
-    xvar,
-    yvar,
-    dvar,
-    stage = "base",
-    ...
-  ) {
-    # --------------------------------------------------------------------------
-    # Spark configuration.
-    config <- spark_environment(workspace = workspace, database = database)
-    config_base <- sparklyr::spark_config()
-    chr_xgboost_jars <- Sys.getenv("XGBOOST_JARS", unset = "")
-    if (nzchar(chr_xgboost_jars)) {
-      config_base[["sparklyr.shell.jars"]] <- chr_xgboost_jars
-    } else {
-      config_base[["sparklyr.shell.packages"]] <- config$chr_xgboost_package
-    }
-    config_base[["spark.cores.max"]] <- as.character(config$int_maxcores)
-    config_base[["spark.executor.cores"]] <- as.character(
-      config$int_executorcores
-    )
-    config_base[["spark.executor.memory"]] <- config$int_executormem
-    config_base[["spark.sql.shuffle.partitions"]] <- as.character(
-      config$int_partitions
-    )
-    config_base[["spark.sql.warehouse.dir"]] <- paste0(
-      "file:",
-      config$chr_warehouse
-    )
-    config_base[["spark.sql.parquet.compression.codec"]] <- "zstd"
-    config_base[["spark.task.cpus"]] <- as.character(config$int_nthreads)
-
-    # --------------------------------------------------------------------------
-    # Connect to local Spark cluster.
-    message("Connecting to Spark...")
-    sc <- sparklyr::spark_connect(
-      master = master,
-      spark_home = home,
-      config = config_base,
-      app_name = "beethoven-devel"
-    )
-    on.exit(
-      {
-        sparklyr::spark_disconnect(sc)
-        message("Disconnected from Spark.")
-      },
-      add = TRUE
-    )
-    message("Spark connected; proceeding with model fitting.")
-
-    # --------------------------------------------------------------------------
-    # Load .parquet file into Spark memory.
-    chr_feat_merge_sptmpl <- "db_feat_merge_sptmpl"
-    sparklyr::spark_read_parquet(
-      sc,
-      name = chr_feat_merge_sptmpl,
-      path = input,
-      memory = FALSE
-    )
-
-    # --------------------------------------------------------------------------
-    # Read data schema.
-    dt_feat_merge_schema <- DBI::dbGetQuery(
-      sc,
-      paste0("DESCRIBE TABLE ", chr_feat_merge_sptmpl)
-    )
-    dt_feat_merge_schema <- dt_feat_merge_schema[
-      nzchar(trimws(dt_feat_merge_schema$col_name)) &
-        !startsWith(trimws(dt_feat_merge_schema$col_name), "#"),
-      ,
-      drop = FALSE
-    ]
-
-    # --------------------------------------------------------------------------
-    # Extract and define numeric features (predictors).
-    bin_feat_merge_num <- grepl(
-      "^(tinyint|smallint|int|bigint|float|double|decimal)",
-      tolower(dt_feat_merge_schema$data_type)
-    )
-    chr_feat_merge_xvar <- setdiff(
-      dt_feat_merge_schema$col_name[bin_feat_merge_num],
-      c(yvar, dvar)
-    )
-
-    # --------------------------------------------------------------------------
-    # Check derived features identical to manually set `$xvar`.
-    stopifnot(identical(chr_feat_merge_xvar, xvar))
-
-    # --------------------------------------------------------------------------
-    # Replace predictor variable names with generic "feature_" labels.
-    chr_feat_merge_xalias <- sprintf(
-      "feature_%04d",
-      seq_along(chr_feat_merge_xvar)
-    )
-
-    # --------------------------------------------------------------------------
-    # Define remapping of variable names to "feature_" labels.
-    chr_feat_merge_proj <- paste(
-      vapply(chr_feat_merge_xvar, sql_identifier, character(1)),
-      "AS",
-      vapply(chr_feat_merge_xalias, sql_identifier, character(1))
-    )
-
-    # --------------------------------------------------------------------------
-    # Define SQL query for response and predictor variables with alias renaming
-    # from the table read from the input Parquet data.
-    chr_feat_model_sql <- paste(
-      "SELECT",
-      paste(
-        c(
-          vapply(
-            c("site_id", "time", "lon", "lat"),
-            sql_identifier,
-            character(1)
-          ),
-          paste(sql_identifier(yvar), "AS `label`"),
-          chr_feat_merge_proj
+fit_xgb_spark <- function(
+  master,
+  home,
+  workspace,
+  database = "duckdb",
+  input = NULL,
+  output,
+  rset,
+  xvar,
+  yvar,
+  dvar,
+  stage = "base",
+  ...
+) {
+  # ----------------------------------------------------------------------------
+  # Spark configuration.
+  config <- spark_environment(workspace = workspace, database = database)
+  config_base <- sparklyr::spark_config()
+  chr_xgboost_jars <- Sys.getenv("XGBOOST_JARS", unset = "")
+  if (nzchar(chr_xgboost_jars)) {
+    config_base[["sparklyr.shell.jars"]] <- chr_xgboost_jars
+  } else {
+    config_base[["sparklyr.shell.packages"]] <- config$chr_xgboost_package
+  }
+  config_base[["spark.cores.max"]] <- as.character(config$int_maxcores)
+  config_base[["spark.executor.cores"]] <- as.character(
+    config$int_executorcores
+  )
+  config_base[["spark.executor.memory"]] <- config$int_executormem
+  config_base[["spark.sql.shuffle.partitions"]] <- as.character(
+    config$int_partitions
+  )
+  config_base[["spark.sql.warehouse.dir"]] <- paste0(
+    "file:",
+    config$chr_warehouse
+  )
+  config_base[["spark.sql.parquet.compression.codec"]] <- "zstd"
+  config_base[["spark.task.cpus"]] <- as.character(config$int_nthreads)
+  # ----------------------------------------------------------------------------
+  # Connect to local Spark cluster.
+  message("Connecting to Spark...")
+  sc <- sparklyr::spark_connect(
+    master = master,
+    spark_home = home,
+    config = config_base,
+    app_name = "beethoven-devel"
+  )
+  on.exit(
+    {
+      sparklyr::spark_disconnect(sc)
+      message("Disconnected from Spark.")
+    },
+    add = TRUE
+  )
+  message("Spark connected; proceeding with model fitting.")
+  # ----------------------------------------------------------------------------
+  # Load .parquet file into Spark memory.
+  chr_feat_merge_sptmpl <- "db_feat_merge_sptmpl"
+  sparklyr::spark_read_parquet(
+    sc,
+    name = chr_feat_merge_sptmpl,
+    path = input,
+    options = list(mergeSchema = "true"),
+    memory = FALSE
+  )
+  # ----------------------------------------------------------------------------
+  # Read data schema.
+  dt_feat_merge_schema <- DBI::dbGetQuery(
+    sc,
+    paste0("DESCRIBE TABLE ", chr_feat_merge_sptmpl)
+  )
+  dt_feat_merge_schema <- dt_feat_merge_schema[
+    nzchar(trimws(dt_feat_merge_schema$col_name)) &
+      !startsWith(trimws(dt_feat_merge_schema$col_name), "#"),
+    ,
+    drop = FALSE
+  ]
+  # ----------------------------------------------------------------------------
+  # Extract and define numeric features (predictors).
+  bin_feat_merge_num <- grepl(
+    "^(tinyint|smallint|int|bigint|float|double|decimal)",
+    tolower(dt_feat_merge_schema$data_type)
+  )
+  chr_feat_merge_xvar <- setdiff(
+    dt_feat_merge_schema$col_name[bin_feat_merge_num],
+    c(yvar, dvar)
+  )
+  # ----------------------------------------------------------------------------
+  # Check derived features identical to manually set `$xvar`.
+  stopifnot(identical(chr_feat_merge_xvar, xvar))
+  # ----------------------------------------------------------------------------
+  # Replace predictor variable names with generic "feature_" labels.
+  chr_feat_merge_xalias <- sprintf(
+    "feature_%04d",
+    seq_along(chr_feat_merge_xvar)
+  )
+  # ----------------------------------------------------------------------------
+  # Define remapping of variable names to "feature_" labels.
+  chr_feat_merge_proj <- paste(
+    vapply(chr_feat_merge_xvar, sql_identifier, character(1)),
+    "AS",
+    vapply(chr_feat_merge_xalias, sql_identifier, character(1))
+  )
+  # ----------------------------------------------------------------------------
+  # Define SQL query for response and predictor variables with alias renaming
+  # from the table read from the input Parquet data.
+  chr_feat_model_sql <- paste(
+    "SELECT",
+    paste(
+      c(
+        vapply(
+          c("site_id", "time", "lon", "lat"),
+          sql_identifier,
+          character(1)
         ),
-        collapse = ", "
+        paste(sql_identifier(yvar), "AS `label`"),
+        chr_feat_merge_proj
       ),
-      "FROM",
-      chr_feat_merge_sptmpl,
-      if (config$int_maxrows > 0L) paste("LIMIT", config$int_maxrows) else ""
-    )
-
-    # --------------------------------------------------------------------------
-    # Query `dt_feat_merge_sptmpl` table for response and predictor variables.
-    db_feat_merge_alias <- sparklyr::sdf_sql(sc, chr_feat_model_sql)
-
-    # --------------------------------------------------------------------------
-    # Assemble the Spark feature vector.
-    tbl_feat_merge_ftvec <- db_feat_merge_alias |>
-      sparklyr::ft_vector_assembler(
-        input_cols = chr_feat_merge_xalias,
-        output_col = "features"
-      ) |>
-      dplyr::select(tidyselect::all_of(
-        c("site_id", "time", "lon", "lat", "label", "features")
-      ))
-
-    # --------------------------------------------------------------------------
-    # VectorAssembler chooses SparseVector when a row contains many zeros. In
-    # XGBoost, absent sparse entries can instead mean missing values. Round-trip
-    # through an array so Spark returns a DenseVector and zeros are retained.
-    sprk_feat_merge_ftvec <- sparklyr::spark_dataframe(tbl_feat_merge_ftvec)
-    sprk_feat_merge_features <- sparklyr::invoke(
-      sprk_feat_merge_ftvec,
-      "col",
-      "features"
-    )
-    sprk_feat_merge_array <- sparklyr::invoke_static(
-      sc,
-      "org.apache.spark.ml.functions",
-      "vector_to_array",
-      sprk_feat_merge_features,
-      "float64"
-    )
-    sprk_feat_merge_dense <- sparklyr::invoke_static(
-      sc,
-      "org.apache.spark.ml.functions",
-      "array_to_vector",
-      sprk_feat_merge_array
-    )
-    tbl_feat_merge_assemble <- sparklyr::invoke(
-      sprk_feat_merge_ftvec,
-      "withColumn",
-      "features",
-      sprk_feat_merge_dense
+      collapse = ", "
+    ),
+    "FROM",
+    chr_feat_merge_sptmpl,
+    if (config$int_maxrows > 0L) paste("LIMIT", config$int_maxrows) else ""
+  )
+  # ----------------------------------------------------------------------------
+  # Query `dt_feat_merge_sptmpl` table for response and predictor variables.
+  db_feat_merge_alias <- sparklyr::sdf_sql(sc, chr_feat_model_sql)
+  # ----------------------------------------------------------------------------
+  # Assemble the Spark feature vector.
+  tbl_feat_merge_ftvec <- db_feat_merge_alias |>
+    sparklyr::ft_vector_assembler(
+      input_cols = chr_feat_merge_xalias,
+      output_col = "features"
     ) |>
-      sparklyr::sdf_register()
-    tbl_feat_merge_assemble <- sparklyr::sdf_persist(
-      tbl_feat_merge_assemble,
-      storage.level = "MEMORY_AND_DISK",
-      name = "beethoven_xgb_features"
-    )
-    sparklyr::invoke(
-      sparklyr::spark_dataframe(tbl_feat_merge_assemble),
-      "count"
-    )
-
-    # --------------------------------------------------------------------------
-    # Set Spark estimator and invoke XGBoost.
-    sprk_estimator <- sparklyr::invoke_new(
-      sc,
-      "ml.dmlc.xgboost4j.scala.spark.XGBoostRegressor"
-    )
-    sprk_estimator <- sprk_estimator |>
-      sparklyr::invoke("setLabelCol", "label") |>
-      sparklyr::invoke("setFeaturesCol", "features") |>
-      sparklyr::invoke("setPredictionCol", "prediction") |>
-      sparklyr::invoke("setObjective", "reg:squarederror") |>
-      sparklyr::invoke("setEvalMetric", "rmse") |>
-      sparklyr::invoke("setTreeMethod", "hist") |>
-      sparklyr::invoke("setDevice", "cpu") |>
-      sparklyr::invoke("setNumWorkers", config$int_nworkers) |>
-      sparklyr::invoke("setNthread", config$int_nthreads) |>
-      sparklyr::invoke("setNumRound", config$int_nround) |>
-      sparklyr::invoke("setSeed", config$int_seed) |>
-      sparklyr::invoke("setMaxDepth", 8L) |>
-      sparklyr::invoke("setEta", 0.1) |>
-      sparklyr::invoke("setSubsample", 0.8) |>
-      sparklyr::invoke("setColsampleBytree", 0.8) |>
-      sparklyr::invoke("setForceRepartition", TRUE)
-
-    # --------------------------------------------------------------------------
-    # Initiate lists for storing all predictions and performance metrics.
-    list_base_xgb_eval <- list()
-
-    # --------------------------------------------------------------------------
-    # Report the model-fitting configuration.
-    message(
-      "Fitting ",
-      length(rset),
-      " XGBoost model(s) with ",
-      config$int_nworkers,
-      " workers, ",
-      config$int_nthreads,
-      " threads and ",
-      config$int_nround,
-      " boosting rounds..."
-    )
-
-    # --------------------------------------------------------------------------
-    # Create output directory if does not exist.
-    dir.create(dirname(output), recursive = TRUE, showWarnings = FALSE)
-
-    # --------------------------------------------------------------------------
-    # Extract file names in output before parquet file writing.
-    chr_output1 <- list.files(
-      output,
-      recursive = TRUE,
-      full.names = TRUE,
-      pattern = "\\.parquet$"
-    )
-
-    # --------------------------------------------------------------------------
-    for (r in seq_along(rset)) {
-      message(sprintf("Fitting model %03d/%03d...", r, length(rset)))
-      folds <- rset[[r]]
-
-      # ------------------------------------------------------------------------
-      # Initiate lists for storing fold predictions and performance metrics.
-      list_base_xgb_eval[[r]] <- list()
-
-      for (f in seq_along(folds)) {
-        message(sprintf("Fitting fold %02d/%02d...", f, length(folds)))
-        # ----------------------------------------------------------------------
-        # Manual split into train and test sets based on spatial cv indices.
-        chr_training <- folds[[f]]$analysis
-        chr_test <- folds[[f]]$assessment
-        list_feat_merge_splits <- list(
-          training = tbl_feat_merge_assemble |>
-            dplyr::filter(.data$site_id %in% !!chr_training),
-          test = tbl_feat_merge_assemble |>
-            dplyr::filter(.data$site_id %in% !!chr_test)
-        )
-        tbl_feat_merge_train <- sparklyr::sdf_persist(
-          list_feat_merge_splits$training,
-          storage.level = "MEMORY_AND_DISK",
-          name = "beethoven_xgb_training"
-        )
-        tbl_feat_merge_test <- sparklyr::sdf_persist(
-          list_feat_merge_splits$test,
-          storage.level = "MEMORY_AND_DISK",
-          name = "beethoven_xgb_test"
-        )
-
-        # ----------------------------------------------------------------------
-        # Fit XGBoost model on Spark cluster.
-        time_base_xgb_model <- system.time({
-          sprk_base_xgb_model <- sparklyr::invoke(
-            sprk_estimator,
-            "fit",
-            sparklyr::spark_dataframe(tbl_feat_merge_train)
-          )
-        })
-
-        # ----------------------------------------------------------------------
-        # Predict model on withheld test data.
-        sprk_base_xgb_test <- sparklyr::invoke(
-          sprk_base_xgb_model,
-          "transform",
-          sparklyr::spark_dataframe(tbl_feat_merge_test)
-        )
-        sprk_base_xgb_pred <- sparklyr::sdf_register(
-          sprk_base_xgb_test,
-          name = sprintf("beethoven_xgb_preds_%03d_%02d", r, f)
-        )
-
-        # ----------------------------------------------------------------------
-        # Evaluate model performance on test data.
-        dt_base_xgb_eval <- evaluate(
-          sc,
-          pred = sprk_base_xgb_pred,
-          r = sprintf("%03d", r),
-          f = sprintf("%02d", f)
-        )
-
-        # ----------------------------------------------------------------------
-        # Retain model evaluation statistics.
-        list_base_xgb_eval[[r]][[f]] <- data.frame(
-          dt_base_xgb_eval,
-          time = unname(time_base_xgb_model[["elapsed"]])
-        )
-
-        # ----------------------------------------------------------------------
-        # Filter to model predictions and original identification values.
-        tbl_base_xgb_pred <- sprk_base_xgb_pred |>
-          dplyr::select(tidyselect::all_of(
-            c("site_id", "time", "lon", "lat", "label", "prediction")
-          )) |>
-          dplyr::rename(
-            !!yvar := tidyselect::all_of("label"),
-            !!sprintf("%s_%03d", stage, r) := tidyselect::all_of("prediction")
-          )
-
-        # ----------------------------------------------------------------------
-        # Generate prediction value output paths.
-        chr_base_xgb_path <- file.path(
-          output,
-          sprintf("rset_%03d_fold_%02d.parquet", r, f)
-        )
-
-        # ----------------------------------------------------------------------
-        # Save model predictions as .parquet files.
-        sparklyr::spark_write_parquet(
-          tbl_base_xgb_pred,
-          path = chr_base_xgb_path,
-          mode = "error"
-        )
-
-        # ----------------------------------------------------------------------
-        # Drop training and testing data from Spark.
-        unpersist(list(tbl_feat_merge_train, tbl_feat_merge_test))
-      }
-    }
-    message("All models fit; proceeding with collection.")
-
-    # --------------------------------------------------------------------------
-    # Extract file names in output after parquet file writing, and limit to only
-    # the new .parquet files.
-    chr_output2 <- list.files(
-      output,
-      recursive = TRUE,
-      full.names = TRUE,
-      pattern = "\\.parquet$"
-    )
-
-    # --------------------------------------------------------------------------
-    # Return only the newly written .parquet file path(s) and evaluation.
-    return(list(
-      pred = setdiff(chr_output2, chr_output1),
-      eval = data.frame(dplyr::bind_rows(list_base_xgb_eval))
+    dplyr::select(tidyselect::all_of(
+      c("site_id", "time", "lon", "lat", "label", "features")
+    ))
+  # ----------------------------------------------------------------------------
+  # VectorAssembler chooses SparseVector when a row contains many zeros. In
+  # XGBoost, absent sparse entries can instead mean missing values. Round-trip
+  # through an array so Spark returns a DenseVector and zeros are retained.
+  sprk_feat_merge_ftvec <- sparklyr::spark_dataframe(tbl_feat_merge_ftvec)
+  sprk_feat_merge_features <- sparklyr::invoke(
+    sprk_feat_merge_ftvec,
+    "col",
+    "features"
+  )
+  sprk_feat_merge_array <- sparklyr::invoke_static(
+    sc,
+    "org.apache.spark.ml.functions",
+    "vector_to_array",
+    sprk_feat_merge_features,
+    "float64"
+  )
+  sprk_feat_merge_dense <- sparklyr::invoke_static(
+    sc,
+    "org.apache.spark.ml.functions",
+    "array_to_vector",
+    sprk_feat_merge_array
+  )
+  tbl_feat_merge_assemble <- sparklyr::invoke(
+    sprk_feat_merge_ftvec,
+    "withColumn",
+    "features",
+    sprk_feat_merge_dense
+  ) |>
+    sparklyr::sdf_register()
+  tbl_feat_merge_assemble <- sparklyr::sdf_persist(
+    tbl_feat_merge_assemble,
+    storage.level = "MEMORY_AND_DISK",
+    name = "beethoven_xgb_features"
+  )
+  sparklyr::invoke(
+    sparklyr::spark_dataframe(tbl_feat_merge_assemble),
+    "count"
+  )
+  # ----------------------------------------------------------------------------
+  # Set Spark estimator and invoke XGBoost.
+  sprk_estimator <- sparklyr::invoke_new(
+    sc,
+    "ml.dmlc.xgboost4j.scala.spark.XGBoostRegressor"
+  )
+  sprk_estimator <- sprk_estimator |>
+    sparklyr::invoke("setLabelCol", "label") |>
+    sparklyr::invoke("setFeaturesCol", "features") |>
+    sparklyr::invoke("setPredictionCol", "prediction") |>
+    sparklyr::invoke("setObjective", "reg:squarederror") |>
+    sparklyr::invoke("setEvalMetric", "rmse") |>
+    sparklyr::invoke("setTreeMethod", "hist") |>
+    sparklyr::invoke("setDevice", "cpu") |>
+    sparklyr::invoke("setNumWorkers", config$int_nworkers) |>
+    sparklyr::invoke("setNthread", config$int_nthreads) |>
+    sparklyr::invoke("setNumRound", config$int_nround) |>
+    sparklyr::invoke("setSeed", config$int_seed) |>
+    sparklyr::invoke("setMaxDepth", 8L) |>
+    sparklyr::invoke("setEta", 0.1) |>
+    sparklyr::invoke("setSubsample", 0.8) |>
+    sparklyr::invoke("setColsampleBytree", 0.8) |>
+    sparklyr::invoke("setForceRepartition", TRUE)
+  # ----------------------------------------------------------------------------
+  # Initiate lists for storing all predictions and performance metrics.
+  list_base_xgb_eval <- list()
+  list_base_xgb_pred <- list()
+  # ----------------------------------------------------------------------------
+  # Report the model-fitting configuration.
+  message(
+    "Fitting ",
+    length(rset),
+    " XGBoost model(s) with ",
+    config$int_nworkers,
+    " workers, ",
+    config$int_nthreads,
+    " threads and ",
+    config$int_nround,
+    " boosting rounds..."
+  )
+  # ----------------------------------------------------------------------------
+  # Create output directory if does not exist.
+  dir.create(dirname(output), recursive = TRUE, showWarnings = FALSE)
+  # ----------------------------------------------------------------------------
+  # Extract file names in output before parquet file writing.
+  chr_output1 <- list.files(
+    output,
+    recursive = TRUE,
+    full.names = TRUE,
+    pattern = "\\.parquet$"
+  )
+  # ----------------------------------------------------------------------------
+  # Site information for model/fold-specific messages.
+  get_sites <- function(x) {
+    x |>
+      dplyr::filter(!is.na(site_id)) |>
+      dplyr::distinct(site_id) |>
+      dplyr::collect() |>
+      dplyr::pull(site_id)
+  }
+  chr_allsites <- get_sites(tbl_feat_merge_assemble)
+  int_allsites <- length(chr_allsites)
+  stopifnot(int_allsites > 0L)
+  report_sites <- function(label, ids) {
+    n <- length(ids)
+    message(sprintf(
+      "  %-24s %4d / %4d sites (%5.1f%%)",
+      label,
+      n,
+      int_allsites,
+      100 * n / int_allsites
     ))
   }
+  # ----------------------------------------------------------------------------
+  for (r in seq_along(rset)) {
+    folds <- rset[[r]]
+    # --------------------------------------------------------------------------
+    # Initiate lists for storing fold predictions and performance metrics.
+    list_base_xgb_eval[[r]] <- list()
+    list_base_xgb_fold <- list()
+    for (f in seq_along(folds)) {
+      # ------------------------------------------------------------------------
+      # Manual split into train and test sets based on spatial cv indices.
+      chr_training <- folds[[f]]$analysis
+      chr_test <- folds[[f]]$assessment
+      list_feat_merge_splits <- list(
+        training = tbl_feat_merge_assemble |>
+          dplyr::filter(.data$site_id %in% !!chr_training),
+        test = tbl_feat_merge_assemble |>
+          dplyr::filter(.data$site_id %in% !!chr_test)
+      )
+      tbl_feat_merge_train <- sparklyr::sdf_persist(
+        list_feat_merge_splits$training,
+        storage.level = "MEMORY_AND_DISK",
+        name = "beethoven_xgb_training"
+      )
+      tbl_feat_merge_test <- sparklyr::sdf_persist(
+        list_feat_merge_splits$test,
+        storage.level = "MEMORY_AND_DISK",
+        name = "beethoven_xgb_test"
+      )
+      # ------------------------------------------------------------------------
+      # Count sites actually present in the Spark splits.
+      # Message sites used in each Spark split.
+      chr_trainsites <- get_sites(tbl_feat_merge_train)
+      chr_testsites <- get_sites(tbl_feat_merge_test)
+      chr_included <- union(chr_trainsites, chr_testsites)
+      chr_excluded <- setdiff(chr_allsites, chr_included)
+      chr_overlap <- intersect(chr_trainsites, chr_testsites)
+      stopifnot(length(chr_overlap) == 0L)
+      message(sprintf("\nModel (%s) %03d; Fold %02d:", stage, r, f))
+      report_sites("Training", chr_trainsites)
+      report_sites("Testing", chr_testsites)
+      report_sites("Included", chr_included)
+      report_sites("Excluded", chr_excluded)
+      # ------------------------------------------------------------------------
+      # Fit XGBoost model on Spark cluster.
+      time_base_xgb_model <- system.time({
+        sprk_base_xgb_model <- sparklyr::invoke(
+          sprk_estimator,
+          "fit",
+          sparklyr::spark_dataframe(tbl_feat_merge_train)
+        )
+      })
+      # ------------------------------------------------------------------------
+      # Predict model on withheld test data.
+      sprk_base_xgb_test <- sparklyr::invoke(
+        sprk_base_xgb_model,
+        "transform",
+        sparklyr::spark_dataframe(tbl_feat_merge_test)
+      )
+      sprk_base_xgb_pred <- sparklyr::sdf_register(
+        sprk_base_xgb_test,
+        name = sprintf("beethoven_xgb_preds_%03d_%02d", r, f)
+      ) |>
+        dplyr::select(tidyselect::all_of(
+          c("site_id", "time", "lon", "lat", "label", "prediction")
+        )) |>
+        sparklyr::sdf_persist(
+          storage.level = "MEMORY_AND_DISK",
+          name = sprintf("beethoven_xgb_predcache_%03d_%02d", r, f)
+        )
+      # ------------------------------------------------------------------------
+      # Materialize predictions before evaluating or releasing the fold data.
+      sparklyr::invoke(
+        sparklyr::spark_dataframe(sprk_base_xgb_pred),
+        "count"
+      )
+      # ------------------------------------------------------------------------
+      # Evaluate model performance on test data.
+      dt_base_xgb_eval <- evaluate(
+        sc,
+        pred = sprk_base_xgb_pred,
+        r = sprintf("%03d", r),
+        f = sprintf("%02d", f)
+      )
+      # ------------------------------------------------------------------------
+      # Retain model evaluation statistics.
+      list_base_xgb_eval[[r]][[f]] <- data.frame(
+        dt_base_xgb_eval,
+        time = unname(time_base_xgb_model[["elapsed"]])
+      )
+      # ------------------------------------------------------------------------
+      # Filter to model predictions and original identification values.
+      tbl_base_xgb_pred <- sprk_base_xgb_pred |>
+        dplyr::select(tidyselect::all_of(
+          c("site_id", "time", "lon", "lat", "label", "prediction")
+        )) |>
+        dplyr::rename(
+          !!yvar := tidyselect::all_of("label"),
+          !!sprintf("%s_%03d", stage, r) := tidyselect::all_of("prediction")
+        )
+      # ------------------------------------------------------------------------
+      # Retain this fold's cached predictions for combination after fitting.
+      list_base_xgb_fold[[f]] <- tbl_base_xgb_pred
+      # ------------------------------------------------------------------------
+      # Drop training and testing data from Spark.
+      unpersist(list(tbl_feat_merge_train, tbl_feat_merge_test))
+    }
+    # --------------------------------------------------------------------------
+    # Row-bind the folds within this resampling set in Spark.
+    list_base_xgb_pred[[r]] <- sparklyr::sdf_bind_rows(list_base_xgb_fold)
+  }
+  message("All models fit; combining predictions.")
+  # ----------------------------------------------------------------------------
+  # Join resampling sets by observation and retain metadata from the first set.
+  tbl_base_xgb_pred <- Reduce(
+    f = function(pred, r) {
+      dplyr::left_join(
+        pred,
+        list_base_xgb_pred[[r]] |>
+          dplyr::select(tidyselect::all_of(
+            c("site_id", "time", sprintf("%s_%03d", stage, r))
+          )),
+        by = c("site_id", "time")
+      )
+    },
+    x = seq_along(list_base_xgb_pred)[-1L],
+    init = list_base_xgb_pred[[1L]]
+  )
+  # ----------------------------------------------------------------------------
+  # Write the complete prediction table as one Parquet dataset.
+  sparklyr::spark_write_parquet(
+    tbl_base_xgb_pred,
+    path = output,
+    mode = "overwrite"
+  )
+  # ----------------------------------------------------------------------------
+  # Extract file names in output after parquet file writing, and limit to only
+  # the new .parquet files.
+  chr_output2 <- list.files(
+    output,
+    recursive = TRUE,
+    full.names = TRUE,
+    pattern = "\\.parquet$"
+  )
+  # ----------------------------------------------------------------------------
+  # Return only the newly written .parquet file path(s) and evaluation.
+  return(list(
+    pred = setdiff(chr_output2, chr_output1),
+    eval = data.frame(dplyr::bind_rows(list_base_xgb_eval))
+  ))
+}
 
 ################################################################################
 #' Evaluate Spark regression predictions
@@ -645,7 +681,6 @@ evaluate <- function(
     var = "explainedVariance"
   )
   stopifnot(all(metric %in% names(methods)))
-
   # --------------------------------------------------------------------------
   # Evaluate predictions for each of the included metrics.
   evaluator <- sparklyr::invoke_new(
@@ -659,7 +694,6 @@ evaluate <- function(
     "getMetrics",
     sparklyr::spark_dataframe(pred)
   )
-
   # --------------------------------------------------------------------------
   # Collect evaluation metrics and drop row names.
   eval <- data.frame(
@@ -673,7 +707,6 @@ evaluate <- function(
     )
   )
   rownames(eval) <- NULL
-
   # --------------------------------------------------------------------------
   eval
 }
