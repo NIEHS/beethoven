@@ -9,7 +9,7 @@ library(amadeusdb)
 # Import configured variables and inputs.
 chr_config_dir <- snakemake@params[["chr_config_dir"]]
 chr_init_dates <- qs2::qs_read(snakemake@input[["chr_init_dates"]])
-sf_feat_aqs_sp <- qs2::qs_read(snakemake@input[["sf_feat_aqs_sp"]])
+sf_train_sites_sp <- qs2::qs_read(snakemake@input[["sf_train_sites_sp"]])
 
 ################################################################################
 # Set path to previously downloaded GEOS data.
@@ -90,7 +90,7 @@ list_iter_geos <- split(df_iter_geos, seq_len(nrow(df_iter_geos)))
 
 ################################################################################
 # Extract GEOS values at AQS locations, stored as variable-time .parquet.
-list_feat_geos_sptmpl <- lapply(
+list_train_feat_geos_sptmpl <- lapply(
   list_iter_geos[1:10],
   function(x) {
     amadeusdb::sedona_geos(
@@ -101,24 +101,27 @@ list_feat_geos_sptmpl <- lapply(
         x$asset,
         "/"
       ),
-      output = "output/feat/geos/",
+      output = "output/train/feat/geos/",
       variable = x$variable,
-      locs = sf_feat_aqs_sp,
+      locs = sf_train_sites_sp,
       locs_id = "site_id",
       batch = 240L,
       radius = 0L
     )
   }
 )
-names(list_feat_geos_sptmpl) <- df_iter_geos$variable[1:10]
+names(list_train_feat_geos_sptmpl) <- df_iter_geos$variable[1:10]
 
 ################################################################################
 # Merge disparate variable-time .parquet files into  joined GEOS database.
-db_feat_geos_sptmpl <- amadeusdb::join_variables(
-  input = list_feat_geos_sptmpl,
-  output = "output/feat/geos/join",
+db_train_feat_geos_sptmpl <- amadeusdb::join_variables(
+  input = list_train_feat_geos_sptmpl,
+  output = "output/train/feat/geos/join",
   by = c("site_id", "time", "level")
 )
 
 ################################################################################
-qs2::qs_save(db_feat_geos_sptmpl, snakemake@output[["db_feat_geos_sptmpl"]])
+qs2::qs_save(
+  db_train_feat_geos_sptmpl,
+  snakemake@output[["db_train_feat_geos_sptmpl"]]
+)

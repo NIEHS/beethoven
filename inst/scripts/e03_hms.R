@@ -9,7 +9,7 @@ library(amadeusdb)
 # Import configured variables and inputs.
 chr_config_dir <- snakemake@params[["chr_config_dir"]]
 chr_init_dates <- qs2::qs_read(snakemake@input[["chr_init_dates"]])
-sf_pred_grid_sp <- qs2::qs_read(snakemake@input[["sf_pred_grid_sp"]])
+sf_grid_sites_sp <- qs2::qs_read(snakemake@input[["sf_grid_sites_sp"]])
 
 ################################################################################
 # Dynamic load of GDAL library to be used by SedonaDB.
@@ -20,15 +20,18 @@ dyn.load(
 )
 
 ################################################################################
-db_pred_hms_sptmpl <- amadeusdb::sedona_hms(
+db_grid_feat_hms_sptmpl <- amadeusdb::sedona_hms(
   date = as.character(beethoven::fl_dates(chr_init_dates)),
   input = file.path(chr_config_dir, "hms", "data_files"),
-  output = "output/grid/hms/",
-  locs = sf_pred_grid_sp,
+  output = "output/grid/feat/hms/",
+  locs = sf_grid_sites_sp,
   locs_id = "site_id",
   radius = 0,
   batch = 50L
 )
 
 ################################################################################
-qs2::qs_save(db_pred_hms_sptmpl, snakemake@output[["db_pred_hms_sptmpl"]])
+qs2::qs_save(
+  db_grid_feat_hms_sptmpl,
+  snakemake@output[["db_grid_feat_hms_sptmpl"]]
+)

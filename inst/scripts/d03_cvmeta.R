@@ -10,20 +10,20 @@ library(beethoven)
 list_base_params_static <- qs2::qs_read(snakemake@input[[
   "list_base_params_static"
 ]])
-sf_feat_aqs_sp <- qs2::qs_read(snakemake@input[["sf_feat_aqs_sp"]])
+sf_train_sites_sp <- qs2::qs_read(snakemake@input[["sf_train_sites_sp"]])
 int_meta_iter <- snakemake@params[["int_meta_iter"]]
 
 ################################################################################
 # Project AQS site locations to meter-based coordinate reference system.
-sf_feat_aqs_5070 <- sf::st_transform(
-  sf_feat_aqs_sp,
+sf_train_sites_5070_sp <- sf::st_transform(
+  sf_train_sites_sp,
   crs = list_base_params_static$crs
 )
 
 ################################################################################
 # Generate spatial v-fold rset objects with pre-defined cell sizes and buffers.
-rset_meta_aqs_sp <- spatialsample::spatial_block_cv(
-  sf_feat_aqs_5070,
+rset_meta_cv_sp <- spatialsample::spatial_block_cv(
+  sf_train_sites_5070_sp,
   v = list_base_params_static$v,
   repeats = int_meta_iter,
   cellsize = list_base_params_static$cellsize,
@@ -35,17 +35,17 @@ rset_meta_aqs_sp <- spatialsample::spatial_block_cv(
 ################################################################################
 # Extract site_id per repeat and fold for pass to Spark in model train/test/fit.
 list_meta_cv_idx <- lapply(
-  split(seq_len(nrow(rset_meta_aqs_sp)), rset_meta_aqs_sp$id),
+  split(seq_len(nrow(rset_meta_cv_sp)), rset_meta_cv_sp$id),
   function(i) {
     stats::setNames(
       lapply(i, function(j) {
-        split_j <- rset_meta_aqs_sp$splits[[j]]
+        split_j <- rset_meta_cv_sp$splits[[j]]
         list(
           analysis = rsample::analysis(split_j)$site_id,
           assessment = rsample::assessment(split_j)$site_id
         )
       }),
-      rset_meta_aqs_sp$id2[i]
+      rset_meta_cv_sp$id2[i]
     )
   }
 )

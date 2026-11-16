@@ -212,10 +212,10 @@ spark_environment <- function(
 #'   `rset_NNN_fold_NN.ubj`. It is created if needed and must be accessible to
 #'   the Spark driver and later prediction jobs. Keep it separate from `pred`
 #'   so overwriting prediction data does not remove saved models.
-#' @param rset Nested list of resampling repeats and folds. Each `rset[[r]][[f]]` must
-#'   contain `analysis` and `assessment` vectors of `site_id` values used for
-#'   training and testing, respectively. These are site identifiers, not row
-#'   positions or `rsample` split objects.
+#' @param rset Nested list of resampling repeats and folds. Each
+#'   `rset[[r]][[f]]` must contain `analysis` and `assessment` vectors of
+#'   `site_id` values used for training and testing, respectively. These are
+#'   site identifiers, not row positions or `rsample` split objects.
 #' @param xvar Character vector of predictor names. Must be identical, including
 #'   order, to the numeric columns in the Spark schema after excluding `yvar`
 #'   and `dvar`.
@@ -248,7 +248,8 @@ spark_environment <- function(
 #'
 #' The returned model metadata retains the predictor order and maps each
 #' repeat and fold to its saved booster path and prediction-column name. Pass
-#' this complete `model` list to [predict_xgb_spark()] for subsequent prediction.
+#' this complete `model` list to [predict_xgb_spark()] for subsequent
+#' prediction.
 #'
 #' @return A list with:
 #' * `pred`: character vector of `.parquet` paths beneath `pred` that were not
@@ -258,9 +259,11 @@ spark_environment <- function(
 #'   time in seconds repeated for each metric within a fold.
 #' * `model`: list containing `index`, a data frame with integer `rset` and
 #'   `fold`, character `prediction`, and absolute native-booster `path` columns;
-#'   `xvar`, the ordered predictor names; `yvar`, the response name; and `stage`,
-#'   the prediction prefix. The caller can save this list for later reuse.
-#' @seealso [spark_environment()], [assemble_xgb_features()], [predict_xgb_spark()]
+#'   `xvar`, the ordered predictor names; `yvar`, the response name; and
+#'   `stage`, the prediction prefix. The caller can save this list for later
+#'    reuse.
+#' @seealso [spark_environment()], [assemble_xgb_features()],
+#' [predict_xgb_spark()]
 #' @importFrom rlang .data
 #' @keywords Baselearner
 #' @export
@@ -1021,7 +1024,7 @@ predict_xgb_spark <- function(
       )
     sparklyr::invoke(sparklyr::spark_dataframe(list_grid_pred[[r]]), "count")
   }
-  messages("Predictions completed; writing .parquet file(s)...")
+  message("Predictions completed; writing .parquet file(s)...")
   # ----------------------------------------------------------------------------
   # Join repeat-specific columns by identifiers rather than Spark row order.
   tbl_grid_pred <- Reduce(

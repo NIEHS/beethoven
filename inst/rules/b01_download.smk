@@ -2,10 +2,10 @@
 ##############################            AQS             ##############################
 rule download_aqs:
     input:
-        int_init_years="output/int_init_years.qs"
+        int_init_years="output/init/int_init_years.qs"
 
     output:
-        list_dl_aqs="output/list_dl_aqs.qs"
+        list_dl_aqs="output/download/list_dl_aqs.qs"
 
     params:
         chr_config_dir=os.path.join(
@@ -22,10 +22,10 @@ rule download_aqs:
 ##############################            HMS             ##############################
 rule download_hms:
     input:
-        chr_init_dates="output/chr_init_dates.qs"
+        chr_init_dates="output/init/chr_init_dates.qs"
 
     output:
-        list_dl_hms="output/list_dl_hms.qs"
+        list_dl_hms="output/download/list_dl_hms.qs"
 
     params:
         chr_config_dir=os.path.join(

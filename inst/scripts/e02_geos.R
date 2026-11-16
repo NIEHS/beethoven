@@ -9,7 +9,7 @@ library(amadeusdb)
 # Import configured variables and inputs.
 chr_config_dir <- snakemake@params[["chr_config_dir"]]
 chr_init_dates <- qs2::qs_read(snakemake@input[["chr_init_dates"]])
-sf_pred_grid_sp <- qs2::qs_read(snakemake@input[["sf_pred_grid_sp"]])
+sf_grid_sites_sp <- qs2::qs_read(snakemake@input[["sf_grid_sites_sp"]])
 
 ################################################################################
 # Set path to previously downloaded GEOS data.
@@ -90,7 +90,7 @@ list_iter_geos <- split(df_iter_geos, seq_len(nrow(df_iter_geos)))
 
 ################################################################################
 # Extract GEOS values at AQS locations, stored as variable-time .parquet.
-list_pred_geos_sptmpl <- lapply(
+list_grid_feat_geos_sptmpl <- lapply(
   list_iter_geos[1:10],
   function(x) {
     amadeusdb::sedona_geos(
@@ -101,24 +101,27 @@ list_pred_geos_sptmpl <- lapply(
         x$asset,
         "/"
       ),
-      output = "output/grid/geos/",
+      output = "output/grid/feat/geos/",
       variable = x$variable,
-      locs = sf_pred_grid_sp,
+      locs = sf_grid_sites_sp,
       locs_id = "site_id",
       batch = 240L,
       radius = 0L
     )
   }
 )
-names(list_pred_geos_sptmpl) <- df_iter_geos$variable[1:10]
+names(list_grid_feat_geos_sptmpl) <- df_iter_geos$variable[1:10]
 
 ################################################################################
 # Merge disparate variable-time .parquet files into joined GEOS database.
-db_pred_geos_sptmpl <- amadeusdb::join_variables(
-  input = list_pred_geos_sptmpl,
-  output = "output/grid/geos/join",
+db_grid_feat_geos_sptmpl <- amadeusdb::join_variables(
+  input = list_grid_feat_geos_sptmpl,
+  output = "output/grid/feat/geos/join",
   by = c("site_id", "time", "level")
 )
 
 ################################################################################
-qs2::qs_save(db_pred_geos_sptmpl, snakemake@output[["db_pred_geos_sptmpl"]])
+qs2::qs_save(
+  db_grid_feat_geos_sptmpl,
+  snakemake@output[["db_grid_feat_geos_sptmpl"]]
+)

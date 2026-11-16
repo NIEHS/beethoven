@@ -9,7 +9,7 @@ library(h3jsr)
 # Import configured variables and inputs.
 int_grid_res <- snakemake@params[["int_grid_res"]]
 chr_init_dates <- qs2::qs_read(snakemake@input[["chr_init_dates"]])
-db_feat_merge_sptmpl <- qs2::qs_read(snakemake@input[["db_feat_merge_sptmpl"]])
+db_train_feat_sptmpl <- qs2::qs_read(snakemake@input[["db_train_feat_sptmpl"]])
 
 ################################################################################
 # Import fixture boundary.
@@ -29,60 +29,60 @@ sf_geometry <- sf::st_sf(
 
 ################################################################################
 # Generate H3 grid from unioned boundary.
-chr_gridid <- unique(
+chr_grid_sites_id <- unique(
   unlist(
     h3jsr::polygon_to_cells(sf_geometry, res = int_grid_res),
     use.names = FALSE
   )
 )
-chr_gridid <- chr_gridid[!is.na(chr_gridid)]
+chr_grid_sites_id <- chr_grid_sites_id[!is.na(chr_grid_sites_id)]
 
 ################################################################################
 # Convert H3 grid to `sf` polygons.
-sf_pred_grid_sp <- sf::st_sf(
-  site_id = chr_gridid,
-  geometry = h3jsr::cell_to_polygon(chr_gridid)
+sf_grid_sites_sp <- sf::st_sf(
+  site_id = chr_grid_sites_id,
+  geometry = h3jsr::cell_to_polygon(chr_grid_sites_id)
 )
 
 ################################################################################
 # Sites with latitude and longitude.
-df_pred_grid_sp <- sf::st_drop_geometry(sf_pred_grid_sp)
-df_pred_xy_sp <- sf::st_coordinates(
-  h3jsr::cell_to_point(df_pred_grid_sp$site_id)
+df_grid_sites_sp <- sf::st_drop_geometry(sf_grid_sites_sp)
+mat_grid_sites_xy_sp <- sf::st_coordinates(
+  h3jsr::cell_to_point(df_grid_sites_sp$site_id)
 )
-df_pred_grid_sp$lon <- df_pred_xy_sp[, "X"]
-df_pred_grid_sp$lat <- df_pred_xy_sp[, "Y"]
-dt_pred_grid_sp <- data.table::data.table(df_pred_grid_sp)
+df_grid_sites_sp$lon <- mat_grid_sites_xy_sp[, "X"]
+df_grid_sites_sp$lat <- mat_grid_sites_xy_sp[, "Y"]
+dt_grid_sites_sp <- data.table::data.table(df_grid_sites_sp)
 
 ################################################################################
 # Expand all dates and hours (temporal).
-df_pred_grid_tmpl <- expand.grid(
+df_grid_index_tmpl <- expand.grid(
   date = chr_init_dates,
   hour = amadeus:::sequence_times(colon = TRUE)
 )
-chr_pred_grid_tmpl <- sprintf(
+chr_grid_index_tmpl <- sprintf(
   "%s %s:00",
-  df_pred_grid_tmpl$date,
-  df_pred_grid_tmpl$hour
+  df_grid_index_tmpl$date,
+  df_grid_index_tmpl$hour
 )
 
 ################################################################################
 # Expand all sites and times (spatiotemporal).
-dt_pred_grid_sptmpl <- data.table::data.table(
+dt_grid_index_keys_sptmpl <- data.table::data.table(
   expand.grid(
-    site_id = dt_pred_grid_sp$site_id,
-    time = as.POSIXct(chr_pred_grid_tmpl, tz = "UTC")
+    site_id = dt_grid_sites_sp$site_id,
+    time = as.POSIXct(chr_grid_index_tmpl, tz = "UTC")
   )
 )
-dt_pred_grid_sptmpl2 <- data.table::merge.data.table(
-  dt_pred_grid_sptmpl,
-  dt_pred_grid_sp,
+dt_grid_index_sptmpl <- data.table::merge.data.table(
+  dt_grid_index_keys_sptmpl,
+  dt_grid_sites_sp,
   by = "site_id"
 )[, c("site_id", "lon", "lat", "time")]
 
 ################################################################################
-qs2::qs_save(sf_pred_grid_sp, snakemake@output[["sf_pred_grid_sp"]])
+qs2::qs_save(sf_grid_sites_sp, snakemake@output[["sf_grid_sites_sp"]])
 arrow::write_parquet(
-  dt_pred_grid_sptmpl2,
-  snakemake@output[["db_pred_grid_sptmpl"]]
+  dt_grid_index_sptmpl,
+  snakemake@output[["db_grid_index_sptmpl"]]
 )

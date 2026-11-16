@@ -23,7 +23,7 @@ list_dl_collect <- list(
 # Import unique AQS monitoring locations across defined time period.
 # !!! Does not import the monitored data values - location unique !!!
 # !!! identifiers and latitude/longitude coordinates only.        !!!
-sf_feat_aqs_sp <- amadeus::process_aqs(
+sf_train_sites_sp <- amadeus::process_aqs(
   path = file.path(chr_config_dir, "aqs", "data_files"),
   date = beethoven::fl_dates(chr_init_dates),
   mode = "location",
@@ -36,7 +36,7 @@ sf_feat_aqs_sp <- amadeus::process_aqs(
 ################################################################################
 # Import spatiotemporal AQS monitoring locations with monitored data values
 # across defined time period.
-dt_feat_aqs_sptmpl <- amadeus::process_aqs(
+dt_train_obs_aqs_sptmpl <- amadeus::process_aqs(
   path = file.path(chr_config_dir, "aqs", "data_files"),
   date = beethoven::fl_dates(chr_init_dates),
   mode = "available-data",
@@ -45,7 +45,7 @@ dt_feat_aqs_sptmpl <- amadeus::process_aqs(
   return_format = "data.table",
   tz = "gmt"
 )
-dt_feat_aqs_sptmpl[,
+dt_train_obs_aqs_sptmpl[,
   time := as.POSIXct(
     time,
     format = "%Y-%m-%d %H:%M",
@@ -54,8 +54,8 @@ dt_feat_aqs_sptmpl[,
 ]
 
 ################################################################################
-qs2::qs_save(sf_feat_aqs_sp, snakemake@output[["sf_feat_aqs_sp"]])
+qs2::qs_save(sf_train_sites_sp, snakemake@output[["sf_train_sites_sp"]])
 arrow::write_parquet(
-  data.table::data.table(dt_feat_aqs_sptmpl),
-  snakemake@output[["db_feat_aqs_sptmpl"]]
+  data.table::data.table(dt_train_obs_aqs_sptmpl),
+  snakemake@output[["db_train_obs_aqs_sptmpl"]]
 )

@@ -9,7 +9,7 @@ source("R/spark.R")
 ################################################################################
 # Import configured variables and inputs.
 list_base_xgb_model <- qs2::qs_read(snakemake@input[["list_base_xgb_model"]])
-db_pred_merge_sptmpl <- qs2::qs_read(snakemake@input[["db_pred_merge_sptmpl"]])
+db_grid_feat_sptmpl <- qs2::qs_read(snakemake@input[["db_grid_feat_sptmpl"]])
 
 ################################################################################
 # Set Spark cluster environmental variables.
@@ -23,15 +23,18 @@ chr_spark_home <- readLines("input/.hidden/chr_spark_home.txt")
 
 ################################################################################
 # Predict at H3 sites.
-db_pred_base_sptmpl <- predict_xgb_spark(
+db_grid_pred_base_mean_sptmpl <- predict_xgb_spark(
   master = chr_spark_master,
   home = chr_spark_home,
   workspace = file.path(getwd(), "spark-warehouse"),
   database = "duckdb",
-  input = db_pred_merge_sptmpl,
+  input = db_grid_feat_sptmpl,
   models = list_base_xgb_model,
-  pred = "output/pred/base/"
+  pred = "output/grid/pred/base/mean/data/"
 )
 
 ################################################################################
-qs2::qs_save(db_pred_base_sptmpl, snakemake@output[["db_pred_base_sptmpl"]])
+qs2::qs_save(
+  db_grid_pred_base_mean_sptmpl,
+  snakemake@output[["db_grid_pred_base_mean_sptmpl"]]
+)

@@ -8,39 +8,43 @@ library(sedonadb)
 
 ################################################################################
 # Import configured variables and inputs.
-db_feat_merge_sptmpl <- qs2::qs_read(snakemake@input[[
-  "db_feat_merge_sptmpl"
+db_train_feat_sptmpl <- qs2::qs_read(snakemake@input[[
+  "db_train_feat_sptmpl"
 ]])
-sf_feat_aqs_sp <- qs2::qs_read(snakemake@input[["sf_feat_aqs_sp"]])
+sf_train_sites_sp <- qs2::qs_read(snakemake@input[["sf_train_sites_sp"]])
 int_base_iter <- snakemake@params[["int_base_iter"]]
 
 ################################################################################
-# Extract column names from db_feat_merge_sptmpl without full read in.
-db_feat_merge_feat <- sedonadb::sd_read_parquet(db_feat_merge_sptmpl)
-sedonadb::sd_to_view(db_feat_merge_feat, "db_feat_merge_feat", overwrite = TRUE)
-chr_feat_merge_names <- sedonadb::sd_sql(
-  "SELECT * FROM db_feat_merge_feat LIMIT 0"
+# Extract column names from db_train_feat_sptmpl without full read in.
+tbl_train_feat_sptmpl <- sedonadb::sd_read_parquet(db_train_feat_sptmpl)
+sedonadb::sd_to_view(
+  tbl_train_feat_sptmpl,
+  "tbl_train_feat_sptmpl",
+  overwrite = TRUE
+)
+chr_train_feat_names <- sedonadb::sd_sql(
+  "SELECT * FROM tbl_train_feat_sptmpl LIMIT 0"
 ) |>
   sedonadb::sd_collect() |>
   names()
 
 ################################################################################
 # Define dependent variable.
-chr_feat_yvar <- "Sample_Measurement"
+chr_train_yvar <- "Sample_Measurement"
 
 ################################################################################
 # Define drop/identification variables.
-chr_feat_dvar <- c("site_id", "time")
+chr_train_dvar <- c("site_id", "time")
 
 ################################################################################
 # Define common parameters across all base learner models.
 list_base_params_static <- list(
-  yvar = chr_feat_yvar,
+  yvar = chr_train_yvar,
   xvar = setdiff(
-    chr_feat_merge_names,
-    c(chr_feat_dvar, chr_feat_yvar, "level")
+    chr_train_feat_names,
+    c(chr_train_dvar, chr_train_yvar, "level")
   ),
-  dvar = chr_feat_dvar,
+  dvar = chr_train_dvar,
   normalize = TRUE,
   nmodels = int_base_iter,
   metric = "mae",
@@ -52,15 +56,15 @@ list_base_params_static <- list(
 
 ################################################################################
 # Project AQS site locations to meter-based coordinate reference system.
-sf_feat_aqs_5070 <- sf::st_transform(
-  sf_feat_aqs_sp,
+sf_train_sites_5070_sp <- sf::st_transform(
+  sf_train_sites_sp,
   crs = list_base_params_static$crs
 )
 
 ################################################################################
 # Generate spatial v-fold rset objects with pre-defined cell sizes and buffers.
-rset_base_aqs_sp <- spatialsample::spatial_block_cv(
-  sf_feat_aqs_5070,
+rset_base_cv_sp <- spatialsample::spatial_block_cv(
+  sf_train_sites_5070_sp,
   v = list_base_params_static$v,
   repeats = list_base_params_static$nmodels,
   cellsize = list_base_params_static$cellsize,
@@ -72,17 +76,17 @@ rset_base_aqs_sp <- spatialsample::spatial_block_cv(
 ################################################################################
 # Extract site_id per repeat and fold for pass to Spark in model train/test/fit.
 list_base_cv_idx <- lapply(
-  split(seq_len(nrow(rset_base_aqs_sp)), rset_base_aqs_sp$id),
+  split(seq_len(nrow(rset_base_cv_sp)), rset_base_cv_sp$id),
   function(i) {
     stats::setNames(
       lapply(i, function(j) {
-        split_j <- rset_base_aqs_sp$splits[[j]]
+        split_j <- rset_base_cv_sp$splits[[j]]
         list(
           analysis = rsample::analysis(split_j)$site_id,
           assessment = rsample::assessment(split_j)$site_id
         )
       }),
-      rset_base_aqs_sp$id2[i]
+      rset_base_cv_sp$id2[i]
     )
   }
 )

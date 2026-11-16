@@ -1,13 +1,13 @@
 ########################################################################################
 ##############################            GRID            ##############################
-rule prediction_grid:
+rule prepare_grid_sites:
     input:
-        chr_init_dates="output/chr_init_dates.qs",
-        db_feat_merge_sptmpl="output/feat/db_feat_merge_sptmpl.qs"
+        chr_init_dates="output/init/chr_init_dates.qs",
+        db_train_feat_sptmpl="output/train/feat/db_train_feat_sptmpl.qs"
 
     output:
-        sf_pred_grid_sp="output/grid/sf_pred_grid_sp.qs",
-        db_pred_grid_sptmpl="output/grid/db_pred_grid_sptmpl.parquet"
+        sf_grid_sites_sp="output/grid/sites/sf_grid_sites_sp.qs",
+        db_grid_index_sptmpl="output/grid/index/db_grid_index_sptmpl.parquet"
 
     params:
         int_grid_res=lambda wildcards: config["int_grid_res"]
@@ -20,13 +20,13 @@ rule prediction_grid:
 
 
 ##############################            GEOS            ##############################
-rule prediction_geos:
+rule prepare_grid_feat_geos:
     input:
-        chr_init_dates="output/chr_init_dates.qs",
-        sf_pred_grid_sp="output/grid/sf_pred_grid_sp.qs"
+        chr_init_dates="output/init/chr_init_dates.qs",
+        sf_grid_sites_sp="output/grid/sites/sf_grid_sites_sp.qs"
 
     output:
-        db_pred_geos_sptmpl="output/grid/db_pred_geos_sptmpl.qs"
+        db_grid_feat_geos_sptmpl="output/grid/feat/db_grid_feat_geos_sptmpl.qs"
 
     params:
         chr_config_dir=os.path.join(os.environ["HOME"], config["chr_config_dir"])
@@ -38,13 +38,13 @@ rule prediction_geos:
         "../scripts/e02_geos.R"
 
 ##############################            HMS             ##############################
-rule prediction_hms:
+rule prepare_grid_feat_hms:
     input:
-        chr_init_dates="output/chr_init_dates.qs",
-        sf_pred_grid_sp="output/grid/sf_pred_grid_sp.qs"
+        chr_init_dates="output/init/chr_init_dates.qs",
+        sf_grid_sites_sp="output/grid/sites/sf_grid_sites_sp.qs"
 
     output:
-        db_pred_hms_sptmpl="output/grid/db_pred_hms_sptmpl.qs"
+        db_grid_feat_hms_sptmpl="output/grid/feat/db_grid_feat_hms_sptmpl.qs"
 
     params:
         chr_config_dir=os.path.join(os.environ["HOME"], config["chr_config_dir"])
@@ -56,14 +56,14 @@ rule prediction_hms:
         "../scripts/e03_hms.R"
 
 ##############################           MERGE            ##############################
-rule prediction_merge:
+rule prepare_grid_feat:
     input:
-        db_pred_grid_sptmpl="output/grid/db_pred_grid_sptmpl.parquet",
-        db_pred_geos_sptmpl="output/grid/db_pred_geos_sptmpl.qs",
-        db_pred_hms_sptmpl="output/grid/db_pred_hms_sptmpl.qs"
+        db_grid_index_sptmpl="output/grid/index/db_grid_index_sptmpl.parquet",
+        db_grid_feat_geos_sptmpl="output/grid/feat/db_grid_feat_geos_sptmpl.qs",
+        db_grid_feat_hms_sptmpl="output/grid/feat/db_grid_feat_hms_sptmpl.qs"
 
     output:
-        db_pred_merge_sptmpl="output/grid/db_pred_merge_sptmpl.qs"
+        db_grid_feat_sptmpl="output/grid/feat/db_grid_feat_sptmpl.qs"
 
     params:
         chr_config_dir=os.path.join(os.environ["HOME"], config["chr_config_dir"])

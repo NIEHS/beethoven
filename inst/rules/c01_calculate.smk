@@ -1,14 +1,14 @@
 ########################################################################################
 ##############################            AQS             ##############################
-rule calculate_aqs:
+rule prepare_train_obs_aqs:
     input:
-        chr_init_dates="output/chr_init_dates.qs",
-        list_dl_aqs="output/list_dl_aqs.qs",
-        list_dl_hms="output/list_dl_hms.qs"
+        chr_init_dates="output/init/chr_init_dates.qs",
+        list_dl_aqs="output/download/list_dl_aqs.qs",
+        list_dl_hms="output/download/list_dl_hms.qs"
 
     output:
-        sf_feat_aqs_sp="output/sf_feat_aqs_sp.qs",
-        db_feat_aqs_sptmpl="output/feat/db_feat_aqs_sptmpl.parquet"
+        sf_train_sites_sp="output/train/sites/sf_train_sites_sp.qs",
+        db_train_obs_aqs_sptmpl="output/train/obs/db_train_obs_aqs_sptmpl.parquet"
 
     params:
         chr_config_dir=os.path.join(os.environ["HOME"], config["chr_config_dir"])
@@ -20,13 +20,13 @@ rule calculate_aqs:
         "../scripts/c01_aqs.R"
 
 ##############################            GEOS            ##############################
-rule calculate_geos:
+rule prepare_train_feat_geos:
     input:
-        chr_init_dates="output/chr_init_dates.qs",
-        sf_feat_aqs_sp="output/sf_feat_aqs_sp.qs",
+        chr_init_dates="output/init/chr_init_dates.qs",
+        sf_train_sites_sp="output/train/sites/sf_train_sites_sp.qs",
 
     output:
-        db_feat_geos_sptmpl="output/feat/db_feat_geos_sptmpl.qs"
+        db_train_feat_geos_sptmpl="output/train/feat/db_train_feat_geos_sptmpl.qs"
 
     params:
         chr_config_dir=os.path.join(os.environ["HOME"], config["chr_config_dir"])
@@ -38,13 +38,13 @@ rule calculate_geos:
         "../scripts/c02_geos.R"
 
 ##############################            HMS             ##############################
-rule calculate_hms:
+rule prepare_train_feat_hms:
     input:
-        chr_init_dates="output/chr_init_dates.qs",
-        sf_feat_aqs_sp="output/sf_feat_aqs_sp.qs",
+        chr_init_dates="output/init/chr_init_dates.qs",
+        sf_train_sites_sp="output/train/sites/sf_train_sites_sp.qs",
 
     output:
-        db_feat_hms_sptmpl="output/feat/db_feat_hms_sptmpl.qs"
+        db_train_feat_hms_sptmpl="output/train/feat/db_train_feat_hms_sptmpl.qs"
 
     params:
         chr_config_dir=os.path.join(os.environ["HOME"], config["chr_config_dir"])
@@ -56,14 +56,14 @@ rule calculate_hms:
         "../scripts/c03_hms.R"
 
 ##############################           MERGE            ##############################
-rule calculate_merge:
+rule prepare_train_feat:
     input:
-        db_feat_aqs_sptmpl="output/feat/db_feat_aqs_sptmpl.parquet",
-        db_feat_geos_sptmpl="output/feat/db_feat_geos_sptmpl.qs",
-        db_feat_hms_sptmpl="output/feat/db_feat_hms_sptmpl.qs",
+        db_train_obs_aqs_sptmpl="output/train/obs/db_train_obs_aqs_sptmpl.parquet",
+        db_train_feat_geos_sptmpl="output/train/feat/db_train_feat_geos_sptmpl.qs",
+        db_train_feat_hms_sptmpl="output/train/feat/db_train_feat_hms_sptmpl.qs",
 
     output:
-        db_feat_merge_sptmpl="output/feat/db_feat_merge_sptmpl.qs"
+        db_train_feat_sptmpl="output/train/feat/db_train_feat_sptmpl.qs"
 
     params:
         chr_config_dir=os.path.join(os.environ["HOME"], config["chr_config_dir"])

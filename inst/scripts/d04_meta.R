@@ -15,7 +15,9 @@ source("R/spark.R")
 list_base_params_static <- qs2::qs_read(snakemake@input[[
   "list_base_params_static"
 ]])
-db_base_xgb_pred <- qs2::qs_read(snakemake@input[["db_base_xgb_pred"]])
+db_train_pred_base_oof_sptmpl <- qs2::qs_read(snakemake@input[[
+  "db_train_pred_base_oof_sptmpl"
+]])
 list_meta_cv_idx <- qs2::qs_read(snakemake@input[["list_meta_cv_idx"]])
 
 ################################################################################
@@ -30,10 +32,10 @@ Sys.setenv("SPARK_EXECUTOR_MEMORY" = "4g")
 
 ################################################################################
 # Extract base learner column names from parquet file.
-chr_feat_base_xgb <- grep(
+chr_train_pred_base_names <- grep(
   "base_",
   arrow::open_dataset(
-    db_base_xgb_pred,
+    db_train_pred_base_oof_sptmpl,
     format = "parquet",
     unify_schemas = TRUE
   )$schema$names,
@@ -42,25 +44,28 @@ chr_feat_base_xgb <- grep(
 
 ################################################################################
 # Fit XGBoost models in Spark; collect full predictions and performance metrics.
-list_meta_xgb_pred <- fit_xgb_spark(
+list_meta_xgb_fit <- fit_xgb_spark(
   master = chr_spark_master,
   home = chr_spark_home,
   workspace = file.path(getwd(), "spark-warehouse"),
   database = "duckdb",
-  input = db_base_xgb_pred,
-  pred = "output/meta/pred/",
-  model = "output/meta/model/",
+  input = db_train_pred_base_oof_sptmpl,
+  pred = "output/train/pred/meta/oof/data/",
+  model = "output/model/meta/",
   rset = list_meta_cv_idx,
-  xvar = c("lon", "lat", chr_feat_base_xgb),
+  xvar = c("lon", "lat", chr_train_pred_base_names),
   yvar = list_base_params_static$yvar,
   dvar = list_base_params_static$dvar,
   stage = "meta"
 )
 
 ################################################################################
-qs2::qs_save(list_meta_xgb_pred$pred, snakemake@output[["db_meta_xgb_pred"]])
-qs2::qs_save(list_meta_xgb_pred$eval, snakemake@output[["dt_meta_xgb_eval"]])
 qs2::qs_save(
-  list_meta_xgb_pred$model,
+  list_meta_xgb_fit$pred,
+  snakemake@output[["db_train_pred_meta_oof_sptmpl"]]
+)
+qs2::qs_save(list_meta_xgb_fit$eval, snakemake@output[["dt_meta_xgb_eval"]])
+qs2::qs_save(
+  list_meta_xgb_fit$model,
   snakemake@output[["list_meta_xgb_model"]]
 )
