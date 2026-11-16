@@ -9,12 +9,8 @@ library(amadeusdb)
 ################################################################################
 # Import configured variables and inputs.
 db_feat_aqs_sptmpl <- snakemake@input[["db_feat_aqs_sptmpl"]]
-db_feat_geos_sptmpl <- qs2::qs_read(snakemake@input[[
-  "db_feat_geos_sptmpl"
-]])
-db_feat_hms_sptmpl <- qs2::qs_read(snakemake@input[[
-  "db_feat_hms_sptmpl"
-]])
+db_feat_geos_sptmpl <- qs2::qs_read(snakemake@input[["db_feat_geos_sptmpl"]])
+db_feat_hms_sptmpl <- qs2::qs_read(snakemake@input[["db_feat_hms_sptmpl"]])
 
 ################################################################################
 db_feat_merge_sptmpl <- amadeusdb::join_covariates(

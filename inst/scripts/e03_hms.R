@@ -31,7 +31,4 @@ db_pred_hms_sptmpl <- amadeusdb::sedona_hms(
 )
 
 ################################################################################
-qs2::qs_save(
-  data.table::data.table(db_pred_hms_sptmpl),
-  snakemake@output[["db_pred_hms_sptmpl"]]
-)
+qs2::qs_save(db_pred_hms_sptmpl, snakemake@output[["db_pred_hms_sptmpl"]])
