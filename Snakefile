@@ -13,7 +13,7 @@ print(
 # Define pipeline endpoint.
 rule all:
     input:
-        "output/grid/db_pred_merge_sptmpl.qs"
+        "output/pred/db_pred_meta_sptmpl.qs"
 
 ###############################      PIPELINE RULES      ###############################
 include: "inst/rules/a01_initiate.smk"

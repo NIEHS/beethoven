@@ -82,9 +82,9 @@ env_integer <- function(name, default, minimum = 1L) {
 ################################################################################
 #' Read Spark and XGBoost settings from environment variables
 #'
-#' Collects configuration for [fit_xgb_spark()] and checks that worker and
-#' thread counts fit within the available cores. Settings are returned in a
-#' list for explicit use by the caller.
+#' Collects configuration for [fit_xgb_spark()] and [predict_xgb_spark()] and
+#' checks that worker and thread counts fit within the available cores.
+#' Settings are returned in a list for explicit use by the caller.
 #'
 #' @param workspace character(1). Base directory for default warehouse and
 #'   results paths. Defaults to the `HOME` environment variable.
@@ -98,7 +98,8 @@ env_integer <- function(name, default, minimum = 1L) {
 #' * `SPARK_SHUFFLE_PARTITIONS`: shuffle partitions; defaults to 32.
 #' * `XGB_NUM_ROUND`: boosting rounds; defaults to 50.
 #' * `XGB_SEED`: nonnegative random seed; defaults to 20260904.
-#' * `XGB_MAX_ROWS`: nonnegative input row limit; 0 means no limit.
+#' * `XGB_MAX_ROWS`: nonnegative training-row limit; 0 means no limit.
+#'   [predict_xgb_spark()] overrides this setting to process all input rows.
 #' * `XGB_NUM_WORKERS`: workers; defaults to maximum cores divided by cores
 #'   per executor, rounded down, with a minimum of 1.
 #' * `XGB_NTHREAD`: threads per worker; defaults to cores per executor.
@@ -188,8 +189,10 @@ spark_environment <- function(
 #' Fit and evaluate XGBoost regression models on Spark
 #'
 #' Reads Parquet data into Spark, assembles numeric predictors, and fits one
-#' XGBoost regression model per resampling fold. Held-out predictions are
-#' written as Parquet datasets and evaluation metrics are collected in R.
+#' XGBoost regression model per fold of each resampling repeat. Each native
+#' booster is saved as a `.ubj` file. Out-of-fold predictions are combined into
+#' one Parquet dataset, and evaluation metrics and a model index are returned
+#' in R.
 #'
 #' @param master character(1). Spark master URL or local master specification,
 #'   passed to [sparklyr::spark_connect()].
@@ -202,10 +205,14 @@ spark_environment <- function(
 #'   [sparklyr::spark_read_parquet()]. A usable path must be supplied despite
 #'   the `NULL` default. Data must contain `site_id`, `time`, `lon`, `lat`, the
 #'   response, and numeric predictor columns.
-#' @param output character(1). Directory for prediction datasets. It must be
-#'   accessible to Spark and the local R process for returned file discovery.
-#'   Existing datasets with the same resample and fold names cause an error.
-#' @param rset Nested list of resamples and folds. Each `rset[[r]][[f]]` must
+#' @param pred character(1). Directory for the combined out-of-fold prediction
+#'   dataset, written with overwrite mode. It must be accessible to Spark and
+#'   the local R process for returned file discovery.
+#' @param model character(1). Directory for native booster files named
+#'   `rset_NNN_fold_NN.ubj`. It is created if needed and must be accessible to
+#'   the Spark driver and later prediction jobs. Keep it separate from `pred`
+#'   so overwriting prediction data does not remove saved models.
+#' @param rset Nested list of resampling repeats and folds. Each `rset[[r]][[f]]` must
 #'   contain `analysis` and `assessment` vectors of `site_id` values used for
 #'   training and testing, respectively. These are site identifiers, not row
 #'   positions or `rsample` split objects.
@@ -214,9 +221,10 @@ spark_environment <- function(
 #'   and `dvar`.
 #' @param yvar character(1). Response column name, aliased to `label` in Spark.
 #' @param dvar Character vector of columns excluded from predictor discovery,
-#'   typically identifiers, coordinates, and time columns.
+#'   typically site identifiers and time columns.
 #' @param stage character(1). Prefix for prediction columns, which are named
-#'   using `sprintf("%s_%03d", stage, r)` for resample `r`.
+#'   using `sprintf("%s_%03d", stage, r)` for repeat `r`. Use `"base"` or
+#'   `"meta"` to distinguish the two learner stages.
 #' @param ... Reserved for future use. Currently ignored.
 #' @details
 #' Requires the sparklyr and DBI packages, a working Spark installation, and
@@ -228,21 +236,31 @@ spark_environment <- function(
 #'
 #' Models use CPU histogram training with squared-error loss, maximum depth 8,
 #' learning rate 0.1, and row and column sampling fractions of 0.8. Feature
-#' vectors are made dense so zero values remain explicit. No final model is
-#' retained; the Spark connection is disconnected on exit, including on error.
+#' vectors are made dense so zero values remain explicit. Each fold's native
+#' booster is saved immediately after fitting, before held-out prediction.
+#' The Spark connection is disconnected on exit, including on error.
 #'
-#' Predictions are written beneath `output` as
-#' `rset_NNN_fold_NN.parquet` datasets, with identification columns `site_id`,
-#' `time`, `lon`, and `lat`, the original response name, and the prediction
-#' column. Each dataset can contain multiple Parquet part files.
+#' Within each repeat, held-out predictions are row-bound across folds. Repeats
+#' are then left-joined by `site_id` and `time`, retaining identifiers and the
+#' response from the first repeat. The dataset beneath `pred` contains
+#' `site_id`, `time`, `lon`, `lat`, the response under its original name, and
+#' one prediction column per repeat. It can contain multiple Parquet part files.
+#'
+#' The returned model metadata retains the predictor order and maps each
+#' repeat and fold to its saved booster path and prediction-column name. Pass
+#' this complete `model` list to [predict_xgb_spark()] for subsequent prediction.
 #'
 #' @return A list with:
-#' * `pred`: character vector of newly discovered `.parquet` file paths beneath
-#'   `output`.
+#' * `pred`: character vector of `.parquet` paths beneath `pred` that were not
+#'   present before writing. Paths with unchanged names are excluded.
 #' * `eval`: data frame with `rset` and `fold` identifiers, `metric` and `value`
 #'   columns for RMSE, MSE, R-squared, and MAE, and `time`, the elapsed fitting
 #'   time in seconds repeated for each metric within a fold.
-#' @seealso [spark_environment()], [sparklyr::spark_connect()]
+#' * `model`: list containing `index`, a data frame with integer `rset` and
+#'   `fold`, character `prediction`, and absolute native-booster `path` columns;
+#'   `xvar`, the ordered predictor names; `yvar`, the response name; and `stage`,
+#'   the prediction prefix. The caller can save this list for later reuse.
+#' @seealso [spark_environment()], [assemble_xgb_features()], [predict_xgb_spark()]
 #' @importFrom rlang .data
 #' @keywords Baselearner
 #' @export
@@ -252,7 +270,8 @@ fit_xgb_spark <- function(
   workspace,
   database = "duckdb",
   input = NULL,
-  output,
+  pred,
+  model,
   rset,
   xvar,
   yvar,
@@ -337,89 +356,22 @@ fit_xgb_spark <- function(
   # Check derived features identical to manually set `$xvar`.
   stopifnot(identical(chr_feat_merge_xvar, xvar))
   # ----------------------------------------------------------------------------
-  # Replace predictor variable names with generic "feature_" labels.
-  chr_feat_merge_xalias <- sprintf(
-    "feature_%04d",
-    seq_along(chr_feat_merge_xvar)
+  # Prepare xvar and yvar features.
+  tbl_feat_merge_assemble <- assemble_xgb_features(
+    sc = sc,
+    chr_feat_merge_sptmpl = chr_feat_merge_sptmpl,
+    chr_feat_merge_xvar = chr_feat_merge_xvar,
+    yvar = yvar,
+    config = config
   )
   # ----------------------------------------------------------------------------
-  # Define remapping of variable names to "feature_" labels.
-  chr_feat_merge_proj <- paste(
-    vapply(chr_feat_merge_xvar, sql_identifier, character(1)),
-    "AS",
-    vapply(chr_feat_merge_xalias, sql_identifier, character(1))
-  )
-  # ----------------------------------------------------------------------------
-  # Define SQL query for response and predictor variables with alias renaming
-  # from the table read from the input Parquet data.
-  chr_feat_model_sql <- paste(
-    "SELECT",
-    paste(
-      c(
-        vapply(
-          c("site_id", "time", "lon", "lat"),
-          sql_identifier,
-          character(1)
-        ),
-        paste(sql_identifier(yvar), "AS `label`"),
-        chr_feat_merge_proj
-      ),
-      collapse = ", "
-    ),
-    "FROM",
-    chr_feat_merge_sptmpl,
-    if (config$int_maxrows > 0L) paste("LIMIT", config$int_maxrows) else ""
-  )
-  # ----------------------------------------------------------------------------
-  # Query `dt_feat_merge_sptmpl` table for response and predictor variables.
-  db_feat_merge_alias <- sparklyr::sdf_sql(sc, chr_feat_model_sql)
-  # ----------------------------------------------------------------------------
-  # Assemble the Spark feature vector.
-  tbl_feat_merge_ftvec <- db_feat_merge_alias |>
-    sparklyr::ft_vector_assembler(
-      input_cols = chr_feat_merge_xalias,
-      output_col = "features"
-    ) |>
-    dplyr::select(tidyselect::all_of(
-      c("site_id", "time", "lon", "lat", "label", "features")
-    ))
-  # ----------------------------------------------------------------------------
-  # VectorAssembler chooses SparseVector when a row contains many zeros. In
-  # XGBoost, absent sparse entries can instead mean missing values. Round-trip
-  # through an array so Spark returns a DenseVector and zeros are retained.
-  sprk_feat_merge_ftvec <- sparklyr::spark_dataframe(tbl_feat_merge_ftvec)
-  sprk_feat_merge_features <- sparklyr::invoke(
-    sprk_feat_merge_ftvec,
-    "col",
-    "features"
-  )
-  sprk_feat_merge_array <- sparklyr::invoke_static(
-    sc,
-    "org.apache.spark.ml.functions",
-    "vector_to_array",
-    sprk_feat_merge_features,
-    "float64"
-  )
-  sprk_feat_merge_dense <- sparklyr::invoke_static(
-    sc,
-    "org.apache.spark.ml.functions",
-    "array_to_vector",
-    sprk_feat_merge_array
-  )
-  tbl_feat_merge_assemble <- sparklyr::invoke(
-    sprk_feat_merge_ftvec,
-    "withColumn",
-    "features",
-    sprk_feat_merge_dense
-  ) |>
-    sparklyr::sdf_register()
-  tbl_feat_merge_assemble <- sparklyr::sdf_persist(
+  tbl_feat_merge_persist <- sparklyr::sdf_persist(
     tbl_feat_merge_assemble,
     storage.level = "MEMORY_AND_DISK",
     name = "beethoven_xgb_features"
   )
   sparklyr::invoke(
-    sparklyr::spark_dataframe(tbl_feat_merge_assemble),
+    sparklyr::spark_dataframe(tbl_feat_merge_persist),
     "count"
   )
   # ----------------------------------------------------------------------------
@@ -463,16 +415,21 @@ fit_xgb_spark <- function(
     " boosting rounds..."
   )
   # ----------------------------------------------------------------------------
-  # Create output directory if does not exist.
-  dir.create(dirname(output), recursive = TRUE, showWarnings = FALSE)
+  # Create prediction directory if does not exist.
+  dir.create(pred, recursive = TRUE, showWarnings = FALSE)
   # ----------------------------------------------------------------------------
   # Extract file names in output before parquet file writing.
-  chr_output1 <- list.files(
-    output,
+  chr_pred1 <- list.files(
+    pred,
     recursive = TRUE,
     full.names = TRUE,
     pattern = "\\.parquet$"
   )
+  # ----------------------------------------------------------------------------
+  # Create model directory if does not exist.
+  dir.create(model, recursive = TRUE, showWarnings = FALSE)
+  model <- normalizePath(model, mustWork = TRUE)
+  list_base_xgb_model <- list()
   # ----------------------------------------------------------------------------
   # Site information for model/fold-specific messages.
   get_sites <- function(x) {
@@ -482,7 +439,7 @@ fit_xgb_spark <- function(
       dplyr::collect() |>
       dplyr::pull(site_id)
   }
-  chr_allsites <- get_sites(tbl_feat_merge_assemble)
+  chr_allsites <- get_sites(tbl_feat_merge_persist)
   int_allsites <- length(chr_allsites)
   stopifnot(int_allsites > 0L)
   report_sites <- function(label, ids) {
@@ -508,9 +465,9 @@ fit_xgb_spark <- function(
       chr_training <- folds[[f]]$analysis
       chr_test <- folds[[f]]$assessment
       list_feat_merge_splits <- list(
-        training = tbl_feat_merge_assemble |>
+        training = tbl_feat_merge_persist |>
           dplyr::filter(.data$site_id %in% !!chr_training),
-        test = tbl_feat_merge_assemble |>
+        test = tbl_feat_merge_persist |>
           dplyr::filter(.data$site_id %in% !!chr_test)
       )
       tbl_feat_merge_train <- sparklyr::sdf_persist(
@@ -546,6 +503,29 @@ fit_xgb_spark <- function(
           sparklyr::spark_dataframe(tbl_feat_merge_train)
         )
       })
+      # ------------------------------------------------------------------------
+      # Save XGBoost model in `model` output folder.
+      chr_model_path <- file.path(
+        model,
+        sprintf("rset_%03d_fold_%02d.ubj", r, f)
+      )
+      sprk_base_xgb_booster <- sparklyr::invoke(
+        sprk_base_xgb_model,
+        "nativeBooster"
+      )
+      sparklyr::invoke(
+        sprk_base_xgb_booster,
+        "saveModel",
+        chr_model_path
+      )
+      # ------------------------------------------------------------------------
+      # Append model information to list.
+      list_base_xgb_model[[length(list_base_xgb_model) + 1L]] <- data.frame(
+        rset = r,
+        fold = f,
+        prediction = sprintf("%s_%03d", stage, r),
+        path = chr_model_path
+      )
       # ------------------------------------------------------------------------
       # Predict model on withheld test data.
       sprk_base_xgb_test <- sparklyr::invoke(
@@ -626,14 +606,14 @@ fit_xgb_spark <- function(
   # Write the complete prediction table as one Parquet dataset.
   sparklyr::spark_write_parquet(
     tbl_base_xgb_pred,
-    path = output,
+    path = pred,
     mode = "overwrite"
   )
   # ----------------------------------------------------------------------------
   # Extract file names in output after parquet file writing, and limit to only
   # the new .parquet files.
-  chr_output2 <- list.files(
-    output,
+  chr_pred2 <- list.files(
+    pred,
     recursive = TRUE,
     full.names = TRUE,
     pattern = "\\.parquet$"
@@ -641,8 +621,14 @@ fit_xgb_spark <- function(
   # ----------------------------------------------------------------------------
   # Return only the newly written .parquet file path(s) and evaluation.
   return(list(
-    pred = setdiff(chr_output2, chr_output1),
-    eval = data.frame(dplyr::bind_rows(list_base_xgb_eval))
+    pred = setdiff(chr_pred2, chr_pred1),
+    eval = data.frame(dplyr::bind_rows(list_base_xgb_eval)),
+    model = list(
+      index = dplyr::bind_rows(list_base_xgb_model),
+      xvar = chr_feat_merge_xvar,
+      yvar = yvar,
+      stage = stage
+    )
   ))
 }
 
@@ -729,6 +715,325 @@ unpersist <- function(tables) {
     )
   }
   invisible(NULL)
+}
+
+################################################################################
+#' Assemble dense Spark feature vectors for XGBoost
+#'
+#' Projects an existing Spark table, aliases an optional response to `label`,
+#' and assembles the supplied predictors into a dense `features` vector in
+#' their supplied order. Identification columns are retained alongside the
+#' vectors.
+#'
+#' @param sc A Spark connection created by [sparklyr::spark_connect()].
+#' @param chr_feat_merge_sptmpl character(1). Name of a table already registered
+#'   in Spark. It must contain `site_id`, `time`, `lon`, `lat`, any supplied
+#'   response, and the supplied numeric predictor columns.
+#' @param chr_feat_merge_xvar Character vector of numeric predictor names,
+#'   selected by the caller. Their order determines the positions
+#'   in the feature vector and must match the order used to train the model.
+#' @param yvar Optional character(1) response column name, aliased to `label`.
+#'   Use `NULL` when assembling prediction data without a response.
+#' @param config Configuration list, such as that returned by
+#'   [spark_environment()], containing `int_maxrows`. A value of 0 applies no
+#'   row limit; a positive value applies SQL `LIMIT` without an ordering clause.
+#' @details
+#' Predictors are temporarily renamed to `feature_0001`, `feature_0002`, and
+#' so on before vector assembly. Vectors are converted to dense form through
+#' an array so zero values remain explicit when passed to XGBoost.
+#'
+#' @return A registered Spark table with columns `site_id`, `time`, `lon`,
+#'   `lat`, and `features`, plus `label` when `yvar` is supplied. The `features`
+#'   column contains dense vectors with one entry per supplied predictor, in
+#'   the supplied order.
+#' @seealso [fit_xgb_spark()], [predict_xgb_spark()], [spark_environment()]
+#' @keywords internal
+assemble_xgb_features <- function(
+  sc,
+  chr_feat_merge_sptmpl,
+  chr_feat_merge_xvar,
+  yvar = NULL,
+  config
+) {
+  # ----------------------------------------------------------------------------
+  # Replace predictor variable names with generic "feature_" labels.
+  chr_feat_merge_xalias <- sprintf(
+    "feature_%04d",
+    seq_along(chr_feat_merge_xvar)
+  )
+  # ----------------------------------------------------------------------------
+  # Define remapping of variable names to "feature_" labels.
+  chr_feat_merge_proj <- paste(
+    vapply(chr_feat_merge_xvar, sql_identifier, character(1)),
+    "AS",
+    vapply(chr_feat_merge_xalias, sql_identifier, character(1))
+  )
+  # ----------------------------------------------------------------------------
+  # Define SQL query for response and predictor variables with alias renaming
+  # from the table read from the input Parquet data.
+  chr_feat_model_sql <- paste(
+    "SELECT",
+    paste(
+      c(
+        vapply(
+          c("site_id", "time", "lon", "lat"),
+          sql_identifier,
+          character(1)
+        ),
+        if (!is.null(yvar)) paste(sql_identifier(yvar), "AS `label`"),
+        chr_feat_merge_proj
+      ),
+      collapse = ", "
+    ),
+    "FROM",
+    chr_feat_merge_sptmpl,
+    if (config$int_maxrows > 0L) paste("LIMIT", config$int_maxrows) else ""
+  )
+  # ----------------------------------------------------------------------------
+  # Query `dt_feat_merge_sptmpl` table for response and predictor variables.
+  db_feat_merge_alias <- sparklyr::sdf_sql(sc, chr_feat_model_sql)
+  # ----------------------------------------------------------------------------
+  # Assemble the Spark feature vector.
+  tbl_feat_merge_ftvec <- db_feat_merge_alias |>
+    sparklyr::ft_vector_assembler(
+      input_cols = chr_feat_merge_xalias,
+      output_col = "features"
+    ) |>
+    dplyr::select(tidyselect::all_of(
+      c(
+        "site_id",
+        "time",
+        "lon",
+        "lat",
+        if (!is.null(yvar)) "label",
+        "features"
+      )
+    ))
+  # ----------------------------------------------------------------------------
+  # VectorAssembler chooses SparseVector when a row contains many zeros. In
+  # XGBoost, absent sparse entries can instead mean missing values. Round-trip
+  # through an array so Spark returns a DenseVector and zeros are retained.
+  sprk_feat_merge_ftvec <- sparklyr::spark_dataframe(tbl_feat_merge_ftvec)
+  sprk_feat_merge_features <- sparklyr::invoke(
+    sprk_feat_merge_ftvec,
+    "col",
+    "features"
+  )
+  sprk_feat_merge_array <- sparklyr::invoke_static(
+    sc,
+    "org.apache.spark.ml.functions",
+    "vector_to_array",
+    sprk_feat_merge_features,
+    "float64"
+  )
+  sprk_feat_merge_dense <- sparklyr::invoke_static(
+    sc,
+    "org.apache.spark.ml.functions",
+    "array_to_vector",
+    sprk_feat_merge_array
+  )
+  sparklyr::invoke(
+    sprk_feat_merge_ftvec,
+    "withColumn",
+    "features",
+    sprk_feat_merge_dense
+  ) |>
+    sparklyr::sdf_register()
+}
+
+################################################################################
+#' Predict with saved XGBoost fold models on Spark
+#'
+#' Reads native `.ubj` booster files, predicts each fold on the supplied data,
+#' and averages folds within each resampling repeat. Predictors are assembled
+#' in the order retained during fitting. Results are written as one Parquet
+#' dataset with one prediction column per repeat, named from the model index.
+#'
+#' @param master,home,workspace,database Spark connection and configuration
+#'   arguments passed as in [fit_xgb_spark()].
+#' @param input Character path or paths to prediction Parquet data. Data must
+#'   contain `site_id`, `time`, `lon`, `lat`, and the saved predictor columns,
+#'   with one row per `site_id` and `time`. No response column is required.
+#'   Usable paths must be supplied despite the `NULL` default.
+#' @param models The complete `model` list returned by [fit_xgb_spark()],
+#'   supplied directly or read from a saved R object. Prediction uses `index`
+#'   and the ordered `xvar` vector. The index must contain `rset`, `fold`,
+#'   `prediction`, and `path` columns, with one native booster file per fold
+#'   and one prediction-column name per repeat. Paths must be accessible to
+#'   the Spark driver.
+#' @param pred character(1). Required output Parquet directory, written with
+#'   overwrite mode. A usable path must be supplied despite the `NULL` default.
+#'   The directory must be accessible to Spark and R and separate from input
+#'   data and model files.
+#' @details
+#' Uses the same Spark and XGBoost JAR configuration as [fit_xgb_spark()].
+#' Native boosters are wrapped as Spark regression models without reading
+#' Spark model metadata. Features are made dense to preserve zero values.
+#' Prediction covers all input rows, regardless of `XGB_MAX_ROWS`.
+#'
+#' All indexed folds within each repeat contribute equally to its mean
+#' prediction. Repeat-specific tables are joined by `site_id`, `time`, `lon`,
+#' and `lat`. The saved dataset contains these identifiers and one prediction
+#' column per repeat, such as `base_001` or `meta_001`. The Spark connection
+#' is disconnected on exit, including on error.
+#'
+#' @return A character vector of absolute `.parquet` part-file paths beneath
+#'   `pred`, suitable for saving as a workflow input to a subsequent stage.
+#' @seealso [fit_xgb_spark()], [assemble_xgb_features()]
+#' @keywords internal
+predict_xgb_spark <- function(
+  master,
+  home,
+  workspace,
+  database = "duckdb",
+  input = NULL,
+  models,
+  pred = NULL
+) {
+  # ----------------------------------------------------------------------------
+  # Group saved fold models by resampling repeat.
+  list_model_index <- split(models$index, models$index$rset)
+  chr_ids <- c("site_id", "time", "lon", "lat")
+  # ----------------------------------------------------------------------------
+  # Spark configuration.
+  config <- spark_environment(workspace = workspace, database = database)
+  config$int_maxrows <- 0L
+  config_base <- sparklyr::spark_config()
+  chr_xgboost_jars <- Sys.getenv("XGBOOST_JARS", unset = "")
+  if (nzchar(chr_xgboost_jars)) {
+    config_base[["sparklyr.shell.jars"]] <- chr_xgboost_jars
+  } else {
+    config_base[["sparklyr.shell.packages"]] <- config$chr_xgboost_package
+  }
+  config_base[["spark.cores.max"]] <- as.character(config$int_maxcores)
+  config_base[["spark.executor.cores"]] <- as.character(
+    config$int_executorcores
+  )
+  config_base[["spark.executor.memory"]] <- config$int_executormem
+  config_base[["spark.sql.shuffle.partitions"]] <- as.character(
+    config$int_partitions
+  )
+  config_base[["spark.sql.warehouse.dir"]] <- paste0(
+    "file:",
+    config$chr_warehouse
+  )
+  config_base[["spark.sql.parquet.compression.codec"]] <- "zstd"
+  config_base[["spark.task.cpus"]] <- as.character(config$int_nthreads)
+  # ----------------------------------------------------------------------------
+  # Connect to local Spark cluster.
+  message("Connecting to Spark...")
+  sc <- sparklyr::spark_connect(
+    master = master,
+    spark_home = home,
+    config = config_base,
+    app_name = "beethoven-devel"
+  )
+  on.exit(
+    {
+      sparklyr::spark_disconnect(sc)
+      message("Disconnected from Spark.")
+    },
+    add = TRUE
+  )
+  message("Spark connected; proceeding with prediction...")
+  # ----------------------------------------------------------------------------
+  # Load .parquet file into Spark memory.
+  chr_feat_merge_sptmpl <- "db_feat_merge_sptmpl"
+  sparklyr::spark_read_parquet(
+    sc,
+    name = chr_feat_merge_sptmpl,
+    path = input,
+    options = list(mergeSchema = "true"),
+    memory = FALSE
+  )
+  # ----------------------------------------------------------------------------
+  # Use the predictor order retained during fitting.
+  chr_feat_merge_xvar <- models$xvar
+  # ----------------------------------------------------------------------------
+  # Assemble prediction features without a response column.
+  tbl_feat_merge_assemble <- assemble_xgb_features(
+    sc = sc,
+    chr_feat_merge_sptmpl = chr_feat_merge_sptmpl,
+    chr_feat_merge_xvar = chr_feat_merge_xvar,
+    yvar = NULL,
+    config = config
+  )
+  # ----------------------------------------------------------------------------
+  # Reuse the assembled grid across all fold models.
+  tbl_feat_merge_persist <- sparklyr::sdf_persist(
+    tbl_feat_merge_assemble,
+    storage.level = "MEMORY_AND_DISK",
+    name = "beethoven_xgb_grid_features"
+  )
+  sparklyr::invoke(sparklyr::spark_dataframe(tbl_feat_merge_persist), "count")
+  sprk_summary <- sparklyr::invoke_static(sc, "scala.Option", "empty")
+  list_grid_pred <- vector("list", length(list_model_index))
+  # ----------------------------------------------------------------------------
+  for (r in seq_along(list_model_index)) {
+    dt_model_repeat <- list_model_index[[r]]
+    chr_prediction <- dt_model_repeat$prediction[[1L]]
+    list_grid_fold <- vector("list", nrow(dt_model_repeat))
+    for (f in seq_len(nrow(dt_model_repeat))) {
+      # ------------------------------------------------------------------------
+      # Read the native booster and restore its Spark regression-model wrapper.
+      sprk_booster <- sparklyr::invoke_static(
+        sc,
+        "ml.dmlc.xgboost4j.scala.XGBoost",
+        "loadModel",
+        dt_model_repeat$path[[f]]
+      )
+      sparklyr::invoke(
+        sprk_booster,
+        "setParam",
+        "nthread",
+        as.character(config$int_nthreads)
+      )
+      sprk_model <- sparklyr::invoke_new(
+        sc,
+        "ml.dmlc.xgboost4j.scala.spark.XGBoostRegressionModel",
+        sprintf("beethoven_xgb_grid_%03d_%02d", r, f),
+        sprk_booster,
+        sprk_summary
+      ) |>
+        sparklyr::invoke("setFeaturesCol", "features") |>
+        sparklyr::invoke("setPredictionCol", "prediction")
+      # ------------------------------------------------------------------------
+      # Keep predictions and identifiers together throughout averaging.
+      list_grid_fold[[f]] <- sparklyr::invoke(
+        sprk_model,
+        "transform",
+        sparklyr::spark_dataframe(tbl_feat_merge_persist)
+      ) |>
+        sparklyr::sdf_register() |>
+        dplyr::select(tidyselect::all_of(c(chr_ids, "prediction")))
+    }
+    # --------------------------------------------------------------------------
+    # Average folds within this repeat, then materialize the result for joining.
+    list_grid_pred[[r]] <- sparklyr::sdf_bind_rows(list_grid_fold) |>
+      dplyr::group_by(dplyr::across(tidyselect::all_of(chr_ids))) |>
+      dplyr::summarise(
+        !!chr_prediction := mean(.data$prediction),
+        .groups = "drop"
+      ) |>
+      sparklyr::sdf_persist(
+        storage.level = "MEMORY_AND_DISK",
+        name = sprintf("beethoven_xgb_grid_repeat_%03d", r)
+      )
+    sparklyr::invoke(sparklyr::spark_dataframe(list_grid_pred[[r]]), "count")
+  }
+  messages("Predictions completed; writing .parquet file(s)...")
+  # ----------------------------------------------------------------------------
+  # Join repeat-specific columns by identifiers rather than Spark row order.
+  tbl_grid_pred <- Reduce(
+    function(x, y) dplyr::left_join(x, y, by = chr_ids),
+    list_grid_pred
+  )
+  # ----------------------------------------------------------------------------
+  # Persist full-grid predictions and return paths for the next workflow step.
+  dir.create(pred, recursive = TRUE, showWarnings = FALSE)
+  pred <- normalizePath(pred, mustWork = TRUE)
+  sparklyr::spark_write_parquet(tbl_grid_pred, path = pred, mode = "overwrite")
+  list.files(pred, recursive = TRUE, full.names = TRUE, pattern = "\\.parquet$")
 }
 
 # nocov end

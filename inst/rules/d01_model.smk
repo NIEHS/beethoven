@@ -29,7 +29,8 @@ rule model_base:
 
     output:
         db_base_xgb_pred="output/base/db_base_xgb_pred.qs",
-        dt_base_xgb_eval="output/base/dt_base_xgb_eval.qs"
+        dt_base_xgb_eval="output/base/dt_base_xgb_eval.qs",
+        list_base_xgb_model="output/base/list_base_xgb_model.qs"
 
     container:
         None
@@ -69,7 +70,8 @@ rule model_meta:
 
     output:
         db_meta_xgb_pred="output/meta/db_meta_xgb_pred.qs",
-        dt_meta_xgb_eval="output/meta/dt_meta_xgb_eval.qs"
+        dt_meta_xgb_eval="output/meta/dt_meta_xgb_eval.qs",
+        list_meta_xgb_model="output/meta/list_meta_xgb_model.qs"
 
     container:
         None

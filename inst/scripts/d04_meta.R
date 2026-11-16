@@ -48,7 +48,8 @@ list_meta_xgb_pred <- fit_xgb_spark(
   workspace = file.path(getwd(), "spark-warehouse"),
   database = "duckdb",
   input = db_base_xgb_pred,
-  output = "output/meta/pred/",
+  pred = "output/meta/pred/",
+  model = "output/meta/model/",
   rset = list_meta_cv_idx,
   xvar = c("lon", "lat", chr_feat_base_xgb),
   yvar = list_base_params_static$yvar,
@@ -59,3 +60,7 @@ list_meta_xgb_pred <- fit_xgb_spark(
 ################################################################################
 qs2::qs_save(list_meta_xgb_pred$pred, snakemake@output[["db_meta_xgb_pred"]])
 qs2::qs_save(list_meta_xgb_pred$eval, snakemake@output[["dt_meta_xgb_eval"]])
+qs2::qs_save(
+  list_meta_xgb_pred$model,
+  snakemake@output[["list_meta_xgb_model"]]
+)

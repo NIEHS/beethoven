@@ -4,47 +4,34 @@
 ################################################################################
 # Load libraries and source local functions.
 library(beethoven)
+source("R/spark.R")
 
 ################################################################################
 # Import configured variables and inputs.
-list_base_fit_elnet <- qs2::qs_read(snakemake@input[["list_base_fit_elnet"]])
-dt_pred_merge_sptmpl <- qs2::qs_read(snakemake@input[["dt_pred_merge_sptmpl"]])
+list_base_xgb_model <- qs2::qs_read(snakemake@input[["list_base_xgb_model"]])
+db_pred_merge_sptmpl <- qs2::qs_read(snakemake@input[["db_pred_merge_sptmpl"]])
 
 ################################################################################
-# Post-append latitude and longitude coordinates to H3 grid cells.
-dt_pred_xy_sptmpl <- sf::st_coordinates(
-  h3jsr::cell_to_point(dt_pred_merge_sptmpl$site_id)
-)
-dt_pred_merge_sptmpl$lon <- dt_pred_xy_sptmpl[, "X"]
-dt_pred_merge_sptmpl$lat <- dt_pred_xy_sptmpl[, "Y"]
-names(dt_pred_merge_sptmpl) <- gsub(
-  "h3r8_id",
-  "site_id",
-  names(dt_pred_merge_sptmpl)
-)
+# Set Spark cluster environmental variables.
+Sys.setenv("SPARK_CORES_MAX" = 128L)
+Sys.setenv("SPARK_EXECUTOR_MEMORY" = "8g")
 
 ################################################################################
-# Predict at H3 sites, collect predictions, and set unique name.
-dt_pred_base_sptmpl <- do.call(
-  dplyr::bind_cols,
-  lapply(
-    list_base_fit_elnet,
-    function(x) {
-      stats::predict(x$workflow, dt_pred_merge_sptmpl)[, ".pred"]
-    }
-  )
-)
-names(dt_pred_base_sptmpl) <- sprintf(
-  "pred_%03d",
-  seq_along(names(dt_pred_base_sptmpl))
+# Import Spark connection details.
+chr_spark_master <- readLines("input/.hidden/chr_spark_local.txt")
+chr_spark_home <- readLines("input/.hidden/chr_spark_home.txt")
+
+################################################################################
+# Predict at H3 sites.
+db_pred_base_sptmpl <- predict_xgb_spark(
+  master = chr_spark_master,
+  home = chr_spark_home,
+  workspace = file.path(getwd(), "spark-warehouse"),
+  database = "duckdb",
+  input = db_pred_merge_sptmpl,
+  models = list_base_xgb_model,
+  pred = "output/pred/base/"
 )
 
 ################################################################################
-# Append to spatiotemporal identifiers (site_id, lon, lat, time).
-dt_pred_base_sptmpl <- dplyr::bind_cols(
-  dt_pred_merge_sptmpl[, c("site_id", "time", "lon", "lat")],
-  dt_pred_base_sptmpl
-)
-
-################################################################################
-qs2::qs_save(dt_pred_base_sptmpl, snakemake@output[["dt_pred_base_sptmpl"]])
+qs2::qs_save(db_pred_base_sptmpl, snakemake@output[["db_pred_base_sptmpl"]])

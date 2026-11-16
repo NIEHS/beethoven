@@ -36,7 +36,8 @@ list_base_xgb_pred <- fit_xgb_spark(
   workspace = file.path(getwd(), "spark-warehouse"),
   database = "duckdb",
   input = db_feat_merge_sptmpl,
-  output = "output/base/pred3/",
+  pred = "output/base/pred3/",
+  model = "output/base/model/",
   rset = list_base_cv_idx,
   xvar = list_base_params_static$xvar,
   yvar = list_base_params_static$yvar,
@@ -47,3 +48,7 @@ list_base_xgb_pred <- fit_xgb_spark(
 ################################################################################
 qs2::qs_save(list_base_xgb_pred$pred, snakemake@output[["db_base_xgb_pred"]])
 qs2::qs_save(list_base_xgb_pred$eval, snakemake@output[["dt_base_xgb_eval"]])
+qs2::qs_save(
+  list_base_xgb_pred$model,
+  snakemake@output[["list_base_xgb_model"]]
+)
