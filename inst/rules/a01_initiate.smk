@@ -11,8 +11,8 @@ rule initiate:
         start=config["chr_config_daterange"]["start"],
         end=config["chr_config_daterange"]["end"],
 
-    container:
-        "inst/container/sif/container_covariates.sif"
+    conda:
+        "beethoven"
 
     script:
         "../scripts/a01_initiate.R"

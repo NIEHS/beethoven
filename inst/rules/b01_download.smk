@@ -8,13 +8,10 @@ rule download_aqs:
         list_dl_aqs="output/download/list_dl_aqs.qs"
 
     params:
-        chr_config_dir=os.path.join(
-            os.environ["HOME"],
-            config["chr_config_dir"],
-        )
+        chr_config_dir=os.path.join(os.environ["HOME"], config["chr_config_dir"])
 
-    container:
-        "inst/container/sif/container_covariates.sif"
+    conda:
+        "beethoven"
 
     script:
         "../scripts/b01_aqs.R"
@@ -28,13 +25,10 @@ rule download_hms:
         list_dl_hms="output/download/list_dl_hms.qs"
 
     params:
-        chr_config_dir=os.path.join(
-            os.environ["HOME"],
-            config["chr_config_dir"],
-        )
+        chr_config_dir=os.path.join(os.environ["HOME"], config["chr_config_dir"])
 
-    container:
-        "inst/container/sif/container_covariates.sif"
+    conda:
+        "beethoven"
 
     script:
         "../scripts/b03_hms.R"
