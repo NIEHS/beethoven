@@ -3,7 +3,8 @@
 rule predict_grid_base:
     input:
         db_grid_feat_sptmpl="output/grid/feat/db_grid_feat_sptmpl.qs",
-        list_base_xgb_model="output/model/base/list_base_xgb_model.qs"
+        list_base_xgb_model="output/model/base/list_base_xgb_model.qs",
+        list_meta_xgb_model="output/model/meta/list_meta_xgb_model.qs"
 
     output:
         db_grid_pred_base_mean_sptmpl="output/grid/pred/base/mean/db_grid_pred_base_mean_sptmpl.qs"
