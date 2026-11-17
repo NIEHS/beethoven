@@ -59,7 +59,6 @@ export(reduce_list)
 export(reduce_merge)
 export(reduce_merge_iter)
 export(reduce_pca)
-export(restore_fit_best)
 export(scancel)
 export(set_args_calc)
 export(set_args_download)
@@ -115,7 +114,6 @@ importFrom(dplyr,
   across,
   all_of,
   arrange,
-  as_tibble,
   bind_rows,
   ends_with,
   filter,
@@ -133,11 +131,6 @@ importFrom(dplyr,
 importFrom(finetune,
   control_race,
   tune_race_anova
-)
-importFrom(future,
-  multicore,
-  multisession,
-  plan
 )
 importFrom(graphics,par)
 importFrom(lubridate,

@@ -5,8 +5,6 @@
 \title{Process atmospheric composition data by chunks (v2)}
 \usage{
 process_geos_bulk(path = NULL, date = c("2018-01-01", "2018-01-01"), ...)
-
-process_geos_bulk(path = NULL, date = c("2018-01-01", "2018-01-01"), ...)
 }
 \arguments{
 \item{path}{character(1). Directory with downloaded netCDF (.nc4) files. or
@@ -18,20 +16,11 @@ netCDF file paths.}
 }
 \value{
 a \code{SpatRaster} object;
-
-a \code{SpatRaster} object;
 }
 \description{
 Returning a single \code{SpatRasterDataset} object.
-
-Returning a single \code{SpatRasterDataset} object.
 }
 \note{
-Layer names of the returned \code{SpatRaster} object contain the variable,
-pressure level, date
-Reference duration: 1 day summary, all layers: 115 seconds
-Superseded by \code{\link{calc_geos_strict}}.
-
 Layer names of the returned \code{SpatRaster} object contain the variable,
 pressure level, date
 Reference duration: 1 day summary, all layers: 115 seconds

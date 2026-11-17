@@ -1,3 +1,4 @@
+# nocov start
 ################################################################################
 #' Generate spatial and temporal covariates at sf locations
 #'
@@ -487,3 +488,4 @@ spacetime_expressions <- function() {
 }
 
 ################################################################################
+# nocov end
