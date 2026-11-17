@@ -15,12 +15,18 @@ db_train_feat_geos_sptmpl <- qs2::qs_read(snakemake@input[[
 db_train_feat_hms_sptmpl <- qs2::qs_read(snakemake@input[[
   "db_train_feat_hms_sptmpl"
 ]])
+db_train_feat_spacetime_sptmpl <- qs2::qs_read(snakemake@input[[
+  "db_train_feat_spacetime_sptmpl"
+]])
 
 ################################################################################
 db_train_feat_sptmpl <- amadeusdb::join_covariates(
   input = db_train_obs_aqs_sptmpl,
   output = "output/train/feat/merge/",
-  hourly = list(geos = db_train_feat_geos_sptmpl),
+  hourly = list(
+    geos = db_train_feat_geos_sptmpl,
+    spacetime = db_train_feat_spacetime_sptmpl
+  ),
   daily = list(hms = db_train_feat_hms_sptmpl),
   static = NULL,
   locs_id = "site_id",

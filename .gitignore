@@ -19,9 +19,6 @@ _targets/
 # Spark files and logs.
 spark-warehouse/
 
-# Developmen files.
-devel/
-
 # Database files and folders.
 metastore_db/
 derby.log
@@ -32,6 +29,7 @@ vignettes/*.pdf
 
 # Large container files
 *.sif
+*.sif.sha256
 
 # Slurm-related error files
 *.err

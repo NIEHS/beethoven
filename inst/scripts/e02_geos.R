@@ -1,5 +1,5 @@
 ################################################################################
-# Calculate GEOS covariates at Uber H3 (resolution 8) locations (spatial only).
+# Calculate GEOS covariates at Uber H3 locations (spatial only).
 
 ################################################################################
 # Load libraries and source local functions.

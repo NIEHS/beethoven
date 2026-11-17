@@ -14,6 +14,7 @@ Authors@R: c(
 Description: Near Real Time air pollution model results and code produced by the SET group. It is fully tested, versioned, and open source and open access.
 Depends: R (>= 4.2.0)
 Imports:
+  checkmate,
   dplyr,
   sf,
   stats,
@@ -72,6 +73,7 @@ Suggests:
   kernlab,
   arrow,
   DBI,
+  duckdb (>= 2.0.0),
   sparklyr
 Remotes:
   ropensci/chopin,

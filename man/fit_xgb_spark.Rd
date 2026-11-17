@@ -10,7 +10,8 @@ fit_xgb_spark(
   workspace,
   database = "duckdb",
   input = NULL,
-  output,
+  pred,
+  model,
   rset,
   xvar,
   yvar,
@@ -36,14 +37,19 @@ passed to \code{\link[sparklyr:spark_connect]{sparklyr::spark_connect()}}.}
 the \code{NULL} default. Data must contain \code{site_id}, \code{time}, \code{lon}, \code{lat}, the
 response, and numeric predictor columns.}
 
-\item{output}{character(1). Directory for prediction datasets. It must be
-accessible to Spark and the local R process for returned file discovery.
-Existing datasets with the same resample and fold names cause an error.}
+\item{pred}{character(1). Directory for the combined out-of-fold prediction
+dataset, written with overwrite mode. It must be accessible to Spark and
+the local R process for returned file discovery.}
 
-\item{rset}{Nested list of resamples and folds. Each \code{rset[[r]][[f]]} must
-contain \code{analysis} and \code{assessment} vectors of \code{site_id} values used for
-training and testing, respectively. These are site identifiers, not row
-positions or \code{rsample} split objects.}
+\item{model}{character(1). Directory for native booster files named
+\code{rset_NNN_fold_NN.ubj}. It is created if needed and must be accessible to
+the Spark driver and later prediction jobs. Keep it separate from \code{pred}
+so overwriting prediction data does not remove saved models.}
+
+\item{rset}{Nested list of resampling repeats and folds. Each
+\code{rset[[r]][[f]]} must contain \code{analysis} and \code{assessment} vectors of
+\code{site_id} values used for training and testing, respectively. These are
+site identifiers, not row positions or \code{rsample} split objects.}
 
 \item{xvar}{Character vector of predictor names. Must be identical, including
 order, to the numeric columns in the Spark schema after excluding \code{yvar}
@@ -52,27 +58,35 @@ and \code{dvar}.}
 \item{yvar}{character(1). Response column name, aliased to \code{label} in Spark.}
 
 \item{dvar}{Character vector of columns excluded from predictor discovery,
-typically identifiers, coordinates, and time columns.}
+typically site identifiers and time columns.}
 
 \item{stage}{character(1). Prefix for prediction columns, which are named
-using \code{sprintf("\%s_\%03d", stage, r)} for resample \code{r}.}
+using \code{sprintf("\%s_\%03d", stage, r)} for repeat \code{r}. Use \code{"base"} or
+\code{"meta"} to distinguish the two learner stages.}
 
 \item{...}{Reserved for future use. Currently ignored.}
 }
 \value{
 A list with:
 \itemize{
-\item \code{pred}: character vector of newly discovered \code{.parquet} file paths beneath
-\code{output}.
+\item \code{pred}: character vector of \code{.parquet} paths beneath \code{pred} that were not
+present before writing. Paths with unchanged names are excluded.
 \item \code{eval}: data frame with \code{rset} and \code{fold} identifiers, \code{metric} and \code{value}
 columns for RMSE, MSE, R-squared, and MAE, and \code{time}, the elapsed fitting
 time in seconds repeated for each metric within a fold.
+\item \code{model}: list containing \code{index}, a data frame with integer \code{rset} and
+\code{fold}, character \code{prediction}, and absolute native-booster \code{path} columns;
+\code{xvar}, the ordered predictor names; \code{yvar}, the response name; and
+\code{stage}, the prediction prefix. The caller can save this list for later
+reuse.
 }
 }
 \description{
 Reads Parquet data into Spark, assembles numeric predictors, and fits one
-XGBoost regression model per resampling fold. Held-out predictions are
-written as Parquet datasets and evaluation metrics are collected in R.
+XGBoost regression model per fold of each resampling repeat. Each native
+booster is saved as a \code{.ubj} file. Out-of-fold predictions are combined into
+one Parquet dataset, and evaluation metrics and a model index are returned
+in R.
 }
 \details{
 Requires the sparklyr and DBI packages, a working Spark installation, and
@@ -84,15 +98,23 @@ settings. A positive row limit uses SQL \code{LIMIT} without an ordering clause.
 
 Models use CPU histogram training with squared-error loss, maximum depth 8,
 learning rate 0.1, and row and column sampling fractions of 0.8. Feature
-vectors are made dense so zero values remain explicit. No final model is
-retained; the Spark connection is disconnected on exit, including on error.
+vectors are made dense so zero values remain explicit. Each fold's native
+booster is saved immediately after fitting, before held-out prediction.
+The Spark connection is disconnected on exit, including on error.
 
-Predictions are written beneath \code{output} as
-\code{rset_NNN_fold_NN.parquet} datasets, with identification columns \code{site_id},
-\code{time}, \code{lon}, and \code{lat}, the original response name, and the prediction
-column. Each dataset can contain multiple Parquet part files.
+Within each repeat, held-out predictions are row-bound across folds. Repeats
+are then left-joined by \code{site_id} and \code{time}, retaining identifiers and the
+response from the first repeat. The dataset beneath \code{pred} contains
+\code{site_id}, \code{time}, \code{lon}, \code{lat}, the response under its original name, and
+one prediction column per repeat. It can contain multiple Parquet part files.
+
+The returned model metadata retains the predictor order and maps each
+repeat and fold to its saved booster path and prediction-column name. Pass
+this complete \code{model} list to \code{\link[=predict_xgb_spark]{predict_xgb_spark()}} for subsequent
+prediction.
 }
 \seealso{
-\code{\link[=spark_environment]{spark_environment()}}, \code{\link[sparklyr:spark_connect]{sparklyr::spark_connect()}}
+\code{\link[=spark_environment]{spark_environment()}}, \code{\link[=assemble_xgb_features]{assemble_xgb_features()}},
+\code{\link[=predict_xgb_spark]{predict_xgb_spark()}}
 }
 \keyword{Baselearner}

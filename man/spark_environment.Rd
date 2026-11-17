@@ -21,9 +21,9 @@ Invisibly, a named list with elements \code{chr_workdir}, \code{int_maxcores},
 \code{chr_resultspath}, \code{int_nworkers}, \code{int_nthreads}, and \code{chr_warehouse}.
 }
 \description{
-Collects configuration for \code{\link[=fit_xgb_spark]{fit_xgb_spark()}} and checks that worker and
-thread counts fit within the available cores. Settings are returned in a
-list for explicit use by the caller.
+Collects configuration for \code{\link[=fit_xgb_spark]{fit_xgb_spark()}} and \code{\link[=predict_xgb_spark]{predict_xgb_spark()}} and
+checks that worker and thread counts fit within the available cores.
+Settings are returned in a list for explicit use by the caller.
 }
 \details{
 The following environment variables control configuration:
@@ -34,7 +34,8 @@ The following environment variables control configuration:
 \item \code{SPARK_SHUFFLE_PARTITIONS}: shuffle partitions; defaults to 32.
 \item \code{XGB_NUM_ROUND}: boosting rounds; defaults to 50.
 \item \code{XGB_SEED}: nonnegative random seed; defaults to 20260904.
-\item \code{XGB_MAX_ROWS}: nonnegative input row limit; 0 means no limit.
+\item \code{XGB_MAX_ROWS}: nonnegative training-row limit; 0 means no limit.
+\code{\link[=predict_xgb_spark]{predict_xgb_spark()}} overrides this setting to process all input rows.
 \item \code{XGB_NUM_WORKERS}: workers; defaults to maximum cores divided by cores
 per executor, rounded down, with a minimum of 1.
 \item \code{XGB_NTHREAD}: threads per worker; defaults to cores per executor.

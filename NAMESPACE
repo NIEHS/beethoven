@@ -12,6 +12,7 @@ export(calc_tri_mod)
 export(calculate)
 export(calculate_modis)
 export(calculate_modis_direct)
+export(calculate_spacetime)
 export(convert_cv_index_rset)
 export(divisor)
 export(export_tif)
@@ -58,6 +59,7 @@ export(reduce_list)
 export(reduce_merge)
 export(reduce_merge_iter)
 export(reduce_pca)
+export(restore_fit_best)
 export(scancel)
 export(set_args_calc)
 export(set_args_download)
@@ -113,6 +115,7 @@ importFrom(dplyr,
   across,
   all_of,
   arrange,
+  as_tibble,
   bind_rows,
   ends_with,
   filter,
@@ -130,6 +133,11 @@ importFrom(dplyr,
 importFrom(finetune,
   control_race,
   tune_race_anova
+)
+importFrom(future,
+  multicore,
+  multisession,
+  plan
 )
 importFrom(graphics,par)
 importFrom(lubridate,
