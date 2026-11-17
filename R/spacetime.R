@@ -62,6 +62,7 @@
 #'   trend = reference
 #' )
 #' }
+#' @keywords Calculation
 #' @export
 calculate_spacetime <- function(
   locs,
