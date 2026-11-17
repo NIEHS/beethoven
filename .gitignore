@@ -26,10 +26,6 @@ devel/
 metastore_db/
 derby.log
 
-# Development files and folers.
-inst/container/def/container_dev.def
-inst/container/sh/build_container_dev.sh
-
 # Vignettes
 vignettes/*.html
 vignettes/*.pdf

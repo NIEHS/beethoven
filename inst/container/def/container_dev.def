@@ -1,0 +1,162 @@
+Bootstrap: docker
+From: ubuntu:24.04
+
+# Build from the repository root using inst/container/sh/build_container_dev.sh.
+# The existing environment and older SIF images are not copied into this image.
+%arguments
+    BUILD_JOBS=4
+
+%files
+    inst/conda/requirements.txt /opt/beethoven-build/requirements.txt
+    inst/container/scripts/restore_r.py /opt/beethoven-build/restore_r.py
+    inst/container/scripts/install_spark.sh /opt/beethoven-build/install_spark.sh
+
+%post -c /bin/bash
+    set -euo pipefail
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update
+    apt-get install -y --no-install-recommends \
+        bash ca-certificates curl bzip2 xz-utils unzip zip locales \
+        build-essential cmake ninja-build pkg-config python3 git \
+        libarchive-dev libcurl4-openssl-dev libssl-dev libgit2-dev \
+        libfontconfig1-dev libfreetype6-dev libharfbuzz-dev libfribidi-dev \
+        libpng-dev libtiff-dev libjpeg-dev libwebp-dev libnode-dev \
+        libglpk-dev libgmp-dev libmpfr-dev libclang-dev libtbb-dev \
+        libicu-dev libuv1-dev libbz2-dev liblzma-dev zlib1g-dev pandoc
+    locale-gen en_US.UTF-8
+    export LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
+
+    # Pin the bootstrap installer separately from the target environment.
+    if [ ! -x /opt/conda/bin/conda ]; then
+      curl -fL --retry 3 \
+        https://github.com/conda-forge/miniforge/releases/download/26.9.4-2/Miniforge3-26.9.4-2-Linux-x86_64.sh \
+        -o /tmp/miniforge.sh
+    echo 'bbaf16b3897da24c4be50315934ba74848f617b4495982841d6a0a60e0edbbdf  /tmp/miniforge.sh' | sha256sum -c -
+      bash /tmp/miniforge.sh -b -p /opt/conda
+    fi
+    if [ ! -f /opt/conda/envs/beethoven/conda-meta/history ]; then
+      /opt/conda/bin/conda create --yes --no-default-packages --name beethoven --format explicit \
+        --file /opt/beethoven-build/requirements.txt
+    fi
+    /opt/conda/bin/conda env config vars set --name beethoven \
+        R_LIBS='' R_LIBS_USER=NULL R_LIBS_SITE=NULL
+    set +u
+    . /opt/conda/etc/profile.d/conda.sh
+    conda activate beethoven
+    set -u
+
+    # Use conda's R/compiler/geospatial stack throughout source compilation.
+    unset R_HOME
+    export R_LIBS='' R_LIBS_USER=NULL R_LIBS_SITE=NULL
+    export R_ENVIRON_USER=/dev/null R_PROFILE_USER=/dev/null
+    export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$CONDA_PREFIX/lib/R/lib"
+    export PKG_CONFIG_PATH="$CONDA_PREFIX/lib/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/share/pkgconfig"
+    # The conda pkg-config binary rewrites Ubuntu's multiarch .pc prefixes.
+    # Use the distribution's pkgconf for build discovery, retaining conda first
+    # in PKG_CONFIG_PATH. Keep system include flags for conda's sysroot compiler.
+    mkdir -p /opt/beethoven-build/bin
+    printf '#!/bin/sh\nexec /usr/bin/pkg-config "$@"\n' > /opt/beethoven-build/bin/pkg-config
+    chmod +x /opt/beethoven-build/bin/pkg-config
+    export PATH="/opt/beethoven-build/bin:$PATH"
+    export PKG_CONFIG=/usr/bin/pkg-config
+    export PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1 PKG_CONFIG_ALLOW_SYSTEM_LIBS=1
+    # Compile with the pinned conda toolchain against this image's libc headers.
+    # Mixing Ubuntu headers with conda's older sysroot breaks C++ include_next.
+    unset CPATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH
+    for compiler in x86_64-conda-linux-gnu-cc x86_64-conda-linux-gnu-c++ \
+                    x86_64-conda-linux-gnu-gcc x86_64-conda-linux-gnu-g++ \
+                    x86_64-conda-linux-gnu-gfortran; do
+        printf '#!/bin/sh\nexec "%s/bin/%s" "$@" --sysroot=/ -isystem /usr/include/x86_64-linux-gnu\n' \
+            "$CONDA_PREFIX" "$compiler" > "/opt/beethoven-build/bin/$compiler"
+        chmod +x "/opt/beethoven-build/bin/$compiler"
+    done
+    export CC=/opt/beethoven-build/bin/x86_64-conda-linux-gnu-cc
+    export CXX=/opt/beethoven-build/bin/x86_64-conda-linux-gnu-c++
+    export FC=/opt/beethoven-build/bin/x86_64-conda-linux-gnu-gfortran
+    export CONDA_BUILD_SYSROOT=/
+    export USE_BUNDLED_LIBUV=1
+    export CMAKE_PREFIX_PATH="$CONDA_PREFIX"
+    export PROJ_DATA="$CONDA_PREFIX/share/proj" PROJ_LIB="$CONDA_PREFIX/share/proj"
+    export GDAL_DATA="$CONDA_PREFIX/share/gdal"
+    export UDUNITS2_XML_PATH="$CONDA_PREFIX/share/udunits/udunits2.xml"
+    export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+    export CURL_CA_BUNDLE="$SSL_CERT_FILE"
+    export CARGO_HOME=/opt/beethoven-build/cargo
+    export CARGO_BUILD_JOBS={{ BUILD_JOBS }}
+    export MAKEFLAGS=-j{{ BUILD_JOBS }}
+    export CMAKE_BUILD_PARALLEL_LEVEL={{ BUILD_JOBS }}
+    export NOT_CRAN=true LIBARROW_MINIMAL=false
+    # Current modeling uses JVM XGBoost. Avoid an unpinned LibTorch download.
+    export TORCH_INSTALL=0
+    python /opt/beethoven-build/restore_r.py \
+        /opt/beethoven-build/requirements.txt "$CONDA_PREFIX"
+
+    bash /opt/beethoven-build/install_spark.sh
+
+    # Installation records only; runtime tests are deferred.
+    conda list --name beethoven --explicit --md5 > /opt/beethoven-build/conda-explicit.txt
+    dpkg-query -W > /opt/beethoven-build/os-packages.tsv
+    chmod -R a+rX /opt/beethoven-build /opt/conda /opt/spark /opt/java21 /opt/xgboost
+    conda clean --all --yes
+    rm -rf /var/lib/apt/lists/* /tmp/miniforge.sh /opt/beethoven-build/sources /opt/beethoven-build/cargo
+
+%environment
+    export LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 TERM=xterm-256color
+    export CONDA_PREFIX=/opt/conda/envs/beethoven
+    export CONDA_DEFAULT_ENV=beethoven
+    export JAVA_HOME=/opt/java21
+    export SPARK_HOME=/opt/spark
+    export SPARK_CONF_DIR=/opt/spark/conf
+    export PATH="$JAVA_HOME/bin:$CONDA_PREFIX/bin:$SPARK_HOME/bin:/opt/conda/bin:$PATH"
+    export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$CONDA_PREFIX/lib/R/lib"
+    unset R_HOME
+    export R_LIBS='' R_LIBS_USER=NULL R_LIBS_SITE=NULL
+    export R_ENVIRON_USER=/dev/null R_PROFILE_USER=/dev/null
+    export PROJ_DATA="$CONDA_PREFIX/share/proj" PROJ_LIB="$CONDA_PREFIX/share/proj"
+    export GDAL_DATA="$CONDA_PREFIX/share/gdal"
+    export GDAL_DRIVER_PATH="$CONDA_PREFIX/lib/gdalplugins"
+    export UDUNITS2_XML_PATH="$CONDA_PREFIX/share/udunits/udunits2.xml"
+    export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+    export CURL_CA_BUNDLE="$SSL_CERT_FILE"
+    export XGBOOST_MAVEN_PACKAGE=ml.dmlc:xgboost4j-spark_2.13:3.4.0
+    export XGBOOST_JARS=/opt/xgboost/xgboost4j-spark_2.13-3.4.0.jar,/opt/xgboost/kryo-5.6.2.jar,/opt/xgboost/reflectasm-1.11.9.jar,/opt/xgboost/objenesis-3.4.jar,/opt/xgboost/minlog-1.3.1.jar,/opt/xgboost/commons-logging-1.3.4.jar
+
+%runscript
+    if [ "$#" -eq 0 ]; then
+        exec R --vanilla
+    fi
+    exec "$@"
+
+%labels
+    org.opencontainers.image.title Beethoven development environment
+    beethoven.environment.snapshot 2026-11-17
+    beethoven.spark.version 4.2.0
+    beethoven.xgboost.version 3.4.0
+    beethoven.tests.status not-run
+
+%help
+    Fully rebuilt beethoven conda/R environment, Spark 4.2.0 (Scala 2.13),
+    Java 21.0.1, and CPU XGBoost4J-Spark 3.4.0. Conda's pinned Java 17 is
+    retained in its environment; Spark uses the separate Java 21 runtime.
+
+    Build: bash inst/container/sh/build_container_dev.sh
+    Execute: apptainer exec --cleanenv --bind "$PWD:$PWD" \
+        --bind /path/to/shared/data:/path/to/shared/data \
+        inst/container/sif/container_dev.sif Rscript your-script.R
+
+    Keep shared data/model paths identical inside the container and on Spark
+    workers. Connect to the existing spark:// master; this image does not start
+    or change the host cluster. Bind host cluster configuration if needed and
+    override SPARK_CONF_DIR with --env. Use /opt/spark for the Spark client.
+    The pipeline's current chr_spark_home.txt and HOME-based GDAL load paths
+    need to use SPARK_HOME and CONDA_PREFIX before switching the workflow.
+
+    R packages are rebuilt from requirements.txt, with patchwork 1.3.2 added
+    to satisfy infer's missing required dependency. Git sources use recorded
+    commits. Build manifests and individual R installation logs are retained
+    in /opt/beethoven-build. Torch's optional LibTorch runtime is not installed;
+    current modeling uses the JVM XGBoost CPU implementation.
+
+    The base OS and apt build dependencies are not a bit-for-bit OS lock.
+    No pipeline tests or Spark jobs are run by the build. Tests require a
+    separate approval after the image has been created.
