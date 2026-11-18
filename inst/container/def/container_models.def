@@ -1,0 +1,55 @@
+Bootstrap: docker
+From: rocker/geospatial:latest
+
+%post
+    set -eu
+    export DEBIAN_FRONTEND=noninteractive
+
+    # The Rocker base supplies R and the geospatial stack. Add the same
+    # system dependencies and R packages as the geospatial-only definition.
+    apt-get update
+    apt-get install -y --no-install-recommends \
+        ca-certificates \
+        curl \
+        libarchive13t64 \
+        libcurl4-openssl-dev \
+        locales
+    locale-gen en_US.UTF-8
+    printf 'LANG=en_US.UTF-8\nLC_ALL=en_US.UTF-8\n' >> /etc/default/locale
+
+    # Rocker/geospatial:latest currently uses Ubuntu 24.04. Install the
+    # CUDA 12.8 toolkit without a driver; Apptainer supplies the host driver
+    # when the container is started with --nv.
+    . /etc/os-release
+    test "$ID" = ubuntu && test "$VERSION_ID" = 24.04
+    test "$(dpkg --print-architecture)" = amd64
+    curl -fsSL \
+        https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.1-1_all.deb \
+        -o /tmp/cuda-keyring.deb
+    dpkg -i /tmp/cuda-keyring.deb
+    rm /tmp/cuda-keyring.deb
+    apt-get update
+    apt-get install -y --no-install-recommends cuda-toolkit-12-8
+    rm -rf /var/lib/apt/lists/*
+
+    Rscript -e 'install.packages(c("pak", "qs2", "mirai", "mori", "h3jsr", "lme4"))'
+    Rscript -e 'pak::pkg_install("NIEHS/beethoven@mm-1013", dependencies = TRUE)'
+    Rscript -e 'pak::pkg_install(c("glmnet", "lme4"))'
+    Rscript -e 'install.packages("torch"); torch::install_torch(version = "latest", update = TRUE)'
+    Rscript -e 'options(timeout = 1800); pak::pkg_install("sparklyr", dependencies = TRUE); sparklyr::spark_install()'
+    Rscript -e 'options(timeout = 1800); install.packages("arrow")'
+
+%environment
+    export LANG=en_US.UTF-8
+    export LC_ALL=en_US.UTF-8
+    export TERM=xterm-256color
+    export CUDA_HOME=/usr/local/cuda-12.8
+    export PATH="${CUDA_HOME}/bin:${PATH}"
+
+    export R_ENVIRON_USER=/dev/null
+    export R_PROFILE_USER=/dev/null
+    export R_LIBS_USER=""
+    export R_LIBS_SITE="/usr/local/lib/R/site-library:/usr/local/lib/R/library"
+
+%runscript
+    echo "{beethoven} container with CUDA 12.8"

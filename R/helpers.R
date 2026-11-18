@@ -39,8 +39,12 @@ scancel <- function(job = NULL) {
   }
 }
 
-batch <- function(file = "run.sh") {
+beethoven <- function(file = "run.sh") {
   system(paste0("sbatch ", file))
+}
+
+dry <- function(file = "inst/devel/dry.sh") {
+  system(paste0("sh ", file))
 }
 
 clean <- function(pattern = NULL) {

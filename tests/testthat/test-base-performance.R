@@ -57,7 +57,8 @@ testthat::test_that("fit elnet (performance)", {
       yvar = "Arithmetic.Mean",
       xvar = seq(4, ncol(dt_train)),
       drop_vars = NULL,
-      normalize = TRUE
+      normalize = TRUE,
+      full_data = dt_train
     )
   )
   # expect a list
@@ -149,7 +150,8 @@ testthat::test_that("fit lightGBM (performance)", {
       yvar = "Arithmetic.Mean",
       xvar = seq(4, ncol(dt_train)),
       drop_vars = NULL,
-      normalize = TRUE
+      normalize = TRUE,
+      full_data = dt_train
     )
   )
   # expect a list
@@ -243,7 +245,8 @@ testthat::test_that("fit {brulee} MLP (performance)", {
       yvar = "Arithmetic.Mean",
       xvar = seq(4, ncol(dt_train)),
       drop_vars = NULL,
-      normalize = TRUE
+      normalize = TRUE,
+      full_data = dt_train
     )
   )
   # expect a list

@@ -1,0 +1,3164 @@
+# Beethoven environment package snapshot
+# Captured: 2026-11-17 (America/New_York)
+# Environment: beethoven (~/.conda/envs/beethoven)
+# Platform: linux-64; R 4.6.1; Python 3.15.0
+#
+# Inventory: 157 conda packages, including all installed conda dependencies;
+# 274 R packages (14 supplied by r-base, 260 installed separately);
+# 3 Python distributions, all supplied by conda; no pip-only installations.
+# Sources: conda list --explicit --md5, conda-meta records/history/state,
+# installed.packages() and installed R DESCRIPTION files, and pip metadata.
+# R was inspected with R_LIBS="", R_LIBS_USER=NULL, R_LIBS_SITE=NULL;
+# its only active library was $CONDA_PREFIX/lib/R/library.
+#
+# FORMAT AND RESTORATION
+# This is a conda explicit specification with a commented R/Python inventory.
+# It is not a pip requirements file or an automatic R restoration script.
+# From the repository root, recreate ONLY the conda-managed packages with:
+#   conda create -n beethoven-restored --file inst/conda/requirements.txt
+# Preserve the existing environment library isolation with:
+#   conda env config vars set -n beethoven-restored R_LIBS="" R_LIBS_USER=NULL R_LIBS_SITE=NULL
+# Then install the separately managed R packages at the versions/revisions
+# recorded below. Conda ignores every commented R/Python inventory entry.
+# R package source availability and compiled build options are not locked
+# by this file; the original installed binaries are not archived here.
+#
+# Conda URLs pin channel, platform, version, build, and archive MD5.
+# Requested means explicitly recorded in conda installation history;
+# dependency means absent from that requested-spec map. R metadata does not
+# reliably distinguish manually requested packages from their dependencies,
+# so every installed R package is recorded, including development tools.
+# Depends/Imports/LinkingTo are required R dependencies; Suggests/Enhances
+# are optional and may not be installed. Dependency constraints come from
+# installed metadata; exact installed versions have their own entries.
+# SystemRequirements are declarations, not verified external installations.
+# Host virtual requirements: __unix; __glibc >=2.28,<3.0.a0.
+# Software installed outside this prefix (for example an external Spark
+# installation or the Snakemake launcher) is outside this snapshot.
+#
+# AUDIT NOTES
+# All installed conda package dependencies satisfy their recorded constraints.
+# Missing required R dependency: infer=1.1.0 imports patchwork, which is not
+# installed in this environment. No installed version can be pinned for it.
+# All other required R package dependencies satisfy their version constraints.
+# Installed beethoven is 0.5.3 from Git revision
+# 5b7b9ad9468d2111b67b265344b22e8b13f80828 (mm-1013); the working tree
+# DESCRIPTION reports 0.6.0. This snapshot records the installed version.
+#
+# CONDA PACKAGES (157)
+@EXPLICIT
+
+# Conda: _openmp_mutex=4.5=20_gnu (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgomp >=7.5.0
+#   Constrains (if installed): openmp_impl <0.0a0
+https://conda.anaconda.org/conda-forge/linux-64/_openmp_mutex-4.5-20_gnu.conda#a9f577daf3de00bca7c3c76c0ecbd1de
+
+# Conda: _r-mutex=1.0.1=anacondar_1 (dependency)
+https://conda.anaconda.org/conda-forge/noarch/_r-mutex-1.0.1-anacondar_1.tar.bz2#19f9db5f4f1b7f5ef5f6d67207f25f38
+
+# Conda: alsa-lib=1.2.16.1=h7cc23a3_1 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=15
+https://conda.anaconda.org/conda-forge/linux-64/alsa-lib-1.2.16.1-h7cc23a3_1.conda#7094e0d8d14de0eff6d83f0d2f1f661e
+
+# Conda: binutils_impl_linux-64=2.46.1=default_hfdba357_103 (dependency)
+#   Depends: ld_impl_linux-64 2.46.1 default_hbd61a6d_103; sysroot_linux-64; zstd >=1.5.7,<1.6.0a0
+https://conda.anaconda.org/conda-forge/linux-64/binutils_impl_linux-64-2.46.1-default_hfdba357_103.conda#e86f9dc615d7533c5be8b15b3a1dee8d
+
+# Conda: blosc=1.21.6=he440d0b_1 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=13; libstdcxx >=13; libzlib >=1.3.1,<2.0a0; lz4-c >=1.10.0,<1.11.0a0; snappy >=1.2.1,<1.3.0a0; zstd >=1.5.6,<1.6.0a0
+https://conda.anaconda.org/conda-forge/linux-64/blosc-1.21.6-he440d0b_1.conda#2c2fae981fd2afd00812c92ac47d023d
+
+# Conda: bwidget=1.10.1=hfc2019e_3 (dependency)
+#   Depends: tk
+https://conda.anaconda.org/conda-forge/linux-64/bwidget-1.10.1-hfc2019e_3.conda#38d3e0382f3f10344ac30772dec58035
+
+# Conda: bzip2=1.0.8=hda65f42_10 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=14
+https://conda.anaconda.org/conda-forge/linux-64/bzip2-1.0.8-hda65f42_10.conda#e675fabcf81499adc7edf58124fb1e01
+
+# Conda: c-ares=1.34.8=hebe6cf0_2 (dependency)
+#   Depends: libgcc >=15; __glibc >=2.17,<3.0.a0
+https://conda.anaconda.org/conda-forge/linux-64/c-ares-1.34.8-hebe6cf0_2.conda#3ad2b403be8fc5612b9159e2ce621f69
+
+# Conda: c-compiler=2.0.0=ha29393d_0 (dependency)
+#   Depends: gcc 15.*
+https://conda.anaconda.org/conda-forge/linux-64/c-compiler-2.0.0-ha29393d_0.conda#b08763a8d93f2ba35bbf956dab90950b
+
+# Conda: ca-certificates=2026.10.18=hbd8a1cb_0 (dependency)
+#   Depends: __unix
+https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2026.10.18-hbd8a1cb_0.conda#f9f6a9cf041f31438b034dac016e6429
+
+# Conda: cairo=1.18.6=h3c89d7e_0 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; fontconfig >=2.18.3,<3.0a0; fonts-conda-ecosystem; icu >=78.3,<79.0a0; libexpat >=2.8.1,<3.0a0; libfreetype >=2.14.3; libfreetype6 >=2.14.3; libgcc >=15; libglib >=2.90.0,<3.0a0; libpng >=1.6.58,<1.7.0a0; libstdcxx >=15; libxcb >=1.17.0,<2.0a0; libzlib >=1.3.2,<2.0a0; pixman >=0.46.4,<1.0a0; xorg-libice >=1.1.2,<2.0a0; xorg-libsm >=1.2.6,<2.0a0; xorg-libx11 >=1.8.13,<2.0a0; xorg-libxext >=1.3.7,<2.0a0; xorg-libxrender >=0.9.12,<0.10.0a0
+https://conda.anaconda.org/conda-forge/linux-64/cairo-1.18.6-h3c89d7e_0.conda#7920701f9abcb488411495742cf365a7
+
+# Conda: compilers=2.0.0=ha770c72_0 (requested: compilers)
+#   Depends: c-compiler 2.0.0 ha29393d_0; cxx-compiler 2.0.0 hdab9b82_0; fortran-compiler 2.0.0 h0f4f740_0
+https://conda.anaconda.org/conda-forge/linux-64/compilers-2.0.0-ha770c72_0.conda#fc251585a901f26b9a3218c9193a1851
+
+# Conda: conda-gcc-specs=15.3.0=h8846f6e_7 (dependency)
+#   Depends: gcc_impl_linux-64 >=15.3.0,<15.3.1.0a0
+https://conda.anaconda.org/conda-forge/linux-64/conda-gcc-specs-15.3.0-h8846f6e_7.conda#da715e003b8f6e6737923cda77f67dbf
+
+# Conda: curl=8.23.0=ha042cf0_0 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; krb5 >=1.22.2,<1.23.0a0; libcurl 8.23.0 ha042cf0_0; libgcc >=15; libpsl >=0.23.1,<0.24.0a0; libssh2 >=1.11.1,<2.0a0; libzlib >=1.3.2,<2.0a0; openssl >=3.5.9,<4.0a0; zstd >=1.5.7,<1.6.0a0
+https://conda.anaconda.org/conda-forge/linux-64/curl-8.23.0-ha042cf0_0.conda#ae85b19bbac7336f4efc4802c351effa
+
+# Conda: cxx-compiler=2.0.0=hdab9b82_0 (dependency)
+#   Depends: gxx 15.*
+https://conda.anaconda.org/conda-forge/linux-64/cxx-compiler-2.0.0-hdab9b82_0.conda#923dacbfd97122c65c97a35f6e959ab8
+
+# Conda: font-ttf-dejavu-sans-mono=2.37=hab24e00_0 (dependency)
+https://conda.anaconda.org/conda-forge/noarch/font-ttf-dejavu-sans-mono-2.37-hab24e00_0.tar.bz2#0c96522c6bdaed4b1566d11387caaf45
+
+# Conda: font-ttf-inconsolata=3.000=h77eed37_0 (dependency)
+https://conda.anaconda.org/conda-forge/noarch/font-ttf-inconsolata-3.000-h77eed37_0.tar.bz2#34893075a5c9e55cdafac56607368fc6
+
+# Conda: font-ttf-source-code-pro=2.038=h77eed37_0 (dependency)
+https://conda.anaconda.org/conda-forge/noarch/font-ttf-source-code-pro-2.038-h77eed37_0.tar.bz2#4d59c254e01d9cde7957100457e2d5fb
+
+# Conda: font-ttf-ubuntu=0.83=h77eed37_3 (dependency)
+https://conda.anaconda.org/conda-forge/noarch/font-ttf-ubuntu-0.83-h77eed37_3.conda#49023d73832ef61042f6a237cb2687e7
+
+# Conda: fontconfig=2.18.3=h4db4eae_1 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libexpat >=2.8.1,<3.0a0; libfreetype >=2.14.3; libfreetype6 >=2.14.3; libgcc >=15; libuuid >=2.42.2,<3.0a0; libzlib >=1.3.2,<2.0a0
+https://conda.anaconda.org/conda-forge/linux-64/fontconfig-2.18.3-h4db4eae_1.conda#922776b528a470ab5afa81fd42abfa1d
+
+# Conda: fonts-conda-ecosystem=1=0 (dependency)
+#   Depends: fonts-conda-forge
+https://conda.anaconda.org/conda-forge/noarch/fonts-conda-ecosystem-1-0.tar.bz2#fee5683a3f04bd15cbd8318b096a27ab
+
+# Conda: fonts-conda-forge=1=hc364b38_1 (dependency)
+#   Depends: font-ttf-ubuntu; font-ttf-inconsolata; font-ttf-dejavu-sans-mono; font-ttf-source-code-pro
+https://conda.anaconda.org/conda-forge/noarch/fonts-conda-forge-1-hc364b38_1.conda#a7970cd949a077b7cb9696379d338681
+
+# Conda: fortran-compiler=2.0.0=h0f4f740_0 (dependency)
+#   Depends: gfortran 15.*
+https://conda.anaconda.org/conda-forge/linux-64/fortran-compiler-2.0.0-h0f4f740_0.conda#7b2f4089fcf4cf6aa43ff932daee8c8b
+
+# Conda: freexl=2.0.0=h1f12c17_3 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=15; libexpat >=2.8.1,<3.0a0; minizip >=4.2.2,<5.0a0; libiconv >=1.18,<2.0a0
+https://conda.anaconda.org/conda-forge/linux-64/freexl-2.0.0-h1f12c17_3.conda#4a0a8fd87ee4767db791047546f56501
+
+# Conda: fribidi=1.0.17=h7cc23a3_0 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=15
+https://conda.anaconda.org/conda-forge/linux-64/fribidi-1.0.17-h7cc23a3_0.conda#f9d5302bca196ee87e62f393f2626562
+
+# Conda: gcc=15.3.0=hc6a0c74_7 (dependency)
+#   Depends: conda-gcc-specs; gcc_impl_linux-64 15.3.0 h6ad849d_7
+https://conda.anaconda.org/conda-forge/linux-64/gcc-15.3.0-hc6a0c74_7.conda#f86312df66bf0d79961e8e185e4f9957
+
+# Conda: gcc_impl_linux-64=15.3.0=h6ad849d_7 (dependency)
+#   Depends: binutils_impl_linux-64 >=2.46.1; libgcc >=15.3.0; libgcc-devel_linux-64 15.3.0 h2b852eb_107; libgomp >=15.3.0; libsanitizer 15.3.0 h54950a5_7; libstdcxx >=15.3.0; libstdcxx-devel_linux-64 15.3.0 hb2c5482_107; sysroot_linux-64
+https://conda.anaconda.org/conda-forge/linux-64/gcc_impl_linux-64-15.3.0-h6ad849d_7.conda#61f2e6900de1f2aff25717b332ed6dac
+
+# Conda: gdal=3.13.3=np2py315h72c27ce_3 (requested: gdal)
+#   Depends: python; libgdal-core 3.13.3.*; libgcc >=15; __glibc >=2.17,<3.0.a0; libstdcxx >=15; libkml >=1.3.0,<1.4.0a0; libdeflate >=1.25,<1.26.0a0; libxml2; libxml2-16 >=2.15.4; libsqlite >=3.53.4,<4.0a0; liblzma >=5.8.3,<6.0a0; libiconv >=1.18,<2.0a0; libcurl >=8.22.0,<9.0a0; xerces-c >=3.3.0,<3.4.0a0; libzlib >=1.3.2,<2.0a0; lerc >=4.2.0,<5.0a0; lz4-c >=1.10.0,<1.11.0a0; json-c >=0.18,<0.19.0a0; libexpat >=2.8.5,<3.0a0; openssl >=3.5.9,<4.0a0; libwebp-base >=1.6.0,<2.0a0; pcre2 >=10.47,<10.48.0a0; libarchive >=3.8.9,<3.9.0a0; libjxl >=0.12.0,<0.13.0a0; libspatialite >=5.1.0,<5.2.0a0; proj >=9.9.0,<9.10.0a0; blosc >=1.21.6,<2.0a0; zstd >=1.5.7,<1.6.0a0; libpng >=1.6.59,<1.7.0a0; geos >=3.14.1,<3.14.2.0a0; muparser >=2.3.5,<2.4.0a0; giflib >=6.1.3,<6.2.0a0; libjpeg-turbo >=3.2.0,<4.0a0; python_abi 3.15.* *_cp315; numpy >=1.25,<3
+https://conda.anaconda.org/conda-forge/linux-64/gdal-3.13.3-np2py315h72c27ce_3.conda#4330c72fab20e7ba33ac5d7031496a4f
+
+# Conda: geos=3.14.1=h55b0958_0 (requested: geos)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=15; libstdcxx >=15
+https://conda.anaconda.org/conda-forge/linux-64/geos-3.14.1-h55b0958_0.conda#5f856b72ca9cd5b5b4a1c43551804622
+
+# Conda: gfortran=15.3.0=hc6a0c74_7 (dependency)
+#   Depends: conda-gcc-specs; gcc 15.3.0 hc6a0c74_7; gcc_impl_linux-64 15.3.0 h6ad849d_7; gfortran_impl_linux-64 15.3.0 h27ced10_7
+https://conda.anaconda.org/conda-forge/linux-64/gfortran-15.3.0-hc6a0c74_7.conda#7d812c5e996b22b7037ca4f6c35f294e
+
+# Conda: gfortran_impl_linux-64=15.3.0=h27ced10_7 (dependency)
+#   Depends: gcc_impl_linux-64 15.3.0.*; libgcc >=15.3.0; libgfortran5 >=15.3.0; libstdcxx >=15.3.0; sysroot_linux-64
+https://conda.anaconda.org/conda-forge/linux-64/gfortran_impl_linux-64-15.3.0-h27ced10_7.conda#5c69dab673a8a43748039694be219190
+
+# Conda: giflib=6.1.3=hebe6cf0_2 (dependency)
+#   Depends: libgcc >=15; __glibc >=2.17,<3.0.a0
+https://conda.anaconda.org/conda-forge/linux-64/giflib-6.1.3-hebe6cf0_2.conda#07bdd65afe03df3fb5dbcaa8257c64a3
+
+# Conda: git=2.56.0=pl5440h3795e67_0 (requested: git)
+#   Depends: __glibc >=2.17,<3.0.a0; libcurl >=8.22.0,<9.0a0; libexpat >=2.8.5,<3.0a0; libgcc >=15; libiconv >=1.18,<2.0a0; libzlib >=1.3.2,<2.0a0; openssl >=3.5.8,<4.0a0; pcre2 >=10.47,<10.48.0a0; perl 5.*
+#   Constrains (if installed): __glibc >=2.17
+https://conda.anaconda.org/conda-forge/linux-64/git-2.56.0-pl5440h3795e67_0.conda#6dbccc130bb4e4f86c9d97af2b787a2a
+
+# Conda: graphite2=1.3.15=h54a6638_1 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libstdcxx >=14; libgcc >=14
+https://conda.anaconda.org/conda-forge/linux-64/graphite2-1.3.15-h54a6638_1.conda#f9fe2984587fa8235a6af6004760cd18
+
+# Conda: gsl=2.7=he838d99_0 (dependency)
+#   Depends: libblas >=3.8.0,<4.0a0; libcblas >=3.8.0,<4.0a0; libgcc-ng >=9.3.0
+https://conda.anaconda.org/conda-forge/linux-64/gsl-2.7-he838d99_0.tar.bz2#fec079ba39c9cca093bf4c00001825de
+
+# Conda: gxx=15.3.0=hc6a0c74_7 (dependency)
+#   Depends: conda-gcc-specs; gcc 15.3.0 hc6a0c74_7; gxx_impl_linux-64 15.3.0 h90d9265_7
+https://conda.anaconda.org/conda-forge/linux-64/gxx-15.3.0-hc6a0c74_7.conda#6ab627ce20ea2270ea95cf54577aacf4
+
+# Conda: gxx_impl_linux-64=15.3.0=h90d9265_7 (dependency)
+#   Depends: gcc_impl_linux-64 15.3.0 h6ad849d_7; libstdcxx-devel_linux-64 15.3.0 hb2c5482_107; sysroot_linux-64; tzdata
+https://conda.anaconda.org/conda-forge/linux-64/gxx_impl_linux-64-15.3.0-h90d9265_7.conda#f36649dd9798b6982afd26447244984e
+
+# Conda: hdf4=4.2.15=h2a13503_7 (dependency)
+#   Depends: libgcc-ng >=12; libjpeg-turbo >=3.0.0,<4.0a0; libstdcxx-ng >=12; libzlib >=1.2.13,<2.0.0a0
+https://conda.anaconda.org/conda-forge/linux-64/hdf4-4.2.15-h2a13503_7.conda#bd77f8da987968ec3927990495dc22e4
+
+# Conda: hdf5=1.14.6=nompi_h19486de_110 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libaec >=1.1.5,<2.0a0; libcurl >=8.20.0,<9.0a0; libgcc >=14; libgfortran; libgfortran5 >=14.3.0; libstdcxx >=14; libzlib >=1.3.2,<2.0a0; openssl >=3.5.6,<4.0a0
+https://conda.anaconda.org/conda-forge/linux-64/hdf5-1.14.6-nompi_h19486de_110.conda#9c6e11a83468e1d5decae516077a73fb
+
+# Conda: icu=78.3=py310h44b86e0_2 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libstdcxx >=14; libgcc >=14
+https://conda.anaconda.org/conda-forge/linux-64/icu-78.3-py310h44b86e0_2.conda#72a381cbad04f24b1c2a43ef707f45b4
+
+# Conda: json-c=0.18=hebe6cf0_2 (dependency)
+#   Depends: libgcc >=15; __glibc >=2.17,<3.0.a0
+https://conda.anaconda.org/conda-forge/linux-64/json-c-0.18-hebe6cf0_2.conda#9aa77c4e7f9a988df94da18a7b9b90fe
+
+# Conda: kernel-headers_linux-64=4.18.0=he073ed8_9 (dependency)
+#   Constrains (if installed): sysroot_linux-64 ==2.28
+https://conda.anaconda.org/conda-forge/noarch/kernel-headers_linux-64-4.18.0-he073ed8_9.conda#86d9cba083cd041bfbf242a01a7a1999
+
+# Conda: keyutils=1.6.3=h7cc23a3_1 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=15
+https://conda.anaconda.org/conda-forge/linux-64/keyutils-1.6.3-h7cc23a3_1.conda#ba55d1b89fd7775e67de8291029b4059
+
+# Conda: krb5=1.22.2=hbc21106_2 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; keyutils >=1.6.3,<2.0a0; libedit >=3.1.20250104,<3.2.0a0; libedit >=3.1.20250104,<4.0a0; libgcc >=15; libstdcxx >=15; openssl >=3.5.7,<4.0a0
+https://conda.anaconda.org/conda-forge/linux-64/krb5-1.22.2-hbc21106_2.conda#53318d715316929a574f83591308b1f8
+
+# Conda: lcms2=2.19.1=h9073bf1_3 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=15; libjpeg-turbo >=3.2.0,<4.0a0; libtiff >=4.7.2,<4.8.0a0
+https://conda.anaconda.org/conda-forge/linux-64/lcms2-2.19.1-h9073bf1_3.conda#596464faa06e0b656b35416188ef9bba
+
+# Conda: ld_impl_linux-64=2.46.1=default_hbd61a6d_103 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; zstd >=1.5.7,<1.6.0a0
+#   Constrains (if installed): binutils_impl_linux-64 2.46.1
+https://conda.anaconda.org/conda-forge/linux-64/ld_impl_linux-64-2.46.1-default_hbd61a6d_103.conda#2362c70e7e79827c32db35547d9c179b
+
+# Conda: lerc=4.2.0=hdb68285_0 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=14; libstdcxx >=14
+https://conda.anaconda.org/conda-forge/linux-64/lerc-4.2.0-hdb68285_0.conda#fb9d356b1a57d6d54768be7ebd5fce09
+
+# Conda: libaec=1.1.5=h088129d_0 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=14; libstdcxx >=14
+https://conda.anaconda.org/conda-forge/linux-64/libaec-1.1.5-h088129d_0.conda#86f7414544ae606282352fa1e116b41f
+
+# Conda: libarchive=3.8.9=gpl_h3152399_101 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; bzip2 >=1.0.8,<2.0a0; libgcc >=15; liblzma >=5.8.3,<6.0a0; libxml2; libxml2-16 >=2.15.3; libzlib >=1.3.2,<2.0a0; lz4-c >=1.10.0,<1.11.0a0; lzo >=2.10,<3.0a0; openssl >=3.5.7,<4.0a0; zstd >=1.5.7,<1.6.0a0
+https://conda.anaconda.org/conda-forge/linux-64/libarchive-3.8.9-gpl_h3152399_101.conda#680520cff78a974d564cd99cdf5ec0b5
+
+# Conda: libblas=3.11.0=11_h4a7cf45_openblas (dependency)
+#   Depends: libopenblas >=0.3.34,<0.3.35.0a0; libopenblas >=0.3.34,<1.0a0
+#   Constrains (if installed): blas 2.311   openblas; libcblas   3.11.0   11*_openblas; liblapack  3.11.0   11*_openblas; liblapacke 3.11.0   11*_openblas; mkl <2027
+https://conda.anaconda.org/conda-forge/linux-64/libblas-3.11.0-11_h4a7cf45_openblas.conda#b8cce1486f3c62f33291d6318c193d0d
+
+# Conda: libbrotlicommon=1.2.0=h39a168f_4 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=15
+https://conda.anaconda.org/conda-forge/linux-64/libbrotlicommon-1.2.0-h39a168f_4.conda#df210655e30a05e3b069c91b7aaddd2d
+
+# Conda: libbrotlidec=1.2.0=ha411449_4 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libbrotlicommon 1.2.0 h39a168f_4; libgcc >=15
+https://conda.anaconda.org/conda-forge/linux-64/libbrotlidec-1.2.0-ha411449_4.conda#0cfd601eb03cca403dcc248844787486
+
+# Conda: libbrotlienc=1.2.0=h018ffa1_4 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libbrotlicommon 1.2.0 h39a168f_4; libgcc >=15
+https://conda.anaconda.org/conda-forge/linux-64/libbrotlienc-1.2.0-h018ffa1_4.conda#4136f6e4ef4835cc7df39a707cbd511c
+
+# Conda: libcblas=3.11.0=11_h0358290_openblas (dependency)
+#   Depends: libblas 3.11.0 11_h4a7cf45_openblas
+#   Constrains (if installed): blas 2.311   openblas; liblapack  3.11.0   11*_openblas; liblapacke 3.11.0   11*_openblas
+https://conda.anaconda.org/conda-forge/linux-64/libcblas-3.11.0-11_h0358290_openblas.conda#73a248c30811075059b5aeda766c2624
+
+# Conda: libcups=2.3.3=h7a8fb5f_6 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; krb5 >=1.22.2,<1.23.0a0; libgcc >=14; libstdcxx >=14; libzlib >=1.3.1,<2.0a0
+https://conda.anaconda.org/conda-forge/linux-64/libcups-2.3.3-h7a8fb5f_6.conda#49c553b47ff679a6a1e9fc80b9c5a2d4
+
+# Conda: libcurl=8.23.0=ha042cf0_0 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; krb5 >=1.22.2,<1.23.0a0; libgcc >=15; libnghttp2 >=1.68.1,<2.0a0; libpsl >=0.23.1,<0.24.0a0; libssh2 >=1.11.1,<2.0a0; libzlib >=1.3.2,<2.0a0; openssl >=3.5.9,<4.0a0; zstd >=1.5.7,<1.6.0a0
+https://conda.anaconda.org/conda-forge/linux-64/libcurl-8.23.0-ha042cf0_0.conda#0ad16151226df493aed967f0efce0e80
+
+# Conda: libdeflate=1.25=hd45a770_1 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=14
+https://conda.anaconda.org/conda-forge/linux-64/libdeflate-1.25-hd45a770_1.conda#40f9b31aa9cf007789867df0decd0492
+
+# Conda: libedit=3.1.20260512=pl5321h373387f_0 (dependency)
+#   Depends: ncurses; __glibc >=2.17,<3.0.a0; libgcc >=14; ncurses >=6.6,<7.0a0
+https://conda.anaconda.org/conda-forge/linux-64/libedit-3.1.20260512-pl5321h373387f_0.conda#27dbd7e2984b8fe48e069379636ccfdd
+
+# Conda: libev=4.33=h280c20c_3 (dependency)
+#   Depends: libgcc >=14; __glibc >=2.17,<3.0.a0
+https://conda.anaconda.org/conda-forge/linux-64/libev-4.33-h280c20c_3.conda#7bc31538d6e3fb349e897353969237ec
+
+# Conda: libexpat=2.8.5=hd2095e1_0 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=15
+#   Constrains (if installed): expat 2.8.5.*
+https://conda.anaconda.org/conda-forge/linux-64/libexpat-2.8.5-hd2095e1_0.conda#72cfd2b95b0540247220b42f58a148d7
+
+# Conda: libffi=3.7.0=h81df57d_1 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=15
+https://conda.anaconda.org/conda-forge/linux-64/libffi-3.7.0-h81df57d_1.conda#6525a0b06aa4fd390795f0740636a9dd
+
+# Conda: libfreetype=2.14.3=ha770c72_2 (dependency)
+#   Depends: libfreetype6 >=2.14.3
+https://conda.anaconda.org/conda-forge/linux-64/libfreetype-2.14.3-ha770c72_2.conda#f8054e759d0ddddaf34a5c8fedc900a1
+
+# Conda: libfreetype6=2.14.3=h5e6c136_2 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=15; libpng >=1.6.58,<1.7.0a0; libzlib >=1.3.2,<2.0a0
+#   Constrains (if installed): freetype >=2.14.3
+https://conda.anaconda.org/conda-forge/linux-64/libfreetype6-2.14.3-h5e6c136_2.conda#b72a266a9317036fd0464cb98b027cd0
+
+# Conda: libgcc=16.2.0=ha9f2e26_7 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; _openmp_mutex >=4.5
+#   Constrains (if installed): libgcc-ng ==16.2.0=*_7; libgomp 16.2.0 he0feb66_7
+https://conda.anaconda.org/conda-forge/linux-64/libgcc-16.2.0-ha9f2e26_7.conda#735629b400b70eeab21a2ba8f5b1c2ce
+
+# Conda: libgcc-devel_linux-64=15.3.0=h2b852eb_107 (dependency)
+#   Depends: __unix
+https://conda.anaconda.org/conda-forge/noarch/libgcc-devel_linux-64-15.3.0-h2b852eb_107.conda#057ab488a4da13485caa3b672df9824a
+
+# Conda: libgcc-ng=16.2.0=h69a702a_7 (dependency)
+#   Depends: libgcc 16.2.0 ha9f2e26_7
+https://conda.anaconda.org/conda-forge/linux-64/libgcc-ng-16.2.0-h69a702a_7.conda#2005515ac9340f816fb2ac7e83afe553
+
+# Conda: libgdal-core=3.13.3=h7fa801c_3 (dependency)
+#   Depends: libgcc >=15; libstdcxx >=15; __glibc >=2.17,<3.0.a0; libspatialite >=5.1.0,<5.2.0a0; muparser >=2.3.5,<2.4.0a0; json-c >=0.18,<0.19.0a0; blosc >=1.21.6,<2.0a0; proj >=9.9.0,<9.10.0a0; libcurl >=8.22.0,<9.0a0; openssl >=3.5.9,<4.0a0; libzlib >=1.3.2,<2.0a0; zstd >=1.5.7,<1.6.0a0; liblzma >=5.8.3,<6.0a0; libjpeg-turbo >=3.2.0,<4.0a0; libexpat >=2.8.5,<3.0a0; libiconv >=1.18,<2.0a0; libpng >=1.6.59,<1.7.0a0; libarchive >=3.8.9,<3.9.0a0; xerces-c >=3.3.0,<3.4.0a0; libsqlite >=3.53.4,<4.0a0; libdeflate >=1.25,<1.26.0a0; libjxl >=0.12.0,<0.13.0a0; geos >=3.14.1,<3.14.2.0a0; lz4-c >=1.10.0,<1.11.0a0; libxml2; libxml2-16 >=2.15.4; libkml >=1.3.0,<1.4.0a0; giflib >=6.1.3,<6.2.0a0; libwebp-base >=1.6.0,<2.0a0; lerc >=4.2.0,<5.0a0; pcre2 >=10.47,<10.48.0a0
+#   Constrains (if installed): libgdal 3.13.3.*
+https://conda.anaconda.org/conda-forge/linux-64/libgdal-core-3.13.3-h7fa801c_3.conda#743a1213d87af795605c2c4a2440800a
+
+# Conda: libgdal-hdf4=3.13.3=hb736611_3 (requested: libgdal-hdf4)
+#   Depends: libgdal-core ==3.13.3 h7fa801c_3; libgcc >=15; libstdcxx >=15; __glibc >=2.17,<3.0.a0; libspatialite >=5.1.0,<5.2.0a0; muparser >=2.3.5,<2.4.0a0; json-c >=0.18,<0.19.0a0; blosc >=1.21.6,<2.0a0; proj >=9.9.0,<9.10.0a0; libcurl >=8.22.0,<9.0a0; openssl >=3.5.9,<4.0a0; libzlib >=1.3.2,<2.0a0; zstd >=1.5.7,<1.6.0a0; liblzma >=5.8.3,<6.0a0; libjpeg-turbo >=3.2.0,<4.0a0; libexpat >=2.8.5,<3.0a0; libiconv >=1.18,<2.0a0; libpng >=1.6.59,<1.7.0a0; libarchive >=3.8.9,<3.9.0a0; xerces-c >=3.3.0,<3.4.0a0; libsqlite >=3.53.4,<4.0a0; libdeflate >=1.25,<1.26.0a0; libjxl >=0.12.0,<0.13.0a0; geos >=3.14.1,<3.14.2.0a0; lz4-c >=1.10.0,<1.11.0a0; libxml2; libxml2-16 >=2.15.4; libkml >=1.3.0,<1.4.0a0; giflib >=6.1.3,<6.2.0a0; libwebp-base >=1.6.0,<2.0a0; lerc >=4.2.0,<5.0a0; pcre2 >=10.47,<10.48.0a0; libaec >=1.1.5,<2.0a0; hdf4 >=4.2.15,<4.2.16.0a0
+https://conda.anaconda.org/conda-forge/linux-64/libgdal-hdf4-3.13.3-hb736611_3.conda#a0bf70c86e12378a27f4528b11e0f055
+
+# Conda: libgdal-hdf5=3.13.3=h3ed37e9_3 (requested: libgdal-hdf5)
+#   Depends: libgdal-core ==3.13.3 h7fa801c_3; libgcc >=15; libstdcxx >=15; __glibc >=2.17,<3.0.a0; libspatialite >=5.1.0,<5.2.0a0; muparser >=2.3.5,<2.4.0a0; json-c >=0.18,<0.19.0a0; blosc >=1.21.6,<2.0a0; proj >=9.9.0,<9.10.0a0; libcurl >=8.22.0,<9.0a0; openssl >=3.5.9,<4.0a0; libzlib >=1.3.2,<2.0a0; zstd >=1.5.7,<1.6.0a0; liblzma >=5.8.3,<6.0a0; libjpeg-turbo >=3.2.0,<4.0a0; libexpat >=2.8.5,<3.0a0; libiconv >=1.18,<2.0a0; libpng >=1.6.59,<1.7.0a0; libarchive >=3.8.9,<3.9.0a0; xerces-c >=3.3.0,<3.4.0a0; libsqlite >=3.53.4,<4.0a0; libdeflate >=1.25,<1.26.0a0; libjxl >=0.12.0,<0.13.0a0; geos >=3.14.1,<3.14.2.0a0; lz4-c >=1.10.0,<1.11.0a0; libxml2; libxml2-16 >=2.15.4; libkml >=1.3.0,<1.4.0a0; giflib >=6.1.3,<6.2.0a0; libwebp-base >=1.6.0,<2.0a0; lerc >=4.2.0,<5.0a0; pcre2 >=10.47,<10.48.0a0; hdf5 >=1.14.6,<1.14.7.0a0
+https://conda.anaconda.org/conda-forge/linux-64/libgdal-hdf5-3.13.3-h3ed37e9_3.conda#879092f6a94c172b570df8fcfb6b39bb
+
+# Conda: libgdal-netcdf=3.13.3=hd0c1eb8_3 (requested: libgdal-netcdf)
+#   Depends: libgdal-core ==3.13.3 h7fa801c_3; libgdal-hdf5 3.13.3.*; libgdal-hdf4 3.13.3.*; libgcc >=15; libstdcxx >=15; __glibc >=2.17,<3.0.a0; libspatialite >=5.1.0,<5.2.0a0; muparser >=2.3.5,<2.4.0a0; json-c >=0.18,<0.19.0a0; blosc >=1.21.6,<2.0a0; proj >=9.9.0,<9.10.0a0; libcurl >=8.22.0,<9.0a0; openssl >=3.5.9,<4.0a0; libzlib >=1.3.2,<2.0a0; zstd >=1.5.7,<1.6.0a0; liblzma >=5.8.3,<6.0a0; libjpeg-turbo >=3.2.0,<4.0a0; libexpat >=2.8.5,<3.0a0; libiconv >=1.18,<2.0a0; libpng >=1.6.59,<1.7.0a0; libarchive >=3.8.9,<3.9.0a0; xerces-c >=3.3.0,<3.4.0a0; libsqlite >=3.53.4,<4.0a0; libdeflate >=1.25,<1.26.0a0; libjxl >=0.12.0,<0.13.0a0; geos >=3.14.1,<3.14.2.0a0; lz4-c >=1.10.0,<1.11.0a0; libxml2; libxml2-16 >=2.15.4; libkml >=1.3.0,<1.4.0a0; giflib >=6.1.3,<6.2.0a0; libwebp-base >=1.6.0,<2.0a0; lerc >=4.2.0,<5.0a0; pcre2 >=10.47,<10.48.0a0; hdf4 >=4.2.15,<4.2.16.0a0; libnetcdf >=4.10.1,<4.10.2.0a0; hdf5 >=1.14.6,<1.14.7.0a0
+https://conda.anaconda.org/conda-forge/linux-64/libgdal-netcdf-3.13.3-hd0c1eb8_3.conda#edf65f687115ad96ad19c2d8ece49db0
+
+# Conda: libgfortran=16.2.0=h69a702a_7 (dependency)
+#   Depends: libgfortran5 16.2.0 h6b99dfc_7
+#   Constrains (if installed): libgfortran-ng ==16.2.0=*_7
+https://conda.anaconda.org/conda-forge/linux-64/libgfortran-16.2.0-h69a702a_7.conda#3a8d285f5f22138ef826ad54cf267e73
+
+# Conda: libgfortran5=16.2.0=h6b99dfc_7 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=16.2.0
+#   Constrains (if installed): libgfortran 16.2.0
+https://conda.anaconda.org/conda-forge/linux-64/libgfortran5-16.2.0-h6b99dfc_7.conda#7719ed7be38ad8c492c4bd5cc2bce0c4
+
+# Conda: libglib=2.90.0=h569388d_0 (dependency)
+#   Depends: libgcc >=15; __glibc >=2.17,<3.0.a0; libiconv >=1.18,<2.0a0; pcre2 >=10.47,<10.48.0a0; libffi >=3.7.0,<3.8.0a0; libzlib >=1.3.2,<2.0a0
+#   Constrains (if installed): glib >2.66
+https://conda.anaconda.org/conda-forge/linux-64/libglib-2.90.0-h569388d_0.conda#c85e9539551f1fd21104e518d940c244
+
+# Conda: libgomp=16.2.0=he0feb66_7 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0
+https://conda.anaconda.org/conda-forge/linux-64/libgomp-16.2.0-he0feb66_7.conda#d904c7ddd95e026254b4b80808ee9e12
+
+# Conda: libharfbuzz=14.6.0=h23af247_2 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; cairo >=1.18.6,<2.0a0; graphite2 >=1.3.15,<2.0a0; icu >=78.3,<79.0a0; libfreetype >=2.14.3; libfreetype6 >=2.14.3; libgcc >=15; libglib >=2.90.0,<3.0a0; libpng >=1.6.59,<1.7.0a0; libstdcxx >=15; libzlib >=1.3.2,<2.0a0
+https://conda.anaconda.org/conda-forge/linux-64/libharfbuzz-14.6.0-h23af247_2.conda#6a93147cab011f36d1659745c3f579e2
+
+# Conda: libhwy=1.4.0=h57c4cff_2 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=15; libstdcxx >=15
+https://conda.anaconda.org/conda-forge/linux-64/libhwy-1.4.0-h57c4cff_2.conda#145497b38fe581a7760dd88b7377c96b
+
+# Conda: libiconv=1.18=h0cb94f2_3 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=15
+https://conda.anaconda.org/conda-forge/linux-64/libiconv-1.18-h0cb94f2_3.conda#f92233bf33e24a25668bb2119e2c51f9
+
+# Conda: libjpeg-turbo=3.2.0=hb03c661_1 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=14
+#   Constrains (if installed): jpeg <0.0.0a
+https://conda.anaconda.org/conda-forge/linux-64/libjpeg-turbo-3.2.0-hb03c661_1.conda#898d1c9793eaa52efc4727bd84d2e39a
+
+# Conda: libjxl=0.12.0=heb2dce7_4 (dependency)
+#   Depends: libstdcxx >=15; libgcc >=15; __glibc >=2.17,<3.0.a0; libbrotlienc >=1.2.0,<1.3.0a0; libbrotlidec >=1.2.0,<1.3.0a0; libhwy >=1.4.0,<1.5.0a0
+https://conda.anaconda.org/conda-forge/linux-64/libjxl-0.12.0-heb2dce7_4.conda#8770a39fd4c5559357efc7cdb8f0c742
+
+# Conda: libkml=1.3.0=haa4a5bd_1023 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libexpat >=2.7.5,<3.0a0; libgcc >=14; libstdcxx >=14; libzlib >=1.3.2,<2.0a0; uriparser >=0.9.8,<1.0a0
+https://conda.anaconda.org/conda-forge/linux-64/libkml-1.3.0-haa4a5bd_1023.conda#953b7cca897e21215302dbfe2af5cd0c
+
+# Conda: liblapack=3.11.0=11_h47877c9_openblas (dependency)
+#   Depends: libblas 3.11.0 11_h4a7cf45_openblas
+#   Constrains (if installed): blas 2.311   openblas; libcblas   3.11.0   11*_openblas; liblapacke 3.11.0   11*_openblas
+https://conda.anaconda.org/conda-forge/linux-64/liblapack-3.11.0-11_h47877c9_openblas.conda#5622a13917855ce4b953b9e655cf9262
+
+# Conda: liblzma=5.8.3=hb03c661_1 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=14
+#   Constrains (if installed): xz 5.8.3.*
+https://conda.anaconda.org/conda-forge/linux-64/liblzma-5.8.3-hb03c661_1.conda#1390b7c5ac0b1d8e447bc5efa6d3c8c2
+
+# Conda: liblzma-devel=5.8.3=hb03c661_1 (requested: liblzma-devel)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=14; liblzma 5.8.3 hb03c661_1
+https://conda.anaconda.org/conda-forge/linux-64/liblzma-devel-5.8.3-hb03c661_1.conda#6d83d6a332c19424e9e66b69b180ec11
+
+# Conda: libmpdec=4.0.0=hb03c661_2 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=14
+https://conda.anaconda.org/conda-forge/linux-64/libmpdec-4.0.0-hb03c661_2.conda#fcfed1dc5053eb1901b66e7b1fc32588
+
+# Conda: libnetcdf=4.10.1=nompi_h3fa17b5_201 (dependency)
+#   Depends: libstdcxx >=14; libgcc >=14; __glibc >=2.17,<3.0.a0; libcurl >=8.21.0,<9.0a0; hdf5 >=1.14.6,<1.14.7.0a0; zstd >=1.5.7,<1.6.0a0; hdf4 >=4.2.15,<4.2.16.0a0; blosc >=1.21.6,<2.0a0; libzlib >=1.3.2,<2.0a0; libxml2; libxml2-16 >=2.14.6; libaec >=1.1.5,<2.0a0; bzip2 >=1.0.8,<2.0a0; libzip >=1.11.2,<2.0a0; openssl >=3.5.7,<4.0a0
+https://conda.anaconda.org/conda-forge/linux-64/libnetcdf-4.10.1-nompi_h3fa17b5_201.conda#4612a01496444744808e82fa6da901d4
+
+# Conda: libnghttp2=1.68.1=h74cf4be_1 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; c-ares >=1.34.8,<2.0a0; libev >=4.33,<4.34.0a0; libev >=4.33,<5.0a0; libgcc >=15; libstdcxx >=15; libzlib >=1.3.2,<2.0a0; openssl >=3.5.7,<4.0a0
+https://conda.anaconda.org/conda-forge/linux-64/libnghttp2-1.68.1-h74cf4be_1.conda#75d211f04ac87506f1f43420712a69fe
+
+# Conda: libnsl=2.0.1=hb9d3cd8_1 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=13
+https://conda.anaconda.org/conda-forge/linux-64/libnsl-2.0.1-hb9d3cd8_1.conda#d864d34357c3b65a4b731f78c0801dc4
+
+# Conda: libopenblas=0.3.34=pthreads_hf13c14d_2 (dependency)
+#   Depends: libgfortran5 >=15.3.0; libgfortran; libgcc >=15; __glibc >=2.17,<3.0.a0
+#   Constrains (if installed): openblas >=0.3.34,<0.3.35.0a0
+https://conda.anaconda.org/conda-forge/linux-64/libopenblas-0.3.34-pthreads_hf13c14d_2.conda#7e19fcd73d7f0997d3cb3326d2586a86
+
+# Conda: libpango=1.58.2=hce4e988_3 (dependency)
+#   Depends: libgcc >=15; __glibc >=2.17,<3.0.a0; libfreetype >=2.14.3; libfreetype6 >=2.14.3; fontconfig >=2.18.3,<3.0a0; fonts-conda-ecosystem; cairo >=1.18.6,<2.0a0; fribidi >=1.0.17,<2.0a0; libglib >=2.90.0,<3.0a0; libharfbuzz >=14.6.0
+https://conda.anaconda.org/conda-forge/linux-64/libpango-1.58.2-hce4e988_3.conda#d1ad1c07f3ae04176c0b218d7fe3be9b
+
+# Conda: libpng=1.6.59=h922cc85_0 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=15; libzlib >=1.3.2,<2.0a0
+https://conda.anaconda.org/conda-forge/linux-64/libpng-1.6.59-h922cc85_0.conda#8c9caf742a485ac688ffa88bbadbf0be
+
+# Conda: libpsl=0.23.1=hd9e3e90_1 (dependency)
+#   Depends: libstdcxx >=15; libgcc >=15; __glibc >=2.17,<3.0.a0; icu >=78.3,<79.0a0
+https://conda.anaconda.org/conda-forge/linux-64/libpsl-0.23.1-hd9e3e90_1.conda#77be60417aa572afcb48cbe0f967401d
+
+# Conda: librttopo=1.1.0=h55b0958_21 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; geos >=3.14.1,<3.14.2.0a0; libgcc >=15; libstdcxx >=15
+https://conda.anaconda.org/conda-forge/linux-64/librttopo-1.1.0-h55b0958_21.conda#6c639697369e9669032ca08d0a566282
+
+# Conda: libsanitizer=15.3.0=h54950a5_7 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=15.3.0; libstdcxx >=15.3.0
+https://conda.anaconda.org/conda-forge/linux-64/libsanitizer-15.3.0-h54950a5_7.conda#04361d154f650289702f20c0ff86d7be
+
+# Conda: libspatialite=5.1.0=gpl_h2988700_122 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; freexl >=2; freexl >=2.0.0,<3.0a0; geos >=3.14.1,<3.14.2.0a0; libgcc >=15; librttopo >=1.1.0,<1.2.0a0; libsqlite >=3.53.4,<4.0a0; libstdcxx >=15; libxml2; libxml2-16 >=2.15.4; libxml2-devel; libzlib >=1.3.2,<2.0a0; proj >=9.9.0,<9.10.0a0; sqlite; zlib
+https://conda.anaconda.org/conda-forge/linux-64/libspatialite-5.1.0-gpl_h2988700_122.conda#2f88d147c5cf80d3f4e8f019fa6cbfed
+
+# Conda: libsqlite=3.54.1=h13e7031_0 (requested: libsqlite)
+#   Depends: __glibc >=2.17,<3.0.a0; icu >=78.3,<79.0a0; libgcc >=15; libzlib >=1.3.2,<2.0a0
+https://conda.anaconda.org/conda-forge/linux-64/libsqlite-3.54.1-h13e7031_0.conda#8f15f0ec9b69344df5c3bb5cce1751a1
+
+# Conda: libssh2=1.11.1=h6154650_1 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=14; libzlib >=1.3.2,<2.0a0; openssl >=3.5.7,<4.0a0
+https://conda.anaconda.org/conda-forge/linux-64/libssh2-1.11.1-h6154650_1.conda#5c526561e1d2a2e071941174eae84557
+
+# Conda: libstdcxx=16.2.0=h934c35e_7 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc 16.2.0 ha9f2e26_7
+#   Constrains (if installed): libstdcxx-ng ==16.2.0=*_7
+https://conda.anaconda.org/conda-forge/linux-64/libstdcxx-16.2.0-h934c35e_7.conda#9b6707e0caca917fa6ea9ee473f37a5d
+
+# Conda: libstdcxx-devel_linux-64=15.3.0=hb2c5482_107 (dependency)
+#   Depends: __unix
+https://conda.anaconda.org/conda-forge/noarch/libstdcxx-devel_linux-64-15.3.0-hb2c5482_107.conda#edce245dade1c29f691983796b4b8414
+
+# Conda: libstdcxx-ng=16.2.0=hdf11a46_7 (dependency)
+#   Depends: libstdcxx 16.2.0 h934c35e_7
+https://conda.anaconda.org/conda-forge/linux-64/libstdcxx-ng-16.2.0-hdf11a46_7.conda#25a23bde5e26d548374f3e02b4669670
+
+# Conda: libtiff=4.7.2=hcc2c06a_1 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; lerc >=4.2.0,<5.0a0; libdeflate >=1.25,<1.26.0a0; libgcc >=15; libjpeg-turbo >=3.2.0,<4.0a0; liblzma >=5.8.3,<6.0a0; libstdcxx >=15; libwebp-base >=1.6.0,<2.0a0; libzlib >=1.3.2,<2.0a0; zstd >=1.5.7,<1.6.0a0
+https://conda.anaconda.org/conda-forge/linux-64/libtiff-4.7.2-hcc2c06a_1.conda#0907d876f460ebc941ae590338b6102f
+
+# Conda: libudunits2=2.2.28=h40f5838_3 (dependency)
+#   Depends: libexpat >=2.5.0,<3.0a0; libgcc-ng >=12
+#   Constrains (if installed): udunits2 2.2.28.*
+https://conda.anaconda.org/conda-forge/linux-64/libudunits2-2.2.28-h40f5838_3.conda#4bdace082e911a3e1f1f0b721bed5b56
+
+# Conda: libuuid=2.42.4=hcfc3c73_0 (dependency)
+#   Depends: libgcc >=15; __glibc >=2.17,<3.0.a0
+https://conda.anaconda.org/conda-forge/linux-64/libuuid-2.42.4-hcfc3c73_0.conda#54a948337e66706380ff24d6b5fde63f
+
+# Conda: libwebp-base=1.6.0=hd42ef1d_1 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=14
+#   Constrains (if installed): libwebp 1.6.0
+https://conda.anaconda.org/conda-forge/linux-64/libwebp-base-1.6.0-hd42ef1d_1.conda#9332b53d0ea93c5d39e33be03a0c611a
+
+# Conda: libxcb=1.17.0=hb83e432_2 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=15; pthread-stubs; xorg-libxau >=1.0.12,<2.0a0; xorg-libxdmcp >=1.1.5,<2.0a0
+https://conda.anaconda.org/conda-forge/linux-64/libxcb-1.17.0-hb83e432_2.conda#61f0ffba9161cbb3a77722869b21e4bb
+
+# Conda: libxcrypt=4.4.38=h280c20c_0 (dependency)
+#   Depends: libgcc >=14; __glibc >=2.17,<3.0.a0
+https://conda.anaconda.org/conda-forge/linux-64/libxcrypt-4.4.38-h280c20c_0.conda#f7a7ff5a6ab331e037abd34f379a631d
+
+# Conda: libxml2=2.15.4=h7df9aa5_1 (requested: libxml2)
+#   Depends: __glibc >=2.17,<3.0.a0; icu >=78.3,<79.0a0; libgcc >=15; libiconv >=1.18,<2.0a0; liblzma >=5.8.3,<6.0a0; libxml2-16 2.15.4 hf3af7cc_1; libzlib >=1.3.2,<2.0a0
+https://conda.anaconda.org/conda-forge/linux-64/libxml2-2.15.4-h7df9aa5_1.conda#51e5162f95bd6840f6b2b3169125fff5
+
+# Conda: libxml2-16=2.15.4=hf3af7cc_1 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; icu >=78.3,<79.0a0; libgcc >=15; libiconv >=1.18,<2.0a0; liblzma >=5.8.3,<6.0a0; libzlib >=1.3.2,<2.0a0
+#   Constrains (if installed): libxml2 2.15.4
+https://conda.anaconda.org/conda-forge/linux-64/libxml2-16-2.15.4-hf3af7cc_1.conda#046d9eada488e1a1657c80b55c23da52
+
+# Conda: libxml2-devel=2.15.4=h7df9aa5_1 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; icu >=78.3,<79.0a0; libgcc >=15; libiconv >=1.18,<2.0a0; liblzma >=5.8.3,<6.0a0; libxml2 2.15.4 h7df9aa5_1; libxml2-16 2.15.4 hf3af7cc_1; libzlib >=1.3.2,<2.0a0
+https://conda.anaconda.org/conda-forge/linux-64/libxml2-devel-2.15.4-h7df9aa5_1.conda#c6f14f767cbfe20fa03a324beb6cd7eb
+
+# Conda: libzip=1.12.1=h6008cf6_0 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; bzip2 >=1.0.8,<2.0a0; libgcc >=15; libzlib >=1.3.2,<2.0a0; openssl >=3.5.9,<4.0a0
+https://conda.anaconda.org/conda-forge/linux-64/libzip-1.12.1-h6008cf6_0.conda#b91ef8a5538f945acc152f41f5704edf
+
+# Conda: libzlib=1.3.2=h25fd6f3_3 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0
+#   Constrains (if installed): zlib 1.3.2 *_3
+https://conda.anaconda.org/conda-forge/linux-64/libzlib-1.3.2-h25fd6f3_3.conda#0de0122d9570a8ab637c6b73db268389
+
+# Conda: lz4-c=1.10.0=hee9eb32_2 (dependency)
+#   Depends: libgcc >=15; libstdcxx >=15; __glibc >=2.17,<3.0.a0
+https://conda.anaconda.org/conda-forge/linux-64/lz4-c-1.10.0-hee9eb32_2.conda#e38a3253d72ab07d471483f24947e2a2
+
+# Conda: lzo=2.10=hebe6cf0_1003 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=15
+https://conda.anaconda.org/conda-forge/linux-64/lzo-2.10-hebe6cf0_1003.conda#10e0aa58ed390ba598b728badf9eb1b7
+
+# Conda: make=4.4.1=h1114479_4 (requested: make)
+#   Depends: libgcc >=15; __glibc >=2.17,<3.0.a0
+https://conda.anaconda.org/conda-forge/linux-64/make-4.4.1-h1114479_4.conda#538c2493de55d1fe2d90e0adc23d4948
+
+# Conda: minizip=4.2.2=haac24f3_1 (dependency)
+#   Depends: libstdcxx >=15; libgcc >=15; __glibc >=2.17,<3.0.a0; zstd >=1.5.7,<1.6.0a0; libzlib >=1.3.2,<2.0a0; libiconv >=1.18,<2.0a0; bzip2 >=1.0.8,<2.0a0; openssl >=3.5.8,<4.0a0; liblzma >=5.8.3,<6.0a0
+https://conda.anaconda.org/conda-forge/linux-64/minizip-4.2.2-haac24f3_1.conda#3fee8d11b0d8a54fb899749052accb4f
+
+# Conda: muparser=2.3.5=hee9eb32_1 (dependency)
+#   Depends: libstdcxx >=15; libgcc >=15; __glibc >=2.17,<3.0.a0
+https://conda.anaconda.org/conda-forge/linux-64/muparser-2.3.5-hee9eb32_1.conda#7de84fd76ec2bdb7ac617507de3d3052
+
+# Conda: ncurses=6.6=hdb14827_1 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=14
+https://conda.anaconda.org/conda-forge/linux-64/ncurses-6.6-hdb14827_1.conda#ee6c0cd80a60961a1f48aa3e0b91f986
+
+# Conda: numpy=2.5.4=py315h11958a5_0 (dependency)
+#   Depends: python; __glibc >=2.17,<3.0.a0; libstdcxx >=15; libgcc >=15; python_abi 3.15.* *_cp315; libcblas >=3.9.0,<4.0a0; libblas >=3.9.0,<4.0a0; liblapack >=3.9.0,<4.0a0
+#   Constrains (if installed): numpy-base <0a0
+https://conda.anaconda.org/conda-forge/linux-64/numpy-2.5.4-py315h11958a5_0.conda#9826d4c893d56867548d8aa126f6e5ec
+
+# Conda: openjdk=17.0.18=h1602c4f_18 (requested: openjdk=17)
+#   Depends: xorg-libx11; xorg-libxext; xorg-libxi; xorg-libxrender; xorg-libxtst; libstdcxx >=15; libgcc >=15; __glibc >=2.17,<3.0.a0; alsa-lib >=1.2.16.1,<1.3.0a0; xorg-libxrandr >=1.5.5,<2.0a0; lcms2 >=2.19.1,<3.0a0; xorg-libxt >=1.3.1,<2.0a0; xorg-libxtst >=1.2.5,<2.0a0; libzlib >=1.3.2,<2.0a0; giflib >=6.1.3,<6.2.0a0; libharfbuzz >=14.4.0; xorg-libxrender >=0.9.12,<0.10.0a0; xorg-libxi >=1.8.3,<2.0a0; libpng >=1.6.58,<1.7.0a0; xorg-libx11 >=1.8.13,<2.0a0; libcups >=2.3.3,<2.4.0a0; xorg-libxext >=1.3.7,<2.0a0; libfreetype >=2.14.3; libfreetype6 >=2.14.3; fontconfig >=2.18.3,<3.0a0; fonts-conda-ecosystem; libjpeg-turbo >=3.2.0,<4.0a0
+https://conda.anaconda.org/conda-forge/linux-64/openjdk-17.0.18-h1602c4f_18.conda#b6596b03736e49cc60360fff8e201c16
+
+# Conda: openssl=3.6.5=h781a0a9_0 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; ca-certificates; libgcc >=15
+https://conda.anaconda.org/conda-forge/linux-64/openssl-3.6.5-h781a0a9_0.conda#5a51a2ea653f120240b1a9bf76e0aae9
+
+# Conda: pcre2=10.47=h8b3dc9c_1 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; bzip2 >=1.0.8,<2.0a0; libgcc >=15; libzlib >=1.3.2,<2.0a0
+https://conda.anaconda.org/conda-forge/linux-64/pcre2-10.47-h8b3dc9c_1.conda#06f6113cf1ff4a54b65f87ead132a5f1
+
+# Conda: perl=5.44.0=1_h7cc23a3_perl5 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=15; libxcrypt >=4.4.38
+https://conda.anaconda.org/conda-forge/linux-64/perl-5.44.0-1_h7cc23a3_perl5.conda#474944e9c978cc84911f1c1f9eaa8bb2
+
+# Conda: pip=26.2.1=pyh145f28c_0 (dependency)
+#   Depends: python >=3.13.0a0
+https://conda.anaconda.org/conda-forge/noarch/pip-26.2.1-pyh145f28c_0.conda#573cb3ed111004230ed3de650653cd4d
+
+# Conda: pixman=0.46.4=h54a6638_3 (dependency)
+#   Depends: libstdcxx >=14; libgcc >=14; __glibc >=2.17,<3.0.a0
+https://conda.anaconda.org/conda-forge/linux-64/pixman-0.46.4-h54a6638_3.conda#0ee5bb30034b081a1386c1e2c98ab0a7
+
+# Conda: pkg-config=0.29.2=h1114479_1013 (requested: pkg-config)
+#   Depends: libgcc >=15; __glibc >=2.17,<3.0.a0
+https://conda.anaconda.org/conda-forge/linux-64/pkg-config-0.29.2-h1114479_1013.conda#0aab2923309084c5f89ef32cd39a19b2
+
+# Conda: proj=9.9.0=h3767062_0 (requested: proj)
+#   Depends: sqlite; libtiff; libcurl; libstdcxx >=15; libgcc >=15; __glibc >=2.17,<3.0.a0; libtiff >=4.7.2,<4.8.0a0; libcurl >=8.22.0,<9.0a0; libsqlite >=3.53.4,<4.0a0
+#   Constrains (if installed): proj4 ==999999999999
+https://conda.anaconda.org/conda-forge/linux-64/proj-9.9.0-h3767062_0.conda#29e9221e3a2122d57234d424b94649b6
+
+# Conda: pthread-stubs=0.4=h7cc23a3_1004 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=15
+https://conda.anaconda.org/conda-forge/linux-64/pthread-stubs-0.4-h7cc23a3_1004.conda#bb66b610707b811e3c65181a6431e7a8
+
+# Conda: python=3.15.0=h6e52b48_101_cp315 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; bzip2 >=1.0.8,<2.0a0; ld_impl_linux-64 >=2.36.1; libedit >=3.1.20260512,<3.2.0a0; libexpat >=2.8.5,<3.0a0; libffi >=3.7.0,<3.8.0a0; libgcc >=15; liblzma >=5.8.3,<6.0a0; libmpdec >=4.0.0,<5.0a0; libsqlite >=3.54.0,<4.0a0; libuuid >=2.42.4,<3.0a0; libzlib >=1.3.2,<2.0a0; ncurses >=6.6,<7.0a0; openssl >=3.5.9,<4.0a0; python_abi 3.15.* *_cp315; tk >=8.6.13,<8.7.0a0; tzdata; zstd >=1.5.7,<1.6.0a0; pip
+https://conda.anaconda.org/conda-forge/linux-64/python-3.15.0-h6e52b48_101_cp315.conda#dd71852d6d8f54a925029fed1dff8c61
+
+# Conda: python_abi=3.15=9_cp315 (dependency)
+#   Constrains (if installed): python 3.15.* *_cp315
+https://conda.anaconda.org/conda-forge/noarch/python_abi-3.15-9_cp315.conda#b23461631fe2abdbade0cb64babe7344
+
+# Conda: qpdf=12.4.2=h7db8e16_1 (requested: qpdf)
+#   Depends: libstdcxx >=15; libgcc >=15; __glibc >=2.17,<3.0.a0; libzlib >=1.3.2,<2.0a0; libjpeg-turbo >=3.2.0,<4.0a0; openssl >=3.5.9,<4.0a0
+https://conda.anaconda.org/conda-forge/linux-64/qpdf-12.4.2-h7db8e16_1.conda#a01314c75b861389d15dff41ac494940
+
+# Conda: r-base=4.6.1=h502d0c9_2 (requested: r-base=4.6)
+#   Depends: __glibc >=2.17,<3.0.a0; _openmp_mutex >=4.5; _r-mutex 1.* anacondar_1; bwidget; bzip2 >=1.0.8,<2.0a0; cairo >=1.18.6,<2.0a0; curl; gcc_impl_linux-64 >=14; gfortran_impl_linux-64; gsl >=2.7,<2.8.0a0; gxx_impl_linux-64 >=14; icu >=78.3,<79.0a0; libblas >=3.9.0,<4.0a0; libcurl >=8.23.0,<9.0a0; libdeflate >=1.25,<1.26.0a0; libexpat >=2.8.5,<3.0a0; libgcc >=14; libgfortran; libgfortran5 >=14.4.0; libglib >=2.90.0,<3.0a0; libiconv >=1.18,<2.0a0; libjpeg-turbo >=3.2.0,<4.0a0; liblapack >=3.9.0,<4.0a0; liblzma >=5.8.3,<6.0a0; libpango >=1.58.2,<2.0a0; libpng >=1.6.59,<1.7.0a0; libstdcxx >=14; libtiff >=4.7.2,<4.8.0a0; libuuid >=2.42.4,<3.0a0; libzlib >=1.3.2,<2.0a0; make; pcre2 >=10.47,<10.48.0a0; readline >=8.3,<9.0a0; sed; tk >=8.6.13,<8.7.0a0; tktable; tzdata >=2024a; xorg-libice >=1.1.2,<2.0a0; xorg-libsm >=1.2.6,<2.0a0; xorg-libx11 >=1.8.13,<2.0a0; xorg-libxt >=1.3.1,<2.0a0
+https://conda.anaconda.org/conda-forge/linux-64/r-base-4.6.1-h502d0c9_2.conda#a64793e91521e0e4e69e3408fdc5907d
+
+# Conda: readline=8.3=hd6e31c0_1 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=15; ncurses >=6.6,<7.0a0
+https://conda.anaconda.org/conda-forge/linux-64/readline-8.3-hd6e31c0_1.conda#69c01c781e7c8190bbdaf79e3848c5ca
+
+# Conda: rust=1.97.1=hc89c8c8_2 (requested: rust=1.97)
+#   Depends: __glibc >=2.17,<3.0.a0; gcc_impl_linux-64; libgcc >=15; libzlib >=1.3.2,<2.0a0; rust-std-x86_64-unknown-linux-gnu 1.97.1 h2c6d0dc_2; sysroot_linux-64 >=2.17
+https://conda.anaconda.org/conda-forge/linux-64/rust-1.97.1-hc89c8c8_2.conda#90838e4a8933fcbf5d817adde1aa9e02
+
+# Conda: rust-std-x86_64-unknown-linux-gnu=1.97.1=h2c6d0dc_2 (dependency)
+#   Depends: __unix
+#   Constrains (if installed): rust >=1.97.1,<1.97.2.0a0
+https://conda.anaconda.org/conda-forge/noarch/rust-std-x86_64-unknown-linux-gnu-1.97.1-h2c6d0dc_2.conda#b6616e82c76df396a08d07c3218f52c4
+
+# Conda: sed=4.10=h19d0853_0 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=14
+https://conda.anaconda.org/conda-forge/linux-64/sed-4.10-h19d0853_0.conda#e4a1ff2e59a5d9b38be71d15c93cf1bd
+
+# Conda: snappy=1.2.2=h34e00bb_2 (dependency)
+#   Depends: libgcc >=15; libstdcxx >=15; __glibc >=2.17,<3.0.a0
+https://conda.anaconda.org/conda-forge/linux-64/snappy-1.2.2-h34e00bb_2.conda#2b7e31ffbd476eecf33b3b833692339c
+
+# Conda: sqlite=3.54.1=h9ffa6c4_0 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; icu >=78.3,<79.0a0; libgcc >=15; libsqlite 3.54.1 h13e7031_0; libzlib >=1.3.2,<2.0a0; ncurses >=6.6,<7.0a0; readline >=8.3,<9.0a0
+https://conda.anaconda.org/conda-forge/linux-64/sqlite-3.54.1-h9ffa6c4_0.conda#3a2bfdc9f738f803c8f075915bd24701
+
+# Conda: sysroot_linux-64=2.28=h4ee821c_9 (dependency)
+#   Depends: __glibc >=2.28; kernel-headers_linux-64 4.18.0 he073ed8_9; tzdata
+https://conda.anaconda.org/conda-forge/noarch/sysroot_linux-64-2.28-h4ee821c_9.conda#13dc3adbc692664cd3beabd216434749
+
+# Conda: tk=8.6.13=noxft_h1df4ec4_4 (dependency)
+#   Depends: libgcc >=15; __glibc >=2.17,<3.0.a0; libzlib >=1.3.2,<2.0a0
+#   Constrains (if installed): xorg-libx11 >=1.8.13,<2.0a0
+https://conda.anaconda.org/conda-forge/linux-64/tk-8.6.13-noxft_h1df4ec4_4.conda#676a2f9b1c4fcf57b70aa5c65f6c60d0
+
+# Conda: tktable=2.10=h0eb2ad0_11 (dependency)
+#   Depends: tk; libgcc >=15; __glibc >=2.17,<3.0.a0; xorg-libx11 >=1.8.13,<2.0a0; tk >=8.6.13,<8.7.0a0
+https://conda.anaconda.org/conda-forge/linux-64/tktable-2.10-h0eb2ad0_11.conda#25d73f1e53349312f316ad82b78b5a7f
+
+# Conda: tzdata=2026c=h151e31d_0 (dependency)
+https://conda.anaconda.org/conda-forge/noarch/tzdata-2026c-h151e31d_0.conda#fcb489df604d100968b737f2cb6076c6
+
+# Conda: udunits2=2.2.28=h40f5838_3 (requested: udunits2)
+#   Depends: libexpat >=2.5.0,<3.0a0; libgcc-ng >=12; libudunits2 2.2.28 h40f5838_3
+https://conda.anaconda.org/conda-forge/linux-64/udunits2-2.2.28-h40f5838_3.conda#6bb8deb138f87c9d48320ac21b87e7a1
+
+# Conda: uriparser=0.9.8=hac33072_0 (dependency)
+#   Depends: libgcc-ng >=12; libstdcxx-ng >=12
+https://conda.anaconda.org/conda-forge/linux-64/uriparser-0.9.8-hac33072_0.conda#d71d3a66528853c0a1ac2c02d79a0284
+
+# Conda: xerces-c=3.3.0=h78fed68_2 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; icu >=78.3,<79.0a0; libgcc >=15; libnsl >=2.0.1,<2.1.0a0; libstdcxx >=15
+https://conda.anaconda.org/conda-forge/linux-64/xerces-c-3.3.0-h78fed68_2.conda#f2ff0de6c209e90c53b3a195c2708f5f
+
+# Conda: xorg-libice=1.1.2=h280c20c_0 (dependency)
+#   Depends: libgcc >=14; __glibc >=2.17,<3.0.a0
+https://conda.anaconda.org/conda-forge/linux-64/xorg-libice-1.1.2-h280c20c_0.conda#85c9442aec283b4e464fa9ecc484a2f3
+
+# Conda: xorg-libsm=1.2.6=h0d788c3_1 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=14; xorg-libice >=1.1.2,<2.0a0; libuuid >=2.42.2,<3.0a0
+https://conda.anaconda.org/conda-forge/linux-64/xorg-libsm-1.2.6-h0d788c3_1.conda#aa7459ed9ad086ba11dda843d764b33d
+
+# Conda: xorg-libx11=1.8.13=he1eb515_1 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=14; libxcb >=1.17.0,<2.0a0
+https://conda.anaconda.org/conda-forge/linux-64/xorg-libx11-1.8.13-he1eb515_1.conda#8c282bbe4808a3cc80a5c98e9aec1cfc
+
+# Conda: xorg-libxau=1.0.12=h7cc23a3_2 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=15
+https://conda.anaconda.org/conda-forge/linux-64/xorg-libxau-1.0.12-h7cc23a3_2.conda#da33efee1a93603d92e06d4a2b68def6
+
+# Conda: xorg-libxdmcp=1.1.5=h7cc23a3_2 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=15
+https://conda.anaconda.org/conda-forge/linux-64/xorg-libxdmcp-1.1.5-h7cc23a3_2.conda#eabfc45786244de252090cf8d55128a8
+
+# Conda: xorg-libxext=1.3.7=h7cc23a3_1 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=15; xorg-libx11 >=1.8.13,<2.0a0
+https://conda.anaconda.org/conda-forge/linux-64/xorg-libxext-1.3.7-h7cc23a3_1.conda#e5b6b28536b81b3f4cb20db4668a4642
+
+# Conda: xorg-libxfixes=6.0.2=h7cc23a3_1 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=15; xorg-libx11 >=1.8.13,<2.0a0
+https://conda.anaconda.org/conda-forge/linux-64/xorg-libxfixes-6.0.2-h7cc23a3_1.conda#09132e874fe0e1f5e4492b0b6b904b6e
+
+# Conda: xorg-libxi=1.8.3=h7cc23a3_1 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=15; xorg-libx11 >=1.8.13,<2.0a0; xorg-libxext >=1.3.7,<2.0a0; xorg-libxfixes >=6.0.2,<7.0a0
+https://conda.anaconda.org/conda-forge/linux-64/xorg-libxi-1.8.3-h7cc23a3_1.conda#a1412b2b1184dacda45f8476fef2cc25
+
+# Conda: xorg-libxrandr=1.5.5=h7cc23a3_1 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=15; xorg-libx11 >=1.8.13,<2.0a0; xorg-libxext >=1.3.7,<2.0a0; xorg-libxrender >=0.9.12,<0.10.0a0
+https://conda.anaconda.org/conda-forge/linux-64/xorg-libxrandr-1.5.5-h7cc23a3_1.conda#798a8c9d171859a022e1cb89e7d0eb10
+
+# Conda: xorg-libxrender=0.9.12=hb03c661_1 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=14; xorg-libx11 >=1.8.13,<2.0a0
+https://conda.anaconda.org/conda-forge/linux-64/xorg-libxrender-0.9.12-hb03c661_1.conda#e470d224a7a5be1b1d021bded7abb536
+
+# Conda: xorg-libxt=1.3.1=h7cc23a3_1 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=15; xorg-libice >=1.1.2,<2.0a0; xorg-libsm >=1.2.6,<2.0a0; xorg-libx11 >=1.8.13,<2.0a0
+https://conda.anaconda.org/conda-forge/linux-64/xorg-libxt-1.3.1-h7cc23a3_1.conda#2121765de9c261e2a95ab9fc6efabefb
+
+# Conda: xorg-libxtst=1.2.6=h7cc23a3_0 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libgcc >=15; xorg-libx11 >=1.8.13,<2.0a0; xorg-libxext >=1.3.7,<2.0a0; xorg-libxi >=1.8.3,<2.0a0
+https://conda.anaconda.org/conda-forge/linux-64/xorg-libxtst-1.2.6-h7cc23a3_0.conda#05e756ed9e8b2358591d47f6b8939db4
+
+# Conda: zlib=1.3.2=h25fd6f3_3 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libzlib 1.3.2 h25fd6f3_3
+https://conda.anaconda.org/conda-forge/linux-64/zlib-1.3.2-h25fd6f3_3.conda#6acb86426229f96f93e5468d1df3a5e8
+
+# Conda: zstd=1.5.7=hb78ec9c_7 (dependency)
+#   Depends: __glibc >=2.17,<3.0.a0; libzlib >=1.3.2,<2.0a0
+https://conda.anaconda.org/conda-forge/linux-64/zstd-1.5.7-hb78ec9c_7.conda#aa459086047c0e5e27023ab19f8cb86a
+
+# PYTHON DISTRIBUTIONS (3; already covered by the conda URLs above)
+# No additional pip installation step is needed for this snapshot.
+# pip freeze records conda build-machine file:// URLs for these packages;
+# those unavailable build paths are deliberately not used as install sources.
+# Python: GDAL==3.13.3 (conda: gdal)
+#   Requires-Dist (optional extra): numpy>1.0.0; extra == "numpy"
+# Python: numpy==2.5.4 (conda: numpy)
+# Python: pip==26.2.1 (conda: pip)
+
+# R PACKAGES (274; alphabetically ordered, case-insensitive)
+# Entries use R: Package=Version as inventory notation, not a conda/pip requirement.
+# Management identifies the packages already supplied by the r-base archive.
+# RemoteSha is preserved for nonstandard sources; use that exact revision
+# when reinstalling, along with RemoteSubdir where present, rather than HEAD
+# or the mutable branch/tag in RemoteRef. CRAN entries are pinned by Version.
+# An absent dependency/source field means it was absent in installed metadata.
+
+# R: abind=1.4-8
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 12:54:22 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 1.5.0)
+#   Imports: methods, utils
+
+# R: amadeus=2.1.0
+#   Management: R (install separately)
+#   RemoteType: github
+#   RemoteHost: api.github.com
+#   RemoteUsername: NIEHS
+#   RemoteRepo: amadeus
+#   RemoteRef: HEAD
+#   RemoteSha: 0f1a41c59c6e037d6921eb90fca14cbbd46e85aa
+#   RemotePkgRef: NIEHS/amadeus
+#   Built: R 4.6.1; ; 2026-11-16 13:43:35 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.2.0)
+#   Imports: checkmate, dplyr, sf, sftime, stats, terra (>= 1.8-42), methods, data.table, httr2, exactextractr, utils, stringi, stars, tidyr, rlang, archive, collapse, Rdpack, xml2
+#   Suggests: covr, devtools, doRNG, FNN, furrr, ggplot2, hydrogeofetch, knitr, lwgeom, maps, mirai, rmarkdown, spelling, stringr, targets, testthat (>= 3.0.0), tigris, withr
+
+# R: amadeusdb=0.0.8
+#   Management: R (install separately)
+#   RemoteType: github
+#   RemoteHost: api.github.com
+#   RemoteUsername: mitchellmanware
+#   RemoteRepo: amadeusdb
+#   RemoteRef: mm-1116
+#   RemoteSha: 625f991a0e1135515389a22aaf5ffdeee179cf63
+#   RemotePkgRef: mitchellmanware/amadeusdb@mm-1116
+#   Built: R 4.6.1; ; 2026-11-16 13:24:32 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.2.0)
+#   Imports: amadeus, checkmate, glue, methods, ncdf4, sedonadb, sf, stats, tidyselect
+#   Suggests: dplyr, terra, testthat (>= 3.0.0)
+
+# R: anticlust=0.8.18
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:13:49 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.6.0)
+#   Imports: Matrix, RANN (>= 2.6.0), lpSolve, MASS
+#   Suggests: knitr, Rglpk, rmarkdown, Rsymphony, tinytest, gurobi, tableone, palmerpenguins
+#   SystemRequirements: Rendering the vignette requires pandoc (<https://pandoc.org/>).
+
+# R: archive=1.1.14
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 12:55:20 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 4.0.0)
+#   Imports: cli, glue, rlang, tibble
+#   LinkingTo: cli
+#   Suggests: testthat
+#   SystemRequirements: libarchive: libarchive-dev (deb), libarchive-devel (rpm), libarchive (homebrew), libarchive_dev (csw)
+
+# R: arrow=25.0.1
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 14:47:11 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 4.2)
+#   Imports: assertthat, bit64 (>= 0.9-7), glue, methods, purrr, R6, rlang (>= 1.0.0), stats, tidyselect (>= 1.0.0), utils, vctrs
+#   LinkingTo: cpp11 (>= 0.4.2)
+#   Suggests: blob, curl, cli, DBI, dbplyr, decor, distro, dplyr, duckdb (>= 0.2.8), hms, jsonlite, knitr, lubridate, pillar, pkgload, reticulate, rmarkdown, stringi, stringr, sys, testthat (>= 3.3.0), tibble, tzdb, withr
+#   SystemRequirements: C++20; for AWS S3 support on Linux, libcurl and openssl (optional); cmake >= 3.26 (build-time only, and only for full source build)
+
+# R: askpass=1.2.1
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 12:54:27 UTC; unix
+#   NeedsCompilation: yes
+#   Imports: sys (>= 2.1)
+#   Suggests: testthat
+
+# R: assertthat=0.2.1
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:35:56 UTC; unix
+#   NeedsCompilation: no
+#   Imports: tools
+#   Suggests: testthat, covr
+
+# R: backports=1.5.1
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:37 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.0.0)
+
+# R: base=4.6.1
+#   Management: conda (r-base)
+#   Priority: base
+#   Built: R 4.6.1; ; 2026-10-16 19:15:42 UTC; unix
+#   Suggests: methods
+#   Enhances: chron, date, round
+
+# R: base64enc=0.1-6
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:37 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 2.9.0)
+#   Enhances: png
+
+# R: base64url=1.4
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:44 UTC; unix
+#   NeedsCompilation: yes
+#   Imports: backports (>= 1.1.0)
+#   Suggests: base64enc, checkmate, knitr, microbenchmark, openssl, rmarkdown, testthat
+
+# R: beethoven=0.5.3
+#   Management: R (install separately)
+#   RemoteType: github
+#   RemoteHost: api.github.com
+#   RemoteUsername: NIEHS
+#   RemoteRepo: beethoven
+#   RemoteRef: mm-1013
+#   RemoteSha: 5b7b9ad9468d2111b67b265344b22e8b13f80828
+#   RemotePkgRef: NIEHS/beethoven@mm-1013
+#   Built: R 4.6.1; ; 2026-10-19 13:17:36 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.2.0)
+#   Imports: dplyr, sf, stats, terra, methods, data.table, targets, tune (>= 1.2.1), rlang, parsnip, rsample, spatialsample, tidyr, tidyselect, yardstick, workflows, recipes, missRanger, qs2, stringi, tibble, collapse, tigris, graphics, scatterplot3d, parallelly, magrittr, lubridate, purrr, finetune, butcher, amadeus, chopin
+#   Suggests: testthat (>= 3.0.0), covr, withr, bonsai, brulee, glmnet, lightgbm, scoringRules, vetiver, tarchetypes, tidymodels, knitr, rmarkdown, stars, sftime, lwgeom, FNN, ggplot2, doRNG, furrr, quarto, torch, kernlab, arrow
+#   SystemRequirements: NetCDF4, CUDA (>= 10.0)
+
+# R: bit=4.6.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:35:47 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.4.0)
+#   Suggests: testthat (>= 3.0.0), roxygen2, knitr, markdown, rmarkdown, microbenchmark, bit64 (>= 4.0.0), ff (>= 4.0.0)
+
+# R: bit64=4.8.6
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:35:58 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.5.0)
+#   Imports: bit (>= 4.0.0), graphics, methods, stats, utils
+#   Suggests: patrick (>= 0.3.0), testthat (>= 3.3.0), withr
+
+# R: blob=1.3.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:19:15 UTC; unix
+#   NeedsCompilation: no
+#   Imports: methods, rlang, vctrs (>= 0.2.1)
+#   Suggests: covr, crayon, pillar (>= 1.2.1), testthat (>= 3.0.0)
+
+# R: boot=1.3-32
+#   Management: R (install separately)
+#   Priority: recommended
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-11-02 16:49:36 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 3.0.0), graphics, stats
+#   Suggests: MASS, survival
+
+# R: brew=1.0-10
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-23 17:43:25 UTC; unix
+#   NeedsCompilation: no
+#   Suggests: testthat (>= 3.0.0)
+
+# R: brio=1.1.5
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-23 17:43:39 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.6)
+#   Suggests: covr, testthat (>= 3.0.0)
+
+# R: broom=1.0.13
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:32:49 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.1)
+#   Imports: backports, cli, dplyr (>= 1.0.0), generics (>= 0.0.2), glue, lifecycle, purrr, rlang (>= 1.1.0), stringr, tibble (>= 3.0.0), tidyr (>= 1.0.0)
+#   Suggests: AER, AUC, bbmle, betareg (>= 3.2-1), biglm, binGroup, boot, btergm (>= 1.10.6), car (>= 3.1-2), carData, caret, cluster, cmprsk, coda, covr, drc, e1071, emmeans, epiR (>= 2.0.85), ergm (>= 3.10.4), fixest (>= 0.9.0), gam (>= 1.15), gee, geepack, ggplot2, glmnet, glmnetUtils, gmm, Hmisc, interp, irlba, joineRML, Kendall, knitr, ks, Lahman, lavaan (>= 0.6.18), leaps, lfe, lm.beta, lme4, lmodel2, lmtest (>= 0.9.38), lsmeans, maps, margins, MASS, mclust, mediation, metafor, mfx, mgcv, mlogit, modeldata, modeltests (>= 0.1.6), muhaz, multcomp, network, nnet, ordinal, plm, poLCA, psych, quantreg, rmarkdown, robust, robustbase, rsample, sandwich, spatialreg, spdep (>= 1.1), speedglm, spelling, stats4, survey, survival (>= 3.6-4), systemfit, testthat (>= 3.0.0), tseries, vars, zoo
+
+# R: brulee=1.2.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-11-02 16:57:10 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.1)
+#   Imports: cli, coro (>= 1.0.1), curl, dplyr, generics, ggplot2, hardhat, jsonlite, purrr, rlang (>= 1.1.1), safetensors, stats, tibble, tidyselect, torch (>= 0.13.0), utils, withr
+#   Suggests: covr, lubridate, modeldata, recipes, spelling, testthat, yardstick
+
+# R: bslib=0.12.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:13:04 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 2.10)
+#   Imports: base64enc, cachem, fastmap (>= 1.1.1), grDevices, htmltools (>= 0.5.8), jquerylib (>= 0.1.3), jsonlite, lifecycle, memoise (>= 2.0.1), mime, rlang, sass (>= 0.4.9)
+#   Suggests: brand.yml, bsicons, curl, fontawesome, future, ggplot2, knitr, lattice, magrittr, rappdirs, rmarkdown (>= 2.7), shiny (>= 1.11.1.9000), testthat, thematic, tools, utils, withr, yaml
+
+# R: butcher=0.4.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:11:01 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.1.0)
+#   Imports: cli (>= 3.3.0), lobstr (>= 1.1.2), methods, purrr (>= 0.3.4), rlang (>= 1.0.2), tibble (>= 3.1.7), utils, vctrs (>= 0.4.1)
+#   Suggests: C50, caret, censored, ClusterR, clustMixType, covr, dbarts, ddalpha, dplyr, e1071, earth, flexsurv, fs, ipred, kernlab, kknn, klaR, knitr, MASS, mda, mgcv, modeldata, nnet, parsnip (>= 1.3.3), pkgload, pls, QSARdata, randomForest, ranger, RANN, recipes (>= 0.2.0), rmarkdown, rpart, rsample, RSpectra, sparklyr, survival (>= 3.2-10), tabnet, testthat (>= 3.0.0), torch, TH.data, tune, usethis (>= 1.5.0), workflowsets, xgboost (>= 1.3.2.1), xrf
+
+# R: cachem=1.1.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:47 UTC; unix
+#   NeedsCompilation: yes
+#   Imports: rlang, fastmap (>= 1.2.0)
+#   Suggests: testthat
+
+# R: callr=3.8.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:10:59 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 3.4)
+#   Imports: otel (>= 0.2.0), processx (>= 3.6.1), R6, utils
+#   Suggests: asciicast (>= 2.3.1), carrier, cli (>= 1.1.0), otelsdk (>= 0.2.0), ps, rprojroot, spelling, testthat (>= 3.2.0), withr (>= 2.3.0)
+
+# R: checkmate=2.3.4
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-23 18:34:18 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.0.0)
+#   Imports: backports (>= 1.1.0), utils
+#   Suggests: R6, fastmatch, data.table (>= 1.9.8), devtools, ggplot2, knitr, magrittr, microbenchmark, rmarkdown, testthat (>= 3.0.4), tinytest (>= 1.1.0), tibble
+
+# R: chopin=0.9.9-6
+#   Management: R (install separately)
+#   RemoteType: github
+#   RemoteHost: api.github.com
+#   RemoteUsername: ropensci
+#   RemoteRepo: chopin
+#   RemoteRef: HEAD
+#   RemoteSha: fd8a4a9b9a68d53f52eb981a9df9e5949dbae9bb
+#   RemotePkgRef: ropensci/chopin
+#   Built: R 4.6.1; ; 2026-10-19 13:16:56 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.1)
+#   Imports: anticlust, cli, dplyr (>= 1.1.0), exactextractr (>= 0.8.2), future, future.apply, igraph, methods, rlang, sf (>= 1.0-10), sfheaders, stars (>= 0.6-0), terra (>= 1.7-18), mirai (>= 1.3.0), collapse
+#   Suggests: covr, devtools, targets, DiagrammeR, future.mirai, knitr, lifecycle, rmarkdown, spatstat.random, testthat (>= 3.0.0), units, withr, dggridR, h3r
+#   SystemRequirements: netcdf
+
+# R: class=7.3-24
+#   Management: R (install separately)
+#   Priority: recommended
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 12:54:22 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.0.0), stats, utils
+#   Suggests: MASS
+
+# R: classInt=0.4-11
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 12:54:37 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 2.2)
+#   Imports: grDevices, stats, graphics, e1071, class, KernSmooth
+#   Suggests: spData (>= 0.2.6.2), units, knitr, rmarkdown, tinytest
+
+# R: cli=3.6.6
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 12:54:23 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.4)
+#   Imports: utils
+#   Suggests: callr, covr, crayon, digest, glue (>= 1.6.0), grDevices, htmltools, htmlwidgets, knitr, methods, processx, ps (>= 1.3.4.9000), rlang (>= 1.0.2.9003), rmarkdown, rprojroot, rstudioapi, testthat (>= 3.2.0), tibble, whoami, withr
+
+# R: clipr=0.8.1
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-23 17:43:18 UTC; unix
+#   NeedsCompilation: no
+#   Imports: utils
+#   Suggests: covr, knitr, rmarkdown, rstudioapi (>= 0.5), testthat (>= 2.0.0)
+#   SystemRequirements: xclip (https://github.com/astrand/xclip) or xsel (http://www.vergenet.net/~conrad/software/xsel/) for accessing the X11 clipboard, or wl-clipboard (https://github.com/bugaevc/wl-clipboard) for systems using Wayland.
+
+# R: clock=0.7.4
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:11:05 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 4.0.0)
+#   Imports: cli (>= 3.6.4), lifecycle (>= 1.0.4), rlang (>= 1.1.5), tzdb (>= 0.5.0), vctrs (>= 0.6.5)
+#   LinkingTo: cpp11 (>= 0.5.2), tzdb (>= 0.5.0)
+#   Suggests: covr, knitr, magrittr, pillar, rmarkdown, slider (>= 0.3.2), testthat (>= 3.0.0), withr
+
+# R: codetools=0.2-20
+#   Management: R (install separately)
+#   Priority: recommended
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:10:37 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 2.1)
+
+# R: collapse=2.1.8
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 12:54:52 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 4.1.0)
+#   Imports: Rcpp (>= 1.0.1)
+#   LinkingTo: Rcpp
+#   Suggests: fastverse, data.table, magrittr, kit, xts, zoo, plm, fixest, vars, RcppArmadillo, RcppEigen, tibble, dplyr, ggplot2, scales, microbenchmark, testthat, covr, knitr, rmarkdown, withr, bit64
+
+# R: commonmark=2.0.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-23 17:43:27 UTC; unix
+#   NeedsCompilation: yes
+#   Suggests: curl, testthat, xml2
+
+# R: compiler=4.6.1
+#   Management: conda (r-base)
+#   Priority: base
+#   Built: R 4.6.1; ; 2026-10-16 19:14:06 UTC; unix
+
+# R: config=0.3.2
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:19:17 UTC; unix
+#   NeedsCompilation: no
+#   Imports: yaml (>= 2.1.19)
+#   Suggests: testthat, knitr, rmarkdown, covr, spelling, withr
+
+# R: conflicted=1.2.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:32:56 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 3.2)
+#   Imports: cli (>= 3.4.0), memoise, rlang (>= 1.0.0)
+#   Suggests: callr, covr, dplyr, Matrix, methods, pkgload, testthat (>= 3.0.0), withr
+
+# R: connectcreds=0.2.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 16:39:24 UTC; unix
+#   NeedsCompilation: no
+#   Imports: cli, httr2 (>= 1.1.0), rlang (>= 1.1.0)
+#   Suggests: testthat (>= 3.0.0), withr
+
+# R: coro=1.1.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-11-02 16:52:01 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 3.5.0)
+#   Imports: rlang (>= 0.4.12)
+#   Suggests: knitr, later (>= 1.1.0), magrittr (>= 2.0.0), promises, reticulate, rmarkdown, testthat (>= 3.0.0)
+
+# R: covr=3.6.5
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-25 17:00:51 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.1.0), methods
+#   Imports: digest, stats, utils, jsonlite, rex, httr, cli, withr (>= 1.0.2), yaml
+#   Suggests: R6, S7 (>= 0.2.0), curl, knitr, rmarkdown, htmltools, DT (>= 0.2), testthat (>= 3.0.0), rlang, rstudioapi (>= 0.2), xml2 (>= 1.0.0), parallel, memoise, covr, box (>= 1.2.0)
+
+# R: cpp11=0.5.5
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 12:54:23 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.0.0)
+#   Suggests: bench, brio, callr, cli, covr, decor, desc, ggplot2, glue, knitr, lobstr, mockery, progress, rmarkdown, scales, Rcpp, testthat (>= 3.2.0), tibble, utils, vctrs, withr
+
+# R: crayon=1.5.3
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:10:37 UTC; unix
+#   NeedsCompilation: no
+#   Imports: grDevices, methods, utils
+#   Suggests: mockery, rstudioapi, testthat, withr
+
+# R: credentials=2.0.3
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-23 17:41:46 UTC; unix
+#   NeedsCompilation: no
+#   Imports: openssl (>= 1.3), sys (>= 2.1), curl, jsonlite, askpass
+#   Suggests: testthat, knitr, rmarkdown
+#   SystemRequirements: git (optional)
+
+# R: curl=8.1.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 12:54:25 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.0.0)
+#   Suggests: spelling, testthat (>= 1.0.0), knitr, jsonlite, later, rmarkdown, httpuv (>= 1.4.4), webutils
+#   SystemRequirements: libcurl (>= 7.73): libcurl-devel (rpm) or libcurl4-openssl-dev (deb)
+
+# R: data.table=1.18.6.1
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 12:54:26 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.4.0)
+#   Imports: methods
+#   Suggests: bit64 (>= 4.0.0), bit (>= 4.0.4), R.utils (>= 2.13.0), xts, zoo (>= 1.8-1), yaml, knitr, markdown
+
+# R: datasets=4.6.1
+#   Management: conda (r-base)
+#   Priority: base
+#   Built: R 4.6.1; ; 2026-10-16 19:15:19 UTC; unix
+
+# R: DBI=1.3.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:20:12 UTC; unix
+#   NeedsCompilation: no
+#   Depends: methods, R (>= 3.0.0)
+#   Suggests: arrow, blob, callr, covr, DBItest (>= 1.8.2), dbplyr, downlit, dplyr, glue, hms, knitr, magrittr, nanoarrow (>= 0.3.0.1), otel, otelsdk, RMariaDB, rmarkdown, rprojroot, RSQLite (>= 1.1-2), testthat (>= 3.0.0), vctrs, xml2
+
+# R: dbplyr=2.6.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:19:36 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.1)
+#   Imports: blob (>= 1.2.0), cli (>= 3.6.1), DBI (>= 1.1.3), dplyr (>= 1.1.2), glue (>= 1.6.2), lifecycle (>= 1.0.3), magrittr, methods, pillar (>= 1.9.0), purrr (>= 1.0.1), R6 (>= 2.2.2), rlang (>= 1.1.1), tibble (>= 3.2.1), tidyr (>= 1.3.0), tidyselect (>= 1.2.1), utils, vctrs (>= 0.6.3), withr (>= 2.5.0)
+#   Suggests: adbcdrivermanager, adbcsqlite, adbi, bit64, covr, knitr, Lahman, nycflights13, odbc (>= 1.4.2), RJDBC, RMariaDB (>= 1.2.2), rmarkdown, RPostgres (>= 1.4.5), RPostgreSQL, RSQLite (>= 2.3.8), testthat (>= 3.1.10)
+
+# R: desc=1.4.3
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-23 17:43:44 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 3.4)
+#   Imports: cli, R6, utils
+#   Suggests: callr, covr, gh, spelling, testthat, whoami, withr
+
+# R: devtools=2.5.2
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-23 17:50:38 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.1), usethis (>= 3.2.1)
+#   Imports: cli (>= 3.6.6), desc (>= 1.4.3), ellipsis (>= 0.3.3), fs (>= 2.1.0), lifecycle (>= 1.0.5), memoise (>= 2.0.1), miniUI (>= 0.1.2), pak (>= 0.9.5), pkgbuild (>= 1.4.8), pkgdown (>= 2.2.0), pkgload (>= 1.5.2), profvis (>= 0.4.0), rcmdcheck (>= 1.4.0), rlang (>= 1.2.0), roxygen2 (>= 7.3.3), rversions (>= 3.0.0), sessioninfo (>= 1.2.3), testthat (>= 3.3.2), urlchecker (>= 1.0.1), withr (>= 3.0.2)
+#   Suggests: BiocManager (>= 1.30.18), callr (>= 3.7.1), covr (>= 3.5.1), curl (>= 4.3.2), digest (>= 0.6.29), DT (>= 0.23), foghorn (>= 1.4.2), gh (>= 1.3.0), httr2 (>= 1.0.0), knitr (>= 1.39), lintr (>= 3.0.0), quarto (>= 1.5.1), remotes (>= 2.5.0), rmarkdown (>= 2.14), rstudioapi (>= 0.13), spelling (>= 2.2), xml2
+
+# R: diagram=1.6.5
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:10:49 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 2.01), shape
+#   Imports: stats, graphics
+
+# R: dials=1.4.4
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:11:17 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.1), scales (>= 1.3.0)
+#   Imports: cli, DiceDesign, dplyr (>= 0.8.5), glue, hardhat (>= 1.1.0), lifecycle, pillar, purrr, rlang (>= 1.1.0), sfd, tibble, utils, vctrs (>= 0.3.8), withr
+#   Suggests: covr, ggplot2, kernlab, knitr, rmarkdown, rpart, testthat (>= 3.1.9), xml2
+
+# R: DiceDesign=1.10
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:37 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 2.10)
+#   Suggests: rgl, randtoolbox, lattice
+
+# R: diffobj=0.3.9
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-23 17:43:10 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 4.1.0)
+#   Imports: crayon (>= 1.3.2), tools, methods, utils, stats
+#   Suggests: knitr, rmarkdown
+
+# R: digest=0.6.39
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:37 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.3.0)
+#   Imports: utils
+#   Suggests: tinytest, simplermarkdown, rbenchmark
+
+# R: downlit=0.4.5
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-23 17:44:28 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.0.0)
+#   Imports: brio, desc, digest, evaluate, fansi, memoise, rlang, vctrs, withr, yaml
+#   Suggests: covr, htmltools, jsonlite, MASS, MassSpecWavelet, pkgload, rmarkdown, testthat (>= 3.0.0), xml2
+
+# R: dplyr=1.2.1
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 12:55:20 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 4.1.0)
+#   Imports: cli (>= 3.6.2), generics, glue (>= 1.3.2), lifecycle (>= 1.0.5), magrittr (>= 1.5), methods, pillar (>= 1.9.0), R6, rlang (>= 1.1.7), tibble (>= 3.2.0), tidyselect (>= 1.2.0), utils, vctrs (>= 0.7.1)
+#   Suggests: broom, covr, DBI, dbplyr (>= 2.2.1), ggplot2, knitr, Lahman, lobstr, nycflights13, purrr, rmarkdown, RSQLite, stringi (>= 1.7.6), testthat (>= 3.1.5), tidyr (>= 1.3.0), withr
+
+# R: duckdb=2.0.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-11-04 15:33:18 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: DBI, R (>= 4.2.0)
+#   Imports: methods, utils
+#   Suggests: adbcdrivermanager, arrow (>= 13.0.0), bit64, callr, clock, DBItest, dbplyr (>= 2.6.0), dplyr, nanoarrow, rlang, sf, testthat (>= 3.0.0), tibble, vctrs, wk, withr
+
+# R: e1071=1.7-17
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 12:54:28 UTC; unix
+#   NeedsCompilation: yes
+#   Imports: graphics, grDevices, class, stats, methods, utils, proxy
+#   Suggests: cluster, mlbench, nnet, randomForest, rpart, SparseM, xtable, Matrix, MASS, slam
+
+# R: ellipsis=0.3.3
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-23 17:43:47 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 3.2)
+#   Imports: rlang (>= 1.1.7)
+#   Suggests: covr, testthat
+
+# R: evaluate=1.0.5
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:10:37 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 3.6.0)
+#   Suggests: callr, covr, ggplot2 (>= 3.3.6), lattice, methods, pkgload, ragg (>= 1.4.0), rlang (>= 1.1.5), knitr, testthat (>= 3.0.0), withr
+
+# R: exactextractr=0.10.1
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:03:01 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.4.0)
+#   Imports: Rcpp (>= 0.12.12), methods, raster, sf (>= 0.9.0),
+#   LinkingTo: Rcpp
+#   Suggests: dplyr, foreign, knitr, ncdf4, rmarkdown, testthat, terra (>= 1.5.17)
+#   SystemRequirements: GEOS (>= 3.5.0)
+
+# R: fansi=1.0.7
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-23 17:42:26 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.1.0)
+#   Imports: grDevices, utils
+#   Suggests: unitizer, knitr, rmarkdown
+
+# R: farver=2.1.2
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:37 UTC; unix
+#   NeedsCompilation: yes
+#   Suggests: covr, testthat (>= 3.0.0)
+
+# R: fastmap=1.2.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:37 UTC; unix
+#   NeedsCompilation: yes
+#   Suggests: testthat (>= 2.1.1)
+
+# R: finetune=1.3.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:15:24 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.1), tune (>= 2.1.0)
+#   Imports: cli, dials (>= 0.3.0), dplyr (>= 1.1.1), ggplot2, parsnip (>= 1.1.0), purrr (>= 1.0.0), rlang (>= 1.1.0), tibble, tidyr, tidyselect, utils, vctrs, workflows (>= 0.2.6)
+#   Suggests: BradleyTerry2, covr, discrim, kknn, klaR, lme4, modeldata, ranger, recipes (>= 0.2.0), rpart, rsample, spelling, testthat, yardstick
+
+# R: FNN=1.1.4.1
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:37 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 4.0.0)
+#   Suggests: chemometrics, mvtnorm
+
+# R: fontawesome=0.5.3
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:10:57 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 3.3.0)
+#   Imports: rlang (>= 1.0.6), htmltools (>= 0.5.1.1)
+#   Suggests: covr, dplyr (>= 1.0.8), gt (>= 0.9.0), knitr (>= 1.31), testthat (>= 3.0.0), rsvg
+
+# R: foreach=1.5.2
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-11-03 15:14:40 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 2.5.0)
+#   Imports: codetools, utils, iterators
+#   Suggests: randomForest, doMC, doParallel, testthat, knitr, rmarkdown
+
+# R: fs=2.1.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:39 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 4.1)
+#   Imports: methods
+#   Suggests: covr, crayon, knitr, pillar (>= 1.0.0), rmarkdown, spelling, testthat (>= 3.0.0), tibble (>= 1.1.0), vctrs (>= 0.3.0), withr
+#   SystemRequirements: libuv: libuv-devel (rpm) or libuv1-dev (deb). Alternatively to build the vendored libuv 'cmake' is required. GNU make.
+
+# R: furrr=0.4.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:11:01 UTC; unix
+#   NeedsCompilation: no
+#   Depends: future (>= 1.70.0), R (>= 4.1.0)
+#   Imports: globals (>= 0.19.1), purrr (>= 1.2.1), rlang (>= 1.1.7), vctrs (>= 0.7.0)
+#   Suggests: carrier, covr, dplyr (>= 1.1.4), knitr, parallelly (>= 1.46.1), testthat (>= 3.3.2), tidyselect
+
+# R: future=1.80.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:10:52 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 3.2.0)
+#   Imports: digest, globals (>= 0.18.0), listenv (>= 0.8.0), parallel, parallelly (>= 1.44.0), tools, utils
+#   Suggests: methods, RhpcBLASctl, R.rsp, markdown
+
+# R: future.apply=1.21.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:11:01 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 3.2.0), future (>= 1.80.0)
+#   Imports: globals, parallel, stats, utils
+#   Suggests: datasets, tools, listenv, R.rsp, markdown
+
+# R: GauPro=0.2.17
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:13:18 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: mixopt (> 0.1.0), numDeriv, rmarkdown, tidyr
+#   Imports: ggplot2, Rcpp, R6, lbfgs
+#   LinkingTo: Rcpp, RcppArmadillo
+#   Suggests: ContourFunctions, dplyr, ggrepel, gridExtra, knitr, lhs, MASS, microbenchmark, rlang, splitfngr, testthat, testthatmulti
+
+# R: generics=0.1.4
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 12:54:23 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 3.6)
+#   Imports: methods
+#   Suggests: covr, pkgload, testthat (>= 3.0.0), tibble, withr
+
+# R: geoarrow=0.4.3
+#   Management: R (install separately)
+#   Repository: https://r-multiverse.r-universe.dev
+#   RemoteUrl: https://github.com/geoarrow/geoarrow-r
+#   RemoteRef: v0.4.3
+#   RemoteSha: 9c305a06f6bd68f6f0d3565cb8971bcedb04a579
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:20:33 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.6.0)
+#   Imports: nanoarrow (>= 0.5.0), wk (>= 0.9.0)
+#   LinkingTo: wk
+#   Suggests: arrow, R6, sf, testthat (>= 3.0.0)
+#   SystemRequirements: C++17
+
+# R: geojsonsf=2.0.5
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-21 12:11:24 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 4.0.0)
+#   Imports: Rcpp (>= 1.1.0)
+#   LinkingTo: geometries (>= 0.2.5), jsonify (>= 1.2.3), rapidjsonr (>= 1.2.1), Rcpp, sfheaders (>= 0.4.5)
+#   Suggests: covr, jsonify, knitr, rmarkdown, tinytest
+
+# R: geometries=0.2.5
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:42 UTC; unix
+#   NeedsCompilation: yes
+#   Imports: Rcpp (>= 1.1.0)
+#   LinkingTo: Rcpp
+#   Suggests: covr, knitr, rmarkdown, tinytest
+
+# R: gert=2.5.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-23 17:44:19 UTC; unix
+#   NeedsCompilation: yes
+#   Imports: askpass, credentials (>= 1.2.1), openssl (>= 2.0.3), rstudioapi (>= 0.11), sys, zip (>= 2.1.0)
+#   Suggests: spelling, knitr, rmarkdown, testthat (>= 3.0.0), roxygen2
+#   SystemRequirements: libgit2 (>= 1.0): libgit2-devel (rpm) or libgit2-dev (deb)
+
+# R: ggplot2=4.0.3
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:11:18 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.1)
+#   Imports: cli, grDevices, grid, gtable (>= 0.3.6), isoband, lifecycle (> 1.0.1), rlang (>= 1.1.0), S7, scales (>= 1.4.0), stats, vctrs (>= 0.6.0), withr (>= 2.5.0)
+#   Suggests: broom, covr, dplyr, ggplot2movies, hexbin, Hmisc, hms, knitr, mapproj, maps, MASS, mgcv, multcomp, munsell, nlme, profvis, quantreg, quarto, ragg (>= 1.2.6), RColorBrewer, roxygen2, rpart, sf (>= 0.7-3), svglite (>= 2.1.2), testthat (>= 3.1.5), tibble, vdiffr (>= 1.0.6), xml2
+#   Enhances: sp
+
+# R: gh=1.6.1
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-23 17:44:25 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.1)
+#   Imports: cli (>= 3.0.1), gitcreds, glue, httr2 (>= 1.0.6), ini, jsonlite, lifecycle, rlang (>= 1.1.0)
+#   Suggests: connectcreds, covr, knitr, rmarkdown, rprojroot, spelling, testthat (>= 3.0.0), vctrs, webfakes (>= 1.5.0), withr
+
+# R: gitcreds=0.1.2
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-23 17:43:42 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 3.4)
+#   Suggests: codetools, covr, knitr, mockery, oskeyring, rmarkdown, testthat (>= 3.0.0), withr
+#   SystemRequirements: git
+
+# R: globals=0.20.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:10:43 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 3.1.2)
+#   Imports: codetools
+
+# R: glue=1.8.1
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 12:54:23 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 4.1)
+#   Imports: methods
+#   Suggests: crayon, DBI (>= 1.2.0), dplyr, knitr, rlang, rmarkdown, RSQLite, testthat (>= 3.2.0), vctrs (>= 0.3.0), waldo (>= 0.5.3), withr
+
+# R: gower=1.0.2
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:37 UTC; unix
+#   NeedsCompilation: yes
+#   Suggests: tinytest (>= 0.9.3),
+
+# R: graphics=4.6.1
+#   Management: conda (r-base)
+#   Priority: base
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-16 19:14:49 UTC; unix
+#   NeedsCompilation: yes
+#   Imports: grDevices
+#   Enhances: vcd
+
+# R: grDevices=4.6.1
+#   Management: conda (r-base)
+#   Priority: base
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-16 19:14:42 UTC; unix
+#   NeedsCompilation: yes
+#   Suggests: KernSmooth
+
+# R: grid=4.6.1
+#   Management: conda (r-base)
+#   Priority: base
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-16 19:15:32 UTC; unix
+#   NeedsCompilation: yes
+#   Imports: grDevices, utils
+
+# R: gtable=0.3.6
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:10:37 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.0)
+#   Imports: cli, glue, grid, lifecycle, rlang (>= 1.1.0), stats
+#   Suggests: covr, ggplot2, knitr, profvis, rmarkdown, testthat (>= 3.0.0)
+
+# R: h3jsr=1.3.1
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-21 12:11:57 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 2.10)
+#   Imports: geojsonsf, methods, sf, tidyr, utils, V8 (>= 4.0.0)
+#   Suggests: covr, dplyr, ggplot2, knitr, rmarkdown, testthat
+#   SystemRequirements: V8 engine version 6+ is needed for modern JS and WASM support. On Debian / Ubuntu install either libv8-dev or libnode-dev, on Fedora use v8-devel.
+
+# R: hardhat=1.4.3
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:10:49 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.1)
+#   Imports: cli (>= 3.6.0), glue (>= 1.6.2), rlang (>= 1.1.0), sparsevctrs (>= 0.2.0), tibble (>= 3.2.1), vctrs (>= 0.6.0)
+#   Suggests: covr, crayon, devtools, knitr, Matrix, modeldata (>= 0.0.2), recipes (>= 1.3.0), rmarkdown (>= 2.3), roxygen2, testthat (>= 3.0.0), usethis (>= 2.1.5), withr (>= 3.0.0)
+
+# R: here=1.0.2
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 16:39:26 UTC; unix
+#   NeedsCompilation: no
+#   Imports: rprojroot (>= 2.1.0)
+#   Suggests: conflicted, covr, fs, knitr, palmerpenguins, plyr, readr, rlang, rmarkdown, testthat, uuid, withr
+
+# R: highr=0.12
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:10:52 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 3.3.0)
+#   Imports: xfun (>= 0.18)
+#   Suggests: knitr, markdown, testit
+
+# R: htmltools=0.5.9
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:52 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 2.14.1)
+#   Imports: base64enc, digest, fastmap (>= 1.1.0), grDevices, rlang (>= 1.0.0), utils
+#   Suggests: Cairo, markdown, ragg, shiny, testthat, withr
+#   Enhances: knitr
+
+# R: htmlwidgets=1.6.4
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-23 17:43:21 UTC; unix
+#   NeedsCompilation: no
+#   Imports: grDevices, htmltools (>= 0.5.7), jsonlite (>= 0.9.16), knitr (>= 1.8), rmarkdown, yaml
+#   Suggests: testthat
+#   Enhances: shiny (>= 1.1)
+
+# R: httpuv=1.6.17
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-23 17:44:43 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 2.15.1)
+#   Imports: later (>= 0.8.0), promises, R6, Rcpp (>= 1.0.7), utils
+#   LinkingTo: later, Rcpp
+#   Suggests: callr, curl, jsonlite, testthat (>= 3.0.0), websocket
+#   SystemRequirements: GNU make, zlib
+
+# R: httr=1.4.9
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 15:52:03 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 3.6)
+#   Imports: curl (>= 5.1.0), jsonlite, mime, openssl (>= 0.8), R6
+#   Suggests: covr, httpuv, jpeg, knitr, png, readr, rmarkdown, testthat (>= 0.8.0), xml2
+
+# R: httr2=1.3.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 12:55:09 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.1)
+#   Imports: cli (>= 3.0.0), curl (>= 6.4.0), glue, lifecycle, magrittr, openssl, R6, rlang (>= 1.3.0), vctrs (>= 0.6.3), withr
+#   Suggests: askpass, bench, clipr, covr, digest, docopt, httpuv, jose, jsonlite, knitr, later (>= 1.4.0), nanonext, otel (>= 0.2.0), otelsdk (>= 0.2.0), paws.common (>= 0.8.0), promises, rappdirs, rmarkdown, testthat (>= 3.1.8), tibble, webfakes (>= 1.4.0), xml2
+
+# R: igraph=2.3.4
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:13:51 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: methods, R (>= 3.5.0)
+#   Imports: cli, graphics, grDevices, lifecycle, magrittr, Matrix, pkgconfig (>= 2.0.0), rlang (>= 1.1.0), stats, utils, vctrs
+#   LinkingTo: cpp11 (>= 0.5.0)
+#   Suggests: ape (>= 5.7-0.1), callr, decor, digest, igraphdata, knitr, rgl (>= 1.3.14), rmarkdown, scales, stats4, tcltk, testthat, vdiffr, withr
+#   Enhances: graph
+#   SystemRequirements: libxml2 (optional), glpk (>= 4.57, optional)
+
+# R: infer=1.1.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:33:15 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.1)
+#   Imports: broom, cli, dplyr (>= 0.7.0), generics, ggplot2 (>= 3.5.2), glue (>= 1.3.0), grDevices, lifecycle, magrittr, methods, patchwork, purrr, rlang (>= 0.2.0), tibble, tidyr, vctrs (>= 0.6.5), withr
+#   Suggests: covr, devtools (>= 1.12.0), fs, knitr, nycflights13, parsnip, rmarkdown, stringr, testthat (>= 3.0.0), vdiffr (>= 1.0.0)
+
+# R: ini=0.3.1
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-23 17:41:48 UTC; unix
+#   NeedsCompilation: no
+#   Suggests: testthat
+
+# R: ipred=0.9-16
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:14:49 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 2.10)
+#   Imports: rpart (>= 3.1-8), MASS, survival, nnet, class, prodlim
+#   Suggests: mvtnorm, mlbench, TH.data, randomForest, party
+
+# R: isoband=0.3.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:37 UTC; unix
+#   NeedsCompilation: yes
+#   Imports: cli, grid, rlang, utils
+#   LinkingTo: cpp11
+#   Suggests: covr, ggplot2, knitr, magick, bench, rmarkdown, sf, testthat (>= 3.0.0), xml2
+
+# R: iterators=1.0.14
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-11-03 15:14:38 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 2.5.0), utils
+#   Suggests: RUnit, foreach
+
+# R: jquerylib=0.1.4
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:10:57 UTC; unix
+#   NeedsCompilation: no
+#   Imports: htmltools
+#   Suggests: testthat
+
+# R: jsonify=1.2.3
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-21 12:10:58 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 4.0.0)
+#   Imports: Rcpp (>= 1.1.0)
+#   LinkingTo: rapidjsonr (>= 1.2.1), Rcpp
+#   Suggests: covr, testthat, knitr, rmarkdown
+
+# R: jsonlite=2.0.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:37 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: methods
+#   Suggests: httr, vctrs, testthat, knitr, rmarkdown, R.rsp, sf
+
+# R: jsonvalidate=1.5.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-11-03 15:35:25 UTC; unix
+#   NeedsCompilation: no
+#   Imports: R6, V8
+#   Suggests: knitr, jsonlite, rmarkdown, testthat, withr
+
+# R: KernSmooth=2.23-27
+#   Management: R (install separately)
+#   Priority: recommended
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 12:54:23 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 2.5.0), stats
+#   Suggests: MASS, carData
+
+# R: knitr=1.52
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:10:54 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 3.6.0)
+#   Imports: evaluate (>= 0.15), highr (>= 0.11), methods, tools, xfun (>= 0.52), yaml (>= 2.1.19)
+#   Suggests: bslib, DBI (>= 0.4-1), digest, formatR, gifski, gridSVG, htmlwidgets (>= 0.7), jpeg, JuliaCall (>= 0.11.1), magick, litedown (>= 0.10), otel, otelsdk, png, ragg (>= 1.5.0), reticulate (>= 1.4), rgl (>= 0.95.1201), rlang, rmarkdown, sass, showtext, styler (>= 1.2.0), targets (>= 0.6.0), testit, tibble, tikzDevice (>= 0.10), tinytex (>= 0.56), webshot, rstudioapi, svglite
+#   SystemRequirements: Package vignettes based on R Markdown v2 or reStructuredText require Pandoc (http://pandoc.org). The function rst2pdf() requires rst2pdf (https://github.com/rst2pdf/rst2pdf).
+
+# R: labeling=0.4.3
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:10:37 UTC; unix
+#   NeedsCompilation: no
+#   Imports: stats, graphics
+
+# R: later=1.4.8
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-23 17:41:51 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.5)
+#   Imports: Rcpp (>= 1.0.10), rlang
+#   LinkingTo: Rcpp
+#   Suggests: knitr, nanonext, promises, rmarkdown, testthat (>= 3.0.0)
+
+# R: lattice=0.23-1
+#   Management: R (install separately)
+#   Priority: recommended
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 12:54:23 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 4.0.0)
+#   Imports: grid, grDevices, graphics, stats, utils
+#   Suggests: KernSmooth, MASS, latticeExtra, colorspace
+#   Enhances: chron, zoo
+
+# R: lava=1.9.3
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:14:22 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 3.5.0)
+#   Imports: cli, future.apply, graphics, grDevices, methods, numDeriv, progressr, stats, survival, SQUAREM, utils
+#   Suggests: KernSmooth, Rgraphviz, data.table, ellipse, fields, future, geepack, graph, knitr, rmarkdown, igraph (>= 0.6), lavaSearch2, lme4 (>= 1.1.35.1), MASS, Matrix (>= 1.6.3), mets (>= 1.1), nlme, optimx, polycor, quantreg, quarto, rgl, svglite, targeted (>= 0.4), testthat (>= 0.11), vdiffr, visNetwork
+#   SystemRequirements: Quarto command line tools (https://github.com/quarto-dev/quarto-cli).
+
+# R: lbfgs=1.2.1.2
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:37 UTC; unix
+#   NeedsCompilation: yes
+#   Imports: Rcpp (>= 0.11.2), methods
+#   LinkingTo: Rcpp
+
+# R: lifecycle=1.0.5
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 12:54:39 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 3.6)
+#   Imports: cli (>= 3.4.0), rlang (>= 1.1.0)
+#   Suggests: covr, knitr, lintr (>= 3.1.0), rmarkdown, testthat (>= 3.0.1), tibble, tidyverse, tools, vctrs, withr, xml2
+
+# R: lintr=3.4.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-26 15:28:50 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.1.0)
+#   Imports: cli (>= 3.4.0), codetools, digest, glue, knitr, rex, stats, utils, xfun, xml2 (>= 1.3.4), xmlparsedata (>= 1.0.5)
+#   Suggests: bookdown, cyclocomp, jsonlite, patrick (>= 0.2.0), rlang, rmarkdown, rstudioapi (>= 0.2), testthat (>= 3.3.0), tibble, tufte, withr (>= 2.5.0)
+#   Enhances: data.table
+
+# R: listenv=1.1.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:10:37 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 3.1.2)
+#   Suggests: R.utils, R.rsp, markdown
+
+# R: lme4=2.1-0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-11-02 16:50:42 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.6), Matrix, methods, stats
+#   Imports: MASS, Rdpack, boot, graphics, grid, lattice, minqa (>= 1.1.15), nlme (>= 3.1-123), nloptr (>= 1.0.4), parallel, reformulas (>= 0.4.3.1), splines, utils
+#   LinkingTo: Matrix (>= 1.5-0), Rcpp (>= 1.1.1-1.1), RcppEigen (>= 0.3.3.9.4)
+#   Suggests: DHARMa, HSAUR3, MEMSS, car, dfoptim, future.apply, gamm4, ggplot2, glmmTMB, gridExtra, knitr, merDeriv, mgcv, mlmRev, numDeriv, optimx (>= 2013.8.6), pbkrtest, performance, rmarkdown, rr2, see, semEff, statmod, testthat (>= 0.8.1), tibble
+
+# R: lobstr=1.2.2
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:47 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.6.0)
+#   Imports: crayon, methods, prettyunits, rlang (>= 1.0.0)
+#   LinkingTo: cpp11 (>= 0.4.2)
+#   Suggests: covr, pillar, pkgdown, testthat (>= 3.0.0)
+
+# R: lpSolve=5.6.23
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:41 UTC; unix
+#   NeedsCompilation: yes
+
+# R: lubridate=1.9.5
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:11:16 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: methods, R (>= 3.2)
+#   Imports: generics, timechange (>= 0.4.0)
+#   Suggests: covr, knitr, rmarkdown, testthat (>= 2.1.0), vctrs (>= 0.6.5)
+#   Enhances: chron, data.table, timeDate, tis, zoo
+#   SystemRequirements: A system with zoneinfo data (e.g. /usr/share/zoneinfo). On Windows the zoneinfo included with R is used.
+
+# R: lwgeom=0.2-17
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-26 11:14:35 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 4.1.0)
+#   Imports: Rcpp, units, sf (>= 1.0-15)
+#   LinkingTo: Rcpp, sf (>= 1.0-15)
+#   Suggests: covr, sp, geosphere, testthat
+#   SystemRequirements: GEOS (>= 3.5.0), PROJ (>= 4.8.0), sqlite3
+
+# R: magrittr=2.0.5
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 12:54:23 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.4.0)
+#   Suggests: covr, knitr, rlang, rmarkdown, testthat
+
+# R: MASS=7.3-66
+#   Management: R (install separately)
+#   Priority: recommended
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:38 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 4.4.0), grDevices, graphics, stats, utils
+#   Imports: methods
+#   Suggests: lattice, nlme, nnet, survival
+
+# R: Matrix=1.7-6
+#   Management: R (install separately)
+#   Priority: recommended
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:40 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 4.4), methods
+#   Imports: grDevices, graphics, grid, lattice, stats, utils
+#   Suggests: MASS, datasets, sfsmisc, tools
+#   Enhances: SparseM, graph
+
+# R: memoise=2.0.1
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:10:50 UTC; unix
+#   NeedsCompilation: no
+#   Imports: rlang (>= 0.4.10), cachem
+#   Suggests: digest, aws.s3, covr, googleAuthR, googleCloudStorageR, httr, testthat
+
+# R: methods=4.6.1
+#   Management: conda (r-base)
+#   Priority: base
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-16 19:15:20 UTC; unix
+#   NeedsCompilation: yes
+#   Imports: utils, stats
+#   Suggests: codetools
+
+# R: mime=0.13
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:38 UTC; unix
+#   NeedsCompilation: yes
+#   Imports: tools
+
+# R: miniUI=0.1.2
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-23 17:50:35 UTC; unix
+#   NeedsCompilation: no
+#   Imports: shiny (>= 0.13), htmltools (>= 0.3), utils
+
+# R: minqa=1.2.8
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-11-02 16:49:40 UTC; unix
+#   NeedsCompilation: yes
+#   Imports: Rcpp (>= 0.9.10)
+#   LinkingTo: Rcpp
+#   SystemRequirements: GNU make
+
+# R: mirai=2.7.3
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:11:24 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 3.6)
+#   Imports: nanonext (>= 1.10.3)
+#   Suggests: cli, litedown, mori, otel, otelsdk, secretbase
+#   Enhances: parallel, promises
+
+# R: missRanger=2.6.1
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:14:55 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 3.5.0)
+#   Imports: FNN, ranger (>= 0.16.0), stats, utils
+#   Suggests: knitr, rmarkdown, testthat (>= 3.0.0)
+
+# R: mixopt=0.1.3
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:11:37 UTC; unix
+#   NeedsCompilation: no
+#   Depends: dplyr, ggplot2, splitfngr
+#   Suggests: ContourFunctions, gridExtra, lhs, testthat (>= 3.0.0)
+
+# R: modeldata=1.6.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:32:58 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.1)
+#   Imports: cli, dplyr, MASS, purrr, rlang (>= 1.1.0), tibble
+#   Suggests: covr, ggplot2, testthat (>= 3.0.0)
+
+# R: modelenv=0.2.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:10:38 UTC; unix
+#   NeedsCompilation: no
+#   Imports: cli, glue, rlang (>= 1.1.0), tibble, vctrs
+#   Suggests: covr, testthat (>= 3.0.0)
+
+# R: nanoarrow=0.9.0
+#   Management: R (install separately)
+#   Repository: https://r-multiverse.r-universe.dev
+#   RemoteUrl: https://github.com/apache/arrow-nanoarrow
+#   RemoteRef: apache-arrow-nanoarrow-0.9.0
+#   RemoteSha: 9fad80292360d0f3978264c11ba865ccc94020d8
+#   RemoteSubdir: r
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:20:22 UTC; unix
+#   NeedsCompilation: yes
+#   Suggests: arrow (>= 9.0.0), bit64, blob, dplyr, hms, jsonlite, reticulate, rlang, testthat (>= 3.0.0), tibble, vctrs, withr
+#   SystemRequirements: libzstd (optional), liblz4 (optional)
+
+# R: nanonext=1.10.3
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:46 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.6)
+#   Suggests: later, litedown, yaml
+#   Enhances: promises
+#   SystemRequirements: 'libnng' >= 1.12 and 'libmbedtls' >= 3.0 (optional, bundled sources compiled otherwise)
+
+# R: ncdf4=1.24
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-27 15:52:30 UTC; unix
+#   NeedsCompilation: yes
+#   SystemRequirements: netcdf library version 4.1 or later
+
+# R: nlme=3.1-172
+#   Management: R (install separately)
+#   Priority: recommended
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-11-02 16:49:58 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.6.0)
+#   Imports: graphics, stats, utils, lattice
+#   Suggests: MASS
+
+# R: nloptr=2.2.1
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-11-02 16:50:34 UTC; unix
+#   NeedsCompilation: yes
+#   Suggests: knitr, rmarkdown, covr, tinytest
+#   SystemRequirements: cmake (>= 3.2.0) which is used only on Linux or macOS systems when no system build of nlopt (>= 2.7.0) can be found.
+
+# R: nnet=7.3-21
+#   Management: R (install separately)
+#   Priority: recommended
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:38 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.0.0), stats, utils
+#   Suggests: MASS
+
+# R: numDeriv=2016.8-1.1
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:10:38 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 2.11.1)
+
+# R: openssl=2.4.2
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 12:54:30 UTC; unix
+#   NeedsCompilation: yes
+#   Imports: askpass
+#   Suggests: curl, testthat (>= 2.1.0), digest, knitr, rmarkdown, jsonlite, jose, sodium
+#   SystemRequirements: OpenSSL >= 1.0.2
+
+# R: otel=0.2.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:10:38 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 3.6.0)
+#   Suggests: callr, cli, glue, jsonlite, otelsdk, processx, shiny, spelling, testthat (>= 3.0.0), utils, withr
+
+# R: pak=0.11.1
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 12:51:36 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.5)
+#   Imports: tools, utils
+#   Suggests: callr (>= 3.7.0), cli (>= 3.2.0), covr, curl (>= 4.3.2), desc (>= 1.4.1), filelock (>= 1.0.2), gitcreds, glue (>= 1.6.2), jsonlite (>= 1.8.0), keyring (>= 1.4.0), pingr, pkgbuild (>= 1.4.2), pkgcache (>= 2.2.4), pkgdepends (>= 0.9.0), pkgload, pkgsearch (>= 3.1.0), processx (>= 3.8.1), ps (>= 1.6.0), rstudioapi, testthat (>= 3.2.0), webfakes, withr, yaml
+
+# R: parallel=4.6.1
+#   Management: conda (r-base)
+#   Priority: base
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-16 19:15:40 UTC; unix
+#   NeedsCompilation: yes
+#   Imports: tools, compiler
+#   Suggests: methods
+#   Enhances: snow, Rmpi, mirai, parallelly
+
+# R: parallelly=1.48.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:38 UTC; unix
+#   NeedsCompilation: yes
+#   Imports: parallel, tools, utils
+#   Suggests: commonmark, base64enc
+
+# R: parsnip=1.6.1
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:11:38 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.1)
+#   Imports: cli, dplyr (>= 1.1.0), generics (>= 0.1.2), ggplot2, globals, glue, hardhat (>= 1.4.1), lifecycle, magrittr, pillar, prettyunits, purrr (>= 1.0.0), rlang (>= 1.1.0), sparsevctrs (>= 0.2.0), stats, tibble (>= 2.1.1), tidyr (>= 1.3.0), utils, vctrs (>= 0.6.0)
+#   Suggests: bench, C50, covr, dials (>= 1.4.3), earth, ggrepel, keras, keras3, kernlab, kknn, knitr, LiblineaR, MASS, Matrix, methods, mgcv, modeldata, nlme, prodlim, ranger (>= 0.12.0), remotes, rmarkdown, rpart, sparklyr (>= 1.0.0), survival, tensorflow, testthat (>= 3.0.0), withr, xgboost (>= 1.5.0.1)
+
+# R: pillar=1.11.1
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 12:55:09 UTC; unix
+#   NeedsCompilation: no
+#   Imports: cli (>= 2.3.0), glue, lifecycle, rlang (>= 1.0.2), utf8 (>= 1.1.0), utils, vctrs (>= 0.5.0)
+#   Suggests: bit64, DBI, debugme, DiagrammeR, dplyr, formattable, ggplot2, knitr, lubridate, nanotime, nycflights13, palmerpenguins, rmarkdown, scales, stringi, survival, testthat (>= 3.1.1), tibble, units (>= 0.7.2), vdiffr, withr
+
+# R: pkgbuild=1.4.8
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-23 17:44:33 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 3.5)
+#   Imports: callr (>= 3.2.0), cli (>= 3.4.0), desc, processx, R6
+#   Suggests: covr, cpp11, knitr, Rcpp, rmarkdown, testthat (>= 3.2.0), withr (>= 2.3.0)
+
+# R: pkgconfig=2.0.3
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 12:54:23 UTC; unix
+#   NeedsCompilation: no
+#   Imports: utils
+#   Suggests: covr, testthat, disposables (>= 1.0.3)
+
+# R: pkgdown=2.2.1
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-23 17:49:49 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.1)
+#   Imports: bslib (>= 0.5.1), callr (>= 3.7.3), cli (>= 3.6.1), desc (>= 1.4.0), downlit (>= 0.4.4), fontawesome, fs (>= 1.4.0), httr2 (>= 1.0.2), jsonlite, lifecycle, openssl, purrr (>= 1.0.0), ragg (>= 1.4.0), rlang (>= 1.1.4), rmarkdown (>= 2.27), tibble, whisker, withr (>= 2.4.3), xml2 (>= 1.3.1), yaml (>= 2.3.9)
+#   Suggests: covr, diffviewer, evaluate (>= 0.24.0), gert, gt, htmltools, htmlwidgets, knitr (>= 1.50), magick, methods, nanonext (>= 1.8.0), pkgload (>= 1.0.2), quarto, rsconnect, rstudioapi, rticles, sass, testthat (>= 3.1.3), tools
+#   SystemRequirements: pandoc (>= 2.10.1)
+
+# R: pkgload=1.5.3
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-23 17:49:23 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 3.4.0)
+#   Imports: cli (>= 3.3.0), desc, fs, glue, lifecycle, methods, pkgbuild, processx, rlang (>= 1.1.1), rprojroot, utils
+#   Suggests: bitops, jsonlite, mathjaxr, pak, Rcpp, remotes, rstudioapi, testthat (>= 3.2.1.1), usethis, withr
+
+# R: png=0.1-9
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 16:39:21 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 2.9.0)
+#   SystemRequirements: libpng
+
+# R: praise=1.0.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-23 17:43:41 UTC; unix
+#   NeedsCompilation: no
+#   Suggests: testthat
+
+# R: prettyunits=1.2.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:10:38 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R(>= 2.10)
+#   Suggests: codetools, covr, testthat
+
+# R: processx=3.9.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:51 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.4.0)
+#   Imports: ps (>= 1.9.3), R6, utils
+#   Suggests: callr (>= 3.7.3), cli (>= 3.3.0), codetools, covr, curl, debugme, parallel, rlang (>= 1.0.2), testthat (>= 3.0.0), webfakes, withr
+
+# R: prodlim=2026.03.11
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:14:40 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 4.1.0)
+#   Imports: Rcpp (>= 0.11.5), stats, rlang, data.table, grDevices, ggplot2, scales, graphics, diagram, survival, KernSmooth, lava
+#   LinkingTo: Rcpp
+#   Suggests: tibble, ggthemes, riskRegression, testthat, etm, survey
+
+# R: profvis=0.4.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-23 17:44:36 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 4.0)
+#   Imports: htmlwidgets (>= 0.3.2), rlang (>= 1.1.0), vctrs
+#   Suggests: htmltools, knitr, rmarkdown, shiny, testthat (>= 3.0.0)
+
+# R: progressr=1.1.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:10:39 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 3.5.0)
+#   Imports: tools, utils
+#   Suggests: graphics, tcltk, beepr, cli, crayon, digest, pbmcapply, progress, purrr, foreach, plyr, doFuture, future, future.apply, furrr, ntfy, RPushbullet, rstudioapi, shiny, commonmark, base64enc
+
+# R: promises=1.5.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-23 17:43:54 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.1.0)
+#   Imports: fastmap (>= 1.1.0), later, lifecycle, magrittr (>= 1.5), otel (>= 0.2.0), R6, rlang
+#   Suggests: future (>= 1.21.0), knitr, mirai, otelsdk (>= 0.2.0), purrr, Rcpp, rmarkdown, spelling, testthat (>= 3.0.0), vembedr
+
+# R: proxy=0.4-29
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 12:54:23 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.4.0)
+#   Imports: stats, utils
+#   Suggests: cba
+
+# R: ps=1.9.3
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:41 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.4)
+#   Imports: utils
+#   Suggests: callr, covr, curl, pillar, pingr, processx (>= 3.1.0), R6, rlang, testthat (>= 3.0.0), webfakes, withr
+
+# R: purrr=1.2.2
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 12:55:09 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 4.1)
+#   Imports: cli (>= 3.6.1), lifecycle (>= 1.0.3), magrittr (>= 1.5.0), rlang (>= 1.1.1), vctrs (>= 0.6.3)
+#   LinkingTo: cli
+#   Suggests: carrier (>= 0.3.0), covr, dplyr (>= 0.7.8), httr, knitr, lubridate, mirai (>= 2.5.1), rmarkdown, testthat (>= 3.0.0), tibble, tidyselect
+
+# R: pysparklyr=0.2.2
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 16:39:49 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.1)
+#   Imports: arrow, cli, DBI, dbplyr (>= 2.6.0), dplyr, fs, glue, httr2, lifecycle, methods, processx, purrr, reticulate (>= 1.44.0), rlang, rstudioapi, sparklyr (>= 1.9.5), tidyr, tidyselect, vctrs, uuid, withr, connectcreds
+#   Suggests: vcr, crayon, R6, testthat (>= 3.0.0), tibble, rsconnect, rsample, workflows, tune (>= 2.1.0), parsnip, dials, tailor, recipes
+
+# R: qs2=0.3.1
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:12:18 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.6.0)
+#   Imports: Rcpp, RcppParallel (>= 6.1.1), stringfish (>= 0.18.0)
+#   LinkingTo: Rcpp, RcppParallel (>= 6.1.1)
+#   Suggests: knitr, rmarkdown, dplyr, data.table, stringi
+#   SystemRequirements: GNU make, C++17
+
+# R: R6=2.6.1
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 12:54:24 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 3.6)
+#   Suggests: lobstr, testthat (>= 3.0.0)
+
+# R: ragg=1.5.2
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-23 17:46:24 UTC; unix
+#   NeedsCompilation: yes
+#   Imports: systemfonts (>= 1.0.3), textshaping (>= 0.3.0)
+#   LinkingTo: systemfonts, textshaping
+#   Suggests: covr, graphics, grid, testthat (>= 3.0.0)
+#   SystemRequirements: freetype2, libpng, libtiff, libjpeg, libwebp, libwebpmux
+
+# R: ranger=0.18.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:13:49 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.1)
+#   Imports: Rcpp (>= 0.11.2), Matrix
+#   LinkingTo: Rcpp, RcppEigen
+#   Suggests: survival, testthat
+
+# R: RANN=2.6.3
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:42 UTC; unix
+#   NeedsCompilation: yes
+#   Suggests: testthat
+
+# R: rapidjsonr=1.2.1
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-21 12:10:29 UTC; unix
+#   NeedsCompilation: no
+#   SystemRequirements: GNU make
+
+# R: rappdirs=0.3.4
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:39 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 4.1)
+#   Suggests: covr, roxygen2, testthat (>= 3.2.0), withr
+
+# R: raster=3.6-32
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:00:14 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: sp (>= 1.4-5), R (>= 3.5.0)
+#   Imports: Rcpp, methods, terra (>= 1.8-5)
+#   LinkingTo: Rcpp
+#   Suggests: ncdf4, igraph, tcltk, parallel, rasterVis, MASS, sf, tinytest, gstat, fields, exactextractr
+
+# R: rbibutils=2.4.1
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 12:54:24 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 2.10)
+#   Imports: utils, tools
+#   Suggests: testthat
+
+# R: rcmdcheck=1.4.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-23 17:49:27 UTC; unix
+#   NeedsCompilation: no
+#   Imports: callr (>= 3.1.1.9000), cli (>= 3.0.0), curl, desc (>= 1.2.0), digest, pkgbuild, prettyunits, R6, rprojroot, sessioninfo (>= 1.1.1), utils, withr, xopen
+#   Suggests: covr, knitr, mockery, processx, ps, rmarkdown, svglite, testthat, webfakes
+
+# R: RColorBrewer=1.1-3
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:10:38 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 2.0.0)
+
+# R: Rcpp=1.1.2
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 12:54:25 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.5.0)
+#   Imports: methods, utils
+#   Suggests: tinytest, inline, rbenchmark, pkgKitten (>= 0.1.2)
+
+# R: RcppArmadillo=15.6.2-1
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:46 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.3.0)
+#   Imports: Rcpp (>= 1.1.1), stats, utils, methods
+#   LinkingTo: Rcpp
+#   Suggests: tinytest, Matrix (>= 1.3.0), pkgKitten, reticulate, slam
+
+# R: RcppEigen=0.3.4.0.2
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:41 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.6.0)
+#   Imports: Rcpp (>= 0.11.0), stats, utils
+#   LinkingTo: Rcpp
+#   Suggests: Matrix, inline, tinytest, pkgKitten, microbenchmark
+
+# R: RcppParallel=6.2.1
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:42 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.6.0)
+#   Suggests: Rcpp, knitr, rmarkdown
+#   SystemRequirements: CMake (>= 3.5)
+
+# R: RcppTOML=0.2.3
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 16:39:06 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.3.0)
+#   Imports: Rcpp (>= 1.0.8)
+#   LinkingTo: Rcpp
+#   Suggests: tinytest
+#   SystemRequirements: A C++17 compiler
+
+# R: Rdpack=2.6.6
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 12:54:41 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 2.15.0), methods
+#   Imports: tools, utils, rbibutils (> 2.4)
+#   Suggests: grDevices, testthat, rstudioapi, rprojroot, gbRd
+
+# R: rdtools=0.1.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-23 17:43:37 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 4.0)
+#   Imports: stats, tools
+#   Suggests: testthat (>= 3.0.0), withr
+
+# R: readmission=0.1.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 16:40:33 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 2.10)
+#   Suggests: knitr
+
+# R: recipes=1.4.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:14:55 UTC; unix
+#   NeedsCompilation: no
+#   Depends: dplyr (>= 1.1.0), R (>= 4.1)
+#   Imports: cli, clock (>= 0.6.1), generics (>= 0.1.2), glue, gower, hardhat (>= 1.4.1), ipred (>= 0.9-12), lifecycle (>= 1.0.3), lubridate (>= 1.8.0), magrittr, Matrix, purrr (>= 1.0.0), rlang (>= 1.1.0), sparsevctrs (>= 0.3.3), stats, tibble, tidyr (>= 1.0.0), tidyselect (>= 1.2.0), timeDate, utils, vctrs (>= 0.5.0), withr
+#   Suggests: covr, ddalpha, dials (>= 1.2.0), dimRed, fastICA, ggplot2, igraph (>= 2.1.1), kernlab, knitr, methods, mixOmics, modeldata (>= 0.1.1), parsnip (>= 1.2.0), quarto, RANN, RcppRoll, rmarkdown, rpart, rsample, RSpectra, splines2, survival, testthat (>= 3.3.0), workflows, xml2
+
+# R: reformulas=0.4.4
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-11-02 16:50:37 UTC; unix
+#   NeedsCompilation: no
+#   Imports: stats, methods, Matrix, Rdpack
+#   Suggests: lme4, tinytest, glmmTMB, Formula
+
+# R: remotes=2.5.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-23 18:35:52 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 3.0.0)
+#   Imports: methods, stats, tools, utils
+#   Suggests: brew, callr, codetools, covr, curl, git2r (>= 0.23.0), knitr, mockery, pingr, pkgbuild (>= 1.0.1), rmarkdown, rprojroot, testthat (>= 3.0.0), webfakes, withr
+#   SystemRequirements: Subversion for install_svn, git for install_git
+
+# R: reticulate=1.47.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 16:39:28 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.5)
+#   Imports: Matrix, Rcpp (>= 1.0.7), RcppTOML, graphics, here, jsonlite, methods, png, rappdirs, utils, rlang, withr
+#   LinkingTo: Rcpp
+#   Suggests: callr, knitr, glue, cli, rmarkdown, pillar, testthat
+#   SystemRequirements: Python (>= 2.7.0)
+
+# R: rex=1.2.2
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-25 17:00:49 UTC; unix
+#   NeedsCompilation: no
+#   Imports: withr
+#   Suggests: covr, dplyr, ggplot2, Hmisc, knitr, magrittr, rmarkdown, roxygen2, rvest, stringr, testthat
+
+# R: rlang=1.3.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 12:54:25 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 4.0.0)
+#   Imports: utils
+#   Suggests: cli (>= 3.1.0), covr, crayon, desc, fs, glue, knitr, magrittr, methods, pillar, pkgload, rmarkdown, stats, testthat (>= 3.3.2), tibble, usethis, vctrs (>= 0.2.3), withr
+#   Enhances: winch
+
+# R: rmarkdown=2.32
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:13:11 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 3.0)
+#   Imports: bslib (>= 0.2.5.1), evaluate (>= 0.13), fontawesome (>= 0.5.0), htmltools (>= 0.5.1), jquerylib, jsonlite, knitr (>= 1.50), methods, tinytex (>= 0.31), tools, utils, xfun (>= 0.36), yaml (>= 2.1.19)
+#   Suggests: digest, dygraphs, fs, rsconnect, downlit (>= 0.4.0), katex (>= 1.4.0), sass (>= 0.4.0), shiny (>= 1.6.0), testthat (>= 3.0.3), tibble, vctrs, cleanrmd, withr (>= 2.4.2), xml2
+#   SystemRequirements: pandoc (>= 2.8) - http://pandoc.org
+
+# R: roxygen2=8.1.1
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-23 17:49:54 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 4.1)
+#   Imports: brew, cli (>= 3.3.0), commonmark, desc (>= 1.2.0), knitr, lifecycle, methods, pkgload (>= 1.5.2), R6 (>= 2.1.2), rdtools (>= 0.1.0), rlang (>= 1.1.0), stats, utils, withr, xml2
+#   LinkingTo: cpp11
+#   Suggests: covr, R.methodsS3, S7, R.oo, rmarkdown (>= 2.16), testthat (>= 3.1.2), yaml
+
+# R: rpart=4.1.27
+#   Management: R (install separately)
+#   Priority: recommended
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:40 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 2.15.0), graphics, stats, grDevices
+#   Suggests: survival
+
+# R: rprojroot=2.1.1
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 16:39:04 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 3.0.0)
+#   Suggests: covr, knitr, lifecycle, rlang, rmarkdown, testthat (>= 3.2.0), withr
+
+# R: rsample=1.3.2
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:11:05 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.1)
+#   Imports: cli, dplyr (>= 1.1.1), furrr, generics, glue, lifecycle, methods, pillar, purrr (>= 1.0.0), rlang (>= 1.1.0), slider (>= 0.1.5), tibble, tidyr, tidyselect, vctrs (>= 0.5.0)
+#   Suggests: broom, covr, ggplot2, knitr, modeldata, recipes (>= 0.1.4), rmarkdown, stats, testthat (>= 3.0.0), utils, whisker, withr, xml2
+
+# R: rstudioapi=0.19.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:19:19 UTC; unix
+#   NeedsCompilation: no
+#   Suggests: testthat, knitr, rmarkdown, clipr, covr, curl, jsonlite, R6, withr
+
+# R: rversions=3.0.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-23 17:43:50 UTC; unix
+#   NeedsCompilation: no
+#   Imports: curl
+#   Suggests: pillar, testthat (>= 3.0.0), webfakes, withr
+
+# R: s2=1.1.13
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 12:56:52 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.0.0)
+#   Imports: Rcpp, wk (>= 0.6.0)
+#   LinkingTo: Rcpp, wk
+#   Suggests: bit64, testthat (>= 3.0.0), vctrs
+#   SystemRequirements: cmake, OpenSSL >= 1.0.1, Abseil >= 20230802.0
+
+# R: S7=0.2.2
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:39 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.5.0)
+#   Imports: utils
+#   Suggests: bench, callr, covr, knitr, methods, rmarkdown, testthat (>= 3.2.0), tibble
+
+# R: safetensors=0.3.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-11-02 16:52:03 UTC; unix
+#   NeedsCompilation: no
+#   Imports: cli, jsonlite, R6, rlang
+#   Suggests: testthat (>= 3.0.0), torch (>= 0.11.0)
+
+# R: sass=0.4.10
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:11:07 UTC; unix
+#   NeedsCompilation: yes
+#   Imports: fs (>= 1.2.4), rlang (>= 0.4.10), htmltools (>= 0.5.1), R6, rappdirs
+#   Suggests: testthat, knitr, rmarkdown, withr, shiny, curl
+#   SystemRequirements: GNU make
+
+# R: scales=1.4.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:11:11 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.1)
+#   Imports: cli, farver (>= 2.0.3), glue, labeling, lifecycle, R6, RColorBrewer, rlang (>= 1.1.0), viridisLite
+#   Suggests: bit64, covr, dichromat, ggplot2, hms (>= 0.5.0), stringi, testthat (>= 3.0.0)
+
+# R: scatterplot3d=0.3-45
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:10:39 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 2.7.0)
+#   Imports: grDevices, graphics, stats
+
+# R: secretbase=1.3.1
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:39 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.5)
+
+# R: sedonadb=0.4.1.9000
+#   Management: R (install separately)
+#   Repository: https://r-multiverse.r-universe.dev
+#   RemoteUrl: https://github.com/apache/sedona-db
+#   RemoteRef: apache-sedona-db-0.5.0
+#   RemoteSha: 751453f04cd6e09842adf3073b2b3dac7d1777bc
+#   RemoteSubdir: r/sedonadb
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:20:44 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 4.1.0)
+#   Imports: geoarrow, nanoarrow
+#   Suggests: adbcdrivermanager, dplyr, jsonlite, lintr, rlang, tibble, sf, testthat (>= 3.0.0), tidyselect, withr, wk
+#   SystemRequirements: Cargo (Rust's package manager), rustc
+
+# R: sessioninfo=1.2.4
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-23 17:43:52 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 3.4)
+#   Imports: cli (>= 3.1.0), tools, utils
+#   Suggests: callr, covr, gh, reticulate, rmarkdown, testthat (>= 3.2.0), withr
+
+# R: sf=1.1-3
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:01:40 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: methods, R (>= 4.1.0)
+#   Imports: classInt (>= 0.4-1), DBI (>= 0.8), graphics, grDevices, grid, s2 (>= 1.1.0), stats, tools, units (>= 0.7-0), utils
+#   LinkingTo: Rcpp
+#   Suggests: blob, covr, dplyr (>= 1.0.0), ggplot2, knitr, lwgeom (>= 0.2-14), maps, mapview, Matrix, microbenchmark, nanoarrow, odbc, pbapply, pillar, pool, raster, rlang, rmarkdown, RPostgres (>= 1.1.0), RPostgreSQL, RSQLite, sp (>= 1.2-4), spatstat (>= 2.0-1), spatstat.geom, spatstat.random, spatstat.linnet, spatstat.utils, stars (>= 0.6-0), terra, testthat (>= 3.0.0), tibble (>= 1.4.1), tidyr (>= 1.2.0), tidyselect (>= 1.0.0), tmap (>= 2.0), vctrs, wk (>= 0.9.0)
+#   SystemRequirements: GDAL (>= 2.0.1), GEOS (>= 3.4.0), PROJ (>= 4.8.0), sqlite3
+
+# R: sfd=0.1.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:10:39 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 2.10), tibble
+#   Imports: cli, rlang
+#   Suggests: ggplot2, spelling, testthat (>= 3.0.0)
+
+# R: sfheaders=0.4.5
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:11:36 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.0.2)
+#   Imports: Rcpp (>= 1.1.0)
+#   LinkingTo: geometries (>= 0.2.5), Rcpp
+#   Suggests: covr, knitr, testthat
+
+# R: sftime=0.3.2
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:03:00 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.1.0), sf (>= 1.0.9)
+#   Imports: methods
+#   Suggests: knitr, spacetime, rmarkdown, dplyr (>= 0.8-3), trajectories (>= 0.2.2), stars, ncmeta, tidyr, ggplot2, sp, rlang, vctrs, spatstat.geom, spatstat.linnet, sftrack, cubble (>= 0.3.0)
+
+# R: shape=1.4.6.1
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:10:40 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 2.01)
+#   Imports: stats, graphics, grDevices
+
+# R: shiny=1.14.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-23 17:49:31 UTC; unix
+#   NeedsCompilation: no
+#   Depends: methods, R (>= 3.1.2)
+#   Imports: bslib (>= 0.6.0), cachem (>= 1.1.0), cli, commonmark (>= 2.0.0), fastmap (>= 1.1.1), fontawesome (>= 0.4.0), glue (>= 1.3.2), grDevices, htmltools (>= 0.5.4), httpuv (>= 1.5.2), jsonlite (>= 0.9.16), later (>= 1.0.0), lifecycle (>= 0.2.0), mime (>= 0.3), otel, promises (>= 1.5.0), R6 (>= 2.0), rlang (>= 0.4.10), sourcetools, tools, utils, withr, xtable
+#   Suggests: Cairo (>= 1.5-5), coro (>= 1.1.0), datasets, DT, dygraphs, future, ggplot2, knitr (>= 1.6), magrittr, markdown, mirai, otelsdk (>= 0.2.0), ragg, reactlog (>= 1.0.0), rmarkdown, sass, shinytest2, showtext, testthat (>= 3.2.1), watcher, yaml
+
+# R: slider=0.3.3
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:50 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 4.0.0)
+#   Imports: cli (>= 3.6.1), rlang (>= 1.1.1), vctrs (>= 0.6.3), warp
+#   LinkingTo: vctrs (>= 0.6.3)
+#   Suggests: covr, dplyr (>= 1.0.0), knitr, lubridate, rmarkdown, testthat (>= 3.0.0)
+
+# R: sourcetools=0.1.7-2
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-23 17:42:19 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.0.2)
+#   Suggests: testthat
+
+# R: sp=2.2-4
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 12:54:36 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.5.0), methods
+#   Imports: utils, stats, graphics, grDevices, lattice, grid
+#   Suggests: RColorBrewer, gstat, deldir, knitr, maps, mapview, rmarkdown, sf, terra, raster
+
+# R: sparklyr=1.9.6
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 15:52:06 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 3.2)
+#   Imports: config (>= 0.2), DBI (>= 1.0.0), dbplyr (>= 2.5.0), dplyr (>= 1.0.9), generics, globals, glue, httr (>= 1.2.1), jsonlite (>= 1.4), methods, openssl (>= 0.8), purrr, rlang (>= 0.1.4), rstudioapi (>= 0.10), tidyr (>= 1.2.0), tidyselect, uuid, vctrs, withr, xml2
+#   Suggests: arrow (>= 0.17.0), broom, diffobj, foreach, ggplot2, iterators, janeaustenr, Lahman, mlbench, nnet, nycflights13, R6, r2d3, RCurl, reshape2, shiny (>= 1.0.1), parsnip, testthat, rprojroot
+#   SystemRequirements: Spark: 2.x, or 3.x, or 4.x
+
+# R: sparsevctrs=0.3.6
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:40 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 4.1)
+#   Imports: cli (>= 3.4.0), rlang (>= 1.1.0), vctrs
+#   Suggests: knitr, Matrix, methods, rmarkdown, testthat (>= 3.0.0), tibble, withr
+
+# R: spatialsample=0.6.1
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:11:38 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.6)
+#   Imports: dplyr (>= 1.0.0), ggplot2, glue, purrr, rlang (>= 1.0.0), rsample (>= 1.1.1), sf (>= 1.0-9), stats, tibble, tidyselect, units, vctrs (>= 0.3.6)
+#   LinkingTo: cpp11
+#   Suggests: covr, gifski, knitr, lwgeom, modeldata, rmarkdown, testthat (>= 3.0.0), tidyr, vdiffr, whisker, withr, yardstick
+
+# R: splines=4.6.1
+#   Management: conda (r-base)
+#   Priority: base
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-16 19:15:38 UTC; unix
+#   NeedsCompilation: yes
+#   Imports: graphics, stats
+#   Suggests: Matrix, methods
+
+# R: splitfngr=0.1.2
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:10:50 UTC; unix
+#   NeedsCompilation: no
+#   Imports: lbfgs
+
+# R: SQUAREM=2026.1
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:10:40 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.0)
+#   Suggests: setRNG, interval
+
+# R: stars=0.7-3
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:03:00 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.1.0), abind, sf (>= 1.0-19)
+#   Imports: methods, parallel, rlang, units
+#   Suggests: Cairo, CFtime (>= 1.7.1), classInt (>= 0.4-1), clue, covr, cubble (>= 0.3.0), cubelyr, digest, dplyr (>= 0.7-0), exactextractr, FNN, future.apply, ggforce, ggplot2, ggthemes, gstat, httr, jsonlite, knitr, lwgeom, maps, mapdata, ncdfCF, ncdfgeom, ncmeta (>= 0.0.3), OpenStreetMap, pbapply, plm, randomForest, raster, rmarkdown, RNetCDF (>= 1.8-2), sp, spacetime, spatstat (>= 2.0-1), spatstat.geom, starsdata, terra (>= 1.4-22), testthat, tibble, tidyr, tsibble, viridis, xts, zoo
+
+# R: stats=4.6.1
+#   Management: conda (r-base)
+#   Priority: base
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-16 19:14:55 UTC; unix
+#   NeedsCompilation: yes
+#   Imports: utils, grDevices, graphics
+#   Suggests: MASS, Matrix, SuppDists, methods, stats4
+#   Enhances: Kendall, coin, multcomp, pcaPP, pspearman, robustbase
+
+# R: stats4=4.6.1
+#   Management: conda (r-base)
+#   Priority: base
+#   Built: R 4.6.1; ; 2026-10-16 19:15:38 UTC; unix
+#   Imports: graphics, methods, stats
+
+# R: stringfish=0.19.2
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:12:00 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.6.0)
+#   Imports: Rcpp, RcppParallel
+#   LinkingTo: Rcpp (>= 0.12.18.3), RcppParallel (>= 6.1.1)
+#   Suggests: knitr, rmarkdown
+#   SystemRequirements: GNU make, C++17
+
+# R: stringi=1.8.9
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 12:54:34 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.4)
+#   Imports: tools, utils, stats
+#   SystemRequirements: ICU4C (>= 61, optional)
+
+# R: stringr=1.6.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 12:56:04 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.1.0)
+#   Imports: cli, glue (>= 1.6.1), lifecycle (>= 1.0.3), magrittr, rlang (>= 1.0.0), stringi (>= 1.5.3), vctrs (>= 0.4.0)
+#   Suggests: covr, dplyr, gt, htmltools, htmlwidgets, knitr, rmarkdown, testthat (>= 3.0.0), tibble
+
+# R: survival=3.8-12
+#   Management: R (install separately)
+#   Priority: recommended
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:13:50 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 4.1.0)
+#   Imports: graphics, Matrix, methods, splines, stats, utils
+
+# R: sys=3.4.3
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 12:54:24 UTC; unix
+#   NeedsCompilation: yes
+#   Suggests: unix (>= 1.4), spelling, testthat
+
+# R: systemfonts=1.3.2
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-23 17:42:33 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.2.0)
+#   Imports: base64enc, grid, jsonlite, lifecycle, tools, utils
+#   LinkingTo: cpp11 (>= 0.2.1)
+#   Suggests: covr, farver, ggplot2, graphics, knitr, ragg, rmarkdown, svglite, testthat (>= 2.1.0)
+#   SystemRequirements: fontconfig, freetype2
+
+# R: tailor=0.1.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:10:54 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.1)
+#   Imports: cli, dplyr, generics, hardhat, purrr, rlang (>= 1.1.0), tibble, tidyselect, vctrs
+#   Suggests: betacal, dials (>= 1.4.1), mgcv, modeldata, probably (>= 1.1.0), testthat (>= 3.0.0)
+
+# R: targets=1.12.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:16:57 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 3.5.0)
+#   Imports: base64url (>= 1.4), callr (>= 3.7.0), cli (>= 2.0.2), codetools (>= 0.2.16), data.table (>= 1.16.0), igraph (>= 2.0.0), knitr (>= 1.34), prettyunits (>= 1.1.0), ps (>= 1.8.0), R6 (>= 2.4.1), rlang (>= 1.0.0), secretbase (>= 0.5.0), stats, tibble (>= 3.0.1), tidyselect (>= 1.1.0), tools, utils, vctrs (>= 0.2.4), yaml (>= 2.2.1)
+#   Suggests: autometric (>= 0.1.0), bslib, clustermq (>= 0.9.2), crew (>= 0.9.0), curl (>= 4.3), DT (>= 0.14), dplyr (>= 1.0.0), fst (>= 0.9.2), future (>= 1.19.1), future.batchtools (>= 0.9.0), future.callr (>= 0.6.0), gargle (>= 1.2.0), googleCloudStorageR (>= 0.7.0), gt (>= 0.2.2), keras (>= 2.2.5.0), markdown (>= 1.1), nanonext (>= 0.12.0), rmarkdown (>= 2.4), parallelly (>= 1.35.0), paws.common (>= 0.6.4), paws.storage (>= 0.4.0), pkgload (>= 1.1.0), processx (>= 3.4.3), qs2, reprex (>= 2.0.0), rstudioapi (>= 0.11), R.utils (>= 2.6.0), shiny (>= 1.5.0), shinybusy (>= 0.2.2), shinyWidgets (>= 0.5.4), tarchetypes, testthat (>= 3.0.0), torch (>= 0.1.0), usethis (>= 1.6.3), visNetwork (>= 2.1.2)
+
+# R: tcltk=4.6.1
+#   Management: conda (r-base)
+#   Priority: base
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-16 19:15:39 UTC; unix
+#   NeedsCompilation: yes
+#   Imports: utils
+
+# R: terra=1.9-50
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 12:54:58 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.5.0), methods
+#   Imports: Rcpp (>= 1.0-10), stats
+#   LinkingTo: Rcpp
+#   Suggests: parallel, tinytest, ncdf4, sf (>= 0.9-8), igraph, deldir, XML, leaflet (>= 2.2.1), htmlwidgets, future, future.apply
+#   SystemRequirements: C++17, GDAL (>= 2.2.3), GEOS (>= 3.4.0), PROJ (>= 4.9.3), TBB, sqlite3
+
+# R: testthat=3.3.2
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-23 17:50:09 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 4.1.0)
+#   Imports: brio (>= 1.1.5), callr (>= 3.7.6), cli (>= 3.6.5), desc (>= 1.4.3), evaluate (>= 1.0.4), jsonlite (>= 2.0.0), lifecycle (>= 1.0.4), magrittr (>= 2.0.3), methods, pkgload (>= 1.4.0), praise (>= 1.0.0), processx (>= 3.8.6), ps (>= 1.9.1), R6 (>= 2.6.1), rlang (>= 1.1.6), utils, waldo (>= 0.6.2), withr (>= 3.0.2)
+#   Suggests: covr, curl (>= 0.9.5), diffviewer (>= 0.1.0), digest (>= 0.6.33), gh, knitr, otel, otelsdk, rmarkdown, rstudioapi, S7, shiny, usethis, vctrs (>= 0.1.0), xml2
+
+# R: textshaping=1.0.5
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-23 17:43:59 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.2.0)
+#   Imports: lifecycle, stats, stringi, systemfonts (>= 1.3.0), utils
+#   LinkingTo: cpp11 (>= 0.2.1), systemfonts (>= 1.0.0)
+#   Suggests: covr, grDevices, grid, knitr, rmarkdown, testthat (>= 3.0.0)
+#   SystemRequirements: freetype2, harfbuzz, fribidi
+
+# R: tibble=3.3.1
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 12:55:14 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.4.0)
+#   Imports: cli, lifecycle (>= 1.0.0), magrittr, methods, pillar (>= 1.8.1), pkgconfig, rlang (>= 1.0.2), utils, vctrs (>= 0.5.0)
+#   Suggests: bench, bit64, blob, brio, callr, DiagrammeR, dplyr, evaluate, formattable, ggplot2, here, hms, htmltools, knitr, lubridate, nycflights13, pkgload, purrr, rmarkdown, stringi, testthat (>= 3.0.2), tidyr, withr
+
+# R: tidymodels=1.5.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:50:31 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.1)
+#   Imports: broom (>= 1.0.12), cli (>= 3.6.6), conflicted (>= 1.2.0), dials (>= 1.4.3), dplyr (>= 1.2.1), ggplot2 (>= 4.0.3), hardhat (>= 1.4.3), infer (>= 1.1.0), modeldata (>= 1.5.1), parsnip (>= 1.5.0), purrr (>= 1.2.2), recipes (>= 1.3.2), rlang (>= 1.2.0), rsample (>= 1.3.2), rstudioapi (>= 0.18.0), tailor (>= 0.1.0), tidyr (>= 1.3.2), tune (>= 2.1.0), workflows (>= 1.3.0), workflowsets (>= 1.1.1), yardstick (>= 1.4.0)
+#   Suggests: covr, glue, knitr, rmarkdown, testthat (>= 3.0.0), xml2
+
+# R: tidyr=1.3.2
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 12:56:07 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 4.1.0)
+#   Imports: cli (>= 3.4.1), dplyr (>= 1.1.0), glue, lifecycle (>= 1.0.3), magrittr, purrr (>= 1.0.1), rlang (>= 1.1.1), stringr (>= 1.5.0), tibble (>= 2.1.1), tidyselect (>= 1.2.1), utils, vctrs (>= 0.5.2)
+#   LinkingTo: cpp11 (>= 0.4.0)
+#   Suggests: covr, data.table, knitr, readr, repurrrsive (>= 1.1.0), rmarkdown, testthat (>= 3.0.0)
+
+# R: tidyselect=1.2.1
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 12:55:09 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.4)
+#   Imports: cli (>= 3.3.0), glue (>= 1.3.0), lifecycle (>= 1.0.3), rlang (>= 1.0.4), vctrs (>= 0.5.2), withr
+#   Suggests: covr, crayon, dplyr, knitr, magrittr, rmarkdown, stringr, testthat (>= 3.1.1), tibble (>= 2.1.3)
+
+# R: tigris=2.3.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:11:04 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.1)
+#   Imports: cli, dplyr, httr2, magrittr, methods, rappdirs, rlang, sf, stringr, utils, zip
+#   Suggests: ggplot2, knitr, leaflet, sp, testthat (>= 3.0.0), withr
+
+# R: timechange=0.4.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:40 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.3)
+#   LinkingTo: cpp11 (>= 0.2.7)
+#   Suggests: testthat (>= 0.7.1.99), knitr
+#   SystemRequirements: A system with zoneinfo data (e.g. /usr/share/zoneinfo). On Windows the zoneinfo included with R is used.
+
+# R: timeDate=4052.112
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:10:41 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 3.6.0), methods
+#   Imports: graphics, utils, stats
+#   Suggests: RUnit
+
+# R: tinytex=0.61
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:10:52 UTC; unix
+#   NeedsCompilation: no
+#   Imports: xfun (>= 0.48)
+#   Suggests: testit, rstudioapi
+
+# R: tools=4.6.1
+#   Management: conda (r-base)
+#   Priority: base
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-16 19:14:06 UTC; unix
+#   NeedsCompilation: yes
+#   Suggests: codetools, methods, xml2, curl, commonmark, knitr, xfun, mathjaxr, V8, bibtex
+
+# R: torch=0.17.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-11-02 16:52:07 UTC; unix
+#   NeedsCompilation: yes
+#   Imports: Rcpp, R6, withr, rlang (>= 1.0.0), methods, utils, stats, bit64, magrittr, tools, coro (>= 1.0.2), callr, cli (>= 3.0.0), glue, desc, safetensors (>= 0.1.1), jsonlite, scales
+#   LinkingTo: Rcpp
+#   Suggests: testthat (>= 3.0.0), covr, knitr (>= 1.36), rmarkdown, palmerpenguins, mvtnorm, numDeriv, katex
+#   SystemRequirements: LibTorch (https://pytorch.org/); Only x86_64 platforms are currently supported except for ARM system running macOS.
+
+# R: tune=2.1.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:15:13 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.1)
+#   Imports: cli (>= 3.3.0), dials (>= 1.4.3), dplyr (>= 1.1.0), GauPro (>= 0.2.15), generics (>= 0.1.2), ggplot2, glue (>= 1.6.2), hardhat (>= 1.4.2), lifecycle, parallel, parsnip (>= 1.5.0), purrr (>= 1.0.0), recipes (>= 1.3.2), rlang (>= 1.1.4), rsample (>= 1.3.2), tailor (>= 0.1.0), tibble (>= 3.1.0), tidyr (>= 1.2.0), tidyselect (>= 1.1.2), vctrs (>= 0.6.1), withr, workflows (>= 1.3.0), yardstick (>= 1.4.0)
+#   Suggests: C50, censored (>= 0.3.0), covr, future (>= 1.33.0), future.apply, kernlab, kknn, knitr, mgcv, mirai (>= 2.4.0), modeldata, probably, scales, spelling, splines2, survival, testthat (>= 3.0.0), xgboost, xml2
+
+# R: tzdb=0.5.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:40 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 4.0.0)
+#   LinkingTo: cpp11 (>= 0.5.2)
+#   Suggests: covr, testthat (>= 3.0.0)
+
+# R: units=1.0-1
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 12:54:55 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.5.0)
+#   Imports: Rcpp
+#   LinkingTo: Rcpp (>= 1.1.0)
+#   Suggests: NISTunits, measurements, xml2, magrittr, pillar (>= 1.3.0), dplyr (>= 1.0.0), vctrs (>= 0.3.1), ggplot2 (> 3.2.1), testthat (>= 3.0.0), vdiffr, knitr, rvest, rmarkdown
+#   SystemRequirements: udunits-2
+
+# R: urlchecker=2.0.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-23 17:44:40 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.1)
+#   Imports: cli, curl, gitcreds, rlang (>= 1.1.0), tools, utils, xml2
+#   Suggests: covr, testthat (>= 3.0.0), webfakes, withr
+
+# R: usethis=3.2.2
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-23 17:49:17 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.1)
+#   Imports: cli (>= 3.0.1), clipr (>= 0.3.0), crayon, curl (>= 2.7), desc (>= 1.4.2), fs (>= 1.3.0), gert (>= 1.4.1), gh (>= 1.6.0), glue (>= 1.3.0), jsonlite, lifecycle (>= 1.0.0), pak, purrr, rappdirs, rlang (>= 1.1.0), rprojroot (>= 2.1.1), rstudioapi, whisker, withr (>= 2.3.0), yaml
+#   Suggests: askpass, covr, knitr, magick, pkgload (>= 1.3.2.1), quarto (>= 1.5.1), rmarkdown, roxygen2 (>= 7.1.2), spelling (>= 1.2), testthat (>= 3.1.8)
+
+# R: utf8=1.2.6
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 12:54:24 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 2.10)
+#   Suggests: cli, covr, knitr, rlang, rmarkdown, testthat (>= 3.0.0), withr
+
+# R: utils=4.6.1
+#   Management: conda (r-base)
+#   Priority: base
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-16 19:14:34 UTC; unix
+#   NeedsCompilation: yes
+#   Suggests: methods, xml2, commonmark, knitr, jsonlite
+
+# R: uuid=1.2-2
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:19:24 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 2.9.0)
+
+# R: V8=8.2.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-21 12:10:45 UTC; unix
+#   NeedsCompilation: yes
+#   Imports: Rcpp (>= 0.12.12), jsonlite (>= 1.0), curl (>= 1.0), utils
+#   LinkingTo: Rcpp
+#   Suggests: testthat, knitr, rmarkdown
+#   SystemRequirements: On Linux you can build against libv8-dev (Debian) or v8-devel (Fedora). We also provide static libv8 binaries for most platforms, see the README for details.
+
+# R: vctrs=0.7.3
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-27 11:42:15 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 4.0.0)
+#   Imports: cli (>= 3.4.0), glue, lifecycle (>= 1.0.3), rlang (>= 1.1.7)
+#   Suggests: bit64, covr, crayon, dplyr (>= 0.8.5), generics, knitr, pillar (>= 1.4.4), pkgdown (>= 2.0.1), rmarkdown, testthat (>= 3.0.0), tibble (>= 3.1.3), waldo (>= 0.2.0), withr, xml2, zeallot
+
+# R: viridisLite=0.4.3
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:10:41 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 2.10)
+#   Suggests: hexbin (>= 1.27.0), ggplot2 (>= 1.0.1), testthat, covr
+
+# R: waldo=0.6.2
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-23 17:44:30 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.0)
+#   Imports: cli, diffobj (>= 0.3.4), glue, methods, rlang (>= 1.1.0)
+#   Suggests: bit64, R6, S7, testthat (>= 3.0.0), withr, xml2
+
+# R: warp=0.2.3
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:40 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 4.0.0)
+#   Suggests: covr, knitr, rmarkdown, testthat (>= 3.0.0)
+
+# R: whisker=0.4.1
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-23 17:43:19 UTC; unix
+#   NeedsCompilation: no
+#   Suggests: markdown
+
+# R: withr=3.0.3
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 12:54:24 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 3.6.0)
+#   Imports: graphics, grDevices
+#   Suggests: callr, DBI, knitr, methods, rlang, rmarkdown (>= 2.12), RSQLite, testthat (>= 3.0.0)
+
+# R: wk=0.9.5
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 12:54:24 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 2.10)
+#   Suggests: testthat (>= 3.0.0), vctrs (>= 0.3.0), sf, tibble, readr
+
+# R: workflows=1.3.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:15:08 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.1)
+#   Imports: cli (>= 3.3.0), generics (>= 0.1.2), glue (>= 1.6.2), hardhat (>= 1.4.2), lifecycle (>= 1.0.3), modelenv (>= 0.1.0), parsnip (>= 1.2.1.9000), recipes (>= 1.0.10.9000), rlang (>= 1.1.0), sparsevctrs (>= 0.1.0.9003), tidyselect (>= 1.2.0), vctrs (>= 0.4.1), withr
+#   Suggests: butcher (>= 0.2.0), covr, dials (>= 1.0.0), glmnet, knitr, magrittr, Matrix, methods, modeldata (>= 1.0.0), probably, rmarkdown, tailor (>= 0.1.0), testthat (>= 3.0.0)
+
+# R: workflowsets=1.1.1
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-19 13:50:20 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 4.1)
+#   Imports: cli, dplyr (>= 1.0.0), generics (>= 0.1.2), ggplot2, hardhat (>= 1.2.0), lifecycle (>= 1.0.0), parsnip (>= 1.2.1), pillar (>= 1.7.0), prettyunits, purrr, rlang (>= 1.1.0), rsample (>= 0.0.9), stats, tibble (>= 3.1.0), tidyr, tune (>= 1.2.0), vctrs, withr, workflows (>= 1.1.4)
+#   Suggests: covr, dials (>= 0.1.0), finetune, kknn, knitr, modeldata, recipes (>= 1.1.0), rmarkdown, spelling, testthat (>= 3.0.0), tidyclust, yardstick (>= 1.3.0)
+
+# R: xfun=0.62
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:41 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.2.0)
+#   Imports: grDevices, stats, tools
+#   Suggests: testit, parallel, codetools, methods, rstudioapi, tinytex (>= 0.30), mime, litedown (>= 0.6), knitr (>= 1.50), remotes, pak, curl, xml2, jsonlite, magick, yaml, data.table, qs2
+
+# R: xml2=1.6.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:19:27 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 3.6.0)
+#   Imports: cli, methods, rlang (>= 1.1.0)
+#   Suggests: covr, curl, httr, knitr, mockery, rmarkdown, testthat (>= 3.2.0), xslt
+#   SystemRequirements: libxml2: libxml2-dev (deb), libxml2-devel (rpm)
+
+# R: xmlparsedata=1.0.5
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-26 15:28:48 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 3.0.0)
+#   Suggests: covr, testthat, xml2
+
+# R: xopen=1.0.1
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-23 17:43:23 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 3.1)
+#   Imports: processx
+#   Suggests: ps, testthat (>= 3.0.0)
+
+# R: xtable=1.8-8
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; ; 2026-10-23 17:42:24 UTC; unix
+#   NeedsCompilation: no
+#   Depends: R (>= 2.10.0)
+#   Imports: stats, utils, methods
+#   Suggests: knitr, zoo, survival, glue, tinytex
+
+# R: yaml=2.3.12
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:41 UTC; unix
+#   NeedsCompilation: yes
+#   Suggests: knitr, rmarkdown, testthat (>= 3.0.0)
+
+# R: yardstick=1.4.0
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:55 UTC; unix
+#   NeedsCompilation: yes
+#   Depends: R (>= 4.1)
+#   Imports: cli, dplyr (>= 1.1.0), generics (>= 0.1.2), hardhat (>= 1.4.3), lifecycle (>= 1.0.3), rlang (>= 1.1.4), tibble, tidyselect (>= 1.2.0), utils, vctrs (>= 0.5.0), withr
+#   Suggests: covr, ggplot2, knitr, probably (>= 1.0.0), rmarkdown, survival (>= 3.5-0), testthat (>= 3.0.0), tidyr
+
+# R: zip=3.0.2
+#   Management: R (install separately)
+#   Repository: CRAN
+#   Built: R 4.6.1; x86_64-conda-linux-gnu; 2026-10-19 13:10:42 UTC; unix
+#   NeedsCompilation: yes
+#   LinkingTo: cli
+#   Suggests: callr, cli, curl, pillar, processx, R6, testthat, webfakes, withr

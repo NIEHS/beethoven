@@ -5,7 +5,7 @@
 ################################################################################
 ##### set_args_download
 testthat::test_that("set_args_download exports qs or rds file", {
-  withr::local_package("qs")
+  withr::local_package("qs2")
 
   # create a temporary directory
   tmpdir <- tempdir()
@@ -109,14 +109,13 @@ testthat::test_that("set_args_download exports qs or rds file", {
   )
 
   unlink(tmpdir, recursive = TRUE)
-
 })
 
 
 ################################################################################
 ##### set_args_calc
 testthat::test_that("set_args_calc exports qs or rds file", {
-  withr::local_package("qs")
+  withr::local_package("qs2")
 
   # create a temporary directory
   tmpdir <- tempdir()
@@ -193,7 +192,6 @@ testthat::test_that("set_args_calc exports qs or rds file", {
   )
 
   unlink(tmpdir, recursive = TRUE)
-
 })
 
 ################################################################################
