@@ -225,6 +225,15 @@ spark_environment <- function(
 #' @param stage character(1). Prefix for prediction columns, which are named
 #'   using `sprintf("%s_%03d", stage, r)` for repeat `r`. Use `"base"` or
 #'   `"meta"` to distinguish the two learner stages.
+#' @param params Named list of numeric XGBoost hyperparameter overrides.
+#'   Supported names and defaults are `num_round` (`XGB_NUM_ROUND`, or 50),
+#'   `max_depth` (8), `eta` (0.1), `min_child_weight` (1), `gamma` (0),
+#'   `subsample` (0.8), `colsample_bytree` (0.8), `lambda` (1), `alpha` (0),
+#'   and `max_bin` (256). An explicit `num_round` overrides the environment.
+#'   Values must be finite, nonnegative scalars; `num_round`, `max_depth`,
+#'   and `max_bin` must be integers, with minima 1, 0, and 2 respectively.
+#'   `eta` must be at most 1; sampling fractions must be in (0, 1].
+#'   Unknown or duplicate names are rejected before connecting to Spark.
 #' @param ... Reserved for future use. Currently ignored.
 #' @details
 #' Requires the sparklyr and DBI packages, a working Spark installation, and
@@ -234,9 +243,10 @@ spark_environment <- function(
 #' resource limits, boosting rounds, seed, warehouse path, and row-limit
 #' settings. A positive row limit uses SQL `LIMIT` without an ordering clause.
 #'
-#' Models use CPU histogram training with squared-error loss, maximum depth 8,
-#' learning rate 0.1, and row and column sampling fractions of 0.8. Feature
-#' vectors are made dense so zero values remain explicit. Each fold's native
+#' Models use CPU histogram training with squared-error loss. Unless overridden
+#' by `params`, maximum depth is 8, learning rate is 0.1, and row and column
+#' sampling fractions are 0.8. Feature vectors are made dense so zero values
+#' remain explicit. Each fold's native
 #' booster is saved immediately after fitting, before held-out prediction.
 #' The Spark connection is disconnected on exit, including on error.
 #'
@@ -280,11 +290,50 @@ fit_xgb_spark <- function(
   yvar,
   dvar,
   stage = "base",
+  params = list(),
   ...
 ) {
   # ----------------------------------------------------------------------------
   # Spark configuration.
   config <- spark_environment(workspace = workspace, database = database)
+  # Validate model settings before opening a Spark connection.
+  default_params <- list(
+    num_round = config$int_nround,
+    max_depth = 8L,
+    eta = 0.1,
+    min_child_weight = 1,
+    gamma = 0,
+    subsample = 0.8,
+    colsample_bytree = 0.8,
+    lambda = 1,
+    alpha = 0,
+    max_bin = 256L
+  )
+  checkmate::assert_list(params, names = "unique")
+  checkmate::assert_subset(names(params), choices = names(default_params))
+  params <- utils::modifyList(default_params, params, keep.null = TRUE)
+  for (name in names(params)) {
+    checkmate::assert_number(
+      params[[name]], lower = 0, finite = TRUE,
+      .var.name = paste0("params$", name)
+    )
+  }
+  minimums <- c(num_round = 1L, max_depth = 0L, max_bin = 2L)
+  for (name in names(minimums)) {
+    params[[name]] <- checkmate::assert_int(
+      params[[name]], lower = minimums[[name]], upper = .Machine$integer.max,
+      tol = 0, coerce = TRUE, .var.name = paste0("params$", name)
+    )
+  }
+  checkmate::assert_number(params$eta, lower = 0, upper = 1)
+  for (name in c("subsample", "colsample_bytree")) {
+    checkmate::assert_number(
+      params[[name]], upper = 1, .var.name = paste0("params$", name)
+    )
+    checkmate::assert_true(
+      params[[name]] > 0, .var.name = paste0("params$", name, " > 0")
+    )
+  }
   config_base <- sparklyr::spark_config()
   chr_xgboost_jars <- Sys.getenv("XGBOOST_JARS", unset = "")
   if (nzchar(chr_xgboost_jars)) {
@@ -393,12 +442,17 @@ fit_xgb_spark <- function(
     sparklyr::invoke("setDevice", "cpu") |>
     sparklyr::invoke("setNumWorkers", config$int_nworkers) |>
     sparklyr::invoke("setNthread", config$int_nthreads) |>
-    sparklyr::invoke("setNumRound", config$int_nround) |>
+    sparklyr::invoke("setNumRound", params$num_round) |>
     sparklyr::invoke("setSeed", config$int_seed) |>
-    sparklyr::invoke("setMaxDepth", 8L) |>
-    sparklyr::invoke("setEta", 0.1) |>
-    sparklyr::invoke("setSubsample", 0.8) |>
-    sparklyr::invoke("setColsampleBytree", 0.8) |>
+    sparklyr::invoke("setMaxDepth", params$max_depth) |>
+    sparklyr::invoke("setEta", params$eta) |>
+    sparklyr::invoke("setMinChildWeight", params$min_child_weight) |>
+    sparklyr::invoke("setGamma", params$gamma) |>
+    sparklyr::invoke("setSubsample", params$subsample) |>
+    sparklyr::invoke("setColsampleBytree", params$colsample_bytree) |>
+    sparklyr::invoke("setLambda", params$lambda) |>
+    sparklyr::invoke("setAlpha", params$alpha) |>
+    sparklyr::invoke("setMaxBins", params$max_bin) |>
     sparklyr::invoke("setForceRepartition", TRUE)
   # ----------------------------------------------------------------------------
   # Initiate lists for storing all predictions and performance metrics.
@@ -414,8 +468,10 @@ fit_xgb_spark <- function(
     " workers, ",
     config$int_nthreads,
     " threads and ",
-    config$int_nround,
-    " boosting rounds..."
+    params$num_round,
+    " boosting rounds (eta=", params$eta,
+    ", depth=", params$max_depth,
+    ", min_child_weight=", params$min_child_weight, ")..."
   )
   # ----------------------------------------------------------------------------
   # Create prediction directory if does not exist.

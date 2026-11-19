@@ -3,7 +3,7 @@
 rule prepare_grid_sites:
     input:
         chr_init_dates="output/init/chr_init_dates.qs",
-        db_train_feat_sptmpl="output/train/feat/db_train_feat_sptmpl.qs"
+        list_meta_xgb_model="output/model/meta/list_meta_xgb_model.qs"
 
     output:
         sf_grid_sites_sp="output/grid/sites/sf_grid_sites_sp.qs",

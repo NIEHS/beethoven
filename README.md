@@ -148,7 +148,7 @@ Use `prepare_<domain>_<role>[_<source>]` for data-preparation rules, `prepare_<l
 | predict | `f` | `predict_grid_base` | `output/grid/pred/base/mean/db_grid_pred_base_mean_sptmpl.qs`. |
 | predict | `f` | `predict_grid_meta` | `output/grid/pred/meta/mean/db_grid_pred_meta_mean_sptmpl.qs`, the default endpoint. |
 
-Initialization supplies dates and years to the download and preparation rules. Both GEOS scripts select the first ten configured variables, use batches of up to 240 files, and join variables by `site_id`, `time`, and `level`. HMS uses batches of up to 50 files. The feature merges pass GEOS as hourly data and HMS as daily data to `amadeusdb::join_covariates()`.
+Initialization supplies dates and years to the download and preparation rules. Both GEOS scripts extract all configured variables using batches of up to 240 files. They join groups of at most ten variables into intermediate Parquet datasets under R's `tempdir()`, then join those datasets into persistent `geos/join/` output. Both stages use full outer joins by `site_id`, `time`, and `level`. The temporary merge directory is removed after the final merge succeeds. HMS uses batches of up to 50 files. The feature merges pass GEOS as hourly data and HMS as daily data to `amadeusdb::join_covariates()`.
 
 GEOS-CF files must already exist: there is no GEOS download rule. `input/.hidden/chr_group_store.txt` supplies the storage root, with data beneath `input/geos/<asset>/`. Both domains load the Conda environment's `libgdal.so.39` before extraction. Rules declare the `.qs` path manifests; referenced batch Parquet and native model files are written by the scripts without separate output declarations.
 

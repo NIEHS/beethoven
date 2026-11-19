@@ -17,6 +17,7 @@ fit_xgb_spark(
   yvar,
   dvar,
   stage = "base",
+  params = list(),
   ...
 )
 }
@@ -64,6 +65,16 @@ typically site identifiers and time columns.}
 using \code{sprintf("\%s_\%03d", stage, r)} for repeat \code{r}. Use \code{"base"} or
 \code{"meta"} to distinguish the two learner stages.}
 
+\item{params}{Named list of numeric XGBoost hyperparameter overrides.
+Supported names and defaults are \code{num_round} (\code{XGB_NUM_ROUND}, or 50),
+\code{max_depth} (8), \code{eta} (0.1), \code{min_child_weight} (1), \code{gamma} (0),
+\code{subsample} (0.8), \code{colsample_bytree} (0.8), \code{lambda} (1), \code{alpha} (0),
+and \code{max_bin} (256). An explicit \code{num_round} overrides the environment.
+Values must be finite, nonnegative scalars; \code{num_round}, \code{max_depth},
+and \code{max_bin} must be integers, with minima 1, 0, and 2 respectively.
+\code{eta} must be at most 1; sampling fractions must be in (0, 1].
+Unknown or duplicate names are rejected before connecting to Spark.}
+
 \item{...}{Reserved for future use. Currently ignored.}
 }
 \value{
@@ -96,9 +107,10 @@ Maven coordinate from \code{\link[=spark_environment]{spark_environment()}} is u
 resource limits, boosting rounds, seed, warehouse path, and row-limit
 settings. A positive row limit uses SQL \code{LIMIT} without an ordering clause.
 
-Models use CPU histogram training with squared-error loss, maximum depth 8,
-learning rate 0.1, and row and column sampling fractions of 0.8. Feature
-vectors are made dense so zero values remain explicit. Each fold's native
+Models use CPU histogram training with squared-error loss. Unless overridden
+by \code{params}, maximum depth is 8, learning rate is 0.1, and row and column
+sampling fractions are 0.8. Feature vectors are made dense so zero values
+remain explicit. Each fold's native
 booster is saved immediately after fitting, before held-out prediction.
 The Spark connection is disconnected on exit, including on error.
 

@@ -9,7 +9,7 @@ library(h3jsr)
 # Import configured variables and inputs.
 int_grid_res <- snakemake@params[["int_grid_res"]]
 chr_init_dates <- qs2::qs_read(snakemake@input[["chr_init_dates"]])
-db_train_feat_sptmpl <- qs2::qs_read(snakemake@input[["db_train_feat_sptmpl"]])
+list_meta_xgb_model <- qs2::qs_read(snakemake@input[["list_meta_xgb_model"]])
 
 ################################################################################
 # Import fixture boundary.

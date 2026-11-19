@@ -27,9 +27,15 @@ chr_spark_home <- readLines("input/.hidden/chr_spark_home.txt")
 
 ################################################################################
 # Set Spark cluster environmental variables.
-Sys.setenv("SPARK_CORES_MAX" = 128L)
-Sys.setenv("SPARK_EXECUTOR_MEMORY" = "4g")
-
+Sys.setenv(
+  SPARK_CORES_MAX = "64",
+  SPARK_EXECUTOR_CORES = "2",
+  SPARK_EXECUTOR_MEMORY = "4g",
+  SPARK_SHUFFLE_PARTITIONS = "128",
+  XGB_NUM_WORKERS = "32",
+  XGB_NTHREAD = "2",
+  XGB_NUM_ROUND = "100"
+)
 ################################################################################
 # Extract base learner column names from parquet file.
 chr_train_pred_base_names <- grep(

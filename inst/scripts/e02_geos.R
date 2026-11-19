@@ -91,7 +91,7 @@ list_iter_geos <- split(df_iter_geos, seq_len(nrow(df_iter_geos)))
 ################################################################################
 # Extract GEOS values at AQS locations, stored as variable-time .parquet.
 list_grid_feat_geos_sptmpl <- lapply(
-  list_iter_geos[1:10],
+  list_iter_geos,
   function(x) {
     amadeusdb::sedona_geos(
       date = as.character(beethoven::fl_dates(chr_init_dates)),
@@ -110,15 +110,43 @@ list_grid_feat_geos_sptmpl <- lapply(
     )
   }
 )
-names(list_grid_feat_geos_sptmpl) <- df_iter_geos$variable[1:10]
+names(list_grid_feat_geos_sptmpl) <- df_iter_geos$variable
 
 ################################################################################
-# Merge disparate variable-time .parquet files into joined GEOS database.
+# Group at most 10 variables per join to limit SQL nesting.
+list_grid_feat_geos_groups_sptmpl <- split(
+  list_grid_feat_geos_sptmpl,
+  ceiling(seq_along(list_grid_feat_geos_sptmpl) / 10L)
+)
+chr_grid_feat_geos_tmp_sptmpl <- tempfile(
+  pattern = "geos_grid_join_",
+  tmpdir = tempdir()
+)
+
+################################################################################
+# Write group joins to temporary storage.
+list_grid_feat_geos_joined_sptmpl <- lapply(
+  seq_along(list_grid_feat_geos_groups_sptmpl),
+  function(i) {
+    amadeusdb::join_variables(
+      input = list_grid_feat_geos_groups_sptmpl[[i]],
+      output = file.path(
+        chr_grid_feat_geos_tmp_sptmpl,
+        sprintf("batch_%02d", i)
+      ),
+      by = c("site_id", "time", "level")
+    )
+  }
+)
+
+################################################################################
+# Persist the final GEOS dataset, then remove intermediate files.
 db_grid_feat_geos_sptmpl <- amadeusdb::join_variables(
-  input = list_grid_feat_geos_sptmpl,
+  input = list_grid_feat_geos_joined_sptmpl,
   output = "output/grid/feat/geos/join",
   by = c("site_id", "time", "level")
 )
+unlink(chr_grid_feat_geos_tmp_sptmpl, recursive = TRUE)
 
 ################################################################################
 qs2::qs_save(
