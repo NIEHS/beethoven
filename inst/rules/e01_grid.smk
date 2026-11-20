@@ -1,5 +1,5 @@
-########################################################################################
-##############################            GRID            ##############################
+# --- Hourly ---------------------------------------------------------------------------
+# --- Grid -----------------------------------------------------------------------------
 rule prepare_grid_sites:
     input:
         chr_init_dates="output/init/chr_init_dates.qs",
@@ -18,8 +18,7 @@ rule prepare_grid_sites:
     script:
         "../scripts/e01_grid.R"
 
-
-##############################            GEOS            ##############################
+# --- GEOS -----------------------------------------------------------------------------
 rule prepare_grid_feat_geos:
     input:
         chr_init_dates="output/init/chr_init_dates.qs",
@@ -37,7 +36,8 @@ rule prepare_grid_feat_geos:
     script:
         "../scripts/e02_geos.R"
 
-##############################            HMS             ##############################
+# --- Daily ----------------------------------------------------------------------------
+# --- HMS ------------------------------------------------------------------------------
 rule prepare_grid_feat_hms:
     input:
         chr_init_dates="output/init/chr_init_dates.qs",
@@ -53,9 +53,12 @@ rule prepare_grid_feat_hms:
         "beethoven"
 
     script:
-        "../scripts/e03_hms.R"
+        "../scripts/e10_hms.R"
 
-##############################          SPACETIME         ##############################
+# --- Static ---------------------------------------------------------------------------
+
+# --- Derived --------------------------------------------------------------------------
+# --- Spacetime ------------------------------------------------------------------------
 rule prepare_grid_feat_spacetime:
     input:
         chr_init_dates="output/init/chr_init_dates.qs",
@@ -71,9 +74,9 @@ rule prepare_grid_feat_spacetime:
         "beethoven"
 
     script:
-        "../scripts/e04_spacetime.R"
+        "../scripts/e30_spacetime.R"
 
-##############################           MERGE            ##############################
+# --- Merge ----------------------------------------------------------------------------
 rule prepare_grid_feat:
     input:
         db_grid_index_sptmpl="output/grid/index/db_grid_index_sptmpl.parquet",
@@ -93,4 +96,4 @@ rule prepare_grid_feat:
     script:
         "../scripts/e99_merge.R"
 
-########################################################################################
+# --------------------------------------------------------------------------------------

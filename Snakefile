@@ -1,21 +1,19 @@
-########################################################################################
-# Path to BEETHOVEN configuration file.
+# --- Configuration --------------------------------------------------------------------
 configfile: "config/config.yaml"
 
-########################################################################################
+# --- Run summary ----------------------------------------------------------------------
 print(
     f"Running {{beethoven}} pipeline: "
     f"{config['chr_config_daterange']['start']} - "
     f"{config['chr_config_daterange']['end']}"
 )
 
-########################################################################################
-# Define pipeline endpoint.
+# --- Pipeline endpoint ----------------------------------------------------------------
 rule all:
     input:
         "output/model/meta/list_meta_xgb_model.qs"
 
-###############################      PIPELINE RULES      ###############################
+# --- Pipeline rules -------------------------------------------------------------------
 include: "inst/rules/a01_initiate.smk"
 include: "inst/rules/b01_download.smk"
 include: "inst/rules/c01_calculate.smk"

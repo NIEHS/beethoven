@@ -1,6 +1,6 @@
 Package: beethoven
 Title: Building an Extensible, rEproducible, Test-driven, Harmonized, Open-source, Versioned, ENsemble model for air quality
-Version: 0.6.0
+Version: 0.6.1
 Authors@R: c(
     person("Kyle", "Messier", , "kyle.messier@nih.gov", role = c("aut", "cre"), comment = c(ORCID = "0000-0001-9508-9623")),
     person("Mitchell", "Manware", role = c("aut", "ctb"), comment = c(ORCID = "0009-0003-6440-6106")),
@@ -44,7 +44,7 @@ Imports:
   purrr,
   finetune,
   butcher,
-  amadeus,
+  amadeus (>= 2.1.2),
   chopin,
   Rdpack
 Suggests:
@@ -77,7 +77,7 @@ Suggests:
   sparklyr
 Remotes:
   ropensci/chopin,
-  NIEHS/amadeus
+  NIEHS/amadeus@mm-hrrr-1120
 SystemRequirements: NetCDF4, CUDA (>= 10.0)
 Encoding: UTF-8
 VignetteBuilder: knitr, rmarkdown

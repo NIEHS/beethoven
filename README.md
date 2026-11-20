@@ -19,11 +19,11 @@ Group Project for the Spatiotemporal Exposures and Toxicology group with help fr
 
 `beethoven` develops an ensemble air quality modeling workflow: download source data, calculate covariates at monitoring sites and prediction locations, fit base and meta learners, and generate predictions.
 
-The root `Snakefile` loads `config/config.yaml` and the rules in `inst/rules/`; those rules dispatch R scripts from `inst/scripts/` through Apptainer containers or the named `beethoven` Conda environment.
+The root `Snakefile` loads `config/config.yaml` and the rules in `inst/rules/`; the current rules dispatch R scripts from `inst/scripts/` through the named `beethoven` Conda environment.
 
-The default `rule all` targets `output/grid/pred/meta/mean/db_grid_pred_meta_mean_sptmpl.qs`, the path manifest for meta-learner predictions at grid sites. Its dependencies include data preparation, base and meta spatial CV and fitting, grid covariate preparation, and both grid prediction steps.
+The default `rule all` targets `output/model/meta/list_meta_xgb_model.qs`, the saved meta-learner model metadata. Its dependencies include data preparation and base and meta spatial CV and fitting. Grid preparation and prediction run when explicitly requested, for example by targeting `predict_grid_meta` or `output/grid/pred/meta/mean/db_grid_pred_meta_mean_sptmpl.qs`.
 
-The calculation tier uses hourly AQS observations, previously downloaded GEOS-CF files, and daily HMS smoke polygons. The `amadeusdb` package performs SedonaDB extraction and joins, writing Parquet data with paths saved in `.qs` files. The modelling tier fits Spark XGBoost base and meta learners, saves native fold models, and generates out-of-fold training predictions. The prediction tier reloads those models and averages fold predictions within each repeat at grid sites.
+The calculation tier uses hourly AQS observations, previously downloaded GEOS-CF files, daily HMS smoke polygons, and derived spacetime covariates. The `amadeusdb` package performs SedonaDB extraction and joins, writing Parquet data with paths saved in `.qs` files. The modelling tier fits Spark XGBoost base and meta learners, saves native fold models, and generates out-of-fold training predictions. The prediction tier reloads those models and averages fold predictions within each repeat at grid sites.
 
 The diagram below shows the broader ensemble design. The current fitting rules use Spark XGBoost for both base and meta learners.
 
@@ -48,7 +48,7 @@ beethoven/
 │   ├── devel/                       # Spark development examples
 │   ├── rules/
 │   │   ├── a01_initiate.smk         # Initialize dates and years
-│   │   ├── b01_download.smk         # Download hourly AQS and HMS
+│   │   ├── b01_download.smk         # Download hourly AQS and daily HMS
 │   │   ├── c01_calculate.smk        # Calculate monitoring-site covariates
 │   │   ├── d01_model.smk            # Spatial CV and Spark models
 │   │   ├── e01_grid.smk             # Prepare grid and covariates
@@ -56,11 +56,14 @@ beethoven/
 │   └── scripts/
 │       ├── a01_initiate.R           # Generate dates and chunks
 │       ├── b01_aqs.R                # Download hourly AQS observations
-│       ├── b02_narr.R               # Retained NARR download script
-│       ├── b03_hms.R                # Download HMS smoke polygons
+│       ├── b02_geos.R               # GEOS-CF downloader; rule integration pending
+│       ├── b03_hrrr.R               # HRRR downloader; rule integration pending
+│       ├── b10_hms.R                # Download daily HMS smoke polygons
 │       ├── c01_aqs.R                # Prepare hourly monitoring-site observations
 │       ├── c02_geos.R               # Extract and join GEOS-CF Parquet batches
-│       ├── c03_hms.R                # Write HMS Parquet batches
+│       ├── c03_hrrr.R               # HRRR calculation under development
+│       ├── c10_hms.R                # Write daily HMS Parquet batches
+│       ├── c30_spacetime.R          # Derive monitoring-site spacetime covariates
 │       ├── c99_merge.R              # Merge features to Parquet
 │       ├── d01_cvbase.R             # Generate base spatial CV indices
 │       ├── d02_base.R               # Fit Spark XGBoost base learners
@@ -68,7 +71,9 @@ beethoven/
 │       ├── d04_meta.R               # Fit Spark XGBoost meta learners
 │       ├── e01_grid.R               # Generate H3 grid polygons
 │       ├── e02_geos.R               # Extract and join grid GEOS-CF Parquet batches
-│       ├── e03_hms.R                # Extract grid HMS covariates
+│       ├── e03_hrrr.R               # Placeholder for grid HRRR calculation
+│       ├── e10_hms.R                # Extract daily grid HMS covariates
+│       ├── e30_spacetime.R          # Derive grid spacetime covariates
 │       ├── e99_merge.R              # Merge grid covariates to Parquet
 │       ├── f01_base.R               # Predict saved base models at grid sites
 │       └── f02_meta.R               # Predict saved meta models at grid sites
@@ -80,6 +85,18 @@ beethoven/
 ```
 
 ## Naming and output policy
+
+Script letters identify workflow tiers: `a` initialization, `b` downloads, `c` monitoring-site calculations, `d` modelling, `e` grid preparation, and `f` prediction. Within the `b`, `c`, and `e` tiers, numeric ranges group scripts as follows:
+
+| Script numbers | Group | Examples |
+| --- | --- | --- |
+| `01–09` | Hourly data and hourly index preparation | `b01_aqs.R`, `c02_geos.R`, `c03_hrrr.R`, `e01_grid.R` |
+| `10–19` | Daily data | `b10_hms.R`, `c10_hms.R`, `e10_hms.R` |
+| `20–29` | Static data | Reserved; no static-source scripts are currently implemented. |
+| `30–39` | Derived covariates | `c30_spacetime.R`, `e30_spacetime.R` |
+| `99` | Merge | `c99_merge.R`, `e99_merge.R` |
+
+Keep each source's number consistent across tiers where it is used: GEOS is `02`, HRRR is `03`, HMS is `10`, and spacetime is `30`. Derived covariates are calculated from locations, dates, or other inputs and can vary over time. The spacetime scripts produce hourly data and therefore enter the hourly merge inputs. The numeric groups do not change the sequential numbering of initialization, modelling, or prediction scripts. Snakemake sections use labelled dashed comment separators padded to 88 characters.
 
 Workflow data artifacts use this order:
 
@@ -110,6 +127,7 @@ output/
 │   ├── feat/                   # db_train_feat[_<source>]_sptmpl.qs
 │   │   ├── geos/               # GEOS batches and join/ data
 │   │   ├── hms/                # HMS batches
+│   │   ├── spacetime/          # Derived hourly spacetime data
 │   │   └── merge/              # Joined training Parquet data
 │   └── pred/
 │       ├── base/oof/           # db_train_pred_base_oof_sptmpl.qs and data/
@@ -120,6 +138,7 @@ output/
 │   ├── feat/                   # db_grid_feat[_<source>]_sptmpl.qs
 │   │   ├── geos/               # GEOS batches and join/ data
 │   │   ├── hms/                # HMS batches
+│   │   ├── spacetime/          # Derived hourly spacetime data
 │   │   └── merge/              # Joined grid Parquet data
 │   └── pred/
 │       ├── base/mean/          # db_grid_pred_base_mean_sptmpl.qs and data/
@@ -139,20 +158,24 @@ Use `prepare_<domain>_<role>[_<source>]` for data-preparation rules, `prepare_<l
 | download | `b` | `download_aqs`, `download_hms` | Download manifests under `output/download/`. |
 | train | `c` | `prepare_train_obs_aqs` | Monitoring locations under `output/train/sites/` and observations under `output/train/obs/`. |
 | train | `c` | `prepare_train_feat_geos`, `prepare_train_feat_hms` | Source covariates and path manifests under `output/train/feat/`. |
+| train | `c` | `prepare_train_feat_spacetime` | Derived hourly covariates under `output/train/feat/spacetime/` and their path manifest. |
 | train | `c` | `prepare_train_feat` | `output/train/feat/db_train_feat_sptmpl.qs`, referencing `output/train/feat/merge/`. |
 | model | `d` | `prepare_base_cv`, `prepare_meta_cv` | CV indices under `output/cv/{base,meta}/`; shared parameters under `output/cv/base/`. |
 | model | `d` | `fit_base`, `fit_meta` | OOF predictions under `output/train/pred/{base,meta}/oof/`, models under `output/model/{base,meta}/`, and metrics under `output/eval/{base,meta}/`. |
 | grid | `e` | `prepare_grid_sites` | H3 polygons under `output/grid/sites/` and site-time rows under `output/grid/index/`. |
 | grid | `e` | `prepare_grid_feat_geos`, `prepare_grid_feat_hms` | Source covariates and path manifests under `output/grid/feat/`. |
+| grid | `e` | `prepare_grid_feat_spacetime` | Derived hourly covariates under `output/grid/feat/spacetime/` and their path manifest. |
 | grid | `e` | `prepare_grid_feat` | `output/grid/feat/db_grid_feat_sptmpl.qs`, referencing `output/grid/feat/merge/`. |
 | predict | `f` | `predict_grid_base` | `output/grid/pred/base/mean/db_grid_pred_base_mean_sptmpl.qs`. |
-| predict | `f` | `predict_grid_meta` | `output/grid/pred/meta/mean/db_grid_pred_meta_mean_sptmpl.qs`, the default endpoint. |
+| predict | `f` | `predict_grid_meta` | `output/grid/pred/meta/mean/db_grid_pred_meta_mean_sptmpl.qs`, when explicitly targeted. |
 
-Initialization supplies dates and years to the download and preparation rules. Both GEOS scripts extract all configured variables using batches of up to 240 files. They join groups of at most ten variables into intermediate Parquet datasets under R's `tempdir()`, then join those datasets into persistent `geos/join/` output. Both stages use full outer joins by `site_id`, `time`, and `level`. The temporary merge directory is removed after the final merge succeeds. HMS uses batches of up to 50 files. The feature merges pass GEOS as hourly data and HMS as daily data to `amadeusdb::join_covariates()`.
+Initialization supplies dates and years to the download and preparation rules. Both GEOS extraction scripts process all configured variables using batches of up to 240 files. They join groups of at most ten variables into intermediate Parquet datasets under R's `tempdir()`, then join those datasets into persistent `geos/join/` output. Both stages use full outer joins by `site_id`, `time`, and `level`. The temporary merge directory is removed after the final merge succeeds. HMS uses batches of up to 50 files. The feature merges pass GEOS and derived spacetime covariates as hourly data and HMS as daily data to `amadeusdb::join_covariates()`; static inputs are currently `NULL`.
 
-GEOS-CF files must already exist: there is no GEOS download rule. `input/.hidden/chr_group_store.txt` supplies the storage root, with data beneath `input/geos/<asset>/`. Both domains load the Conda environment's `libgdal.so.39` before extraction. Rules declare the `.qs` path manifests; referenced batch Parquet and native model files are written by the scripts without separate output declarations.
+GEOS-CF files must already exist for the current workflow. `input/.hidden/chr_group_store.txt` supplies the storage root, with data beneath `input/geos/<asset>/`. Both domains load the Conda environment's `libgdal.so.39` before extraction. Rules declare the `.qs` path manifests; referenced batch Parquet and native model files are written by the scripts without separate output declarations.
 
-`b02_narr.R` remains without a corresponding download or calculation rule. Grid generation uses the North Carolina county example bundled with `sf`, storing H3 cell IDs as `site_id` at the configured resolution. It still declares and reads the merged training-feature manifest, although grid construction does not use its contents. The naming migration preserves that dependency and the existing computational behavior.
+The GEOS-CF and HRRR download scripts, `b02_geos.R` and `b03_hrrr.R`, await integration into the download rules and downstream dependencies. The HRRR downloader requests CONUS `2d surface` files for all 24 hourly cycles and forecast hours `f00` and `f01`. Monitoring-site HRRR calculation (`c03_hrrr.R`) is under development, and `e03_hrrr.R` is a placeholder for grid calculation. Neither feature merge currently includes HRRR. The static sections remain reserved for future sources.
+
+Grid generation uses the North Carolina county example bundled with `sf`, storing H3 cell IDs as `site_id` at the configured resolution. It declares and reads the meta-model metadata, although grid construction does not use its contents; this dependency places grid preparation after meta-model fitting.
 
 ## Spark modelling
 
@@ -168,16 +191,18 @@ All four fitting/prediction scripts read `input/.hidden/chr_spark_local.txt` and
 
 | Spark setting | Current value or default | Use |
 | --- | --- | --- |
-| `SPARK_CORES_MAX` | `64` by default; both fitting scripts set `128` | Maximum cores requested for the Spark application. |
+| `SPARK_CORES_MAX` | `64` by default and in both fitting scripts | Maximum cores requested for the Spark application. |
 | `SPARK_EXECUTOR_CORES` | `2` | Executor cores, read by the shared helper. |
-| `SPARK_EXECUTOR_MEMORY` | `2g` by default; base script sets `8g`, meta script sets `4g` | Memory per executor. |
-| `SPARK_SHUFFLE_PARTITIONS` | `32` | Spark SQL shuffle partitions. |
-| `XGB_NUM_WORKERS` | Maximum cores divided by executor cores, rounded down, with a minimum of 1 | XGBoost workers; defaults to 64 with the fitting scripts' 128 cores and 2 cores per executor. |
+| `SPARK_EXECUTOR_MEMORY` | `2g` by default; both fitting scripts set `4g` | Memory per executor. |
+| `SPARK_SHUFFLE_PARTITIONS` | `32` by default; both fitting scripts set `128` | Spark SQL shuffle partitions. |
+| `XGB_NUM_WORKERS` | Maximum cores divided by executor cores, rounded down, with a minimum of 1; both fitting scripts set `32` | XGBoost workers. |
 | `XGB_NTHREAD` | Executor cores (`2` by default) | Threads per XGBoost worker; also sets `spark.task.cpus`. |
 | `XGBOOST_MAVEN_PACKAGE` | `ml.dmlc:xgboost4j-spark_2.13:3.4.0` | Package requested when `XGBOOST_JARS` is unset. |
-| `XGB_NUM_ROUND` | `50` | Boosting rounds per fold fit. |
+| `XGB_NUM_ROUND` | `50` by default; both fitting scripts set `100` | Boosting rounds per fold fit. |
 | `XGB_SEED` | `20260904` | XGBoost estimator seed; it is not passed to the spatial CV generators. |
 | `XGB_MAX_ROWS` | `0` | Optional SQL row limit; zero uses all rows. |
+
+Both prediction scripts currently set `SPARK_CORES_MAX = 128` and `SPARK_EXECUTOR_MEMORY = "8g"`; these differ from the fitting settings above.
 
 `spark_environment()` reads the settings into a list used explicitly by `fit_xgb_spark()`. Worker and thread overrides are applied to the estimator. Validation requires executor cores not to exceed maximum cores, threads per worker not to exceed executor cores, and workers times threads not to exceed maximum cores. The objective is `reg:squarederror`, evaluation metric is `rmse`, tree method is `hist`, maximum depth is 8, learning rate is 0.1, and row/column sampling fractions are 0.8. The stored `normalize` and `metric` fields in the common parameter list are not passed into this helper.
 
@@ -188,16 +213,11 @@ All four fitting/prediction scripts read `input/.hidden/chr_spark_local.txt` and
 | `chr_config_daterange` | `2018-01-01` through `2019-12-31` | Inclusive dates for downloading and processing data. |
 | `chr_config_dir` | `beethoven/beethoven/input/` | AQS/HMS download directory, resolved relative to `$HOME` by the rules. GEOS-CF uses the separate shared-storage path described above. |
 | `int_config_radii` | `1000`, `5000`, `10000` | Configured buffer radii in meters; not consumed by the current rules. HMS monitoring-site calculation explicitly passes `radius = 0`. |
-| `int_grid_res` | `5` | H3 resolution for grid preparation. |
+| `int_grid_res` | `6` | H3 resolution for grid preparation. |
 | `int_base_iter` | `25` | Number of repeated spatial CV partitions for base learners. |
 | `int_meta_iter` | `10` | Number of repeated spatial CV partitions for meta learners. |
 
-`run.sh` enables both `--use-apptainer` and `--use-conda`. Snakemake dispatches scripts through the environment declared by each rule:
-
-| Execution environment | Rules |
-| --- | --- |
-| `inst/container/sif/container_covariates.sif` | `initiate`, `download_aqs`, and `download_hms`. |
-| Named Conda environment `beethoven` | All `prepare_*`, `fit_*`, and `predict_grid_*` rules. |
+`run.sh` enables both `--use-apptainer` and `--use-conda`. All current script rules declare the named Conda environment `beethoven`; none selects a container image.
 
 The Conda rules name an existing environment rather than a YAML file for automatic creation. `inst/conda/beethoven.yml` records R 4.6, Java 17, native geospatial libraries, and build tools, with notes for manual R package installation. The scripts require the corresponding R packages, including `amadeus`, `amadeusdb`, `beethoven`, `sedonadb`, `arrow`, `qs2`, `spatialsample`, `sparklyr`, and `DBI`. HMS downloading also requires mirai; grid generation requires `h3jsr`.
 
@@ -205,7 +225,7 @@ The container definitions and build scripts remain under `inst/container/def/` a
 
 `run.sh` requests one SLURM allocation on the `geo` partition with 20 CPUs and 250 GB of memory. Logs are written to `slurm/beethoven_<jobid>.out` and `.err`. The Snakemake core limit comes from the first script argument, then `SLURM_CPUS_PER_TASK`, then a fallback of `1`. The launcher does not request GPUs or pass `--nv`. Spark fitting connects from this allocation to the separately configured cluster, whose executor settings are independent of the launcher allocation.
 
-The HMS download script starts 100 local mirai workers; the unused NARR download script starts 50. Both source the download helpers in `R/amadeus.R`. No current calculation or grid script calls `calculate_narr_mirai()` or `calculate_hms_map()`: the GEOS/HMS extraction scripts use `amadeusdb` and do not start mirai pools. Spatial CV preparation and Spark fitting also do not start mirai pools. The download rules declare no thread resources corresponding to those local pools, so their sizes must be accounted for separately from Snakemake's core limit. Inputs, outputs, runtime state, logs, Spark warehouse files, and container images are ignored by Git.
+The HMS download script starts 100 local mirai workers and calls `amadeus::download_hms()` directly. The GEOS-CF and HRRR download scripts also configure 100 workers, but their rules are not yet connected. The GEOS/HMS extraction scripts use `amadeusdb` and do not start mirai pools. Spatial CV preparation and Spark fitting also do not start mirai pools. The download rules declare no thread resources corresponding to those local pools, so their sizes must be accounted for separately from Snakemake's core limit. Inputs, outputs, runtime state, logs, Spark warehouse files, and container images are ignored by Git.
 
 
 ## Contribution

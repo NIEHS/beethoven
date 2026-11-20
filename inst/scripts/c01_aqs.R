@@ -12,11 +12,11 @@ chr_init_dates <- qs2::qs_read(snakemake@input[["chr_init_dates"]])
 
 ################################################################################
 # Import download lists.
-list_dl_aqs <- qs2::qs_read(snakemake@input[["list_dl_aqs"]])
-list_dl_hms <- qs2::qs_read(snakemake@input[["list_dl_hms"]])
 list_dl_collect <- list(
-  aqs = list_dl_aqs,
-  hms = list_dl_hms
+  aqs = qs2::qs_read(snakemake@input[["list_dl_aqs"]]),
+  geos = qs2::qs_read(snakemake@input[["list_dl_geos"]]),
+  hrrr = qs2::qs_read(snakemake@input[["list_dl_hrrr"]]),
+  hms = qs2::qs_read(snakemake@input[["list_dl_hms"]])
 )
 
 ################################################################################

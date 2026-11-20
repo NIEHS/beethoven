@@ -1,9 +1,11 @@
-########################################################################################
-##############################            AQS             ##############################
+# --- Hourly ---------------------------------------------------------------------------
+# --- AQS ------------------------------------------------------------------------------
 rule prepare_train_obs_aqs:
     input:
         chr_init_dates="output/init/chr_init_dates.qs",
         list_dl_aqs="output/download/list_dl_aqs.qs",
+        list_dl_geos="output/download/list_dl_geos.qs",
+        list_dl_hrrr="output/download/list_dl_hrrr.qs",
         list_dl_hms="output/download/list_dl_hms.qs"
 
     output:
@@ -19,7 +21,7 @@ rule prepare_train_obs_aqs:
     script:
         "../scripts/c01_aqs.R"
 
-##############################            GEOS            ##############################
+# --- GEOS -----------------------------------------------------------------------------
 rule prepare_train_feat_geos:
     input:
         chr_init_dates="output/init/chr_init_dates.qs",
@@ -37,7 +39,8 @@ rule prepare_train_feat_geos:
     script:
         "../scripts/c02_geos.R"
 
-##############################            HMS             ##############################
+# --- Daily ----------------------------------------------------------------------------
+# --- HMS ------------------------------------------------------------------------------
 rule prepare_train_feat_hms:
     input:
         chr_init_dates="output/init/chr_init_dates.qs",
@@ -53,9 +56,12 @@ rule prepare_train_feat_hms:
         "beethoven"
 
     script:
-        "../scripts/c03_hms.R"
+        "../scripts/c10_hms.R"
 
-##############################          SPACETIME         ##############################
+# --- Static ---------------------------------------------------------------------------
+
+# --- Derived --------------------------------------------------------------------------
+# --- Spacetime ------------------------------------------------------------------------
 rule prepare_train_feat_spacetime:
     input:
         chr_init_dates="output/init/chr_init_dates.qs",
@@ -71,9 +77,9 @@ rule prepare_train_feat_spacetime:
         "beethoven"
 
     script:
-        "../scripts/c04_spacetime.R"
+        "../scripts/c30_spacetime.R"
 
-##############################           MERGE            ##############################
+# --- Merge ----------------------------------------------------------------------------
 rule prepare_train_feat:
     input:
         db_train_obs_aqs_sptmpl="output/train/obs/db_train_obs_aqs_sptmpl.parquet",
@@ -93,4 +99,4 @@ rule prepare_train_feat:
     script:
         "../scripts/c99_merge.R"
 
-########################################################################################
+# --------------------------------------------------------------------------------------
