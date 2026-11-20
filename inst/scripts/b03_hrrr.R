@@ -19,7 +19,7 @@ list_dl_hrrr <- amadeus::download_hrrr(
   cycle_runtime = 0:23L,
   forecast_hour = 0:1L,
   directory_to_save = file.path(chr_config_dir, "hrrr"),
-  date = beethoven::fl_dates(chr_init_dates),
+  date = as.character(beethoven::fl_dates(chr_init_dates)),
   acknowledgement = TRUE,
   hash = FALSE,
   rate_limit = 2 / int_ndaemons

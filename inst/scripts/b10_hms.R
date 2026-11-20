@@ -15,7 +15,7 @@ int_ndaemons <- 33L
 mirai::daemons(int_ndaemons)
 list_dl_hms <- amadeus::download_hms(
   directory_to_save = file.path(chr_config_dir, "hms"),
-  date = beethoven::fl_dates(chr_init_dates),
+  date = as.character(beethoven::fl_dates(chr_init_dates)),
   acknowledgement = TRUE,
   hash = FALSE,
   remove_zip = FALSE,
