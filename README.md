@@ -23,7 +23,7 @@ The root `Snakefile` loads `config/config.yaml` and the rules in `inst/rules/`; 
 
 The default `rule all` targets `output/model/meta/list_meta_xgb_model.qs`, the saved meta-learner model metadata. Its dependencies include data preparation and base and meta spatial CV and fitting. Grid preparation and prediction run when explicitly requested, for example by targeting `predict_grid_meta` or `output/grid/pred/meta/mean/db_grid_pred_meta_mean_sptmpl.qs`.
 
-The calculation tier uses hourly AQS observations, previously downloaded GEOS-CF files, daily HMS smoke polygons, and derived spacetime covariates. The `amadeusdb` package performs SedonaDB extraction and joins, writing Parquet data with paths saved in `.qs` files. The modelling tier fits Spark XGBoost base and meta learners, saves native fold models, and generates out-of-fold training predictions. The prediction tier reloads those models and averages fold predictions within each repeat at grid sites.
+The download tier retrieves AQS, GEOS-CF, HRRR, and HMS data. The calculation tier currently uses hourly AQS observations, ten selected GEOS-CF variables, daily HMS smoke polygons, and derived spacetime covariates; HRRR calculation remains under development. The `amadeusdb` package performs SedonaDB extraction and joins, writing Parquet data with paths saved in `.qs` files. The modelling tier fits Spark XGBoost base and meta learners, saves native fold models, and generates out-of-fold training predictions. The prediction tier reloads those models and averages fold predictions within each repeat at grid sites.
 
 The diagram below shows the broader ensemble design. The current fitting rules use Spark XGBoost for both base and meta learners.
 
@@ -48,7 +48,7 @@ beethoven/
 │   ├── devel/                       # Spark development examples
 │   ├── rules/
 │   │   ├── a01_initiate.smk         # Initialize dates and years
-│   │   ├── b01_download.smk         # Download hourly AQS and daily HMS
+│   │   ├── b01_download.smk         # Download AQS, GEOS-CF, HRRR, and HMS
 │   │   ├── c01_calculate.smk        # Calculate monitoring-site covariates
 │   │   ├── d01_model.smk            # Spatial CV and Spark models
 │   │   ├── e01_grid.smk             # Prepare grid and covariates
@@ -56,8 +56,8 @@ beethoven/
 │   └── scripts/
 │       ├── a01_initiate.R           # Generate dates and chunks
 │       ├── b01_aqs.R                # Download hourly AQS observations
-│       ├── b02_geos.R               # GEOS-CF downloader; rule integration pending
-│       ├── b03_hrrr.R               # HRRR downloader; rule integration pending
+│       ├── b02_geos.R               # Download hourly GEOS-CF collections
+│       ├── b03_hrrr.R               # Download hourly HRRR f00/f01 surface files
 │       ├── b10_hms.R                # Download daily HMS smoke polygons
 │       ├── c01_aqs.R                # Prepare hourly monitoring-site observations
 │       ├── c02_geos.R               # Extract and join GEOS-CF Parquet batches
@@ -155,7 +155,7 @@ Use `prepare_<domain>_<role>[_<source>]` for data-preparation rules, `prepare_<l
 | Tier | Script prefix | Rules | Principal outputs |
 | --- | --- | --- | --- |
 | initiate | `a` | `initiate` | Date and year objects under `output/init/`. |
-| download | `b` | `download_aqs`, `download_hms` | Download manifests under `output/download/`. |
+| download | `b` | `download_aqs`, `download_geos`, `download_hrrr`, `download_hms` | Download manifests under `output/download/`. |
 | train | `c` | `prepare_train_obs_aqs` | Monitoring locations under `output/train/sites/` and observations under `output/train/obs/`. |
 | train | `c` | `prepare_train_feat_geos`, `prepare_train_feat_hms` | Source covariates and path manifests under `output/train/feat/`. |
 | train | `c` | `prepare_train_feat_spacetime` | Derived hourly covariates under `output/train/feat/spacetime/` and their path manifest. |
@@ -169,11 +169,24 @@ Use `prepare_<domain>_<role>[_<source>]` for data-preparation rules, `prepare_<l
 | predict | `f` | `predict_grid_base` | `output/grid/pred/base/mean/db_grid_pred_base_mean_sptmpl.qs`. |
 | predict | `f` | `predict_grid_meta` | `output/grid/pred/meta/mean/db_grid_pred_meta_mean_sptmpl.qs`, when explicitly targeted. |
 
-Initialization supplies dates and years to the download and preparation rules. Both GEOS extraction scripts process all configured variables using batches of up to 240 files. They join groups of at most ten variables into intermediate Parquet datasets under R's `tempdir()`, then join those datasets into persistent `geos/join/` output. Both stages use full outer joins by `site_id`, `time`, and `level`. The temporary merge directory is removed after the final merge succeeds. HMS uses batches of up to 50 files. The feature merges pass GEOS and derived spacetime covariates as hourly data and HMS as daily data to `amadeusdb::join_covariates()`; static inputs are currently `NULL`.
+Initialization supplies dates and years to the download and preparation rules. AQS preparation declares and reads all four download manifests, so it currently waits for AQS, GEOS-CF, HRRR, and HMS downloads before producing the training sites. Training covariate rules depend on those sites; grid preparation follows model fitting.
 
-GEOS-CF files must already exist for the current workflow. `input/.hidden/chr_group_store.txt` supplies the storage root, with data beneath `input/geos/<asset>/`. Both domains load the Conda environment's `libgdal.so.39` before extraction. Rules declare the `.qs` path manifests; referenced batch Parquet and native model files are written by the scripts without separate output declarations.
+`b02_geos.R` downloads GEOS-CF into `<chr_config_dir>/geos/<collection>/`. Both extraction scripts read those same collection directories, which contain `.nc4` files directly, without a `data_files` subdirectory. Filenames follow `GEOS-CF.v01.rpl.<collection>.<YYYYMMDD>_<HHMM>z.nc4`; the hourly-average collections use timestamps from `0030` through `2330`. The GEOS downloader reads its NASA Earthdata token from `input/.hidden/chr_nasa_earthdata_token.txt`.
 
-The GEOS-CF and HRRR download scripts, `b02_geos.R` and `b03_hrrr.R`, await integration into the download rules and downstream dependencies. The HRRR downloader requests CONUS `2d surface` files for all 24 hourly cycles and forecast hours `f00` and `f01`. Monitoring-site HRRR calculation (`c03_hrrr.R`) is under development, and `e03_hrrr.R` is a placeholder for grid calculation. Neither feature merge currently includes HRRR. The static sections remain reserved for future sources.
+Training and grid extraction retain the same ten GEOS-CF variables:
+
+| Collection | Active variables |
+| --- | --- |
+| `aqc_tavg_1hr_g1440x721_v1` | `CO`, `NO2` |
+| `chm_tavg_1hr_g1440x721_v1` | `PM25_RH35_GCC`, `PM25bc_RH35_GCC`, `PM25du_RH35_GCC`, `PM25ni_RH35_GCC`, `PM25oc_RH35_GCC`, `PM25soa_RH35_GCC`, `PM25ss_RH35_GCC`, `PM25su_RH35_GCC` |
+
+This selection retains total PM2.5, seven component diagnostics, and two combustion-related gases. Other candidates remain commented in the extraction scripts. Reducing the active set from 52 to 10 reduces extraction and join work; downloads still retrieve the complete files for both collections.
+
+Both GEOS extraction scripts use batches of up to 240 files. They join groups of at most ten variables into intermediate Parquet datasets under R's `tempdir()`, then join those datasets into persistent `geos/join/` output. Both stages use full outer joins by `site_id`, `time`, and `level`. The temporary merge directory is removed after the final merge succeeds. Existing GEOS Parquet batches from the previous group-store extraction are intentionally reused during current development. `sedona_geos()` discovers source files before skipping existing variable/time batches; the input collection directories and source files are still required. Changing the input directory alone does not invalidate cached batches. Only the ten active variables feed the joins.
+
+Both domains load the Conda environment's `libgdal.so.39` before extraction. HMS uses batches of up to 50 files. The feature merges pass GEOS and derived spacetime covariates as hourly data and HMS as daily data to `amadeusdb::join_covariates()`; static inputs are currently `NULL`. Rules declare the `.qs` path manifests; referenced batch Parquet and native model files are written by the scripts without separate output declarations.
+
+The HRRR download rule calls `b03_hrrr.R` for CONUS `2d surface` files, covering all 24 hourly cycles and forecast hours `f00` and `f01`. Files are saved beneath `<chr_config_dir>/hrrr/conus/`. Monitoring-site HRRR calculation (`c03_hrrr.R`) is under development, and `e03_hrrr.R` is a placeholder for grid calculation. Neither feature merge currently includes HRRR. The static sections remain reserved for future sources.
 
 Grid generation uses the North Carolina county example bundled with `sf`, storing H3 cell IDs as `site_id` at the configured resolution. It declares and reads the meta-model metadata, although grid construction does not use its contents; this dependency places grid preparation after meta-model fitting.
 
@@ -211,7 +224,7 @@ Both prediction scripts currently set `SPARK_CORES_MAX = 128` and `SPARK_EXECUTO
 | Setting | Current value | Use |
 | --- | --- | --- |
 | `chr_config_daterange` | `2018-01-01` through `2019-12-31` | Inclusive dates for downloading and processing data. |
-| `chr_config_dir` | `beethoven/beethoven/input/` | AQS/HMS download directory, resolved relative to `$HOME` by the rules. GEOS-CF uses the separate shared-storage path described above. |
+| `chr_config_dir` | `beethoven/beethoven/input/` | Shared download root for AQS, GEOS-CF, HRRR, and HMS, resolved relative to `$HOME` by the rules. GEOS extraction reads its collection subdirectories beneath this root. |
 | `int_config_radii` | `1000`, `5000`, `10000` | Configured buffer radii in meters; not consumed by the current rules. HMS monitoring-site calculation explicitly passes `radius = 0`. |
 | `int_grid_res` | `6` | H3 resolution for grid preparation. |
 | `int_base_iter` | `25` | Number of repeated spatial CV partitions for base learners. |
@@ -219,13 +232,15 @@ Both prediction scripts currently set `SPARK_CORES_MAX = 128` and `SPARK_EXECUTO
 
 `run.sh` enables both `--use-apptainer` and `--use-conda`. All current script rules declare the named Conda environment `beethoven`; none selects a container image.
 
-The Conda rules name an existing environment rather than a YAML file for automatic creation. `inst/conda/beethoven.yml` records R 4.6, Java 17, native geospatial libraries, and build tools, with notes for manual R package installation. The scripts require the corresponding R packages, including `amadeus`, `amadeusdb`, `beethoven`, `sedonadb`, `arrow`, `qs2`, `spatialsample`, `sparklyr`, and `DBI`. HMS downloading also requires mirai; grid generation requires `h3jsr`.
+The Conda rules name an existing environment rather than a YAML file for automatic creation. `inst/conda/beethoven.yml` records R 4.6, Java 17, native geospatial libraries, and build tools, with notes for manual R package installation. The scripts require the corresponding R packages, including `amadeus`, `amadeusdb`, `beethoven`, `sedonadb`, `arrow`, `qs2`, `spatialsample`, `sparklyr`, and `DBI`. GEOS-CF, HRRR, and HMS downloading also require mirai; grid generation requires `h3jsr`.
 
 The container definitions and build scripts remain under `inst/container/def/` and `inst/container/sh/`. Both main definitions install `beethoven` from `NIEHS/beethoven@mm-1013`, `sparklyr`, Spark, and `arrow`. The covariates definition installs `amadeus` from `NIEHS/amadeus@mm-aqs-1019` for hourly AQS support. The models image includes CUDA support; current Spark fitting specifies the CPU.
 
 `run.sh` requests one SLURM allocation on the `geo` partition with 20 CPUs and 250 GB of memory. Logs are written to `slurm/beethoven_<jobid>.out` and `.err`. The Snakemake core limit comes from the first script argument, then `SLURM_CPUS_PER_TASK`, then a fallback of `1`. The launcher does not request GPUs or pass `--nv`. Spark fitting connects from this allocation to the separately configured cluster, whose executor settings are independent of the launcher allocation.
 
-The HMS download script starts 100 local mirai workers and calls `amadeus::download_hms()` directly. The GEOS-CF and HRRR download scripts also configure 100 workers, but their rules are not yet connected. The GEOS/HMS extraction scripts use `amadeusdb` and do not start mirai pools. Spatial CV preparation and Spark fitting also do not start mirai pools. The download rules declare no thread resources corresponding to those local pools, so their sizes must be accounted for separately from Snakemake's core limit. Inputs, outputs, runtime state, logs, Spark warehouse files, and container images are ignored by Git.
+GEOS-CF, HRRR, and HMS downloads each start 33 local mirai workers and call their respective `amadeus` download functions directly. The three pools can total 99 workers if their rules run concurrently, in addition to AQS and the parent processes. Each script sets `rate_limit = 2 / int_ndaemons`; the current `amadeus` runner multiplies this interval by the daemon count, giving each worker a nominal two-second request interval. The combined nominal rate is therefore 16.5 requests per second per pool, subject to transfer duration and throttle bursts.
+
+The GEOS/HMS extraction scripts use `amadeusdb` and do not start mirai pools. Spatial CV preparation and Spark fitting also do not start mirai pools. The download rules declare no thread resources corresponding to those local pools, so Snakemake's core limit does not directly cap their child-process counts. Inputs, outputs, runtime state, logs, Spark warehouse files, and container images are ignored by Git.
 
 
 ## Contribution
