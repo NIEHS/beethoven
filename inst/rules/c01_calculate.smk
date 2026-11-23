@@ -39,6 +39,24 @@ rule prepare_train_feat_geos:
     script:
         "../scripts/c02_geos.R"
 
+# --- HRRR -----------------------------------------------------------------------------
+rule prepare_train_feat_hrrr:
+    input:
+        chr_init_dates="output/init/chr_init_dates.qs",
+        sf_train_sites_sp="output/train/sites/sf_train_sites_sp.qs",
+
+    output:
+        db_train_feat_hrrr_sptmpl="output/train/feat/db_train_feat_hrrr_sptmpl.qs"
+
+    params:
+        chr_config_dir=os.path.join(os.environ["HOME"], config["chr_config_dir"])
+
+    conda:
+        "beethoven"
+
+    script:
+        "../scripts/c03_hrrr.R"
+
 # --- Daily ----------------------------------------------------------------------------
 # --- HMS ------------------------------------------------------------------------------
 rule prepare_train_feat_hms:

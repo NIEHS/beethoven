@@ -11,7 +11,7 @@ print(
 # --- Pipeline endpoint ----------------------------------------------------------------
 rule all:
     input:
-        "output/model/meta/list_meta_xgb_model.qs"
+        "output/train/feat/db_train_feat_hrrr_sptmpl.qs"
 
 # --- Pipeline rules -------------------------------------------------------------------
 include: "inst/rules/a01_initiate.smk"
