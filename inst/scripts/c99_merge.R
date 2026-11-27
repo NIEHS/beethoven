@@ -12,6 +12,9 @@ db_train_obs_aqs_sptmpl <- snakemake@input[["db_train_obs_aqs_sptmpl"]]
 db_train_feat_geos_sptmpl <- qs2::qs_read(snakemake@input[[
   "db_train_feat_geos_sptmpl"
 ]])
+db_train_feat_hrrr_sptmpl <- qs2::qs_read(snakemake@input[[
+  "db_train_feat_hrrr_sptmpl"
+]])
 db_train_feat_hms_sptmpl <- qs2::qs_read(snakemake@input[[
   "db_train_feat_hms_sptmpl"
 ]])
@@ -25,6 +28,7 @@ db_train_feat_sptmpl <- amadeusdb::join_covariates(
   output = "output/train/feat/merge/",
   hourly = list(
     geos = db_train_feat_geos_sptmpl,
+    hrrr = db_train_feat_hrrr_sptmpl,
     spacetime = db_train_feat_spacetime_sptmpl
   ),
   daily = list(hms = db_train_feat_hms_sptmpl),

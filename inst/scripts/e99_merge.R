@@ -12,6 +12,9 @@ db_grid_index_sptmpl <- snakemake@input[["db_grid_index_sptmpl"]]
 db_grid_feat_geos_sptmpl <- qs2::qs_read(snakemake@input[[
   "db_grid_feat_geos_sptmpl"
 ]])
+db_grid_feat_hrrr_sptmpl <- qs2::qs_read(snakemake@input[[
+  "db_grid_feat_hrrr_sptmpl"
+]])
 db_grid_feat_hms_sptmpl <- qs2::qs_read(snakemake@input[[
   "db_grid_feat_hms_sptmpl"
 ]])
@@ -25,6 +28,7 @@ db_grid_feat_sptmpl <- amadeusdb::join_covariates(
   output = "output/grid/feat/merge/",
   hourly = list(
     geos = db_grid_feat_geos_sptmpl,
+    hrrr = db_grid_feat_hrrr_sptmpl,
     spacetime = db_grid_feat_spacetime_sptmpl
   ),
   daily = list(hms = db_grid_feat_hms_sptmpl),

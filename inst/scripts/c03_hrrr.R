@@ -4,6 +4,7 @@
 ################################################################################
 # Load libraries and source local functions.
 library(amadeus)
+library(beethoven)
 
 ################################################################################
 # Import configured variables and inputs.
@@ -21,20 +22,18 @@ Sys.setenv(
 
 ################################################################################
 # Define HRRR variables and iteration list.
-df_hrrr_metadata <- amadeus:::metadata_hrrr()
+df_hrrr_metadata <- amadeus:::metadata_hrrr(accumulation = 1L)
 df_iter_f00 <- data.frame(
   forecast_hour = 0L,
   variable = sprintf(
     c(
-      "2[m] %s; Dew point temperature [C]",
-      "2[m] %s; Relative humidity [%%]",
-      "2[m] %s; Specific humidity [kg/kg]",
-      "2[m] %s; Temperature [C]",
-      "10[m] %s; U Component of Hourly Maximum 10m Wind Speed [m/s]",
-      "10[m] %s; V Component of Hourly Maximum 10m Wind Speed [m/s]",
-      "10[m] %s; u-component of wind [m/s]",
-      "10[m] %s; v-component of wind [m/s]",
-      "10[m] %s; Wind speed [m/s]"
+      # "2[m] %s; Dew point temperature [C]",
+      # "2[m] %s; Relative humidity [%%]",
+      # "2[m] %s; Specific humidity [kg/kg]",
+      "2[m] %s; Temperature [C]"
+      # "10[m] %s; u-component of wind [m/s]",
+      # "10[m] %s; v-component of wind [m/s]",
+      # "10[m] %s; Wind speed [m/s]"
     ),
     "HTGL=Specified height level above ground"
   )
@@ -42,12 +41,24 @@ df_iter_f00 <- data.frame(
 df_iter_f01 <- data.frame(
   forecast_hour = 1L,
   variable = c(
-    "SFC=Ground or water surface; Total precipitation [kg/(m^2)]"
+    "SFC=Ground or water surface; 01 hr Total precipitation [kg/(m^2)]"
   )
 )
 df_iter_hrrr <- rbind(df_iter_f00, df_iter_f01)
-stopifnot(all(df_iter_hrrr$variable %in% amadeus:::metadata_hrrr()$layer_name))
+stopifnot(all(df_iter_hrrr$variable %in% df_hrrr_metadata$layer_name))
 list_iter_hrrr <- split(df_iter_hrrr, seq_len(nrow(df_iter_hrrr)))
+
+################################################################################
+# Define all relevant time stamps.
+df_times <- expand.grid(
+  date = chr_init_dates,
+  hour = amadeus:::sequence_times(colon = TRUE)
+)
+df_times$time <- as.POSIXct(
+  paste0(df_times$date, " ", df_times$hour, ":00"),
+  tz = "UTC"
+)
+df_times$tchar <- format(df_times$time, "%Y%m%d%H%M", tz = "UTC")
 
 ################################################################################
 # Extract HRRR values at AQS locations, stored as variable-time .parquet.
@@ -56,21 +67,9 @@ mirai::daemons(int_ndaemons)
 list_train_feat_hrrr_sptmpl <- lapply(
   list_iter_hrrr,
   function(x) {
-    df_x <- amadeus:::calculate_hrrr(
-      from = amadeus:::process_hrrr(
-        date = as.character(beethoven::fl_dates(chr_init_dates)),
-        path = file.path(chr_config_dir, "hrrr", "conus"),
-        variable = x$variable,
-        forecast_hour = x$forecast_hour
-      ),
-      locs = sf_train_sites_sp,
-      locs_id = "site_id",
-      radius = 0L
-    )
-    df_x$level <- NULL
     chr_parquet <- amadeusdb::batch_prep(
-      df = data.frame(tchar = format(df_x$time, "%Y%m%d%H%M", tz = "UTC")),
-      batch = list(seq_len(nrow(df_x))),
+      df = df_times,
+      batch = list(seq_len(nrow(df_times))),
       output = "output/train/feat/hrrr/",
       source = "hrrr",
       variable = df_hrrr_metadata$short_name[
@@ -78,7 +77,25 @@ list_train_feat_hrrr_sptmpl <- lapply(
       ],
       time_id = "tchar"
     )
-    arrow::write_parquet(df_x, chr_parquet)
+    if (length(chr_parquet) == 1L && file.exists(chr_parquet)) {
+      message("Skipping calculation for variable: ", x$variable)
+    } else {
+      message("Performing calculation for variable: ", x$variable)
+      df_x <- amadeus:::calculate_hrrr(
+        from = amadeus:::process_hrrr(
+          date = as.character(beethoven::fl_dates(chr_init_dates)),
+          path = file.path(chr_config_dir, "hrrr", "conus"),
+          variable = x$variable,
+          forecast_hour = x$forecast_hour,
+          accumulation = 1L
+        ),
+        locs = sf_train_sites_sp,
+        locs_id = "site_id",
+        radius = 0L
+      )
+      df_x$level <- NULL
+      arrow::write_parquet(df_x, chr_parquet)
+    }
     chr_parquet
   }
 )

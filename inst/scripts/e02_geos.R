@@ -108,40 +108,51 @@ list_grid_feat_geos_sptmpl <- lapply(
 names(list_grid_feat_geos_sptmpl) <- df_iter_geos$variable
 
 ################################################################################
-# Group at most 10 variables per join to limit SQL nesting.
-list_grid_feat_geos_groups_sptmpl <- split(
+# Index each variable's files by the time range of its 240-hour batch.
+list_grid_feat_geos_batches_sptmpl <- lapply(
   list_grid_feat_geos_sptmpl,
-  ceiling(seq_along(list_grid_feat_geos_sptmpl) / 10L)
-)
-chr_grid_feat_geos_tmp_sptmpl <- tempfile(
-  pattern = "geos_grid_join_",
-  tmpdir = tempdir()
-)
-
-################################################################################
-# Write group joins to temporary storage.
-list_grid_feat_geos_joined_sptmpl <- lapply(
-  seq_along(list_grid_feat_geos_groups_sptmpl),
-  function(i) {
-    amadeusdb::join_variables(
-      input = list_grid_feat_geos_groups_sptmpl[[i]],
-      output = file.path(
-        chr_grid_feat_geos_tmp_sptmpl,
-        sprintf("batch_%02d", i)
-      ),
-      by = c("site_id", "time", "level")
+  function(x) {
+    chr_batch <- sub(
+      "^.*_([0-9]{12}_[0-9]{12})\\.parquet$",
+      "\\1",
+      basename(x)
     )
+    stopifnot(
+      length(x) > 0L,
+      all(grepl("^[0-9]{12}_[0-9]{12}$", chr_batch)),
+      !anyDuplicated(chr_batch)
+    )
+    stats::setNames(x, chr_batch)
   }
 )
+chr_grid_feat_geos_batches <- sort(names(list_grid_feat_geos_batches_sptmpl[[1L]]))
+stopifnot(all(vapply(
+  list_grid_feat_geos_batches_sptmpl,
+  function(x) setequal(names(x), chr_grid_feat_geos_batches),
+  FUN.VALUE = logical(1)
+)))
 
 ################################################################################
-# Persist the final GEOS dataset, then remove intermediate files.
-db_grid_feat_geos_sptmpl <- amadeusdb::join_variables(
-  input = list_grid_feat_geos_joined_sptmpl,
-  output = "output/grid/feat/geos/join",
-  by = c("site_id", "time", "level")
+# Join and write one time batch at a time; all output files form one dataset.
+db_grid_feat_geos_sptmpl <- unlist(
+  lapply(
+    chr_grid_feat_geos_batches,
+    function(x) {
+      message("Joining GEOS grid batch ", x, "...")
+      chr_parquet <- amadeusdb::join_variables(
+        input = lapply(
+          list_grid_feat_geos_batches_sptmpl,
+          function(y) unname(y[[x]])
+        ),
+        output = file.path("output/grid/feat/geos/join", x),
+        by = c("site_id", "time", "level")
+      )
+      gc(verbose = FALSE)
+      chr_parquet
+    }
+  ),
+  use.names = FALSE
 )
-unlink(chr_grid_feat_geos_tmp_sptmpl, recursive = TRUE)
 
 ################################################################################
 qs2::qs_save(

@@ -102,6 +102,7 @@ rule prepare_train_feat:
     input:
         db_train_obs_aqs_sptmpl="output/train/obs/db_train_obs_aqs_sptmpl.parquet",
         db_train_feat_geos_sptmpl="output/train/feat/db_train_feat_geos_sptmpl.qs",
+        db_train_feat_hrrr_sptmpl="output/train/feat/db_train_feat_hrrr_sptmpl.qs",
         db_train_feat_hms_sptmpl="output/train/feat/db_train_feat_hms_sptmpl.qs",
         db_train_feat_spacetime_sptmpl="output/train/feat/db_train_feat_spacetime_sptmpl.qs"
 
