@@ -25,17 +25,37 @@ Sys.setenv(
 df_hrrr_metadata <- amadeus:::metadata_hrrr(accumulation = 1L)
 df_iter_f00 <- data.frame(
   forecast_hour = 0L,
-  variable = sprintf(
-    c(
-      # "2[m] %s; Dew point temperature [C]",
-      # "2[m] %s; Relative humidity [%%]",
-      # "2[m] %s; Specific humidity [kg/kg]",
-      "2[m] %s; Temperature [C]"
-      # "10[m] %s; u-component of wind [m/s]",
-      # "10[m] %s; v-component of wind [m/s]",
-      # "10[m] %s; Wind speed [m/s]"
-    ),
-    "HTGL=Specified height level above ground"
+  variable = c(
+    # Near-surface temperature and humidity.
+    "2[m] HTGL=Specified height level above ground; Temperature [C]",
+    "2[m] HTGL=Specified height level above ground; Dew point temperature [C]",
+    "2[m] HTGL=Specified height level above ground; Relative humidity [%]",
+    "2[m] HTGL=Specified height level above ground; Specific humidity [kg/kg]",
+
+    # Wind components at 10 m and 80 m.
+    "10[m] HTGL=Specified height level above ground; u-component of wind [m/s]",
+    "10[m] HTGL=Specified height level above ground; v-component of wind [m/s]",
+    "80[m] HTGL=Specified height level above ground; u-component of wind [m/s]",
+    "80[m] HTGL=Specified height level above ground; v-component of wind [m/s]",
+
+    # Boundary layer and turbulent surface exchange.
+    "SFC=Ground or water surface; Planetary boundary layer height [m]",
+    "SFC=Ground or water surface; Sensible heat net flux [W/(m^2)]",
+    "SFC=Ground or water surface; Latent heat net flux [W/(m^2)]",
+    "SFC=Ground or water surface; Frictional velocity [m/s]",
+
+    # Surface pressure and skin temperature.
+    "SFC=Ground or water surface; Pressure [Pa]",
+    "SFC=Ground or water surface; Temperature [C]",
+
+    # Downward surface radiation.
+    "SFC=Ground or water surface; Downward short-wave radiation flux [W/(m^2)]",
+    "SFC=Ground or water surface; Downward long-wave radiation flux [W/(m^2)]",
+
+    # Atmospheric-column moisture and clouds.
+    "EATM=Entire atmosphere (considered as a single layer); Precipitable water [kg/(m^2)]",
+    "LCY=Low cloud level; Low cloud cover [%]",
+    "EATM=Entire Atmosphere; Total cloud cover [%]"
   )
 )
 df_iter_f01 <- data.frame(
